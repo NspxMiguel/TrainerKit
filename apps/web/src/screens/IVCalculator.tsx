@@ -15,7 +15,9 @@ import {
 } from "@trainerkit/core";
 
 import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
+import { useSetup } from "../onboarding/setup.ts";
 import { IVBar } from "../ui/IVBar.tsx";
+import { AssistantCard } from "../ui/AssistantCard.tsx";
 import { ScanDropzone } from "../ui/ScanDropzone.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 
@@ -32,6 +34,7 @@ export function IVCalculator({ species, data, onClose }: Props) {
   const [ivs, setIvs] = useState<IVs | null>(null);
   // Caminho de recuperacao: so aparece depois de o print falhar. Ate la a tela
   // fica no fluxo que o Miguel pediu — anexa e pronto.
+  const setup = useSetup();
   const [manual, setManual] = useState(false);
   const [cp, setCp] = useState("");
   const [hp, setHp] = useState("");
@@ -233,6 +236,16 @@ export function IVCalculator({ species, data, onClose }: Props) {
             </section>
           )}
         </div>
+      )}
+
+      {setup.assistant && (
+        <AssistantCard
+          name={species.name}
+          baseStats={species.baseStats}
+          cpm={data.cpm}
+          levelCap={data.version.levelCap}
+          ivs={ivs}
+        />
       )}
 
       <div className="tk-overline" style={{ display: "block", marginTop: 26 }}>

@@ -7,3 +7,4 @@ export * from "./raid.js";
 export * from "./appraisal.js";
 export * from "./scan.js";
 export * from "./moves.js";
+export * from "./assistant.js";
