@@ -1,13 +1,16 @@
+import { useState } from "react";
+
 import type { DatasetState } from "../data/useDataset.ts";
 import { datasetLabel } from "../data/useDataset.ts";
+import { useInstallState } from "../storage/install.ts";
 import type { PersistState } from "../storage/persist.ts";
-import { isIos } from "../storage/persist.ts";
 import { IconAlert, IconPlus } from "../ui/Icons.tsx";
+import { InstallBanner } from "../ui/InstallBanner.tsx";
+import { InstallGuide } from "./InstallGuide.tsx";
 
 interface Props {
   dataset: DatasetState;
   persist: PersistState | null;
-  installed: boolean;
 }
 
 function greeting(): string {
@@ -18,25 +21,40 @@ function greeting(): string {
   return "Boa noite";
 }
 
-export function HomeScreen({ dataset, persist, installed }: Props) {
-  // O aviso de durabilidade so aparece quando ha risco real: navegador que
-  // suporta modo persistente, mas nao concedeu. Avisar sempre viraria ruido.
+export function HomeScreen({ dataset, persist }: Props) {
+  const install = useInstallState();
+  const [guideOpen, setGuideOpen] = useState(false);
+
+  // Armazenamento sem garantia de durabilidade. So avisa quando ha risco real:
+  // navegador que suporta modo persistente mas ainda nao concedeu.
   const atRisk = persist?.supported === true && !persist.persisted;
+
+  const showInstall = !install.installed && !install.dismissed;
 
   return (
     <>
       <p className="tk-greeting">{greeting()}</p>
       <h1 className="tk-h1">TrainerKit</h1>
 
-      {atRisk && (
+      {showInstall && (
+        <InstallBanner
+          platform={install.platform}
+          atRisk={atRisk}
+          onOpen={() => setGuideOpen(true)}
+          onDismiss={install.dismiss}
+        />
+      )}
+
+      {/* Ja instalado mas o navegador ainda nao garantiu o armazenamento: e o
+          caso raro em que instalar nao resolveu, entao o aviso muda de conselho. */}
+      {install.installed && atRisk && (
         <div className="tk-banner tk-banner--warn" role="status">
           <IconAlert size={20} />
           <div className="tk-banner-text">
             <div className="tk-banner-title">Seus dados podem ser apagados</div>
             <p className="tk-banner-body">
-              {isIos() && !installed
-                ? "O Safari apaga os dados de sites que passam 7 dias sem uso. Adicione o TrainerKit à Tela de Início para que ele pare de fazer isso."
-                : "O navegador ainda não garantiu o armazenamento. Mantenha um backup exportado até que ele garanta."}
+              O navegador ainda não garantiu o armazenamento. Mantenha um backup
+              exportado por segurança.
             </p>
           </div>
         </div>
@@ -49,9 +67,7 @@ export function HomeScreen({ dataset, persist, installed }: Props) {
           <IconAlert size={20} />
           <div className="tk-banner-text">
             <div className="tk-banner-title">Não consegui carregar o dataset</div>
-            <p className="tk-banner-body">
-              Sem ele o app não calcula nada. {dataset.message}
-            </p>
+            <p className="tk-banner-body">Sem ele o app não calcula nada. {dataset.message}</p>
           </div>
         </div>
       )}
@@ -63,7 +79,9 @@ export function HomeScreen({ dataset, persist, installed }: Props) {
             <div style={{ display: "flex", gap: 24, marginTop: 12 }}>
               <div>
                 <div style={{ font: "800 26px/1.1 var(--tk-font)", letterSpacing: "-0.02em" }}>
-                  {dataset.data.species.length.toLocaleString("pt-BR")}
+                  {dataset.data.species
+                    .filter((s) => s.cosmeticOf === null)
+                    .length.toLocaleString("pt-BR")}
                 </div>
                 <div className="tk-caption">espécies</div>
               </div>
@@ -96,6 +114,14 @@ export function HomeScreen({ dataset, persist, installed }: Props) {
             </p>
           </div>
         </>
+      )}
+
+      {guideOpen && (
+        <InstallGuide
+          platform={install.platform}
+          promptInstall={install.promptInstall}
+          onClose={() => setGuideOpen(false)}
+        />
       )}
     </>
   );

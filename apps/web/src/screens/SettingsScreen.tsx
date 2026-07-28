@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 
 import type { PersistState } from "../storage/persist.ts";
-import { isInstalled, isIos } from "../storage/persist.ts";
+import { useInstallState } from "../storage/install.ts";
+import { InstallGuide } from "./InstallGuide.tsx";
 import { SpriteSettings } from "./SpriteSettings.tsx";
 
 interface Props {
@@ -27,6 +28,8 @@ function formatBytes(n: number): string {
 }
 
 export function SettingsScreen({ datasetLabel, persist }: Props) {
+  const install = useInstallState();
+  const [guideOpen, setGuideOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>(
     () => (localStorage.getItem(THEME_KEY) as Theme | null) ?? "sistema",
   );
@@ -62,10 +65,17 @@ export function SettingsScreen({ datasetLabel, persist }: Props) {
         Armazenamento
       </div>
       <section className="tk-card" style={{ marginTop: 10 }}>
-        <div className="tk-row">
-          <span className="tk-row-label">Instalado na tela de início</span>
-          <span className="tk-row-value">{isInstalled() ? "Sim" : "Não"}</span>
-        </div>
+        {install.installed ? (
+          <div className="tk-row">
+            <span className="tk-row-label">Instalado na tela de início</span>
+            <span className="tk-row-value">Sim</span>
+          </div>
+        ) : (
+          <button type="button" className="tk-row" onClick={() => setGuideOpen(true)}>
+            <span className="tk-row-label">Instalar na tela de início</span>
+            <span className="tk-row-value">ver como ›</span>
+          </button>
+        )}
         <div className="tk-row">
           <span className="tk-row-label">Dados protegidos</span>
           <span
@@ -93,13 +103,6 @@ export function SettingsScreen({ datasetLabel, persist }: Props) {
           </div>
         )}
       </section>
-
-      {persist?.supported && !persist.persisted && isIos() && !isInstalled() && (
-        <p className="tk-caption" style={{ marginTop: 10, lineHeight: 1.5 }}>
-          No iPhone, abra o menu Compartilhar do Safari e toque em “Adicionar à Tela de
-          Início”. Sem isso o Safari apaga os dados do app depois de 7 dias sem uso.
-        </p>
-      )}
 
       <SpriteSettings />
 
@@ -132,6 +135,14 @@ export function SettingsScreen({ datasetLabel, persist }: Props) {
           Versão 0.1.0
         </p>
       </section>
+
+      {guideOpen && (
+        <InstallGuide
+          platform={install.platform}
+          promptInstall={install.promptInstall}
+          onClose={() => setGuideOpen(false)}
+        />
+      )}
     </>
   );
 }

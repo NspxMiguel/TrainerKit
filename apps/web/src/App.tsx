@@ -5,7 +5,7 @@ import { CollectionScreen } from "./screens/CollectionScreen.tsx";
 import { HomeScreen } from "./screens/HomeScreen.tsx";
 import { PokedexScreen } from "./screens/PokedexScreen.tsx";
 import { SettingsScreen } from "./screens/SettingsScreen.tsx";
-import { isInstalled, requestPersistence, type PersistState } from "./storage/persist.ts";
+import { requestPersistence, type PersistState } from "./storage/persist.ts";
 import { IconGrid, IconHome, IconSearch, IconSliders } from "./ui/Icons.tsx";
 
 export type Tab = "inicio" | "pokedex" | "colecao" | "ajustes";
@@ -37,7 +37,7 @@ export function App() {
       <div className="tk-shell">
         <main className="tk-main" key={tab}>
           {tab === "inicio" && (
-            <HomeScreen dataset={dataset} persist={persist} installed={isInstalled()} />
+            <HomeScreen dataset={dataset} persist={persist} />
           )}
           {tab === "pokedex" && <PokedexScreen dataset={dataset} />}
           {tab === "colecao" && <CollectionScreen dataset={dataset} />}

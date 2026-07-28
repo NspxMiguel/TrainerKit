@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import { monogram, spriteUrl, typeGradient } from "../sprites/provider.ts";
+import { isPixelArt, monogram, needsScreen, spriteUrl, typeGradient } from "../sprites/provider.ts";
 import { useSpriteSettings } from "../sprites/settings.ts";
 
 interface Props {
@@ -25,17 +25,20 @@ export function SpeciesTile({ spriteId, dex, name, types, size = 64, shiny }: Pr
   const settings = useSpriteSettings();
   const url = spriteUrl({ spriteId, dex, ...(shiny === undefined ? {} : { shiny }) }, settings);
 
-  const [loaded, setLoaded] = useState(false);
-  const [failed, setFailed] = useState(false);
+  // Guardamos QUAL url carregou, nao um booleano.
+  //
+  // Com booleano + efeito de reset havia uma corrida real: imagem em cache
+  // dispara `onLoad` antes de o efeito rodar, e o efeito entao apagava o `true`
+  // recem-gravado — o sprite ficava invisivel para sempre. Sprites pequenos
+  // (Game Boy, ~700 B) caiam nisso quase sempre; a arte oficial, quase nunca.
+  // Comparar url dispensa o reset: trocar de fonte ja invalida sozinho.
+  const [loadedUrl, setLoadedUrl] = useState<string | null>(null);
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
 
-  // Trocar de fonte nos Ajustes precisa refazer a tentativa: sem isto, uma
-  // fonte que falhou deixaria o tile preso no monograma para sempre.
-  useEffect(() => {
-    setLoaded(false);
-    setFailed(false);
-  }, [url]);
-
-  const showImage = url !== null && !failed;
+  const loaded = url !== null && loadedUrl === url;
+  const showImage = url !== null && failedUrl !== url;
+  const pixel = isPixelArt(settings.source);
+  const screen = needsScreen(settings.source);
 
   return (
     <div
@@ -51,7 +54,7 @@ export function SpeciesTile({ spriteId, dex, name, types, size = 64, shiny }: Pr
       }}
       aria-hidden="true"
     >
-      <span style={{ opacity: loaded && showImage ? 0 : 1, transition: "opacity .18s ease" }}>
+      <span style={{ opacity: loaded ? 0 : 1, transition: "opacity .18s ease" }}>
         {monogram(name)}
       </span>
 
@@ -62,17 +65,33 @@ export function SpeciesTile({ spriteId, dex, name, types, size = 64, shiny }: Pr
           alt=""
           loading="lazy"
           decoding="async"
-          onLoad={() => setLoaded(true)}
-          onError={() => setFailed(true)}
+          // Imagem vinda do cache pode terminar antes de o React ligar o
+          // onLoad. O ref roda na montagem e pega justamente esse caso.
+          ref={(el) => {
+            if (el?.complete && el.naturalWidth > 0) setLoadedUrl(url);
+          }}
+          onLoad={() => setLoadedUrl(url)}
+          onError={() => setFailedUrl(url)}
           style={{
             position: "absolute",
-            inset: "8%",
-            width: "84%",
-            height: "84%",
+            // A telinha ocupa mais do tile e ganha cantos proprios; sem ela o
+            // sprite respira dentro do gradiente do tipo.
+            inset: screen ? "10%" : "8%",
+            width: screen ? "80%" : "84%",
+            height: screen ? "80%" : "84%",
             objectFit: "contain",
+            background: screen ? "#F6F7F2" : "none",
+            borderRadius: screen ? Math.round(size / 9) : 0,
+            padding: screen ? "4%" : 0,
             opacity: loaded ? 1 : 0,
             transition: "opacity .18s ease",
-            filter: "drop-shadow(0 2px 6px rgba(0,0,0,.35))",
+            // Sprite de 96px ampliado pra 116 vira borrao com a interpolacao
+            // padrao do navegador. `pixelated` mantem o pixel quadrado, que e o
+            // ponto inteiro de escolher arte de Game Boy.
+            imageRendering: pixel ? "pixelated" : "auto",
+            filter: pixel
+              ? "drop-shadow(0 1px 2px rgba(0,0,0,.4))"
+              : "drop-shadow(0 2px 6px rgba(0,0,0,.35))",
           }}
         />
       )}

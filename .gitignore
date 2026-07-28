@@ -15,16 +15,27 @@ dev-dist/
 .env.*
 !.env.example
 
-# Sprites baixados dos repositorios da comunidade. NUNCA versionados.
+# ----------------------------------------------------------------- SPRITES
 #
-# Sao arte protegida da The Pokemon Company / Nintendo / Scopely, publicada em
-# repositorios sem licenca. Esta build e de uso pessoal e local; versionar os
-# arquivos transformaria o repositorio em redistribuicao, que e outra coisa
-# completamente diferente do ponto de vista legal.
+# NENHUM sprite de Pokemon entra neste repositorio. Nunca.
 #
-# O app funciona sem eles: cai no tile de monograma. Rode `pnpm sprites:fetch`
-# para popular localmente.
+# Sao arte protegida da The Pokemon Company / Nintendo / Creatures / GAME FREAK.
+# O app busca as imagens em runtime, no aparelho de quem ligou a fonte nos
+# Ajustes — e por isso ele nao redistribui nada. Commitar os arquivos
+# transformaria o repositorio em redistribuicao, que e coisa completamente
+# diferente do ponto de vista legal.
+#
+# Sem imagem o app continua inteiro: cai no tile de monograma, que e o padrao de
+# fabrica.
+#
+# ATENCAO: os `icon-*.png` e `apple-touch-icon.png` em apps/web/public sao
+# versionados de proposito — sao arte PROPRIA (o monograma TK), geradas por
+# `apps/web/scripts/make-icons.ts`. Nao confundir com sprite.
 apps/web/public/sprites/
+apps/web/public/pokemon/
+**/sprites/pokemon/
+*.sprite.png
+sprites-cache/
 packages/dataset/.cache/
 
 # GAME_MASTER cru (18 MB). Reconstruivel pelo pipeline de ETL.

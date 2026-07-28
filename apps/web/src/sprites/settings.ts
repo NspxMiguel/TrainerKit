@@ -11,7 +11,13 @@ import { useSyncExternalStore } from "react";
  * O provider `custom` existe pra quem tem os proprios arquivos: aponta o
  * template e pronto, sem precisar mexer no codigo.
  */
-export type SpriteSourceId = "off" | "pokeapi-artwork" | "pokeapi-home" | "custom";
+export type SpriteSourceId =
+  | "off"
+  | "gameboy"
+  | "pixel"
+  | "pokeapi-artwork"
+  | "pokeapi-home"
+  | "custom";
 
 export interface SpriteSettings {
   source: SpriteSourceId;
@@ -35,13 +41,22 @@ export const SOURCE_LABELS: Record<SpriteSourceId, { title: string; detail: stri
     title: "Sem imagens",
     detail: "Só o selo com a cor do tipo e as iniciais. Nada é baixado.",
   },
+  gameboy: {
+    title: "Game Boy",
+    detail:
+      "O sprite mais antigo que existe de cada um: Vermelho/Azul, depois Cristal, Esmeralda, e Preto/Branco pros novos. ~1 KB cada.",
+  },
+  pixel: {
+    title: "Pixel art uniforme",
+    detail: "Tudo no estilo Preto/Branco. Mesma cara da Pokédex inteira. ~1 KB cada.",
+  },
   "pokeapi-artwork": {
     title: "Arte oficial",
-    detail: "Ilustração grande, do PokeAPI. ~150 KB por Pokémon, baixada só ao ver.",
+    detail: "Ilustração grande. Bonita, mas ~150 KB por Pokémon.",
   },
   "pokeapi-home": {
-    title: "Renders do HOME",
-    detail: "Modelos 3D do Pokémon HOME, do PokeAPI. Estilo mais uniforme.",
+    title: "Renders 3D",
+    detail: "Modelos do Pokémon HOME. Estilo uniforme e moderno. ~170 KB cada.",
   },
   custom: {
     title: "Fonte própria",

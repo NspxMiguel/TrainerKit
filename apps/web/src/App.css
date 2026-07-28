@@ -457,3 +457,71 @@
 .tk-tabbar {
   grid-template-columns: repeat(4, 1fr);
 }
+
+/* --------------------------------------------------- guia de instalacao */
+
+.tk-reasons {
+  margin: 10px 0 0;
+  padding: 0 0 0 18px;
+  display: grid;
+  gap: 8px;
+  font: 400 13px/1.5 var(--tk-font);
+  color: var(--tk-txt2);
+}
+
+.tk-reasons strong {
+  color: var(--tk-txt);
+}
+
+.tk-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  counter-reset: step;
+}
+
+.tk-steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--tk-s3);
+  padding: var(--tk-s3) var(--tk-s4);
+  border-radius: var(--tk-r-input);
+  background: var(--tk-surf);
+  border: 1px solid var(--tk-line);
+}
+
+.tk-step-num {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--tk-pri-soft);
+  border: 1px solid var(--tk-pri-line);
+  color: var(--tk-pri-fg);
+  font: 700 12px var(--tk-mono);
+}
+
+.tk-step-text {
+  flex: 1;
+  font: 400 14px/1.45 var(--tk-font);
+  color: var(--tk-txt);
+}
+
+.tk-step-glyph {
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  height: 24px;
+  margin-left: 8px;
+  padding: 0 6px;
+  vertical-align: -6px;
+  border-radius: 7px;
+  background: var(--tk-surf3);
+  border: 1px solid var(--tk-line2);
+  font-size: 14px;
+  line-height: 1;
+}
