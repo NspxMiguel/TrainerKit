@@ -133,8 +133,18 @@ function longestFilledRuns(bmp: Bitmap): Run[] {
       }
     }
 
-    // Ignora sequencias curtas: sao texto laranja, icone, borda.
-    if (best && best.end - best.start >= bmp.width * 0.04) runs.push(best);
+    // Limiar deliberadamente BAIXO.
+    //
+    // Filtrar aqui pelo tamanho do preenchimento apagaria justamente as barras
+    // que mais importam: um IV 1 pinta ~1/15 do trilho, o que num print de 688
+    // px de largura da uns 14 px. Com o corte antigo de 4% da largura, todo
+    // Pokemon de ataque baixo era lido errado — e sao exatamente os que o
+    // jogador quer achar pra transferir.
+    //
+    // A separacao entre barra e enfeite fica para o filtro de LARGURA DE
+    // TRILHO, mais adiante: barra e cor seguida de trilho cinza ate uma borda
+    // definida; selo e carimbo nao tem trilho.
+    if (best && best.end - best.start >= 4) runs.push(best);
   }
 
   return runs;
@@ -221,6 +231,18 @@ export function scanAppraisalBars(bmp: Bitmap): ScanResult {
     const stepWidth = barLength / MAX_BAR;
     if (stepWidth < MIN_STEP_PX) continue;
 
+    // Teste de PUREZA — o que separa barra de enfeite.
+    //
+    // Um trilho de avaliacao e feito exclusivamente de duas coisas: a cor de
+    // preenchimento e o cinza do vazio. Qualquer outra coisa laranja no print
+    // (o selo de estrelas, o carimbo de data, o brilho do fundo) tem pixels de
+    // outras cores no meio do caminho e cai aqui.
+    //
+    // Sem este teste eu precisaria de um limiar alto de preenchimento, e ai
+    // barras de IV baixo — as que mais importam pra decidir o que transferir —
+    // seriam descartadas como ruido.
+    if (!looksLikeTrack(bmp, middle.y, left, barLength)) continue;
+
     let value = 0;
     let perfect = false;
     for (let step = 0; step < MAX_BAR; step++) {
@@ -252,6 +274,20 @@ export function scanAppraisalBars(bmp: Bitmap): ScanResult {
     });
   }
 
+  // Uma barra que escapou da deteccao pode ser DEDUZIDA.
+  //
+  // As tres sao empilhadas com espacamento regular e dividem o mesmo trilho.
+  // Entao, com duas encontradas, a terceira nao e adivinhacao: ou o intervalo
+  // entre elas veio dobrado, e a que falta esta exatamente no meio, ou ela esta
+  // numa das pontas, a um intervalo de distancia.
+  //
+  // Isto salva o caso real de uma barra reprovada no teste de pureza por um
+  // detalhe da tela passando por cima dela.
+  if (bars.length === 2) {
+    const inferred = inferMissingBar(bmp, bars[0]!, bars[1]!);
+    if (inferred) bars.splice(inferred.index, 0, inferred.bar);
+  }
+
   if (bars.length < 3) {
     return {
       ok: false,
@@ -276,33 +312,197 @@ export function scanAppraisalBars(bmp: Bitmap): ScanResult {
     };
   }
 
+  // Remede as tres com a MESMA geometria.
+  //
+  // Detectar cada barra isoladamente deixa uma leitura ruim contaminar so ela:
+  // numa amostra real uma barra saiu com x=263/larg=141 enquanto as vizinhas
+  // tinham x=190/larg=215 — mesma borda direita, esquerda perdida. Como as tres
+  // dividem o mesmo trilho por construcao, usar a mediana das tres corrige a
+  // que escorregou sem estragar as que estavam certas.
+  const left = median(chosen.map((b) => b.rect.x));
+  const width = median(chosen.map((b) => b.rect.width));
+
+  const remeasured = chosen.map((bar) => {
+    const centerY = bar.rect.y + Math.floor(bar.rect.height / 2);
+    const value = measureAt(bmp, centerY, left, width);
+    return {
+      ...bar,
+      value: value.value,
+      perfect: value.perfect,
+      rect: { ...bar.rect, x: left, width },
+    };
+  }) as [ScanBar, ScanBar, ScanBar];
+
   return {
     ok: true,
-    ivs: { atk: chosen[0].value, def: chosen[1].value, hp: chosen[2].value },
-    bars: chosen,
+    ivs: {
+      atk: remeasured[0].value,
+      def: remeasured[1].value,
+      hp: remeasured[2].value,
+    },
+    bars: remeasured,
   };
 }
 
-/** Escolhe as tres barras consecutivas mais parecidas em largura e alinhamento. */
-function pickThree(bars: ScanBar[]): [ScanBar, ScanBar, ScanBar] | null {
-  if (bars.length === 3) return [bars[0]!, bars[1]!, bars[2]!];
+/**
+ * Deduz a terceira barra a partir das duas encontradas.
+ *
+ * Devolve tambem em que posicao ela entra, para a ordem Ataque/Defesa/PS
+ * continuar correta — inserir no lugar errado trocaria os stats de nome, que e
+ * pior que nao ler.
+ */
+function inferMissingBar(
+  bmp: Bitmap,
+  first: ScanBar,
+  second: ScanBar,
+): { bar: ScanBar; index: number } | null {
+  // Precisam dividir o mesmo trilho para que a deducao faca sentido.
+  if (Math.abs(first.rect.width - second.rect.width) > first.rect.width * 0.1) return null;
 
+  const left = Math.min(first.rect.x, second.rect.x);
+  const width = Math.max(first.rect.width, second.rect.width);
+  const height = Math.max(first.rect.height, second.rect.height);
+  const gap = second.rect.y - first.rect.y;
+
+  // Intervalo dobrado: a que falta e a do MEIO.
+  const doubled = gap > height * 3.5;
+  const y = doubled
+    ? Math.round((first.rect.y + second.rect.y) / 2)
+    : // Caso contrario ela esta numa ponta. Tento acima primeiro; a de baixo
+      // costuma estar coberta pelo texto de captura.
+      first.rect.y - gap;
+
+  if (y < 0 || y + height >= bmp.height) return null;
+
+  const centerY = y + Math.floor(height / 2);
+  if (!looksLikeTrack(bmp, centerY, left, width)) return null;
+
+  const measured = measureAt(bmp, centerY, left, width);
+  return {
+    bar: {
+      value: measured.value,
+      perfect: measured.perfect,
+      rect: { x: left, y, width, height },
+    },
+    index: doubled ? 1 : 0,
+  };
+}
+
+/**
+ * Confere se o intervalo se comporta como trilho de avaliacao.
+ *
+ * Amostra ao longo da faixa e exige que quase tudo seja preenchimento ou vazio.
+ * As bordas ficam de fora da amostragem porque o antialias mistura a cor do
+ * trilho com a do cartao branco.
+ */
+function looksLikeTrack(bmp: Bitmap, y: number, left: number, width: number): boolean {
+  const SAMPLES = 24;
+  let belong = 0;
+  let seen = 0;
+
+  for (let i = 0; i < SAMPLES; i++) {
+    const x = Math.round(left + ((i + 0.5) / SAMPLES) * width);
+    if (x < 0 || x >= bmp.width) continue;
+    seen++;
+
+    const offset = (y * bmp.width + x) * 4;
+    if (
+      near(bmp.data, offset, ORANGE) ||
+      near(bmp.data, offset, RED) ||
+      near(bmp.data, offset, EMPTY, 34)
+    ) {
+      belong++;
+    }
+  }
+
+  return seen > 0 && belong / seen >= 0.85;
+}
+
+function median(values: number[]): number {
+  const sorted = [...values].sort((a, b) => a - b);
+  return sorted[Math.floor(sorted.length / 2)]!;
+}
+
+/** Conta os passos pintados de uma barra com geometria ja conhecida. */
+function measureAt(
+  bmp: Bitmap,
+  y: number,
+  left: number,
+  width: number,
+): { value: number; perfect: boolean } {
+  const stepWidth = width / MAX_BAR;
+  let value = 0;
+  let perfect = false;
+
+  for (let step = 0; step < MAX_BAR; step++) {
+    const x = Math.round(left + (step + 0.5) * stepWidth);
+    if (x < 0 || x >= bmp.width) break;
+    const offset = (y * bmp.width + x) * 4;
+
+    const isRed = near(bmp.data, offset, RED);
+    if (isRed || near(bmp.data, offset, ORANGE)) {
+      value++;
+      if (isRed) perfect = true;
+    } else {
+      break;
+    }
+  }
+
+  return { value: perfect ? MAX_BAR : value, perfect };
+}
+
+/**
+ * Escolhe as tres barras de verdade entre as candidatas.
+ *
+ * O print inteiro tem laranja: o selo de estrelas, o carimbo de data, enfeites
+ * de fundo. Testar apenas trios CONSECUTIVOS mordia esse ruido, porque o selo
+ * gera varias faixas parecidas entre si logo acima das barras reais.
+ *
+ * O que distingue as barras de verdade nao e a cor — e a GEOMETRIA: as tres
+ * comecam na mesma coluna, tem exatamente a mesma largura de trilho e ficam
+ * empilhadas com espacamento regular. Nada mais no print faz isso.
+ */
+function pickThree(bars: ScanBar[]): [ScanBar, ScanBar, ScanBar] | null {
+  if (bars.length < 3) return null;
+
+  // Primeiro corte: LARGURA. O trilho da avaliacao e de longe o elemento
+  // laranja mais largo do print — o selo de estrelas e o carimbo de data ficam
+  // na casa dos 40 a 140 px contra 215 do trilho. Este corte sozinho limpa
+  // quase todo o ruido, e sem depender de posicao na tela.
+  const widest = Math.max(...bars.map((b) => b.rect.width));
+  const candidates = bars.filter((b) => b.rect.width >= widest * 0.6);
+  if (candidates.length < 3) return null;
+
+  // Segundo corte: ESPACAMENTO REGULAR. As tres barras sao empilhadas com o
+  // mesmo intervalo. Nao exijo alinhamento perfeito a esquerda de proposito —
+  // uma barra pode ter a borda esquerda mal detectada, e e justamente isso que
+  // a remedicao por mediana conserta depois. Exigir alinhamento aqui derrubaria
+  // o trio certo por causa de uma leitura ruim.
   let best: [ScanBar, ScanBar, ScanBar] | null = null;
   let bestScore = Infinity;
 
-  for (let i = 0; i + 2 < bars.length; i++) {
-    const trio = [bars[i]!, bars[i + 1]!, bars[i + 2]!] as [ScanBar, ScanBar, ScanBar];
-    const widths = trio.map((b) => b.rect.width);
-    const lefts = trio.map((b) => b.rect.x);
+  for (let i = 0; i < candidates.length; i++) {
+    for (let j = i + 1; j < candidates.length; j++) {
+      for (let k = j + 1; k < candidates.length; k++) {
+        const trio = [candidates[i]!, candidates[j]!, candidates[k]!] as [
+          ScanBar,
+          ScanBar,
+          ScanBar,
+        ];
+        const tops = trio.map((b) => b.rect.y);
 
-    const widthSpread = Math.max(...widths) - Math.min(...widths);
-    const leftSpread = Math.max(...lefts) - Math.min(...lefts);
-    const score = widthSpread + leftSpread;
+        const gap1 = tops[1]! - tops[0]!;
+        const gap2 = tops[2]! - tops[1]!;
+        if (gap1 <= 0 || gap2 <= 0) continue;
 
-    // As tres barras compartilham a mesma coluna e a mesma largura de trilho.
-    if (score < bestScore && widthSpread <= Math.max(...widths) * 0.15) {
-      bestScore = score;
-      best = trio;
+        const irregularity = Math.abs(gap1 - gap2) / Math.max(gap1, gap2);
+        if (irregularity > 0.25) continue;
+
+        if (irregularity < bestScore) {
+          bestScore = irregularity;
+          best = trio;
+        }
+      }
     }
   }
 
