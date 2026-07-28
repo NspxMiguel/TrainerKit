@@ -7,16 +7,7 @@ import {
   type SpriteSourceId,
 } from "../sprites/settings.ts";
 
-// Ordem: do mais leve pro mais pesado. Quem se importa com dado movel decide
-// pelo topo da lista sem precisar comparar tamanhos.
-const ORDER: SpriteSourceId[] = [
-  "off",
-  "gameboy",
-  "pixel",
-  "pokeapi-artwork",
-  "pokeapi-home",
-  "custom",
-];
+const ORDER: SpriteSourceId[] = ["off", "pokeapi-artwork", "pokeapi-home", "custom"];
 
 /**
  * Liga e desliga as imagens.

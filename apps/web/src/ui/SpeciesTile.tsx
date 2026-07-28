@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { isPixelArt, monogram, needsScreen, spriteUrl, typeGradient } from "../sprites/provider.ts";
+import { monogram, spriteUrl, typeGradient } from "../sprites/provider.ts";
 import { useSpriteSettings } from "../sprites/settings.ts";
 
 interface Props {
@@ -37,8 +37,6 @@ export function SpeciesTile({ spriteId, dex, name, types, size = 64, shiny }: Pr
 
   const loaded = url !== null && loadedUrl === url;
   const showImage = url !== null && failedUrl !== url;
-  const pixel = isPixelArt(settings.source);
-  const screen = needsScreen(settings.source);
 
   return (
     <div
@@ -74,24 +72,13 @@ export function SpeciesTile({ spriteId, dex, name, types, size = 64, shiny }: Pr
           onError={() => setFailedUrl(url)}
           style={{
             position: "absolute",
-            // A telinha ocupa mais do tile e ganha cantos proprios; sem ela o
-            // sprite respira dentro do gradiente do tipo.
-            inset: screen ? "10%" : "8%",
-            width: screen ? "80%" : "84%",
-            height: screen ? "80%" : "84%",
+            inset: "8%",
+            width: "84%",
+            height: "84%",
             objectFit: "contain",
-            background: screen ? "#F6F7F2" : "none",
-            borderRadius: screen ? Math.round(size / 9) : 0,
-            padding: screen ? "4%" : 0,
             opacity: loaded ? 1 : 0,
             transition: "opacity .18s ease",
-            // Sprite de 96px ampliado pra 116 vira borrao com a interpolacao
-            // padrao do navegador. `pixelated` mantem o pixel quadrado, que e o
-            // ponto inteiro de escolher arte de Game Boy.
-            imageRendering: pixel ? "pixelated" : "auto",
-            filter: pixel
-              ? "drop-shadow(0 1px 2px rgba(0,0,0,.4))"
-              : "drop-shadow(0 2px 6px rgba(0,0,0,.35))",
+            filter: "drop-shadow(0 2px 6px rgba(0,0,0,.35))",
           }}
         />
       )}

@@ -12,24 +12,6 @@ import { getSpriteSettings, type SpriteSettings } from "./settings.ts";
  */
 
 const POKEAPI = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon";
-const VERSIONS = `${POKEAPI}/versions`;
-
-/**
- * Ate onde cada geracao desenhou sprite.
- *
- * Os jogos antigos so tem arte dos Pokemon que existiam na epoca: Vermelho/Azul
- * param no 151, Cristal no 251, Esmeralda no 386. Preto/Branco cobre a Pokedex
- * inteira e por isso fecha a cascata.
- *
- * Verificado por requisicao: dex 152 em generation-i da 404, dex 1025 em
- * black-white da 200 com PNG 96x96 valido.
- */
-const RETRO_CHAIN: ReadonlyArray<{ maxDex: number; path: string }> = [
-  { maxDex: 151, path: "generation-i/red-blue" },
-  { maxDex: 251, path: "generation-ii/crystal" },
-  { maxDex: 386, path: "generation-iii/emerald" },
-  { maxDex: Infinity, path: "generation-v/black-white" },
-];
 
 export interface SpriteRequest {
   /**
@@ -40,20 +22,6 @@ export interface SpriteRequest {
   spriteId: number | null;
   dex: number;
   shiny?: boolean;
-}
-
-/**
- * Escolhe a pasta de geracao para o modo Game Boy.
- *
- * A decisao usa a DEX, nao o spriteId: formas regionais tem id acima de 10000 e
- * cairiam sempre na ultima geracao, mesmo sendo de um Pokemon da primeira. Como
- * elas so foram desenhadas a partir da setima geracao, o `spriteId` alto sai da
- * cascata sozinho na hora de montar a URL.
- */
-function retroPath(dex: number, spriteId: number): string {
-  // Formas alternativas (id 10000+) so existem em pixel art moderna.
-  if (spriteId >= 10000) return "generation-v/black-white";
-  return RETRO_CHAIN.find((g) => dex <= g.maxDex)!.path;
 }
 
 /** URL do sprite, ou `null` quando a fonte esta desligada ou nao tem arte. */
@@ -67,12 +35,6 @@ export function spriteUrl(
   const shiny = req.shiny ? "/shiny" : "";
 
   switch (settings.source) {
-    case "gameboy":
-      return `${VERSIONS}/${retroPath(req.dex, req.spriteId)}${shiny}/${req.spriteId}.png`;
-
-    case "pixel":
-      return `${VERSIONS}/generation-v/black-white${shiny}/${req.spriteId}.png`;
-
     case "pokeapi-artwork":
       return `${POKEAPI}/other/official-artwork${shiny}/${req.spriteId}.png`;
 
@@ -87,30 +49,6 @@ export function spriteUrl(
         .replaceAll("{dex}", String(req.dex));
     }
   }
-}
-
-/**
- * Pixel art precisa de renderizacao sem suavizacao — o navegador interpola por
- * padrao e transforma um sprite de 96px num borrao ao ampliar pra 116.
- */
-export function isPixelArt(source: SpriteSettings["source"]): boolean {
-  return source === "gameboy" || source === "pixel";
-}
-
-/**
- * Os sprites de Game Boy e Game Boy Color sao PNG de paleta SEM canal alfa: o
- * fundo e branco opaco, nao transparente. Jogados direto sobre o gradiente do
- * tipo, viram um quadrado branco no meio da cor.
- *
- * Em vez de disfarcar, o modo Game Boy assume isso: o sprite fica numa telinha
- * clara, que e como ele aparecia no aparelho. Gen III em diante ja vem
- * transparente e ganha a mesma telinha so para o conjunto nao ficar mestico.
- *
- * Verificado nos arquivos: red-blue e crystal sao `tipo=paleta` sem tRNS;
- * emerald e RGBA e black-white tem tRNS.
- */
-export function needsScreen(source: SpriteSettings["source"]): boolean {
-  return source === "gameboy";
 }
 
 // ---------------------------------------------------------------- monograma
@@ -154,8 +92,7 @@ export function typeColor(type: string): string {
   return (TYPE_COLORS[type] ?? FALLBACK_COLORS)[0];
 }
 
-/** Nome do tipo em portugues. */
-export const TYPE_NAMES_PT: Record<string, string> = {
+const TYPE_NAMES_PT: Record<string, string> = {
   normal: "Normal",
   fighting: "Lutador",
   flying: "Voador",

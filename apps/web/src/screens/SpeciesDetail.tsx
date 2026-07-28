@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { computeCPAtLevel } from "@trainerkit/core";
@@ -6,6 +6,7 @@ import { computeCPAtLevel } from "@trainerkit/core";
 import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
 import { typeColor, typeName } from "../sprites/provider.ts";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
+import { IVCalculator } from "./IVCalculator.tsx";
 
 interface Props {
   species: DatasetSpecies;
@@ -52,6 +53,8 @@ function StatBar({ label, value }: { label: string; value: number }) {
 }
 
 export function SpeciesDetail({ species, data, onClose }: Props) {
+  const [calcOpen, setCalcOpen] = useState(false);
+
   useEffect(() => {
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -119,6 +122,15 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
           </div>
         </div>
       </div>
+
+      <button
+        type="button"
+        className="tk-btn tk-btn--primary tk-btn--block"
+        style={{ marginBottom: 22 }}
+        onClick={() => setCalcOpen(true)}
+      >
+        Calcular IV do meu
+      </button>
 
       <div className="tk-overline">Stats base</div>
       <section className="tk-card" style={{ marginTop: 10, display: "grid", gap: 10 }}>
@@ -206,6 +218,9 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
         O ranking de melhor moveset por contexto — PvP, raide, uso geral — entra
         numa próxima versão. Por enquanto os ataques aparecem só listados.
       </p>
+      {calcOpen && (
+        <IVCalculator species={species} data={data} onClose={() => setCalcOpen(false)} />
+      )}
     </div>,
     document.body,
   );

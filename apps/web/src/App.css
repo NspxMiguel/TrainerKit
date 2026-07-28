@@ -525,3 +525,35 @@
   font-size: 14px;
   line-height: 1;
 }
+
+/*
+ * Campo numerico lado a lado.
+ *
+ * Sem `min-width: 0` o filho de um flex nunca encolhe abaixo do tamanho
+ * intrinseco do input, e o segundo campo vaza pra fora do cartao.
+ */
+.tk-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.tk-field .tk-search {
+  height: 48px;
+  margin-top: 4px;
+}
+
+.tk-field input {
+  min-width: 0;
+}
+
+/* Tira as setinhas do input numerico — elas roubam espaco e ninguem usa. */
+.tk-field input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.tk-field input[type="number"]::-webkit-outer-spin-button,
+.tk-field input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

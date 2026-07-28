@@ -97,6 +97,25 @@ function extractCpm(templates: Template[]): number[] {
   return trimmed;
 }
 
+/**
+ * Ordem dos tipos no `attackScalar`.
+ *
+ * O array de 18 posicoes de cada `typeEffective` e indexado pelo ENUM de tipo do
+ * jogo, e essa ordem NAO esta em lugar nenhum do GAME_MASTER — os templates
+ * aparecem em ordem alfabetica, que e outra coisa. Entao ela e fixada aqui e
+ * validada por teste contra confrontos conhecidos (Fogo resistido por rocha,
+ * fogo, agua e dragao; super efetivo contra inseto, aco, planta e gelo).
+ *
+ * Se algum dia a ordem mudar, os testes de efetividade quebram — que e
+ * exatamente o que deve acontecer, porque um chart torto envenena todo ranking
+ * de raide e de PvP sem dar nenhum sinal na tela.
+ */
+const TYPE_ORDER = [
+  "normal", "fighting", "flying", "poison", "ground", "rock",
+  "bug", "ghost", "steel", "fire", "water", "grass",
+  "electric", "psychic", "ice", "dragon", "dark", "fairy",
+] as const;
+
 function extractTypeChart(templates: Template[]): Record<string, number[]> {
   const chart: Record<string, number[]> = {};
   for (const t of templates) {
@@ -435,6 +454,7 @@ async function main(): Promise<void> {
   const spritesResolved = await resolveSpriteIds(species);
 
   const dataset = {
+    typeOrder: TYPE_ORDER,
     version: {
       batchId: stamp.batchId,
       uploadTime: stamp.uploadTime,
