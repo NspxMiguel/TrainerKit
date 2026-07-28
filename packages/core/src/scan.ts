@@ -76,8 +76,21 @@ const EMPTY = [0xe2, 0xe2, 0xe2] as const;
  */
 const TOLERANCE = 46;
 
-/** Cada passo precisa ter largura util; abaixo disso a leitura vira chute. */
-const MIN_STEP_PX = 2;
+/**
+ * Largura minima de um ponto de IV, em pixels.
+ *
+ * MEDIDO, nao chutado: reescalando os prints reais, a leitura se manteve exata
+ * ate cerca de 400 px de largura de imagem e comecou a errar entre 262 e 374 px
+ * — onde cada ponto de IV fica com ~5 px e o antialias come a fronteira.
+ *
+ * Com 6 px de folga o scanner RECUSA a imagem em vez de devolver um numero
+ * errado. Essa e a troca certa: IV errado com cara de certo faz o jogador
+ * transferir o Pokemon bom.
+ */
+const MIN_STEP_PX = 6;
+
+/** A barra e desenhada em tres blocos de 5 pontos, com um vao entre eles. */
+const BLOCKS = 3;
 
 function near(
   data: Bitmap["data"],
@@ -99,38 +112,67 @@ interface Run {
 }
 
 /**
- * Maior sequencia horizontal de cor de preenchimento em cada linha.
+ * Maior sequencia horizontal de TRILHO em cada linha.
  *
- * Varre linha a linha porque a barra e sempre horizontal e continua. Guardar so
- * a maior sequencia por linha ja descarta a maior parte do ruido — icone,
- * texto, borda de card.
+ * Ancorar no trilho inteiro — preenchimento MAIS vazio — e nao so na parte
+ * pintada. A diferenca importa muito: a parte pintada muda de tamanho conforme
+ * o IV, entao um Pokemon de ataque 2 dava uma ancora minuscula e a geometria
+ * saia errada. O trilho tem sempre a mesma largura, seja o IV 0 ou 15.
+ *
+ * Foi isso que fez a leitura variar com a resolucao: em print reduzido a ancora
+ * pequena escorregava, e com ela a posicao e a largura da barra.
+ *
+ * Vaos entre blocos sao atravessados aqui (nao encerram a sequencia), porque o
+ * que se quer e o trilho de ponta a ponta.
  */
 function longestFilledRuns(bmp: Bitmap): Run[] {
   const runs: Run[] = [];
+  const maxGap = Math.max(2, Math.round(bmp.width * 0.02));
 
   for (let y = 0; y < bmp.height; y++) {
     let best: Run | null = null;
     let start = -1;
+    let end = -1;
     let sawRed = false;
+    let sawFilled = false;
+    let gap = 0;
 
     for (let x = 0; x <= bmp.width; x++) {
-      const offset = (y * bmp.width + x) * 4;
-      const isRed = x < bmp.width && near(bmp.data, offset, RED);
-      const filled = x < bmp.width && (isRed || near(bmp.data, offset, ORANGE));
+      const kind = x < bmp.width ? classify(bmp, y, x) : "other";
+      const isTrack = kind !== "other";
 
-      if (filled) {
+      if (isTrack) {
         if (start < 0) {
           start = x;
           sawRed = false;
+          sawFilled = false;
         }
-        if (isRed) sawRed = true;
+        end = x + 1;
+        gap = 0;
+        if (kind === "filled") {
+          sawFilled = true;
+          const offset = (y * bmp.width + x) * 4;
+          if (near(bmp.data, offset, RED)) sawRed = true;
+        }
       } else if (start >= 0) {
-        const length = x - start;
-        if (!best || length > best.end - best.start) {
-          best = { y, start, end: x, perfect: sawRed };
+        // Vao curto entre blocos nao encerra o trilho.
+        if (++gap <= maxGap) continue;
+        if (sawFilled && fillsFromLeft(bmp, y, start, end) &&
+            (!best || end - start > best.end - best.start)) {
+          best = { y, start, end, perfect: sawRed };
         }
         start = -1;
+        gap = 0;
       }
+    }
+
+    if (
+      start >= 0 &&
+      sawFilled &&
+      fillsFromLeft(bmp, y, start, end) &&
+      (!best || end - start > best.end - best.start)
+    ) {
+      best = { y, start, end, perfect: sawRed };
     }
 
     // Limiar deliberadamente BAIXO.
@@ -148,6 +190,23 @@ function longestFilledRuns(bmp: Bitmap): Run[] {
   }
 
   return runs;
+}
+
+/**
+ * Barra de avaliacao enche da ESQUERDA para a direita, sempre.
+ *
+ * Ancorar no trilho inteiro deixou a deteccao mais estavel em escala, mas
+ * tambem mais crua: cinza e cor comum na interface, entao qualquer painel claro
+ * com um detalhe laranja no meio virava candidato. Exigir que o preenchimento
+ * comece na ponta esquerda separa barra de painel sem voltar a depender do
+ * tamanho do preenchimento — que era o problema original.
+ */
+function fillsFromLeft(bmp: Bitmap, y: number, start: number, end: number): boolean {
+  const margin = Math.max(2, Math.round((end - start) * 0.04));
+  for (let x = start; x < Math.min(start + margin + 1, end); x++) {
+    if (classify(bmp, y, x) === "filled") return true;
+  }
+  return false;
 }
 
 /** Agrupa linhas vizinhas: cada grupo e uma barra. */
@@ -224,8 +283,9 @@ export function scanAppraisalBars(bmp: Bitmap): ScanResult {
   for (const group of groups) {
     // A linha do meio do grupo e a mais limpa: longe do antialias das bordas.
     const middle = group[Math.floor(group.length / 2)]!;
-    const left = Math.min(...group.map((r) => r.start));
-    const right = trackEnd(bmp, middle.y, Math.max(...group.map((r) => r.end)));
+    // A sequencia ja cobre o trilho inteiro, entao as pontas saem dela mesma.
+    const left = median(group.map((r) => r.start));
+    const right = median(group.map((r) => r.end));
 
     const barLength = right - left;
     const stepWidth = barLength / MAX_BAR;
@@ -243,28 +303,13 @@ export function scanAppraisalBars(bmp: Bitmap): ScanResult {
     // seriam descartadas como ruido.
     if (!looksLikeTrack(bmp, middle.y, left, barLength)) continue;
 
-    let value = 0;
-    let perfect = false;
-    for (let step = 0; step < MAX_BAR; step++) {
-      const x = Math.round(left + (step + 0.5) * stepWidth);
-      if (x >= bmp.width) break;
-      const offset = (middle.y * bmp.width + x) * 4;
-
-      const isRed = near(bmp.data, offset, RED);
-      if (isRed || near(bmp.data, offset, ORANGE)) {
-        value++;
-        if (isRed) perfect = true;
-      } else {
-        break;
-      }
-    }
-
-    // Barra vermelha e o stat perfeito: o jogo troca a cor exatamente em 15.
-    if (perfect) value = MAX_BAR;
+    // Usa o MESMO medidor da etapa final: um so modelo de barra no arquivo
+    // inteiro evita que deteccao e leitura discordem entre si.
+    const measured = measureAt(bmp, middle.y, left, barLength);
 
     bars.push({
-      value,
-      perfect,
+      value: measured.value,
+      perfect: measured.perfect,
       rect: {
         x: left,
         y: group[0]!.y,
@@ -322,9 +367,12 @@ export function scanAppraisalBars(bmp: Bitmap): ScanResult {
   const left = median(chosen.map((b) => b.rect.x));
   const width = median(chosen.map((b) => b.rect.width));
 
+  const centers = chosen.map((b) => b.rect.y + Math.floor(b.rect.height / 2));
+  const layout = deriveBlocks(bmp, centers, left, width);
+
   const remeasured = chosen.map((bar) => {
     const centerY = bar.rect.y + Math.floor(bar.rect.height / 2);
-    const value = measureAt(bmp, centerY, left, width);
+    const value = measureAt(bmp, centerY, left, width, layout);
     return {
       ...bar,
       value: value.value,
@@ -423,32 +471,173 @@ function median(values: number[]): number {
   return sorted[Math.floor(sorted.length / 2)]!;
 }
 
-/** Conta os passos pintados de uma barra com geometria ja conhecida. */
+export interface BlockLayout {
+  /** Inicio e fim de cada um dos tres blocos, em coordenada de imagem. */
+  blocks: Array<{ start: number; end: number }>;
+}
+
+/**
+ * Descobre o gabarito dos blocos usando as TRES barras ao mesmo tempo.
+ *
+ * Este e o passo que faz a leitura parar de depender da resolucao. Sozinha,
+ * uma barra e um sinal fraco: num print reduzido os vaos entre blocos borram e
+ * as vezes somem, e ai o medidor confunde dois blocos com um. Mas o vao
+ * atravessa as TRES barras na mesma coluna — entao, olhando as tres juntas,
+ * ele reaparece: uma coluna so e vao se for vao nas tres.
+ *
+ * Com o gabarito em maos, cada barra vira uma proporcao dentro de um bloco
+ * conhecido, e o resultado deixa de mudar quando a imagem encolhe.
+ */
+function deriveBlocks(
+  bmp: Bitmap,
+  rows: readonly number[],
+  left: number,
+  width: number,
+): BlockLayout | null {
+  const gapColumn: boolean[] = [];
+  for (let i = 0; i < width; i++) {
+    let allOther = true;
+    for (const y of rows) {
+      if (classify(bmp, y, left + i) !== "other") {
+        allOther = false;
+        break;
+      }
+    }
+    gapColumn.push(allOther);
+  }
+
+  // Blocos sao os trechos entre as colunas de vao.
+  const blocks: Array<{ start: number; end: number }> = [];
+  let start = -1;
+  for (let i = 0; i <= width; i++) {
+    const isTrack = i < width && !gapColumn[i];
+    if (isTrack) {
+      if (start < 0) start = i;
+    } else if (start >= 0) {
+      if (i - start >= Math.max(2, width / 20)) {
+        blocks.push({ start: left + start, end: left + i });
+      }
+      start = -1;
+    }
+  }
+
+  if (blocks.length !== BLOCKS) return null;
+
+  // Os tres blocos tem a mesma largura por construcao. Se as larguras saem
+  // muito diferentes, o que foi detectado nao e o gabarito — melhor recusar do
+  // que medir contra um molde torto.
+  const widths = blocks.map((b) => b.end - b.start);
+  const spread = Math.max(...widths) - Math.min(...widths);
+  if (spread > Math.max(...widths) * 0.35) return null;
+
+  return { blocks };
+}
+
+type PixelKind = "filled" | "empty" | "other";
+
+function classify(bmp: Bitmap, y: number, x: number): PixelKind {
+  if (x < 0 || x >= bmp.width || y < 0 || y >= bmp.height) return "other";
+  const offset = (y * bmp.width + x) * 4;
+  if (near(bmp.data, offset, ORANGE) || near(bmp.data, offset, RED)) return "filled";
+  // Tolerancia maior no vazio: o cinza claro se mistura facil com o branco do
+  // cartao quando a imagem foi reduzida.
+  if (near(bmp.data, offset, EMPTY, 34)) return "empty";
+  return "other";
+}
+
+/**
+ * Mede uma barra MODELANDO os tres blocos.
+ *
+ * A barra nao e uma regua de 15 passos corridos: sao TRES BLOCOS de 5 pontos,
+ * com um vao entre eles. Tratar como 15 passos uniformes ao longo do trilho
+ * inteiro faz os pontos de amostragem derivarem para a direita — porque os vaos
+ * tambem ocupam largura — e o erro CRESCE conforme o IV sobe. Foi assim que um
+ * 10 virava 7 e um 14 virava 13 assim que o print era reduzido.
+ *
+ * Aqui os blocos sao localizados primeiro e cada um e medido no proprio
+ * espaco. Como a conta vira proporcao dentro do bloco, o resultado deixa de
+ * depender da resolucao: vale para print de 4K e para print reduzido pelo
+ * WhatsApp.
+ */
 function measureAt(
   bmp: Bitmap,
   y: number,
   left: number,
   width: number,
+  layout?: BlockLayout | null,
 ): { value: number; perfect: boolean } {
-  const stepWidth = width / MAX_BAR;
-  let value = 0;
-  let perfect = false;
+  const right = left + width;
 
-  for (let step = 0; step < MAX_BAR; step++) {
-    const x = Math.round(left + (step + 0.5) * stepWidth);
-    if (x < 0 || x >= bmp.width) break;
-    const offset = (y * bmp.width + x) * 4;
+  const kinds: PixelKind[] = [];
+  for (let x = left; x < right; x++) kinds.push(classify(bmp, y, x));
 
-    const isRed = near(bmp.data, offset, RED);
-    if (isRed || near(bmp.data, offset, ORANGE)) {
-      value++;
-      if (isRed) perfect = true;
-    } else {
-      break;
+  const perfect = (() => {
+    for (let x = left; x < right; x++) {
+      const offset = (y * bmp.width + x) * 4;
+      if (near(bmp.data, offset, RED)) return true;
+    }
+    return false;
+  })();
+
+  // Vermelho e o stat perfeito: o jogo so usa essa cor no 15.
+  if (perfect) return { value: MAX_BAR, perfect: true };
+
+  const IV_PER_BLOCK_ = MAX_BAR / BLOCKS;
+
+  // Caminho preferido: gabarito derivado das tres barras juntas.
+  if (layout) {
+    let value = 0;
+    for (const block of layout.blocks) {
+      let filled = 0;
+      let span = 0;
+      for (let x = block.start; x < block.end; x++) {
+        span++;
+        if (classify(bmp, y, x) === "filled") filled++;
+      }
+      if (span > 0) value += Math.round((filled / span) * IV_PER_BLOCK_);
+    }
+    return { value: Math.min(value, MAX_BAR), perfect: false };
+  }
+
+  // Localiza os blocos: trechos de trilho (cheio ou vazio) separados por vaos.
+  const blocks: Array<{ start: number; end: number }> = [];
+  let start = -1;
+  for (let i = 0; i <= kinds.length; i++) {
+    const isTrack = i < kinds.length && kinds[i] !== "other";
+    if (isTrack) {
+      if (start < 0) start = i;
+    } else if (start >= 0) {
+      // Vaos sao estreitos; ignora fragmentos menores que um ponto de IV.
+      if (i - start >= Math.max(2, width / 30)) blocks.push({ start, end: i });
+      start = -1;
     }
   }
 
-  return { value: perfect ? MAX_BAR : value, perfect };
+  const IV_PER_BLOCK = MAX_BAR / BLOCKS;
+
+  if (blocks.length === BLOCKS) {
+    let value = 0;
+    for (const block of blocks) {
+      const span = block.end - block.start;
+      let filled = 0;
+      for (let i = block.start; i < block.end; i++) if (kinds[i] === "filled") filled++;
+      value += Math.round((filled / span) * IV_PER_BLOCK);
+    }
+    return { value: Math.min(value, MAX_BAR), perfect: false };
+  }
+
+  // Reserva: em print muito reduzido os vaos somem e os blocos viram um so.
+  // Ai a proporcao sobre o trilho inteiro ainda serve, e continua melhor que
+  // parar no primeiro pixel que destoa.
+  let filled = 0;
+  let track = 0;
+  for (const kind of kinds) {
+    if (kind === "filled") filled++;
+    if (kind !== "other") track++;
+  }
+  if (track === 0) return { value: 0, perfect: false };
+
+  return { value: Math.min(Math.round((filled / track) * MAX_BAR), MAX_BAR), perfect: false };
 }
 
 /**
