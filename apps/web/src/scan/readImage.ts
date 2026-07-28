@@ -18,12 +18,15 @@ export interface ScanOutcome {
 /**
  * Limite de trabalho por imagem.
  *
- * Print de celular moderno passa de 1200x2600. Reduzir antes de varrer corta o
- * tempo pela metade sem perder precisao: a barra tem ~215 px de largura no
- * print original, e mesmo reduzida continua com folga sobre o minimo de 2 px
- * por passo.
+ * Reduzir acelera a varredura, mas reduzir DEMAIS destroi a leitura: medindo os
+ * prints reais em varias escalas, o scanner acerta ate cerca de 400 px de
+ * largura e passa a recusar abaixo disso.
+ *
+ * O teto age sobre o LADO MAIOR, e um print de celular e bem mais alto que
+ * largo — entao 2000 aqui mantem a largura confortavelmente acima da zona de
+ * risco mesmo vindo de um aparelho 4K.
  */
-const MAX_DIMENSION = 1400;
+const MAX_DIMENSION = 2000;
 
 export async function scanFile(file: File): Promise<ScanOutcome> {
   const bitmap = await createImageBitmap(file);

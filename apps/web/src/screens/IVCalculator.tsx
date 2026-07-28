@@ -94,11 +94,16 @@ export function IVCalculator({ species, data, onClose }: Props) {
         />
         {ivs && badge ? (
           <div>
+            {/* Numero inteiro: IV e contagem, nao medida. "48,9%" sugere uma
+                precisao que nao existe — o que existe sao 22 pontos de 45. */}
             <div style={{ font: "800 34px/1.05 var(--tk-font)", letterSpacing: "-0.03em" }}>
-              {ivPercentOf(ivs).toFixed(1)}%
+              {total}
+              <span style={{ font: "700 20px var(--tk-font)", color: "var(--tk-txt3)" }}>
+                {" "}/ 45
+              </span>
             </div>
             <div className="tk-caption">
-              {total} de 45 ·{" "}
+              {Math.round(ivPercentOf(ivs))}% ·{" "}
               <span style={badge.pink ? { color: "var(--tk-dang)" } : undefined}>
                 {"★".repeat(badge.litStars)}
                 {"☆".repeat(3 - badge.litStars)}
