@@ -3,11 +3,12 @@ import { useEffect, useState } from "react";
 import { datasetLabel, useDataset } from "./data/useDataset.ts";
 import { CollectionScreen } from "./screens/CollectionScreen.tsx";
 import { HomeScreen } from "./screens/HomeScreen.tsx";
+import { PokedexScreen } from "./screens/PokedexScreen.tsx";
 import { SettingsScreen } from "./screens/SettingsScreen.tsx";
 import { isInstalled, requestPersistence, type PersistState } from "./storage/persist.ts";
-import { IconGrid, IconHome, IconSliders } from "./ui/Icons.tsx";
+import { IconGrid, IconHome, IconSearch, IconSliders } from "./ui/Icons.tsx";
 
-export type Tab = "inicio" | "colecao" | "ajustes";
+export type Tab = "inicio" | "pokedex" | "colecao" | "ajustes";
 
 const TABS: ReadonlyArray<{
   id: Tab;
@@ -15,6 +16,9 @@ const TABS: ReadonlyArray<{
   Icon: typeof IconHome;
 }> = [
   { id: "inicio", label: "Início", Icon: IconHome },
+  // Consulta pura, sem cadastro: nem todo mundo quer catalogar a colecao, as
+  // vezes a pergunta e so "esse Pokemon presta?".
+  { id: "pokedex", label: "Pokédex", Icon: IconSearch },
   { id: "colecao", label: "Coleção", Icon: IconGrid },
   { id: "ajustes", label: "Ajustes", Icon: IconSliders },
 ];
@@ -35,7 +39,8 @@ export function App() {
           {tab === "inicio" && (
             <HomeScreen dataset={dataset} persist={persist} installed={isInstalled()} />
           )}
-          {tab === "colecao" && <CollectionScreen />}
+          {tab === "pokedex" && <PokedexScreen dataset={dataset} />}
+          {tab === "colecao" && <CollectionScreen dataset={dataset} />}
           {tab === "ajustes" && (
             <SettingsScreen
               datasetLabel={

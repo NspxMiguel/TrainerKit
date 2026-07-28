@@ -8,5 +8,9 @@
     "build": "node src/etl.ts",
     "refresh": "node src/fetch.ts && node src/etl.ts",
     "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.2",
+    "typescript": "^5.9.3"
   }
 }

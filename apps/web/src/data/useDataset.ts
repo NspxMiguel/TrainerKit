@@ -16,6 +16,14 @@ export interface DatasetSpecies {
   parent: string | null;
   evolvesInto: string[];
   candyToEvolve: Record<string, number>;
+  /**
+   * Preenchido quando a entrada e so uma variacao cosmetica (fantasia, forma
+   * "_normal" redundante, padrao de Unown). Elas tem stats identicos aos da
+   * forma canonica, entao nao mudam veredito nenhum e ficam fora da busca.
+   */
+  cosmeticOf: string | null;
+  /** Id do sprite no PokeAPI, resolvido no ETL. `null` = sem arte, usa monograma. */
+  spriteId: number | null;
 }
 
 export interface DatasetMove {

@@ -43,19 +43,36 @@ function normalizeId(raw: string): string {
   return raw.toLowerCase();
 }
 
-/** MACHAMP -> Machamp ; RATTATA_ALOLA -> Rattata (Alola) */
-function displayName(pokemonId: string, templateSuffix: string): string {
-  const base = pokemonId
+/** MACHAMP -> Machamp ; NIDORAN_FEMALE -> Nidoran Female */
+function titleCase(raw: string): string {
+  return raw
     .toLowerCase()
     .replace(/(^|_)(\w)/g, (_, sep: string, ch: string) => (sep ? " " : "") + ch.toUpperCase());
+}
 
-  const form = templateSuffix.slice(pokemonId.length).replace(/^_/, "");
-  if (!form || form === "NORMAL") return base;
+/**
+ * Extrai o sufixo de forma.
+ *
+ * O campo `form` repete o nome da especie na frente ("RATTATA_ALOLA"), mas nem
+ * sempre o nome COMPLETO: para o Nidoran, `pokemonId` e "NIDORAN_FEMALE"
+ * enquanto `form` e "NIDORAN_NORMAL". Por isso o corte e por segmentos comuns,
+ * nao por `slice(pokemonId.length)` — que produziria lixo como "(Al)".
+ */
+function formSuffix(pokemonId: string, form: string | undefined): string {
+  if (!form) return "";
 
-  const prettyForm = form
-    .toLowerCase()
-    .replace(/(^|_)(\w)/g, (_, sep: string, ch: string) => (sep ? " " : "") + ch.toUpperCase());
-  return `${base} (${prettyForm})`;
+  const idParts = pokemonId.split("_");
+  const formParts = form.split("_");
+
+  let shared = 0;
+  while (
+    shared < idParts.length &&
+    shared < formParts.length &&
+    idParts[shared] === formParts[shared]
+  ) {
+    shared++;
+  }
+  return formParts.slice(shared).join("_");
 }
 
 // ------------------------------------------------------------------ extracao
@@ -109,6 +126,137 @@ interface OutSpecies {
   parent: string | null;
   evolvesInto: string[];
   candyToEvolve: Record<string, number>;
+  /**
+   * Id da forma canonica quando esta entrada e apenas cosmetica (fantasia,
+   * padrao de Unown, "_normal" redundante). `null` quando a forma e real.
+   */
+  cosmeticOf: string | null;
+  /** Id do sprite no PokeAPI. `null` quando nao ha arte — cai no monograma. */
+  spriteId: number | null;
+}
+
+/**
+ * Resolve o id de sprite de cada especie contra o indice do PokeAPI.
+ *
+ * Os sprites do PokeAPI sao indexados por id numerico, e formas regionais nao
+ * seguem formula nenhuma (Rattata de Alola e 10091, Raichu de Alola e 10100).
+ * A unica forma confiavel de mapear e consultar o indice de nomes.
+ *
+ * A nomenclatura tambem diverge: o GAME_MASTER diz "GALARIAN" e "HISUIAN", o
+ * PokeAPI diz "galar" e "hisui". Por isso as tentativas em cascata.
+ *
+ * Falhar aqui nao e erro: a especie sem sprite cai no tile de monograma, que
+ * existe justamente para isso.
+ */
+async function resolveSpriteIds(species: OutSpecies[]): Promise<number> {
+  let index: Record<string, number>;
+  try {
+    const res = await fetch("https://pokeapi.co/api/v2/pokemon?limit=2000");
+    if (!res.ok) throw new Error(`PokeAPI respondeu ${res.status}`);
+    const body = (await res.json()) as { results: Array<{ name: string; url: string }> };
+    index = Object.fromEntries(
+      body.results.map((r) => [r.name, Number(r.url.replace(/\/$/, "").split("/").pop())]),
+    );
+  } catch (err) {
+    console.warn(
+      `AVISO: nao consegui buscar o indice do PokeAPI (${
+        err instanceof Error ? err.message : String(err)
+      }). Todas as especies vao cair no monograma.`,
+    );
+    return 0;
+  }
+
+  const SUFFIX_ALIASES: ReadonlyArray<readonly [RegExp, string]> = [
+    [/-galarian$/, "-galar"],
+    [/-hisuian$/, "-hisui"],
+    [/-paldean$/, "-paldea"],
+    [/-alolan$/, "-alola"],
+    // Genero: o GAME_MASTER escreve por extenso, o PokeAPI abrevia.
+    [/-female$/, "-f"],
+    [/-male$/, "-m"],
+  ];
+
+  // Indice sem separadores: os Pokemon Paradoxo vem colados no GAME_MASTER
+  // ("GREAT_TUSK" vira "greattusk" porque o proprio pokemonId e "GREATTUSK")
+  // enquanto o PokeAPI hifeniza ("great-tusk"). Comparar sem separador casa os
+  // dois sem precisar de lista.
+  const bySquashed = new Map<string, number>();
+  for (const [name, id] of Object.entries(index)) {
+    const squashed = name.replace(/-/g, "");
+    const current = bySquashed.get(squashed);
+    if (current === undefined || id < current) bySquashed.set(squashed, id);
+  }
+
+  // Indice auxiliar por prefixo: varias especies so existem no PokeAPI com a
+  // forma explicita ("deoxys-normal", "giratina-altered", "wormadam-plant"),
+  // sem entrada para o nome nu. O menor id e sempre a forma padrao.
+  const byPrefix = new Map<string, number>();
+  for (const [name, id] of Object.entries(index)) {
+    const dash = name.indexOf("-");
+    if (dash <= 0) continue;
+    const prefix = name.slice(0, dash);
+    const current = byPrefix.get(prefix);
+    if (current === undefined || id < current) byPrefix.set(prefix, id);
+  }
+
+  let resolved = 0;
+  for (const s of species) {
+    const dashed = s.id.replace(/_/g, "-");
+
+    const candidates = [dashed];
+    for (const [pattern, replacement] of SUFFIX_ALIASES) {
+      if (pattern.test(dashed)) candidates.push(dashed.replace(pattern, replacement));
+    }
+    // Ultimo recurso: o nome base, sem sufixo de forma.
+    const base = dashed.split("-")[0]!;
+    candidates.push(base);
+
+    let found: number | undefined;
+    for (const name of candidates) {
+      found = index[name];
+      if (found !== undefined) break;
+    }
+    // Ainda nada: tenta ignorando separadores, depois a forma padrao.
+    found ??= bySquashed.get(dashed.replace(/-/g, ""));
+    found ??= byPrefix.get(base);
+
+    if (found !== undefined) {
+      s.spriteId = found;
+      resolved++;
+    }
+  }
+  return resolved;
+}
+
+/**
+ * Marca formas cosmeticas.
+ *
+ * O GAME_MASTER traz ~2.470 entradas para ~1.020 especies porque cada fantasia,
+ * cada letra de Unown e um "_NORMAL" redundante viram template proprio. Numa
+ * busca isso aparece como "Bulbasaur" tres vezes seguidas, o que e lixo.
+ *
+ * A regra e por DADO, nao por lista de sufixos: se a forma tem a mesma dex, os
+ * mesmos stats base e os mesmos tipos da entrada canonica, ela nao muda nenhum
+ * veredito e portanto e cosmetica. Alola, Galar e Hisui sobrevivem sozinhos
+ * porque de fato diferem — sem precisar que ninguem os liste.
+ */
+function markCosmeticForms(species: OutSpecies[]): void {
+  const canonicalByDex = new Map<number, OutSpecies>();
+
+  // A entrada canonica e a de id mais curto (sem sufixo de forma).
+  for (const s of species) {
+    const current = canonicalByDex.get(s.dex);
+    if (!current || s.id.length < current.id.length) canonicalByDex.set(s.dex, s);
+  }
+
+  const signature = (s: OutSpecies): string =>
+    `${s.baseStats.atk}/${s.baseStats.def}/${s.baseStats.hp}|${[...s.types].sort().join(",")}`;
+
+  for (const s of species) {
+    const canonical = canonicalByDex.get(s.dex);
+    if (!canonical || canonical.id === s.id) continue;
+    if (signature(s) === signature(canonical)) s.cosmeticOf = canonical.id;
+  }
 }
 
 function extractSpecies(templates: Template[]): OutSpecies[] {
@@ -118,13 +266,22 @@ function extractSpecies(templates: Template[]): OutSpecies[] {
     const s = t.data?.pokemonSettings;
     if (!s) continue;
 
-    const m = /^V(\d{4})_POKEMON_(.+)$/.exec(t.templateId);
+    const m = /^V(\d{4})_POKEMON_/.exec(t.templateId);
     if (!m) continue;
     const dex = Number(m[1]);
-    const suffix = m[2]!;
 
+    // A identidade vem de pokemonId + form, NUNCA do sufixo do templateId:
+    // `V0029_POKEMON_NIDORAN` e `V0032_POKEMON_NIDORAN` tem o mesmo sufixo para
+    // especies diferentes (Nidoran femea e macho), e derivar dali gera ids
+    // colidentes.
     const pokemonId = required(s.pokemonId, `${t.templateId}.pokemonId`) as string;
     const stats = required(s.stats, `${t.templateId}.stats`);
+
+    const suffix = formSuffix(pokemonId, s.form);
+    const id = normalizeId(suffix ? `${pokemonId}_${suffix}` : pokemonId);
+    const name = suffix && suffix !== "NORMAL"
+      ? `${titleCase(pokemonId)} (${titleCase(suffix)})`
+      : titleCase(pokemonId);
 
     // Formas nao lancadas aparecem no GAME_MASTER com stats zerados. Incluir
     // isso na busca so polui a lista com coisa que o jogador nao pode ter.
@@ -143,9 +300,9 @@ function extractSpecies(templates: Template[]): OutSpecies[] {
     }
 
     out.push({
-      id: normalizeId(suffix),
+      id,
       dex,
-      name: displayName(pokemonId, suffix),
+      name,
       types,
       baseStats: {
         atk: stats.baseAttack,
@@ -160,12 +317,32 @@ function extractSpecies(templates: Template[]): OutSpecies[] {
       parent: s.parentPokemonId ? normalizeId(s.parentPokemonId) : null,
       evolvesInto,
       candyToEvolve,
+      cosmeticOf: null,
+      spriteId: null,
     });
   }
 
   if (out.length < 1000) {
     throw new Error(`extraiu so ${out.length} especies, esperava mais de 1000`);
   }
+
+  // Id repetido nao e detalhe: ele quebra qualquer busca por id e, na UI, faz o
+  // React manter no DOM um item que ja saiu da lista — bug que aparece como
+  // "Nidoran Female no meio dos Alola" e custa caro pra rastrear. Melhor
+  // explodir aqui.
+  const seen = new Map<string, string>();
+  for (const s of out) {
+    const previous = seen.get(s.id);
+    if (previous !== undefined) {
+      throw new Error(
+        `id de especie duplicado: ${s.id} (dex ${s.dex} "${s.name}" colide com "${previous}"). ` +
+          `A derivacao de id a partir de pokemonId+form precisa ser revista.`,
+      );
+    }
+    seen.set(s.id, s.name);
+  }
+
+  markCosmeticForms(out);
   return out.sort((a, b) => a.dex - b.dex || a.id.localeCompare(b.id));
 }
 
@@ -204,7 +381,8 @@ function extractMoves(templates: Template[]): { fast: OutMove[]; charged: OutMov
 
     const move: OutMove = {
       id,
-      name: displayName(ms.movementId.replace(/_FAST$/, ""), ms.movementId.replace(/_FAST$/, "")),
+      // O sufixo "_FAST" e marcador interno, nao faz parte do nome do golpe.
+      name: titleCase(ms.movementId.replace(/_FAST$/, "")),
       type: normalizeType(required(ms.pokemonType, `${t.templateId}.pokemonType`)),
       power: ms.power ?? 0,
       energyDelta: ms.energyDelta ?? 0,
@@ -254,6 +432,8 @@ async function main(): Promise<void> {
   const { fast, charged } = extractMoves(templates);
   const settings = extractSettings(templates);
 
+  const spritesResolved = await resolveSpriteIds(species);
+
   const dataset = {
     version: {
       batchId: stamp.batchId,
@@ -274,10 +454,12 @@ async function main(): Promise<void> {
   const json = JSON.stringify(dataset);
   await writeFile(outPath, json);
 
+  const real = species.filter((s) => s.cosmeticOf === null).length;
   console.log(
     [
-      `  especies:  ${species.length}`,
+      `  especies:  ${species.length} (${real} reais, ${species.length - real} cosmeticas)`,
       `  ataques:   ${fast.length} rapidos, ${charged.length} carregados`,
+      `  sprites:   ${spritesResolved} de ${species.length} resolvidos`,
       `  tipos:     ${Object.keys(typeChart).length}`,
       `  cpm:       ${cpm.length} niveis (cap ${LEVEL_CAP}, ultimo ${cpm[cpm.length - 1]})`,
       `  saida:     ${(json.length / 1_048_576).toFixed(2)} MB em ${outPath}`,

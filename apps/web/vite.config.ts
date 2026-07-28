@@ -25,6 +25,29 @@ export default defineConfig({
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,png,woff2,json}"],
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
+        runtimeCaching: [
+          {
+            // Sprites sao buscados sob demanda e ficam guardados. Baixar as
+            // 1024 de uma vez seriam ~150 MB; assim o app so paga pelo que voce
+            // realmente olha, e a partir da segunda vez funciona offline.
+            urlPattern: /^https:\/\/raw\.githubusercontent\.com\/PokeAPI\/sprites\//,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "tk-sprites",
+              expiration: { maxEntries: 1500, maxAgeSeconds: 60 * 60 * 24 * 180 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\//,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "tk-fonts",
+              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
       },
       devOptions: { enabled: true },
       manifest: {

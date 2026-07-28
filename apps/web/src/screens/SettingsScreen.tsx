@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import type { PersistState } from "../storage/persist.ts";
 import { isInstalled, isIos } from "../storage/persist.ts";
+import { SpriteSettings } from "./SpriteSettings.tsx";
 
 interface Props {
   datasetLabel: string | null;
@@ -99,6 +100,8 @@ export function SettingsScreen({ datasetLabel, persist }: Props) {
           Início”. Sem isso o Safari apaga os dados do app depois de 7 dias sem uso.
         </p>
       )}
+
+      <SpriteSettings />
 
       <div className="tk-overline" style={{ display: "block", marginTop: 28 }}>
         Dados do jogo

@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "noEmit": true,
+    "declaration": false,
+    // Os scripts rodam direto no Node (que faz type stripping), sem passo de
+    // build. Por isso os imports carregam a extensao .ts real.
+    "allowImportingTsExtensions": true,
+    // O GAME_MASTER e JSON arbitrario com centenas de campos opcionais; tipar
+    // cada um seria fingir uma garantia que a fonte nao da. O ETL se protege
+    // com `required()` em runtime, que e onde a checagem importa.
+    "noImplicitAny": false
+  },
+  "include": ["src/**/*"]
+}

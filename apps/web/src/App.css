@@ -277,3 +277,183 @@
   height: 100%;
   object-fit: contain;
 }
+
+/* ------------------------------------------------------------ folha cheia */
+
+.tk-sheet-full {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: var(--tk-sheet);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: calc(var(--tk-safe-top) + env(safe-area-inset-top)) var(--tk-gutter)
+    calc(var(--tk-s8) + env(safe-area-inset-bottom));
+  margin: 0 auto;
+  max-width: var(--tk-container);
+  animation: tk-fade 0.2s ease-out both;
+}
+
+.tk-sheet-head {
+  display: flex;
+  align-items: center;
+  gap: var(--tk-s2);
+  margin-bottom: var(--tk-s5);
+}
+
+.tk-sheet-close {
+  width: var(--tk-touch);
+  height: var(--tk-touch);
+  margin-left: -12px;
+  border-radius: 50%;
+  font: 400 28px/1 var(--tk-font);
+  color: var(--tk-txt2);
+  display: grid;
+  place-items: center;
+}
+
+.tk-sheet-title {
+  font: 800 26px/1.1 var(--tk-font);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+/* ------------------------------------------------------------------ busca */
+
+.tk-search {
+  display: flex;
+  align-items: center;
+  gap: var(--tk-s2);
+  height: 48px;
+  padding: 0 var(--tk-s4);
+  border-radius: var(--tk-r-input);
+  background: var(--tk-surf2);
+  border: 1px solid var(--tk-line);
+  color: var(--tk-txt3);
+}
+
+.tk-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: none;
+  color: var(--tk-txt);
+  /* 16px evita o zoom automatico do Safari ao focar um campo. */
+  font: 400 16px var(--tk-font);
+}
+
+.tk-search input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+/* ------------------------------------------------------- grade de especies */
+
+.tk-species-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--tk-s3);
+}
+
+.tk-species-cell {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: var(--tk-s3) 6px var(--tk-s2);
+  border-radius: var(--tk-r-input);
+  background: var(--tk-surf);
+  border: 1px solid var(--tk-line);
+  transition:
+    background-color 0.15s ease,
+    transform 0.08s ease;
+}
+
+.tk-species-cell:active {
+  transform: scale(0.97);
+}
+
+.tk-species-cell:hover {
+  background: var(--tk-surf2);
+}
+
+.tk-species-name {
+  font: 700 12px/1.25 var(--tk-font);
+  color: var(--tk-txt);
+  text-align: center;
+  /* Nome longo com forma nao pode empurrar a grade. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tk-species-dex {
+  font: 500 10px var(--tk-mono);
+  color: var(--tk-txt4);
+}
+
+/* ------------------------------------------------------ opcao de ajuste */
+
+.tk-option {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--tk-s3);
+  width: 100%;
+  min-height: var(--tk-touch);
+  padding: var(--tk-s3);
+  border-radius: var(--tk-r-input);
+  border: 1px solid var(--tk-line);
+  background: var(--tk-surf2);
+  text-align: left;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.tk-option[data-active] {
+  background: var(--tk-pri-soft);
+  border-color: var(--tk-pri-line);
+}
+
+.tk-option-mark {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--tk-txt3);
+}
+
+.tk-option[data-active] .tk-option-mark {
+  color: var(--tk-pri);
+}
+
+.tk-option-title {
+  display: block;
+  font: 700 14px/1.3 var(--tk-font);
+  color: var(--tk-txt);
+}
+
+.tk-option-detail {
+  display: block;
+  font: 400 12px/1.45 var(--tk-font);
+  color: var(--tk-txt3);
+  margin-top: 2px;
+}
+
+.tk-caption code {
+  font: 500 11px var(--tk-mono);
+  background: var(--tk-code);
+  padding: 1px 5px;
+  border-radius: 5px;
+}
+
+/* Com 4 abas os rotulos ficam mais apertados. */
+.tk-tabbar {
+  grid-template-columns: repeat(4, 1fr);
+}
