@@ -96,6 +96,7 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
         <SpeciesTile
           spriteId={species.spriteId}
           dex={species.dex}
+          speciesId={species.id}
           name={species.name}
           types={species.types}
           size={116}
@@ -200,6 +201,7 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
                 <SpeciesTile
                   spriteId={e.spriteId}
                   dex={e.dex}
+                  speciesId={e.id}
                   name={e.name}
                   types={e.types}
                   size={44}

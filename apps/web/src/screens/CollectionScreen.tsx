@@ -26,6 +26,7 @@ export function CollectionScreen({ dataset }: Props) {
           <SpeciesTile
             spriteId={picked.spriteId}
             dex={picked.dex}
+            speciesId={picked.id}
             name={picked.name}
             types={picked.types}
             size={64}

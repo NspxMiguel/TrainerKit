@@ -1,71 +1,110 @@
-import type { AppraisalRange } from "./iv.js";
+import { computeCP, cpmForLevel, effectiveStamina, type CpmTable } from "./cp.js";
+import type { BaseStats, IVs } from "./types.js";
+import { MAX_LEVEL, MIN_LEVEL } from "./types.js";
 
 /**
- * Faixas da avaliacao do lider de equipe.
+ * Avaliacao do jogo — o sistema ATUAL.
  *
- * ATENCAO: estes numeros **nao estao no GAME_MASTER**. Varri os 18.670
- * templates procurando qualquer chave com "appraisal" e nao ha nenhuma — os
- * limites sao do cliente do jogo e so se conhecem por engenharia reversa da
- * comunidade.
+ * A tela de avaliacao mostra tres barras (Ataque, Defesa, PS) e cada uma vale
+ * de 0 a 15. Elas nao dao "faixa": dao o IV EXATO. O jogador so precisa
+ * replicar o que ve, e o app ja sabe tudo sobre os IV.
  *
- * Ou seja: sao a unica parte do app que nao pode ser conferida contra uma fonte
- * primaria. Precisam ser validados contra Pokemon reais, comparando o resultado
- * do solver com o IV que o jogador ja conhece. Ate la, tratar com desconfianca.
+ * Isso torna obsoleto o modelo antigo, de antes de 2018, em que o lider de
+ * equipe falava frases ("Fantástico!", "Realmente forte") e o app deduzia
+ * faixas. Aquilo existia porque o jogo escondia o numero. Hoje ele mostra.
+ *
+ * O que as barras NAO dao e o **nivel** — e e so por isso que PC e PS ainda
+ * importam. Ver `solveLevel`.
  */
 
-/** Estrelas da avaliacao, pela soma dos tres IV. */
-export const STAR_RANGES = [
-  { stars: 4, label: "Melhores que já vi", totalMin: 37, totalMax: 45 },
-  { stars: 3, label: "Realmente fortes", totalMin: 30, totalMax: 36 },
-  { stars: 2, label: "Acima da média", totalMin: 23, totalMax: 29 },
-  { stars: 1, label: "Comuns", totalMin: 0, totalMax: 22 },
-] as const;
+export const MAX_BAR = 15;
 
-/** Faixa do maior stat individual, pela frase do lider. */
-export const MAX_STAT_RANGES = [
-  { label: "Fantástico (barra vermelha)", min: 15, max: 15 },
-  { label: "Muito bom", min: 13, max: 14 },
-  { label: "Bom", min: 8, max: 12 },
-  { label: "Fraco", min: 0, max: 7 },
-] as const;
+/** Quantos segmentos visuais a barra tem. Cada um vale 5 pontos de IV. */
+export const BAR_SEGMENTS = 3;
+export const IV_PER_SEGMENT = MAX_BAR / BAR_SEGMENTS;
 
-export type StatKey = "atk" | "def" | "hp";
-
-export interface AppraisalInput {
-  /** 1 a 4. `null` quando o jogador nao avaliou. */
-  stars: number | null;
-  /** Quais stats o lider destacou. */
-  bestStats: readonly StatKey[];
-  /** Indice em MAX_STAT_RANGES. `null` quando nao informado. */
-  maxStatTier: number | null;
+/**
+ * Estrelas do selo, pela soma dos tres IV.
+ *
+ * Diferente das barras, isto e derivado — o selo e so um resumo. Serve para
+ * conferir se o jogador leu as barras direito: se as barras somam 40 mas o selo
+ * mostra 2 estrelas, alguma coisa foi lida errado.
+ */
+export function starsFor(total: number): number {
+  if (total >= 37) return 4;
+  if (total >= 30) return 3;
+  if (total >= 23) return 2;
+  return 1;
 }
 
-export const EMPTY_APPRAISAL: AppraisalInput = {
-  stars: null,
-  bestStats: [],
-  maxStatTier: null,
-};
+/** Cor da barra no jogo: vermelha quando o stat e perfeito, laranja no resto. */
+export function isBarPerfect(value: number): boolean {
+  return value === MAX_BAR;
+}
 
-/** Converte o que o jogador marcou na tela para restricoes do solver. */
-export function toRange(input: AppraisalInput): AppraisalRange | undefined {
-  const star = input.stars === null ? null : STAR_RANGES.find((r) => r.stars === input.stars);
-  const tier = input.maxStatTier === null ? null : MAX_STAT_RANGES[input.maxStatTier];
+export interface LevelCandidate {
+  level: number;
+  cp: number;
+  hp: number;
+}
 
-  // Sem nenhuma informacao nao ha o que restringir.
-  if (!star && !tier && input.bestStats.length === 0) return undefined;
+/**
+ * Descobre o nivel a partir do que esta na tela.
+ *
+ * Com os IV ja conhecidos pelas barras, PC e PS sobredeterminam o nivel: basta
+ * varrer os 109 niveis e ver qual produz exatamente aqueles dois numeros. Quase
+ * sempre sobra um so.
+ *
+ * Lista vazia significa que os numeros nao existem juntos — barra lida errada,
+ * PC digitado errado, ou especie errada. E um resultado util, nao uma falha.
+ */
+export function solveLevel(
+  cpm: CpmTable,
+  base: BaseStats,
+  ivs: IVs,
+  observed: { cp: number; hp: number },
+  levelCap: number = MAX_LEVEL,
+): LevelCandidate[] {
+  const out: LevelCandidate[] = [];
 
-  const range: AppraisalRange = {
-    totalMin: star?.totalMin ?? 0,
-    totalMax: star?.totalMax ?? 45,
-  };
+  for (let level = MIN_LEVEL; level <= levelCap; level += 0.5) {
+    const multiplier = cpmForLevel(cpm, level);
+    const hp = effectiveStamina(base, ivs, multiplier);
+    if (hp !== observed.hp) continue;
 
-  if (input.bestStats.length > 0) {
-    return {
-      ...range,
-      bestStats: input.bestStats,
-      ...(tier ? { maxStatMin: tier.min, maxStatMax: tier.max } : {}),
-    };
+    const cp = computeCP(base, ivs, multiplier);
+    if (cp !== observed.cp) continue;
+
+    out.push({ level, cp, hp });
   }
 
-  return tier ? { ...range, maxStatMin: tier.min, maxStatMax: tier.max } : range;
+  return out;
+}
+
+/**
+ * Nivel a partir so do PS.
+ *
+ * Util enquanto o jogador ainda nao digitou o PC: o PS ja estreita bastante, e
+ * a tela pode ir mostrando o que ja da pra saber em vez de esperar tudo.
+ */
+export function levelsMatchingHp(
+  cpm: CpmTable,
+  base: BaseStats,
+  ivs: IVs,
+  hp: number,
+  levelCap: number = MAX_LEVEL,
+): number[] {
+  const out: number[] = [];
+  for (let level = MIN_LEVEL; level <= levelCap; level += 0.5) {
+    if (effectiveStamina(base, ivs, cpmForLevel(cpm, level)) === hp) out.push(level);
+  }
+  return out;
+}
+
+export function ivTotalOf(ivs: IVs): number {
+  return ivs.atk + ivs.def + ivs.hp;
+}
+
+export function ivPercentOf(ivs: IVs): number {
+  return (ivTotalOf(ivs) / 45) * 100;
 }

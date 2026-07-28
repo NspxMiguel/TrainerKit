@@ -99,6 +99,7 @@ export function SpeciesBrowser({ species, onPick }: Props) {
                   <SpeciesTile
                     spriteId={s.spriteId}
                     dex={s.dex}
+                    speciesId={s.id}
                     name={s.name}
                     types={s.types}
                     size={72}

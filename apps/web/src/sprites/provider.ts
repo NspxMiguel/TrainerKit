@@ -41,13 +41,10 @@ export function spriteUrl(
     case "pokeapi-home":
       return `${POKEAPI}/other/home${shiny}/${req.spriteId}.png`;
 
-    case "custom": {
-      const template = settings.customTemplate.trim();
-      if (!template) return null;
-      return template
-        .replaceAll("{id}", String(req.spriteId))
-        .replaceAll("{dex}", String(req.dex));
-    }
+    // Fontes adicionadas pelo usuario ("src:<uuid>") sao resolvidas em
+    // `useSpriteUrl`, porque um .zip exige leitura assincrona do IndexedDB.
+    default:
+      return null;
   }
 }
 
