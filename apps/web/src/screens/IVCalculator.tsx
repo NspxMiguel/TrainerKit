@@ -28,7 +28,8 @@ interface Props {
 const LEAGUES = [GREAT_LEAGUE, ULTRA_LEAGUE, MASTER_LEAGUE];
 
 export function IVCalculator({ species, data, onClose }: Props) {
-  const [ivs, setIvs] = useState<IVs>({ atk: 15, def: 15, hp: 15 });
+  // `null` ate o print ser lido: sem print nao ha o que mostrar.
+  const [ivs, setIvs] = useState<IVs | null>(null);
   const [cp, setCp] = useState("");
   const [hp, setHp] = useState("");
 
@@ -48,9 +49,6 @@ export function IVCalculator({ species, data, onClose }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const total = ivTotalOf(ivs);
-  const percent = ivPercentOf(ivs);
-  const badge = badgeFor(total);
 
   const cpNum = Number(cp);
   const hpNum = Number(hp);
@@ -60,18 +58,20 @@ export function IVCalculator({ species, data, onClose }: Props) {
   // As barras dao o IV; PC e PS servem so pra descobrir o NIVEL, que a
   // avaliacao nao mostra.
   const levels = useMemo(() => {
-    if (!hasNumbers) return null;
+    if (!ivs || !hasNumbers) return null;
     return solveLevel(data.cpm, species.baseStats, ivs, { cp: cpNum, hp: hpNum });
-  }, [hasNumbers, cpNum, hpNum, ivs, data.cpm, species.baseStats]);
+  }, [ivs, hasNumbers, cpNum, hpNum, data.cpm, species.baseStats]);
 
-  const ranks = useMemo(
-    () =>
-      LEAGUES.map((league) => ({
-        league,
-        ranked: rankOf(data.cpm, species.baseStats, ivs, league),
-      })),
-    [ivs, data.cpm, species.baseStats],
-  );
+  const ranks = useMemo(() => {
+    if (!ivs) return null;
+    return LEAGUES.map((league) => ({
+      league,
+      ranked: rankOf(data.cpm, species.baseStats, ivs, league),
+    }));
+  }, [ivs, data.cpm, species.baseStats]);
+
+  const total = ivs ? ivTotalOf(ivs) : 0;
+  const badge = ivs ? badgeFor(total) : null;
 
   return createPortal(
     <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label="Calcular IV">
@@ -80,6 +80,7 @@ export function IVCalculator({ species, data, onClose }: Props) {
           ‹
         </button>
         <h2 className="tk-sheet-title">IV do meu {species.name}</h2>
+        <span className="tk-beta">BETA</span>
       </header>
 
       <div style={{ display: "flex", gap: 14, alignItems: "center", marginBottom: 20 }}>
@@ -91,35 +92,43 @@ export function IVCalculator({ species, data, onClose }: Props) {
           types={species.types}
           size={72}
         />
-        <div>
-          <div style={{ font: "800 34px/1.05 var(--tk-font)", letterSpacing: "-0.03em" }}>
-            {percent.toFixed(1)}%
+        {ivs && badge ? (
+          <div>
+            <div style={{ font: "800 34px/1.05 var(--tk-font)", letterSpacing: "-0.03em" }}>
+              {ivPercentOf(ivs).toFixed(1)}%
+            </div>
+            <div className="tk-caption">
+              {total} de 45 ·{" "}
+              <span style={badge.pink ? { color: "var(--tk-dang)" } : undefined}>
+                {"★".repeat(badge.litStars)}
+                {"☆".repeat(3 - badge.litStars)}
+              </span>
+            </div>
           </div>
-          <div className="tk-caption">
-            {total} de 45 ·{" "}
-            <span style={badge.pink ? { color: "var(--tk-dang)" } : undefined}>
-              {"★".repeat(badge.litStars)}
-              {"☆".repeat(3 - badge.litStars)}
-            </span>
+        ) : (
+          <div>
+            <div style={{ font: "700 17px var(--tk-font)" }}>{species.name}</div>
+            <div className="tk-caption">#{String(species.dex).padStart(3, "0")}</div>
           </div>
-        </div>
+        )}
       </div>
 
       <ScanDropzone onRead={setIvs} />
 
+      {ivs && (
+        <>
       <div className="tk-overline" style={{ display: "block", marginTop: 26 }}>
-        Ou copie as barras à mão
+        O que ele leu
       </div>
       <section className="tk-card" style={{ marginTop: 10, display: "grid", gap: 18 }}>
-        <IVBar label="Ataque" value={ivs.atk} onChange={(atk) => setIvs((v) => ({ ...v, atk }))} />
-        <IVBar label="Defesa" value={ivs.def} onChange={(def) => setIvs((v) => ({ ...v, def }))} />
-        <IVBar label="PS" value={ivs.hp} onChange={(hp) => setIvs((v) => ({ ...v, hp }))} />
+        <IVBar label="Ataque" value={ivs.atk} />
+        <IVBar label="Defesa" value={ivs.def} />
+        <IVBar label="PS" value={ivs.hp} />
       </section>
 
       <p className="tk-caption" style={{ margin: "10px 2px 0", lineHeight: 1.5 }}>
-        Cada barra tem 3 blocos de 5 pontos e anda de 1 em 1, e fica vermelha
-        quando o stat é 15. Confira as estrelas acima contra as do jogo — é a
-        forma mais rápida de perceber uma barra lida errado.
+        Confira as estrelas acima contra as do jogo — é a forma mais rápida de
+        perceber uma leitura errada.
       </p>
 
       <div className="tk-overline" style={{ display: "block", marginTop: 26 }}>
@@ -200,7 +209,7 @@ export function IVCalculator({ species, data, onClose }: Props) {
         Posição em PvP
       </div>
       <section className="tk-card" style={{ marginTop: 10 }}>
-        {ranks.map(({ league, ranked }) => (
+        {ranks?.map(({ league, ranked }) => (
           <div className="tk-row" key={league.id}>
             <span className="tk-row-label">{league.name}</span>
             <span className="tk-row-value">
@@ -216,6 +225,8 @@ export function IVCalculator({ species, data, onClose }: Props) {
           posição importa mais que a porcentagem.
         </p>
       </section>
+        </>
+      )}
     </div>,
     document.body,
   );

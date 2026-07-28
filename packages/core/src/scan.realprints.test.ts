@@ -18,11 +18,26 @@ import { scanAppraisalBars } from "./scan.js";
  */
 const DIR = process.env.TK_PRINTS ?? "";
 
+/**
+ * Os tres primeiros tem gabarito: o proprio dono escreveu o IV no apelido do
+ * Pokemon ("Gyardeos100", "Mewtwo93", "Dragonitlv86"). Os demais nao tem numero
+ * conhecido e servem para garantir que a leitura ao menos NAO FALHA — foi assim
+ * que apareceram os casos de barra quase vazia e de barra encoberta.
+ */
 const CASOS = [
   { file: "p1", nome: "Dragonite", esperado: 86.7 },
   { file: "p2", nome: "Gyarados", esperado: 100 },
   { file: "p3", nome: "Mewtwo", esperado: 93.3 },
   { file: "p4", nome: "Hariyama", esperado: null },
+  { file: "novos/n1", nome: "Obstagoon (ataque quase zero)", esperado: null },
+  { file: "novos/n2", nome: "novo 2", esperado: null },
+  { file: "novos/n3", nome: "novo 3", esperado: null },
+  { file: "novos/n4", nome: "novo 4", esperado: null },
+  { file: "novos/n5", nome: "novo 5", esperado: null },
+  { file: "novos/n6", nome: "novo 6", esperado: null },
+  { file: "novos/n7", nome: "novo 7", esperado: null },
+  { file: "novos/n8", nome: "novo 8", esperado: null },
+  { file: "novos/n9", nome: "novo 9", esperado: null },
 ] as const;
 
 const temFixtures = DIR !== "" && CASOS.every((c) => existsSync(`${DIR}/${c.file}.raw`));

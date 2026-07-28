@@ -622,3 +622,15 @@
 .tk-drop-title {
   font: 700 14px/1.3 var(--tk-font);
 }
+
+/* Selo BETA — o escaneador ainda esta sendo calibrado contra prints reais. */
+.tk-beta {
+  align-self: center;
+  font: 700 10px var(--tk-mono);
+  letter-spacing: 0.12em;
+  padding: 3px 7px;
+  border-radius: 6px;
+  background: var(--tk-warn-soft);
+  border: 1px solid var(--tk-warn-line);
+  color: var(--tk-warn);
+}

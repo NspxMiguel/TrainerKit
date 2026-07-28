@@ -1,23 +1,30 @@
-import { BAR_SEGMENTS, IV_PER_SEGMENT, MAX_BAR, isBarPerfect } from "@trainerkit/core";
+import {
+  BAR_COLOR_FILLED,
+  BAR_COLOR_PERFECT,
+  BAR_SEGMENTS,
+  IV_PER_SEGMENT,
+  MAX_BAR,
+  isBarPerfect,
+} from "@trainerkit/core";
 
 interface Props {
   label: string;
   value: number;
-  onChange: (value: number) => void;
 }
 
 /**
- * Barra de IV, do jeito que o jogo desenha.
+ * Barra de IV, desenhada como o jogo desenha.
  *
- * Tres segmentos, cada um valendo 5 pontos, e dentro do segmento o
- * preenchimento anda de 20% em 20% — ou seja, 1 ponto de IV por passo. O jogo
- * mostra o valor EXATO assim; o usuario so precisa reproduzir o que ve.
+ * Tres blocos de 5 pontos, andando de 1 em 1 dentro do bloco, e vermelha quando
+ * o stat e 15. As cores sao as MEDIDAS em prints reais, nao aproximacoes.
  *
- * Fica vermelha quando o stat e 15, igual ao jogo.
+ * Somente leitura de proposito: o valor vem do print. Deixar o usuario arrastar
+ * a barra abriria a porta para ele "corrigir" o que o scanner leu certo, e o
+ * numero deixaria de significar o que o jogo mostra.
  */
-export function IVBar({ label, value, onChange }: Props) {
+export function IVBar({ label, value }: Props) {
   const perfect = isBarPerfect(value);
-  const color = perfect ? "var(--tk-dang)" : "#F0A03C";
+  const color = perfect ? BAR_COLOR_PERFECT : BAR_COLOR_FILLED;
 
   return (
     <div>
@@ -57,17 +64,6 @@ export function IVBar({ label, value, onChange }: Props) {
         })}
       </div>
 
-      {/* O range e o controle de verdade: acessivel, arrastavel e com teclado. */}
-      <input
-        type="range"
-        min={0}
-        max={MAX_BAR}
-        step={1}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        aria-label={label}
-        className="tk-iv-range"
-      />
     </div>
   );
 }
