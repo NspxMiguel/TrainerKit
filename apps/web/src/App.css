@@ -588,3 +588,37 @@
   border: 2px solid var(--tk-line2);
   box-shadow: var(--tk-e1);
 }
+
+/* -------------------------------------------------- anexar print (scan) */
+
+.tk-drop {
+  display: flex;
+  gap: var(--tk-s4);
+  align-items: flex-start;
+  padding: var(--tk-s4);
+  border-radius: var(--tk-r-card);
+  background: var(--tk-surf);
+  border: 1px dashed var(--tk-line2);
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.tk-drop--over {
+  border-color: var(--tk-pri);
+  background: var(--tk-pri-soft);
+}
+
+.tk-drop-preview {
+  width: 72px;
+  height: 108px;
+  object-fit: cover;
+  object-position: bottom;
+  border-radius: var(--tk-r-input);
+  border: 1px solid var(--tk-line2);
+  flex: none;
+}
+
+.tk-drop-title {
+  font: 700 14px/1.3 var(--tk-font);
+}
