@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import type { DatasetState } from "../data/useDataset.ts";
 import { datasetLabel } from "../data/useDataset.ts";
+import { useSetup } from "../onboarding/setup.ts";
 import { useInstallState } from "../storage/install.ts";
 import type { PersistState } from "../storage/persist.ts";
 import { IconAlert, IconPlus } from "../ui/Icons.tsx";
@@ -23,6 +24,7 @@ function greeting(): string {
 
 export function HomeScreen({ dataset, persist }: Props) {
   const install = useInstallState();
+  const setup = useSetup();
   const [guideOpen, setGuideOpen] = useState(false);
 
   // Armazenamento sem garantia de durabilidade. So avisa quando ha risco real:
@@ -33,8 +35,10 @@ export function HomeScreen({ dataset, persist }: Props) {
 
   return (
     <>
+      {/* A saudacao e o nome do app estavam empilhados e liam como uma frase
+          so — "Boa noite TrainerKit". Quem cumprimenta e a pessoa, nao o app. */}
       <p className="tk-greeting">{greeting()}</p>
-      <h1 className="tk-h1">TrainerKit</h1>
+      <h1 className="tk-h1">{setup.name.trim() || "Treinador"}</h1>
 
       {showInstall && (
         <InstallBanner

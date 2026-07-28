@@ -51,6 +51,8 @@ export interface Dataset {
   species: DatasetSpecies[];
   fastMoves: DatasetMove[];
   chargedMoves: DatasetMove[];
+  /** Nome oficial do golpe por idioma: `moveNames["pt-BR"]["counter_fast"]`. */
+  moveNames?: Record<string, Record<string, string>>;
 }
 
 export type DatasetState =

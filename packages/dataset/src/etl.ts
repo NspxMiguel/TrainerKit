@@ -9,6 +9,8 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { LANGUAGES, moveKeyFor, toMap, urlFor } from "./i18n.ts";
+
 const HERE = dirname(fileURLToPath(import.meta.url));
 const RAW_DIR = join(HERE, "..", "raw");
 const OUT_DIR = join(HERE, "..", "..", "..", "apps", "web", "public", "dataset");
@@ -248,6 +250,43 @@ async function resolveSpriteIds(species: OutSpecies[]): Promise<number> {
 }
 
 /**
+ * Busca os nomes de golpe em todos os idiomas.
+ *
+ * Falhar aqui NAO derruba o build: sem traducao o app mostra so o nome em
+ * ingles, que continua correto. Perder o dataset inteiro porque um arquivo de
+ * idioma nao respondeu seria trocar um problema pequeno por um grande.
+ */
+async function fetchMoveNames(
+  moves: OutMove[],
+): Promise<Record<string, Record<string, string>>> {
+  const out: Record<string, Record<string, string>> = {};
+
+  for (const spec of LANGUAGES) {
+    try {
+      const res = await fetch(urlFor(spec));
+      if (!res.ok) throw new Error(`respondeu ${res.status}`);
+      const map = toMap(await res.json());
+
+      const names: Record<string, string> = {};
+      for (const move of moves) {
+        const key = moveKeyFor(move.templateId);
+        const name = key ? map[key] : undefined;
+        if (name) names[move.id] = name;
+      }
+      out[spec.code] = names;
+      console.log(`  ${spec.code.padEnd(7)} ${Object.keys(names).length} nomes de golpe`);
+    } catch (err) {
+      console.warn(
+        `  AVISO: ${spec.code} falhou (${err instanceof Error ? err.message : String(err)}) — ` +
+          `o app cai no nome em ingles.`,
+      );
+    }
+  }
+
+  return out;
+}
+
+/**
  * Marca formas cosmeticas.
  *
  * O GAME_MASTER traz ~2.470 entradas para ~1.020 especies porque cada fantasia,
@@ -366,6 +405,8 @@ function extractSpecies(templates: Template[]): OutSpecies[] {
 }
 
 interface OutMove {
+  /** Guardado so para casar com a chave de traducao (`V0101_MOVE_...`). */
+  templateId: string;
   id: string;
   name: string;
   type: string;
@@ -399,6 +440,7 @@ function extractMoves(templates: Template[]): { fast: OutMove[]; charged: OutMov
     const pvp = pvpById.get(id);
 
     const move: OutMove = {
+      templateId: t.templateId,
       id,
       // O sufixo "_FAST" e marcador interno, nao faz parte do nome do golpe.
       name: titleCase(ms.movementId.replace(/_FAST$/, "")),
@@ -453,6 +495,9 @@ async function main(): Promise<void> {
 
   const spritesResolved = await resolveSpriteIds(species);
 
+  console.log("buscando traducoes oficiais:");
+  const moveNames = await fetchMoveNames([...fast, ...charged]);
+
   const dataset = {
     typeOrder: TYPE_ORDER,
     version: {
@@ -466,6 +511,8 @@ async function main(): Promise<void> {
     species,
     fastMoves: fast,
     chargedMoves: charged,
+    /** Nome oficial do golpe por idioma. O `name` em ingles fica no proprio golpe. */
+    moveNames,
     settings,
   };
 
@@ -480,6 +527,7 @@ async function main(): Promise<void> {
       `  especies:  ${species.length} (${real} reais, ${species.length - real} cosmeticas)`,
       `  ataques:   ${fast.length} rapidos, ${charged.length} carregados`,
       `  sprites:   ${spritesResolved} de ${species.length} resolvidos`,
+      `  idiomas:   ${Object.keys(moveNames).length}`,
       `  tipos:     ${Object.keys(typeChart).length}`,
       `  cpm:       ${cpm.length} niveis (cap ${LEVEL_CAP}, ultimo ${cpm[cpm.length - 1]})`,
       `  saida:     ${(json.length / 1_048_576).toFixed(2)} MB em ${outPath}`,

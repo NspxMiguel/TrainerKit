@@ -10,6 +10,7 @@ import {
 } from "@trainerkit/core";
 
 import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
+import { moveLabel, useLanguage } from "../i18n/language.ts";
 import { useSetup } from "../onboarding/setup.ts";
 import { typeColor, typeName } from "../sprites/provider.ts";
 import { AssistantCard } from "../ui/AssistantCard.tsx";
@@ -64,6 +65,7 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
   const [calcOpen, setCalcOpen] = useState(false);
   const [context, setContext] = useState<Context>("general");
   const setup = useSetup();
+  const language = useLanguage();
 
   useEffect(() => {
     const previous = document.body.style.overflow;
@@ -238,7 +240,18 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
                 className="tk-row-label"
                 style={i === 0 ? { fontWeight: 700 } : undefined}
               >
-                {m.fast.name} + {m.charged.name}
+                {[m.fast, m.charged].map((mv, k) => {
+                  const l = moveLabel(mv.name, data.moveNames, mv.id, language);
+                  return (
+                    <span key={mv.id}>
+                      {k > 0 && " + "}
+                      {l.primary}
+                      {l.secondary && (
+                        <span className="tk-caption"> ({l.secondary})</span>
+                      )}
+                    </span>
+                  );
+                })}
                 {m.needsElite && (
                   <span className="tk-caption" style={{ display: "block" }}>
                     exige TM Elite

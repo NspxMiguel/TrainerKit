@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import type { PersistState } from "../storage/persist.ts";
+import { LANGUAGES, setLanguage, useLanguage } from "../i18n/language.ts";
 import { useInstallState } from "../storage/install.ts";
 import { InstallGuide } from "./InstallGuide.tsx";
 import { SpriteSettings } from "./SpriteSettings.tsx";
@@ -29,6 +30,7 @@ function formatBytes(n: number): string {
 
 export function SettingsScreen({ datasetLabel, persist }: Props) {
   const install = useInstallState();
+  const language = useLanguage();
   const [guideOpen, setGuideOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>(
     () => (localStorage.getItem(THEME_KEY) as Theme | null) ?? "sistema",
@@ -103,6 +105,31 @@ export function SettingsScreen({ datasetLabel, persist }: Props) {
           </div>
         )}
       </section>
+
+      <div className="tk-overline" style={{ display: "block", marginTop: 28 }}>
+        Idioma
+      </div>
+      <div className="tk-lang-grid">
+        {LANGUAGES.map((l) => (
+          <button
+            key={l.code}
+            type="button"
+            className="tk-lang"
+            data-active={language === l.code || undefined}
+            aria-pressed={language === l.code}
+            onClick={() => setLanguage(l.code)}
+          >
+            <span aria-hidden="true" style={{ fontSize: 18 }}>
+              {l.flag}
+            </span>
+            <span>{l.label}</span>
+          </button>
+        ))}
+      </div>
+      <p className="tk-caption" style={{ marginTop: 8, lineHeight: 1.5 }}>
+        Em inglês o nome do ataque sai numa linha só. Nos outros idiomas sai o
+        nome em inglês e a tradução oficial do jogo ao lado.
+      </p>
 
       <SpriteSettings />
 
