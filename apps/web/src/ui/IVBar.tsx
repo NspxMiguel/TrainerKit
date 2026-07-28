@@ -10,6 +10,14 @@ import {
 interface Props {
   label: string;
   value: number;
+  /**
+   * Quando presente, a barra vira editavel.
+   *
+   * So e ligado no caminho de RECUPERACAO: o print falhou e o usuario precisa
+   * de uma saida. No caminho normal a barra e leitura pura, para ninguem
+   * "corrigir" um valor que o scanner leu certo.
+   */
+  onChange?: (value: number) => void;
 }
 
 /**
@@ -22,7 +30,7 @@ interface Props {
  * a barra abriria a porta para ele "corrigir" o que o scanner leu certo, e o
  * numero deixaria de significar o que o jogo mostra.
  */
-export function IVBar({ label, value }: Props) {
+export function IVBar({ label, value, onChange }: Props) {
   const perfect = isBarPerfect(value);
   const color = perfect ? BAR_COLOR_PERFECT : BAR_COLOR_FILLED;
 
@@ -64,6 +72,18 @@ export function IVBar({ label, value }: Props) {
         })}
       </div>
 
+      {onChange && (
+        <input
+          type="range"
+          min={0}
+          max={MAX_BAR}
+          step={1}
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          aria-label={label}
+          className="tk-iv-range"
+        />
+      )}
     </div>
   );
 }

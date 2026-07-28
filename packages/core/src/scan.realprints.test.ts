@@ -38,6 +38,24 @@ const CASOS = [
   { file: "novos/n7", nome: "novo 7", esperado: null },
   { file: "novos/n8", nome: "novo 8", esperado: null },
   { file: "novos/n9", nome: "novo 9", esperado: null },
+
+  // Prints NATIVOS de iPhone (1206x2622) — os mais representativos do uso real.
+  // O c2 e o Slaking cujo apelido diz 64%: o scanner le 8/6/15 = 29/45 = 64,4%,
+  // com PS vermelho e os outros dois laranja. E a prova de que a cor vermelha e
+  // por STAT, nao por Pokemon.
+  { file: "cel/c2", nome: "iPhone — Slaking (só o PS vermelho)", esperado: 64.4 },
+  { file: "cel/c3", nome: "iPhone 3", esperado: null },
+  { file: "cel/c4", nome: "iPhone 4", esperado: null },
+  { file: "cel/c5", nome: "iPhone 5", esperado: null },
+  { file: "cel/c6", nome: "iPhone 6", esperado: null },
+  { file: "cel/c7", nome: "iPhone 7", esperado: null },
+  { file: "cel/c8", nome: "iPhone 8", esperado: null },
+  { file: "cel/c9", nome: "iPhone 9", esperado: null },
+  { file: "cel/c10", nome: "iPhone 10", esperado: null },
+  { file: "cel/c11", nome: "iPhone 11", esperado: null },
+  { file: "cel/c12", nome: "iPhone 12", esperado: null },
+  { file: "cel/c13", nome: "iPhone 13", esperado: null },
+  { file: "cel/c14", nome: "iPhone 14", esperado: null },
   // LIMITACAO CONHECIDA — nao incluido.
   //
   // O print do Slaking (novos/n10) e 1592x1518: um screenshot da JANELA DO
