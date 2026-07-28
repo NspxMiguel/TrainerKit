@@ -10,7 +10,9 @@ import {
 } from "@trainerkit/core";
 
 import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
+import { useSetup } from "../onboarding/setup.ts";
 import { typeColor, typeName } from "../sprites/provider.ts";
+import { AssistantCard } from "../ui/AssistantCard.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 import { IVCalculator } from "./IVCalculator.tsx";
 
@@ -61,6 +63,7 @@ function StatBar({ label, value }: { label: string; value: number }) {
 export function SpeciesDetail({ species, data, onClose }: Props) {
   const [calcOpen, setCalcOpen] = useState(false);
   const [context, setContext] = useState<Context>("general");
+  const setup = useSetup();
 
   useEffect(() => {
     const previous = document.body.style.overflow;
@@ -168,7 +171,18 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
         Calcular IV do meu
       </button>
 
-      <div className="tk-overline">Stats base</div>
+      {setup.assistant && (
+        <AssistantCard
+          name={species.name}
+          baseStats={species.baseStats}
+          cpm={data.cpm}
+          levelCap={data.version.levelCap}
+        />
+      )}
+
+      <div className="tk-overline" style={{ display: "block", marginTop: 26 }}>
+        Stats base
+      </div>
       <section className="tk-card" style={{ marginTop: 10, display: "grid", gap: 10 }}>
         <StatBar label="Ataque" value={species.baseStats.atk} />
         <StatBar label="Defesa" value={species.baseStats.def} />
