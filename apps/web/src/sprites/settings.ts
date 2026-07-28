@@ -11,15 +11,17 @@ import { useSyncExternalStore } from "react";
  * O provider `custom` existe pra quem tem os proprios arquivos: aponta o
  * template e pronto, sem precisar mexer no codigo.
  */
-export type SpriteSourceId = "off" | "pokeapi-artwork" | "pokeapi-home" | "custom";
+/**
+ * Fonte ativa.
+ *
+ * Alem das embutidas, aceita `src:<uuid>` apontando para uma fonte que o
+ * usuario adicionou (manifesto por URL ou .zip importado).
+ */
+export type BuiltinSourceId = "off" | "pokeapi-artwork" | "pokeapi-home";
+export type SpriteSourceId = BuiltinSourceId | `src:${string}`;
 
 export interface SpriteSettings {
   source: SpriteSourceId;
-  /**
-   * Template do provider custom. `{id}` e trocado pelo id do sprite e `{dex}`
-   * pelo numero da Pokedex.
-   */
-  customTemplate: string;
 }
 
 const STORAGE_KEY = "tk:sprites";
@@ -27,10 +29,9 @@ const STORAGE_KEY = "tk:sprites";
 export const DEFAULT_SETTINGS: SpriteSettings = {
   // Desligado por padrao. Ligar e uma escolha de quem instala, nao nossa.
   source: "off",
-  customTemplate: "",
 };
 
-export const SOURCE_LABELS: Record<SpriteSourceId, { title: string; detail: string }> = {
+export const SOURCE_LABELS: Record<BuiltinSourceId, { title: string; detail: string }> = {
   off: {
     title: "Sem imagens",
     detail: "Só o selo com a cor do tipo e as iniciais. Nada é baixado.",
@@ -43,10 +44,6 @@ export const SOURCE_LABELS: Record<SpriteSourceId, { title: string; detail: stri
     title: "Renders 3D",
     detail: "Modelos do Pokémon HOME. Estilo mais uniforme entre as espécies.",
   },
-  custom: {
-    title: "Fonte própria",
-    detail: "Seus arquivos. Use {id} e {dex} no endereço.",
-  },
 };
 
 function read(): SpriteSettings {
@@ -54,10 +51,7 @@ function read(): SpriteSettings {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_SETTINGS;
     const parsed = JSON.parse(raw) as Partial<SpriteSettings>;
-    return {
-      source: parsed.source ?? DEFAULT_SETTINGS.source,
-      customTemplate: parsed.customTemplate ?? DEFAULT_SETTINGS.customTemplate,
-    };
+    return { source: parsed.source ?? DEFAULT_SETTINGS.source };
   } catch {
     return DEFAULT_SETTINGS;
   }

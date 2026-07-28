@@ -1,11 +1,12 @@
 import { useState } from "react";
 
-import { monogram, spriteUrl, typeGradient } from "../sprites/provider.ts";
-import { useSpriteSettings } from "../sprites/settings.ts";
+import { monogram, typeGradient } from "../sprites/provider.ts";
+import { useSpriteUrl } from "../sprites/useSpriteUrl.ts";
 
 interface Props {
   spriteId: number | null;
   dex: number;
+  speciesId?: string;
   name: string;
   types: readonly string[];
   /** 44 lista · 48 home · 64 galeria · 92 grade · 116 detalhe (escala do prototipo). */
@@ -21,9 +22,8 @@ interface Props {
  * tile nunca fica vazio nem "pula" de tamanho — o gradiente do tipo ja ocupa o
  * espaco final desde o primeiro frame.
  */
-export function SpeciesTile({ spriteId, dex, name, types, size = 64, shiny }: Props) {
-  const settings = useSpriteSettings();
-  const url = spriteUrl({ spriteId, dex, ...(shiny === undefined ? {} : { shiny }) }, settings);
+export function SpeciesTile({ spriteId, dex, speciesId = "", name, types, size = 64 }: Props) {
+  const url = useSpriteUrl({ spriteId, dex, speciesId });
 
   // Guardamos QUAL url carregou, nao um booleano.
   //
