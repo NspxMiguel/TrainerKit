@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 
 import type { PersistState } from "../storage/persist.ts";
-import { LANGUAGES, setLanguage, useLanguage } from "../i18n/language.ts";
+import {
+  LANGUAGES,
+  setLanguage,
+  setShowTranslation,
+  useLanguage,
+  useShowTranslation,
+} from "../i18n/language.ts";
 import { useInstallState } from "../storage/install.ts";
 import { InstallGuide } from "./InstallGuide.tsx";
 import { SpriteSettings } from "./SpriteSettings.tsx";
@@ -31,6 +37,7 @@ function formatBytes(n: number): string {
 export function SettingsScreen({ datasetLabel, persist }: Props) {
   const install = useInstallState();
   const language = useLanguage();
+  const showTranslation = useShowTranslation();
   const [guideOpen, setGuideOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>(
     () => (localStorage.getItem(THEME_KEY) as Theme | null) ?? "sistema",
@@ -126,10 +133,26 @@ export function SettingsScreen({ datasetLabel, persist }: Props) {
           </button>
         ))}
       </div>
-      <p className="tk-caption" style={{ marginTop: 8, lineHeight: 1.5 }}>
-        Em inglês o nome do ataque sai numa linha só. Nos outros idiomas sai o
-        nome em inglês e a tradução oficial do jogo ao lado.
-      </p>
+      {language !== "en" && (
+        <button
+          type="button"
+          className="tk-option"
+          data-active={showTranslation || undefined}
+          aria-pressed={showTranslation}
+          style={{ marginTop: 10 }}
+          onClick={() => setShowTranslation(!showTranslation)}
+        >
+          <span className="tk-option-mark" aria-hidden="true">
+            {showTranslation ? "●" : "○"}
+          </span>
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span className="tk-option-title">Mostrar tradução dos ataques</span>
+            <span className="tk-option-detail">
+              Counter (Contra-atacar). Desligado, fica só o inglês.
+            </span>
+          </span>
+        </button>
+      )}
 
       <SpriteSettings />
 
@@ -148,15 +171,12 @@ export function SettingsScreen({ datasetLabel, persist }: Props) {
       </div>
       <section className="tk-card" style={{ marginTop: 10 }}>
         <p className="tk-caption" style={{ lineHeight: 1.6 }}>
-          TrainerKit é um app independente feito por fãs e não é afiliado, patrocinado ou
-          endossado por Scopely Explore (ex-Niantic), The Pokémon Company, Nintendo,
-          Creatures Inc. ou GAME FREAK. Pokémon, Pokémon GO e os nomes de personagens são
-          marcas de seus respectivos titulares.
+          App independente feito por fãs, sem vínculo com Scopely Explore (ex-Niantic),
+          The Pokémon Company ou Nintendo. Marcas pertencem aos seus titulares.
         </p>
         <p className="tk-caption" style={{ lineHeight: 1.6, marginTop: 10 }}>
-          O TrainerKit funciona exclusivamente por leitura de capturas de tela fornecidas
-          por você e não acessa, modifica ou se comunica com os servidores do jogo. Nenhuma
-          imagem sai do seu aparelho.
+          Funciona só por leitura de prints que você fornece. Não acessa os servidores do
+          jogo, e nenhuma imagem sai do aparelho.
         </p>
         <p className="tk-caption" style={{ marginTop: 12, color: "var(--tk-txt4)" }}>
           Versão 0.1.0
