@@ -10,12 +10,13 @@ import {
   ivTotalOf,
   rankOf,
   solveLevel,
-  starsFor,
+  badgeFor,
   type IVs,
 } from "@trainerkit/core";
 
 import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
 import { IVBar } from "../ui/IVBar.tsx";
+import { ScanDropzone } from "../ui/ScanDropzone.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 
 interface Props {
@@ -49,7 +50,7 @@ export function IVCalculator({ species, data, onClose }: Props) {
 
   const total = ivTotalOf(ivs);
   const percent = ivPercentOf(ivs);
-  const stars = starsFor(total);
+  const badge = badgeFor(total);
 
   const cpNum = Number(cp);
   const hpNum = Number(hp);
@@ -95,13 +96,20 @@ export function IVCalculator({ species, data, onClose }: Props) {
             {percent.toFixed(1)}%
           </div>
           <div className="tk-caption">
-            {total} de 45 · {"★".repeat(stars)}
-            {"☆".repeat(4 - stars)}
+            {total} de 45 ·{" "}
+            <span style={badge.pink ? { color: "var(--tk-dang)" } : undefined}>
+              {"★".repeat(badge.litStars)}
+              {"☆".repeat(3 - badge.litStars)}
+            </span>
           </div>
         </div>
       </div>
 
-      <div className="tk-overline">Copie as barras da tela de avaliação</div>
+      <ScanDropzone onRead={setIvs} />
+
+      <div className="tk-overline" style={{ display: "block", marginTop: 26 }}>
+        Ou copie as barras à mão
+      </div>
       <section className="tk-card" style={{ marginTop: 10, display: "grid", gap: 18 }}>
         <IVBar label="Ataque" value={ivs.atk} onChange={(atk) => setIvs((v) => ({ ...v, atk }))} />
         <IVBar label="Defesa" value={ivs.def} onChange={(def) => setIvs((v) => ({ ...v, def }))} />
@@ -109,9 +117,9 @@ export function IVCalculator({ species, data, onClose }: Props) {
       </section>
 
       <p className="tk-caption" style={{ margin: "10px 2px 0", lineHeight: 1.5 }}>
-        Cada barra tem 3 blocos de 5 pontos e anda de 1 em 1. A barra fica
-        vermelha quando o stat é 15. Confira as estrelas acima: se não baterem com
-        as do jogo, alguma barra saiu errada.
+        Cada barra tem 3 blocos de 5 pontos e anda de 1 em 1, e fica vermelha
+        quando o stat é 15. Confira as estrelas acima contra as do jogo — é a
+        forma mais rápida de perceber uma barra lida errado.
       </p>
 
       <div className="tk-overline" style={{ display: "block", marginTop: 26 }}>

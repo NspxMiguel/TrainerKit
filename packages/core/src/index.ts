@@ -5,3 +5,4 @@ export * from "./iv.js";
 export * from "./pvp.js";
 export * from "./raid.js";
 export * from "./appraisal.js";
+export * from "./scan.js";

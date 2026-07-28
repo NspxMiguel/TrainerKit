@@ -24,20 +24,56 @@ export const BAR_SEGMENTS = 3;
 export const IV_PER_SEGMENT = MAX_BAR / BAR_SEGMENTS;
 
 /**
- * Estrelas do selo, pela soma dos tres IV.
+ * Selo de avaliacao.
  *
- * Diferente das barras, isto e derivado — o selo e so um resumo. Serve para
- * conferir se o jogador leu as barras direito: se as barras somam 40 mas o selo
- * mostra 2 estrelas, alguma coisa foi lida errado.
+ * O selo tem SEMPRE **tres** slots de estrela — o que muda e quantos estao
+ * acesos e a cor do fundo. Nao existe "4 estrelas": o tier de 100% e tres
+ * estrelas com o fundo ROSA em vez de laranja.
+ *
+ * Verificado contra as cinco imagens oficiais (`GO Appraisal 0` a `4`) e a
+ * tabela do Bulbapedia. Note que 37–44 e 45 sao tiers SEPARADOS — juntar os
+ * dois esconde do jogador justamente o caso que ele mais quer ver.
  */
-export function starsFor(total: number): number {
-  if (total >= 37) return 4;
-  if (total >= 30) return 3;
-  if (total >= 23) return 2;
-  return 1;
+export interface AppraisalBadge {
+  /** 0 a 4. */
+  tier: number;
+  /** Quantas das tres estrelas ficam acesas. */
+  litStars: number;
+  /** O tier de 100%, que o jogo pinta de rosa. */
+  pink: boolean;
+  label: string;
 }
 
-/** Cor da barra no jogo: vermelha quando o stat e perfeito, laranja no resto. */
+export const BADGE_TIERS: readonly AppraisalBadge[] = [
+  { tier: 0, litStars: 0, pink: false, label: "Nenhuma estrela" },
+  { tier: 1, litStars: 1, pink: false, label: "Uma estrela" },
+  { tier: 2, litStars: 2, pink: false, label: "Duas estrelas" },
+  { tier: 3, litStars: 3, pink: false, label: "Três estrelas" },
+  { tier: 4, litStars: 3, pink: true, label: "Perfeito" },
+];
+
+export function badgeFor(total: number): AppraisalBadge {
+  if (total >= 45) return BADGE_TIERS[4]!;
+  if (total >= 37) return BADGE_TIERS[3]!;
+  if (total >= 30) return BADGE_TIERS[2]!;
+  if (total >= 23) return BADGE_TIERS[1]!;
+  return BADGE_TIERS[0]!;
+}
+
+/**
+ * Cores das barras no jogo.
+ *
+ * Batem hex a hex entre duas fontes independentes: as constantes do GoIV e a
+ * amostragem de pixel das imagens oficiais.
+ */
+export const BAR_COLOR_EMPTY = "#E2E2E2";
+export const BAR_COLOR_FILLED = "#EE9219";
+export const BAR_COLOR_PERFECT = "#E18079";
+
+/**
+ * A cor vermelha e por STAT, nao por Pokemon: um 12/15/9 tem UMA barra vermelha
+ * (a defesa) e duas laranjas. As tres so ficam vermelhas quando as tres sao 15.
+ */
 export function isBarPerfect(value: number): boolean {
   return value === MAX_BAR;
 }
