@@ -10,7 +10,7 @@ import {
 } from "@trainerkit/core";
 
 import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
-import { moveLabel, useLanguage } from "../i18n/language.ts";
+import { moveLabel, useLanguage, useShowTranslation } from "../i18n/language.ts";
 import { useSetup } from "../onboarding/setup.ts";
 import { typeColor, typeName } from "../sprites/provider.ts";
 import { AssistantCard } from "../ui/AssistantCard.tsx";
@@ -66,6 +66,7 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
   const [context, setContext] = useState<Context>("general");
   const setup = useSetup();
   const language = useLanguage();
+  useShowTranslation(); // re-renderiza ao ligar/desligar a traducao
 
   useEffect(() => {
     const previous = document.body.style.overflow;

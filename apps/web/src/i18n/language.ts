@@ -33,6 +33,7 @@ export const LANGUAGES: readonly LanguageSpec[] = [
 ];
 
 const KEY = "tk:idioma";
+const SHOW_KEY = "tk:traducao";
 
 /** Palpite inicial pelo idioma do aparelho, caindo em ingles. */
 function detect(): string {
@@ -44,7 +45,30 @@ function detect(): string {
 }
 
 let current = localStorage.getItem(KEY) ?? detect();
+let showTranslation = localStorage.getItem(SHOW_KEY) !== "0";
 const listeners = new Set<() => void>();
+
+/** Quem ja conhece os nomes em ingles nao precisa da segunda linha ocupando espaco. */
+export function getShowTranslation(): boolean {
+  return showTranslation;
+}
+
+export function setShowTranslation(value: boolean): void {
+  showTranslation = value;
+  localStorage.setItem(SHOW_KEY, value ? "1" : "0");
+  for (const fn of listeners) fn();
+}
+
+export function useShowTranslation(): boolean {
+  return useSyncExternalStore(
+    (fn) => {
+      listeners.add(fn);
+      return () => listeners.delete(fn);
+    },
+    getShowTranslation,
+    () => true,
+  );
+}
 
 export function getLanguage(): string {
   return current;
@@ -81,7 +105,7 @@ export function moveLabel(
   moveId: string,
   language: string,
 ): { primary: string; secondary: string | null } {
-  if (language === "en") return { primary: englishName, secondary: null };
+  if (language === "en" || !showTranslation) return { primary: englishName, secondary: null };
 
   const translated = translations?.[language]?.[moveId];
   if (!translated || translated === englishName) {
