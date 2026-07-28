@@ -45,6 +45,8 @@ export interface Dataset {
     levelCap: number;
   };
   cpm: number[];
+  /** Ordem do enum de tipos, usada para indexar `typeChart`. Vem do ETL. */
+  typeOrder: string[];
   typeChart: Record<string, number[]>;
   species: DatasetSpecies[];
   fastMoves: DatasetMove[];

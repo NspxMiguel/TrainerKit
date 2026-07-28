@@ -634,3 +634,16 @@
   border: 1px solid var(--tk-warn-line);
   color: var(--tk-warn);
 }
+
+/* Marca do onboarding — mesmo gradiente do icone do app. */
+.tk-onb-mark {
+  width: 84px;
+  height: 84px;
+  border-radius: 28px;
+  background: var(--tk-brand);
+  display: grid;
+  place-items: center;
+  font: 800 30px var(--tk-mono);
+  color: #fff;
+  box-shadow: var(--tk-e2);
+}

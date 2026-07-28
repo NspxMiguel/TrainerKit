@@ -38,6 +38,20 @@ const CASOS = [
   { file: "novos/n7", nome: "novo 7", esperado: null },
   { file: "novos/n8", nome: "novo 8", esperado: null },
   { file: "novos/n9", nome: "novo 9", esperado: null },
+  // LIMITACAO CONHECIDA — nao incluido.
+  //
+  // O print do Slaking (novos/n10) e 1592x1518: um screenshot da JANELA DO
+  // DESKTOP com o celular pequeno dentro. O scanner recusa, e o diagnostico e
+  // claro: a imagem tem ~57 mil pixels alaranjados vindos da interface do
+  // navegador e do fundo, enquanto as barras ocupam uma fracao minuscula.
+  //
+  // A causa e estrutural: varios limiares aqui sao relativos a LARGURA DA
+  // IMAGEM, mas as barras sao relativas ao CELULAR dentro dela. Quando o
+  // celular e 30% do print, a proporcao deixa de valer.
+  //
+  // Recusar e o comportamento correto e seguro, mas o certo seria localizar o
+  // painel de avaliacao primeiro e so entao medir em relacao a ELE. Fica como
+  // proxima tarefa do scanner.
 ] as const;
 
 const temFixtures = DIR !== "" && CASOS.every((c) => existsSync(`${DIR}/${c.file}.raw`));
