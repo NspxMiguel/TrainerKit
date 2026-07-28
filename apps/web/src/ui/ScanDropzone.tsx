@@ -7,6 +7,8 @@ import { IconDownload } from "./Icons.tsx";
 
 interface Props {
   onRead: (ivs: IVs) => void;
+  /** Chamado quando a leitura falha, para a tela abrir a entrada manual. */
+  onFail: () => void;
 }
 
 /**
@@ -19,7 +21,20 @@ interface Props {
  * Mostra sempre o que foi detectado, com o print ao lado. Ler errado em
  * silencio seria muito pior que falhar.
  */
-export function ScanDropzone({ onRead }: Props) {
+/**
+ * O scanner foi calibrado em prints tirados NO CELULAR.
+ *
+ * Print feito no computador — janela do navegador com um emulador ou um mockup
+ * dentro — falha na pratica: a imagem fica cheia de laranja da interface e as
+ * barras viram uma fracao minuscula dela. Avisar antes e melhor que deixar a
+ * pessoa tentar tres vezes e achar que o app e quebrado.
+ */
+function isDesktop(): boolean {
+  if (navigator.maxTouchPoints > 1) return false;
+  return !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+export function ScanDropzone({ onRead, onFail }: Props) {
   const [outcome, setOutcome] = useState<ScanOutcome | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +58,7 @@ export function ScanDropzone({ onRead }: Props) {
         return next;
       });
       if (next.result.ok) onRead(next.result.ivs);
+      else onFail();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -72,6 +88,19 @@ export function ScanDropzone({ onRead }: Props) {
       )}
 
       <div style={{ flex: 1, minWidth: 0 }}>
+        {isDesktop() && !outcome && (
+          <div className="tk-banner tk-banner--warn" style={{ marginBottom: 12 }}>
+            <div className="tk-banner-text">
+              <div className="tk-banner-title">Você está no computador</div>
+              <p className="tk-banner-body">
+                A leitura foi testada em print tirado no celular. Print de tela de
+                computador quase sempre falha — a interface em volta atrapalha. Se der
+                errado, dá pra preencher à mão.
+              </p>
+            </div>
+          </div>
+        )}
+
         {busy ? (
           <div className="tk-drop-title">Lendo o print…</div>
         ) : result?.ok ? (

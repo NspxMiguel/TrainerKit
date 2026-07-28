@@ -30,6 +30,9 @@ const LEAGUES = [GREAT_LEAGUE, ULTRA_LEAGUE, MASTER_LEAGUE];
 export function IVCalculator({ species, data, onClose }: Props) {
   // `null` ate o print ser lido: sem print nao ha o que mostrar.
   const [ivs, setIvs] = useState<IVs | null>(null);
+  // Caminho de recuperacao: so aparece depois de o print falhar. Ate la a tela
+  // fica no fluxo que o Miguel pediu — anexa e pronto.
+  const [manual, setManual] = useState(false);
   const [cp, setCp] = useState("");
   const [hp, setHp] = useState("");
 
@@ -118,22 +121,44 @@ export function IVCalculator({ species, data, onClose }: Props) {
         )}
       </div>
 
-      <ScanDropzone onRead={setIvs} />
+      <ScanDropzone
+        onRead={(read) => {
+          setIvs(read);
+          setManual(false);
+        }}
+        onFail={() => {
+          setManual(true);
+          setIvs((v) => v ?? { atk: 0, def: 0, hp: 0 });
+        }}
+      />
 
       {ivs && (
         <>
       <div className="tk-overline" style={{ display: "block", marginTop: 26 }}>
-        O que ele leu
+        {manual ? "Coloque manualmente" : "O que ele leu"}
       </div>
       <section className="tk-card" style={{ marginTop: 10, display: "grid", gap: 18 }}>
-        <IVBar label="Ataque" value={ivs.atk} />
-        <IVBar label="Defesa" value={ivs.def} />
-        <IVBar label="PS" value={ivs.hp} />
+        <IVBar
+          label="Ataque"
+          value={ivs.atk}
+          {...(manual ? { onChange: (atk: number) => setIvs((v) => ({ ...v!, atk })) } : {})}
+        />
+        <IVBar
+          label="Defesa"
+          value={ivs.def}
+          {...(manual ? { onChange: (def: number) => setIvs((v) => ({ ...v!, def })) } : {})}
+        />
+        <IVBar
+          label="PS"
+          value={ivs.hp}
+          {...(manual ? { onChange: (hp: number) => setIvs((v) => ({ ...v!, hp })) } : {})}
+        />
       </section>
 
       <p className="tk-caption" style={{ margin: "10px 2px 0", lineHeight: 1.5 }}>
-        Confira as estrelas acima contra as do jogo — é a forma mais rápida de
-        perceber uma leitura errada.
+        {manual
+          ? "Arraste cada barra até ficar igual à do jogo. Confira as estrelas acima: se baterem com as do jogo, você acertou."
+          : "Confira as estrelas acima contra as do jogo — é a forma mais rápida de perceber uma leitura errada."}
       </p>
 
       <div className="tk-overline" style={{ display: "block", marginTop: 26 }}>
