@@ -1,0 +1,7 @@
+packages:
+  - "packages/*"
+  - "apps/*"
+allowBuilds:
+  # O postinstall do esbuild baixa o binario nativo da plataforma. Sem isto o
+  # Vite nao roda.
+  esbuild: true

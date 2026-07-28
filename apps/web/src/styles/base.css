@@ -1,0 +1,93 @@
+@import "./tokens.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--tk-bg);
+  /* Impede o "rubber band" horizontal que estraga a sensacao de app nativo. */
+  overscroll-behavior-x: none;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--tk-bg);
+  color: var(--tk-txt);
+  font-family: var(--tk-font);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Nada de zoom acidental ao tocar duas vezes num botao. */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+  touch-action: manipulation;
+}
+
+button {
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+a {
+  color: var(--tk-pri);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--tk-pri-h);
+}
+
+/* Foco visivel em anel de 2px na cor primaria — requisito do prototipo. */
+:focus-visible {
+  outline: 2px solid var(--tk-pri);
+  outline-offset: 2px;
+  border-radius: var(--tk-r-chip);
+}
+
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Movimento: so onde ha relacao de causa. Sem cascata, sem brilho, sem parallax. */
+@keyframes tk-nav {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes tk-fade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

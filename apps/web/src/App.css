@@ -1,0 +1,279 @@
+.tk-app {
+  min-height: 100dvh;
+  background: var(--tk-screen);
+  background-attachment: fixed;
+  display: flex;
+  justify-content: center;
+}
+
+/* Container mobile 390 com margem 22; em telas largas ele apenas centraliza. */
+.tk-shell {
+  width: 100%;
+  max-width: var(--tk-container);
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  position: relative;
+}
+
+.tk-main {
+  flex: 1;
+  padding: calc(var(--tk-safe-top) + env(safe-area-inset-top)) var(--tk-gutter)
+    calc(var(--tk-safe-bottom) + 72px + env(safe-area-inset-bottom));
+  animation: tk-fade 0.22s ease-out both;
+}
+
+/* ------------------------------------------------------------------ cabecalho */
+
+.tk-greeting {
+  font: 400 13px/1.4 var(--tk-font);
+  color: var(--tk-txt3);
+}
+
+.tk-h1 {
+  font: 800 34px/1.05 var(--tk-font);
+  letter-spacing: -0.03em;
+  margin: var(--tk-s1) 0 var(--tk-s6);
+}
+
+.tk-h2 {
+  font: 800 17px/1.2 var(--tk-font);
+  letter-spacing: -0.01em;
+  margin: var(--tk-s6) 0 var(--tk-s3);
+}
+
+.tk-overline {
+  font: 600 11px var(--tk-mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--tk-txt4);
+}
+
+.tk-body {
+  font: 400 14px/1.5 var(--tk-font);
+  color: var(--tk-txt2);
+}
+
+.tk-caption {
+  font: 400 12px/1.4 var(--tk-font);
+  color: var(--tk-txt3);
+}
+
+/* ---------------------------------------------------------------------- card */
+
+.tk-card {
+  background: var(--tk-surf);
+  border: 1px solid var(--tk-line);
+  border-radius: var(--tk-r-card);
+  padding: var(--tk-s4);
+}
+
+.tk-card + .tk-card {
+  margin-top: var(--tk-s3);
+}
+
+/* ------------------------------------------------------------------- tab bar */
+
+.tk-tabbar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  max-width: var(--tk-container);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: var(--tk-glass);
+  backdrop-filter: blur(20px) saturate(1.6);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  border-top: 1px solid var(--tk-line);
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 10;
+}
+
+.tk-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  /* Alvo minimo de 44px — requisito de acessibilidade, nunca reduzir. */
+  min-height: var(--tk-touch);
+  padding: 10px 0 12px;
+  color: var(--tk-txt3);
+  transition: color 0.15s ease;
+}
+
+.tk-tab[aria-current="page"] {
+  color: var(--tk-pri);
+}
+
+.tk-tab-label {
+  font: 600 11px var(--tk-font);
+}
+
+/* ------------------------------------------------------------------- avisos */
+
+.tk-banner {
+  display: flex;
+  gap: var(--tk-s3);
+  align-items: flex-start;
+  border-radius: var(--tk-r-input);
+  padding: var(--tk-s3) var(--tk-s4);
+  margin-bottom: var(--tk-s4);
+}
+
+.tk-banner--warn {
+  background: var(--tk-warn-soft);
+  border: 1px solid var(--tk-warn-line);
+  color: var(--tk-warn);
+}
+
+.tk-banner--info {
+  background: var(--tk-info-soft);
+  border: 1px solid var(--tk-info-line);
+  color: var(--tk-info);
+}
+
+.tk-banner-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.tk-banner-title {
+  font: 700 13px/1.3 var(--tk-font);
+}
+
+.tk-banner-body {
+  font: 400 12px/1.45 var(--tk-font);
+  color: var(--tk-txt2);
+  margin-top: 2px;
+}
+
+/* ------------------------------------------------------------------ vazios */
+
+.tk-empty {
+  text-align: center;
+  padding: 56px var(--tk-s5);
+}
+
+.tk-empty-mark {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto var(--tk-s4);
+  border-radius: 20px;
+  background: var(--tk-ph);
+  border: 1px solid var(--tk-line2);
+  display: grid;
+  place-items: center;
+  color: var(--tk-txt3);
+}
+
+.tk-empty-title {
+  font: 700 17px/1.2 var(--tk-font);
+  margin-bottom: var(--tk-s1);
+}
+
+/* ------------------------------------------------------------------ botoes */
+
+.tk-btn {
+  height: 48px;
+  min-width: var(--tk-touch);
+  padding: 0 var(--tk-s5);
+  border-radius: var(--tk-r-input);
+  font: 700 15px var(--tk-font);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tk-s2);
+  transition:
+    background-color 0.15s ease,
+    transform 0.08s ease;
+}
+
+.tk-btn:active {
+  transform: scale(0.985);
+}
+
+.tk-btn--primary {
+  background: var(--tk-pri);
+  color: var(--tk-on-pri);
+}
+
+.tk-btn--primary:hover {
+  background: var(--tk-pri-h);
+}
+
+.tk-btn--secondary {
+  background: var(--tk-surf2);
+  color: var(--tk-txt);
+  border: 1px solid var(--tk-line2);
+}
+
+.tk-btn--block {
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------- FAB */
+
+.tk-fab {
+  position: fixed;
+  right: max(var(--tk-gutter), calc(50vw - var(--tk-container) / 2 + var(--tk-gutter)));
+  bottom: calc(84px + env(safe-area-inset-bottom));
+  width: 56px;
+  height: 56px;
+  border-radius: 20px;
+  background: var(--tk-pri);
+  color: var(--tk-on-pri);
+  display: grid;
+  place-items: center;
+  box-shadow: var(--tk-e2);
+  z-index: 11;
+}
+
+/* ------------------------------------------------------------------- listas */
+
+.tk-row {
+  display: flex;
+  align-items: center;
+  gap: var(--tk-s3);
+  width: 100%;
+  padding: var(--tk-s3) 0;
+  text-align: left;
+  min-height: var(--tk-touch);
+}
+
+.tk-row + .tk-row {
+  border-top: 1px solid var(--tk-line);
+}
+
+.tk-row-label {
+  flex: 1;
+  font: 500 14px var(--tk-font);
+}
+
+.tk-row-value {
+  font: 400 13px var(--tk-font);
+  color: var(--tk-txt3);
+}
+
+/* ------------------------------------------------------ selo de especie */
+
+/*
+ * Tile de reserva quando a especie nao tem sprite: gradiente na cor do tipo e
+ * monograma de duas letras. Raio = 1/3 do lado, como o prototipo especifica.
+ */
+.tk-mono {
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--tk-line2);
+  box-shadow: inset 0 -8px 14px -8px rgba(0, 0, 0, 0.45);
+  font: 800 17px var(--tk-mono);
+  color: rgba(255, 255, 255, 0.93);
+  flex: none;
+  overflow: hidden;
+}
+
+.tk-mono img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}

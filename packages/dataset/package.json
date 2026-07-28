@@ -1,0 +1,12 @@
+{
+  "name": "@trainerkit/dataset",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "fetch": "node src/fetch.ts",
+    "build": "node src/etl.ts",
+    "refresh": "node src/fetch.ts && node src/etl.ts",
+    "typecheck": "tsc --noEmit"
+  }
+}

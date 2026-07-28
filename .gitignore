@@ -1,0 +1,37 @@
+# Dependencias e artefatos de build.
+node_modules/
+dist/
+build/
+.vite/
+*.tsbuildinfo
+dev-dist/
+
+# Lixo do sistema e logs.
+.DS_Store
+*.log
+
+# Segredos.
+.env
+.env.*
+!.env.example
+
+# Sprites baixados dos repositorios da comunidade. NUNCA versionados.
+#
+# Sao arte protegida da The Pokemon Company / Nintendo / Scopely, publicada em
+# repositorios sem licenca. Esta build e de uso pessoal e local; versionar os
+# arquivos transformaria o repositorio em redistribuicao, que e outra coisa
+# completamente diferente do ponto de vista legal.
+#
+# O app funciona sem eles: cai no tile de monograma. Rode `pnpm sprites:fetch`
+# para popular localmente.
+apps/web/public/sprites/
+packages/dataset/.cache/
+
+# GAME_MASTER cru (18 MB). Reconstruivel pelo pipeline de ETL.
+packages/dataset/raw/
+
+# Dataset gerado. Fora do git pelo mesmo motivo dos sprites: e dado do jogo,
+# so que transformado. `pnpm --filter @trainerkit/dataset refresh` regenera em
+# segundos, entao versionar so traria o incomodo de um diff de 1 MB a cada
+# atualizacao do jogo.
+apps/web/public/dataset/

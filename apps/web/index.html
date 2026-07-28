@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5"
+    />
+    <title>TrainerKit</title>
+    <meta
+      name="description"
+      content="Decide o que fazer com cada Pokémon: investir, evoluir, guardar ou transferir."
+    />
+
+    <!-- A cor da barra do sistema segue o tema, senao fica uma faixa clara no topo do app escuro. -->
+    <meta name="theme-color" content="#07080B" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#ECEEF3" media="(prefers-color-scheme: light)" />
+
+    <!-- iOS: sem isto o app abre em aba do Safari em vez de standalone. -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="TrainerKit" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

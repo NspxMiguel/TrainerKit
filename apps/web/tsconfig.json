@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "declaration": false,
+    // O app nao emite JS — o Vite resolve os imports. Escrever a extensao real
+    // (.ts/.tsx) evita a confusao de importar ".js" de um arquivo que nao existe.
+    "allowImportingTsExtensions": true,
+    "types": ["vite/client", "vite-plugin-pwa/client", "node"],
+    "paths": {
+      "@trainerkit/core": ["../../packages/core/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*", "vite.config.ts"]
+}
