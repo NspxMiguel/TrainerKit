@@ -16,6 +16,11 @@ export interface Setup {
   mode: UsageMode;
   /** Liga o assistente que opina sobre os Pokemon. */
   assistant: boolean;
+  /**
+   * Como a pessoa quer ser chamada. Vazio e valido — quem nao quiser dizer o
+   * nome ve so a saudacao, e nada no app depende disto.
+   */
+  name: string;
 }
 
 const KEY = "tk:setup";
@@ -24,6 +29,7 @@ export const DEFAULT_SETUP: Setup = {
   done: false,
   mode: "consulta",
   assistant: true,
+  name: "",
 };
 
 function read(): Setup {
@@ -35,6 +41,7 @@ function read(): Setup {
       done: parsed.done ?? false,
       mode: parsed.mode === "colecao" ? "colecao" : "consulta",
       assistant: parsed.assistant ?? true,
+      name: typeof parsed.name === "string" ? parsed.name : "",
     };
   } catch {
     return DEFAULT_SETUP;

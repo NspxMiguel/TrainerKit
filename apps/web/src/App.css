@@ -647,3 +647,31 @@
   color: #fff;
   box-shadow: var(--tk-e2);
 }
+
+/* Grade de idiomas do setup. */
+.tk-lang-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.tk-lang {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--tk-touch);
+  padding: 0 12px;
+  border-radius: var(--tk-r-input);
+  background: var(--tk-surf2);
+  border: 1px solid var(--tk-line);
+  font: 600 13px var(--tk-font);
+  color: var(--tk-txt);
+  text-align: left;
+}
+
+.tk-lang[data-active] {
+  background: var(--tk-pri-soft);
+  border-color: var(--tk-pri-line);
+  color: var(--tk-pri-fg);
+}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 
+import { LANGUAGES, setLanguage, useLanguage } from "../i18n/language.ts";
 import { InstallGuide } from "../screens/InstallGuide.tsx";
 import { useInstallState } from "../storage/install.ts";
 import { IconDownload, IconGrid, IconSearch } from "../ui/Icons.tsx";
@@ -16,12 +17,14 @@ import { updateSetup, type UsageMode } from "./setup.ts";
  */
 export function Onboarding() {
   const [step, setStep] = useState(0);
+  const [name, setName] = useState("");
   const [mode, setMode] = useState<UsageMode>("consulta");
   const [assistant, setAssistant] = useState(true);
   const [guideOpen, setGuideOpen] = useState(false);
   const install = useInstallState();
+  const language = useLanguage();
 
-  const finish = () => updateSetup({ done: true, mode, assistant });
+  const finish = () => updateSetup({ done: true, mode, assistant, name: name.trim() });
 
   return createPortal(
     <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label="Boas-vindas">
@@ -38,10 +41,55 @@ export function Onboarding() {
             Tudo fica no seu aparelho — sem conta, sem login, e nada é enviado pra
             lugar nenhum.
           </p>
+          <div className="tk-overline" style={{ display: "block", marginTop: 26 }}>
+            Idioma
+          </div>
+          <div className="tk-lang-grid">
+            {LANGUAGES.map((l) => (
+              <button
+                key={l.code}
+                type="button"
+                className="tk-lang"
+                data-active={language === l.code || undefined}
+                aria-pressed={language === l.code}
+                onClick={() => setLanguage(l.code)}
+              >
+                <span aria-hidden="true" style={{ fontSize: 18 }}>
+                  {l.flag}
+                </span>
+                <span>{l.label}</span>
+              </button>
+            ))}
+          </div>
+          <p className="tk-caption" style={{ marginTop: 8, lineHeight: 1.5 }}>
+            Os nomes de ataque aparecem em inglês e, se você escolher outro idioma,
+            também na tradução oficial do jogo — porque nenhuma das duas sozinha
+            serve pra procurar guia e achar no jogo ao mesmo tempo.
+          </p>
+
+          <label style={{ display: "block", marginTop: 22 }}>
+            <span className="tk-caption">Como posso te chamar?</span>
+            <div className="tk-search" style={{ marginTop: 6 }}>
+              <input
+                type="text"
+                autoComplete="given-name"
+                placeholder="Seu nome ou apelido"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                maxLength={24}
+                aria-label="Seu nome"
+              />
+            </div>
+          </label>
+          <p className="tk-caption" style={{ marginTop: 8, lineHeight: 1.5 }}>
+            Só pra te cumprimentar na tela inicial. Fica no aparelho e pode ficar em
+            branco.
+          </p>
+
           <button
             type="button"
             className="tk-btn tk-btn--primary tk-btn--block"
-            style={{ marginTop: 28 }}
+            style={{ marginTop: 22 }}
             onClick={() => setStep(1)}
           >
             Começar
