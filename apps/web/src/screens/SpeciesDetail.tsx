@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { computeCPAtLevel } from "@trainerkit/core";
+import {
+  CONTEXT_LABELS,
+  computeCPAtLevel,
+  rankMovesets,
+  type Context,
+  type MoveWithPvp,
+} from "@trainerkit/core";
 
 import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
 import { typeColor, typeName } from "../sprites/provider.ts";
@@ -54,6 +60,7 @@ function StatBar({ label, value }: { label: string; value: number }) {
 
 export function SpeciesDetail({ species, data, onClose }: Props) {
   const [calcOpen, setCalcOpen] = useState(false);
+  const [context, setContext] = useState<Context>("general");
 
   useEffect(() => {
     const previous = document.body.style.overflow;
@@ -78,6 +85,34 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
     data.fastMoves.find((m) => m.id === id)?.name ??
     data.chargedMoves.find((m) => m.id === id)?.name ??
     id;
+
+  const moveById = (id: string): MoveWithPvp | null => {
+    const fast = data.fastMoves.find((m) => m.id === id);
+    if (fast) return fast as MoveWithPvp;
+    const charged = data.chargedMoves.find((m) => m.id === id);
+    return charged ? (charged as MoveWithPvp) : null;
+  };
+
+  const collect = (ids: string[], elite: string[]): MoveWithPvp[] =>
+    [
+      ...ids.map((id) => moveById(id)),
+      ...elite.map((id) => {
+        const m = moveById(id);
+        return m ? { ...m, elite: true } : null;
+      }),
+    ].filter((m): m is MoveWithPvp => m !== null);
+
+  const movesets = rankMovesets(
+    collect(species.fastMoves, species.eliteFastMoves),
+    collect(species.chargedMoves, species.eliteChargedMoves),
+    context,
+    {
+      attackerTypes: species.types,
+      chart: data.typeChart,
+      order: data.typeOrder,
+      stabMultiplier: 1.2,
+    },
+  );
 
   const evolutions = species.evolvesInto
     .map((id) => data.species.find((s) => s.id === id))
@@ -157,37 +192,58 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
       </section>
 
       <div className="tk-overline" style={{ display: "block", marginTop: 24 }}>
-        Ataques rápidos
+        Melhores ataques
       </div>
-      <section className="tk-card" style={{ marginTop: 10 }}>
-        {species.fastMoves.map((id) => (
-          <div className="tk-row" key={id}>
-            <span className="tk-row-label">{moveName(id)}</span>
-          </div>
-        ))}
-        {species.eliteFastMoves.map((id) => (
-          <div className="tk-row" key={id}>
-            <span className="tk-row-label">{moveName(id)}</span>
-            <span className="tk-row-value">TM Elite</span>
-          </div>
-        ))}
-      </section>
 
-      <div className="tk-overline" style={{ display: "block", marginTop: 24 }}>
-        Ataques carregados
+      <div style={{ display: "flex", gap: 6, margin: "10px 0" }}>
+        {(["general", "raid", "pvp"] as const).map((c) => (
+          <button
+            key={c}
+            type="button"
+            className={`tk-btn ${context === c ? "tk-btn--primary" : "tk-btn--secondary"}`}
+            style={{ flex: 1, height: 40, fontSize: 13, padding: 0 }}
+            aria-pressed={context === c}
+            onClick={() => setContext(c)}
+          >
+            {CONTEXT_LABELS[c].title}
+          </button>
+        ))}
       </div>
-      <section className="tk-card" style={{ marginTop: 10 }}>
-        {species.chargedMoves.map((id) => (
-          <div className="tk-row" key={id}>
-            <span className="tk-row-label">{moveName(id)}</span>
-          </div>
-        ))}
-        {species.eliteChargedMoves.map((id) => (
-          <div className="tk-row" key={id}>
-            <span className="tk-row-label">{moveName(id)}</span>
-            <span className="tk-row-value">TM Elite</span>
-          </div>
-        ))}
+
+      <p className="tk-caption" style={{ margin: "0 2px 10px", lineHeight: 1.45 }}>
+        {CONTEXT_LABELS[context].detail}
+      </p>
+
+      <section className="tk-card">
+        {movesets.length === 0 ? (
+          <p className="tk-body">Sem dados de ataque para esta espécie.</p>
+        ) : (
+          movesets.slice(0, 5).map((m, i) => (
+            <div className="tk-row" key={`${m.fast.id}/${m.charged.id}`}>
+              <span
+                className="tk-row-label"
+                style={i === 0 ? { fontWeight: 700 } : undefined}
+              >
+                {m.fast.name} + {m.charged.name}
+                {m.needsElite && (
+                  <span className="tk-caption" style={{ display: "block" }}>
+                    exige TM Elite
+                  </span>
+                )}
+              </span>
+              <span
+                className="tk-row-value"
+                style={i === 0 ? { color: "var(--tk-succ)", fontWeight: 700 } : undefined}
+              >
+                {Math.round(m.score * 100)}
+              </span>
+            </div>
+          ))
+        )}
+        <p className="tk-caption" style={{ marginTop: 12, lineHeight: 1.5 }}>
+          A nota compara os movesets DESTE Pokémon entre si — 100 é o melhor dele,
+          não o melhor do jogo.
+        </p>
       </section>
 
       {evolutions.length > 0 && (

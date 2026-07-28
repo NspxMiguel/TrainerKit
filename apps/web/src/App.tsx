@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 
 import { datasetLabel, useDataset } from "./data/useDataset.ts";
+import { Onboarding } from "./onboarding/Onboarding.tsx";
+import { useSetup } from "./onboarding/setup.ts";
 import { CollectionScreen } from "./screens/CollectionScreen.tsx";
 import { HomeScreen } from "./screens/HomeScreen.tsx";
 import { PokedexScreen } from "./screens/PokedexScreen.tsx";
@@ -25,6 +27,7 @@ const TABS: ReadonlyArray<{
 
 export function App() {
   const [tab, setTab] = useState<Tab>("inicio");
+  const setup = useSetup();
   const dataset = useDataset();
   const [persist, setPersist] = useState<PersistState | null>(null);
 
@@ -51,8 +54,14 @@ export function App() {
           )}
         </main>
 
-        <nav className="tk-tabbar" aria-label="Navegação principal">
-          {TABS.map(({ id, label, Icon }) => (
+        <nav
+          className="tk-tabbar"
+          aria-label="Navegação principal"
+          // No modo consulta a aba Colecao nao aparece: ela so faria sentido
+          // pra quem escolheu cadastrar, e uma aba vazia permanente e ruido.
+          style={setup.mode === "consulta" ? { gridTemplateColumns: "repeat(3, 1fr)" } : undefined}
+        >
+          {TABS.filter((t) => setup.mode === "colecao" || t.id !== "colecao").map(({ id, label, Icon }) => (
             <button
               key={id}
               type="button"
@@ -67,6 +76,8 @@ export function App() {
           ))}
         </nav>
       </div>
+
+      {!setup.done && <Onboarding />}
     </div>
   );
 }
