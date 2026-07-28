@@ -62,7 +62,7 @@ export function opine(input: AssistantInput): Opinion {
   if (baseStats.atk >= HIGH_ATK) {
     observations.push({
       tone: "bom",
-      text: "Bate muito forte. É candidato natural a time de raide.",
+      text: "Bate forte. Bom pra raide.",
       evidence: `ataque base ${baseStats.atk}`,
     });
   }
@@ -70,41 +70,42 @@ export function opine(input: AssistantInput): Opinion {
   if (bulk(baseStats) >= HIGH_DEF + HIGH_HP) {
     observations.push({
       tone: "bom",
-      text: "Aguenta pancada. Esse tipo de corpo rende bem em PvP, onde durar importa mais que matar rápido.",
+      text: "Aguenta pancada. Bom pra PvP.",
       evidence: `defesa ${baseStats.def} e PS ${baseStats.hp}`,
     });
   }
 
-  // Uma leitura de PERFIL que sempre sai.
+  // Especie fraca em tudo: o perfil nao interessa.
   //
-  // Sem isto o assistente ficava mudo em especies medianas — justamente as
-  // que mais precisam de uma opiniao, porque o numero sozinho nao diz se o
-  // bicho serve pra atacar ou pra aguentar.
+  // Antes as duas regras disparavam juntas e se contradiziam — o Bulbasaur
+  // recebia "Equilibrado, serve pros dois" E "Fraco nos dois" na mesma tela.
+  // Dizer que um Pokemon fraco e "equilibrado" e tecnicamente verdade e
+  // praticamente inutil.
+  const weak = baseStats.atk < 150 && bulk(baseStats) < 300;
+
   const attackerish = baseStats.atk / Math.max(1, bulk(baseStats) / 2);
-  if (attackerish >= 1.15) {
+  if (weak) {
+    observations.push({
+      tone: "ruim",
+      text: "Fraco nos dois. Só pra Pokédex.",
+      evidence: `ataque ${baseStats.atk}, defesa ${baseStats.def}, PS ${baseStats.hp}`,
+    });
+  } else if (attackerish >= 1.15) {
     observations.push({
       tone: "neutro",
-      text: "É mais atacante que parede: entrega dano, mas cai rápido. Bom pra raide, arriscado em PvP.",
+      text: "Atacante: dá dano, mas cai rápido.",
       evidence: `ataque ${baseStats.atk} contra defesa ${baseStats.def} e PS ${baseStats.hp}`,
     });
   } else if (attackerish <= 0.8) {
     observations.push({
       tone: "neutro",
-      text: "É mais parede que atacante: dura muito, mas demora pra derrubar. Perfil de PvP.",
+      text: "Parede: dura muito, mata devagar.",
       evidence: `defesa ${baseStats.def} e PS ${baseStats.hp} contra ataque ${baseStats.atk}`,
     });
   } else {
     observations.push({
       tone: "neutro",
-      text: "Perfil equilibrado — não se destaca em nada, mas também não tem buraco.",
-      evidence: `ataque ${baseStats.atk}, defesa ${baseStats.def}, PS ${baseStats.hp}`,
-    });
-  }
-
-  if (baseStats.atk < 150 && bulk(baseStats) < 300) {
-    observations.push({
-      tone: "ruim",
-      text: "Não bate nem aguenta. Serve pra Pokédex e pouco mais.",
+      text: "Equilibrado. Serve pros dois.",
       evidence: `ataque ${baseStats.atk}, defesa ${baseStats.def}, PS ${baseStats.hp}`,
     });
   }
@@ -113,7 +114,7 @@ export function opine(input: AssistantInput): Opinion {
 
   if (!ivs) {
     return {
-      headline: `${name} chega a ${maxCp.toLocaleString("pt-BR")} de PC no nível ${levelCap}.`,
+      headline: `Até ${maxCp.toLocaleString("pt-BR")} de PC no nível ${levelCap}.`,
       tone: observations.some((o) => o.tone === "bom") ? "bom" : "neutro",
       observations,
     };
@@ -141,7 +142,7 @@ export function opine(input: AssistantInput): Opinion {
   if (bestLeague && bestLeague.rank <= 100) {
     observations.push({
       tone: "bom",
-      text: `Esse IV é excelente pra ${bestLeague.label} League. Guarda esse.`,
+      text: `IV excelente pra ${bestLeague.label} League.`,
       evidence: `#${bestLeague.rank.toLocaleString("pt-BR")} entre 4.096 combinações`,
     });
   }
@@ -149,7 +150,7 @@ export function opine(input: AssistantInput): Opinion {
   if (ivs.atk === MAX_BAR) {
     observations.push({
       tone: "bom",
-      text: "Ataque perfeito. Pra raide é o stat que mais importa.",
+      text: "Ataque 15. O stat que mais vale em raide.",
       evidence: "ataque 15 de 15",
     });
   }
@@ -158,7 +159,7 @@ export function opine(input: AssistantInput): Opinion {
   if (ivs.atk >= 13 && bestLeague && bestLeague.label !== "Master" && bestLeague.rank > 500) {
     observations.push({
       tone: "neutro",
-      text: "Ataque alto ajuda em raide, mas atrapalha em liga com teto: ele infla o PC e obriga a parar num nível mais baixo.",
+      text: "Ataque alto atrapalha em liga com teto: infla o PC.",
       evidence: `ataque ${ivs.atk}, posição #${bestLeague.rank.toLocaleString("pt-BR")} na ${bestLeague.label}`,
     });
   }
@@ -166,7 +167,7 @@ export function opine(input: AssistantInput): Opinion {
   if (total <= 15) {
     observations.push({
       tone: "ruim",
-      text: "IV bem fraco. Se não for por apego, é candidato a transferir.",
+      text: "IV fraco. Candidato a transferir.",
       evidence: `${total} de 45 pontos`,
     });
   }
@@ -174,12 +175,12 @@ export function opine(input: AssistantInput): Opinion {
   // ------------------------------------------------------------------- manchete
 
   const headline = perfect
-    ? `${name} 100%. Esse é dos raros — não transfere de jeito nenhum.`
+    ? `${name} 100%. Não transfere.`
     : bestLeague && bestLeague.rank <= 100
-      ? `${name} vale guardar: é top ${bestLeague.rank} na ${bestLeague.label} League.`
+      ? `Top ${bestLeague.rank} na ${bestLeague.label} League.`
       : total <= 15
-        ? `${name} com IV fraco. Provavelmente não vale investir.`
-        : `${name} está em ${total} de 45, e chega a ${maxCp.toLocaleString("pt-BR")} de PC.`;
+        ? "IV fraco. Não vale investir."
+        : `${total} de 45 · até ${maxCp.toLocaleString("pt-BR")} de PC.`;
 
   const good = observations.filter((o) => o.tone === "bom").length;
   const bad = observations.filter((o) => o.tone === "ruim").length;

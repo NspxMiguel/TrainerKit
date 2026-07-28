@@ -129,10 +129,10 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
         <button type="button" className="tk-sheet-close" onClick={onClose} aria-label="Voltar">
           ‹
         </button>
-        <h2 className="tk-sheet-title">{species.name}</h2>
+        <h2 className="tk-sheet-title">Pokédex</h2>
       </header>
 
-      <div style={{ display: "flex", gap: 16, alignItems: "center", marginBottom: 22 }}>
+      <div style={{ display: "flex", gap: 16, alignItems: "flex-start", marginBottom: 22 }}>
         <SpeciesTile
           spriteId={species.spriteId}
           dex={species.dex}
@@ -141,8 +141,14 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
           types={species.types}
           size={116}
         />
+        {/* O nome vive aqui, ao lado do sprite — nao so no cabecalho.
+            Antes ficava um bloco vazio neste ponto porque a dex e os tipos
+            comecavam alinhados ao topo, e o olho procurava o nome no vazio. */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div className="tk-species-dex" style={{ marginBottom: 8 }}>
+          <div style={{ font: "800 22px/1.15 var(--tk-font)", letterSpacing: "-0.02em" }}>
+            {species.name}
+          </div>
+          <div className="tk-species-dex" style={{ margin: "4px 0 10px" }}>
             #{String(species.dex).padStart(3, "0")}
           </div>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>

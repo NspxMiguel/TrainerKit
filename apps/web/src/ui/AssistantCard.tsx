@@ -63,10 +63,6 @@ export function AssistantCard(props: AssistantInput) {
           </div>
         )}
 
-        <p className="tk-caption" style={{ marginTop: 14, lineHeight: 1.5 }}>
-          Isso não é IA — é o app lendo os próprios números. Cada frase acima tem o
-          dado que a sustenta logo abaixo dela.
-        </p>
       </section>
     </>
   );

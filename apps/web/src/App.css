@@ -20,7 +20,7 @@
   flex: 1;
   padding: calc(var(--tk-safe-top) + env(safe-area-inset-top)) var(--tk-gutter)
     calc(var(--tk-safe-bottom) + 72px + env(safe-area-inset-bottom));
-  animation: tk-fade 0.22s ease-out both;
+  animation: tk-fade 0.14s var(--tk-ease) both;
 }
 
 /* ------------------------------------------------------------------ cabecalho */
@@ -99,7 +99,7 @@
   min-height: var(--tk-touch);
   padding: 10px 0 12px;
   color: var(--tk-txt3);
-  transition: color 0.15s ease;
+  transition: color 0.12s var(--tk-ease);
 }
 
 .tk-tab[aria-current="page"] {
@@ -185,12 +185,17 @@
   justify-content: center;
   gap: var(--tk-s2);
   transition:
-    background-color 0.15s ease,
-    transform 0.08s ease;
+    background-color 0.12s var(--tk-ease),
+    transform 0.06s var(--tk-ease);
 }
 
+/*
+ * O toque precisa responder na hora. 0.06s e quase imperceptivel como
+ * animacao, mas a diferenca entre ter e nao ter e a diferenca entre o botao
+ * parecer fisico e parecer uma imagem.
+ */
 .tk-btn:active {
-  transform: scale(0.985);
+  transform: scale(0.97);
 }
 
 .tk-btn--primary {
@@ -293,7 +298,7 @@
     calc(var(--tk-s8) + env(safe-area-inset-bottom));
   margin: 0 auto;
   max-width: var(--tk-container);
-  animation: tk-fade 0.2s ease-out both;
+  animation: tk-rise 0.2s var(--tk-ease) both;
 }
 
 .tk-sheet-head {
@@ -371,12 +376,12 @@
   background: var(--tk-surf);
   border: 1px solid var(--tk-line);
   transition:
-    background-color 0.15s ease,
-    transform 0.08s ease;
+    background-color 0.12s var(--tk-ease),
+    transform 0.06s var(--tk-ease);
 }
 
 .tk-species-cell:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
 }
 
 .tk-species-cell:hover {
@@ -414,8 +419,8 @@
   background: var(--tk-surf2);
   text-align: left;
   transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease;
+    background-color 0.12s var(--tk-ease),
+    border-color 0.12s var(--tk-ease);
 }
 
 .tk-option[data-active] {
