@@ -20,6 +20,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { LANGUAGES, moveKeyFor, toMap, urlFor } from "./i18n.ts";
+import { DECLARED_SOURCES } from "./sources.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const RAW_DIR = join(HERE, "..", "raw");
@@ -573,6 +574,11 @@ async function main(): Promise<void> {
 
   const dataset = {
     typeOrder: TYPE_ORDER,
+    /**
+     * De onde veio cada numero. Vai DENTRO do dataset de proposito: quem
+     * apontar o app pra outra base ve as fontes daquela base, nao as minhas.
+     */
+    sources: DECLARED_SOURCES,
     version: {
       batchId: stamp.batchId,
       uploadTime: stamp.uploadTime,

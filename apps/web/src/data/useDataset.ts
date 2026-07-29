@@ -4,6 +4,14 @@ import { looksLikeDataset, resolvedDatasetUrl, useDataSource } from "./source.ts
 
 import type { BaseStats, RankedSpecies } from "@trainerkit/core";
 
+/** Uma fonte declarada pelo proprio dataset. */
+export interface DatasetSource {
+  name: string;
+  url: string;
+  /** Chave de traducao dizendo o que vem dela. */
+  provides: string;
+}
+
 export interface DatasetSpecies {
   id: string;
   dex: number;
@@ -49,6 +57,11 @@ export interface Dataset {
     levelCap: number;
   };
   cpm: number[];
+  /**
+   * As fontes deste dataset. Opcional porque uma base de terceiro pode nao
+   * declarar nada — e ai a tela diz isso, em vez de inventar procedencia.
+   */
+  sources?: DatasetSource[];
   /** Ordem do enum de tipos, usada para indexar `typeChart`. Vem do ETL. */
   typeOrder: string[];
   typeChart: Record<string, number[]>;

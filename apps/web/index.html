@@ -23,12 +23,38 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="TrainerKit" />
+    <!-- Escuro e o padrao: e como o app abre, e e o `background_color` do
+         manifest. O iOS copia UM arquivo na hora de instalar e nao volta a
+         olhar, entao o icone instalado nao muda depois — o `media` aqui so
+         decide qual e copiado, quando o Safari o respeita. -->
+    <link
+      rel="apple-touch-icon"
+      href="/apple-touch-icon-light.png"
+      media="(prefers-color-scheme: light)"
+    />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <!-- Dois tamanhos renderizados NO tamanho, nao encolhidos do 512: a marca
          sao tres barras finas, e o navegador reamostrando a imagem grande as
          funde num borrao. Nesses dois a seta sai do desenho de proposito — ver
          `scripts/make-icons.ts`. -->
+    <!-- O favicon TROCA sozinho com o tema: `media` em `rel="icon"` e
+         respeitado pelos navegadores atuais. A ordem importa — a regra clara
+         vem primeiro e a escura fica como padrao pra quem nao avalia `media`. -->
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/favicon-32-light.png"
+      media="(prefers-color-scheme: light)"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/favicon-16-light.png"
+      media="(prefers-color-scheme: light)"
+    />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
 
