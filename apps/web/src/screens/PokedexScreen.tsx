@@ -73,6 +73,7 @@ export function PokedexScreen({ dataset }: Props) {
           species={selected}
           data={dataset.data}
           onClose={() => setSelected(null)}
+          onPickSpecies={setSelected}
         />
       )}
     </>

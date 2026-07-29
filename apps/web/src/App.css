@@ -1400,3 +1400,75 @@
   font: 400 14px/1.55 var(--tk-font);
   color: var(--tk-txt);
 }
+
+/* Linha de evolucao — clicavel, porque o usuario vai tentar tocar. */
+.tk-evo {
+  display: flex;
+  gap: var(--tk-s3);
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  padding: var(--tk-s1) 0;
+  min-height: var(--tk-touch);
+  transition: opacity 0.12s var(--tk-ease);
+}
+
+.tk-evo:active {
+  opacity: 0.6;
+}
+
+/* ------------------------------------------------------- linha de moveset */
+
+/*
+ * Duas linhas fixas, nao um paragrafo que se enrola.
+ *
+ * "Vine Whip (Chicote de Vinha) + Power Whip (Chicote Poderoso)" quebrava em
+ * tres linhas com a nota boiando no meio, e cinco movesets viravam cinco
+ * alturas diferentes. Separar nome de traducao alinha a coluna da nota e deixa
+ * a lista escaneavel — que e a unica coisa que se faz com uma lista dessas.
+ */
+.tk-move {
+  display: flex;
+  align-items: center;
+  gap: var(--tk-s3);
+  padding: var(--tk-s3) 0;
+  min-height: var(--tk-touch);
+}
+
+.tk-move + .tk-move {
+  border-top: 1px solid var(--tk-line);
+}
+
+.tk-move-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.tk-move-name {
+  display: block;
+  font: 500 14px/1.3 var(--tk-font);
+}
+
+.tk-move-name--top {
+  font-weight: 700;
+}
+
+.tk-move-sub {
+  display: block;
+  font: 400 11px/1.35 var(--tk-font);
+  color: var(--tk-txt3);
+  margin-top: 2px;
+}
+
+.tk-move-score {
+  flex: none;
+  width: 34px;
+  text-align: right;
+  font: 500 14px var(--tk-mono);
+  color: var(--tk-txt3);
+}
+
+.tk-move-score--top {
+  font-weight: 700;
+  color: var(--tk-succ);
+}

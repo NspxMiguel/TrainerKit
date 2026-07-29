@@ -31,6 +31,8 @@ interface Props {
   species: DatasetSpecies;
   data: Dataset;
   onClose: () => void;
+  /** Abrir outra especie a partir daqui — a linha de evolucao usa isto. */
+  onPickSpecies?: (s: DatasetSpecies) => void;
 }
 
 const PERFECT = { atk: 15, def: 15, hp: 15 };
@@ -76,7 +78,7 @@ function StatBar({ label, value }: { label: string; value: number }) {
   );
 }
 
-export function SpeciesDetail({ species, data, onClose }: Props) {
+export function SpeciesDetail({ species, data, onClose, onPickSpecies }: Props) {
   const [calcOpen, setCalcOpen] = useState(false);
   const [raidOpen, setRaidOpen] = useState(false);
   const [context, setContext] = useState<Context>("general");
@@ -179,17 +181,39 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
 
   // Ranquear 4.096 combinacoes nao e barato; sem memo isso rodaria de novo a
   // cada clique no seletor de moveset, que nao tem nada a ver com a liga.
+  /**
+   * Quais ligas valem um botao.
+   *
+   * Uma liga so muda a resposta se o teto de PC dela REALMENTE limitar a
+   * especie. Um Azumarill nao chega aos 2.500 da Ultra: ali, na Master e em
+   * qualquer teto acima, todo IV sobe ao nivel maximo e o melhor vira 15/15/15
+   * — a mesma tabela tres vezes.
+   *
+   * Tres botoes que dao o mesmo resultado nao sao escolha, sao ruido. Entao a
+   * tela mostra so as ligas em que o teto morde, e junta o resto numa unica
+   * entrada honesta: "sem teto que limite".
+   */
+  const leagues = useMemo(() => {
+    const cap = data.version.levelCap;
+    const limita = (l: League) =>
+      l.cpCap !== null &&
+      (topSpreads(data.cpm, species.baseStats, l, 1)[0]?.level ?? 0) < cap;
+
+    const comTeto = LEAGUES.filter(limita);
+    // A Master (e qualquer liga que nao limite) colapsam numa so: o resultado
+    // e identico, entao mostrar as duas seria mentir sobre haver escolha.
+    return [...comTeto, MASTER_LEAGUE];
+  }, [data.cpm, data.version.levelCap, species.baseStats]);
+
+  // Se a liga selecionada sumiu ao trocar de especie, cai na primeira.
+  const activeLeague = leagues.some((l) => l.id === league.id) ? league : leagues[0]!;
+
   // Ranquear 4.096 combinacoes nao e barato; sem memo isso rodaria de novo a
   // cada clique no seletor de moveset, que nao tem nada a ver com a liga.
   const spreads = useMemo(
-    () => topSpreads(data.cpm, species.baseStats, league, TOP_SPREADS),
-    [data.cpm, species.baseStats, league],
+    () => topSpreads(data.cpm, species.baseStats, activeLeague, TOP_SPREADS),
+    [data.cpm, species.baseStats, activeLeague],
   );
-
-  // A especie nem encosta no teto da liga: todo mundo sobe ate o nivel maximo e
-  // o teto de PC nao restringe nada. Muda o que ha para explicar embaixo.
-  const semTeto =
-    league.cpCap !== null && (spreads[0]?.level ?? 0) >= data.version.levelCap;
 
   const evolutions = species.evolvesInto
     .map((id) => data.species.find((s) => s.id === id))
@@ -251,7 +275,9 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
       </button>
 
       {/* A outra pergunta que se faz olhando uma especie: "consigo derrubar
-          esse numa raide?". A resposta sai da colecao, nao de uma lista fixa. */}
+          esse numa raide?". A resposta sai da COLECAO — entao no modo consulta,
+          onde colecao nao existe, o botao prometia uma resposta que nunca viria. */}
+      {setup.mode === "colecao" && (
       <button
         type="button"
         className="tk-quick"
@@ -269,6 +295,7 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
           ›
         </span>
       </button>
+      )}
 
       {setup.assistant && (
         <AssistantCard
@@ -354,56 +381,51 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
         {movesets.length === 0 ? (
           <p className="tk-body">{t("species.noMoves")}</p>
         ) : (
-          movesets.slice(0, 5).map((m, i) => (
-            <div
-              className="tk-row"
-              key={`${m.fast.id}/${m.charged.id}/${m.bait?.id ?? ""}`}
-            >
-              <span
-                className="tk-row-label"
-                style={i === 0 ? { fontWeight: 700 } : undefined}
-              >
-                {[m.fast, m.charged].map((mv, k) => {
-                  const l = moveLabel(mv.name, data.moveNames, mv.id, language);
-                  return (
-                    <span key={mv.id}>
-                      {k > 0 && " + "}
-                      {l.primary}
-                      {l.secondary && (
-                        <span className="tk-caption"> ({l.secondary})</span>
-                      )}
+          movesets.slice(0, 5).map((m, i) => {
+            const f = moveLabel(m.fast.name, data.moveNames, m.fast.id, language);
+            const c = moveLabel(m.charged.name, data.moveNames, m.charged.id, language);
+            const traducao = [f.secondary, c.secondary].filter(Boolean).join(" · ");
+            const extras = [
+              m.bait
+                ? t("species.bait", {
+                    move: moveLabel(m.bait.name, data.moveNames, m.bait.id, language).primary,
+                  })
+                : null,
+              m.isFrustration ? t("species.stuckOnFrustration") : null,
+              m.needsElite ? t("species.needsElite") : null,
+            ].filter(Boolean);
+
+            return (
+              /*
+               * Duas linhas fixas em vez de um paragrafo que se enrola.
+               *
+               * Antes o nome ingles, a traducao entre parenteses e o "+" viviam
+               * na mesma linha, e "Vine Whip (Chicote de Vinha) + Power Whip
+               * (Chicote Poderoso)" quebrava em tres — com a nota flutuando no
+               * meio. Separando nome de traducao, os cinco movesets viram cinco
+               * linhas do mesmo tamanho, e a coluna da nota alinha.
+               */
+              <div className="tk-move" key={`${m.fast.id}/${m.charged.id}/${m.bait?.id ?? ""}`}>
+                <span className="tk-move-main">
+                  <span className={`tk-move-name${i === 0 ? " tk-move-name--top" : ""}`}>
+                    {f.primary} + {c.primary}
+                  </span>
+                  {traducao && <span className="tk-move-sub">{traducao}</span>}
+                  {extras.length > 0 && (
+                    <span
+                      className="tk-move-sub"
+                      style={m.isFrustration ? { color: "var(--tk-dang)" } : undefined}
+                    >
+                      {extras.join(" · ")}
                     </span>
-                  );
-                })}
-                {/* A isca e conselho, nao enfeite: e o segundo carregado, que
-                    custa doce e poeira. Dizer qual e faz parte da resposta. */}
-                {m.bait && (
-                  <span className="tk-caption" style={{ display: "block" }}>
-                    {t("species.bait", { move: moveLabel(m.bait.name, data.moveNames, m.bait.id, language).primary })}
-                  </span>
-                )}
-                {m.isFrustration && (
-                  <span
-                    className="tk-caption"
-                    style={{ display: "block", color: "var(--tk-dang)" }}
-                  >
-                    {t("species.stuckOnFrustration")}
-                  </span>
-                )}
-                {m.needsElite && (
-                  <span className="tk-caption" style={{ display: "block" }}>
-                    {t("species.needsElite")}
-                  </span>
-                )}
-              </span>
-              <span
-                className="tk-row-value"
-                style={i === 0 ? { color: "var(--tk-succ)", fontWeight: 700 } : undefined}
-              >
-                {Math.round(m.score * 100)}
-              </span>
-            </div>
-          ))
+                  )}
+                </span>
+                <span className={`tk-move-score${i === 0 ? " tk-move-score--top" : ""}`}>
+                  {Math.round(m.score * 100)}
+                </span>
+              </div>
+            );
+          })
         )}
       </section>
 
@@ -411,27 +433,48 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
           A tela do jogo mostra porcentagem, e porcentagem e a metrica errada
           aqui: em liga com teto o 100% quase sempre perde. */}
       <div className="tk-overline" style={{ display: "block", marginTop: 24 }}>
-        {t("spread.title")}
+        {leagues.length > 1 ? t("spread.title") : t("spread.titleSimple")}
       </div>
 
-      <div style={{ display: "flex", gap: 6, margin: "10px 0" }}>
-        {LEAGUES.map((l) => (
-          <button
-            key={l.id}
-            type="button"
-            className={`tk-btn ${league.id === l.id ? "tk-btn--primary" : "tk-btn--secondary"}`}
-            style={{ flex: 1, height: 40, fontSize: 12, padding: 0 }}
-            aria-pressed={league.id === l.id}
-            onClick={() => setLeague(l)}
-          >
-            {l.name.replace(" League", "")}
-          </button>
-        ))}
-      </div>
+      {/* Um botao so quando so ha uma resposta: nao ha o que escolher. */}
+      {leagues.length > 1 && (
+        <div style={{ display: "flex", gap: 6, margin: "10px 0" }}>
+          {leagues.map((l) => (
+            <button
+              key={l.id}
+              type="button"
+              className={`tk-btn ${activeLeague.id === l.id ? "tk-btn--primary" : "tk-btn--secondary"}`}
+              style={{ flex: 1, height: 40, fontSize: 12, padding: 0 }}
+              aria-pressed={activeLeague.id === l.id}
+              onClick={() => setLeague(l)}
+            >
+              {l.id === "master" ? t("spread.noLimit") : l.name.replace(" League", "")}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Grade propria em vez de `tk-row`: sao dez linhas de numeros curtos, e
           o espacamento de linha de formulario deixava a tabela com mais de mil
           pixels de altura, com o IV quebrando em duas linhas. */}
+      {/*
+        Sem teto que limite, a tabela e ruido.
+        Dez linhas de 15/15/15, 14/15/15, 15/14/15… nao sao dez respostas: sao a
+        mesma resposta escrita dez vezes. Quem chega aqui quer saber que IV
+        procurar, e quando o teto nao morde a resposta e "o mais alto possivel".
+        Mostrar a tabela mesmo assim seria encher tela pra parecer que o app
+        trabalhou.
+      */}
+      {leagues.length === 1 ? (
+        <section className="tk-card">
+          <p className="tk-body" style={{ color: "var(--tk-txt)", margin: 0 }}>
+            {t("spread.neverCapped", {
+              name: species.name,
+              maxCp: cpAt(data.version.levelCap).toLocaleString(language),
+            })}
+          </p>
+        </section>
+      ) : (
       <section className="tk-card">
         <div className="tk-spread-head">
           <span>{t("spread.rank")}</span>
@@ -456,22 +499,13 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
           </div>
         ))}
 
-        {/* A explicacao segue a TABELA, nao a liga: Azumarill na Ultra nem
-            chega ao teto, entao o topo dele E 15/15/15 — e o texto padrao
-            ficava dizendo o contrario logo acima da tabela. */}
         <p className="tk-caption" style={{ marginTop: 12, lineHeight: 1.5 }}>
-          {league.cpCap === null
+          {activeLeague.cpCap === null
             ? t("spread.noCap")
-            : semTeto
-              ? t("spread.cantReach", {
-                  name: species.name,
-                  cap: league.cpCap.toLocaleString(language),
-                  level: data.version.levelCap,
-                  maxCp: cpAt(data.version.levelCap).toLocaleString(language),
-                })
-              : t("spread.capped", { cap: league.cpCap.toLocaleString(language) })}
+            : t("spread.capped", { cap: activeLeague.cpCap.toLocaleString(language) })}
         </p>
       </section>
+      )}
 
       {evolutions.length > 0 && (
         <>
@@ -479,8 +513,15 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
             {t("species.evolvesInto")}
           </div>
           <section className="tk-card" style={{ marginTop: 10, display: "grid", gap: 12 }}>
+            {/* Clicavel. Um usuario que ve "Evolui para Venusaur" com o sprite
+                do lado vai tentar tocar — e ate agora nao acontecia nada. */}
             {evolutions.map((e) => (
-              <div key={e.id} style={{ display: "flex", gap: 12, alignItems: "center" }}>
+              <button
+                type="button"
+                key={e.id}
+                className="tk-evo"
+                onClick={() => onPickSpecies?.(e)}
+              >
                 <SpeciesTile
                   spriteId={e.spriteId}
                   dex={e.dex}
@@ -495,7 +536,10 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
                     {t("species.candy", { count: species.candyToEvolve[e.id]! })}
                   </span>
                 )}
-              </div>
+                <span className="tk-quick-go" aria-hidden="true">
+                  ›
+                </span>
+              </button>
             ))}
           </section>
         </>
