@@ -114,3 +114,14 @@ export function IconCamera(props: IconProps) {
     </Svg>
   );
 }
+
+export function IconSwords(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M14.5 15.5 20 21" />
+      <path d="M4 3h3l10.5 10.5-3.5 3.5L3 6.5V3Z" />
+      <path d="M9.5 15.5 4 21" />
+      <path d="M20 3h-3L6.5 13.5l3.5 3.5L21 6.5V3Z" />
+    </Svg>
+  );
+}

@@ -22,8 +22,10 @@ import { useT, type Key } from "../i18n/t.ts";
 import { useSetup } from "../onboarding/setup.ts";
 import { typeColor, typeName } from "../sprites/provider.ts";
 import { AssistantCard } from "../ui/AssistantCard.tsx";
+import { IconSwords } from "../ui/Icons.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 import { IVCalculator } from "./IVCalculator.tsx";
+import { RaidCounters } from "./RaidCounters.tsx";
 
 interface Props {
   species: DatasetSpecies;
@@ -76,6 +78,7 @@ function StatBar({ label, value }: { label: string; value: number }) {
 
 export function SpeciesDetail({ species, data, onClose }: Props) {
   const [calcOpen, setCalcOpen] = useState(false);
+  const [raidOpen, setRaidOpen] = useState(false);
   const [context, setContext] = useState<Context>("general");
   const [shadow, setShadow] = useState(false);
   const [league, setLeague] = useState<League>(GREAT_LEAGUE);
@@ -242,10 +245,29 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
       <button
         type="button"
         className="tk-btn tk-btn--primary tk-btn--block"
-        style={{ marginBottom: 22 }}
         onClick={() => setCalcOpen(true)}
       >
         {t("species.calcIV")}
+      </button>
+
+      {/* A outra pergunta que se faz olhando uma especie: "consigo derrubar
+          esse numa raide?". A resposta sai da colecao, nao de uma lista fixa. */}
+      <button
+        type="button"
+        className="tk-quick"
+        style={{ marginTop: 10, marginBottom: 22 }}
+        onClick={() => setRaidOpen(true)}
+      >
+        <span className="tk-quick-mark" aria-hidden="true">
+          <IconSwords size={22} />
+        </span>
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span className="tk-quick-title">{t("raid.open")}</span>
+          <span className="tk-quick-detail">{t("raid.openDetail")}</span>
+        </span>
+        <span className="tk-quick-go" aria-hidden="true">
+          ›
+        </span>
       </button>
 
       {setup.assistant && (
@@ -481,6 +503,9 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
 
       {calcOpen && (
         <IVCalculator species={species} data={data} onClose={() => setCalcOpen(false)} />
+      )}
+      {raidOpen && (
+        <RaidCounters boss={species} data={data} onClose={() => setRaidOpen(false)} />
       )}
     </div>,
     document.body,
