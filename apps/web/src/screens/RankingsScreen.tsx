@@ -50,13 +50,17 @@ export function RankingsScreen({ data, onPick }: Props) {
 
   return (
     <>
-      <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+      {/* Raide/PvP e subordinado a Buscar/Melhores, entao nao pode ter o
+          mesmo peso: tres fileiras de botoes identicos empilhadas viram uma
+          parede em que nada parece mais importante que nada. Chip menor
+          resolve sem esconder a escolha. */}
+      <div className="tk-chips" style={{ marginBottom: 10 }}>
         {(["raid", "pvp"] as const).map((m) => (
           <button
             key={m}
             type="button"
-            className={`tk-btn ${mode === m ? "tk-btn--primary" : "tk-btn--secondary"}`}
-            style={{ flex: 1, height: 40, fontSize: 13, padding: 0 }}
+            className="tk-chip"
+            data-on={mode === m || undefined}
             aria-pressed={mode === m}
             onClick={() => setMode(m)}
           >
@@ -69,7 +73,7 @@ export function RankingsScreen({ data, onPick }: Props) {
         <div className="tk-chips">
           <button
             type="button"
-            className="tk-chip"
+            className="tk-chip tk-chip--dim"
             data-on={type === null || undefined}
             onClick={() => setType(null)}
           >
@@ -79,7 +83,7 @@ export function RankingsScreen({ data, onPick }: Props) {
             <button
               key={tp}
               type="button"
-              className="tk-chip"
+              className="tk-chip tk-chip--dim"
               data-on={type === tp || undefined}
               onClick={() => setType(tp)}
             >

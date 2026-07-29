@@ -38,11 +38,18 @@ function applyTheme(theme: Theme): void {
   else el.setAttribute("data-tk", theme === "claro" ? "light" : "dark");
 }
 
+/**
+ * Tamanho legivel.
+ *
+ * Uma casa decimal so quando ela diz algo: "796,0 MB" finge uma precisao que
+ * ninguem pediu e ainda ocupa dois caracteres a toa numa linha ja apertada.
+ */
 function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`;
-  if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`;
-  if (n < 1024 * 1024 * 1024) return `${(n / 1048576).toFixed(1)} MB`;
-  return `${(n / 1073741824).toFixed(1)} GB`;
+  if (n < 1024 * 1024) return `${Math.round(n / 1024)} KB`;
+  if (n < 1024 * 1024 * 1024) return `${Math.round(n / 1048576)} MB`;
+  const gb = n / 1073741824;
+  return `${gb >= 10 ? Math.round(gb) : gb.toFixed(1)} GB`;
 }
 
 export function SettingsScreen({ datasetLabel, persist }: Props) {
