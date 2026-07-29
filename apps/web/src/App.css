@@ -157,21 +157,32 @@
 /* ------------------------------------------------- barra de abas do iOS 26 */
 
 /*
- * Liquid Glass.
+ * Liquid Glass, como a Apple descreve.
  *
- * No iOS 26 a barra de abas do sistema deixou de ser uma faixa presa na borda e
- * virou uma capsula FLUTUANTE de vidro: o conteudo por tras aparece desfocado e
- * mais saturado, a borda de cima tem um brilho especular e a peca projeta
- * sombra sobre a tela. Um app web que mantem a barra retangular colada embaixo
- * denuncia na hora que nao e nativo.
+ * A definicao deles tem tres verbos, e faltavam dois aqui:
+ *
+ *   "Liquid Glass is a material that BLURS content behind it, REFLECTS color
+ *    and light of surrounding content, and REACTS TO TOUCH and pointer
+ *    interactions in real time."
+ *
+ * Desfocar eu ja fazia. Refletir e reagir, nao.
+ *
+ * Refletir: o vidro nao tem cor propria — *"By default, Liquid Glass has no
+ * inherent color, and instead takes on colors from the content directly behind
+ * it."* Antes o fundo era um cinza-azulado com 52% de opacidade, ou seja, uma
+ * tinta cobrindo a cena. Agora sao 28% quase neutros, e quem constroi a
+ * aparencia e o `backdrop-filter`: desfoque pra espalhar, saturacao pra puxar a
+ * cor de tras, brilho pra o material nao morrer sobre preto.
+ *
+ * O que da ESPESSURA sao tres luzes, nao uma:
+ *   - `::before` — o brilho especular no topo, onde a luz bate primeiro
+ *   - `inset 0 1px` — o fio de luz na quina de cima
+ *   - `inset 0 -1px` — o reflexo fraco na base, que fecha a peca
+ *
+ * Reagir ao toque esta em `.tk-tab:active` mais abaixo.
  *
  * So no iOS de proposito. No Android o padrao e o oposto — a barra do Material
- * e assente e opaca —, e copiar o vidro da Apple la pareceria igualmente
- * estrangeiro.
- *
- * O efeito e tres camadas: `backdrop-filter` faz a refracao, o `::before`
- * desenha o realce de cima, e a `box-shadow` interna fecha a borda inferior.
- * Nao da pra fazer com uma propriedade so.
+ * e assente e opaca —, e copiar o vidro da Apple la pareceria estrangeiro.
  */
 [data-platform="ios"] .tk-tabbar {
   left: 50%;
@@ -179,77 +190,113 @@
   bottom: calc(env(safe-area-inset-bottom) + 12px);
   width: calc(100% - 2 * var(--tk-gutter));
   max-width: calc(var(--tk-container) - 2 * var(--tk-gutter));
-  border-radius: 26px;
+
+  /*
+   * Capsula, nao retangulo arredondado.
+   *
+   * *"By default, the modifier uses the regular variant of Glass and applies
+   * the given effect within a Capsule shape."* Um valor gigante vira capsula
+   * exata em qualquer altura, entao a barra continua certa recolhida ou nao —
+   * um raio fixo de 26px ficava quadrado demais aberta e redondo demais
+   * encolhida.
+   */
+  border-radius: 999px;
   border-top: none;
   overflow: hidden;
   padding-bottom: 0;
 
-  /* Mais saturacao que desfoque: e o que faz a cor de tras "vazar" pelo vidro
-     em vez de virar um cinza leitoso. */
   background: var(--tk-glass-ios);
-  backdrop-filter: blur(28px) saturate(2.2);
-  -webkit-backdrop-filter: blur(28px) saturate(2.2);
+  backdrop-filter: blur(24px) saturate(1.9) brightness(1.08);
+  -webkit-backdrop-filter: blur(24px) saturate(1.9) brightness(1.08);
   border: 1px solid var(--tk-glass-edge);
   box-shadow:
-    0 10px 34px rgba(0, 0, 0, 0.42),
-    0 2px 8px rgba(0, 0, 0, 0.24),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.06);
+    0 12px 32px rgba(0, 0, 0, 0.34),
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 var(--tk-glass-sheen),
+    inset 0 -1px 0 var(--tk-glass-rim);
 }
 
-/* O realce especular: uma faixa clara na borda de cima, que e o que faz o vidro
-   parecer ter espessura em vez de ser um retangulo translucido. */
+/* O realce especular. Vai so ate a metade porque luz de cima nao ilumina a
+   peca inteira — se descer ate embaixo vira um degrade decorativo. */
 [data-platform="ios"] .tk-tabbar::before {
   content: "";
   position: absolute;
   inset: 0 0 auto;
-  height: 50%;
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.16),
-    rgba(255, 255, 255, 0)
-  );
+  height: 52%;
+  background: linear-gradient(to bottom, var(--tk-glass-sheen), transparent);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/*
+ * A pilula que DESLIZA entre as abas.
+ *
+ * Antes ela sumia de uma aba e nascia na outra com um `scale`. A Apple chama o
+ * comportamento certo de morph: *"Morphing effects occur during transitions or
+ * animations between views with Liquid Glass effects"*, e em SwiftUI o padrao
+ * e `matchedGeometry` — a MESMA forma indo de um lugar ao outro.
+ *
+ * Um elemento so, movido por `transform`, e o equivalente honesto disso em CSS:
+ * a forma nunca desaparece, ela viaja. E `transform` anima na GPU, sem tocar em
+ * layout.
+ *
+ * O raio e concentrico com o da barra, como a Apple pede: a capsula de fora tem
+ * ~30px de raio e a pilula esta 4px pra dentro, entao 26px mantem as duas
+ * curvas paralelas. Os 18px antigos deixavam a pilula mais "quadrada" que a
+ * moldura, e o olho pega isso mesmo sem saber nomear.
+ */
+.tk-tab-pill {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 8px;
+  width: calc(100% / var(--tk-tabs) - 16px);
+  border-radius: 26px;
+  background: var(--tk-glass-active);
+  transform: translateX(calc(var(--tk-tab-i) * (100% + 16px)));
+  transition: transform 0.42s var(--tk-ease-glass);
   pointer-events: none;
 }
 
 [data-platform="ios"] .tk-tab {
   padding: 9px 0 10px;
   position: relative;
-  /* O vidro reage ao toque. A Apple: *"controls come to life when a person
-     interacts with them"*. Um alvo de vidro que nao afunda parece decalque. */
-  transition:
-    color 0.12s var(--tk-ease),
-    transform 0.1s var(--tk-ease);
 }
 
-[data-platform="ios"] .tk-tab:active {
-  transform: scale(0.92);
-}
-
-/* A aba ativa ganha a propria pilula, como no sistema. */
-[data-platform="ios"] .tk-tab[aria-current="page"]::before {
-  content: "";
-  position: absolute;
-  inset: 4px 8px;
-  border-radius: 18px;
-  background: var(--tk-glass-active);
-  animation: tk-pill 0.28s var(--tk-ease) both;
-}
-
-/* A pilula NASCE em volta do icone e se abre, em vez de aparecer pronta.
-   E o "fluidly morph" da Apple traduzido pro que da pra fazer em CSS. */
-@keyframes tk-pill {
-  from {
-    opacity: 0;
-    transform: scale(0.72);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-[data-platform="ios"] .tk-tab > * {
+/*
+ * Reagir ao toque, em tempo real.
+ *
+ * *"Add interactive() to custom components to make them react to touch and
+ * pointer interactions."* Duas coisas ao mesmo tempo: a aba AFUNDA e o vidro
+ * ACENDE. So encolher e feedback de botao comum; o brilho e o que faz parecer
+ * material, porque vidro de verdade devolve mais luz quando pressionado.
+ *
+ * 90ms na ida e 260ms na volta: aperto e instantaneo, soltura relaxa. Tempos
+ * iguais nos dois sentidos dao aquela borracha de template.
+ */
+.tk-tab > * {
   position: relative;
+  transition: transform 0.26s var(--tk-ease-glass);
+}
+
+.tk-tab:active > * {
+  transform: scale(0.88);
+  transition-duration: 0.09s;
+}
+
+/*
+ * A pilula acende quando a aba dela e apertada.
+ *
+ * `~` e `+` nao servem: a pilula e o PRIMEIRO filho da barra, e combinador de
+ * irmao so enxerga pra frente. Escrito com eles, este seletor nunca casava com
+ * nada — parecia funcionar porque nao dava erro.
+ *
+ * `:has()` olha de fora pra dentro e resolve. Restrito a aba ATIVA porque e a
+ * unica que esta de fato sob a pilula; acender ao apertar outra seria acender
+ * uma peca que o dedo nao encostou.
+ */
+.tk-tabbar:has(.tk-tab[aria-current="page"]:active) .tk-tab-pill {
+  background: var(--tk-glass-press);
 }
 
 /*
@@ -262,24 +309,24 @@
  *
  * O que encolhe e a ALTURA e o rotulo — os icones ficam. Sumir com a navegacao
  * inteira economizaria mais espaco e custaria orientacao.
- *
- * `max-height` em vez de `display:none` porque so o primeiro anima. E a
- * transicao e no proprio elemento (nao numa animation) pra que ir e voltar seja
- * simetrico: quem sobe a tela ve a barra crescer de volta pelo mesmo caminho.
  */
 [data-platform="ios"] .tk-tabbar {
   transition:
-    transform 0.3s var(--tk-ease),
-    box-shadow 0.3s var(--tk-ease);
+    transform 0.34s var(--tk-ease-glass),
+    box-shadow 0.34s var(--tk-ease-glass);
 }
 
 [data-platform="ios"] .tk-tabbar .tk-tab-label {
   max-height: 16px;
   overflow: hidden;
+  /* `transform` precisa continuar na lista: esta regra sobrescreve a transicao
+     de `.tk-tab > *`, e sem ele o rotulo saltava no toque enquanto o icone
+     acompanhava — a mesma aba respondendo de dois jeitos. */
   transition:
-    max-height 0.26s var(--tk-ease),
+    transform 0.26s var(--tk-ease-glass),
+    max-height 0.3s var(--tk-ease-glass),
     opacity 0.18s var(--tk-ease),
-    margin-top 0.26s var(--tk-ease);
+    margin-top 0.3s var(--tk-ease-glass);
 }
 
 [data-platform="ios"] .tk-tabbar[data-min] .tk-tab-label {
@@ -289,32 +336,72 @@
 }
 
 [data-platform="ios"] .tk-tabbar[data-min] {
-  /* Desce um pouco junto: a barra nao so encolhe, ela se afasta. */
+  /* Recolhida ela nao so encolhe: se afasta e projeta sombra menor, como uma
+     peca que recuou no eixo Z. */
   transform: translateX(-50%) translateY(6px);
   box-shadow:
-    0 6px 20px rgba(0, 0, 0, 0.34),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.06);
+    0 6px 18px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 var(--tk-glass-sheen),
+    inset 0 -1px 0 var(--tk-glass-rim);
 }
 
-[data-platform="ios"] .tk-tabbar[data-min] .tk-tab {
-  padding: 8px 0;
+/*
+ * Efeito de borda de rolagem.
+ *
+ * *"Scroll views offer a scroll edge effect that helps maintain sufficient
+ * legibility and contrast for controls by obscuring content that scrolls
+ * beneath them."*
+ *
+ * Sem isto, um texto passando por tras do vidro competia com o rotulo da aba:
+ * duas camadas de letra sobrepostas, ambas legiveis, nenhuma clara. O degrade
+ * apaga o conteudo pouco antes de ele chegar na barra.
+ *
+ * Fica ABAIXO da barra na pilha (z 8 contra 10) e nao captura toque.
+ */
+.tk-scroll-edge {
+  position: fixed;
+  bottom: 0;
+  /*
+   * Largura da TELA, nao da coluna do app.
+   *
+   * Limitado a `--tk-container` ele pintava um retangulo de 448px sobre o
+   * gradiente de fundo, e num monitor largo dava pra ver a emenda vertical dos
+   * dois lados. O conteudo so existe dentro da coluna, mas o degrade nao custa
+   * nada fora dela e assim nao ha borda pra aparecer.
+   */
+  left: 0;
+  right: 0;
+  height: calc(84px + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, var(--tk-bg) 42%, transparent);
+  pointer-events: none;
+  z-index: 8;
+}
+
+[data-platform="ios"] .tk-scroll-edge {
+  height: calc(96px + env(safe-area-inset-bottom));
 }
 
 /*
  * Sem transparencia, sem vidro.
  *
  * Quem liga "Reduzir transparencia" nos ajustes de acessibilidade nao esta
- * pedindo um vidro mais fraco — esta pedindo fundo solido. `backdrop-filter`
- * aqui e decoracao, e decoracao cede.
+ * pedindo um vidro mais fraco — esta pedindo fundo solido. A propria Apple
+ * avisa: *"people can turn on accessibility settings that reduce transparency
+ * or motion in the interface. These settings can remove or modify certain
+ * effects."* Aqui o vidro e decoracao, e decoracao cede.
  */
 @media (prefers-reduced-transparency: reduce) {
   [data-platform="ios"] .tk-tabbar {
-    background: var(--tk-surf);
+    background: var(--tk-elev);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
 
   [data-platform="ios"] .tk-tabbar::before {
+    display: none;
+  }
+
+  .tk-scroll-edge {
     display: none;
   }
 }
@@ -2067,4 +2154,111 @@
   height: 36px;
   font-size: 13px;
   padding: 0 14px;
+}
+
+/* ------------------------------------------------------------- movimento */
+
+/*
+ * As regras, e de onde elas vem.
+ *
+ * A Apple e direta sobre o que NAO fazer: *"Add motion purposefully,
+ * supporting the experience without overshadowing it. Don't add motion for the
+ * sake of adding motion. Gratuitous or excessive animation can distract
+ * people."* E ainda: *"In apps, generally avoid adding motion to UI
+ * interactions that occur frequently."*
+ *
+ * Entao aqui so ha movimento onde ele RESPONDE a alguma coisa:
+ *
+ *   1. Toque — o controle afunda. E a unica que acontece o tempo todo, e por
+ *      isso e a mais curta de todas.
+ *   2. Troca de tela — um fade curtissimo, so pra dizer "trocou". Sem deslize:
+ *      abas sao irmas, nao ha "pra dentro" nem "pra fora" entre elas.
+ *   3. Resultado chegando — a barra de confianca cresce, porque o numero
+ *      acabou de ser calculado.
+ *   4. Folha subindo — vem de baixo, que e de onde o dedo a puxaria.
+ *
+ * O que NAO existe de proposito: nada aparecendo ao rolar, nada em cascata
+ * fora do setup, nenhum quique. Sao os quatro tiques que fazem uma interface
+ * parecer gerada — muito movimento, nenhum motivo.
+ */
+
+/*
+ * Toque.
+ *
+ * Superficie grande afunda pouco, alvo pequeno afunda muito: o deslocamento
+ * tem que ser proporcional ao tamanho pra parecer a mesma pressao. Uma pilula
+ * de 32px encolhendo 1,5% nao se ve; um cartao de 340px encolhendo 7% parece
+ * que quebrou.
+ */
+.tk-chip,
+.tk-option,
+.tk-fab,
+.tk-sheet-close,
+.tk-strip {
+  transition:
+    transform 0.22s var(--tk-ease-glass),
+    background-color 0.12s var(--tk-ease);
+}
+
+.tk-chip:active,
+.tk-sheet-close:active {
+  transform: scale(0.9);
+  transition-duration: 0.08s;
+}
+
+.tk-fab:active {
+  transform: scale(0.92);
+  transition-duration: 0.08s;
+}
+
+.tk-option:active,
+.tk-strip:active {
+  transform: scale(0.985);
+  transition-duration: 0.08s;
+}
+
+/*
+ * Troca de aba.
+ *
+ * 140ms e so opacidade. O `key={tab}` do App remonta o conteudo, entao isto
+ * dispara uma vez por troca — e nunca durante o uso da tela.
+ *
+ * Sem deslize horizontal de proposito. Deslizar diz "voce foi PRA FRENTE", e
+ * entre abas irmas isso e mentira: nao ha ordem, nao ha volta. O setup desliza
+ * porque la existe uma sequencia de verdade.
+ */
+.tk-main {
+  animation: tk-fade 0.14s var(--tk-ease) both;
+}
+
+/*
+ * Resultado chegando.
+ *
+ * A barra de confianca ja nascia cheia. Crescendo, ela diz que aquele numero
+ * acabou de sair de uma conta — que e literalmente o que aconteceu. Cresce por
+ * `scaleX`, nao por `width`: `width` recalcula layout a cada quadro, `scaleX`
+ * roda na GPU.
+ */
+.tk-meter {
+  flex: 1;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--tk-surf2);
+  overflow: hidden;
+}
+
+.tk-meter-fill {
+  height: 100%;
+  border-radius: 3px;
+  transform-origin: left center;
+  animation: tk-meter 0.55s var(--tk-ease-glass) both;
+}
+
+@keyframes tk-meter {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }

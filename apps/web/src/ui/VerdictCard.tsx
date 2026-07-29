@@ -103,21 +103,12 @@ export function VerdictCard(props: VerdictInput) {
       )}
 
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 14 }}>
-        <div
-          style={{
-            flex: 1,
-            height: 5,
-            borderRadius: 3,
-            background: "var(--tk-surf2)",
-            overflow: "hidden",
-          }}
-        >
+        {/* A barra CRESCE ao aparecer. Nao e enfeite: ela esta dizendo que
+            aquele numero acabou de sair de uma conta. Ver `.tk-meter` no CSS. */}
+        <div className="tk-meter">
           <div
-            style={{
-              width: `${Math.round(verdict.confidence * 100)}%`,
-              height: "100%",
-              background: color,
-            }}
+            className="tk-meter-fill"
+            style={{ width: `${Math.round(verdict.confidence * 100)}%`, background: color }}
           />
         </div>
         <span className="tk-caption">

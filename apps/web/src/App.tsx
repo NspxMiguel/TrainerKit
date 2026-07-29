@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 
 import { datasetLabel, useDataset } from "./data/useDataset.ts";
 import { Onboarding } from "./onboarding/Onboarding.tsx";
@@ -62,6 +62,9 @@ export function App() {
 
   const species = dataset.status === "ready" ? dataset.data.species : [];
 
+  const visibleTabs = TABS.filter((x) => setup.mode === "colecao" || x.id !== "colecao");
+  const activeIndex = visibleTabs.findIndex((x) => x.id === tab);
+
   return (
     <div className="tk-app">
       <div className="tk-shell">
@@ -87,15 +90,29 @@ export function App() {
 
         <SpriteDownloadStrip />
 
+        {/* Apaga o conteudo pouco antes de ele passar por tras do vidro — o
+            "scroll edge effect" que a Apple usa nas barras do sistema. */}
+        <div className="tk-scroll-edge" aria-hidden="true" />
+
         <nav
           className="tk-tabbar"
           data-min={minimized || undefined}
           aria-label={t("nav.aria")}
-          // No modo consulta a aba Colecao nao aparece: ela so faria sentido
-          // pra quem escolheu cadastrar, e uma aba vazia permanente e ruido.
-          style={setup.mode === "consulta" ? { gridTemplateColumns: "repeat(3, 1fr)" } : undefined}
+          style={{
+            // No modo consulta a aba Colecao nao aparece: ela so faria sentido
+            // pra quem escolheu cadastrar, e uma aba vazia permanente e ruido.
+            gridTemplateColumns: `repeat(${visibleTabs.length}, 1fr)`,
+            // A pilula precisa saber quantas colunas existem e em qual esta,
+            // pra se mover por transform em vez de renascer no lugar novo.
+            "--tk-tabs": visibleTabs.length,
+            "--tk-tab-i": Math.max(0, activeIndex),
+          } as CSSProperties}
         >
-          {TABS.filter((tab) => setup.mode === "colecao" || tab.id !== "colecao").map(({ id, labelKey, Icon }) => (
+          {/* Uma forma so, que VIAJA entre as abas. E o `matchedGeometry` do
+              SwiftUI traduzido: a pilula nunca some, ela muda de lugar. */}
+          <span className="tk-tab-pill" aria-hidden="true" />
+
+          {visibleTabs.map(({ id, labelKey, Icon }) => (
             <button
               key={id}
               type="button"
