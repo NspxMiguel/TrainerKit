@@ -163,9 +163,6 @@ export function IVCalculator({ species, data, onClose }: Props) {
         />
       </section>
 
-      <p className="tk-caption" style={{ margin: "10px 2px 0", lineHeight: 1.5 }}>
-        {manual ? t("iv.dragBars") : t("iv.checkStars")}
-      </p>
 
       <div style={{ marginTop: 20 }}>
         <VerdictCard
@@ -311,9 +308,6 @@ export function IVCalculator({ species, data, onClose }: Props) {
             </span>
           </div>
         ))}
-        <p className="tk-caption" style={{ marginTop: 12, lineHeight: 1.5 }}>
-          {t("iv.pvpNote")}
-        </p>
       </section>
         </>
       )}

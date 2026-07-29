@@ -9,6 +9,7 @@ import {
   useShowTranslation,
 } from "../i18n/language.ts";
 import { useT, type Key } from "../i18n/t.ts";
+import { WheelPicker } from "../ui/WheelPicker.tsx";
 import { useInstallState } from "../storage/install.ts";
 import { InstallGuide } from "./InstallGuide.tsx";
 import { SpriteSettings } from "./SpriteSettings.tsx";
@@ -125,23 +126,15 @@ export function SettingsScreen({ datasetLabel, persist }: Props) {
       <div className="tk-overline" style={{ display: "block", marginTop: 28 }}>
         {t("settings.language")}
       </div>
-      <div className="tk-lang-grid">
-        {LANGUAGES.map((l) => (
-          <button
-            key={l.code}
-            type="button"
-            className="tk-lang"
-            data-active={language === l.code || undefined}
-            aria-pressed={language === l.code}
-            onClick={() => setLanguage(l.code)}
-          >
-            <span aria-hidden="true" style={{ fontSize: 18 }}>
-              {l.flag}
-            </span>
-            <span>{l.label}</span>
-          </button>
-        ))}
-      </div>
+      {/* Roda em vez de grade: dez idiomas viravam vinte botoes ocupando
+          meia tela. O idioma ja vem detectado do aparelho — isto aqui e a
+          excecao, nao o caminho principal. */}
+      <WheelPicker
+        ariaLabel={t("settings.language")}
+        value={language}
+        onChange={setLanguage}
+        options={LANGUAGES.map((l) => ({ value: l.code, label: l.label, glyph: l.flag }))}
+      />
       {language !== "en" && (
         <button
           type="button"

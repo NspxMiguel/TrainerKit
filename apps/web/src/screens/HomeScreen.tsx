@@ -186,9 +186,6 @@ export function HomeScreen({ dataset, persist }: Props) {
                   ? t("home.nothingPending.one")
                   : t("home.nothingPending.many", { count: pendencias.total })}
               </div>
-              <p className="tk-caption" style={{ marginTop: 6, lineHeight: 1.5 }}>
-                {t("home.nothingPending.body")}
-              </p>
             </section>
           ) : (
             <section className="tk-card" style={{ display: "grid", gap: 12 }}>

@@ -91,9 +91,6 @@ export function VerdictCard(props: VerdictInput) {
               </div>
             ))}
           </div>
-          <p className="tk-caption" style={{ marginTop: 12, lineHeight: 1.5 }}>
-            {t("verdict.traceNote")}
-          </p>
         </>
       )}
     </section>
