@@ -8,8 +8,11 @@ import { HomeScreen } from "./screens/HomeScreen.tsx";
 import { PokedexScreen } from "./screens/PokedexScreen.tsx";
 import { SettingsScreen } from "./screens/SettingsScreen.tsx";
 import { useT, type Key } from "./i18n/t.ts";
+import { detectPlatform } from "./storage/install.ts";
 import { requestPersistence, type PersistState } from "./storage/persist.ts";
 import { IconGrid, IconHome, IconSearch, IconSliders } from "./ui/Icons.tsx";
+import { SpriteDownloadPanel, SpriteDownloadStrip } from "./ui/SpriteDownload.tsx";
+import { useTabBarMinimize } from "./ui/useTabBarMinimize.ts";
 
 export type Tab = "inicio" | "pokedex" | "colecao" | "ajustes";
 
@@ -37,6 +40,12 @@ export function App() {
     void requestPersistence().then(setPersist);
   }, []);
 
+  // O recolhimento e comportamento do iOS 26. No Android a barra do Material e
+  // assente e nao se mexe — recolher la pareceria bug, nao refinamento.
+  const minimized = useTabBarMinimize(detectPlatform() === "ios");
+
+  const species = dataset.status === "ready" ? dataset.data.species : [];
+
   return (
     <div className="tk-app">
       <div className="tk-shell">
@@ -52,12 +61,16 @@ export function App() {
                 dataset.status === "ready" ? datasetLabel(dataset.data.version) : null
               }
               persist={persist}
+              species={species}
             />
           )}
         </main>
 
+        <SpriteDownloadStrip />
+
         <nav
           className="tk-tabbar"
+          data-min={minimized || undefined}
           aria-label={t("nav.aria")}
           // No modo consulta a aba Colecao nao aparece: ela so faria sentido
           // pra quem escolheu cadastrar, e uma aba vazia permanente e ruido.
@@ -80,6 +93,7 @@ export function App() {
       </div>
 
       {!setup.done && <Onboarding />}
+      <SpriteDownloadPanel />
     </div>
   );
 }

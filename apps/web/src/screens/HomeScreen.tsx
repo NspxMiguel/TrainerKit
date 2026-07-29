@@ -5,7 +5,7 @@ import { ACTION_KEYS, decide, type Action } from "@trainerkit/core";
 import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
 import { datasetLabel } from "../data/useDataset.ts";
 import { useT, type Key } from "../i18n/t.ts";
-import { useSetup } from "../onboarding/setup.ts";
+import { updateSetup, useSetup } from "../onboarding/setup.ts";
 import { useCollection } from "../storage/collection.ts";
 import { useInstallState } from "../storage/install.ts";
 import type { PersistState } from "../storage/persist.ts";
@@ -334,14 +334,38 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
               <span className="tk-tile-t">{t("home.go.search")}</span>
               <span className="tk-tile-d">{t("home.go.searchDetail")}</span>
             </button>
+            {/*
+              No modo consulta este atalho era mentira.
+
+              Ele dizia "Coleção · Tudo que você salvou" pra quem escolheu NAO
+              salvar nada, e levava pra Pokedex — outra tela, com outro nome.
+              Prometer uma coisa e entregar outra e o tipo de detalhe que faz o
+              app parecer mal encaixado.
+
+              Agora ele oferece o que de fato falta: LIGAR a coleção. Era a
+              única forma de mudar de ideia sem ir cavar nos Ajustes.
+            */}
             <button
               type="button"
               className="tk-tile tk-tile--coll"
-              onClick={() => onGo(setup.mode === "colecao" ? "colecao" : "pokedex")}
+              onClick={() => {
+                if (setup.mode === "colecao") {
+                  onGo("colecao");
+                  return;
+                }
+                updateSetup({ mode: "colecao" });
+                onGo("colecao");
+              }}
             >
               <IconPlus size={20} />
-              <span className="tk-tile-t">{t("home.go.collection")}</span>
-              <span className="tk-tile-d">{t("home.go.collectionDetail")}</span>
+              <span className="tk-tile-t">
+                {setup.mode === "colecao" ? t("home.go.collection") : t("home.go.startCollection")}
+              </span>
+              <span className="tk-tile-d">
+                {setup.mode === "colecao"
+                  ? t("home.go.collectionDetail")
+                  : t("home.go.startCollectionDetail")}
+              </span>
             </button>
           </div>
 

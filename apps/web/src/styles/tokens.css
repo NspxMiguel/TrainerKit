@@ -32,7 +32,11 @@
   --tk-glass-ios: rgba(22, 26, 36, 0.52);
   --tk-glass-edge: rgba(255, 255, 255, 0.12);
   --tk-glass-active: rgba(255, 255, 255, 0.1);
-  --tk-sheet: rgba(18, 21, 28, 0.94);
+  /* Opaco de proposito. Era 0.94, e o `backdrop-filter` da folha escondia os
+     6% restantes — tirando o desfoque (que custava um quadro inteiro ao rolar),
+     a tela de tras passou a aparecer atras do texto. Vidro de verdade so na
+     barra de abas, onde ele nao rola junto. */
+  --tk-sheet: #12151c;
   --tk-elev: #181b23;
   --tk-code: #05070c;
   --tk-scrim: rgba(4, 5, 10, 0.6);
@@ -211,9 +215,28 @@
   --tk-e2: 0 6px 18px -6px var(--tk-shadow);
   --tk-e3: 0 18px 40px -14px var(--tk-shadow);
 
-  /* Container mobile 390 com margem 22; safe area 52 topo, 34 base. */
-  --tk-container: 390px;
+  /*
+   * Largura do container.
+   *
+   * O prototipo desenhou em 390 (iPhone 13/14). Fixar 390 aqui fazia o app
+   * abrir como uma COLUNA de 390px centralizada num iPhone de 402 ou 440pt,
+   * com uma faixa de fundo sobrando dos dois lados — que e exatamente a
+   * sensacao de "nao ficou em tela cheia". 448 cobre o maior iPhone atual
+   * (16 Pro Max, 440pt), entao no celular o app sempre usa a tela inteira e o
+   * limite so passa a valer no desktop.
+   */
+  --tk-container: 448px;
   --tk-gutter: 22px;
+
+  /*
+   * Respiro do topo e da base EM ABA DE NAVEGADOR, onde `env(safe-area-inset-*)`
+   * vale 0 porque a barra do Safari ja empurra o conteudo.
+   *
+   * Instalado e outra historia: `viewport-fit=cover` faz o conteudo ir ate
+   * embaixo do relogio, e `env()` passa a valer 59px no topo. Somar os dois
+   * dava 111px de vazio antes do primeiro texto. Por isso todo uso destes
+   * tokens e via `max()`, nunca soma — ver `.tk-main`.
+   */
   --tk-safe-top: 52px;
   --tk-safe-bottom: 34px;
 

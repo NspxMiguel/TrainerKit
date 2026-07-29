@@ -10,18 +10,24 @@ import { updateSetup, type UsageMode } from "./setup.ts";
 /**
  * Primeira abertura.
  *
- * Tres telas que NAO ROLAM. Cada uma cabe inteira no aparelho e tem um botao
- * fixo embaixo — e assim que app se comporta; rolar pra achar o "continuar" e
+ * Telas que NAO ROLAM. Cada uma cabe inteira no aparelho e tem um botao fixo
+ * embaixo — e assim que app se comporta; rolar pra achar o "continuar" e
  * comportamento de site.
  *
  * O idioma saiu daqui. Ele ja e detectado pelo aparelho no `language.ts`, e
  * quem quiser trocar acha em Ajustes. Pedir idioma na primeira tela era pedir
  * uma decisao que o sistema ja tinha tomado.
  */
-const STEPS = 3;
+type StepId = "boas-vindas" | "modo" | "instalar";
 
 export function Onboarding() {
   const [step, setStep] = useState(0);
+  /**
+   * Pra onde a tela esta indo. Sem isto, voltar tem a mesma animacao de
+   * avancar, e ai o movimento nao quer dizer nada — o usuario ve algo se mexer
+   * sem entender se progrediu ou regrediu.
+   */
+  const [dir, setDir] = useState<1 | -1>(1);
   const [name, setName] = useState("");
   const [mode, setMode] = useState<UsageMode>("consulta");
   const [assistant, setAssistant] = useState(true);
@@ -29,21 +35,56 @@ export function Onboarding() {
   const install = useInstallState();
   const { t } = useT();
 
+  /**
+   * O passo de instalar so existe se ainda houver o que instalar.
+   *
+   * O Miguel instalou o app na tela de inicio e o setup continuou pedindo pra
+   * instalar — o app estava, literalmente, aberto dentro do proprio icone
+   * enquanto sugeria que ele criasse um. Nao e so um passo inutil: destroi a
+   * confianca, porque o app claramente nao sabe onde esta rodando.
+   */
+  const steps: StepId[] = install.installed
+    ? ["boas-vindas", "modo"]
+    : ["boas-vindas", "modo", "instalar"];
+
+  const current = steps[step]!;
+  const last = step === steps.length - 1;
+
   const finish = () => updateSetup({ done: true, mode, assistant, name: name.trim() });
+
+  const go = (delta: 1 | -1) => {
+    setDir(delta);
+    setStep((s) => Math.min(steps.length - 1, Math.max(0, s + delta)));
+  };
 
   return createPortal(
     <div className="tk-onb" role="dialog" aria-modal="true" aria-label={t("onb.aria")}>
-      {/* Pontos de progresso: o app diz quantas telas faltam antes de a pessoa
-          precisar perguntar. Tres pontos e informacao; barra de porcentagem
-          seria enfeite. */}
-      <div className="tk-onb-dots" aria-hidden="true">
-        {Array.from({ length: STEPS }, (_, i) => (
-          <span key={i} data-on={i <= step || undefined} />
-        ))}
+      <div className="tk-onb-top">
+        {/* Voltar so aparece quando ha pra onde voltar. Um botao permanentemente
+            desabilitado ocupa o mesmo espaco e nao serve pra nada. */}
+        {step > 0 && (
+          <button
+            type="button"
+            className="tk-onb-back"
+            onClick={() => go(-1)}
+            aria-label={t("common.back")}
+          >
+            ‹
+          </button>
+        )}
+
+        {/* Pontos de progresso: o app diz quantas telas faltam antes de a pessoa
+            precisar perguntar. O ativo e mais largo — a barra cresce junto com
+            o avanco em vez de so trocar de cor. */}
+        <div className="tk-onb-dots" aria-hidden="true">
+          {steps.map((id, i) => (
+            <span key={id} data-on={i <= step || undefined} data-now={i === step || undefined} />
+          ))}
+        </div>
       </div>
 
-      <div className="tk-onb-body">
-        {step === 0 && (
+      <div className="tk-onb-body" key={current} data-dir={dir === 1 ? "fwd" : "back"}>
+        {current === "boas-vindas" && (
           <>
             <div className="tk-onb-mark" aria-hidden="true">
               <span />
@@ -67,7 +108,7 @@ export function Onboarding() {
           </>
         )}
 
-        {step === 1 && (
+        {current === "modo" && (
           <>
             <h1 className="tk-onb-title">{t("onb.howToUse")}</h1>
 
@@ -119,7 +160,7 @@ export function Onboarding() {
           </>
         )}
 
-        {step === 2 && (
+        {current === "instalar" && (
           <>
             <div className="tk-onb-mark tk-onb-mark--small" aria-hidden="true">
               <IconDownload size={30} />
@@ -132,16 +173,16 @@ export function Onboarding() {
         )}
       </div>
 
-      {/* Rodape fixo: o botao de avancar fica sempre no mesmo lugar, nas tres
+      {/* Rodape fixo: o botao de avancar fica sempre no mesmo lugar, em todas as
           telas, e nunca depende de rolagem pra aparecer. */}
       <div className="tk-onb-foot">
-        {step < 2 ? (
+        {current !== "instalar" ? (
           <button
             type="button"
             className="tk-btn tk-btn--primary tk-btn--block"
-            onClick={() => setStep((s) => s + 1)}
+            onClick={() => (last ? finish() : go(1))}
           >
-            {step === 0 ? t("onb.start") : t("onb.continue")}
+            {step === 0 ? t("onb.start") : last ? t("onb.open") : t("onb.continue")}
           </button>
         ) : (
           <>
@@ -153,11 +194,7 @@ export function Onboarding() {
               <IconDownload size={16} />
               {t("onb.seeHowToInstall")}
             </button>
-            <button
-              type="button"
-              className="tk-btn tk-btn--ghost tk-btn--block"
-              onClick={finish}
-            >
+            <button type="button" className="tk-btn tk-btn--ghost tk-btn--block" onClick={finish}>
               {t("onb.skipInstall")}
             </button>
           </>

@@ -33,6 +33,7 @@ const EN = {
   "common.defense": "Defense",
   "common.stamina": "HP",
   "common.beta": "BETA",
+  "common.done": "Done",
 
   // ---------------------------------------------------------------------- acoes
   "action.invest": "Power up",
@@ -81,6 +82,7 @@ const EN = {
   "install.ios.step2": "Scroll the list and tap “Add to Home Screen”.",
   "install.ios.step3": "Tap “Add”, top right.",
   "install.ios.step4": "Done. Open TrainerKit from the icon, not from Safari.",
+  "install.ios.barAria": "The Safari bottom bar, with the Share button in the middle",
   "install.android.title": "Install on Android",
   "install.android.browser": "Works in Chrome, Edge, Opera or Samsung Internet.",
   "install.android.step1": "Tap the three-dot menu, top right.",
@@ -102,6 +104,7 @@ const EN = {
   "pokedex.count.one": "1 species",
   "pokedex.count.many": "{count} species",
   "pokedex.noResults": "Nothing matches “{query}”.",
+  "pokedex.showMore": "Show more ({count} left)",
   "pokedex.whichPokemon": "Which Pokémon?",
 
   // ------------------------------------------------------------------- especie
@@ -178,6 +181,9 @@ const EN = {
   "collection.empty.body": "Scan the appraisal screenshot and save it. The verdict shows up here.",
   "collection.add": "Add Pokémon",
   "collection.backup": "Backup",
+  "collection.done": "Done",
+  "collection.markDone": "I already did this",
+  "collection.undoDone": "Not done after all",
   "collection.export": "Export",
   "collection.import": "Import",
   "collection.imported": "{count} Pokémon imported.",
@@ -218,7 +224,7 @@ const EN = {
 
   // ------------------------------------------------------------------ onboarding
   "onb.aria": "Welcome",
-  "onb.tagline": "Is this Pokémon worth it, and what for.",
+  "onb.tagline": "It tells you what to do with each Pokémon you catch.",
   "onb.nameLabel": "What should I call you?",
   "onb.namePlaceholder": "Your name or nickname",
   "onb.nameAria": "Your name",
@@ -231,9 +237,10 @@ const EN = {
   "onb.assistant": "Assistant",
   "onb.assistantDetail": "A written opinion, not just numbers.",
   "onb.continue": "Continue",
+  "onb.open": "Open the app",
   "onb.lastThing": "One last thing",
   "onb.installIos": "Safari wipes data from apps idle for 7 days. Installed, yours is safe.",
-  "onb.installOther": "Full screen, offline, and screenshots straight from Share.",
+  "onb.installOther": "Full screen, works offline, and your data stays saved.",
   "onb.seeHowToInstall": "See how to install",
   "onb.skipInstall": "Not now, open the app",
 
@@ -256,6 +263,18 @@ const EN = {
   "sprites.remove": "Remove source",
   "sprites.clearCache": "Clear image cache",
   "sprites.cacheCleared": "Cache cleared.",
+
+  // --------------------------------------------- baixar imagens de uma vez
+  "prefetch.start": "Download all {count} images",
+  "prefetch.warning": "Official artwork runs to hundreds of megabytes. On mobile data, wait for Wi‑Fi.",
+  "prefetch.title": "Downloading images",
+  "prefetch.doneTitle": "Images downloaded",
+  "prefetch.progress": "{done} of {total} · {size}",
+  "prefetch.failed": "{count} failed",
+  "prefetch.background": "Keep using the app",
+  "prefetch.stop": "Stop",
+  "prefetch.strip": "Downloading images · {pct}%",
+  "prefetch.finished": "{count} images saved, {size}. They won’t download again.",
 
   // ------------------------------------------------- mensagens vindas do core
   //
@@ -402,6 +421,8 @@ const EN = {
   "home.go.searchDetail": "Look up any species",
   "home.go.collection": "Collection",
   "home.go.collectionDetail": "Everything you saved",
+  "home.go.startCollection": "Start a collection",
+  "home.go.startCollectionDetail": "Save yours and get a verdict for each",
   "tip.title": "Did you know",
   "tip.capped": "In a capped league the 100% usually loses. The best {name} for Great is {atk}/{def}/{hp} — attack near zero.",
   "tip.raidAttack": "For raids, 15 attack is worth more than a high IV total. The other two barely move the damage.",
