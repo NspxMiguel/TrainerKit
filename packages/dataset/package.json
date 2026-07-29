@@ -4,13 +4,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "fetch": "node src/fetch.ts",
-    "build": "node src/etl.ts",
-    "refresh": "node src/fetch.ts && node src/etl.ts",
+    "fetch": "tsx src/fetch.ts",
+    "build": "tsx src/etl.ts",
+    "refresh": "pnpm fetch && pnpm build",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/node": "^26.1.2",
+    "tsx": "^4.23.1",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@trainerkit/core": "workspace:*"
   }
 }
