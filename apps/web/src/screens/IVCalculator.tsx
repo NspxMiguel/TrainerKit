@@ -86,7 +86,20 @@ export function IVCalculator({ species, data, onClose }: Props) {
   const badge = ivs ? badgeFor(total) : null;
 
   return createPortal(
-    <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label="Calcular IV">
+    <div
+      /*
+        Sem print, a tela inteira e um convite.
+
+        Antes o botao de anexar ficava num cartao la em cima e sobrava meia
+        tela de nada embaixo — a acao mais importante da tela parecendo um
+        detalhe de rodape invertido. Com IV lido a tela volta a ser uma lista
+        que rola, porque ai ha o que ler.
+      */
+      className={`tk-sheet-full${ivs ? "" : " tk-sheet-full--empty"}`}
+      role="dialog"
+      aria-modal="true"
+      aria-label={t("iv.title", { name: species.name })}
+    >
       <header className="tk-sheet-head">
         <button type="button" className="tk-sheet-close" onClick={onClose} aria-label={t("common.back")}>
           ‹
@@ -143,16 +156,18 @@ export function IVCalculator({ species, data, onClose }: Props) {
         )}
       </div>
 
-      <ScanDropzone
-        onRead={(read) => {
-          setIvs(read);
-          setManual(false);
-        }}
-        onFail={() => {
-          setManual(true);
-          setIvs((v) => v ?? { atk: 0, def: 0, hp: 0 });
-        }}
-      />
+      <div className={ivs ? undefined : "tk-empty-slot"}>
+        <ScanDropzone
+          onRead={(read) => {
+            setIvs(read);
+            setManual(false);
+          }}
+          onFail={() => {
+            setManual(true);
+            setIvs((v) => v ?? { atk: 0, def: 0, hp: 0 });
+          }}
+        />
+      </div>
 
       {ivs && (
         <>

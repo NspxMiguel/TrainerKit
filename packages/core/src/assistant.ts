@@ -60,7 +60,10 @@ export function opine(input: AssistantInput): Opinion {
 
   const maxCp = computeCPAtLevel(cpm, baseStats, { atk: 15, def: 15, hp: 15 }, levelCap);
 
-  if (baseStats.atk >= HIGH_ATK) {
+  const hitsHard = baseStats.atk >= HIGH_ATK;
+  const tanky = bulk(baseStats) >= HIGH_DEF + HIGH_HP;
+
+  if (hitsHard) {
     observations.push({
       tone: "bom",
       text: msg("assistant.profile.hitsHard"),
@@ -68,7 +71,7 @@ export function opine(input: AssistantInput): Opinion {
     });
   }
 
-  if (bulk(baseStats) >= HIGH_DEF + HIGH_HP) {
+  if (tanky) {
     observations.push({
       tone: "bom",
       text: msg("assistant.profile.tanky"),
@@ -84,8 +87,31 @@ export function opine(input: AssistantInput): Opinion {
   // praticamente inutil.
   const weak = baseStats.atk < 150 && bulk(baseStats) < 300;
 
+  /*
+   * A razao diz pra QUE LADO a especie pende. Ela nao diz se a especie e frouxa.
+   *
+   * Era isso que fazia o Eternatus se contradizer em tres linhas seguidas:
+   *
+   *   Bate forte          (ataque 278, absoluto)
+   *   Aguenta pancada     (defesa+PS 460, absoluto)
+   *   Da dano, mas cai rapido   (razao 1.21)
+   *
+   * As duas primeiras olham valores ABSOLUTOS; a terceira olha uma PROPORCAO.
+   * Um lendario com tudo alto pende pro ataque e continua durissimo — a razao
+   * 1.21 significa "inclinado pra ofensiva", nunca "morre facil". Dizer que ele
+   * cai rapido logo depois de dizer que ele aguenta pancada e o app discordando
+   * de si mesmo na mesma tela.
+   *
+   * Entao a leitura de tendencia so fala em fragilidade quando a especie de
+   * fato NAO e dura, e so fala em passividade quando ela de fato NAO bate
+   * forte. Quando os dois absolutos ja dispararam, nao ha terceira linha: as
+   * duas de cima ja descreveram o bicho, e "pende pro ataque" nao acrescenta
+   * nada que valha uma linha.
+   */
   const attackerish = baseStats.atk / Math.max(1, bulk(baseStats) / 2);
-  if (weak) {
+  if (hitsHard && tanky) {
+    // Forte nos dois. Nada a acrescentar.
+  } else if (weak) {
     observations.push({
       tone: "ruim",
       text: msg("assistant.profile.weak"),
@@ -95,7 +121,7 @@ export function opine(input: AssistantInput): Opinion {
         hp: baseStats.hp,
       }),
     });
-  } else if (attackerish >= 1.15) {
+  } else if (attackerish >= 1.15 && !tanky) {
     observations.push({
       tone: "neutro",
       text: msg("assistant.profile.attacker"),
@@ -105,7 +131,7 @@ export function opine(input: AssistantInput): Opinion {
         hp: baseStats.hp,
       }),
     });
-  } else if (attackerish <= 0.8) {
+  } else if (attackerish <= 0.8 && !hitsHard) {
     observations.push({
       tone: "neutro",
       text: msg("assistant.profile.wall"),

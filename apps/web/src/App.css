@@ -2262,3 +2262,54 @@
     transform: scaleX(1);
   }
 }
+
+/* --------------------------------------------- folha sem nada pra mostrar */
+
+/*
+ * O estado vazio ocupa a tela.
+ *
+ * Na avaliacao de IV sem print anexado, o convite pra anexar ficava num cartao
+ * no topo e o resto da tela era vazio — a acao principal com cara de nota de
+ * rodape. Com a folha virando coluna flexivel, o espaco que sobra vira o lugar
+ * do convite, no centro, que e onde o olho ja esta.
+ *
+ * Vale so enquanto nao ha resultado. Assim que o IV existe a folha volta a ser
+ * uma lista que rola de cima pra baixo, porque ai ha o que ler em ordem.
+ */
+.tk-sheet-full--empty {
+  display: flex;
+  flex-direction: column;
+}
+
+.tk-empty-slot {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  /*
+   * O convite fica no centro da TELA, nao do espaco que sobrou.
+   *
+   * `place-items: center` sozinho centraliza dentro do vao abaixo do
+   * cabecalho, e o cabecalho tem uns 240px — o cartao acabava bem abaixo da
+   * metade. Esta folga empurra o conteudo pra cima ate a altura onde o olho
+   * de fato procura, um pouco acima do meio geometrico.
+   */
+  padding-bottom: 12vh;
+}
+
+.tk-empty-slot > * {
+  width: 100%;
+}
+
+/* Centralizado, o convite deixa de ser uma linha e vira um alvo: icone e texto
+   empilhados, botao embaixo, tudo no eixo. */
+.tk-empty-slot .tk-drop {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--tk-s6) var(--tk-s5);
+}
+
+.tk-empty-slot .tk-drop .tk-btn {
+  margin-left: auto;
+  margin-right: auto;
+}

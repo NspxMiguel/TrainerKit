@@ -133,7 +133,14 @@ export default defineConfig({
         theme_color: "#07080B",
         background_color: "#07080B",
         display: "standalone",
-        orientation: "portrait",
+        /*
+         * Sem trava de orientacao.
+         *
+         * Era `orientation: "portrait"`, e isso vale pro app INSTALADO — num
+         * iPad significa um app que se recusa a girar. O layout e uma coluna
+         * unica centralizada, que funciona igual deitado ou em pe, entao a
+         * trava nao protegia nada: so impedia.
+         */
         icons: [
           { src: `${base}icon-192.png`, sizes: "192x192", type: "image/png" },
           { src: `${base}icon-512.png`, sizes: "512x512", type: "image/png" },

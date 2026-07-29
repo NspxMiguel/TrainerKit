@@ -134,10 +134,26 @@ describe("auditoria de todas as especies", () => {
       if (!o.headline.key) ruins.push(`${s.id}: sem manchete`);
       if (o.observations.length === 0) ruins.push(`${s.id}: sem observacao`);
 
+      const tem = (k: string) => o.observations.some((x) => x.text.key === k);
+
       // "fraco em tudo" e "bom pra X" nao podem sair juntos.
-      const fraco = o.observations.some((x) => x.text.key === "assistant.profile.weak");
+      const fraco = tem("assistant.profile.weak");
       const bom = o.observations.some((x) => x.tone === "bom");
       if (fraco && bom) ruins.push(`${s.id}: diz fraco e bom ao mesmo tempo`);
+
+      /*
+       * Aguentar pancada e cair rapido sao a MESMA pergunta com respostas
+       * opostas. O Eternatus recebia as duas na mesma tela, uma embaixo da
+       * outra: "Aguenta pancada (192/268)" e logo abaixo "Da dano, mas cai
+       * rapido". Vinha de misturar leitura absoluta com leitura de proporcao —
+       * ataque 278 e defesa+PS 460 sao absolutos, a razao 1.21 e relativa.
+       */
+      if (tem("assistant.profile.tanky") && tem("assistant.profile.attacker")) {
+        ruins.push(`${s.id}: diz que aguenta pancada e que cai rapido`);
+      }
+      if (tem("assistant.profile.hitsHard") && tem("assistant.profile.wall")) {
+        ruins.push(`${s.id}: diz que bate forte e que quase nao ataca`);
+      }
 
       for (const obs of o.observations) {
         if (!obs.evidence.key) ruins.push(`${s.id}: observacao sem dado`);
