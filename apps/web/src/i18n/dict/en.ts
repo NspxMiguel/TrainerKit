@@ -109,6 +109,7 @@ const EN = {
 
   // ------------------------------------------------------------------- especie
   "species.calcIV": "Check my IVs",
+  "species.seeMyIV": "See my IV",
   "species.baseStats": "Base stats",
   "species.maxCP": "Max CP with perfect IVs",
   "species.bestMoves": "Best moves",
@@ -209,7 +210,6 @@ const EN = {
   "settings.checking": "Checking…",
   "settings.unsupported": "Not supported",
   "settings.spaceUsed": "Space used",
-  "settings.spaceOf": " of {total}",
   "settings.language": "Language",
   "settings.showTranslation": "Show move translations",
   "settings.showTranslationDetail": "Counter (Contra-atacar)",

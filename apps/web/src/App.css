@@ -124,7 +124,9 @@
   width: 100%;
   max-width: var(--tk-container);
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /* Quantas abas existem vem do React como variavel; o layout continua aqui.
+     No modo consulta sao 3, com colecao ligada sao 4. */
+  grid-template-columns: repeat(var(--tk-tabs, 3), 1fr);
   background: var(--tk-glass);
   backdrop-filter: blur(20px) saturate(1.6);
   -webkit-backdrop-filter: blur(20px) saturate(1.6);
@@ -206,8 +208,16 @@
   padding-bottom: 0;
 
   background: var(--tk-glass-ios);
-  backdrop-filter: blur(24px) saturate(1.9) brightness(1.08);
-  -webkit-backdrop-filter: blur(24px) saturate(1.9) brightness(1.08);
+  /*
+   * Menos desfoque, mais LENTE.
+   *
+   * 24px de blur transformava tudo atras num borrao uniforme — que e
+   * exatamente a aparencia de vidro FOSCO, e nao de vidro. Vidro deixa
+   * reconhecer o que esta atras, so distorcido. 12px preserva a forma; a
+   * saturacao e o contraste devolvem a cor e o desenho que o desfoque comeu.
+   */
+  backdrop-filter: blur(12px) saturate(2.4) contrast(1.08) brightness(1.12);
+  -webkit-backdrop-filter: blur(12px) saturate(2.4) contrast(1.08) brightness(1.12);
   border: 1px solid var(--tk-glass-edge);
   box-shadow:
     0 12px 32px rgba(0, 0, 0, 0.34),
@@ -216,16 +226,78 @@
     inset 0 -1px 0 var(--tk-glass-rim);
 }
 
-/* O realce especular. Vai so ate a metade porque luz de cima nao ilumina a
-   peca inteira — se descer ate embaixo vira um degrade decorativo. */
+/*
+ * A BORDA GROSSA — a peca que faltava.
+ *
+ * Vidro de verdade nao e uma chapa: e um solido com espessura, e a espessura
+ * aparece na quina, onde a luz atravessa mais material e entorta mais. E por
+ * isso que uma peca de vidro tem aquele halo brilhante na borda e o miolo
+ * quase limpo.
+ *
+ * Aqui isso vira uma segunda camada de vidro com desfoque MAIOR, recortada por
+ * `mask` pra existir so nos ~10px da borda. O miolo fica nitido, a quina fica
+ * distorcida — e e essa diferenca entre borda e centro que o olho le como
+ * "liquido". Sem ela, todo o painel tinha o mesmo desfoque e virava fosco.
+ */
+/*
+ * `@supports` obrigatorio aqui.
+ *
+ * O anel depende de `mask-composite: exclude` pra recortar so a borda. Onde
+ * isso nao existir, a mascara e ignorada e a camada inteira ganha o desfoque
+ * extra — ou seja, o painel todo fica com blur duplo. O modo de falha seria
+ * exatamente o vidro fosco que esta correcao existe pra tirar. Sem suporte,
+ * melhor nao ter o anel.
+ */
+@supports (mask-composite: exclude) or (-webkit-mask-composite: xor) {
+  [data-platform="ios"] .tk-tabbar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    backdrop-filter: blur(7px) saturate(1.6) brightness(1.3);
+    -webkit-backdrop-filter: blur(7px) saturate(1.6) brightness(1.3);
+    /* Recorta so o anel: opaco na borda, transparente do miolo pra dentro. */
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    padding: 10px;
+    pointer-events: none;
+  }
+}
+
+/*
+ * O realce especular, agora em dois pontos.
+ *
+ * Uma faixa reta de cima e o que qualquer cartao translucido tem. O que faz
+ * parecer vidro CURVO e a luz concentrada onde a superficie mais se inclina:
+ * forte no alto e um retorno fraco embaixo, com o meio quase limpo.
+ */
 [data-platform="ios"] .tk-tabbar::before {
   content: "";
   position: absolute;
-  inset: 0 0 auto;
-  height: 52%;
-  background: linear-gradient(to bottom, var(--tk-glass-sheen), transparent);
-  opacity: 0.5;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(
+      to bottom,
+      var(--tk-glass-sheen) 0,
+      transparent 34%,
+      transparent 76%,
+      var(--tk-glass-rim) 100%
+    ),
+    /* Brilho que corre na horizontal, mais aceso no meio da capsula, como luz
+       batendo de frente numa superficie convexa. */
+    radial-gradient(
+      120% 180% at 50% -40%,
+      var(--tk-glass-sheen) 0%,
+      transparent 60%
+    );
+  opacity: 0.75;
   pointer-events: none;
+  z-index: 1;
 }
 
 /*
@@ -252,15 +324,33 @@
   left: 8px;
   width: calc(100% / var(--tk-tabs) - 16px);
   border-radius: 26px;
+  /*
+   * A pilula tambem e vidro, nao um retangulo branco por cima.
+   *
+   * Ela fica SOBRE a barra, entao nao pode so clarear: precisa de quina
+   * propria. O `inset` de cima e o fio de luz, o de baixo e o retorno, e o
+   * fundo continua quase transparente — assim ela parece uma peca pousada no
+   * vidro, e nao uma mancha pintada nele.
+   */
   background: var(--tk-glass-active);
+  box-shadow:
+    inset 0 1px 0 var(--tk-glass-sheen),
+    inset 0 -1px 0 var(--tk-glass-rim),
+    0 1px 3px rgba(0, 0, 0, 0.18);
   transform: translateX(calc(var(--tk-tab-i) * (100% + 16px)));
-  transition: transform 0.42s var(--tk-ease-glass);
+  transition:
+    transform 0.42s var(--tk-ease-glass),
+    background-color 0.2s var(--tk-ease);
   pointer-events: none;
+  z-index: 2;
 }
 
 [data-platform="ios"] .tk-tab {
   padding: 9px 0 10px;
   position: relative;
+  /* Acima do anel de borda (::after) e da pilula, senao o vidro passa por cima
+     do proprio rotulo. */
+  z-index: 3;
 }
 
 /*
@@ -397,7 +487,8 @@
     -webkit-backdrop-filter: none;
   }
 
-  [data-platform="ios"] .tk-tabbar::before {
+  [data-platform="ios"] .tk-tabbar::before,
+  [data-platform="ios"] .tk-tabbar::after {
     display: none;
   }
 
@@ -761,11 +852,6 @@
   background: var(--tk-code);
   padding: 1px 5px;
   border-radius: 5px;
-}
-
-/* Com 4 abas os rotulos ficam mais apertados. */
-.tk-tabbar {
-  grid-template-columns: repeat(4, 1fr);
 }
 
 /* --------------------------------------------------- guia de instalacao */
@@ -1285,11 +1371,20 @@
   transform: scale(0.985);
 }
 
-/* A camada de "abrir": cobre a linha toda, fica ATRAS dos dois botoes de acao
-   (que sobem com z-index) e nao rouba o clique deles. */
+/*
+ * A camada de "abrir": cobre a linha toda.
+ *
+ * O `z-index: 1` nao e detalhe. O sprite dentro do selo e um `<img>`
+ * posicionado, e elementos posicionados sem z-index pintam por ORDEM DE DOM —
+ * como o selo vem depois desta camada, o sprite ficava POR CIMA dela e engolia
+ * o toque. Resultado: clicar no nome abria o Pokemon, clicar na foto nao fazia
+ * nada. Com z-index explicito a camada sobe acima de tudo que e conteudo, e os
+ * dois botoes de acao sobem acima dela.
+ */
 .tk-owned-open {
   position: absolute;
   inset: 0;
+  z-index: 1;
   border-radius: inherit;
 }
 
@@ -1318,7 +1413,7 @@
 
 .tk-owned-remove {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   grid-column: 4;
   grid-row: 1;
   width: 32px;
@@ -1359,7 +1454,7 @@
  */
 .tk-owned-act {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   grid-column: 3;
   grid-row: 1;
   padding: 5px 9px;
@@ -2312,4 +2407,179 @@
 .tk-empty-slot .tk-drop .tk-btn {
   margin-left: auto;
   margin-right: auto;
+}
+
+/* ----------------------------------------- tela media: tablet em retrato */
+
+/*
+ * Entre 700 e 900: barra embaixo, coluna mais larga.
+ *
+ * Um iPad em pe tem 834px. Com a coluna travada em 448 sobravam 193px de fundo
+ * vazio de cada lado — o app parecendo um celular esquecido no meio de uma
+ * tela grande, que e exatamente o que o Miguel viu.
+ *
+ * Mas barra lateral aqui seria pior: em retrato ela roubaria um quarto da
+ * largura pra quatro itens. O certo e manter a navegacao embaixo, onde o
+ * polegar alcanca, e deixar o CONTEUDO ocupar a tela. Como tudo (coluna,
+ * barra, borda de rolagem, botao de adicionar) e medido a partir de
+ * `--tk-container`, mudar so essa variavel move o conjunto inteiro junto.
+ */
+@media (min-width: 700px) and (max-width: 899px) {
+  :root {
+    --tk-container: 680px;
+  }
+
+  .tk-species-grid {
+    grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  }
+
+  .tk-sheet-full {
+    max-width: 620px;
+  }
+}
+
+/* ------------------------------------------- tela grande: iPad e computador */
+
+/*
+ * Acima de 900px a navegacao vira BARRA LATERAL.
+ *
+ * Nao e capricho: e o que a Apple manda fazer. *"Consider adapting your tab bar
+ * into a sidebar automatically. If your app uses a tab-based navigation, you
+ * can allow the tab bar to adapt into a sidebar depending on the context."*
+ *
+ * E resolve o problema real: numa tela de 1024 ou 1194 o app era uma coluna de
+ * celular de 448px parada no meio, com dois tercos da tela vazios e a
+ * navegacao flutuando longe de qualquer canto util. Deitado ficava pior ainda.
+ *
+ * 900px como corte porque e onde o iPad em retrato (834) ainda quer a coluna
+ * unica — em pe ele e um celular grande, deitado (1194) ele e um computador
+ * pequeno. O mesmo limiar cobre notebook e monitor.
+ */
+@media (min-width: 900px) {
+  .tk-shell {
+    flex-direction: row;
+    justify-content: center;
+    max-width: 1180px;
+    align-items: stretch;
+    gap: var(--tk-s6);
+    padding: 0 var(--tk-gutter);
+  }
+
+  /* A barra deixa de ser flutuante e vira coluna: ela some do rodape, entao o
+     conteudo nao precisa mais reservar espaco embaixo. */
+  .tk-main,
+  [data-platform="ios"] .tk-main {
+    flex: 1;
+    min-width: 0;
+    /*
+     * Largura util, nao largura maxima.
+     *
+     * Deixar o conteudo esticar ate os 896px que sobram parece "usar a tela",
+     * mas uma linha de texto de 896px e ilegivel — o olho perde o comeco da
+     * linha seguinte. O que ganha com tela grande e a GRADE de especies, e essa
+     * usa `auto-fill` e se vira sozinha. Os cartoes de texto ficam num limite
+     * confortavel e o conjunto centraliza no que sobra.
+     */
+    max-width: 860px;
+    padding: var(--tk-s8) 0 var(--tk-s8);
+  }
+
+  .tk-tabbar,
+  [data-platform="ios"] .tk-tabbar {
+    /* Antes do conteudo. No DOM o <main> vem primeiro porque no celular a barra
+       fica embaixo; deitado ela precisa ficar a esquerda, e `order` resolve sem
+       mexer na ordem de leitura nem no foco do teclado. */
+    order: -1;
+    position: sticky;
+    top: var(--tk-s8);
+    left: auto;
+    bottom: auto;
+    transform: none;
+    width: 216px;
+    max-width: 216px;
+    height: max-content;
+    /* Uma coluna, uma linha por aba. */
+    grid-template-columns: 1fr;
+    grid-auto-rows: 52px;
+    gap: 2px;
+    padding: var(--tk-s2);
+    border-radius: var(--tk-r-card);
+    align-self: start;
+    margin-top: max(var(--tk-safe-top), calc(env(safe-area-inset-top) + var(--tk-s3)));
+  }
+
+  /* Deitada, a aba e icone + rotulo lado a lado, alinhados a esquerda — a
+     mesma leitura de uma lista, que e o que uma barra lateral e. */
+  .tk-tab,
+  [data-platform="ios"] .tk-tab {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: var(--tk-s3);
+    padding: 0 var(--tk-s4);
+  }
+
+  .tk-tab-label,
+  [data-platform="ios"] .tk-tabbar .tk-tab-label {
+    font-size: 14px;
+    max-height: none;
+  }
+
+  /* A pilula continua sendo uma peca so que viaja — agora na vertical. */
+  .tk-tab-pill {
+    top: var(--tk-s2);
+    bottom: auto;
+    left: var(--tk-s2);
+    right: var(--tk-s2);
+    width: auto;
+    height: 52px;
+    border-radius: calc(var(--tk-r-card) - var(--tk-s2));
+    transform: translateY(calc(var(--tk-tab-i) * (100% + 2px)));
+  }
+
+  /* Sem barra embaixo nao ha borda de rolagem pra suavizar, e o botao de
+     adicionar volta pro canto do CONTEUDO, nao da janela. */
+  .tk-scroll-edge {
+    display: none;
+  }
+
+  .tk-fab,
+  [data-platform="ios"] .tk-fab {
+    bottom: var(--tk-s8);
+    right: max(var(--tk-gutter), calc(50vw - 1180px / 2 + var(--tk-gutter)));
+  }
+
+  .tk-strip,
+  [data-platform="ios"] .tk-strip {
+    bottom: var(--tk-s5);
+    max-width: 420px;
+  }
+
+  /* Com o dobro de largura, tres colunas de especie viram um desperdicio de
+     linha. `auto-fill` acha quantas cabem em vez de eu adivinhar. */
+  .tk-species-grid {
+    grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  }
+
+  /* As folhas continuam sendo uma coluna legivel — texto longo em 1180px de
+     largura e ilegivel, e essa e a unica coisa que a tela grande NAO melhora. */
+  .tk-sheet-full {
+    max-width: 620px;
+    border-radius: var(--tk-r-sheet);
+    inset: var(--tk-s6) 0;
+    box-shadow: var(--tk-e3);
+  }
+}
+
+/* A barra lateral so recolhe no celular. Numa coluna fixa, encolher ao rolar
+   nao ganharia espaco nenhum e so tiraria o rotulo do lugar. */
+@media (min-width: 900px) {
+  [data-platform="ios"] .tk-tabbar[data-min] {
+    transform: none;
+  }
+
+  [data-platform="ios"] .tk-tabbar[data-min] .tk-tab-label {
+    max-height: none;
+    opacity: 1;
+    margin-top: 0;
+  }
 }

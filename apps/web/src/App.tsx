@@ -99,11 +99,16 @@ export function App() {
           data-min={minimized || undefined}
           aria-label={t("nav.aria")}
           style={{
-            // No modo consulta a aba Colecao nao aparece: ela so faria sentido
-            // pra quem escolheu cadastrar, e uma aba vazia permanente e ruido.
-            gridTemplateColumns: `repeat(${visibleTabs.length}, 1fr)`,
-            // A pilula precisa saber quantas colunas existem e em qual esta,
-            // pra se mover por transform em vez de renascer no lugar novo.
+            /*
+              So variaveis aqui, nunca propriedade final.
+              
+              Antes isto escrevia `gridTemplateColumns` direto, e estilo inline
+              ganha de media query: na tela grande, onde a barra vira coluna
+              unica, a regra do CSS era simplesmente ignorada e a barra
+              continuava com tres colunas espremidas. Quem decide o layout e a
+              folha de estilo; o React so informa quantas abas ha e qual esta
+              ativa — que sao dados, nao layout.
+            */
             "--tk-tabs": visibleTabs.length,
             "--tk-tab-i": Math.max(0, activeIndex),
           } as CSSProperties}

@@ -174,11 +174,17 @@ export function SettingsScreen({ datasetLabel, persist, species }: Props) {
         {persist?.supported && persist.usageBytes !== null && (
           <div className="tk-row">
             <span className="tk-row-label">{t("settings.spaceUsed")}</span>
-            <span className="tk-row-value">
-              {formatBytes(persist.usageBytes)}
-              {persist.quotaBytes !== null &&
-                t("settings.spaceOf", { total: formatBytes(persist.quotaBytes) })}
-            </span>
+            {/*
+              So o que o app usa. A cota saiu.
+
+              `navigator.storage.estimate()` devolve `quota`, e o navegador
+              calcula esse numero como uma FATIA DO DISCO LIVRE — daí os "77 GB"
+              que apareciam. Nao e espaco reservado pro TrainerKit, nao e
+              promessa, e muda sozinho conforme o disco enche. Dizer "2 MB de
+              77 GB" sugeria um limite que nao existe e um numero que nao
+              significa nada pra quem le.
+            */}
+            <span className="tk-row-value">{formatBytes(persist.usageBytes)}</span>
           </div>
         )}
       </section>

@@ -20,6 +20,7 @@ import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
 import { moveLabel, useLanguage, useShowTranslation } from "../i18n/language.ts";
 import { useT, type Key } from "../i18n/t.ts";
 import { useSetup } from "../onboarding/setup.ts";
+import type { OwnedPokemon } from "../storage/collection.ts";
 import { typeColor, typeKey } from "../sprites/provider.ts";
 import { AssistantCard } from "../ui/AssistantCard.tsx";
 import { IconSwords } from "../ui/Icons.tsx";
@@ -33,6 +34,8 @@ interface Props {
   onClose: () => void;
   /** Abrir outra especie a partir daqui — a linha de evolucao usa isto. */
   onPickSpecies?: (s: DatasetSpecies) => void;
+  /** O Pokemon salvo, quando a tela vem da Colecao. */
+  owned?: OwnedPokemon | undefined;
 }
 
 const PERFECT = { atk: 15, def: 15, hp: 15 };
@@ -78,7 +81,7 @@ function StatBar({ label, value }: { label: string; value: number }) {
   );
 }
 
-export function SpeciesDetail({ species, data, onClose, onPickSpecies }: Props) {
+export function SpeciesDetail({ species, data, onClose, onPickSpecies, owned }: Props) {
   const [calcOpen, setCalcOpen] = useState(false);
   const [raidOpen, setRaidOpen] = useState(false);
   const [context, setContext] = useState<Context>("general");
@@ -215,6 +218,22 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies }: Props) 
     [data.cpm, species.baseStats, activeLeague],
   );
 
+  /*
+   * Quem aparece como chefe de raide: so forma FINAL.
+   *
+   * A lista real muda a cada evento e nao esta no GAME_MASTER, entao isto e
+   * regra, nao dado. A primeira versao dizia "lendario OU forma final" — e a
+   * varredura nas 1.182 especies mostrou que "lendario" sozinho nao serve:
+   * existem oito lendarios e miticos que AINDA EVOLUEM (Cosmog, Cosmoem,
+   * Meltan, Poipole, Kubfu, Type: Null, Zygarde e Zygarde 10%), e nenhum deles
+   * e chefe de raide — sao bichos de pesquisa e evolucao.
+   *
+   * "Nao evolui mais" cobre os dois lados sozinho: pega Mewtwo e Rayquaza,
+   * descarta Caterpie e Cosmog. Perguntar "consigo derrubar esse numa raide?"
+   * pro Caterpie fazia o app parecer que nao sabe do que fala.
+   */
+  const podeSerChefe = species.evolvesInto.length === 0;
+
   const evolutions = species.evolvesInto
     .map((id) => data.species.find((s) => s.id === id))
     .filter((s): s is DatasetSpecies => s !== undefined);
@@ -286,31 +305,11 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies }: Props) 
         className="tk-btn tk-btn--primary tk-btn--block"
         onClick={() => setCalcOpen(true)}
       >
-        {t("species.calcIV")}
+        {/* Vindo da Colecao o IV ja e conhecido: o botao abre o que ja existe,
+            nao pede pra calcular de novo. */}
+        {owned ? t("species.seeMyIV") : t("species.calcIV")}
       </button>
 
-      {/* A outra pergunta que se faz olhando uma especie: "consigo derrubar
-          esse numa raide?". A resposta sai da COLECAO — entao no modo consulta,
-          onde colecao nao existe, o botao prometia uma resposta que nunca viria. */}
-      {setup.mode === "colecao" && (
-      <button
-        type="button"
-        className="tk-quick"
-        style={{ marginTop: 10, marginBottom: 22 }}
-        onClick={() => setRaidOpen(true)}
-      >
-        <span className="tk-quick-mark" aria-hidden="true">
-          <IconSwords size={22} />
-        </span>
-        <span style={{ flex: 1, minWidth: 0 }}>
-          <span className="tk-quick-title">{t("raid.open")}</span>
-          <span className="tk-quick-detail">{t("raid.openDetail")}</span>
-        </span>
-        <span className="tk-quick-go" aria-hidden="true">
-          ›
-        </span>
-      </button>
-      )}
 
       {setup.assistant && (
         <AssistantCard
@@ -329,6 +328,26 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies }: Props) 
         <StatBar label={t("common.defense")} value={species.baseStats.def} />
         <StatBar label={t("common.stamina")} value={species.baseStats.hp} />
       </section>
+
+      {/*
+        "Consigo derrubar numa raide?" — menor, e mais embaixo.
+
+        Estava logo abaixo do nome, num bloco do tamanho da acao principal, e
+        aparecia ate em Caterpie. Duas coisas erradas ao mesmo tempo: peso de
+        acao primaria pra uma pergunta secundaria, e a pergunta em si sem
+        sentido pra quem nunca e chefe de raide.
+      */}
+      {setup.mode === "colecao" && podeSerChefe && (
+        <button
+          type="button"
+          className="tk-btn tk-btn--secondary tk-btn--block"
+          style={{ marginTop: 22, height: 44, fontSize: 14 }}
+          onClick={() => setRaidOpen(true)}
+        >
+          <IconSwords size={17} />
+          {t("raid.open")}
+        </button>
+      )}
 
       <div className="tk-overline" style={{ display: "block", marginTop: 24 }}>
         {t("species.maxCP")}
@@ -561,7 +580,7 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies }: Props) 
       )}
 
       {calcOpen && (
-        <IVCalculator species={species} data={data} onClose={() => setCalcOpen(false)} />
+        <IVCalculator species={species} data={data} onClose={() => setCalcOpen(false)} owned={owned} />
       )}
       {raidOpen && (
         <RaidCounters boss={species} data={data} onClose={() => setRaidOpen(false)} />
