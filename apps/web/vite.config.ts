@@ -118,22 +118,16 @@ export default defineConfig({
             purpose: "maskable",
           },
         ],
-        // Recebe print compartilhado direto do sistema. Android apenas — o
-        // WebKit tem o bug aberto desde 2019 e nao vai implementar. No iOS o
-        // caminho e o seletor de arquivo com `multiple`.
-        share_target: {
-          action: `${base}compartilhar`,
-          method: "POST",
-          enctype: "multipart/form-data",
-          params: {
-            files: [
-              {
-                name: "screenshot",
-                accept: ["image/png", "image/jpeg", ".png", ".jpg", ".jpeg"],
-              },
-            ],
-          },
-        },
+        // NAO declaramos `share_target`.
+        //
+        // Ele estava aqui e era uma promessa quebrada: o manifest anunciava a
+        // capacidade, o Android colocava o TrainerKit na folha de compartilhar,
+        // e o POST caia numa rota que nao existe. Anunciar e falhar e pior que
+        // nao anunciar.
+        //
+        // Implementar exige service worker proprio (`injectManifest`) que
+        // intercepte o POST com `event.request.formData()`. Vale fazer — mas
+        // fazer, nao prometer.
       },
     }),
   ],
