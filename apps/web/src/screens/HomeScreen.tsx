@@ -5,6 +5,7 @@ import { ACTION_KEYS, decide, type Action } from "@trainerkit/core";
 import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
 import { datasetLabel } from "../data/useDataset.ts";
 import { useT, type Key } from "../i18n/t.ts";
+import type { PokedexIntent } from "../App.tsx";
 import { updateSetup, useSetup } from "../onboarding/setup.ts";
 import { useCollection } from "../storage/collection.ts";
 import { useInstallState } from "../storage/install.ts";
@@ -28,7 +29,7 @@ interface Props {
   dataset: DatasetState;
   persist: PersistState | null;
   /** A home leva pras outras abas — atalho e atalho, nao decoracao. */
-  onGo: (tab: "pokedex" | "colecao") => void;
+  onGo: (tab: "pokedex" | "colecao", intent?: PokedexIntent) => void;
 }
 
 const TONE: Record<Action, string> = {
@@ -319,17 +320,32 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
               distancia, escondidos dentro da Pokedex. */}
           <h2 className="tk-h2">{t("home.shortcuts")}</h2>
           <div className="tk-quickgrid">
-            <button type="button" className="tk-tile tk-tile--raid" onClick={() => onGo("pokedex")}>
+            {/* Cada atalho leva a intencao junto. Sem isso os tres primeiros
+                abriam a mesma tela — a busca por nome — e so o texto do botao
+                mudava. */}
+            <button
+              type="button"
+              className="tk-tile tk-tile--raid"
+              onClick={() => onGo("pokedex", { view: "best", mode: "raid" })}
+            >
               <IconTrophy size={20} />
               <span className="tk-tile-t">{t("home.go.raidBest")}</span>
               <span className="tk-tile-d">{t("home.go.raidBestDetail")}</span>
             </button>
-            <button type="button" className="tk-tile tk-tile--pvp" onClick={() => onGo("pokedex")}>
+            <button
+              type="button"
+              className="tk-tile tk-tile--pvp"
+              onClick={() => onGo("pokedex", { view: "best", mode: "pvp" })}
+            >
               <IconShield size={20} />
               <span className="tk-tile-t">{t("home.go.pvpBest")}</span>
               <span className="tk-tile-d">{t("home.go.pvpBestDetail")}</span>
             </button>
-            <button type="button" className="tk-tile tk-tile--dex" onClick={() => onGo("pokedex")}>
+            <button
+              type="button"
+              className="tk-tile tk-tile--dex"
+              onClick={() => onGo("pokedex", { view: "browse" })}
+            >
               <IconSearch size={20} />
               <span className="tk-tile-t">{t("home.go.search")}</span>
               <span className="tk-tile-d">{t("home.go.searchDetail")}</span>

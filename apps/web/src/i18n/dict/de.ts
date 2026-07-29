@@ -287,7 +287,7 @@ export const DE: Dict = {
   "raid.bossHp": "{hp} KP",
   "raid.tier": "Stufe {n}",
   "raid.tierMega": "Mega",
-  "raid.canYou": "Schaffst du es",
+  "raid.canYou": "Schaffst du das?",
   "raid.solo": "Du schaffst es allein",
   "raid.needTrainers": "Du brauchst {n} Trainer",
   "raid.soloIn": "Etwa {seconds} Sekunden mit deinem besten.",

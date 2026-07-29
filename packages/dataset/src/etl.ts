@@ -164,6 +164,18 @@ interface OutSpecies {
   cosmeticOf: string | null;
   /** Id do sprite no PokeAPI. `null` quando nao ha arte — cai no monograma. */
   spriteId: number | null;
+  /**
+   * Lendario, mitico ou Ultra Beast.
+   *
+   * Vem do `pokemonClass` do GAME_MASTER, e serve pra uma coisa so: e essa
+   * classe que aparece em raide de tier 5. Sem ela o app supunha tier 5 pra
+   * qualquer especie e anunciava um Machamp de 40.227 de PC — numero certo pra
+   * formula e absurdo pro jogo, porque Machamp nunca e chefe de tier 5.
+   *
+   * A lista de chefes de cada tier NAO esta no GAME_MASTER (muda a cada
+   * evento), entao isto e o mais perto que da pra chegar sem inventar dado.
+   */
+  legendary: boolean;
 }
 
 /**
@@ -387,6 +399,10 @@ function extractSpecies(templates: Template[]): OutSpecies[] {
       candyToEvolve,
       cosmeticOf: null,
       spriteId: null,
+      legendary:
+        s.pokemonClass === "POKEMON_CLASS_LEGENDARY" ||
+        s.pokemonClass === "POKEMON_CLASS_MYTHIC" ||
+        s.pokemonClass === "POKEMON_CLASS_ULTRA_BEAST",
     });
   }
 
