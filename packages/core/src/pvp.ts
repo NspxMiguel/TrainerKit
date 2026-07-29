@@ -47,9 +47,17 @@ export interface RankedSpread extends IVSpread {
 /**
  * Maior nivel em que a especie cabe no teto de PC.
  *
- * Busca linear de cima para baixo: sao no maximo 109 passos e o resultado
- * precisa ser o maior nivel VALIDO, nao uma aproximacao — meio nivel a mais
- * estoura o limite e o Pokemon nem entra na liga.
+ * Busca BINARIA, nao linear. O PC cresce junto com o nivel — `cpmForLevel` e
+ * estritamente crescente e a formula de PC e monotona nele —, entao o conjunto
+ * de niveis validos e um prefixo e da para cortar pela metade a cada passo:
+ * 109 niveis viram 7 comparacoes em vez de ate 109.
+ *
+ * Isso importa porque esta funcao roda 4.096 vezes por liga em cada ranking, e
+ * o ranking roda uma vez por Pokemon da colecao. A versao linear custava ~8ms
+ * por Pokemon; numa colecao de cem, a tela travava quase um segundo.
+ *
+ * O resultado continua sendo o maior nivel VALIDO, nao uma aproximacao — meio
+ * nivel a mais estoura o limite e o Pokemon nem entra na liga.
  */
 export function maxLevelForCap(
   cpm: CpmTable,
@@ -60,11 +68,22 @@ export function maxLevelForCap(
 ): number | null {
   if (cpCap === null) return levelCap;
 
-  for (let level = levelCap; level >= MIN_LEVEL; level -= 0.5) {
-    if (computeCP(base, ivs, cpmForLevel(cpm, level)) <= cpCap) return level;
+  // Indice i <-> nivel MIN_LEVEL + i * 0.5. Passos de 0.5 sao exatos em ponto
+  // flutuante binario, entao a conversao nao acumula erro.
+  const levelAt = (i: number): number => MIN_LEVEL + i * 0.5;
+  const fits = (i: number): boolean =>
+    computeCP(base, ivs, cpmForLevel(cpm, levelAt(i))) <= cpCap;
+
+  if (!fits(0)) return null; // Nem no nivel 1 cabe: forte demais para a liga.
+
+  let low = 0;
+  let high = Math.round((levelCap - MIN_LEVEL) / 0.5);
+  while (low < high) {
+    const mid = Math.ceil((low + high) / 2);
+    if (fits(mid)) low = mid;
+    else high = mid - 1;
   }
-  // Nem no nivel 1 cabe: especie forte demais para a liga.
-  return null;
+  return levelAt(low);
 }
 
 /**
@@ -118,8 +137,76 @@ export function rankIVSpreads(
 }
 
 /**
+ * Tabela compacta de stat product, para responder posicao sem materializar
+ * 4.096 objetos.
+ *
+ * `products` e indexada por `ivIndex` e guarda 0 onde a combinacao nao entra na
+ * liga (nem no nivel 1 cabe) ou esta abaixo do piso de IV. Um `Float64Array` de
+ * 4.096 posicoes sao 32 KB — cabe em cache com folga, ao contrario do array de
+ * objetos, que passa de 800 KB por especie e liga.
+ */
+interface ProductTable {
+  products: Float64Array;
+  best: number;
+}
+
+const ivIndex = (ivs: IVs): number => (ivs.atk * 16 + ivs.def) * 16 + ivs.hp;
+
+/**
+ * Cache dos rankings ja calculados.
+ *
+ * A colecao repete especie o tempo todo — cinco Azumarill sao um calculo, nao
+ * cinco — e cada re-render do React pediria tudo de novo. O limite existe para
+ * o cache nao virar vazamento numa sessao longa; ao estourar, esvazia inteiro,
+ * que e simples e bom o bastante para um mapa de algumas dezenas de entradas.
+ */
+const PRODUCT_CACHE = new Map<string, ProductTable>();
+const PRODUCT_CACHE_LIMIT = 64;
+
+function productTable(
+  cpm: CpmTable,
+  base: BaseStats,
+  league: League,
+  options: { floorIV?: number; levelCap?: number },
+): ProductTable {
+  const floor = Math.max(MIN_IV, options.floorIV ?? MIN_IV);
+  const levelCap = options.levelCap ?? MAX_LEVEL;
+  const key = `${base.atk}/${base.def}/${base.hp}|${league.id}|${floor}|${levelCap}`;
+
+  const cached = PRODUCT_CACHE.get(key);
+  if (cached) return cached;
+
+  const products = new Float64Array(16 * 16 * 16);
+  let best = 0;
+
+  for (let atk = floor; atk <= MAX_IV; atk++) {
+    for (let def = floor; def <= MAX_IV; def++) {
+      for (let hp = floor; hp <= MAX_IV; hp++) {
+        const ivs: IVs = { atk, def, hp };
+        const level = maxLevelForCap(cpm, base, ivs, league.cpCap, levelCap);
+        if (level === null) continue;
+
+        const product = statProduct(base, ivs, cpmForLevel(cpm, level));
+        products[ivIndex(ivs)] = product;
+        if (product > best) best = product;
+      }
+    }
+  }
+
+  if (PRODUCT_CACHE.size >= PRODUCT_CACHE_LIMIT) PRODUCT_CACHE.clear();
+  const table = { products, best };
+  PRODUCT_CACHE.set(key, table);
+  return table;
+}
+
+/**
  * Posicao de um IV especifico, sem materializar o ranking inteiro para quem so
  * quer saber do proprio Pokemon.
+ *
+ * A posicao e "quantos sao estritamente melhores, mais um" — empate divide a
+ * mesma posicao, que e o que a palavra significa. A versao anterior ordenava o
+ * array e lia o indice, o que dava posicoes diferentes para stat products
+ * iguais dependendo da ordem em que a ordenacao os deixou.
  */
 export function rankOf(
   cpm: CpmTable,
@@ -128,10 +215,24 @@ export function rankOf(
   league: League,
   options: { floorIV?: number; levelCap?: number } = {},
 ): RankedSpread | null {
-  const all = rankIVSpreads(cpm, base, league, options);
-  return (
-    all.find(
-      (s) => s.ivs.atk === ivs.atk && s.ivs.def === ivs.def && s.ivs.hp === ivs.hp,
-    ) ?? null
-  );
+  const { products, best } = productTable(cpm, base, league, options);
+  const mine = products[ivIndex(ivs)] ?? 0;
+  if (mine <= 0) return null;
+
+  let better = 0;
+  for (const product of products) {
+    if (product > mine) better++;
+  }
+
+  const level = maxLevelForCap(cpm, base, ivs, league.cpCap, options.levelCap ?? MAX_LEVEL);
+  if (level === null) return null;
+
+  return {
+    ivs,
+    level,
+    cp: computeCP(base, ivs, cpmForLevel(cpm, level)),
+    statProduct: mine,
+    rank: better + 1,
+    percent: best > 0 ? mine / best : 0,
+  };
 }

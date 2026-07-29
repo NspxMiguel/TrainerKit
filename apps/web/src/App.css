@@ -680,3 +680,50 @@
   border-color: var(--tk-pri-line);
   color: var(--tk-pri-fg);
 }
+
+/* Rastro do veredito — mono, para as colunas alinharem como no protótipo. */
+.tk-trace {
+  margin: 14px 0 0;
+  padding: var(--tk-s3);
+  border-radius: var(--tk-r-input);
+  background: var(--tk-code);
+  border: 1px solid var(--tk-line);
+  font: 500 11px/1.7 var(--tk-mono);
+  color: var(--tk-txt2);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* Linha da coleção: o item inteiro abre, o ✕ remove. */
+.tk-owned {
+  display: flex;
+  gap: 6px;
+}
+
+.tk-owned-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--tk-s3);
+  padding: var(--tk-s3);
+  border-radius: var(--tk-r-input);
+  background: var(--tk-surf);
+  border: 1px solid var(--tk-line);
+  transition:
+    background-color 0.12s var(--tk-ease),
+    transform 0.06s var(--tk-ease);
+}
+
+.tk-owned-main:active {
+  transform: scale(0.985);
+}
+
+.tk-owned-remove {
+  flex: none;
+  width: 44px;
+  border-radius: var(--tk-r-input);
+  background: var(--tk-surf);
+  border: 1px solid var(--tk-line);
+  color: var(--tk-txt3);
+}

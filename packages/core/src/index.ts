@@ -8,3 +8,4 @@ export * from "./appraisal.js";
 export * from "./scan.js";
 export * from "./moves.js";
 export * from "./assistant.js";
+export * from "./verdict.js";

@@ -17,7 +17,9 @@ import {
 import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
 import { useSetup } from "../onboarding/setup.ts";
 import { IVBar } from "../ui/IVBar.tsx";
+import { addPokemon } from "../storage/collection.ts";
 import { AssistantCard } from "../ui/AssistantCard.tsx";
+import { VerdictCard } from "../ui/VerdictCard.tsx";
 import { ScanDropzone } from "../ui/ScanDropzone.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 
@@ -36,6 +38,7 @@ export function IVCalculator({ species, data, onClose }: Props) {
   // fica no fluxo que o Miguel pediu — anexa e pronto.
   const setup = useSetup();
   const [manual, setManual] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [cp, setCp] = useState("");
   const [hp, setHp] = useState("");
 
@@ -163,6 +166,46 @@ export function IVCalculator({ species, data, onClose }: Props) {
           ? "Arraste cada barra até ficar igual à do jogo. Confira as estrelas acima: se baterem com as do jogo, você acertou."
           : "Confira as estrelas acima contra as do jogo — é a forma mais rápida de perceber uma leitura errada."}
       </p>
+
+      <div style={{ marginTop: 20 }}>
+        <VerdictCard
+          name={species.name}
+          baseStats={species.baseStats}
+          ivs={ivs}
+          level={levels?.[0]?.level ?? 20}
+          cpm={data.cpm}
+          levelCap={data.version.levelCap}
+          evolvesInto={species.evolvesInto}
+          candyToEvolve={
+            species.evolvesInto[0]
+              ? (species.candyToEvolve[species.evolvesInto[0]] ?? null)
+              : null
+          }
+        />
+      </div>
+
+      {setup.mode === "colecao" && (
+        <button
+          type="button"
+          className="tk-btn tk-btn--primary tk-btn--block"
+          style={{ marginTop: 12 }}
+          disabled={saved}
+          onClick={() => {
+            void addPokemon({
+              speciesId: species.id,
+              nickname: null,
+              ivs,
+              level: levels?.[0]?.level ?? null,
+              cp: hasNumbers ? cpNum : null,
+              hp: hasNumbers ? hpNum : null,
+              lucky: false,
+              shadow: false,
+            }).then(() => setSaved(true));
+          }}
+        >
+          {saved ? "Salvo na coleção" : "Salvar na coleção"}
+        </button>
+      )}
 
       <div className="tk-overline" style={{ display: "block", marginTop: 26 }}>
         Descobrir o nível <span style={{ textTransform: "none" }}>(opcional)</span>
