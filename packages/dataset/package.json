@@ -4,11 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "fetch": "tsx src/fetch.ts",
+    "download": "tsx src/download.ts",
     "build": "tsx src/etl.ts",
-    "refresh": "pnpm fetch && pnpm build",
-    "typecheck": "tsc --noEmit",
-    "test": "echo 'sem testes: o ETL e validado pelos testes do core contra o dataset gerado'"
+    "refresh": "pnpm run download && pnpm run build",
+    "test": "echo 'sem testes: o ETL e validado pelos testes do core contra o dataset gerado'",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/node": "^26.1.2",

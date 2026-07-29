@@ -318,4 +318,6 @@ export const DE: Dict = {
   "ai.off": "aus",
   "ai.help": "Kostenloser Schlüssel auf console.groq.com. Er bleibt auf diesem Gerät und geht direkt an Groq — TrainerKit hat keinen Server und verlangt nichts.",
   "ai.what": "Es analysiert nichts: das Urteil wird hier berechnet. Es formuliert es nur natürlich.",
+  "settings.usage": "Wie du sie nutzt",
+  "raid.emptyBrowse": "Diese Antwort kommt aus deiner Sammlung. Wechsle in den Einstellungen in den Sammlungsmodus, um deine Pokémon zu speichern.",
 };

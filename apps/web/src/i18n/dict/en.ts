@@ -373,6 +373,8 @@ const EN = {
   "ai.off": "off",
   "ai.help": "Free key at console.groq.com. It stays on this device and goes straight to Groq — TrainerKit has no server and charges nothing.",
   "ai.what": "It doesn't analyse anything: the verdict is already calculated here. It only rewrites it in plain language.",
+  "settings.usage": "How you use it",
+  "raid.emptyBrowse": "This answer comes from your collection. Switch to collection mode in Settings to save your Pokémon.",
 } as const;
 
 /**

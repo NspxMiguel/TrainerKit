@@ -17,6 +17,7 @@ import {
 import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
 import { moveLabel, useLanguage } from "../i18n/language.ts";
 import { useT } from "../i18n/t.ts";
+import { useSetup } from "../onboarding/setup.ts";
 import { useCollection } from "../storage/collection.ts";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 
@@ -42,6 +43,7 @@ const TIERS: readonly RaidTier[] = [1, 3, 5, "mega"];
 export function RaidCounters({ boss, data, onClose }: Props) {
   const [tier, setTier] = useState<RaidTier>(5);
   const { items } = useCollection();
+  const setup = useSetup();
   const { t } = useT();
   const language = useLanguage();
 
@@ -230,7 +232,9 @@ export function RaidCounters({ boss, data, onClose }: Props) {
       ) : (
         <div className="tk-empty">
           <div className="tk-empty-title">{t("raid.emptyTitle")}</div>
-          <p className="tk-body">{t("raid.emptyBody")}</p>
+          <p className="tk-body">
+            {setup.mode === "colecao" ? t("raid.emptyBody") : t("raid.emptyBrowse")}
+          </p>
         </div>
       )}
 

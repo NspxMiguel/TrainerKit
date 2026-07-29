@@ -171,6 +171,10 @@ export function HomeScreen({ dataset, persist }: Props) {
             </span>
           </button>
 
+          {/* No modo consulta nao existe colecao nem aba pra ela: um bloco
+              vazio apontando pra uma aba que nao esta na tela e so confusao. */}
+          {setup.mode === "colecao" && (
+            <>
           <h2 className="tk-h2">{t("home.yourCollection")}</h2>
 
           {!pendencias ? (
@@ -243,6 +247,8 @@ export function HomeScreen({ dataset, persist }: Props) {
                 </p>
               )}
             </section>
+          )}
+            </>
           )}
         </>
       )}

@@ -318,4 +318,6 @@ export const KO: Dict = {
   "ai.off": "꺼짐",
   "ai.help": "console.groq.com에서 무료 키를 받을 수 있습니다. 이 기기에 저장되고 Groq으로 바로 갑니다 — TrainerKit은 서버가 없고 아무것도 청구하지 않습니다.",
   "ai.what": "분석하지 않습니다. 판정은 여기서 이미 계산되고, 그것을 자연스러운 문장으로 옮길 뿐입니다.",
+  "settings.usage": "사용 방식",
+  "raid.emptyBrowse": "이 답은 내 컬렉션에서 나옵니다. 설정에서 컬렉션 모드로 바꾸면 저장할 수 있습니다.",
 };

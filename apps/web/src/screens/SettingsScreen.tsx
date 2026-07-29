@@ -10,6 +10,7 @@ import {
 } from "../i18n/language.ts";
 import { useT, type Key } from "../i18n/t.ts";
 import { WheelPicker } from "../ui/WheelPicker.tsx";
+import { updateSetup, useSetup } from "../onboarding/setup.ts";
 import { useInstallState } from "../storage/install.ts";
 import { InstallGuide } from "./InstallGuide.tsx";
 import { AiSettings } from "./AiSettings.tsx";
@@ -49,6 +50,7 @@ export function SettingsScreen({ datasetLabel, persist }: Props) {
   const language = useLanguage();
   const showTranslation = useShowTranslation();
   const { t } = useT();
+  const setup = useSetup();
   const [guideOpen, setGuideOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>(
     () => (localStorage.getItem(THEME_KEY) as Theme | null) ?? "sistema",
@@ -80,6 +82,43 @@ export function SettingsScreen({ datasetLabel, persist }: Props) {
           ))}
         </div>
       </section>
+
+      {/* O onboarding promete "da pra trocar depois nos Ajustes" — e ate agora
+          nao dava. Modo e assistente sao as duas escolhas daquele fluxo, e
+          escolha de setup que nao se desfaz e armadilha. */}
+      <div className="tk-overline" style={{ display: "block", marginTop: 28 }}>
+        {t("settings.usage")}
+      </div>
+      <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+        {(["consulta", "colecao"] as const).map((m) => (
+          <button
+            key={m}
+            type="button"
+            className={`tk-btn ${setup.mode === m ? "tk-btn--primary" : "tk-btn--secondary"}`}
+            style={{ flex: 1, height: 44, padding: 0, fontSize: 13 }}
+            aria-pressed={setup.mode === m}
+            onClick={() => updateSetup({ mode: m })}
+          >
+            {m === "consulta" ? t("onb.mode.browse") : t("onb.mode.collection")}
+          </button>
+        ))}
+      </div>
+      <button
+        type="button"
+        className="tk-option"
+        data-active={setup.assistant || undefined}
+        aria-pressed={setup.assistant}
+        style={{ marginTop: 10 }}
+        onClick={() => updateSetup({ assistant: !setup.assistant })}
+      >
+        <span className="tk-option-mark" aria-hidden="true">
+          {setup.assistant ? "●" : "○"}
+        </span>
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span className="tk-option-title">{t("onb.assistant")}</span>
+          <span className="tk-option-detail">{t("onb.assistantDetail")}</span>
+        </span>
+      </button>
 
       <div className="tk-overline" style={{ display: "block", marginTop: 28 }}>
         {t("settings.storage")}

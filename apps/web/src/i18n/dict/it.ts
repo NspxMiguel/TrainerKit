@@ -318,4 +318,6 @@ export const IT: Dict = {
   "ai.off": "spento",
   "ai.help": "Chiave gratuita su console.groq.com. Resta su questo dispositivo e va dritta a Groq — TrainerKit non ha server e non fa pagare nulla.",
   "ai.what": "Non analizza niente: il verdetto è già calcolato qui. Lo riscrive solo in linguaggio naturale.",
+  "settings.usage": "Come la usi",
+  "raid.emptyBrowse": "Questa risposta viene dalla tua collezione. Passa alla modalità collezione nelle Impostazioni per salvare i tuoi Pokémon.",
 };
