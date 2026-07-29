@@ -368,4 +368,7 @@ export const KO: Dict = {
   "ask.s1": "그레이트 리그에 제일 좋은 건?",
   "ask.s2": "전송해도 되는 건?",
   "ask.s3": "먼저 강화할 건?",
+  "spread.noLimit": "상한 없음",
+  "spread.neverCapped": "{name}은(는) 어느 리그의 CP 상한에도 못 미칩니다 — 최대 {maxCp}. 그래서 모든 개체값이 최고 레벨까지 올라가고 15/15/15가 최고입니다. 여기서 고를 리그는 없습니다.",
+  "spread.titleSimple": "노려야 할 개체값",
 };

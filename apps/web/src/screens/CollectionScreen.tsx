@@ -220,7 +220,12 @@ export function CollectionScreen({ dataset }: Props) {
       )}
 
       {open && ready && (
-        <SpeciesDetail species={open} data={dataset.data} onClose={() => setOpen(null)} />
+        <SpeciesDetail
+          species={open}
+          data={dataset.data}
+          onClose={() => setOpen(null)}
+          onPickSpecies={setOpen}
+        />
       )}
     </>
   );

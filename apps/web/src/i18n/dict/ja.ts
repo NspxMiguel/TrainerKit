@@ -368,4 +368,7 @@ export const JA: Dict = {
   "ask.s1": "グレートリーグに一番いいのは？",
   "ask.s2": "交換していいのはどれ？",
   "ask.s3": "最初に強化するならどれ？",
+  "spread.noLimit": "上限なし",
+  "spread.neverCapped": "{name}はどのリーグのCP上限にも届きません（最大{maxCp}）。つまりどの個体値も最大レベルまで上がり、15/15/15が最良です。ここに選ぶリーグはありません。",
+  "spread.titleSimple": "狙うべき個体値",
 };

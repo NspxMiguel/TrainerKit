@@ -60,7 +60,7 @@ const EN = {
   "home.needsDecision.many": "{count} need a decision",
   "home.ofSaved.one": "of {count} saved",
   "home.ofSaved.many": "of {count} saved",
-  "home.andMore": "and {count} more under Collection.",
+  "home.andMore": "And {count} more under Collection.",
   "home.datasetError.title": "Couldn't load the dataset",
   "home.datasetError.body": "Without it the app can't calculate anything. {message}",
   "home.atRisk.title": "Your data can be wiped",
@@ -261,16 +261,16 @@ const EN = {
   //
   // Estas o core emite como chave + numeros. A checagem no fim do arquivo
   // garante que nenhuma fique sem traducao.
-  "verdict.evolution.ready": "you already have the {candy} candy",
-  "verdict.evolution.pending": "it still evolves, and evolving changes everything",
-  "verdict.pvp.top": "it's top {rank} in the {league}",
-  "verdict.pvp.good": "it's #{rank} in the {league}",
-  "verdict.raid.attack": "base attack {base} with {iv} attack IV",
-  "verdict.shadow.bonus": "shadow hits 20% harder — don't purify without thinking",
-  "verdict.lucky.cost": "being lucky, powering up costs half the dust",
+  "verdict.evolution.ready": "You already have the {candy} candy",
+  "verdict.evolution.pending": "It still evolves, and evolving changes everything",
+  "verdict.pvp.top": "It's top {rank} in the {league}",
+  "verdict.pvp.good": "It's #{rank} in the {league}",
+  "verdict.raid.attack": "Base attack {base} with {iv} attack IV",
+  "verdict.shadow.bonus": "Shadow hits 20% harder — don't purify without thinking",
+  "verdict.lucky.cost": "Being lucky, powering up costs half the dust",
   "verdict.iv.weak": "IV {total} out of 45",
-  "verdict.species.weak": "the species delivers neither damage nor bulk",
-  "verdict.default": "nothing here calls for action right now",
+  "verdict.species.weak": "The species delivers neither damage nor bulk",
+  "verdict.default": "Nothing here calls for action right now",
 
   "assistant.profile.hitsHard": "Hits hard. Good for raids.",
   "assistant.profile.tanky": "Takes hits. Good for PvP.",
@@ -284,14 +284,14 @@ const EN = {
   "assistant.iv.attackHurtsCapped": "High attack hurts in a capped league: it inflates CP.",
   "assistant.iv.weak": "Weak IVs. Transfer candidate.",
 
-  "assistant.evidence.baseAttack": "base attack {atk}",
-  "assistant.evidence.defAndHp": "defense {def} and HP {hp}",
-  "assistant.evidence.hpAndDefVsAtk": "defense {def} and HP {hp} against attack {atk}",
-  "assistant.evidence.allStats": "attack {atk}, defense {def}, HP {hp}",
-  "assistant.evidence.atkVsBulk": "attack {atk} against defense {def} and HP {hp}",
+  "assistant.evidence.baseAttack": "Base attack {atk}",
+  "assistant.evidence.defAndHp": "Defense {def} and HP {hp}",
+  "assistant.evidence.hpAndDefVsAtk": "Defense {def} and HP {hp} against attack {atk}",
+  "assistant.evidence.allStats": "Attack {atk}, defense {def}, HP {hp}",
+  "assistant.evidence.atkVsBulk": "Attack {atk} against defense {def} and HP {hp}",
   "assistant.evidence.rankOf4096": "#{rank} out of 4,096 combinations",
-  "assistant.evidence.attackMax": "attack 15 of 15",
-  "assistant.evidence.attackAndRank": "attack {atk}, position #{rank} in {league}",
+  "assistant.evidence.attackMax": "Attack 15 of 15",
+  "assistant.evidence.attackAndRank": "Attack {atk}, position #{rank} in {league}",
   "assistant.evidence.ivOutOf45": "{total} of 45 points",
 
   "assistant.headline.perfect": "{name} 100%. Don't transfer.",
@@ -423,6 +423,9 @@ const EN = {
   "ask.s1": "Which is best for Great League?",
   "ask.s2": "What can I transfer?",
   "ask.s3": "What should I power up first?",
+  "spread.noLimit": "No cap",
+  "spread.neverCapped": "{name} never hits any league's CP cap — it maxes at {maxCp}. So every IV goes to top level and 15/15/15 wins. No league to pick here.",
+  "spread.titleSimple": "Which IVs to look for",
 } as const;
 
 /**
