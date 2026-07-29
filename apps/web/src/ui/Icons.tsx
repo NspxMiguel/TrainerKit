@@ -125,3 +125,38 @@ export function IconSwords(props: IconProps) {
     </Svg>
   );
 }
+
+export function IconTrophy(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M7 4h10v5a5 5 0 0 1-10 0Z" />
+      <path d="M7 6H4v1a3 3 0 0 0 3 3" />
+      <path d="M17 6h3v1a3 3 0 0 1-3 3" />
+      <path d="M9 20h6" />
+      <path d="M12 14v6" />
+    </Svg>
+  );
+}
+
+export function IconShield(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M12 3 5 6v6c0 4.5 3 7.7 7 9 4-1.3 7-4.5 7-9V6Z" />
+    </Svg>
+  );
+}
+
+export function IconSpark(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M12 3v4" />
+      <path d="M12 17v4" />
+      <path d="M3 12h4" />
+      <path d="M17 12h4" />
+      <path d="m5.6 5.6 2.8 2.8" />
+      <path d="m15.6 15.6 2.8 2.8" />
+      <path d="m18.4 5.6-2.8 2.8" />
+      <path d="m8.4 15.6-2.8 2.8" />
+    </Svg>
+  );
+}

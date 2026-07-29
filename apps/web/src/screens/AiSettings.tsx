@@ -26,6 +26,15 @@ export function AiSettings() {
         {t("ai.title")}
       </div>
 
+      {/* A explicacao fica ACIMA e sempre visivel, nao escondida dentro do
+          painel: quem nao sabe pra que serve nao vai abrir pra descobrir. */}
+      <p className="tk-caption" style={{ margin: "8px 2px 0", lineHeight: 1.5 }}>
+        {t("ai.what")}
+      </p>
+      <p className="tk-caption" style={{ margin: "6px 2px 0", color: "var(--tk-pri)" }}>
+        {t("ai.example")}
+      </p>
+
       <section className="tk-card" style={{ marginTop: 10 }}>
         <button type="button" className="tk-row" onClick={() => setOpen((v) => !v)}>
           <span className="tk-row-label">{t("ai.key")}</span>
@@ -91,9 +100,6 @@ export function AiSettings() {
             ))}
           </div>
 
-          <p className="tk-caption" style={{ lineHeight: 1.5 }}>
-            {t("ai.what")}
-          </p>
           <p className="tk-caption" style={{ lineHeight: 1.5 }}>
             {t("ai.help")}
           </p>

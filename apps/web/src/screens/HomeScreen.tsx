@@ -9,7 +9,15 @@ import { useSetup } from "../onboarding/setup.ts";
 import { useCollection } from "../storage/collection.ts";
 import { useInstallState } from "../storage/install.ts";
 import type { PersistState } from "../storage/persist.ts";
-import { IconAlert, IconCamera, IconPlus } from "../ui/Icons.tsx";
+import { DidYouKnow } from "../ui/DidYouKnow.tsx";
+import {
+  IconAlert,
+  IconCamera,
+  IconPlus,
+  IconSearch,
+  IconShield,
+  IconTrophy,
+} from "../ui/Icons.tsx";
 import { InstallBanner } from "../ui/InstallBanner.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 import { InstallGuide } from "./InstallGuide.tsx";
@@ -19,6 +27,8 @@ import { SpeciesPicker } from "./SpeciesPicker.tsx";
 interface Props {
   dataset: DatasetState;
   persist: PersistState | null;
+  /** A home leva pras outras abas — atalho e atalho, nao decoracao. */
+  onGo: (tab: "pokedex" | "colecao") => void;
 }
 
 const TONE: Record<Action, string> = {
@@ -46,7 +56,7 @@ function greetingKey(): Key {
   return "home.greeting.night";
 }
 
-export function HomeScreen({ dataset, persist }: Props) {
+export function HomeScreen({ dataset, persist, onGo }: Props) {
   const install = useInstallState();
   const setup = useSetup();
   const { items } = useCollection();
@@ -94,6 +104,28 @@ export function HomeScreen({ dataset, persist }: Props) {
       );
 
     return { total: decided.length, agir };
+  }, [items, data]);
+
+  /**
+   * O resumo da colecao.
+   *
+   * Tres numeros que a pessoa quer ver ao abrir o app: quantos tem, quantos sao
+   * 100%, e qual o melhor. Nao decide nada — e o "olha o que eu tenho" que faz
+   * uma colecao ser colecao em vez de planilha.
+   */
+  const resumo = useMemo(() => {
+    if (!items || items.length === 0 || !data) return null;
+    const comIv = items.map((o) => ({
+      owned: o,
+      total: o.ivs.atk + o.ivs.def + o.ivs.hp,
+      species: data.species.find((s) => s.id === o.speciesId),
+    }));
+    const melhor = comIv.reduce((a, b) => (b.total > a.total ? b : a));
+    return {
+      total: items.length,
+      perfeitos: comIv.filter((x) => x.total === 45).length,
+      melhor,
+    };
   }, [items, data]);
 
   // Armazenamento sem garantia de durabilidade. So avisa quando ha risco real:
@@ -177,6 +209,35 @@ export function HomeScreen({ dataset, persist }: Props) {
             <>
           <h2 className="tk-h2">{t("home.yourCollection")}</h2>
 
+          {/* Tres numeros que dao gosto de olhar. Nao decidem nada — e o
+              "olha o que eu tenho" que faz colecao ser colecao. */}
+          {resumo && (
+            <div className="tk-stats">
+              <div className="tk-stat">
+                <span className="tk-stat-n">{resumo.total.toLocaleString(language)}</span>
+                <span className="tk-stat-l">{t("home.stat.saved")}</span>
+              </div>
+              <div className="tk-stat">
+                <span
+                  className="tk-stat-n"
+                  style={resumo.perfeitos > 0 ? { color: "var(--tk-succ)" } : undefined}
+                >
+                  {resumo.perfeitos}
+                </span>
+                <span className="tk-stat-l">{t("home.stat.perfect")}</span>
+              </div>
+              <div className="tk-stat">
+                <span className="tk-stat-n">
+                  {resumo.melhor.total}
+                  <span className="tk-stat-sub">/45</span>
+                </span>
+                <span className="tk-stat-l">
+                  {resumo.melhor.species?.name ?? t("home.stat.best")}
+                </span>
+              </div>
+            </div>
+          )}
+
           {!pendencias ? (
             <div className="tk-empty">
               <div className="tk-empty-mark">
@@ -250,6 +311,41 @@ export function HomeScreen({ dataset, persist }: Props) {
           )}
             </>
           )}
+
+          {/* Atalhos.
+              A home tinha uma acao so e sobrava meia tela vazia. Estes levam
+              direto pras respostas que o app sabe dar e que ninguem descobria
+              sozinho — o ranking e os counters viviam a dois toques de
+              distancia, escondidos dentro da Pokedex. */}
+          <h2 className="tk-h2">{t("home.shortcuts")}</h2>
+          <div className="tk-quickgrid">
+            <button type="button" className="tk-tile tk-tile--raid" onClick={() => onGo("pokedex")}>
+              <IconTrophy size={20} />
+              <span className="tk-tile-t">{t("home.go.raidBest")}</span>
+              <span className="tk-tile-d">{t("home.go.raidBestDetail")}</span>
+            </button>
+            <button type="button" className="tk-tile tk-tile--pvp" onClick={() => onGo("pokedex")}>
+              <IconShield size={20} />
+              <span className="tk-tile-t">{t("home.go.pvpBest")}</span>
+              <span className="tk-tile-d">{t("home.go.pvpBestDetail")}</span>
+            </button>
+            <button type="button" className="tk-tile tk-tile--dex" onClick={() => onGo("pokedex")}>
+              <IconSearch size={20} />
+              <span className="tk-tile-t">{t("home.go.search")}</span>
+              <span className="tk-tile-d">{t("home.go.searchDetail")}</span>
+            </button>
+            <button
+              type="button"
+              className="tk-tile tk-tile--coll"
+              onClick={() => onGo(setup.mode === "colecao" ? "colecao" : "pokedex")}
+            >
+              <IconPlus size={20} />
+              <span className="tk-tile-t">{t("home.go.collection")}</span>
+              <span className="tk-tile-d">{t("home.go.collectionDetail")}</span>
+            </button>
+          </div>
+
+          <DidYouKnow data={dataset.data} />
         </>
       )}
 

@@ -66,6 +66,10 @@ export function DataSourceSettings({ datasetLabel }: Props) {
         {t("settings.gameData")}
       </div>
 
+      <p className="tk-caption" style={{ margin: "8px 2px 0", lineHeight: 1.5 }}>
+        {t("data.what")}
+      </p>
+
       <section className="tk-card" style={{ marginTop: 10 }}>
         <div className="tk-row">
           <span className="tk-row-label">{t("settings.datasetVersion")}</span>
