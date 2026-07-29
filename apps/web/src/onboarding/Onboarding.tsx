@@ -30,8 +30,12 @@ export function Onboarding() {
     <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label="Boas-vindas">
       {step === 0 && (
         <>
+          {/* A mesma marca do icone: tres barras crescentes e a decisao em
+              verde. Antes eram as letras "TK", que diziam o nome e mais nada. */}
           <div className="tk-onb-mark" aria-hidden="true">
-            TK
+            <span />
+            <span />
+            <span />
           </div>
           <h1 className="tk-h1" style={{ marginTop: 24 }}>
             TrainerKit

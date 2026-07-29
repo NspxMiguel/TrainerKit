@@ -641,16 +641,54 @@
 }
 
 /* Marca do onboarding — mesmo gradiente do icone do app. */
+/* A marca do app, nas mesmas proporcoes do icone (ver scripts/make-icons.ts).
+   Aqui ela e feita de tres <span>: o icone gerado e PNG, e um PNG de 84px numa
+   tela de densidade 3 fica mole. Em CSS ela e nitida em qualquer aparelho. */
 .tk-onb-mark {
   width: 84px;
   height: 84px;
   border-radius: 28px;
   background: var(--tk-brand);
-  display: grid;
-  place-items: center;
-  font: 800 30px var(--tk-mono);
-  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding-left: 21px;
   box-shadow: var(--tk-e2);
+}
+
+.tk-onb-mark > span {
+  height: 9px;
+  border-radius: 5px;
+  background: #fff;
+}
+
+.tk-onb-mark > span:nth-child(1) {
+  width: 17px;
+}
+
+.tk-onb-mark > span:nth-child(2) {
+  width: 25px;
+}
+
+/* A terceira e a decisao: vai mais longe, vem no verde de "Investir" e termina
+   em seta — a seta e um triangulo feito com borda, sem SVG nem imagem. */
+.tk-onb-mark > span:nth-child(3) {
+  width: 28px;
+  background: var(--tk-succ);
+  position: relative;
+}
+
+.tk-onb-mark > span:nth-child(3)::after {
+  content: "";
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 2px;
+  border: 8px solid transparent;
+  border-left: 10px solid var(--tk-succ);
+  border-right: 0;
 }
 
 /* Grade de idiomas do setup. */
