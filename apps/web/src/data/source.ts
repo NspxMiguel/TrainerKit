@@ -71,6 +71,35 @@ export function useDataSource(): string | null {
   );
 }
 
+/**
+ * O endereco e utilizavel a partir daqui?
+ *
+ * Um `http://` numa pagina servida por `https://` e bloqueado pelo navegador
+ * como conteudo misto, e o erro que chega ao app e um `TypeError: Failed to
+ * fetch` — indistinguivel de "servidor fora do ar". Melhor dizer o que
+ * realmente aconteceu.
+ */
+export function checkUrl(url: string): string | null {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return "endereço inválido";
+  }
+  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+    return "só http ou https";
+  }
+  if (
+    parsed.protocol === "http:" &&
+    globalThis.location?.protocol === "https:" &&
+    parsed.hostname !== "localhost" &&
+    parsed.hostname !== "127.0.0.1"
+  ) {
+    return "o navegador bloqueia http numa página https — use https";
+  }
+  return null;
+}
+
 /** Endereco efetivo: o do usuario, ou o embarcado. */
 export function resolvedDatasetUrl(): string {
   return current ?? BUILTIN_DATASET;
@@ -86,6 +115,7 @@ export function resolvedDatasetUrl(): string {
  * de quebrar.
  */
 export function looksLikeDataset(value: unknown): string | null {
+  if (typeof value === "string") return "veio texto, não JSON";
   if (typeof value !== "object" || value === null) return "não é um objeto JSON";
 
   const d = value as Record<string, unknown>;
