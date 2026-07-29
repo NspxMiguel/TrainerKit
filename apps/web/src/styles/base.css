@@ -66,6 +66,18 @@ a:hover {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    /*
+     * O ATRASO tambem precisa ir a zero.
+     *
+     * Zerar so a duracao nao basta quando a animacao tem `both` e um delay: o
+     * elemento fica preso no primeiro quadro — opacidade 0 — durante todo o
+     * atraso, e so entao aparece de estalo. Quem pediu menos movimento acabava
+     * vendo a tela montar aos pedacos, que e pior que a animacao original.
+     *
+     * Aparece na cascata do setup, onde os itens entram com 0.02s a 0.17s.
+     */
+    animation-delay: 0ms !important;
+    transition-delay: 0ms !important;
   }
 }
 
