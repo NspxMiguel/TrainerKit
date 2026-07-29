@@ -20,7 +20,7 @@ import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
 import { moveLabel, useLanguage, useShowTranslation } from "../i18n/language.ts";
 import { useT, type Key } from "../i18n/t.ts";
 import { useSetup } from "../onboarding/setup.ts";
-import { typeColor, typeName } from "../sprites/provider.ts";
+import { typeColor, typeKey } from "../sprites/provider.ts";
 import { AssistantCard } from "../ui/AssistantCard.tsx";
 import { IconSwords } from "../ui/Icons.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
@@ -224,18 +224,18 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
             #{String(species.dex).padStart(3, "0")}
           </div>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {species.types.map((t) => (
+            {species.types.map((tp) => (
               <span
-                key={t}
+                key={tp}
                 style={{
                   font: "700 11px var(--tk-font)",
                   padding: "5px 10px",
                   borderRadius: "var(--tk-r-chip)",
-                  background: typeColor(t),
+                  background: typeColor(tp),
                   color: "#fff",
                 }}
               >
-                {typeName(t)}
+                {t(typeKey(tp) as "type.normal")}
               </span>
             ))}
           </div>

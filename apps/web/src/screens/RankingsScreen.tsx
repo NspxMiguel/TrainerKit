@@ -3,7 +3,7 @@ import { useState } from "react";
 import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
 import { moveLabel, useLanguage } from "../i18n/language.ts";
 import { useT } from "../i18n/t.ts";
-import { typeName } from "../sprites/provider.ts";
+import { typeKey } from "../sprites/provider.ts";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 
 interface Props {
@@ -83,7 +83,7 @@ export function RankingsScreen({ data, onPick }: Props) {
               data-on={type === tp || undefined}
               onClick={() => setType(tp)}
             >
-              {typeName(tp)}
+              {t(typeKey(tp) as "type.normal")}
             </button>
           ))}
         </div>
