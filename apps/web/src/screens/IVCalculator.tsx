@@ -18,7 +18,7 @@ import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
 import { useT } from "../i18n/t.ts";
 import { useSetup } from "../onboarding/setup.ts";
 import { IVBar } from "../ui/IVBar.tsx";
-import { addPokemon } from "../storage/collection.ts";
+import { addPokemon, type OwnedPokemon } from "../storage/collection.ts";
 import { AmongYours } from "../ui/AmongYours.tsx";
 import { AssistantCard } from "../ui/AssistantCard.tsx";
 import { VerdictCard } from "../ui/VerdictCard.tsx";
@@ -29,21 +29,31 @@ interface Props {
   species: DatasetSpecies;
   data: Dataset;
   onClose: () => void;
+  /**
+   * O Pokemon salvo, quando a tela e aberta pela Colecao.
+   *
+   * Sem isto o app pedia pra escanear DE NOVO um bicho que ja estava salvo com
+   * IV, PC e nivel — o dado estava no IndexedDB e a tela abria em branco.
+   */
+  owned?: OwnedPokemon | undefined;
 }
 
 const LEAGUES = [GREAT_LEAGUE, ULTRA_LEAGUE, MASTER_LEAGUE];
 
-export function IVCalculator({ species, data, onClose }: Props) {
-  // `null` ate o print ser lido: sem print nao ha o que mostrar.
-  const [ivs, setIvs] = useState<IVs | null>(null);
+export function IVCalculator({ species, data, onClose, owned }: Props) {
+  // Vindo da Colecao, ja nasce com o IV salvo. Sem dono, `null` ate o print ser
+  // lido — sem print nao ha o que mostrar.
+  const [ivs, setIvs] = useState<IVs | null>(owned?.ivs ?? null);
   // Caminho de recuperacao: so aparece depois de o print falhar. Ate la a tela
   // fica no fluxo que o Miguel pediu — anexa e pronto.
   const setup = useSetup();
   const { t, language } = useT();
   const [manual, setManual] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [cp, setCp] = useState("");
-  const [hp, setHp] = useState("");
+  const [cp, setCp] = useState(owned?.cp != null ? String(owned.cp) : "");
+  const [hp, setHp] = useState(owned?.hp != null ? String(owned.hp) : "");
+  // Ja esta na colecao: nao ha o que salvar de novo.
+  const jaSalvo = owned !== undefined;
 
   useEffect(() => {
     const previous = document.body.style.overflow;
@@ -156,6 +166,9 @@ export function IVCalculator({ species, data, onClose }: Props) {
         )}
       </div>
 
+      {/* Quem veio da Colecao ja tem o IV: reescanear e opcional, nao o caminho.
+          Por isso o convite so aparece pra quem chegou sem nada. */}
+      {!jaSalvo && (
       <div className={ivs ? undefined : "tk-empty-slot"}>
         <ScanDropzone
           onRead={(read) => {
@@ -168,6 +181,7 @@ export function IVCalculator({ species, data, onClose }: Props) {
           }}
         />
       </div>
+      )}
 
       {ivs && (
         <>
@@ -210,7 +224,7 @@ export function IVCalculator({ species, data, onClose }: Props) {
         />
       </div>
 
-      {setup.mode === "colecao" && (
+      {setup.mode === "colecao" && !jaSalvo && (
         <button
           type="button"
           className="tk-btn tk-btn--primary tk-btn--block"

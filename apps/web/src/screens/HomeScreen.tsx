@@ -133,7 +133,17 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
   // navegador que suporta modo persistente mas ainda nao concedeu.
   const atRisk = persist?.supported === true && !persist.persisted;
 
-  const showInstall = !install.installed && !install.dismissed;
+  /*
+   * O convite de instalar nao aparece no computador.
+   *
+   * O motivo dele e um so, e e de celular: o Safari apaga os dados de origens
+   * paradas ha 7 dias, e estar na tela de inicio e o que faz o WebKit conceder
+   * armazenamento persistente. No desktop nao ha esse despejo, o navegador ja
+   * fica aberto, e "instale este site" vira uma sugestao estranha — o Miguel
+   * viu isso no PC e a reacao foi exatamente essa.
+   */
+  const showInstall =
+    !install.installed && !install.dismissed && install.platform !== "desktop";
 
   return (
     <>

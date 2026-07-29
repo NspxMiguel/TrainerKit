@@ -4,6 +4,7 @@ import { ACTION_KEYS, decide, ivTotalOf } from "@trainerkit/core";
 
 import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
 import { useT, type Key } from "../i18n/t.ts";
+import type { OwnedPokemon } from "../storage/collection.ts";
 import {
   exportJson,
   importJson,
@@ -32,7 +33,11 @@ export function CollectionScreen({ dataset }: Props) {
   const { items, reload } = useCollection();
   const { t, language } = useT();
   const [picking, setPicking] = useState(false);
-  const [open, setOpen] = useState<DatasetSpecies | null>(null);
+  /* Guarda a ESPECIE e o bicho salvo. Sem o segundo, a tela de IV abria em
+     branco pedindo pra escanear algo que ja estava gravado no aparelho. */
+  const [open, setOpen] = useState<{ species: DatasetSpecies; owned?: OwnedPokemon } | null>(
+    null,
+  );
   const [message, setMessage] = useState<string | null>(null);
 
   const ready = dataset.status === "ready";
@@ -122,7 +127,7 @@ export function CollectionScreen({ dataset }: Props) {
                   type="button"
                   className="tk-owned-open"
                   aria-label={s.name}
-                  onClick={() => setOpen(s)}
+                  onClick={() => setOpen({ species: s, owned })}
                 />
 
                 <SpeciesTile
@@ -258,7 +263,7 @@ export function CollectionScreen({ dataset }: Props) {
         <SpeciesPicker
           species={species}
           onPick={(s) => {
-            setOpen(s);
+            setOpen({ species: s });
             setPicking(false);
           }}
           onClose={() => setPicking(false)}
@@ -267,10 +272,11 @@ export function CollectionScreen({ dataset }: Props) {
 
       {open && ready && (
         <SpeciesDetail
-          species={open}
+          species={open.species}
           data={dataset.data}
           onClose={() => setOpen(null)}
-          onPickSpecies={setOpen}
+          onPickSpecies={(s) => setOpen({ species: s })}
+          owned={open.owned}
         />
       )}
     </>

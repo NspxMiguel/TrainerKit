@@ -93,6 +93,7 @@ export const PT_BR: Dict = {
   "pokedex.whichPokemon": "Qual Pokémon?",
 
   "species.calcIV": "Calcular IV do meu",
+  "species.seeMyIV": "Ver o IV do meu",
   "species.baseStats": "Stats base",
   "species.maxCP": "PC máximo com IV perfeito",
   "species.bestMoves": "Melhores ataques",
@@ -186,7 +187,6 @@ export const PT_BR: Dict = {
   "settings.checking": "Verificando…",
   "settings.unsupported": "Não suportado",
   "settings.spaceUsed": "Espaço usado",
-  "settings.spaceOf": " de {total}",
   "settings.language": "Idioma",
   "settings.showTranslation": "Mostrar tradução dos ataques",
   "settings.showTranslationDetail": "Counter (Contra-atacar)",
