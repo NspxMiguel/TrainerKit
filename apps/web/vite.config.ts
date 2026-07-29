@@ -61,6 +61,16 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
+      /*
+       * O registro e nosso — ver `src/storage/updates.ts`.
+       *
+       * O script que o plugin injeta chama `register()` sem
+       * `updateViaCache: "none"` e sem recarregar quando a versao nova assume.
+       * Com o `max-age=600` do GitHub Pages isso deixava o app instalado
+       * rodando codigo velho por tempo indeterminado — verificado no site
+       * publicado, com a pagina num bundle e o servidor em outro.
+       */
+      injectRegister: false,
       // O dataset tem ~1 MB e precisa estar no precache: sem ele o app abre
       // offline mas nao consegue calcular nada.
       workbox: {
