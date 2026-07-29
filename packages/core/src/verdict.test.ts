@@ -64,7 +64,7 @@ describe("motor de veredito", () => {
   it("o Azumarill 0/15/15 vira investir pelo rank de PvP", () => {
     const v = base("azumarill", { atk: 0, def: 15, hp: 15 });
     expect(v.action).toBe("investir");
-    expect(v.reason).toMatch(/top/i);
+    expect(v.reason.key).toBe("verdict.pvp.top");
   });
 
   it("evolui o mediano, mas transfere o lixo — mesmo evoluivel", () => {
@@ -84,7 +84,7 @@ describe("motor de veredito", () => {
   it("sempre devolve motivo e ao menos um sinal", () => {
     for (const id of ["machamp", "blissey", "magikarp", "mewtwo", "smeargle"]) {
       const v = base(id, { atk: 10, def: 10, hp: 10 });
-      expect(v.reason.trim().length).toBeGreaterThan(0);
+      expect(v.reason.key.length).toBeGreaterThan(0);
       expect(v.signals.length).toBeGreaterThan(0);
       expect(v.confidence).toBeGreaterThan(0);
       expect(v.confidence).toBeLessThanOrEqual(1);

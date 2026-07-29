@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
+import { useT } from "../i18n/t.ts";
 import { SpeciesBrowser } from "../ui/SpeciesBrowser.tsx";
 import { SpeciesDetail } from "./SpeciesDetail.tsx";
 
@@ -17,12 +18,13 @@ interface Props {
  */
 export function PokedexScreen({ dataset }: Props) {
   const [selected, setSelected] = useState<DatasetSpecies | null>(null);
+  const { t } = useT();
 
   if (dataset.status === "loading") {
     return (
       <>
-        <h1 className="tk-h1">Pokédex</h1>
-        <p className="tk-body">Carregando dados do jogo…</p>
+        <h1 className="tk-h1">{t("pokedex.title")}</h1>
+        <p className="tk-body">{t("common.loadingGameData")}</p>
       </>
     );
   }
@@ -30,15 +32,15 @@ export function PokedexScreen({ dataset }: Props) {
   if (dataset.status === "error") {
     return (
       <>
-        <h1 className="tk-h1">Pokédex</h1>
-        <p className="tk-body">Não consegui carregar o dataset. {dataset.message}</p>
+        <h1 className="tk-h1">{t("pokedex.title")}</h1>
+        <p className="tk-body">{t("pokedex.loadError", { message: dataset.message })}</p>
       </>
     );
   }
 
   return (
     <>
-      <h1 className="tk-h1">Pokédex</h1>
+      <h1 className="tk-h1">{t("pokedex.title")}</h1>
       <SpeciesBrowser species={dataset.data.species} onPick={setSelected} />
 
       {selected && (

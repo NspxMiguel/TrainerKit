@@ -131,16 +131,16 @@ describe("auditoria de todas as especies", () => {
         levelCap: data.version.levelCap,
       });
 
-      if (!o.headline.trim()) ruins.push(`${s.id}: sem manchete`);
+      if (!o.headline.key) ruins.push(`${s.id}: sem manchete`);
       if (o.observations.length === 0) ruins.push(`${s.id}: sem observacao`);
 
       // "fraco em tudo" e "bom pra X" nao podem sair juntos.
-      const fraco = o.observations.some((x) => x.text.includes("Fraco nos dois"));
+      const fraco = o.observations.some((x) => x.text.key === "assistant.profile.weak");
       const bom = o.observations.some((x) => x.tone === "bom");
       if (fraco && bom) ruins.push(`${s.id}: diz fraco e bom ao mesmo tempo`);
 
       for (const obs of o.observations) {
-        if (!obs.evidence.trim()) ruins.push(`${s.id}: observacao sem dado`);
+        if (!obs.evidence.key) ruins.push(`${s.id}: observacao sem dado`);
       }
     }
     expect(ruins, ruins.slice(0, 10).join(" | ")).toHaveLength(0);

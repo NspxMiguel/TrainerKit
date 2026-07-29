@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 
+import { useT, type Key } from "../i18n/t.ts";
 import type { Platform } from "../storage/install.ts";
 
 interface Props {
@@ -10,38 +11,38 @@ interface Props {
 }
 
 interface Step {
-  text: string;
+  textKey: Key;
   /** Glifo que imita o icone real do sistema, pra achar o botao na tela. */
   glyph?: string;
 }
 
-const STEPS: Record<Platform, { title: string; browser: string; steps: Step[] }> = {
+const STEPS: Record<Platform, { titleKey: Key; browserKey: Key; steps: Step[] }> = {
   ios: {
-    title: "Instalar no iPhone",
-    browser: "Precisa ser pelo Safari — no iPhone só ele consegue instalar.",
+    titleKey: "install.ios.title",
+    browserKey: "install.ios.browser",
     steps: [
-      { text: "Toque no botão Compartilhar, na barra de baixo.", glyph: "􀈂" },
-      { text: "Role a lista e toque em “Adicionar à Tela de Início”.", glyph: "＋" },
-      { text: "Toque em “Adicionar”, no canto superior direito." },
-      { text: "Pronto. Abra o TrainerKit pelo ícone, não mais pelo Safari." },
+      { textKey: "install.ios.step1", glyph: "\u{F0202}" },
+      { textKey: "install.ios.step2", glyph: "＋" },
+      { textKey: "install.ios.step3" },
+      { textKey: "install.ios.step4" },
     ],
   },
   android: {
-    title: "Instalar no Android",
-    browser: "Funciona no Chrome, Edge, Opera ou Samsung Internet.",
+    titleKey: "install.android.title",
+    browserKey: "install.android.browser",
     steps: [
-      { text: "Toque no menu de três pontos, no canto superior direito.", glyph: "⋮" },
-      { text: "Toque em “Instalar app” ou “Adicionar à tela inicial”." },
-      { text: "Confirme em “Instalar”." },
-      { text: "Pronto. O TrainerKit vira um app na sua gaveta." },
+      { textKey: "install.android.step1", glyph: "⋮" },
+      { textKey: "install.android.step2" },
+      { textKey: "install.android.step3" },
+      { textKey: "install.android.step4" },
     ],
   },
   desktop: {
-    title: "Instalar no computador",
-    browser: "Funciona no Chrome, Edge ou Brave.",
+    titleKey: "install.desktop.title",
+    browserKey: "install.desktop.browser",
     steps: [
-      { text: "Clique no ícone de instalar, na barra de endereço.", glyph: "⊕" },
-      { text: "Confirme em “Instalar”." },
+      { textKey: "install.desktop.step1", glyph: "⊕" },
+      { textKey: "install.desktop.step2" },
     ],
   },
 };
@@ -64,45 +65,42 @@ export function InstallGuide({ platform, promptInstall, onClose }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
+  const { t } = useT();
   const guide = STEPS[platform];
 
   return createPortal(
-    <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={guide.title}>
+    <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={t(guide.titleKey)}>
       <header className="tk-sheet-head">
-        <button type="button" className="tk-sheet-close" onClick={onClose} aria-label="Fechar">
+        <button type="button" className="tk-sheet-close" onClick={onClose} aria-label={t("common.close")}>
           ‹
         </button>
-        <h2 className="tk-sheet-title">{guide.title}</h2>
+        <h2 className="tk-sheet-title">{t(guide.titleKey)}</h2>
       </header>
 
       <section className="tk-card">
-        <div className="tk-overline">Por que vale a pena</div>
+        <div className="tk-overline">{t("install.why")}</div>
         <ul className="tk-reasons">
-          <li>Abre direto do ícone, em tela cheia, sem a barra do navegador.</li>
-          <li>Funciona offline — os dados do jogo já ficam salvos no aparelho.</li>
+          <li>{t("install.why.fullscreen")}</li>
+          <li>{t("install.why.offline")}</li>
           {platform === "ios" && (
-            <li>
-              <strong>E o mais importante:</strong> o Safari apaga os dados de sites que
-              passam 7 dias sem uso. Instalado, ele para de fazer isso — é o que protege a
-              sua coleção.
-            </li>
+            <li>{t("install.why.iosImportant")}</li>
           )}
           {platform === "android" && (
-            <li>Recebe print direto pelo botão Compartilhar do sistema.</li>
+            <li>{t("install.why.androidShare")}</li>
           )}
         </ul>
       </section>
 
       <p className="tk-caption" style={{ margin: "18px 2px 12px", lineHeight: 1.5 }}>
-        {guide.browser}
+        {t(guide.browserKey)}
       </p>
 
       <ol className="tk-steps">
         {guide.steps.map((step, i) => (
-          <li key={step.text}>
+          <li key={step.textKey}>
             <span className="tk-step-num">{i + 1}</span>
             <span className="tk-step-text">
-              {step.text}
+              {t(step.textKey)}
               {step.glyph && <span className="tk-step-glyph">{step.glyph}</span>}
             </span>
           </li>
@@ -120,7 +118,7 @@ export function InstallGuide({ platform, promptInstall, onClose }: Props) {
             });
           }}
         >
-          Instalar agora
+          {t("install.now")}
         </button>
       )}
 
@@ -130,7 +128,7 @@ export function InstallGuide({ platform, promptInstall, onClose }: Props) {
         style={{ marginTop: 10 }}
         onClick={onClose}
       >
-        Fechar
+        {t("common.close")}
       </button>
     </div>,
     document.body,

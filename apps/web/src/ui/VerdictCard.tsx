@@ -1,6 +1,8 @@
 import { useState } from "react";
 
-import { ACTION_LABELS, decide, formatTrace, type VerdictInput } from "@trainerkit/core";
+import { ACTION_KEYS, decide, formatTrace, type VerdictInput } from "@trainerkit/core";
+
+import { useT, type Key } from "../i18n/t.ts";
 
 const TONE: Record<string, string> = {
   investir: "var(--tk-succ)",
@@ -20,12 +22,13 @@ const TONE: Record<string, string> = {
  */
 export function VerdictCard(props: VerdictInput) {
   const verdict = decide(props);
+  const { t, tm } = useT();
   const [traceOpen, setTraceOpen] = useState(false);
   const color = TONE[verdict.action] ?? "var(--tk-txt)";
 
   return (
     <section className="tk-card" style={{ borderColor: color }}>
-      <div className="tk-overline">Veredito</div>
+      <div className="tk-overline">{t("verdict.title")}</div>
 
       <div
         style={{
@@ -35,11 +38,11 @@ export function VerdictCard(props: VerdictInput) {
           margin: "8px 0 6px",
         }}
       >
-        {ACTION_LABELS[verdict.action]}
+        {t(ACTION_KEYS[verdict.action] as Key)}
       </div>
 
       <p className="tk-body" style={{ color: "var(--tk-txt)" }}>
-        {verdict.reason}
+        {tm(verdict.reason)}
       </p>
 
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 14 }}>
@@ -61,7 +64,7 @@ export function VerdictCard(props: VerdictInput) {
           />
         </div>
         <span className="tk-caption">
-          confiança {Math.round(verdict.confidence * 100)}%
+          {t("verdict.confidence", { percent: Math.round(verdict.confidence * 100) })}
         </span>
       </div>
 
@@ -72,7 +75,7 @@ export function VerdictCard(props: VerdictInput) {
         onClick={() => setTraceOpen((v) => !v)}
         aria-expanded={traceOpen}
       >
-        {traceOpen ? "Esconder" : "Como cheguei nisso"}
+        {traceOpen ? t("verdict.hide") : t("verdict.howIGotHere")}
       </button>
 
       {traceOpen && (
@@ -84,13 +87,12 @@ export function VerdictCard(props: VerdictInput) {
                 <span style={{ fontFamily: "var(--tk-mono)", color: "var(--tk-txt2)" }}>
                   {s.rule}
                 </span>{" "}
-                — {s.because}
+                — {tm(s.because)}
               </div>
             ))}
           </div>
           <p className="tk-caption" style={{ marginTop: 12, lineHeight: 1.5 }}>
-            A confiança é a concordância entre as regras. Quando duas puxam pra lados
-            opostos, ela cai — e deve cair mesmo.
+            {t("verdict.traceNote")}
           </p>
         </>
       )}

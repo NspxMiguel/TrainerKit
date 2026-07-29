@@ -15,6 +15,7 @@ import {
 } from "@trainerkit/core";
 
 import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
+import { useT } from "../i18n/t.ts";
 import { useSetup } from "../onboarding/setup.ts";
 import { IVBar } from "../ui/IVBar.tsx";
 import { addPokemon } from "../storage/collection.ts";
@@ -37,6 +38,7 @@ export function IVCalculator({ species, data, onClose }: Props) {
   // Caminho de recuperacao: so aparece depois de o print falhar. Ate la a tela
   // fica no fluxo que o Miguel pediu — anexa e pronto.
   const setup = useSetup();
+  const { t, language } = useT();
   const [manual, setManual] = useState(false);
   const [saved, setSaved] = useState(false);
   const [cp, setCp] = useState("");
@@ -85,11 +87,11 @@ export function IVCalculator({ species, data, onClose }: Props) {
   return createPortal(
     <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label="Calcular IV">
       <header className="tk-sheet-head">
-        <button type="button" className="tk-sheet-close" onClick={onClose} aria-label="Voltar">
+        <button type="button" className="tk-sheet-close" onClick={onClose} aria-label={t("common.back")}>
           ‹
         </button>
-        <h2 className="tk-sheet-title">IV do meu {species.name}</h2>
-        <span className="tk-beta">BETA</span>
+        <h2 className="tk-sheet-title">{t("iv.title", { name: species.name })}</h2>
+        <span className="tk-beta">{t("common.beta")}</span>
       </header>
 
       <div style={{ display: "flex", gap: 14, alignItems: "center", marginBottom: 20 }}>
@@ -141,30 +143,28 @@ export function IVCalculator({ species, data, onClose }: Props) {
       {ivs && (
         <>
       <div className="tk-overline" style={{ display: "block", marginTop: 26 }}>
-        {manual ? "Coloque manualmente" : "O que ele leu"}
+        {manual ? t("iv.enterByHand") : t("iv.whatItRead")}
       </div>
       <section className="tk-card" style={{ marginTop: 10, display: "grid", gap: 18 }}>
         <IVBar
-          label="Ataque"
+          label={t("common.attack")}
           value={ivs.atk}
           {...(manual ? { onChange: (atk: number) => setIvs((v) => ({ ...v!, atk })) } : {})}
         />
         <IVBar
-          label="Defesa"
+          label={t("common.defense")}
           value={ivs.def}
           {...(manual ? { onChange: (def: number) => setIvs((v) => ({ ...v!, def })) } : {})}
         />
         <IVBar
-          label="PS"
+          label={t("common.stamina")}
           value={ivs.hp}
           {...(manual ? { onChange: (hp: number) => setIvs((v) => ({ ...v!, hp })) } : {})}
         />
       </section>
 
       <p className="tk-caption" style={{ margin: "10px 2px 0", lineHeight: 1.5 }}>
-        {manual
-          ? "Arraste cada barra até ficar igual à do jogo. Confira as estrelas acima: se baterem com as do jogo, você acertou."
-          : "Confira as estrelas acima contra as do jogo — é a forma mais rápida de perceber uma leitura errada."}
+        {manual ? t("iv.dragBars") : t("iv.checkStars")}
       </p>
 
       <div style={{ marginTop: 20 }}>
@@ -203,16 +203,17 @@ export function IVCalculator({ species, data, onClose }: Props) {
             }).then(() => setSaved(true));
           }}
         >
-          {saved ? "Salvo na coleção" : "Salvar na coleção"}
+          {saved ? t("iv.savedToCollection") : t("iv.saveToCollection")}
         </button>
       )}
 
       <div className="tk-overline" style={{ display: "block", marginTop: 26 }}>
-        Descobrir o nível <span style={{ textTransform: "none" }}>(opcional)</span>
+        {t("iv.findLevel")}{" "}
+        <span style={{ textTransform: "none" }}>{t("common.optional")}</span>
       </div>
       <section className="tk-card" style={{ marginTop: 10, display: "flex", gap: 12 }}>
         <label className="tk-field">
-          <span className="tk-caption">PC</span>
+          <span className="tk-caption">{t("common.cp")}</span>
           <div className="tk-search">
             <input
               type="number"
@@ -220,12 +221,12 @@ export function IVCalculator({ species, data, onClose }: Props) {
               placeholder="3566"
               value={cp}
               onChange={(e) => setCp(e.target.value)}
-              aria-label="PC"
+              aria-label={t("common.cp")}
             />
           </div>
         </label>
         <label className="tk-field">
-          <span className="tk-caption">PS</span>
+          <span className="tk-caption">{t("common.stamina")}</span>
           <div className="tk-search">
             <input
               type="number"
@@ -233,7 +234,7 @@ export function IVCalculator({ species, data, onClose }: Props) {
               placeholder="172"
               value={hp}
               onChange={(e) => setHp(e.target.value)}
-              aria-label="PS"
+              aria-label={t("common.stamina")}
             />
           </div>
         </label>
@@ -244,36 +245,41 @@ export function IVCalculator({ species, data, onClose }: Props) {
           {levels.length === 0 ? (
             <div className="tk-banner tk-banner--warn" role="alert">
               <div className="tk-banner-text">
-                <div className="tk-banner-title">Esses números não fecham</div>
+                <div className="tk-banner-title">{t("iv.impossible.title")}</div>
                 <p className="tk-banner-body">
-                  Nenhum nível dá PC {cpNum} com PS {hpNum} para um {species.name} com
-                  esses IV. Confira as barras, os números — ou se é essa espécie mesmo.
+                  {t("iv.impossible.body", {
+                    cp: cpNum.toLocaleString(language),
+                    hp: hpNum,
+                    name: species.name,
+                  })}
                 </p>
               </div>
             </div>
           ) : (
             <section className="tk-card">
               <div className="tk-row">
-                <span className="tk-row-label">Nível</span>
+                <span className="tk-row-label">{t("iv.levelIs")}</span>
                 <span className="tk-row-value">
-                  {levels.map((l) => l.level).join(" ou ")}
+                  {levels.map((l) => l.level).join(` ${t("iv.or")} `)}
                 </span>
               </div>
               <div className="tk-row">
-                <span className="tk-row-label">PC no nível 40 com esses IV</span>
+                <span className="tk-row-label">{t("iv.cpAt40")}</span>
                 <span className="tk-row-value">
-                  {computeCPAtLevel(data.cpm, species.baseStats, ivs, 40).toLocaleString("pt-BR")}
+                  {computeCPAtLevel(data.cpm, species.baseStats, ivs, 40).toLocaleString(language)}
                 </span>
               </div>
               <div className="tk-row">
-                <span className="tk-row-label">PC no nível {data.version.levelCap}</span>
+                <span className="tk-row-label">
+                  {t("iv.cpAtCap", { level: data.version.levelCap })}
+                </span>
                 <span className="tk-row-value">
                   {computeCPAtLevel(
                     data.cpm,
                     species.baseStats,
                     ivs,
                     data.version.levelCap,
-                  ).toLocaleString("pt-BR")}
+                  ).toLocaleString(language)}
                 </span>
               </div>
             </section>
@@ -292,7 +298,7 @@ export function IVCalculator({ species, data, onClose }: Props) {
       )}
 
       <div className="tk-overline" style={{ display: "block", marginTop: 26 }}>
-        Posição em PvP
+        {t("iv.pvpPosition")}
       </div>
       <section className="tk-card" style={{ marginTop: 10 }}>
         {ranks?.map(({ league, ranked }) => (
@@ -300,15 +306,13 @@ export function IVCalculator({ species, data, onClose }: Props) {
             <span className="tk-row-label">{league.name}</span>
             <span className="tk-row-value">
               {ranked
-                ? `#${ranked.rank.toLocaleString("pt-BR")} · ${(ranked.percent * 100).toFixed(1)}%`
-                : "não entra"}
+                ? `#${ranked.rank.toLocaleString(language)} · ${(ranked.percent * 100).toFixed(1)}%`
+                : t("iv.notEligible")}
             </span>
           </div>
         ))}
         <p className="tk-caption" style={{ marginTop: 12, lineHeight: 1.5 }}>
-          Em liga com teto de PC o 100% costuma ser <em>pior</em>: ataque alto infla o PC e
-          obriga a parar num nível mais baixo, custando defesa e PS. É por isso que a
-          posição importa mais que a porcentagem.
+          {t("iv.pvpNote")}
         </p>
       </section>
         </>

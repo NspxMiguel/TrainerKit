@@ -1,4 +1,5 @@
 import type { Platform } from "../storage/install.ts";
+import { useT } from "../i18n/t.ts";
 import { IconDownload } from "./Icons.tsx";
 
 interface Props {
@@ -19,18 +20,17 @@ interface Props {
  */
 export function InstallBanner({ platform, atRisk, onOpen, onDismiss }: Props) {
   const urgent = platform === "ios" && atRisk;
+  const { t } = useT();
 
   return (
     <div className={`tk-banner ${urgent ? "tk-banner--warn" : "tk-banner--info"}`}>
       <IconDownload size={20} />
       <div className="tk-banner-text">
         <div className="tk-banner-title">
-          {urgent ? "Instale para não perder sua coleção" : "Adicione à tela de início"}
+          {urgent ? t("install.banner.urgentTitle") : t("install.banner.title")}
         </div>
         <p className="tk-banner-body">
-          {urgent
-            ? "O Safari apaga os dados de sites parados há 7 dias. Instalado, o TrainerKit fica protegido."
-            : "Abre em tela cheia, funciona offline e mantém seus dados salvos."}
+          {urgent ? t("install.banner.urgentBody") : t("install.banner.body")}
         </p>
         <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
           <button
@@ -39,7 +39,7 @@ export function InstallBanner({ platform, atRisk, onOpen, onDismiss }: Props) {
             style={{ height: 36, fontSize: 13, padding: "0 14px" }}
             onClick={onOpen}
           >
-            Como instalar
+            {t("install.banner.how")}
           </button>
           <button
             type="button"
@@ -47,7 +47,7 @@ export function InstallBanner({ platform, atRisk, onOpen, onDismiss }: Props) {
             style={{ height: 36, fontSize: 13, padding: "0 14px" }}
             onClick={onDismiss}
           >
-            Agora não
+            {t("install.banner.later")}
           </button>
         </div>
       </div>

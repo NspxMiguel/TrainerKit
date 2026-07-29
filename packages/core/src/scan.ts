@@ -48,7 +48,7 @@ export type ScanFailure =
 
 export type ScanResult =
   | { ok: true; ivs: IVs; bars: [ScanBar, ScanBar, ScanBar] }
-  | { ok: false; reason: ScanFailure; detail: string; bars: ScanBar[] };
+  | { ok: false; reason: ScanFailure; bars: ScanBar[] };
 
 /**
  * Cores das barras, MEDIDAS em prints reais de 2026.
@@ -273,7 +273,6 @@ export function scanAppraisalBars(bmp: Bitmap): ScanResult {
     return {
       ok: false,
       reason: "sem-barras",
-      detail: "Não encontrei nenhuma barra laranja ou vermelha na imagem.",
       bars: [],
     };
   }
@@ -337,10 +336,6 @@ export function scanAppraisalBars(bmp: Bitmap): ScanResult {
     return {
       ok: false,
       reason: bars.length === 0 ? "barra-curta-demais" : "barras-insuficientes",
-      detail:
-        bars.length === 0
-          ? "As barras ficaram pequenas demais na imagem para uma leitura confiável."
-          : `Achei ${bars.length} barra(s), preciso das três (Ataque, Defesa e PS).`,
       bars,
     };
   }
@@ -352,7 +347,6 @@ export function scanAppraisalBars(bmp: Bitmap): ScanResult {
     return {
       ok: false,
       reason: "larguras-divergentes",
-      detail: "Achei barras, mas com larguras diferentes demais para serem as três da avaliação.",
       bars,
     };
   }

@@ -1,4 +1,5 @@
 import { computeCPAtLevel, type CpmTable } from "./cp.js";
+import { msg, type Message } from "./message.js";
 import { GREAT_LEAGUE, MASTER_LEAGUE, ULTRA_LEAGUE, rankOf, type League } from "./pvp.js";
 import type { BaseStats, IVs } from "./types.js";
 
@@ -25,8 +26,8 @@ export interface Signal {
   towards: Action;
   /** De 0 a 1. Quanto a regra "acredita" no que diz. */
   weight: number;
-  /** Em portugues claro, para virar a frase de motivo. */
-  because: string;
+  /** A frase de motivo, como chave + numeros. A interface e quem traduz. */
+  because: Message;
 }
 
 export interface Verdict {
@@ -34,7 +35,7 @@ export interface Verdict {
   /** 0 a 1. Concordancia entre os sinais, nao certeza absoluta. */
   confidence: number;
   /** A frase unica de motivo. Nunca duas — regra do prototipo. */
-  reason: string;
+  reason: Message;
   /** Todos os sinais, para o Trace Viewer. */
   signals: Signal[];
 }
@@ -58,11 +59,15 @@ export interface VerdictInput {
 
 const ACTIONS: readonly Action[] = ["investir", "evoluir", "guardar", "transferir"];
 
-export const ACTION_LABELS: Record<Action, string> = {
-  investir: "Investir",
-  evoluir: "Evoluir",
-  guardar: "Guardar",
-  transferir: "Transferir",
+/**
+ * Chave de traducao de cada acao. Nao e o rotulo — o rotulo depende do idioma e
+ * mora no dicionario da interface.
+ */
+export const ACTION_KEYS: Record<Action, string> = {
+  investir: "action.invest",
+  evoluir: "action.evolve",
+  guardar: "action.keep",
+  transferir: "action.transfer",
 };
 
 /** A melhor posicao entre as tres ligas, que e o que decide se vale pra PvP. */
@@ -100,14 +105,14 @@ export function decide(input: VerdictInput): Verdict {
         rule: "evolucao.disponivel",
         towards: "evoluir",
         weight: 0.95,
-        because: `você já tem os ${need} doces`,
+        because: msg("verdict.evolution.ready", { candy: need }),
       });
     } else {
       signals.push({
         rule: "evolucao.pendente",
         towards: "evoluir",
         weight: 0.7,
-        because: "ele ainda evolui, e evoluir muda tudo",
+        because: msg("verdict.evolution.pending"),
       });
     }
   }
@@ -120,14 +125,14 @@ export function decide(input: VerdictInput): Verdict {
       rule: "pvp.rank",
       towards: "investir",
       weight: 0.9,
-      because: `é top ${best.rank} na ${best.league.name}`,
+      because: msg("verdict.pvp.top", { rank: best.rank, league: best.league.name }),
     });
   } else if (best && best.rank <= 500) {
     signals.push({
       rule: "pvp.rank",
       towards: "guardar",
       weight: 0.55,
-      because: `é #${best.rank.toLocaleString("pt-BR")} na ${best.league.name}`,
+      because: msg("verdict.pvp.good", { rank: best.rank, league: best.league.name }),
     });
   }
 
@@ -140,7 +145,7 @@ export function decide(input: VerdictInput): Verdict {
       rule: "raide.ataque",
       towards: "investir",
       weight: 0.85,
-      because: `ataque base ${input.baseStats.atk} com IV ${input.ivs.atk}`,
+      because: msg("verdict.raid.attack", { base: input.baseStats.atk, iv: input.ivs.atk }),
     });
   }
 
@@ -151,7 +156,7 @@ export function decide(input: VerdictInput): Verdict {
       rule: "shadow.bonus",
       towards: "guardar",
       weight: 0.75,
-      because: "sombroso bate 20% mais forte — não purifique sem pensar",
+      because: msg("verdict.shadow.bonus"),
     });
   }
 
@@ -160,7 +165,7 @@ export function decide(input: VerdictInput): Verdict {
       rule: "lucky.custo",
       towards: "investir",
       weight: 0.6,
-      because: "sendo lucky, subir custa metade da poeira",
+      because: msg("verdict.lucky.cost"),
     });
   }
 
@@ -170,7 +175,7 @@ export function decide(input: VerdictInput): Verdict {
       rule: "iv.fraco",
       towards: "transferir",
       weight: 0.8,
-      because: `IV ${total} de 45`,
+      because: msg("verdict.iv.weak", { total }),
     });
   }
 
@@ -179,7 +184,7 @@ export function decide(input: VerdictInput): Verdict {
       rule: "especie.fraca",
       towards: "transferir",
       weight: 0.5,
-      because: "a espécie não rende nem atacando nem aguentando",
+      because: msg("verdict.species.weak"),
     });
   }
 
@@ -189,7 +194,7 @@ export function decide(input: VerdictInput): Verdict {
       rule: "padrao",
       towards: "guardar",
       weight: 0.4,
-      because: "não há nada que peça ação agora",
+      because: msg("verdict.default"),
     });
   }
 

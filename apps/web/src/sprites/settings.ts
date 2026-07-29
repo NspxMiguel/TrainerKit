@@ -31,19 +31,11 @@ export const DEFAULT_SETTINGS: SpriteSettings = {
   source: "off",
 };
 
-export const SOURCE_LABELS: Record<BuiltinSourceId, { title: string; detail: string }> = {
-  off: {
-    title: "Sem imagens",
-    detail: "Só o selo com a cor do tipo e as iniciais. Nada é baixado.",
-  },
-  "pokeapi-artwork": {
-    title: "Arte oficial",
-    detail: "Ilustração grande, do PokeAPI. Baixada só ao ver, e fica guardada.",
-  },
-  "pokeapi-home": {
-    title: "Renders 3D",
-    detail: "Modelos do Pokémon HOME. Estilo mais uniforme entre as espécies.",
-  },
+/** Chaves de traducao de cada fonte embutida. O texto mora no dicionario. */
+export const SOURCE_KEYS: Record<BuiltinSourceId, { title: string; detail: string }> = {
+  off: { title: "sprites.none", detail: "sprites.noneDetail" },
+  "pokeapi-artwork": { title: "sprites.official", detail: "sprites.officialDetail" },
+  "pokeapi-home": { title: "sprites.home", detail: "sprites.homeDetail" },
 };
 
 function read(): SpriteSettings {
