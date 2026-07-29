@@ -3,11 +3,16 @@ import { createPortal } from "react-dom";
 
 import {
   CONTEXT_KEYS,
+  GREAT_LEAGUE,
+  MASTER_LEAGUE,
+  ULTRA_LEAGUE,
   computeCPAtLevel,
   rankMovesets,
   shadowDamageMultiplier,
+  topSpreads,
   withFrustration,
   type Context,
+  type League,
   type MoveWithPvp,
 } from "@trainerkit/core";
 
@@ -27,6 +32,11 @@ interface Props {
 }
 
 const PERFECT = { atk: 15, def: 15, hp: 15 };
+
+const LEAGUES: readonly League[] = [GREAT_LEAGUE, ULTRA_LEAGUE, MASTER_LEAGUE];
+
+/** Quantas linhas do topo mostrar. Dez cabe na tela e ja basta pra caçar. */
+const TOP_SPREADS = 10;
 
 /**
  * O maior stat base que existe no jogo, usado para escalar as barras.
@@ -68,6 +78,7 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
   const [calcOpen, setCalcOpen] = useState(false);
   const [context, setContext] = useState<Context>("general");
   const [shadow, setShadow] = useState(false);
+  const [league, setLeague] = useState<League>(GREAT_LEAGUE);
   const setup = useSetup();
   const language = useLanguage();
   const { t } = useT();
@@ -165,6 +176,18 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
 
   // Ranquear 4.096 combinacoes nao e barato; sem memo isso rodaria de novo a
   // cada clique no seletor de moveset, que nao tem nada a ver com a liga.
+  // Ranquear 4.096 combinacoes nao e barato; sem memo isso rodaria de novo a
+  // cada clique no seletor de moveset, que nao tem nada a ver com a liga.
+  const spreads = useMemo(
+    () => topSpreads(data.cpm, species.baseStats, league, TOP_SPREADS),
+    [data.cpm, species.baseStats, league],
+  );
+
+  // A especie nem encosta no teto da liga: todo mundo sobe ate o nivel maximo e
+  // o teto de PC nao restringe nada. Muda o que ha para explicar embaixo.
+  const semTeto =
+    league.cpCap !== null && (spreads[0]?.level ?? 0) >= data.version.levelCap;
+
   const evolutions = species.evolvesInto
     .map((id) => data.species.find((s) => s.id === id))
     .filter((s): s is DatasetSpecies => s !== undefined);
@@ -360,6 +383,72 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
             </div>
           ))
         )}
+      </section>
+
+      {/* O IV que se procura, por liga.
+          A tela do jogo mostra porcentagem, e porcentagem e a metrica errada
+          aqui: em liga com teto o 100% quase sempre perde. */}
+      <div className="tk-overline" style={{ display: "block", marginTop: 24 }}>
+        {t("spread.title")}
+      </div>
+
+      <div style={{ display: "flex", gap: 6, margin: "10px 0" }}>
+        {LEAGUES.map((l) => (
+          <button
+            key={l.id}
+            type="button"
+            className={`tk-btn ${league.id === l.id ? "tk-btn--primary" : "tk-btn--secondary"}`}
+            style={{ flex: 1, height: 40, fontSize: 12, padding: 0 }}
+            aria-pressed={league.id === l.id}
+            onClick={() => setLeague(l)}
+          >
+            {l.name.replace(" League", "")}
+          </button>
+        ))}
+      </div>
+
+      {/* Grade propria em vez de `tk-row`: sao dez linhas de numeros curtos, e
+          o espacamento de linha de formulario deixava a tabela com mais de mil
+          pixels de altura, com o IV quebrando em duas linhas. */}
+      <section className="tk-card">
+        <div className="tk-spread-head">
+          <span>{t("spread.rank")}</span>
+          <span>{t("spread.atk")}</span>
+          <span>{t("spread.def")}</span>
+          <span>{t("spread.hp")}</span>
+          <span>{t("spread.level")}</span>
+          <span>{t("spread.cp")}</span>
+        </div>
+
+        {spreads.map((sp) => (
+          <div
+            key={`${sp.ivs.atk}-${sp.ivs.def}-${sp.ivs.hp}`}
+            className={`tk-spread${sp.rank === 1 ? " tk-spread--top" : ""}`}
+          >
+            <span>{sp.rank}</span>
+            <span>{sp.ivs.atk}</span>
+            <span>{sp.ivs.def}</span>
+            <span>{sp.ivs.hp}</span>
+            <span className="tk-spread-dim">{sp.level}</span>
+            <span>{sp.cp.toLocaleString(language)}</span>
+          </div>
+        ))}
+
+        {/* A explicacao segue a TABELA, nao a liga: Azumarill na Ultra nem
+            chega ao teto, entao o topo dele E 15/15/15 — e o texto padrao
+            ficava dizendo o contrario logo acima da tabela. */}
+        <p className="tk-caption" style={{ marginTop: 12, lineHeight: 1.5 }}>
+          {league.cpCap === null
+            ? t("spread.noCap")
+            : semTeto
+              ? t("spread.cantReach", {
+                  name: species.name,
+                  cap: league.cpCap.toLocaleString(language),
+                  level: data.version.levelCap,
+                  maxCp: cpAt(data.version.levelCap).toLocaleString(language),
+                })
+              : t("spread.capped", { cap: league.cpCap.toLocaleString(language) })}
+        </p>
       </section>
 
       {evolutions.length > 0 && (

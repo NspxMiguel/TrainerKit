@@ -310,6 +310,16 @@ const EN = {
   "sprites.manifestHelp": "The manifest is a JSON with {nameField} and {templateField} — for example {example}. In a .zip, the file name is what matches: {byDex} by Pokédex number, {byName} by name. Folders are ignored.",
   "home.quickScan": "Scan a screenshot",
   "home.quickScanDetail": "Exact IVs and a verdict",
+  "spread.title": "Best IVs by league",
+  "spread.rank": "#",
+  "spread.atk": "Atk",
+  "spread.def": "Def",
+  "spread.hp": "HP",
+  "spread.level": "level",
+  "spread.cp": "CP",
+  "spread.noCap": "No CP cap, nothing punishes high attack: here 100% really is best.",
+  "spread.cantReach": "{name} doesn't even reach this league's {cap} CP — at level {level} it stops at {maxCp}. With no cap to punish it, 100% is best again, but entering here is already a handicap.",
+  "spread.capped": "With a {cap} CP cap, high attack inflates CP and forces a lower level. That's why the top is almost never 15/15/15 — and why the percentage the game shows misleads.",
 } as const;
 
 /**

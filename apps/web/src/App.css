@@ -1078,3 +1078,49 @@
   font: 400 22px/1 var(--tk-font);
   color: var(--tk-txt4);
 }
+
+/* --------------------------------------------------- tabela de IV por liga */
+
+/* Grade fixa em vez de linha de formulario: sao dez linhas de numeros curtos,
+   e o espacamento do `.tk-row` estourava a altura e quebrava o IV em duas. */
+.tk-spread-head,
+.tk-spread {
+  display: grid;
+  grid-template-columns: 24px repeat(3, 1fr) 44px 52px;
+  gap: 6px;
+  align-items: center;
+}
+
+.tk-spread-head {
+  font: 500 11px var(--tk-font);
+  color: var(--tk-txt3);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--tk-line);
+}
+
+.tk-spread {
+  font: 500 13px var(--tk-mono);
+  padding: 9px 0;
+  border-bottom: 1px solid var(--tk-line);
+}
+
+.tk-spread:last-of-type {
+  border-bottom: none;
+}
+
+.tk-spread--top {
+  font-weight: 700;
+  color: var(--tk-succ);
+}
+
+.tk-spread-dim,
+.tk-spread-head > span:nth-child(n + 5) {
+  color: var(--tk-txt3);
+}
+
+.tk-spread-head > span:nth-child(n + 5),
+.tk-spread > span:nth-child(n + 5) {
+  text-align: right;
+}
