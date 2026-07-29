@@ -106,13 +106,13 @@ export default defineConfig({
         display: "standalone",
         orientation: "portrait",
         icons: [
-          { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
-          { src: "/icon-512.png", sizes: "512x512", type: "image/png" },
+          { src: `${base}icon-192.png`, sizes: "192x192", type: "image/png" },
+          { src: `${base}icon-512.png`, sizes: "512x512", type: "image/png" },
           {
             // Variante propria: o sistema recorta ate 10% de cada borda, entao
             // este arquivo tem zona segura e o monograma encolhido. Usar o
             // icone normal aqui faria o Android cortar as pontas do "K".
-            src: "/icon-maskable-512.png",
+            src: `${base}icon-maskable-512.png`,
             sizes: "512x512",
             type: "image/png",
             purpose: "maskable",
@@ -122,7 +122,7 @@ export default defineConfig({
         // WebKit tem o bug aberto desde 2019 e nao vai implementar. No iOS o
         // caminho e o seletor de arquivo com `multiple`.
         share_target: {
-          action: "/compartilhar",
+          action: `${base}compartilhar`,
           method: "POST",
           enctype: "multipart/form-data",
           params: {

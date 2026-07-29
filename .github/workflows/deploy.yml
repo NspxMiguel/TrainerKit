@@ -41,14 +41,20 @@ jobs:
       - name: Checagem de tipos
         run: pnpm -r typecheck
 
-      - name: Testes
-        run: pnpm -r test
-
-      # Precisa de rede: baixa o GAME_MASTER (18 MB), transforma e pre-calcula
-      # os rankings. Se a fonte estiver fora do ar, o deploy para aqui — melhor
-      # que publicar sem dado.
+      # ANTES dos testes, de proposito: eles conferem a matematica contra o
+      # dataset real (PC do Machamp, stats base pela conversao da serie
+      # principal, PC de chefe de raide). Rodar antes de gerar quebraria por
+      # arquivo ausente — e, pior, testar um dataset diferente do que vai ao ar
+      # nao provaria nada sobre o que foi publicado.
+      #
+      # Precisa de rede: baixa o GAME_MASTER (18 MB) e transforma. Se a fonte
+      # estiver fora do ar o deploy para aqui, o que e melhor que publicar sem
+      # dado.
       - name: Gerar o dataset
         run: pnpm --filter @trainerkit/dataset refresh
+
+      - name: Testes
+        run: pnpm -r test
 
       - name: Build
         # Pages de projeto serve em /<repo>/, nao na raiz. O build tambem roda
