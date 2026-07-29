@@ -41,7 +41,20 @@ const TIERS: readonly RaidTier[] = [1, 3, 5, "mega"];
  * e porque voce precisa mesmo.
  */
 export function RaidCounters({ boss, data, onClose }: Props) {
-  const [tier, setTier] = useState<RaidTier>(5);
+  /*
+   * O tier que a especie de fato ocupa, ate onde da pra saber.
+   *
+   * Antes abria sempre em 5, e ai o app anunciava "Machamp · 40.227 de PC ·
+   * 15.000 de vida". A conta esta certa pra tier 5; o problema e que Machamp
+   * nunca e chefe de tier 5, entao a primeira coisa que a tela mostrava era um
+   * numero que nao existe no jogo.
+   *
+   * Lendario, mitico ou Ultra Beast abre em 5; o resto, em 3, que e onde mora
+   * a maioria dos chefes normais. Continua trocavel — a lista real de chefes
+   * muda a cada evento e nao esta no GAME_MASTER, entao isto e um palpite bom,
+   * nao uma verdade.
+   */
+  const [tier, setTier] = useState<RaidTier>(boss.legendary ? 5 : 3);
   const { items } = useCollection();
   const setup = useSetup();
   const { t } = useT();

@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import type { PokedexIntent } from "../App.tsx";
 import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
 import { useT } from "../i18n/t.ts";
 import { SpeciesBrowser } from "../ui/SpeciesBrowser.tsx";
@@ -8,6 +9,8 @@ import { SpeciesDetail } from "./SpeciesDetail.tsx";
 
 interface Props {
   dataset: DatasetState;
+  /** De onde a pessoa veio, quando veio por um atalho da home. */
+  intent?: PokedexIntent | null;
 }
 
 /**
@@ -17,10 +20,17 @@ interface Props {
  * "esse Pokemon presta?". Aqui a resposta sai sem cadastro nenhum, sem conta e
  * sem passo intermediario.
  */
-export function PokedexScreen({ dataset }: Props) {
+export function PokedexScreen({ dataset, intent }: Props) {
   const [selected, setSelected] = useState<DatasetSpecies | null>(null);
   const { t } = useT();
-  const [tab, setTab] = useState<"browse" | "best">("browse");
+  /*
+   * O estado inicial basta — nao precisa de efeito pra sincronizar.
+   *
+   * O `<main key={tab}>` do App remonta esta tela a cada troca de aba, entao
+   * chegar pelo atalho SEMPRE passa por uma montagem nova. Um efeito aqui so
+   * criaria o risco de sobrescrever a escolha que a pessoa fizer depois.
+   */
+  const [tab, setTab] = useState<"browse" | "best">(intent?.view ?? "browse");
 
   if (dataset.status === "loading") {
     return (
@@ -65,7 +75,11 @@ export function PokedexScreen({ dataset }: Props) {
       {tab === "browse" ? (
         <SpeciesBrowser species={dataset.data.species} onPick={setSelected} />
       ) : (
-        <RankingsScreen data={dataset.data} onPick={setSelected} />
+        <RankingsScreen
+          data={dataset.data}
+          onPick={setSelected}
+          {...(intent?.view === "best" ? { initialMode: intent.mode } : {})}
+        />
       )}
 
       {selected && (

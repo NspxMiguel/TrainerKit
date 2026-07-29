@@ -291,7 +291,7 @@ export const KO: Dict = {
   "raid.bossHp": "HP {hp}",
   "raid.tier": "{n}성",
   "raid.tierMega": "메가",
-  "raid.canYou": "가능한가",
+  "raid.canYou": "잡을 수 있나요?",
   "raid.solo": "혼자 잡을 수 있습니다",
   "raid.needTrainers": "{n}명이 필요합니다",
   "raid.soloIn": "가장 좋은 포켓몬으로 약 {seconds}초.",

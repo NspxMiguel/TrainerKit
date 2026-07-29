@@ -344,7 +344,7 @@ const EN = {
   "raid.bossHp": "{hp} HP",
   "raid.tier": "Tier {n}",
   "raid.tierMega": "Mega",
-  "raid.canYou": "Can you do it",
+  "raid.canYou": "Can you take it down?",
   "raid.solo": "You can solo it",
   "raid.needTrainers": "You need {n} trainers",
   "raid.soloIn": "About {seconds} seconds with your best.",

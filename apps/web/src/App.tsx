@@ -16,6 +16,15 @@ import { useTabBarMinimize } from "./ui/useTabBarMinimize.ts";
 
 export type Tab = "inicio" | "pokedex" | "colecao" | "ajustes";
 
+/**
+ * Com que pergunta a pessoa chegou na Pokedex.
+ *
+ * Os atalhos da home diziam "Raide · Melhores atacantes por tipo" e abriam a
+ * BUSCA — a lista de espécies em ordem de número, que não é o que o atalho
+ * prometeu. Levar junto a intenção é o que faz o atalho chegar onde diz.
+ */
+export type PokedexIntent = { view: "browse" } | { view: "best"; mode: "raid" | "pvp" };
+
 const TABS: ReadonlyArray<{
   id: Tab;
   labelKey: Key;
@@ -31,6 +40,12 @@ const TABS: ReadonlyArray<{
 
 export function App() {
   const [tab, setTab] = useState<Tab>("inicio");
+  const [intent, setIntent] = useState<PokedexIntent | null>(null);
+
+  const go = (next: Tab, withIntent?: PokedexIntent) => {
+    setTab(next);
+    setIntent(withIntent ?? null);
+  };
   const { t } = useT();
   const setup = useSetup();
   const dataset = useDataset();
@@ -51,9 +66,9 @@ export function App() {
       <div className="tk-shell">
         <main className="tk-main" key={tab}>
           {tab === "inicio" && (
-            <HomeScreen dataset={dataset} persist={persist} onGo={setTab} />
+            <HomeScreen dataset={dataset} persist={persist} onGo={go} />
           )}
-          {tab === "pokedex" && <PokedexScreen dataset={dataset} />}
+          {tab === "pokedex" && <PokedexScreen dataset={dataset} intent={intent} />}
           {tab === "colecao" && <CollectionScreen dataset={dataset} />}
           {tab === "ajustes" && (
             <SettingsScreen
@@ -82,7 +97,7 @@ export function App() {
               type="button"
               className="tk-tab"
               aria-current={tab === id ? "page" : undefined}
-              onClick={() => setTab(id)}
+              onClick={() => go(id)}
             >
               <Icon size={22} />
               {/* Rotulo sempre visivel: o prototipo proibe icone sem rotulo na navegacao. */}

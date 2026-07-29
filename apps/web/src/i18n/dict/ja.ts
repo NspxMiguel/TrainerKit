@@ -291,7 +291,7 @@ export const JA: Dict = {
   "raid.bossHp": "HP {hp}",
   "raid.tier": "星{n}",
   "raid.tierMega": "メガ",
-  "raid.canYou": "倒せるか",
+  "raid.canYou": "倒せる？",
   "raid.solo": "ソロで倒せます",
   "raid.needTrainers": "{n}人必要です",
   "raid.soloIn": "最良の1匹でおよそ{seconds}秒。",

@@ -291,7 +291,7 @@ export const IT: Dict = {
   "raid.bossHp": "{hp} PS",
   "raid.tier": "Livello {n}",
   "raid.tierMega": "Mega",
-  "raid.canYou": "Ce la fai",
+  "raid.canYou": "Ce la fai?",
   "raid.solo": "Puoi farlo da solo",
   "raid.needTrainers": "Servono {n} allenatori",
   "raid.soloIn": "Circa {seconds} secondi col tuo migliore.",

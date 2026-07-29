@@ -9,6 +9,8 @@ import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 interface Props {
   data: Dataset;
   onPick: (s: DatasetSpecies) => void;
+  /** Qual das duas listas abrir — vem do atalho que trouxe a pessoa aqui. */
+  initialMode?: Mode;
 }
 
 type Mode = "raid" | "pvp";
@@ -29,8 +31,8 @@ const LEAGUES = ["great", "ultra", "master"] as const;
  * Ambas vem prontas do dataset. O stat product levava 3 segundos no navegador —
  * conta fixa sobre dado fixo pertence ao build.
  */
-export function RankingsScreen({ data, onPick }: Props) {
-  const [mode, setMode] = useState<Mode>("raid");
+export function RankingsScreen({ data, onPick, initialMode = "raid" }: Props) {
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [type, setType] = useState<string | null>(null);
   const [league, setLeague] = useState<(typeof LEAGUES)[number]>("great");
   const { t } = useT();
