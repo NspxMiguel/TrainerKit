@@ -43,8 +43,6 @@ export const PT_BR: Dict = {
   "home.empty.body": "Ainda não há nenhum Pokémon salvo. Leva menos de 10 segundos.",
   "home.nothingPending.one": "1 Pokémon salvo, nada pendente",
   "home.nothingPending.many": "{count} Pokémon salvos, nada pendente",
-  "home.nothingPending.body":
-    "Todos com veredito de guardar. Escaneie mais prints e eu aviso quando algum pedir ação.",
   "home.needsDecision.one": "1 pede uma decisão",
   "home.needsDecision.many": "{count} pedem uma decisão",
   "home.ofSaved.one": "de {count} salvo",
@@ -79,12 +77,7 @@ export const PT_BR: Dict = {
   "install.desktop.browser": "Funciona no Chrome, Edge ou Brave.",
   "install.desktop.step1": "Clique no ícone de instalar, na barra de endereço.",
   "install.desktop.step2": "Confirme em “Instalar”.",
-  "install.why": "Por que vale a pena",
-  "install.why.fullscreen": "Abre direto do ícone, em tela cheia, sem a barra do navegador.",
-  "install.why.offline": "Funciona offline — os dados do jogo já ficam salvos no aparelho.",
-  "install.why.iosImportant":
-    "E o mais importante: o Safari apaga os dados de sites que passam 7 dias sem uso. Instalado, ele para de fazer isso — é o que protege a sua coleção.",
-  "install.why.androidShare": "Recebe print direto pelo botão Compartilhar do sistema.",
+  "install.why.iosImportant": "O Safari apaga dados após 7 dias parados. Instalado, ele para.",
   "install.now": "Instalar agora",
 
   "pokedex.title": "Pokédex",
@@ -100,39 +93,30 @@ export const PT_BR: Dict = {
   "species.baseStats": "Stats base",
   "species.maxCP": "PC máximo com IV perfeito",
   "species.bestMoves": "Melhores ataques",
-  "species.scoreNote":
-    "A nota compara os movesets DESTE Pokémon entre si — 100 é o melhor dele, não o melhor do jogo.",
   "species.noMoves": "Sem dados de ataque para esta espécie.",
   "species.needsElite": "exige TM Elite",
   "species.bait": "isca: {move}",
   "species.stuckOnFrustration": "preso na Frustração",
   "species.shadowToggle": "O meu é sombroso",
   "species.shadowToggleOn": "✓ sombroso",
-  "species.shadowNote":
-    "Sombroso bate {percent}% mais forte, mas isso multiplica todos os ataques igual — a ordem abaixo não muda por causa disso. O que muda é a Frustração, que ocupa um slot e só sai com TM de evento.",
-  "species.frustrationCost": " Se ela for o único carregado, ele rende {percent}% menos em PvP.",
+  "species.shadowNote": "Sombroso bate {percent}% mais forte. A Frustração ocupa um slot e só sai com TM de evento.",
+  "species.frustrationCost": " Sozinha, custa {percent}% em PvP.",
   "species.evolvesInto": "Evolui para",
   "species.candy": "{count} doces",
 
   "context.general.title": "Pra tudo",
-  "context.general.detail":
-    "Vai bem nos dois. Escolha de quem não quer trocar de ataque depois.",
+  "context.general.detail": "Vai bem nos dois.",
   "context.raid.title": "Raide",
-  "context.raid.detail": "Dano por segundo contra um alvo só, sem trocas.",
+  "context.raid.detail": "Dano por segundo num alvo só.",
   "context.pvp.title": "PvP",
-  "context.pvp.detail":
-    "Turnos e energia. Golpe barato que sai rápido vence o forte que nunca carrega.",
+  "context.pvp.detail": "Turnos e energia.",
   "context.rocket.title": "Rocket",
-  "context.rocket.detail":
-    "Os líderes bloqueiam seus dois primeiros carregados. Vence quem atravessa os escudos, não quem bate mais forte.",
+  "context.rocket.detail": "Os líderes bloqueiam seus dois primeiros carregados.",
 
   "iv.title": "IV do meu {name}",
   "iv.whatItRead": "O que ele leu",
   "iv.enterByHand": "Coloque manualmente",
-  "iv.checkStars":
-    "Confira as estrelas acima contra as do jogo — é a forma mais rápida de perceber uma leitura errada.",
-  "iv.dragBars":
-    "Arraste cada barra até ficar igual à do jogo. Confira as estrelas acima: se baterem com as do jogo, você acertou.",
+  "iv.dragBars": "Arraste cada barra até bater com o jogo.",
   "iv.findLevel": "Descobrir o nível",
   "iv.saveToCollection": "Salvar na coleção",
   "iv.savedToCollection": "Salvo na coleção",
@@ -143,21 +127,18 @@ export const PT_BR: Dict = {
   "iv.cpAtCap": "PC no nível {level}",
   "iv.pvpPosition": "Posição em PvP",
   "iv.notEligible": "não entra",
-  "iv.pvpNote":
-    "Em liga com teto de PC o 100% costuma ser pior: ataque alto infla o PC e obriga a parar num nível mais baixo, custando defesa e PS. É por isso que a posição importa mais que a porcentagem.",
   "iv.levelIs": "Nível",
   "iv.or": "ou",
 
   "scan.desktopWarning.title": "Você está no computador",
-  "scan.desktopWarning.body":
-    "A leitura foi testada em print tirado no celular. Print de tela de computador quase sempre falha — a interface em volta atrapalha. Se der errado, dá pra preencher à mão.",
+  "scan.desktopWarning.body": "Testado em print de celular. Print de PC quase sempre falha.",
   "scan.reading": "Lendo o print…",
   "scan.readAll": "Li as três barras",
   "scan.readValues": "Ataque {atk} · Defesa {def} · PS {hp}",
   "scan.failed": "Não consegui ler",
   "scan.adjustByHand": " Ajuste as barras à mão abaixo.",
   "scan.prompt": "Anexe o print da avaliação",
-  "scan.promptDetail": "Aquela tela com as três barras. Ele lê o IV exato e preenche tudo.",
+  "scan.promptDetail": "A tela com as três barras.",
   "scan.pick": "Escolher print",
   "scan.swap": "Trocar print",
   "scan.fail.noBars": "Não encontrei nenhuma barra laranja ou vermelha na imagem.",
@@ -170,8 +151,6 @@ export const PT_BR: Dict = {
   "verdict.confidence": "confiança {percent}%",
   "verdict.howIGotHere": "Como cheguei nisso",
   "verdict.hide": "Esconder",
-  "verdict.traceNote":
-    "A confiança é a concordância entre as regras. Quando duas puxam pra lados opostos, ela cai — e deve cair mesmo.",
 
   "collection.title": "Coleção",
   "collection.empty.title": "Nenhum Pokémon salvo",
@@ -204,7 +183,7 @@ export const PT_BR: Dict = {
   "settings.spaceOf": " de {total}",
   "settings.language": "Idioma",
   "settings.showTranslation": "Mostrar tradução dos ataques",
-  "settings.showTranslationDetail": "Counter (Contra-atacar). Desligado, fica só o inglês.",
+  "settings.showTranslationDetail": "Counter (Contra-atacar)",
   "settings.gameData": "Dados do jogo",
   "settings.datasetVersion": "Versão da base",
   "settings.about": "Sobre",
@@ -215,32 +194,22 @@ export const PT_BR: Dict = {
   "settings.version": "Versão {version}",
 
   "onb.aria": "Boas-vindas",
-  "onb.tagline":
-    "Um app que responde uma pergunta por vez: esse Pokémon presta, e pra quê. Tudo fica no seu aparelho — sem conta, sem login, e nada é enviado pra lugar nenhum.",
-  "onb.languageNote":
-    "Os nomes de ataque aparecem em inglês e, se você escolher outro idioma, também na tradução oficial do jogo — porque nenhuma das duas sozinha serve pra procurar guia e achar no jogo ao mesmo tempo.",
+  "onb.tagline": "Esse Pokémon presta, e pra quê.",
   "onb.nameLabel": "Como posso te chamar?",
   "onb.namePlaceholder": "Seu nome ou apelido",
   "onb.nameAria": "Seu nome",
-  "onb.nameNote": "Só pra te cumprimentar na tela inicial. Fica no aparelho e pode ficar em branco.",
   "onb.start": "Começar",
   "onb.howToUse": "Como você quer usar?",
-  "onb.changeLater": "Dá pra trocar depois nos Ajustes.",
   "onb.mode.browse": "Só consultar",
-  "onb.mode.browseDetail":
-    "Busca qualquer Pokémon e vê os melhores ataques, o PC máximo e o IV por print. Não cadastra nada.",
+  "onb.mode.browseDetail": "Busca, vê ataques e IV. Não salva nada.",
   "onb.mode.collection": "Montar minha coleção",
-  "onb.mode.collectionDetail":
-    "Salva os seus Pokémon e o app diz o que fazer com cada um: investir, evoluir, guardar ou transferir.",
+  "onb.mode.collectionDetail": "Salva os seus e dá um veredito pra cada.",
   "onb.assistant": "Assistente",
-  "onb.assistantDetail":
-    "Dá uma opinião em texto sobre cada Pokémon, em vez de só mostrar número. Funciona no aparelho, sem internet.",
+  "onb.assistantDetail": "Uma opinião em texto, não só número.",
   "onb.continue": "Continuar",
   "onb.lastThing": "Uma última coisa",
-  "onb.installIos":
-    "No iPhone isso não é só conveniência: o Safari apaga os dados de sites parados há 7 dias. Instalado, o TrainerKit fica protegido.",
-  "onb.installOther":
-    "Instalado, ele abre em tela cheia, funciona offline e recebe print direto pelo botão de compartilhar.",
+  "onb.installIos": "O Safari apaga dados de apps parados 7 dias. Instalado, o seu fica salvo.",
+  "onb.installOther": "Tela cheia, offline, e print direto pelo compartilhar.",
   "onb.seeHowToInstall": "Ver como instalar",
   "onb.skipInstall": "Agora não, abrir o app",
 
@@ -252,9 +221,8 @@ export const PT_BR: Dict = {
   "sprites.home": "Renders 3D",
   "sprites.homeDetail": "Modelos do Pokémon HOME. Estilo mais uniforme entre as espécies.",
   "sprites.custom": "Fonte personalizada",
-  "sprites.customDetail": "Um link de manifesto ou um .zip com as imagens. Você aponta e tudo aparece.",
-  "sprites.note":
-    "O TrainerKit não hospeda nem redistribui nenhuma imagem — ele só aponta para a fonte que você escolher.",
+  "sprites.customDetail": "Um link de manifesto ou um .zip.",
+  "sprites.note": "O TrainerKit só aponta para a fonte que você escolher.",
   "sprites.addSource": "Adicionar fonte",
   "sprites.sourceUrl": "Link do manifesto ou .zip",
   "sprites.pickZip": "Escolher um .zip",
@@ -309,6 +277,6 @@ export const PT_BR: Dict = {
   "sprites.unzipping": "Descompactando…",
   "sprites.manifestPlaceholder": "https://exemplo.com/sprites.json",
   "sprites.manifestAria": "Endereço do manifesto",
-  "sprites.noneActive": "Nenhuma imagem é baixada. Cada espécie aparece com a cor do tipo e as iniciais.",
+  "sprites.noneActive": "Nada é baixado.",
   "sprites.manifestHelp": "O manifesto é um JSON com {nameField} e {templateField} — por exemplo {example}. No .zip, o nome do arquivo é o que casa: {byDex} por número da Pokédex, {byName} por nome. Pastas são ignoradas.",
 };

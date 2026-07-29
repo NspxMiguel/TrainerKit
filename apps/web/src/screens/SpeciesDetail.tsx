@@ -360,9 +360,6 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
             </div>
           ))
         )}
-        <p className="tk-caption" style={{ marginTop: 12, lineHeight: 1.5 }}>
-          {t("species.scoreNote")}
-        </p>
       </section>
 
       {evolutions.length > 0 && (

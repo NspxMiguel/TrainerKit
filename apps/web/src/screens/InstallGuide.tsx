@@ -77,20 +77,6 @@ export function InstallGuide({ platform, promptInstall, onClose }: Props) {
         <h2 className="tk-sheet-title">{t(guide.titleKey)}</h2>
       </header>
 
-      <section className="tk-card">
-        <div className="tk-overline">{t("install.why")}</div>
-        <ul className="tk-reasons">
-          <li>{t("install.why.fullscreen")}</li>
-          <li>{t("install.why.offline")}</li>
-          {platform === "ios" && (
-            <li>{t("install.why.iosImportant")}</li>
-          )}
-          {platform === "android" && (
-            <li>{t("install.why.androidShare")}</li>
-          )}
-        </ul>
-      </section>
-
       <p className="tk-caption" style={{ margin: "18px 2px 12px", lineHeight: 1.5 }}>
         {t(guide.browserKey)}
       </p>

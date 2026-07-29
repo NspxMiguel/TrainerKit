@@ -465,18 +465,6 @@
 
 /* --------------------------------------------------- guia de instalacao */
 
-.tk-reasons {
-  margin: 10px 0 0;
-  padding: 0 0 0 18px;
-  display: grid;
-  gap: 8px;
-  font: 400 13px/1.5 var(--tk-font);
-  color: var(--tk-txt2);
-}
-
-.tk-reasons strong {
-  color: var(--tk-txt);
-}
 
 .tk-steps {
   list-style: none;
@@ -640,7 +628,106 @@
   color: var(--tk-warn);
 }
 
-/* Marca do onboarding — mesmo gradiente do icone do app. */
+/* ------------------------------------------------------------- onboarding */
+
+/*
+ * Tela de app, nao pagina.
+ *
+ * Altura fixa em tres faixas — progresso, conteudo, rodape — e o conteudo NAO
+ * rola. Se um passo nao couber, o passo esta grande demais e a resposta e
+ * cortar texto, nao liberar a rolagem: rolar pra achar o botao de continuar e
+ * o que faz um app parecer site.
+ *
+ * Usa os mesmos tokens do resto (`--tk-surf`, `--tk-gutter`, `.tk-option`,
+ * `.tk-btn`) de proposito. Antes o setup montava o proprio visual em cima do
+ * `.tk-sheet-full`, e a costura aparecia na primeira tela depois dele.
+ */
+.tk-onb {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: var(--tk-screen);
+  display: flex;
+  flex-direction: column;
+  max-width: var(--tk-container);
+  margin: 0 auto;
+  padding: calc(var(--tk-safe-top) + env(safe-area-inset-top)) var(--tk-gutter)
+    calc(var(--tk-s5) + env(safe-area-inset-bottom));
+}
+
+.tk-onb-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex: none;
+  padding-bottom: var(--tk-s6);
+}
+
+.tk-onb-dots > span {
+  width: 24px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--tk-line2);
+  transition: background-color 0.18s var(--tk-ease);
+}
+
+.tk-onb-dots > span[data-on] {
+  background: var(--tk-pri);
+}
+
+/*
+ * O conteudo comeca a um terco da altura, nao centralizado.
+ *
+ * Centralizado, o titulo flutuava no meio com um vazio enorme em cima — cada
+ * passo parecia comecar num lugar diferente conforme o tanto de conteudo.
+ * Ancorado no topo, os tres passos abrem no MESMO ponto, e e isso que da a
+ * sensacao de tela trocando em vez de pagina recarregando.
+ */
+.tk-onb-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-top: 6vh;
+  animation: tk-fade 0.16s var(--tk-ease) both;
+}
+
+.tk-onb-title {
+  font: 800 30px/1.1 var(--tk-font);
+  letter-spacing: -0.03em;
+  margin: var(--tk-s5) 0 0;
+}
+
+.tk-onb-sub {
+  font: 400 15px/1.5 var(--tk-font);
+  color: var(--tk-txt2);
+  margin: var(--tk-s3) 0 0;
+}
+
+.tk-onb-field {
+  margin-top: var(--tk-s6);
+}
+
+.tk-onb-options {
+  display: grid;
+  gap: var(--tk-s2);
+  margin-top: var(--tk-s6);
+}
+
+.tk-onb-foot {
+  flex: none;
+  display: grid;
+  gap: var(--tk-s2);
+  padding-top: var(--tk-s5);
+}
+
+/* Botao de escape do rodape: presente, mas sem competir com o primario. */
+.tk-btn--ghost {
+  background: transparent;
+  color: var(--tk-txt3);
+}
+
 /* A marca do app, nas mesmas proporcoes do icone (ver scripts/make-icons.ts).
    Aqui ela e feita de tres <span>: o icone gerado e PNG, e um PNG de 84px numa
    tela de densidade 3 fica mole. Em CSS ela e nitida em qualquer aparelho. */
@@ -691,32 +778,14 @@
   border-right: 0;
 }
 
-/* Grade de idiomas do setup. */
-.tk-lang-grid {
+/* Mesmo selo, com um icone no lugar das barras. Precisa vir DEPOIS da regra
+   base: as duas tem uma classe de especificidade, entao quem vence e a ultima. */
+.tk-onb-mark--small {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 6px;
-  margin-top: 10px;
-}
-
-.tk-lang {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: var(--tk-touch);
-  padding: 0 12px;
-  border-radius: var(--tk-r-input);
-  background: var(--tk-surf2);
-  border: 1px solid var(--tk-line);
-  font: 600 13px var(--tk-font);
-  color: var(--tk-txt);
-  text-align: left;
-}
-
-.tk-lang[data-active] {
-  background: var(--tk-pri-soft);
-  border-color: var(--tk-pri-line);
-  color: var(--tk-pri-fg);
+  place-items: center;
+  padding: 0;
+  gap: 0;
+  color: #fff;
 }
 
 /* Rastro do veredito — mono, para as colunas alinharem como no protótipo. */
@@ -766,3 +835,87 @@
   color: var(--tk-txt3);
 }
 
+
+/* ------------------------------------------------------------ roda de escolha */
+
+/*
+ * Seletor em roda, como o de data do sistema.
+ *
+ * Mostra tres itens: o escolhido no centro e um vizinho de cada lado, apagados.
+ * A altura total e fixa em 3 x 44px — a mesma altura de um campo de formulario,
+ * contra os ~500px que dez idiomas ocupavam empilhados.
+ */
+.tk-wheel {
+  position: relative;
+  height: 132px; /* 3 x --tk-wheel-item */
+  margin-top: var(--tk-s3);
+  border-radius: var(--tk-r-input);
+  background: var(--tk-surf);
+  border: 1px solid var(--tk-line);
+  overflow: hidden;
+}
+
+/* A faixa do meio: sinalizacao de onde a escolha acontece, nunca um alvo. */
+.tk-wheel-window {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 44px;
+  height: 44px;
+  background: var(--tk-pri-soft);
+  border-top: 1px solid var(--tk-pri-line);
+  border-bottom: 1px solid var(--tk-pri-line);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.tk-wheel-scroll {
+  height: 100%;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  overscroll-behavior: contain;
+}
+
+.tk-wheel-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Meia janela em cima e embaixo, pra primeira e ultima opcao alcancarem o centro. */
+.tk-wheel-pad {
+  height: 44px;
+}
+
+.tk-wheel-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 44px;
+  padding: 0 var(--tk-s4);
+  scroll-snap-align: start;
+  font: 500 15px var(--tk-font);
+  color: var(--tk-txt3);
+  text-align: left;
+  position: relative;
+  z-index: 2;
+  transition:
+    color 0.14s var(--tk-ease),
+    opacity 0.14s var(--tk-ease);
+}
+
+.tk-wheel-item[data-on] {
+  font-weight: 700;
+  color: var(--tk-pri-fg);
+}
+
+/* Quem esta a mais de uma posicao do centro some — e o que da a impressao de
+   roda em vez de lista, sem nenhuma transformacao 3D. */
+.tk-wheel-item[data-far] {
+  opacity: 0.35;
+}
+
+.tk-wheel-glyph {
+  font-size: 18px;
+  line-height: 1;
+}
