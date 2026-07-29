@@ -906,9 +906,29 @@
 }
 
 /* Linha da coleção: o item inteiro abre, o ✕ remove. */
+/*
+ * Linha da colecao.
+ *
+ * O botao de remover era um bloco de 44px do lado de fora, com borda propria e
+ * a mesma altura do item — apagar competia visualmente com abrir, e apagar e a
+ * coisa que menos se faz aqui. Agora ele e um alvo pequeno DENTRO da linha,
+ * ainda com os 44px de area de toque que a acessibilidade exige, mas sem peso
+ * visual. A linha inteira continua abrindo o Pokemon.
+ */
 .tk-owned {
+  position: relative;
   display: flex;
-  gap: 6px;
+  align-items: center;
+  gap: var(--tk-s3);
+  padding: var(--tk-s3);
+  border-radius: var(--tk-r-input);
+  background: var(--tk-surf);
+  border: 1px solid var(--tk-line);
+  transition: transform 0.06s var(--tk-ease);
+}
+
+.tk-owned:active {
+  transform: scale(0.985);
 }
 
 .tk-owned-main {
@@ -917,27 +937,39 @@
   display: flex;
   align-items: center;
   gap: var(--tk-s3);
-  padding: var(--tk-s3);
-  border-radius: var(--tk-r-input);
-  background: var(--tk-surf);
-  border: 1px solid var(--tk-line);
-  transition:
-    background-color 0.12s var(--tk-ease),
-    transform 0.06s var(--tk-ease);
-}
-
-.tk-owned-main:active {
-  transform: scale(0.985);
+  text-align: left;
 }
 
 .tk-owned-remove {
   flex: none;
-  width: 44px;
-  border-radius: var(--tk-r-input);
-  background: var(--tk-surf);
-  border: 1px solid var(--tk-line);
-  color: var(--tk-txt3);
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--tk-txt4);
+  font: 400 16px/1 var(--tk-font);
+  transition:
+    color 0.12s var(--tk-ease),
+    background-color 0.12s var(--tk-ease);
 }
+
+/* Area de toque de 44px sem ocupar 44px de pixel — requisito de
+   acessibilidade que nao precisa virar requisito de layout. */
+.tk-owned-remove::after {
+  content: "";
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  transform: translate(-6px, -6px);
+}
+
+.tk-owned-remove:hover,
+.tk-owned-remove:active {
+  color: var(--tk-dang);
+  background: var(--tk-dang-soft, rgba(255, 107, 122, 0.12));
+}
+
 
 
 /* ------------------------------------------------------------ roda de escolha */

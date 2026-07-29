@@ -102,11 +102,7 @@ export function CollectionScreen({ dataset }: Props) {
 
             return (
               <div key={owned.id} className="tk-owned">
-                <button
-                  type="button"
-                  className="tk-owned-main"
-                  onClick={() => setOpen(s)}
-                >
+                <button type="button" className="tk-owned-main" onClick={() => setOpen(s)}>
                   <SpeciesTile
                     spriteId={s.spriteId}
                     dex={s.dex}
@@ -161,7 +157,7 @@ export function CollectionScreen({ dataset }: Props) {
 
       {/* Backup fica sempre visivel, nao escondido atras de "avancado": e a
           unica coisa que sobrevive se o navegador despejar os dados. */}
-      <div className="tk-overline" style={{ display: "block", marginTop: 28 }}>
+      <div className="tk-overline" style={{ display: "block", marginTop: 36 }}>
         {t("collection.backup")}
       </div>
       <section className="tk-card" style={{ marginTop: 10 }}>
