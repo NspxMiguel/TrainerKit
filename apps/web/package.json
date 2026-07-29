@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && pnpm audit:bundle",
-    "preview": "vite preview",
+    "preview": "vite preview --port 4273 --strictPort",
     "typecheck": "tsc --noEmit",
     "icons": "node --experimental-strip-types scripts/make-icons.ts",
     "test": "vitest run",

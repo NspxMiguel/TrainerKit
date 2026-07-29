@@ -199,6 +199,21 @@ export const PT_BR: Dict = {
     "Funciona só por leitura de prints que você fornece. Não acessa os servidores do jogo, e nenhuma imagem sai do aparelho.",
   "settings.version": "Versão {version}",
 
+  // ------------------------------------------------------- atualizacao
+  "update.title": "Nova atualização disponível",
+  "update.body": "Já está baixada. Atualizar leva um segundo.",
+  "update.apply": "Atualizar",
+  "update.later": "Daqui a {days} dias",
+  "update.never": "Não avisar mais",
+  "settings.updates": "Atualizações",
+  "settings.checkUpdate": "Procurar atualização",
+  "settings.upToDate": "Você já está na versão mais nova.",
+  "settings.updateFound": "Tem versão nova. O aviso voltou lá no início.",
+  "settings.notifyAgain": "Voltar a avisar de atualização",
+  "settings.forceUpdate": "Forçar atualização",
+  "settings.forceUpdateDetail": "Último recurso se o app travar numa versão antiga. Limpa o cache e baixa tudo de novo. A sua coleção não é tocada.",
+  "settings.buildOf": "Compilado em {date}",
+
   "onb.aria": "Boas-vindas",
   "onb.tagline": "Diz o que fazer com cada Pokémon que você pega.",
   "onb.nameLabel": "Como posso te chamar?",
