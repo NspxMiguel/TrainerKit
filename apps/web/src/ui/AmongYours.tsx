@@ -11,6 +11,14 @@ interface Props {
   ivs: IVs;
   /** Todas as especies, pra achar a familia evolutiva. */
   allSpecies: readonly DatasetSpecies[];
+  /**
+   * Este ja foi salvo? Muda o total.
+   *
+   * Enquanto ele nao esta na colecao, ele mesmo precisa entrar na conta —
+   * senao da pra ficar em segundo lugar entre um, que foi exatamente o que o
+   * app escreveu: "O seu #2 entre 1 dessa família".
+   */
+  alreadySaved?: boolean;
 }
 
 /**
@@ -25,7 +33,7 @@ interface Props {
  * ouvir que o Machoke novo e "o melhor Machoke" dele. Eles competem pelo mesmo
  * lugar.
  */
-export function AmongYours({ species, ivs, allSpecies }: Props) {
+export function AmongYours({ species, ivs, allSpecies, alreadySaved = false }: Props) {
   const { items } = useCollection();
   const { t } = useT();
 
@@ -43,8 +51,9 @@ export function AmongYours({ species, ivs, allSpecies }: Props) {
 
     const meu = ivTotalOf(ivs);
     const melhores = daFamilia.filter((o) => ivTotalOf(o.ivs) > meu).length;
-    return { total: daFamilia.length, lugar: melhores + 1 };
-  }, [items, species.familyId, ivs, allSpecies]);
+    // Salvo, ele ja esta em `daFamilia`; ainda nao salvo, entra na conta agora.
+    return { total: daFamilia.length + (alreadySaved ? 0 : 1), lugar: melhores + 1 };
+  }, [items, species.familyId, ivs, allSpecies, alreadySaved]);
 
   if (!posicao) return null;
 

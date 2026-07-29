@@ -28,6 +28,19 @@ export interface OwnedPokemon {
   lucky: boolean;
   shadow: boolean;
   addedAt: string;
+  /**
+   * O veredito que a pessoa JA CUMPRIU.
+   *
+   * O app dizia "INVESTIR" em verde e continuava dizendo pra sempre, mesmo
+   * depois de a pessoa investir. Um aviso que nao sai depois de atendido para
+   * de ser aviso e vira ruido — e pior, ensina a ignorar os outros.
+   *
+   * Guardamos QUAL acao foi feita, nao um booleano: o veredito muda quando o
+   * Pokemon sobe de nivel ou evolui, e "ja evolui" nao responde a um
+   * "transferir" que apareca depois. Marcado e cumprido so quando o veredito
+   * atual e o mesmo que foi marcado.
+   */
+  doneAction: string | null;
 }
 
 class CollectionDb extends Dexie {
@@ -64,10 +77,22 @@ export async function removePokemon(id: string): Promise<void> {
   emit();
 }
 
+/** Marca (ou desmarca) o veredito como cumprido. `null` volta a cobrar. */
+export async function setDoneAction(id: string, action: string | null): Promise<void> {
+  await db.pokemon.update(id, { doneAction: action });
+  emit();
+}
+
 export async function listPokemon(): Promise<OwnedPokemon[]> {
   const all = await db.pokemon.toArray();
-  // Mais recente primeiro: o que voce acabou de escanear e o que voce quer ver.
-  return all.sort((a, b) => b.addedAt.localeCompare(a.addedAt));
+  return (
+    all
+      // Linhas gravadas antes do campo existir vem sem ele. Normalizar aqui
+      // dispensa `?? null` espalhado por toda tela que le a colecao.
+      .map((row) => ({ ...row, doneAction: row.doneAction ?? null }))
+      // Mais recente primeiro: o que voce acabou de escanear e o que voce quer ver.
+      .sort((a, b) => b.addedAt.localeCompare(a.addedAt))
+  );
 }
 
 /** Lista reativa — recarrega sozinha quando algo e adicionado ou removido. */

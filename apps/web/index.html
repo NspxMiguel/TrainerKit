@@ -16,7 +16,10 @@
     <meta name="theme-color" content="#07080B" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#ECEEF3" media="(prefers-color-scheme: light)" />
 
-    <!-- iOS: sem isto o app abre em aba do Safari em vez de standalone. -->
+    <!-- iOS: sem isto o app abre em aba do Safari em vez de standalone.
+         `mobile-web-app-capable` e o nome padronizado (o Chrome depreciou o
+         prefixado); o Safari ainda le o `apple-`. Os dois ficam. -->
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="TrainerKit" />

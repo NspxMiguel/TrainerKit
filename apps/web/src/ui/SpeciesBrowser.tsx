@@ -120,7 +120,9 @@ export function SpeciesBrowser({ species, onPick }: Props) {
               style={{ marginTop: 18 }}
               onClick={() => setLimit((n) => n + PAGE * 2)}
             >
-              Mostrar mais ({results.length - limit} restantes)
+              {t("pokedex.showMore", {
+                count: (results.length - limit).toLocaleString(language),
+              })}
             </button>
           )}
         </>

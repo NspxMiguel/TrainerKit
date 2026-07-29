@@ -9,6 +9,8 @@ import {
 import { useT, type Key } from "../i18n/t.ts";
 import { addManifestSource, addZipSource, removeSource } from "../sprites/sources.ts";
 import { refreshSources, useSources } from "../sprites/useSpriteUrl.ts";
+import type { DatasetSpecies } from "../data/useDataset.ts";
+import { SpriteDownloadButton } from "../ui/SpriteDownload.tsx";
 
 const BUILTIN: BuiltinSourceId[] = ["off", "pokeapi-artwork", "pokeapi-home"];
 
@@ -23,7 +25,7 @@ const BUILTIN: BuiltinSourceId[] = ["off", "pokeapi-artwork", "pokeapi-home"];
  * O app nao embarca nem hospeda arte: ele aponta. Isso mantem o que se
  * distribui limpo e nao prende ninguem ao acervo que eu escolhi.
  */
-export function SpriteSettings() {
+export function SpriteSettings({ species }: { species: readonly DatasetSpecies[] }) {
   const settings = useSpriteSettings();
   const sources = useSources();
   const { t } = useT();
@@ -232,6 +234,10 @@ export function SpriteSettings() {
       <p className="tk-caption" style={{ marginTop: 10, lineHeight: 1.5 }}>
         {settings.source === "off" ? t("sprites.noneActive") : t("sprites.note")}
       </p>
+
+      {/* Só aparece com fonte ligada: oferecer download antes de haver o que
+          baixar seria um botão que não faz nada. */}
+      <SpriteDownloadButton species={species} />
     </>
   );
 }

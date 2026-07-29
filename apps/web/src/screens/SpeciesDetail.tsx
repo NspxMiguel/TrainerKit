@@ -221,11 +221,26 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies }: Props) 
 
   return createPortal(
     <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={species.name}>
+      {/*
+        Sem titulo no cabecalho.
+
+        Ele dizia "Pokédex" — e mentia quando a tela era aberta pela Coleção,
+        que e de onde ela mais se abre. Pior: o nome da especie ja aparece
+        logo abaixo, em corpo 22, do lado do sprite. Eram duas linhas grandes
+        seguidas, uma delas errada, empurrando o conteudo pra baixo.
+
+        Fica so a seta, como nas telas de detalhe do proprio iOS: o que nomeia
+        a tela e o conteudo dela.
+      */}
       <header className="tk-sheet-head">
-        <button type="button" className="tk-sheet-close" onClick={onClose} aria-label={t("common.back")}>
+        <button
+          type="button"
+          className="tk-sheet-close"
+          onClick={onClose}
+          aria-label={t("common.back")}
+        >
           ‹
         </button>
-        <h2 className="tk-sheet-title">{t("pokedex.title")}</h2>
       </header>
 
       <div style={{ display: "flex", gap: 16, alignItems: "flex-start", marginBottom: 22 }}>

@@ -16,6 +16,22 @@ interface BeforeInstallPromptEvent extends Event {
 export type Platform = "ios" | "android" | "desktop";
 
 export function detectPlatform(): Platform {
+  /*
+   * `?platform=ios` no dev.
+   *
+   * O visual do iOS 26 — vidro flutuante, barra que recolhe, guia do Safari —
+   * so aparece num iPhone, e verificar cada ajuste no aparelho de verdade
+   * custa minutos por mudanca. Com isto da pra ver no navegador.
+   *
+   * `import.meta.env.DEV` e substituido por `false` no build de producao, entao
+   * o bloco inteiro e removido pelo empacotador. Ninguem consegue forcar
+   * plataforma no site publicado.
+   */
+  if (import.meta.env.DEV) {
+    const forced = new URLSearchParams(location.search).get("platform");
+    if (forced === "ios" || forced === "android" || forced === "desktop") return forced;
+  }
+
   if (isIos()) return "ios";
   if (/Android/i.test(navigator.userAgent)) return "android";
   return "desktop";

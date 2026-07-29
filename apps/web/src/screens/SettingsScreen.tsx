@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import type { DatasetSpecies } from "../data/useDataset.ts";
 import type { PersistState } from "../storage/persist.ts";
 import {
   LANGUAGES,
@@ -20,6 +21,8 @@ import { SpriteSettings } from "./SpriteSettings.tsx";
 interface Props {
   datasetLabel: string | null;
   persist: PersistState | null;
+  /** Precisa da lista pra saber quantas imagens existem pra baixar. */
+  species: readonly DatasetSpecies[];
 }
 
 type Theme = "sistema" | "claro" | "escuro";
@@ -52,7 +55,7 @@ function formatBytes(n: number): string {
   return `${gb >= 10 ? Math.round(gb) : gb.toFixed(1)} GB`;
 }
 
-export function SettingsScreen({ datasetLabel, persist }: Props) {
+export function SettingsScreen({ datasetLabel, persist, species }: Props) {
   const install = useInstallState();
   const language = useLanguage();
   const showTranslation = useShowTranslation();
@@ -204,7 +207,7 @@ export function SettingsScreen({ datasetLabel, persist }: Props) {
         </button>
       )}
 
-      <SpriteSettings />
+      <SpriteSettings species={species} />
 
       <DataSourceSettings datasetLabel={datasetLabel} />
 

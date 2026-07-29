@@ -105,16 +105,28 @@ export function IVCalculator({ species, data, onClose }: Props) {
           size={72}
         />
         {ivs && badge ? (
-          <div>
+          <div style={{ minWidth: 0 }}>
+            {/*
+              A palavra IV, do tamanho que ela merece.
+
+              O numero grande estava sozinho: "22 / 45" nao diz do que e. E IV e
+              justamente o termo que o jogador ja conhece de fora do app — nao
+              usar a palavra e trocar o nome que ele procura por um numero
+              anonimo. Agora e IV primeiro, valor depois.
+            */}
+            <div className="tk-iv-label">IV</div>
             {/* Numero inteiro: IV e contagem, nao medida. "48,9%" sugere uma
                 precisao que nao existe — o que existe sao 22 pontos de 45. */}
-            <div style={{ font: "800 34px/1.05 var(--tk-font)", letterSpacing: "-0.03em" }}>
+            <div className="tk-iv-total">
               {total}
-              <span style={{ font: "700 20px var(--tk-font)", color: "var(--tk-txt3)" }}>
-                {" "}/ 45
-              </span>
+              <span>/ 45</span>
             </div>
-            <AmongYours species={species} ivs={ivs} allSpecies={data.species} />
+            <AmongYours
+              species={species}
+              ivs={ivs}
+              allSpecies={data.species}
+              alreadySaved={saved}
+            />
             <div className="tk-caption">
               {Math.round(ivPercentOf(ivs))}% ·{" "}
               <span style={badge.pink ? { color: "var(--tk-dang)" } : undefined}>
@@ -199,6 +211,7 @@ export function IVCalculator({ species, data, onClose }: Props) {
               hp: hasNumbers ? hpNum : null,
               lucky: false,
               shadow: false,
+              doneAction: null,
             }).then(() => setSaved(true));
           }}
         >
@@ -311,6 +324,27 @@ export function IVCalculator({ species, data, onClose }: Props) {
           </div>
         ))}
       </section>
+
+      {/*
+        Sair pelo fim da pagina.
+
+        O unico jeito de fechar era o "‹" la em cima. Depois de ler o veredito,
+        as ligas e o nivel, voltar exigia rolar a tela inteira de novo — e uma
+        tela longa que so tem saida no topo prende quem chegou ate o fim, que e
+        justamente quem leu tudo.
+
+        Fica DENTRO do bloco que so existe com IV lido: sem print a tela cabe
+        inteira, o "‹" esta a um dedo de distancia, e um segundo botao de
+        fechar seria so mais uma coisa pra ler.
+      */}
+      <button
+        type="button"
+        className="tk-btn tk-btn--secondary tk-btn--block"
+        style={{ marginTop: 28 }}
+        onClick={onClose}
+      >
+        {t("common.done")}
+      </button>
         </>
       )}
     </div>,

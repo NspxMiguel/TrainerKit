@@ -4,7 +4,13 @@ import { ACTION_KEYS, decide, ivTotalOf } from "@trainerkit/core";
 
 import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
 import { useT, type Key } from "../i18n/t.ts";
-import { exportJson, importJson, removePokemon, useCollection } from "../storage/collection.ts";
+import {
+  exportJson,
+  importJson,
+  removePokemon,
+  setDoneAction,
+  useCollection,
+} from "../storage/collection.ts";
 import { AskBox } from "../ui/AskBox.tsx";
 import { IconPlus } from "../ui/Icons.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
@@ -102,36 +108,80 @@ export function CollectionScreen({ dataset }: Props) {
 
             return (
               <div key={owned.id} className="tk-owned">
-                <button type="button" className="tk-owned-main" onClick={() => setOpen(s)}>
-                  <SpeciesTile
-                    spriteId={s.spriteId}
-                    dex={s.dex}
-                    speciesId={s.id}
-                    name={s.name}
-                    types={s.types}
-                    size={48}
-                  />
-                  <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
-                    <span style={{ display: "block", font: "700 15px var(--tk-font)" }}>
-                      {s.name}
-                    </span>
-                    <span className="tk-caption" style={{ display: "block" }}>
-                      {ivTotalOf(owned.ivs)}/45
-                      {owned.cp !== null &&
-                        ` · ${t("common.cp")} ${owned.cp.toLocaleString(language)}`}
-                      {owned.level !== null && ` · ${t("common.level")} ${owned.level}`}
-                    </span>
-                  </span>
-                  <span
-                    style={{
-                      font: "700 12px var(--tk-font)",
-                      color: TONE[verdict.action],
-                      flex: "none",
-                    }}
-                  >
-                    {t(ACTION_KEYS[verdict.action] as Key)}
-                  </span>
+                {/*
+                  Abrir e a acao da LINHA inteira, entao ela e uma camada
+                  invisivel por cima de tudo — e nao um botao que precisa
+                  embrulhar o conteudo.
+
+                  Assim o nome e o veredito dividem a primeira linha e os
+                  numeros ocupam a segunda INTEIRA. Antes tudo disputava a mesma
+                  faixa estreita ao lado da etiqueta, e "44/45 · PC 2.800 ·
+                  nível 30" quebrava deixando o "30" sozinho embaixo.
+                */}
+                <button
+                  type="button"
+                  className="tk-owned-open"
+                  aria-label={s.name}
+                  onClick={() => setOpen(s)}
+                />
+
+                <SpeciesTile
+                  spriteId={s.spriteId}
+                  dex={s.dex}
+                  speciesId={s.id}
+                  name={s.name}
+                  types={s.types}
+                  size={48}
+                />
+
+                <span className="tk-owned-name">{s.name}</span>
+
+                <span className="tk-owned-meta">
+                  {ivTotalOf(owned.ivs)}/45
+                  {owned.cp !== null &&
+                    ` · ${t("common.cp")} ${owned.cp.toLocaleString(language)}`}
+                  {owned.level !== null && ` · ${t("common.level")} ${owned.level}`}
+                </span>
+
+                {/*
+                  O veredito como BOTAO, nao como etiqueta.
+
+                  Enquanto era so texto, "Investir" ficava em verde pra sempre —
+                  inclusive depois de a pessoa ter investido. Agora tocar nele
+                  diz "ja fiz": a cor sai, vira um ✓ discreto, e o cartao para
+                  de cobrar. Tocar de novo desfaz.
+
+                  Ele so conta como cumprido se a acao marcada for a MESMA que o
+                  veredito indica hoje. Subiu de nivel e o conselho virou
+                  "evoluir"? Volta a cobrar, porque e outra coisa a fazer.
+                */}
+                <button
+                  type="button"
+                  className="tk-owned-act"
+                  data-done={owned.doneAction === verdict.action || undefined}
+                  aria-pressed={owned.doneAction === verdict.action}
+                  style={
+                    owned.doneAction === verdict.action
+                      ? undefined
+                      : { color: TONE[verdict.action] }
+                  }
+                  title={
+                    owned.doneAction === verdict.action
+                      ? t("collection.undoDone")
+                      : t("collection.markDone")
+                  }
+                  onClick={() =>
+                    void setDoneAction(
+                      owned.id,
+                      owned.doneAction === verdict.action ? null : verdict.action,
+                    )
+                  }
+                >
+                  {owned.doneAction === verdict.action
+                    ? `✓ ${t("collection.done")}`
+                    : t(ACTION_KEYS[verdict.action] as Key)}
                 </button>
+
                 <button
                   type="button"
                   className="tk-owned-remove"
