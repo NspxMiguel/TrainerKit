@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 
 import { App } from "./App.tsx";
 import { detectPlatform } from "./storage/install.ts";
+import { registerServiceWorker } from "./storage/updates.ts";
 import "./styles/base.css";
 import "./App.css";
 
@@ -15,6 +16,8 @@ import "./App.css";
  * Com o atributo na raiz, qualquer regra pode se ajustar sem tocar em JSX.
  */
 document.documentElement.dataset.platform = detectPlatform();
+
+registerServiceWorker();
 
 const root = document.getElementById("root");
 if (!root) throw new Error("#root nao existe no index.html");
