@@ -1,13 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
 import {
   CONTEXT_LABELS,
+  GREAT_LEAGUE,
+  MASTER_LEAGUE,
+  ULTRA_LEAGUE,
   computeCPAtLevel,
   rankMovesets,
   shadowDamageMultiplier,
+  topSpreads,
   withFrustration,
   type Context,
+  type League,
   type MoveWithPvp,
 } from "@trainerkit/core";
 
@@ -26,6 +31,11 @@ interface Props {
 }
 
 const PERFECT = { atk: 15, def: 15, hp: 15 };
+
+const LEAGUES: readonly League[] = [GREAT_LEAGUE, ULTRA_LEAGUE, MASTER_LEAGUE];
+
+/** Quantas linhas do topo mostrar. Dez cabe na tela e ja basta pra caçar. */
+const TOP_SPREADS = 10;
 
 /**
  * O maior stat base que existe no jogo, usado para escalar as barras.
@@ -67,6 +77,7 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
   const [calcOpen, setCalcOpen] = useState(false);
   const [context, setContext] = useState<Context>("general");
   const [shadow, setShadow] = useState(false);
+  const [league, setLeague] = useState<League>(GREAT_LEAGUE);
   const setup = useSetup();
   const language = useLanguage();
   useShowTranslation(); // re-renderiza ao ligar/desligar a traducao
@@ -160,6 +171,18 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
     if (!livre || !presa) return null;
     return Math.round((1 - presa.score / livre.score) * 100);
   })();
+
+  // Ranquear 4.096 combinacoes nao e barato; sem memo isso rodaria de novo a
+  // cada clique no seletor de moveset, que nao tem nada a ver com a liga.
+  const spreads = useMemo(
+    () => topSpreads(data.cpm, species.baseStats, league, TOP_SPREADS),
+    [data.cpm, species.baseStats, league],
+  );
+
+  // A especie nem encosta no teto da liga: todo mundo sobe ate o nivel maximo e
+  // o teto de PC nao restringe nada. Muda o que ha para explicar embaixo.
+  const semTeto =
+    league.cpCap !== null && (spreads[0]?.level ?? 0) >= data.version.levelCap;
 
   const evolutions = species.evolvesInto
     .map((id) => data.species.find((s) => s.id === id))
@@ -360,6 +383,69 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
         <p className="tk-caption" style={{ marginTop: 12, lineHeight: 1.5 }}>
           A nota compara os movesets DESTE Pokémon entre si — 100 é o melhor dele,
           não o melhor do jogo.
+        </p>
+      </section>
+
+      {/* O IV que se procura, por liga.
+          A tela do jogo mostra porcentagem, e porcentagem e a metrica errada
+          aqui: em liga com teto o 100% quase sempre perde. Esta tabela e a
+          resposta pra pergunta que se faz ANTES de capturar. */}
+      <div className="tk-overline" style={{ display: "block", marginTop: 24 }}>
+        Melhores IV por liga
+      </div>
+
+      <div style={{ display: "flex", gap: 6, margin: "10px 0" }}>
+        {LEAGUES.map((l) => (
+          <button
+            key={l.id}
+            type="button"
+            className={`tk-btn ${league.id === l.id ? "tk-btn--primary" : "tk-btn--secondary"}`}
+            style={{ flex: 1, height: 40, fontSize: 12, padding: 0 }}
+            aria-pressed={league.id === l.id}
+            onClick={() => setLeague(l)}
+          >
+            {l.name.replace(" League", "")}
+          </button>
+        ))}
+      </div>
+
+      {/* Grade propria em vez de `tk-row`: sao dez linhas de numeros curtos, e
+          o espacamento de linha de formulario deixava a tabela com mais de mil
+          pixels de altura, com o IV quebrando em duas linhas. */}
+      <section className="tk-card">
+        <div className="tk-spread-head">
+          <span>#</span>
+          <span>Atq</span>
+          <span>Def</span>
+          <span>PS</span>
+          <span>nível</span>
+          <span>PC</span>
+        </div>
+
+        {spreads.map((s) => (
+          <div
+            key={`${s.ivs.atk}-${s.ivs.def}-${s.ivs.hp}`}
+            className={`tk-spread${s.rank === 1 ? " tk-spread--top" : ""}`}
+          >
+            <span>{s.rank}</span>
+            <span>{s.ivs.atk}</span>
+            <span>{s.ivs.def}</span>
+            <span>{s.ivs.hp}</span>
+            <span className="tk-spread-dim">{s.level}</span>
+            <span>{s.cp.toLocaleString("pt-BR")}</span>
+          </div>
+        ))}
+
+        {/* A explicacao segue a TABELA, nao a liga.
+            Azumarill na Ultra pegou este caso: ele nem chega aos 2.500, entao o
+            topo e 15/15/15 — e o texto padrao ficava dizendo que o topo "quase
+            nunca e 15/15/15" logo acima de uma tabela que comeca com 15/15/15. */}
+        <p className="tk-caption" style={{ marginTop: 12, lineHeight: 1.5 }}>
+          {league.cpCap === null
+            ? "Sem teto de PC, nada pune ataque alto: aqui o 100% é o melhor mesmo, e o nível é o único limite."
+            : semTeto
+              ? `${species.name} nem alcança os ${league.cpCap.toLocaleString("pt-BR")} de PC desta liga — no nível ${data.version.levelCap} ele para em ${cpAt(data.version.levelCap).toLocaleString("pt-BR")}. Sem teto pra punir, o 100% volta a ser o melhor, mas entrar aqui já é desvantagem.`
+              : `Com teto de ${league.cpCap.toLocaleString("pt-BR")} de PC, ataque alto infla o PC e obriga a parar num nível mais baixo. Por isso o topo quase nunca é 15/15/15 — e por isso a porcentagem que o jogo mostra engana.`}
         </p>
       </section>
 
