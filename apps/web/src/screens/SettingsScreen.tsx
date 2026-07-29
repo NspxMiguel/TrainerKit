@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import type { DatasetSpecies } from "../data/useDataset.ts";
+import type { DatasetSource, DatasetSpecies } from "../data/useDataset.ts";
 import type { PersistState } from "../storage/persist.ts";
 import {
   LANGUAGES,
@@ -24,12 +24,15 @@ import { InstallGuide } from "./InstallGuide.tsx";
 import { AiSettings } from "./AiSettings.tsx";
 import { DataSourceSettings } from "./DataSourceSettings.tsx";
 import { SpriteSettings } from "./SpriteSettings.tsx";
+import { WipeDialog } from "../ui/WipeDialog.tsx";
 
 interface Props {
   datasetLabel: string | null;
   persist: PersistState | null;
   /** Precisa da lista pra saber quantas imagens existem pra baixar. */
   species: readonly DatasetSpecies[];
+  /** Procedencia declarada pelo dataset carregado. */
+  sources?: DatasetSource[] | undefined;
 }
 
 type Theme = "sistema" | "claro" | "escuro";
@@ -62,9 +65,10 @@ function formatBytes(n: number): string {
   return `${gb >= 10 ? Math.round(gb) : gb.toFixed(1)} GB`;
 }
 
-export function SettingsScreen({ datasetLabel, persist, species }: Props) {
+export function SettingsScreen({ datasetLabel, persist, species, sources }: Props) {
   const update = useUpdate();
   const [updateMsg, setUpdateMsg] = useState<string | null>(null);
+  const [wipeOpen, setWipeOpen] = useState(false);
   const install = useInstallState();
   const language = useLanguage();
   const showTranslation = useShowTranslation();
@@ -224,7 +228,7 @@ export function SettingsScreen({ datasetLabel, persist, species }: Props) {
 
       <SpriteSettings species={species} />
 
-      <DataSourceSettings datasetLabel={datasetLabel} />
+      <DataSourceSettings datasetLabel={datasetLabel} sources={sources} />
 
       <AiSettings />
 
@@ -296,7 +300,25 @@ export function SettingsScreen({ datasetLabel, persist, species }: Props) {
         >
           {t("settings.forceUpdate")}
         </button>
+
+        {/* Apagar tudo fica no fim da secao de manutencao, separado por uma
+            linha, e NUNCA com aparencia de botao normal. O dialogo e que
+            explica o que se perde e oferece o backup. */}
+        <hr className="tk-sep" />
+        <p className="tk-caption" style={{ lineHeight: 1.55 }}>
+          {t("wipe.openDetail")}
+        </p>
+        <button
+          type="button"
+          className="tk-btn tk-btn--danger tk-btn--block"
+          style={{ marginTop: 8 }}
+          onClick={() => setWipeOpen(true)}
+        >
+          {t("wipe.open")}
+        </button>
       </section>
+
+      {wipeOpen && <WipeDialog onClose={() => setWipeOpen(false)} />}
 
       <div className="tk-overline" style={{ display: "block", marginTop: 28 }}>
         {t("settings.about")}

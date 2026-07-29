@@ -2583,3 +2583,78 @@
     margin-top: 0;
   }
 }
+
+/* --------------------------------------------------------- acao destrutiva */
+
+/*
+ * Vermelho, e sozinho.
+ *
+ * Um botao que apaga tudo nao pode parecer com os outros. Fundo fraco e borda
+ * vermelha: visivel o bastante pra ser achado por quem procura, apagado o
+ * bastante pra nao ser tocado por quem esta so passando. So no toque ele fica
+ * cheio — a cor solida e a confirmacao visual, nao o convite.
+ */
+.tk-btn--danger {
+  background: var(--tk-dang-soft);
+  border: 1px solid var(--tk-dang-line);
+  color: var(--tk-dang);
+}
+
+.tk-btn--danger:active {
+  background: var(--tk-dang);
+  color: var(--tk-on-dang);
+}
+
+.tk-btn--danger:disabled {
+  opacity: 0.6;
+}
+
+.tk-sep {
+  border: 0;
+  border-top: 1px solid var(--tk-line);
+  margin: var(--tk-s5) 0 var(--tk-s4);
+}
+
+.tk-wipe-mark {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: var(--tk-dang-soft);
+  border: 1px solid var(--tk-dang-line);
+  color: var(--tk-dang);
+}
+
+/* Lista do que se perde. Marcador quadrado e pequeno: e inventario, nao
+   argumento — a pessoa precisa CONTAR os itens, nao ser convencida. */
+.tk-wipe-list {
+  margin: var(--tk-s4) 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+  font: 400 13px/1.45 var(--tk-font);
+  color: var(--tk-txt);
+}
+
+.tk-wipe-list li::marker {
+  color: var(--tk-dang);
+}
+
+/* Lista de procedencia: nome clicavel em cima, o que vem dele embaixo. */
+.tk-sources {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--tk-s3);
+}
+
+.tk-sources li {
+  display: grid;
+  gap: 1px;
+}
+
+.tk-sources a {
+  font: 600 13px var(--tk-font);
+}

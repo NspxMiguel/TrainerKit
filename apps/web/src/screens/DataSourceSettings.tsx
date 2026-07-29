@@ -8,10 +8,13 @@ import {
   setDataSource,
   useDataSource,
 } from "../data/source.ts";
-import { useT } from "../i18n/t.ts";
+import { useT, type Key } from "../i18n/t.ts";
+import type { DatasetSource } from "./../data/useDataset.ts";
 
 interface Props {
   datasetLabel: string | null;
+  /** Fontes declaradas pelo dataset carregado — nao pelo app. */
+  sources?: DatasetSource[] | undefined;
 }
 
 /**
@@ -26,7 +29,7 @@ interface Props {
  * daria tela branca ou, muito pior, numeros calculados sobre lixo — o unico
  * tipo de erro que este app nao pode cometer.
  */
-export function DataSourceSettings({ datasetLabel }: Props) {
+export function DataSourceSettings({ datasetLabel, sources }: Props) {
   const source = useDataSource();
   const { t } = useT();
   const [url, setUrl] = useState(getDataSource() ?? "");
@@ -81,6 +84,36 @@ export function DataSourceSettings({ datasetLabel }: Props) {
             {custom ? t("data.custom") : t("data.builtin")} ›
           </span>
         </button>
+      </section>
+
+      {/*
+        As fontes, com nome.
+        
+        "O app traz os dele" nao respondia a pergunta — o app nao PRODUZ numero
+        nenhum, ele junta tres origens. Dizer quais sao, e o que vem de cada uma,
+        e o minimo pra alguem poder conferir. A lista sai do proprio dataset,
+        entao apontar pra outra base mostra as fontes DAQUELA base.
+      */}
+      <div className="tk-overline" style={{ display: "block", marginTop: 22 }}>
+        {t("data.sourcesTitle")}
+      </div>
+      <section className="tk-card" style={{ marginTop: 10 }}>
+        {sources && sources.length > 0 ? (
+          <ul className="tk-sources">
+            {sources.map((src) => (
+              <li key={src.url}>
+                <a href={src.url} target="_blank" rel="noreferrer noopener">
+                  {src.name}
+                </a>
+                <span className="tk-caption">{t(src.provides as Key)}</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="tk-caption" style={{ lineHeight: 1.55 }}>
+            {t("data.sourcesNone")}
+          </p>
+        )}
       </section>
 
       {open && (

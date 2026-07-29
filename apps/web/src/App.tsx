@@ -84,6 +84,7 @@ export function App() {
               }
               persist={persist}
               species={species}
+              sources={dataset.status === "ready" ? dataset.data.sources : undefined}
             />
           )}
         </main>

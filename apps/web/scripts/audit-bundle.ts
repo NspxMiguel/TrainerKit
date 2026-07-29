@@ -33,6 +33,13 @@ const ALLOWED_IMAGES = new Set([
   "apple-touch-icon.png",
   "favicon-32.png",
   "favicon-16.png",
+  // As variantes claras, geradas pelo mesmo script a partir dos mesmos tokens.
+  "icon-192-light.png",
+  "icon-512-light.png",
+  "icon-maskable-512-light.png",
+  "apple-touch-icon-light.png",
+  "favicon-32-light.png",
+  "favicon-16-light.png",
 ]);
 
 const IMAGE_EXT = new Set([".png", ".jpg", ".jpeg", ".webp", ".gif", ".avif", ".bmp"]);

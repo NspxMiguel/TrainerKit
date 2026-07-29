@@ -27,13 +27,41 @@ import { fileURLToPath } from "node:url";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = join(HERE, "..", "public");
 
-// --- gradiente da marca, o mesmo --tk-brand dos tokens -----------------------
-const FROM = [0x4f, 0x8c, 0xff] as const;
-const TO = [0xb7, 0x9c, 0xff] as const;
+/*
+ * Fundo solido, preto ou branco. O gradiente saiu.
+ *
+ * Instalado, o icone senta ao lado dos icones do sistema — e ali um tile com
+ * gradiente roxo-azul briga com tudo em volta, ainda mais no iOS, onde o
+ * conjunto e sobrio. Preto no tema escuro, branco no claro: o icone deixa de
+ * competir e a marca (as tres barras) fica sendo a unica coisa que se ve.
+ *
+ * Cada variante tem a propria paleta, porque as barras brancas do tema escuro
+ * simplesmente sumiriam no branco.
+ */
+type Tema = "dark" | "light";
 
-/** --tk-succ: o verde que o app usa para "Investir". */
-const DECISION = [0x37, 0xd3, 0x99] as const;
-const WHITE = [0xff, 0xff, 0xff] as const;
+interface Paleta {
+  readonly bg: readonly [number, number, number];
+  /** As duas primeiras barras: as que o app LE. */
+  readonly bar: readonly [number, number, number];
+  /** A terceira: a DECISAO. Sempre o verde de "Investir" do tema. */
+  readonly decision: readonly [number, number, number];
+}
+
+const PALETAS: Record<Tema, Paleta> = {
+  // Preto puro, nao o `--tk-bg` (#07080b): no icone, um preto quase-preto
+  // aparece como um cinza sujo ao lado dos icones vizinhos.
+  dark: {
+    bg: [0x00, 0x00, 0x00],
+    bar: [0xff, 0xff, 0xff],
+    decision: [0x37, 0xd3, 0x99], // --tk-succ do tema escuro
+  },
+  light: {
+    bg: [0xff, 0xff, 0xff],
+    bar: [0x10, 0x13, 0x19], // --tk-txt do tema claro
+    decision: [0x0b, 0x8a, 0x5f], // --tk-succ do tema claro: o verde escuro
+  },
+};
 
 const crcTable = (() => {
   const t = new Uint32Array(256);
@@ -139,6 +167,7 @@ function markAt(
   u: number,
   v: number,
   simple: boolean,
+  paleta: Paleta,
 ): readonly [number, number, number] | null {
   const top = 0.5 - (3 * BAR_H + 2 * BAR_GAP) / 2;
   const r = BAR_H / 2;
@@ -152,7 +181,7 @@ function markAt(
     const headBase = MARK_LEFT + BAR_LEN[2]! + HEAD_GAP;
     if (u >= headBase && u <= headBase + HEAD_LEN) {
       const t = (u - headBase) / HEAD_LEN;
-      if (Math.abs(v - headCy) <= HEAD_H * (1 - t)) return DECISION;
+      if (Math.abs(v - headCy) <= HEAD_H * (1 - t)) return paleta.decision;
     }
   }
 
@@ -167,14 +196,15 @@ function markAt(
     const xb = MARK_LEFT + len - r;
     const nearest = Math.max(xa, Math.min(xb, u));
     if (Math.hypot(u - nearest, v - cy) <= r) {
-      return i === 2 ? DECISION : WHITE;
+      return i === 2 ? paleta.decision : paleta.bar;
     }
   }
 
   return null;
 }
 
-function renderIcon(size: number, maskable: boolean): Uint8Array {
+function renderIcon(size: number, maskable: boolean, tema: Tema): Uint8Array {
+  const paleta = PALETAS[tema];
   const rgba = new Uint8Array(size * size * 4);
 
   // Icone maskable precisa de zona segura: o sistema recorta ate 10% de cada
@@ -199,11 +229,9 @@ function renderIcon(size: number, maskable: boolean): Uint8Array {
       const coverage = Math.max(0, Math.min(1, 0.5 - d));
       if (coverage <= 0) continue;
 
-      // Gradiente na diagonal, como o --tk-brand (150deg).
-      const t = Math.max(0, Math.min(1, (px * 0.45 + py * 0.9) / (size * 1.35)));
-      let r = FROM[0] + (TO[0] - FROM[0]) * t;
-      let g = FROM[1] + (TO[1] - FROM[1]) * t;
-      let b = FROM[2] + (TO[2] - FROM[2]) * t;
+      let r: number = paleta.bg[0];
+      let g: number = paleta.bg[1];
+      let b: number = paleta.bg[2];
 
       // A marca por cima, com antialias por supersampling 4x4. Quatro amostras
       // bastavam pro monograma, que era todo reto; a ponta da barra decisiva e
@@ -216,7 +244,7 @@ function renderIcon(size: number, maskable: boolean): Uint8Array {
         for (const ox of [-0.375, -0.125, 0.125, 0.375]) {
           const u = (px + ox - size / 2) / (size * monoScale) + 0.5;
           const w = (py + oy - size / 2) / (size * monoScale) + 0.5;
-          const color = markAt(u, w, simple);
+          const color = markAt(u, w, simple, paleta);
           if (!color) continue;
           hits++;
           mr += color[0];
@@ -243,6 +271,15 @@ function renderIcon(size: number, maskable: boolean): Uint8Array {
 
 await mkdir(OUT_DIR, { recursive: true });
 
+/*
+ * Cada arquivo sai duas vezes: escuro e claro.
+ *
+ * O favicon TROCA sozinho — `<link rel="icon" media="(prefers-color-scheme:
+ * dark)">` e respeitado pelos navegadores atuais. O icone instalado NAO troca:
+ * o manifest nao tem como declarar variante por tema, e o sistema copia o
+ * arquivo uma vez, na hora de instalar. O escuro fica como padrao porque o app
+ * abre no escuro e o `background_color` do manifest e preto.
+ */
 for (const [size, maskable, name] of [
   [192, false, "icon-192.png"],
   [512, false, "icon-512.png"],
@@ -254,7 +291,10 @@ for (const [size, maskable, name] of [
   [32, false, "favicon-32.png"],
   [16, false, "favicon-16.png"],
 ] as const) {
-  const png = encodePng(size, size, renderIcon(size, maskable));
-  await writeFile(join(OUT_DIR, name), png);
-  console.log(`${name.padEnd(26)} ${size}x${size}  ${(png.length / 1024).toFixed(1)} KB`);
+  for (const tema of ["dark", "light"] as const) {
+    const arquivo = tema === "dark" ? name : name.replace(".png", "-light.png");
+    const png = encodePng(size, size, renderIcon(size, maskable, tema));
+    await writeFile(join(OUT_DIR, arquivo), png);
+    console.log(`${arquivo.padEnd(30)} ${size}x${size}  ${(png.length / 1024).toFixed(1)} KB`);
+  }
 }

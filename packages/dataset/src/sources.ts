@@ -32,6 +32,40 @@ export const TIMESTAMP_SOURCE = {
 } as const;
 
 /**
+ * As fontes, como o APP as mostra.
+ *
+ * Isto vai dentro do proprio `gamedata.json`, e nao fica escrito na interface.
+ * O motivo e simples: quem aponta o app pra outra base tem que ver as fontes
+ * DAQUELA base, nao as minhas. Procedencia e propriedade do dado, nao do app.
+ *
+ * `provides` e uma chave de traducao — o dataset nao carrega texto em dez
+ * idiomas, carrega a chave e o app resolve.
+ */
+export interface DeclaredSource {
+  readonly name: string;
+  readonly url: string;
+  readonly provides: string;
+}
+
+export const DECLARED_SOURCES: readonly DeclaredSource[] = [
+  {
+    name: "alexelgt/game_masters",
+    url: "https://github.com/alexelgt/game_masters",
+    provides: "data.provides.gameMaster",
+  },
+  {
+    name: "PokeMiners/pogo_assets",
+    url: "https://github.com/PokeMiners/pogo_assets",
+    provides: "data.provides.translations",
+  },
+  {
+    name: "PokéAPI",
+    url: "https://pokeapi.co",
+    provides: "data.provides.spriteIndex",
+  },
+];
+
+/**
  * Campos com prefixo `ob` sao nomes OFUSCADOS pela Niantic/Scopely: a
  * comunidade nao determinou o significado deles e eles mudam de nome sem aviso.
  * Nunca dependa de um campo `ob*` — o ETL deve falhar alto se um campo que

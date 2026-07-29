@@ -235,6 +235,21 @@ const EN = {
   "settings.notifyAgain": "Notify me about updates again",
   "settings.forceUpdate": "Force update",
   "settings.forceUpdateDetail": "Last resort if the app is stuck on an old version. Clears the cache and downloads everything again. Your collection is not touched.",
+
+  // -------------------------------------------------------- apagar tudo
+  "wipe.open": "Erase all app data",
+  "wipe.openDetail": "Leaves the app exactly as it was before you ever opened it.",
+  "wipe.title": "Erase everything?",
+  "wipe.body": "This cannot be undone.",
+  "wipe.item.collection": "Your whole collection, with every IV you scanned",
+  "wipe.item.settings": "Your name, language, theme, image source and AI key",
+  "wipe.item.cache": "Downloaded images and the offline copy of the game data",
+  "wipe.noServer": "There is no server: none of this exists anywhere else. Export a backup first if you might want it back.",
+  "wipe.exportFirst": "Export a backup first",
+  "wipe.exported": "Backup saved",
+  "wipe.action": "Erase everything",
+  "wipe.confirm": "Tap again to erase for good",
+  "wipe.wiping": "Erasing…",
   "settings.buildOf": "Build of {date}",
 
   // ------------------------------------------------------------------ onboarding
@@ -448,6 +463,11 @@ const EN = {
   "tip.species": "{count} species in the database, with moves, stats and rankings for each.",
   "data.help": "A link to a gamedata.json in the same format. Checked before it's accepted.",
   "data.what": "Where the game numbers come from. The app ships its own, updated daily — change this only if you want another source.",
+  "data.provides.gameMaster": "Stats, moves, CPM, type chart",
+  "data.provides.translations": "Official move names in 10 languages",
+  "data.provides.spriteIndex": "Image index only — no art is bundled",
+  "data.sourcesTitle": "Where the numbers come from",
+  "data.sourcesNone": "This dataset does not say where its numbers come from.",
   "ai.example": "“Which of mine is best for Great League?”",
   "sprites.customDetail": "A manifest link or a .zip.",
   "sprites.manifestAria": "Manifest address",
