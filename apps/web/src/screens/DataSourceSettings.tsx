@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import {
   BUILTIN_DATASET,
+  checkUrl,
   getDataSource,
   looksLikeDataset,
   setDataSource,
@@ -38,6 +39,12 @@ export function DataSourceSettings({ datasetLabel }: Props) {
   const apply = async () => {
     const target = url.trim();
     if (!target) return;
+    const bad = checkUrl(target);
+    if (bad) {
+      setError(bad);
+      return;
+    }
+
     setBusy(true);
     setError(null);
     try {
