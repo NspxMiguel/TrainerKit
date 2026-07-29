@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 
 import { useT } from "../i18n/t.ts";
@@ -162,8 +162,25 @@ export function SpriteDownloadPanel() {
 export function SpriteDownloadStrip() {
   const { t } = useT();
   const pre = usePrefetch();
+  const visible = pre.background && pre.status === "running";
 
-  if (!pre.background || pre.status !== "running") return null;
+  /*
+   * A tarja avisa o resto do layout que existe.
+   *
+   * Ela mora logo acima da barra de abas, e o botao de adicionar da Colecao
+   * mora no mesmo pedaco de tela — os dois se sobrepunham. Como o botao esta
+   * dentro de outra tela, nao ha seletor CSS que os relacione; o atributo na
+   * raiz e o mesmo caminho que `data-platform` ja usa.
+   */
+  useEffect(() => {
+    if (!visible) return;
+    document.documentElement.dataset.tkStrip = "1";
+    return () => {
+      delete document.documentElement.dataset.tkStrip;
+    };
+  }, [visible]);
+
+  if (!visible) return null;
 
   const pct = pre.total === 0 ? 0 : Math.round((pre.done / pre.total) * 100);
 

@@ -1986,6 +1986,16 @@
   bottom: calc(96px + env(safe-area-inset-bottom));
 }
 
+/* O botao de adicionar sobe pra tarja caber. Sem isto os dois ocupam a mesma
+   faixa e o botao redondo corta a barra de progresso ao meio. */
+[data-tk-strip] .tk-fab {
+  bottom: calc(122px + env(safe-area-inset-bottom));
+}
+
+[data-tk-strip][data-platform="ios"] .tk-fab {
+  bottom: calc(142px + env(safe-area-inset-bottom));
+}
+
 /* O progresso e o proprio FUNDO da tarja, nao uma barrinha separada: com 30px
    de altura, uma barra dentro de outra vira sujeira. */
 .tk-strip-fill {
