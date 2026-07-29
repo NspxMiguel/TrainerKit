@@ -53,6 +53,20 @@ export interface Dataset {
   chargedMoves: DatasetMove[];
   /** Nome oficial do golpe por idioma: `moveNames["pt-BR"]["counter_fast"]`. */
   moveNames?: Record<string, Record<string, string>>;
+  /**
+   * Constantes de batalha do proprio GAME_MASTER — STAB, bonus de sombroso,
+   * energia maxima. Nunca digitadas a mao: elas mudam com o jogo, e um numero
+   * defasado aqui faz o app mentir com confianca.
+   */
+  settings: {
+    battle: {
+      sameTypeAttackBonusMultiplier: number;
+      enemyAttackInterval: number;
+      maximumEnergy: number;
+      shadowPokemonAttackBonusMultiplier: number;
+      shadowPokemonDefenseBonusMultiplier: number;
+    };
+  };
 }
 
 export type DatasetState =

@@ -5,6 +5,8 @@ import {
   CONTEXT_LABELS,
   computeCPAtLevel,
   rankMovesets,
+  shadowDamageMultiplier,
+  withFrustration,
   type Context,
   type MoveWithPvp,
 } from "@trainerkit/core";
@@ -64,6 +66,7 @@ function StatBar({ label, value }: { label: string; value: number }) {
 export function SpeciesDetail({ species, data, onClose }: Props) {
   const [calcOpen, setCalcOpen] = useState(false);
   const [context, setContext] = useState<Context>("general");
+  const [shadow, setShadow] = useState(false);
   const setup = useSetup();
   const language = useLanguage();
   useShowTranslation(); // re-renderiza ao ligar/desligar a traducao
@@ -108,9 +111,14 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
       }),
     ].filter((m): m is MoveWithPvp => m !== null);
 
+  // Sombroso nao aprende nada a mais — ele PERDE um slot para a Frustracao, que
+  // TM comum nao remove. Por isso o modo sombroso injeta o golpe em vez de so
+  // aplicar um multiplicador: e a Frustracao que muda a recomendacao.
+  const frustration = moveById("frustration");
+  const chargedPool = collect(species.chargedMoves, species.eliteChargedMoves);
   const movesets = rankMovesets(
     collect(species.fastMoves, species.eliteFastMoves),
-    collect(species.chargedMoves, species.eliteChargedMoves),
+    shadow ? withFrustration(chargedPool, frustration) : chargedPool,
     context,
     {
       attackerTypes: species.types,
@@ -119,6 +127,39 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
       stabMultiplier: 1.2,
     },
   );
+
+  // Quanto custa continuar com a Frustracao.
+  //
+  // A conta e "e se ela fosse o UNICO carregado" — que e o estado em que o
+  // sombroso sai da luta contra a Rocket, antes de o jogador pagar o segundo
+  // slot de golpe. Medir contra a lista completa dava um numero pequeno e
+  // enganoso: com dois slots, a Frustracao vira so uma isca ruim, e o app
+  // diria que ela quase nao atrapalha. Atrapalha, e muito, no caso comum.
+  //
+  // Medido sempre em PvP, mesmo quando outro contexto esta selecionado: e onde
+  // a Frustracao doi mais e onde o numero e mais facil de ler. As duas notas
+  // saem da MESMA lista de propósito — `rankMovesets` normaliza pela melhor de
+  // cada chamada, entao notas de listas diferentes nao se comparam.
+  const custoDaFrustracao = (() => {
+    if (!shadow || !frustration) return null;
+
+    const juntos = rankMovesets(
+      collect(species.fastMoves, species.eliteFastMoves),
+      withFrustration(chargedPool, frustration),
+      "pvp",
+      {
+        attackerTypes: species.types,
+        chart: data.typeChart,
+        order: data.typeOrder,
+        stabMultiplier: 1.2,
+      },
+    );
+
+    const livre = juntos.find((m) => !m.isFrustration);
+    const presa = juntos.find((m) => m.isFrustration);
+    if (!livre || !presa) return null;
+    return Math.round((1 - presa.score / livre.score) * 100);
+  })();
 
   const evolutions = species.evolvesInto
     .map((id) => data.species.find((s) => s.id === id))
@@ -219,12 +260,12 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
       </div>
 
       <div style={{ display: "flex", gap: 6, margin: "10px 0" }}>
-        {(["general", "raid", "pvp"] as const).map((c) => (
+        {(["general", "raid", "pvp", "rocket"] as const).map((c) => (
           <button
             key={c}
             type="button"
             className={`tk-btn ${context === c ? "tk-btn--primary" : "tk-btn--secondary"}`}
-            style={{ flex: 1, height: 40, fontSize: 13, padding: 0 }}
+            style={{ flex: 1, height: 40, fontSize: 12, padding: 0 }}
             aria-pressed={context === c}
             onClick={() => setContext(c)}
           >
@@ -237,12 +278,39 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
         {CONTEXT_LABELS[context].detail}
       </p>
 
+      {/* Chip, nao botao de bloco: o sombroso e um filtro do que esta abaixo,
+          nao a acao principal da tela — quem compete por essa atencao e o
+          "Calcular IV do meu" la em cima. */}
+      <button
+        type="button"
+        className={`tk-btn ${shadow ? "tk-btn--primary" : "tk-btn--secondary"}`}
+        style={{ height: 34, fontSize: 12, padding: "0 14px", marginBottom: 10 }}
+        aria-pressed={shadow}
+        onClick={() => setShadow((v) => !v)}
+      >
+        {shadow ? "✓ sombroso" : "O meu é sombroso"}
+      </button>
+
+      {shadow && (
+        <p className="tk-caption" style={{ margin: "0 2px 10px", lineHeight: 1.45 }}>
+          Sombroso bate {Math.round((shadowDamageMultiplier(data.settings.battle) - 1) * 100)}%
+          mais forte, mas isso multiplica todos os ataques igual — a <em>ordem</em> abaixo não
+          muda por causa disso. O que muda é a Frustração, que ocupa um slot e só sai com TM
+          de evento.
+          {custoDaFrustracao !== null &&
+            ` Se ela for o único carregado, ele rende ${custoDaFrustracao}% menos em PvP.`}
+        </p>
+      )}
+
       <section className="tk-card">
         {movesets.length === 0 ? (
           <p className="tk-body">Sem dados de ataque para esta espécie.</p>
         ) : (
           movesets.slice(0, 5).map((m, i) => (
-            <div className="tk-row" key={`${m.fast.id}/${m.charged.id}`}>
+            <div
+              className="tk-row"
+              key={`${m.fast.id}/${m.charged.id}/${m.bait?.id ?? ""}`}
+            >
               <span
                 className="tk-row-label"
                 style={i === 0 ? { fontWeight: 700 } : undefined}
@@ -259,6 +327,21 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
                     </span>
                   );
                 })}
+                {/* A isca e conselho, nao enfeite: e o segundo carregado, que
+                    custa doce e poeira. Dizer qual e faz parte da resposta. */}
+                {m.bait && (
+                  <span className="tk-caption" style={{ display: "block" }}>
+                    isca: {moveLabel(m.bait.name, data.moveNames, m.bait.id, language).primary}
+                  </span>
+                )}
+                {m.isFrustration && (
+                  <span
+                    className="tk-caption"
+                    style={{ display: "block", color: "var(--tk-dang)" }}
+                  >
+                    preso na Frustração
+                  </span>
+                )}
                 {m.needsElite && (
                   <span className="tk-caption" style={{ display: "block" }}>
                     exige TM Elite
@@ -306,10 +389,6 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
         </>
       )}
 
-      <p className="tk-caption" style={{ marginTop: 22, lineHeight: 1.5 }}>
-        O ranking de melhor moveset por contexto — PvP, raide, uso geral — entra
-        numa próxima versão. Por enquanto os ataques aparecem só listados.
-      </p>
       {calcOpen && (
         <IVCalculator species={species} data={data} onClose={() => setCalcOpen(false)} />
       )}
