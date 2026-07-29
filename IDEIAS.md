@@ -1,102 +1,103 @@
-# Ideias para as próximas sessões
+# Ideias
 
-Ordenadas por **quanto mudam o app**, não por facilidade. Cada uma diz o que
-já existe no código, para não redescobrir.
+## Por que a lista anterior era ruim
+
+A primeira versão deste arquivo listava "custo em poeira", "comparador lado a
+lado", "cobertura de tipos". Recheio de calculadora. Nenhuma delas faz alguém
+**abrir** o app — respondem perguntas que a pessoa só faria se já estivesse
+com o app aberto.
+
+O teste que a lista velha não passava: *isso faz o Miguel tirar o celular do
+bolso no meio da rua?*
+
+Quem joga Pokémon GO abre um app auxiliar em três situações, e só três:
+
+1. **Acabou de pegar alguma coisa** e precisa decidir na hora se guarda.
+2. **Vai entrar num raide** e precisa saber se dá conta.
+3. **Está com a mochila cheia** e precisa limpar.
+
+Tudo que não serve a um desses três é feature de quem gosta de mexer no app,
+não de quem joga.
 
 ---
 
-## As três que eu faria primeiro
+## O que já responde essas três
 
-### 1. Custo até o alvo — poeira e doce
+**(1) acabou de pegar** — o scanner lê o print e dá o veredito. E desde agora
+diz *onde ele fica entre os que você já tem*: "o seu melhor entre 4 dessa
+família". Era a metade que faltava.
 
-**Por que primeiro:** hoje o app manda investir sem dizer o preço. "Investir"
-sem "custa 250 mil de poeira e 4 dias de caminhada" é meio conselho. O plano
-original lista um `cost.ts` que **nunca foi escrito**.
+**(2) vai entrar num raide** — os counters saem da sua coleção e dizem quantas
+pessoas você precisa.
 
-Responde: *"levar esse ao 50 custa quanto?"* e *"com a poeira que eu tenho, dá
-pra quantos?"*.
+**(3) mochila cheia** — **não existe nada**. É o maior buraco.
 
-O que já existe: a tabela de CPM completa e `computeCPAtLevel`. Falta a tabela
-de custo por nível (não está no GAME_MASTER — é client-side, como os limiares
-da avaliação) e a UI.
+---
 
-### 2. Faxina em massa
+## As três que eu faria agora
 
-**Por que:** é onde a coleção deixa de ser lista e vira alívio. Quem tem 2.000
-Pokémon não vai abrir 2.000 telas.
+### 1. Faxina — o buraco (3)
 
-Varre a coleção e devolve *"esses 23 são transferência segura"*, com seleção
-múltipla e um resumo do que se ganha em doce. O veredito já classifica cada um
-— falta a tela de lote e a confirmação.
+"Esses 23 são transferência segura." Seleção múltipla, total de doce que você
+ganha, e um resumo antes de confirmar.
+
+É onde a coleção deixa de ser lista e vira alívio. Quem tem 2.000 Pokémon não
+abre 2.000 telas — e é a única das três situações que o app ainda não atende.
 
 ⚠️ Precisa de confirmação explícita e desfazer. Transferir é irreversível no
-jogo, e um app que erra aqui destrói coisa de verdade.
+jogo.
 
-### 3. Comparador lado a lado
+### 2. Escanear vários prints de uma vez
 
-**Por que:** é a pergunta mais frequente que hoje exige abrir duas telas e
-lembrar dos números. *"Invisto nesse ou naquele?"*
+Hoje é um print, um Pokémon, uma tela. Mas quem acabou de fazer uma sessão de
+capturas tem 20 prints na galeria.
 
-Dois Pokémon, os mesmos números, e um veredito comparativo. O motor de veredito
-já devolve sinais com peso; comparar é confrontar dois conjuntos de sinais.
+O `<input multiple>` já existe no iOS e abre a fototeca com os mais recentes
+primeiro. Faltam a fila de leitura e a tela de revisão — "li 18 de 20, estes
+dois não deram".
 
----
+Junto com a faxina, transforma o app de "consulto um" em "resolvo a sessão".
 
-## Coisas boas que ficam bem depois
+### 3. Vale a pena esse raide?
 
-### Compartilhar print direto pelo sistema (Android)
-
-Estava declarado no manifest e **eu removi**: o `share_target` anunciava a
-capacidade, o Android colocava o TrainerKit na folha de compartilhar, e o POST
-caía numa rota inexistente. Anunciar e falhar é pior que não anunciar.
-
-Implementar exige service worker próprio (`injectManifest` em vez de
-`generateSW`) que intercepte o POST com `event.request.formData()`. No iOS
-nunca vai existir — o bug do WebKit está aberto desde 2019.
-
-### "O que faço com meus doces"
-
-Inverte a pergunta: em vez de *"esse presta?"*, vira *"com o que eu tenho, qual
-o melhor gasto?"*. Você informa os doces por família e o app ordena as
-evoluções por retorno.
-
-### Como a análise mudou
-
-O protótipo previa: *"esse subiu 40 posições desde a última base"*. Exige
-guardar o veredito anterior junto do Pokémon — mudança pequena no schema do
-Dexie, e o dataset já tem `version.batchId` para saber contra o quê comparar.
-
-### Cobertura de tipos do time
-
-Contra quais tipos você não tem resposta. Diz o que **caçar**, que nenhuma
-outra tela faz — todas falam do que você já tem.
-
-### Vale a pena virar lucky?
-
-Lucky custa metade da poeira. Tem conta fechada e ninguém mostra.
-
-### Hero adaptativo
-
-Os 8 estados priorizados da home que o protótipo especifica. Hoje ela tem a
-ação rápida e as pendências — falta variar conforme o que importa hoje
-(evento ativo, dataset novo, raide do dia).
+Antes de gastar o passe: *"você derruba sozinho em 2 min"*, *"você derruba mas
+cai 3 vezes"*, *"nem com a sala cheia"*. O motor de counters já calcula isso —
+falta virar uma resposta que se dá **antes** de entrar, não durante.
 
 ---
 
-## Dívidas técnicas conhecidas
+## Depois, se fizer sentido
 
-**`dugtrio_normal` não é marcado como cosmético.** A entrada legada tem 2
-pontos de defesa a mais que a canônica, então a assinatura não bate. 1 caso em
-969 pares — inofensivo, mas está registrado.
+**IA local.** O Miguel perguntou e eu não entreguei. Dá pra fazer com WebLLM,
+mas o menor modelo útil passa de 500 MB de download. Antes de gastar isso do
+usuário: vale? Com a chave da Groq a resposta é instantânea e não custa nada
+de espaço. A IA local só ganha em privacidade — e aqui nada sai do aparelho
+além da pergunta.
 
-**O `react` chunk saiu com 12 KB.** Menor do que deveria; o `react-dom` provavelmente
-continua no chunk principal. Não afeta o usuário, mas o *code splitting* não
-está fazendo o que eu quis.
+**Compartilhar print pelo sistema (Android).** Estava no manifest e **eu
+removi**: anunciava a capacidade e o POST caía numa rota inexistente. Exige
+service worker próprio (`injectManifest`). No iOS nunca vai existir.
 
-**Os prints de teste do scanner ficam fora do repositório.** Os 26 casos reais
-que validaram a leitura são grandes e contêm arte do jogo. `TK_PRINTS` aponta
-para eles; sem a variável, os testes se ignoram em vez de falhar. Significa que
-o CI **não** exercita o scanner.
+**Como a análise mudou.** "Esse subiu 40 posições desde a última base." Exige
+guardar o veredito anterior — mudança pequena no schema.
 
-**Não há teste de interface.** A i18n e o validador de dataset têm testes, mas
-os fluxos (escanear → salvar → veredito) são verificados só à mão no navegador.
+**Hero adaptativo.** Os 8 estados da home que o protótipo especifica. Hoje ela
+tem ação, resumo, atalhos e a dica; falta variar conforme o dia.
+
+---
+
+## Dívidas técnicas
+
+**O CI não exercita o scanner.** Os 26 prints reais que validaram a leitura
+ficam fora do repositório (são grandes e contêm arte do jogo). `TK_PRINTS`
+aponta pra eles; sem a variável os testes se ignoram. É a parte mais delicada
+do app e a menos coberta automaticamente.
+
+**Não há teste de interface.** i18n e o validador de dataset têm testes; os
+fluxos são verificados à mão no navegador.
+
+**`dugtrio_normal` não é marcado como cosmético** — a entrada legada tem 2
+pontos de defesa a mais, então a assinatura não bate. 1 caso em 969.
+
+**O chunk `react` saiu com 12 KB**, menor do que deveria: o `react-dom`
+provavelmente continua no principal. Não afeta o usuário.
