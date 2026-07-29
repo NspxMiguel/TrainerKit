@@ -1504,3 +1504,16 @@
   font-weight: 700;
   color: var(--tk-succ);
 }
+
+/* Filtro de segundo nivel: mesma forma, menos peso. A hierarquia precisa
+   aparecer, senao tres fileiras de botoes iguais viram uma parede. */
+.tk-chip--dim {
+  height: 28px;
+  padding: 0 12px;
+  font-size: 11px;
+  background: transparent;
+}
+
+.tk-chip--dim[data-on] {
+  background: var(--tk-pri-soft);
+}
