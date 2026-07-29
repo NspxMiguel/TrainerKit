@@ -318,4 +318,6 @@ export const JA: Dict = {
   "ai.off": "オフ",
   "ai.help": "console.groq.com で無料のキーが取れます。この端末に保存され、Groq に直接送られます。TrainerKit にサーバーはなく、課金もありません。",
   "ai.what": "分析はしません。判定はここで計算済みで、それを自然な文章に書き直すだけです。",
+  "settings.usage": "使い方",
+  "raid.emptyBrowse": "この答えはあなたのコレクションから出ます。設定でコレクションモードに切り替えると保存できます。",
 };

@@ -1,4 +1,14 @@
 /**
+ * ATENCAO ao nome deste arquivo: ele NAO pode se chamar `fetch`.
+ *
+ * `pnpm fetch` e comando embutido do pnpm — popula a store a partir do
+ * lockfile. Um script com esse nome no `package.json` e silenciosamente
+ * ignorado, e o embutido roda no lugar. No CI isso apareceu como "o passo de
+ * baixar passou" seguido de "arquivo nao existe" no passo seguinte, que e o
+ * tipo de falha que custa meia hora pra entender.
+ */
+
+/**
  * Baixa o GAME_MASTER cru, mas so quando ele mudou de verdade.
  *
  * O timestamp.json tem 69 bytes e o GAME_MASTER tem 18 MB; comparar o batchId
