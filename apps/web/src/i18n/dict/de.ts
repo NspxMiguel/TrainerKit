@@ -371,4 +371,6 @@ export const DE: Dict = {
   "spread.noLimit": "Ohne Grenze",
   "spread.neverCapped": "{name} erreicht die WP-Grenze keiner Liga — bei {maxCp} ist Schluss. Also geht jedes IV auf Maximallevel und 15/15/15 gewinnt. Hier gibt es keine Liga zu wählen.",
   "spread.titleSimple": "Welche IV suchen",
+  "among.best": "Dein bestes von {count} in dieser Familie",
+  "among.rank": "Dein #{place} von {count} in dieser Familie",
 };

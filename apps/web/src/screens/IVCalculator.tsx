@@ -19,6 +19,7 @@ import { useT } from "../i18n/t.ts";
 import { useSetup } from "../onboarding/setup.ts";
 import { IVBar } from "../ui/IVBar.tsx";
 import { addPokemon } from "../storage/collection.ts";
+import { AmongYours } from "../ui/AmongYours.tsx";
 import { AssistantCard } from "../ui/AssistantCard.tsx";
 import { VerdictCard } from "../ui/VerdictCard.tsx";
 import { ScanDropzone } from "../ui/ScanDropzone.tsx";
@@ -113,6 +114,7 @@ export function IVCalculator({ species, data, onClose }: Props) {
                 {" "}/ 45
               </span>
             </div>
+            <AmongYours species={species} ivs={ivs} allSpecies={data.species} />
             <div className="tk-caption">
               {Math.round(ivPercentOf(ivs))}% ·{" "}
               <span style={badge.pink ? { color: "var(--tk-dang)" } : undefined}>

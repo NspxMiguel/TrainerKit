@@ -371,4 +371,6 @@ export const RU: Dict = {
   "spread.noLimit": "Без потолка",
   "spread.neverCapped": "{name} не достигает потолка CP ни в одной лиге — максимум {maxCp}. Значит любой IV идёт до максимального уровня и побеждает 15/15/15. Выбирать лигу тут не из чего.",
   "spread.titleSimple": "Какие IV искать",
+  "among.best": "Лучший из твоих {count} в этой линии",
+  "among.rank": "Твой #{place} из {count} в этой линии",
 };

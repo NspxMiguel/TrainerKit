@@ -1517,3 +1517,20 @@
 .tk-chip--dim[data-on] {
   background: var(--tk-pri-soft);
 }
+
+/* ------------------------------------------- posicao dentro da colecao */
+
+/*
+ * A pergunta do momento em que se joga: voce acabou de pegar o quarto Machamp
+ * e decide na hora se guarda. O app sabia o IV e sabia a colecao, mas nunca
+ * cruzava os dois.
+ */
+.tk-among {
+  margin: 4px 0 0;
+  font: 600 12px var(--tk-font);
+  color: var(--tk-txt3);
+}
+
+.tk-among--top {
+  color: var(--tk-succ);
+}

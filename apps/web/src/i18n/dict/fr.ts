@@ -371,4 +371,6 @@ export const FR: Dict = {
   "spread.noLimit": "Sans plafond",
   "spread.neverCapped": "{name} n'atteint le plafond de PC d'aucune ligue — il s'arrête à {maxCp}. Donc tous les IV montent au niveau max et 15/15/15 gagne. Pas de ligue à choisir ici.",
   "spread.titleSimple": "Quels IV chercher",
+  "among.best": "Ton meilleur sur {count} de cette famille",
+  "among.rank": "Ton #{place} sur {count} de cette famille",
 };

@@ -371,4 +371,6 @@ export const IT: Dict = {
   "spread.noLimit": "Senza tetto",
   "spread.neverCapped": "{name} non raggiunge il tetto di PL di nessuna lega — si ferma a {maxCp}. Quindi ogni IV sale al livello massimo e vince 15/15/15. Qui non c'è lega da scegliere.",
   "spread.titleSimple": "Quali IV cercare",
+  "among.best": "Il tuo migliore fra {count} di questa famiglia",
+  "among.rank": "Il tuo #{place} su {count} di questa famiglia",
 };
