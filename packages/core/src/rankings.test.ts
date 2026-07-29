@@ -7,7 +7,8 @@ import { computeCPAtLevel } from "./cp.js";
 import { ivPercent, solveIVs, summarize } from "./iv.js";
 import { GREAT_LEAGUE, MASTER_LEAGUE, ULTRA_LEAGUE, maxLevelForCap, rankIVSpreads, rankOf } from "./pvp.js";
 import { equivalentRating } from "./raid.js";
-import type { BaseStats } from "./types.js";
+import type { BaseStats, IVs } from "./types.js";
+import { MAX_LEVEL } from "./types.js";
 import {
   DOUBLE_RESISTED,
   NEUTRAL,
@@ -152,6 +153,49 @@ describe("ranking de PvP", () => {
     expect(computeCPAtLevel(cpm, slaking, perfect, 1)).toBe(62);
     expect(maxLevelForCap(cpm, slaking, perfect, 500)).not.toBeNull();
     expect(maxLevelForCap(cpm, slaking, perfect, 61)).toBeNull();
+  });
+
+  it("a busca binaria da o mesmo nivel que a varredura linear", () => {
+    // `maxLevelForCap` foi de varredura linear para busca binaria por causa do
+    // custo (4.096 chamadas por liga, uma vez por Pokemon da colecao). A troca
+    // so e valida porque o PC cresce junto com o nivel; se algum dia a formula
+    // deixar de ser monotona, e este teste que avisa.
+    const linear = (b: BaseStats, ivs: IVs, cap: number): number | null => {
+      for (let level = MAX_LEVEL; level >= 1; level -= 0.5) {
+        if (computeCPAtLevel(cpm, b, ivs, level) <= cap) return level;
+      }
+      return null;
+    };
+
+    for (const nome of ["azumarill", "medicham", "dragonite", "slaking"]) {
+      const b = base(nome);
+      for (const cap of [500, 1500, 2500]) {
+        for (const ivs of [
+          { atk: 0, def: 0, hp: 0 },
+          { atk: 15, def: 15, hp: 15 },
+          { atk: 0, def: 15, hp: 15 },
+          { atk: 7, def: 3, hp: 12 },
+        ]) {
+          expect(maxLevelForCap(cpm, b, ivs, cap)).toBe(linear(b, ivs, cap));
+        }
+      }
+    }
+  });
+
+  it("empate divide a mesma posicao", () => {
+    // A versao antiga ordenava e lia o indice, entao dois IV com stat product
+    // identico recebiam posicoes diferentes conforme a ordem da ordenacao.
+    // Posicao e "quantos sao melhores que voce", e empate nao torna ninguem
+    // melhor.
+    const azumarill = base("azumarill");
+    const spreads = rankIVSpreads(cpm, azumarill, GREAT_LEAGUE);
+
+    const empatados = spreads.filter(
+      (s) => s.statProduct === spreads[0]!.statProduct,
+    );
+    for (const s of empatados) {
+      expect(rankOf(cpm, azumarill, s.ivs, GREAT_LEAGUE)!.rank).toBe(1);
+    }
   });
 });
 
