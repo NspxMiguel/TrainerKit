@@ -200,6 +200,48 @@ function productTable(
 }
 
 /**
+ * Os N melhores IV da especie para a liga.
+ *
+ * Responde a pergunta que o jogador faz ANTES de capturar: "que IV eu procuro
+ * neste aqui pra Great?". Reusa a tabela cacheada em vez de materializar as
+ * 4.096 combinacoes so pra jogar 4.086 fora.
+ */
+export function topSpreads(
+  cpm: CpmTable,
+  base: BaseStats,
+  league: League,
+  count: number,
+  options: { floorIV?: number; levelCap?: number } = {},
+): RankedSpread[] {
+  const { products, best } = productTable(cpm, base, league, options);
+  const levelCap = options.levelCap ?? MAX_LEVEL;
+
+  const candidates: Array<{ ivs: IVs; product: number }> = [];
+  for (let i = 0; i < products.length; i++) {
+    const product = products[i]!;
+    if (product <= 0) continue;
+    candidates.push({
+      ivs: { atk: (i >> 8) & 15, def: (i >> 4) & 15, hp: i & 15 },
+      product,
+    });
+  }
+
+  candidates.sort((a, b) => b.product - a.product);
+
+  return candidates.slice(0, count).map((c, i) => {
+    const level = maxLevelForCap(cpm, base, c.ivs, league.cpCap, levelCap) ?? levelCap;
+    return {
+      ivs: c.ivs,
+      level,
+      cp: computeCP(base, c.ivs, cpmForLevel(cpm, level)),
+      statProduct: c.product,
+      rank: i + 1,
+      percent: best > 0 ? c.product / best : 0,
+    };
+  });
+}
+
+/**
  * Posicao de um IV especifico, sem materializar o ranking inteiro para quem so
  * quer saber do proprio Pokemon.
  *

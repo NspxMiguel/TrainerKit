@@ -5,7 +5,15 @@ import { describe, expect, it } from "vitest";
 
 import { computeCPAtLevel } from "./cp.js";
 import { ivPercent, solveIVs, summarize } from "./iv.js";
-import { GREAT_LEAGUE, MASTER_LEAGUE, ULTRA_LEAGUE, maxLevelForCap, rankIVSpreads, rankOf } from "./pvp.js";
+import {
+  GREAT_LEAGUE,
+  MASTER_LEAGUE,
+  ULTRA_LEAGUE,
+  maxLevelForCap,
+  rankIVSpreads,
+  rankOf,
+  topSpreads,
+} from "./pvp.js";
 import { equivalentRating } from "./raid.js";
 import type { BaseStats, IVs } from "./types.js";
 import { MAX_LEVEL } from "./types.js";
@@ -180,6 +188,29 @@ describe("ranking de PvP", () => {
         }
       }
     }
+  });
+
+  it("o topo da liga bate com o ranking completo", () => {
+    // `topSpreads` pega um atalho pela tabela cacheada; se ele divergir da
+    // enumeracao completa, a tela de "melhores IV" mente.
+    const azumarill = base("azumarill");
+    const completo = rankIVSpreads(cpm, azumarill, GREAT_LEAGUE).slice(0, 10);
+    const topo = topSpreads(cpm, azumarill, GREAT_LEAGUE, 10);
+
+    expect(topo).toHaveLength(10);
+    for (let i = 0; i < 10; i++) {
+      expect(topo[i]!.ivs).toEqual(completo[i]!.ivs);
+      expect(topo[i]!.level).toBe(completo[i]!.level);
+      expect(topo[i]!.cp).toBe(completo[i]!.cp);
+      expect(topo[i]!.rank).toBe(i + 1);
+      expect(topo[i]!.percent).toBeCloseTo(completo[i]!.percent, 9);
+    }
+  });
+
+  it("na Master o topo e o 100%, porque nao ha teto pra punir ataque alto", () => {
+    const topo = topSpreads(cpm, base("dragonite"), MASTER_LEAGUE, 3);
+    expect(topo[0]!.ivs).toEqual({ atk: 15, def: 15, hp: 15 });
+    expect(topo[0]!.percent).toBeCloseTo(1, 9);
   });
 
   it("empate divide a mesma posicao", () => {
