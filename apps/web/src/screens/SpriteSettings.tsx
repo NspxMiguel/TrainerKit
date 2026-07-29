@@ -1,11 +1,12 @@
 import { useRef, useState } from "react";
 
 import {
-  SOURCE_LABELS,
+  SOURCE_KEYS,
   setSpriteSettings,
   useSpriteSettings,
   type BuiltinSourceId,
 } from "../sprites/settings.ts";
+import { useT, type Key } from "../i18n/t.ts";
 import { addManifestSource, addZipSource, removeSource } from "../sprites/sources.ts";
 import { refreshSources, useSources } from "../sprites/useSpriteUrl.ts";
 
@@ -25,6 +26,7 @@ const BUILTIN: BuiltinSourceId[] = ["off", "pokeapi-artwork", "pokeapi-home"];
 export function SpriteSettings() {
   const settings = useSpriteSettings();
   const sources = useSources();
+  const { t } = useT();
 
   const [url, setUrl] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
@@ -37,7 +39,7 @@ export function SpriteSettings() {
 
   const addUrl = async () => {
     setError(null);
-    setBusy("Lendo manifesto…");
+    setBusy(t("sprites.readingManifest"));
     try {
       const source = await addManifestSource(url);
       await refreshSources();
@@ -52,10 +54,10 @@ export function SpriteSettings() {
 
   const addZip = async (file: File) => {
     setError(null);
-    setBusy("Descompactando…");
+    setBusy(t("sprites.unzipping"));
     try {
       const source = await addZipSource(file, (done, total) =>
-        setBusy(`Importando ${done} de ${total}…`),
+        setBusy(t("sprites.loaded", { count: `${done}/${total}` })),
       );
       await refreshSources();
       setSpriteSettings({ source: `src:${source.id}` });
@@ -75,7 +77,7 @@ export function SpriteSettings() {
   return (
     <>
       <div className="tk-overline" style={{ display: "block", marginTop: 28 }}>
-        Imagens
+        {t("sprites.title")}
       </div>
 
       <section className="tk-card" style={{ marginTop: 10, display: "grid", gap: 8 }}>
@@ -97,8 +99,8 @@ export function SpriteSettings() {
                 {active ? "●" : "○"}
               </span>
               <span style={{ flex: 1, minWidth: 0 }}>
-                <span className="tk-option-title">{SOURCE_LABELS[id].title}</span>
-                <span className="tk-option-detail">{SOURCE_LABELS[id].detail}</span>
+                <span className="tk-option-title">{t(SOURCE_KEYS[id].title as Key)}</span>
+                <span className="tk-option-detail">{t(SOURCE_KEYS[id].detail as Key)}</span>
               </span>
             </button>
           );
@@ -115,10 +117,9 @@ export function SpriteSettings() {
             {usingCustom ? "●" : "○"}
           </span>
           <span style={{ flex: 1, minWidth: 0 }}>
-            <span className="tk-option-title">Fonte personalizada</span>
+            <span className="tk-option-title">{t("sprites.custom")}</span>
             <span className="tk-option-detail">
-              Um link de manifesto ou um .zip com as imagens. Você aponta e tudo
-              aparece.
+              {t("sprites.customDetail")}
             </span>
           </span>
         </button>
@@ -168,10 +169,10 @@ export function SpriteSettings() {
                 inputMode="url"
                 autoComplete="off"
                 spellCheck={false}
-                placeholder="https://exemplo.com/sprites.json"
+                placeholder={t("sprites.manifestPlaceholder")}
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                aria-label="Endereço do manifesto"
+                aria-label={t("sprites.manifestAria")}
               />
             </div>
 
@@ -183,7 +184,7 @@ export function SpriteSettings() {
                 disabled={url.trim() === "" || busy !== null}
                 onClick={() => void addUrl()}
               >
-                Adicionar link
+                {t("sprites.addLink")}
               </button>
               <button
                 type="button"
@@ -192,7 +193,7 @@ export function SpriteSettings() {
                 disabled={busy !== null}
                 onClick={() => fileInput.current?.click()}
               >
-                Importar .zip
+                {t("sprites.importZip")}
               </button>
             </div>
 
@@ -216,19 +217,20 @@ export function SpriteSettings() {
             )}
 
             <p className="tk-caption" style={{ lineHeight: 1.6 }}>
-              O manifesto é um JSON com <code>name</code> e <code>template</code> — por
-              exemplo <code>{'"https://…/{dex}.png"'}</code>. No .zip, o nome do arquivo é
-              o que casa: <code>025.png</code> por número da Pokédex,{" "}
-              <code>pikachu.png</code> por nome. Pastas são ignoradas.
+              {t("sprites.manifestHelp", {
+                nameField: "name",
+                templateField: "template",
+                example: '"https://…/{dex}.png"',
+                byDex: "025.png",
+                byName: "pikachu.png",
+              })}
             </p>
           </div>
         )}
       </section>
 
       <p className="tk-caption" style={{ marginTop: 10, lineHeight: 1.5 }}>
-        {settings.source === "off"
-          ? "Nenhuma imagem é baixada. Cada espécie aparece com a cor do tipo e as iniciais."
-          : "O TrainerKit não hospeda nem redistribui nenhuma imagem — ele só aponta para a fonte que você escolheu."}
+        {settings.source === "off" ? t("sprites.noneActive") : t("sprites.note")}
       </p>
     </>
   );

@@ -1,5 +1,7 @@
 import { opine, type AssistantInput, type Tone } from "@trainerkit/core";
 
+import { useT } from "../i18n/t.ts";
+
 const TONE_COLOR: Record<Tone, string> = {
   bom: "var(--tk-succ)",
   neutro: "var(--tk-info)",
@@ -16,11 +18,12 @@ const TONE_COLOR: Record<Tone, string> = {
  */
 export function AssistantCard(props: AssistantInput) {
   const opinion = opine(props);
+  const { t, tm } = useT();
 
   return (
     <>
       <div className="tk-overline" style={{ display: "block", marginTop: 26 }}>
-        O que eu acho
+        {t("assistant.title")}
       </div>
 
       <section className="tk-card" style={{ marginTop: 10 }}>
@@ -31,13 +34,13 @@ export function AssistantCard(props: AssistantInput) {
             margin: 0,
           }}
         >
-          {opinion.headline}
+          {tm(opinion.headline)}
         </p>
 
         {opinion.observations.length > 0 && (
           <div style={{ display: "grid", gap: 12, marginTop: 16 }}>
             {opinion.observations.map((o) => (
-              <div key={o.text} style={{ display: "flex", gap: 10 }}>
+              <div key={o.text.key} style={{ display: "flex", gap: 10 }}>
                 <span
                   aria-hidden="true"
                   style={{
@@ -49,13 +52,13 @@ export function AssistantCard(props: AssistantInput) {
                 />
                 <span style={{ flex: 1, minWidth: 0 }}>
                   <span className="tk-body" style={{ display: "block", color: "var(--tk-txt)" }}>
-                    {o.text}
+                    {tm(o.text)}
                   </span>
                   <span
                     className="tk-caption"
                     style={{ display: "block", marginTop: 2, fontFamily: "var(--tk-mono)" }}
                   >
-                    {o.evidence}
+                    {tm(o.evidence)}
                   </span>
                 </span>
               </div>

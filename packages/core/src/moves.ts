@@ -320,22 +320,13 @@ export function shadowDamageMultiplier(settings: {
   return settings.shadowPokemonAttackBonusMultiplier;
 }
 
-export const CONTEXT_LABELS: Record<Context, { title: string; detail: string }> = {
-  general: {
-    title: "Pra tudo",
-    detail: "Vai bem nos dois. Escolha de quem não quer trocar de ataque depois.",
-  },
-  raid: {
-    title: "Raide",
-    detail: "Dano por segundo contra um alvo só, sem trocas.",
-  },
-  pvp: {
-    title: "PvP",
-    detail: "Turnos e energia. Golpe barato que sai rápido vence o forte que nunca carrega.",
-  },
-  rocket: {
-    title: "Rocket",
-    detail:
-      "Os líderes bloqueiam seus dois primeiros carregados. Vence quem atravessa os escudos, não quem bate mais forte.",
-  },
+/**
+ * Chaves de traducao de cada contexto. Nao sao os rotulos: eles dependem do
+ * idioma e moram no dicionario da interface.
+ */
+export const CONTEXT_KEYS: Record<Context, { title: string; detail: string }> = {
+  general: { title: "context.general.title", detail: "context.general.detail" },
+  raid: { title: "context.raid.title", detail: "context.raid.detail" },
+  pvp: { title: "context.pvp.title", detail: "context.pvp.detail" },
+  rocket: { title: "context.rocket.title", detail: "context.rocket.detail" },
 };

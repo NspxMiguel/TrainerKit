@@ -1,4 +1,5 @@
 import { MAX_BAR, ivTotalOf } from "./appraisal.js";
+import { msg, type Message } from "./message.js";
 import { computeCPAtLevel, type CpmTable } from "./cp.js";
 import { rankOf, GREAT_LEAGUE, MASTER_LEAGUE, ULTRA_LEAGUE, type League } from "./pvp.js";
 import type { BaseStats, IVs } from "./types.js";
@@ -21,14 +22,14 @@ export type Tone = "bom" | "neutro" | "ruim";
 export interface Observation {
   tone: Tone;
   /** A frase. Curta, direta, sem enrolacao. */
-  text: string;
+  text: Message;
   /** O numero que sustenta a frase. Sempre presente — sem dado, sem opiniao. */
-  evidence: string;
+  evidence: Message;
 }
 
 export interface Opinion {
   /** Uma frase de resumo. Nunca duas. */
-  headline: string;
+  headline: Message;
   tone: Tone;
   observations: Observation[];
 }
@@ -62,16 +63,16 @@ export function opine(input: AssistantInput): Opinion {
   if (baseStats.atk >= HIGH_ATK) {
     observations.push({
       tone: "bom",
-      text: "Bate forte. Bom pra raide.",
-      evidence: `ataque base ${baseStats.atk}`,
+      text: msg("assistant.profile.hitsHard"),
+      evidence: msg("assistant.evidence.baseAttack", { atk: baseStats.atk }),
     });
   }
 
   if (bulk(baseStats) >= HIGH_DEF + HIGH_HP) {
     observations.push({
       tone: "bom",
-      text: "Aguenta pancada. Bom pra PvP.",
-      evidence: `defesa ${baseStats.def} e PS ${baseStats.hp}`,
+      text: msg("assistant.profile.tanky"),
+      evidence: msg("assistant.evidence.defAndHp", { def: baseStats.def, hp: baseStats.hp }),
     });
   }
 
@@ -87,26 +88,42 @@ export function opine(input: AssistantInput): Opinion {
   if (weak) {
     observations.push({
       tone: "ruim",
-      text: "Fraco nos dois. Só pra Pokédex.",
-      evidence: `ataque ${baseStats.atk}, defesa ${baseStats.def}, PS ${baseStats.hp}`,
+      text: msg("assistant.profile.weak"),
+      evidence: msg("assistant.evidence.allStats", {
+        atk: baseStats.atk,
+        def: baseStats.def,
+        hp: baseStats.hp,
+      }),
     });
   } else if (attackerish >= 1.15) {
     observations.push({
       tone: "neutro",
-      text: "Atacante: dá dano, mas cai rápido.",
-      evidence: `ataque ${baseStats.atk} contra defesa ${baseStats.def} e PS ${baseStats.hp}`,
+      text: msg("assistant.profile.attacker"),
+      evidence: msg("assistant.evidence.atkVsBulk", {
+        atk: baseStats.atk,
+        def: baseStats.def,
+        hp: baseStats.hp,
+      }),
     });
   } else if (attackerish <= 0.8) {
     observations.push({
       tone: "neutro",
-      text: "Parede: dura muito, mata devagar.",
-      evidence: `defesa ${baseStats.def} e PS ${baseStats.hp} contra ataque ${baseStats.atk}`,
+      text: msg("assistant.profile.wall"),
+      evidence: msg("assistant.evidence.hpAndDefVsAtk", {
+        atk: baseStats.atk,
+        def: baseStats.def,
+        hp: baseStats.hp,
+      }),
     });
   } else {
     observations.push({
       tone: "neutro",
-      text: "Equilibrado. Serve pros dois.",
-      evidence: `ataque ${baseStats.atk}, defesa ${baseStats.def}, PS ${baseStats.hp}`,
+      text: msg("assistant.profile.balanced"),
+      evidence: msg("assistant.evidence.allStats", {
+        atk: baseStats.atk,
+        def: baseStats.def,
+        hp: baseStats.hp,
+      }),
     });
   }
 
@@ -114,7 +131,7 @@ export function opine(input: AssistantInput): Opinion {
 
   if (!ivs) {
     return {
-      headline: `Até ${maxCp.toLocaleString("pt-BR")} de PC no nível ${levelCap}.`,
+      headline: msg("assistant.headline.speciesOnly", { cp: maxCp, level: levelCap }),
       tone: observations.some((o) => o.tone === "bom") ? "bom" : "neutro",
       observations,
     };
@@ -142,16 +159,16 @@ export function opine(input: AssistantInput): Opinion {
   if (bestLeague && bestLeague.rank <= 100) {
     observations.push({
       tone: "bom",
-      text: `IV excelente pra ${bestLeague.label} League.`,
-      evidence: `#${bestLeague.rank.toLocaleString("pt-BR")} entre 4.096 combinações`,
+      text: msg("assistant.iv.greatForLeague", { league: bestLeague.label }),
+      evidence: msg("assistant.evidence.rankOf4096", { rank: bestLeague.rank }),
     });
   }
 
   if (ivs.atk === MAX_BAR) {
     observations.push({
       tone: "bom",
-      text: "Ataque 15. O stat que mais vale em raide.",
-      evidence: "ataque 15 de 15",
+      text: msg("assistant.iv.maxAttack"),
+      evidence: msg("assistant.evidence.attackMax"),
     });
   }
 
@@ -159,28 +176,32 @@ export function opine(input: AssistantInput): Opinion {
   if (ivs.atk >= 13 && bestLeague && bestLeague.label !== "Master" && bestLeague.rank > 500) {
     observations.push({
       tone: "neutro",
-      text: "Ataque alto atrapalha em liga com teto: infla o PC.",
-      evidence: `ataque ${ivs.atk}, posição #${bestLeague.rank.toLocaleString("pt-BR")} na ${bestLeague.label}`,
+      text: msg("assistant.iv.attackHurtsCapped"),
+      evidence: msg("assistant.evidence.attackAndRank", {
+        atk: ivs.atk,
+        rank: bestLeague.rank,
+        league: bestLeague.label,
+      }),
     });
   }
 
   if (total <= 15) {
     observations.push({
       tone: "ruim",
-      text: "IV fraco. Candidato a transferir.",
-      evidence: `${total} de 45 pontos`,
+      text: msg("assistant.iv.weak"),
+      evidence: msg("assistant.evidence.ivOutOf45", { total }),
     });
   }
 
   // ------------------------------------------------------------------- manchete
 
   const headline = perfect
-    ? `${name} 100%. Não transfere.`
+    ? msg("assistant.headline.perfect", { name })
     : bestLeague && bestLeague.rank <= 100
-      ? `Top ${bestLeague.rank} na ${bestLeague.label} League.`
+      ? msg("assistant.headline.topLeague", { rank: bestLeague.rank, league: bestLeague.label })
       : total <= 15
-        ? "IV fraco. Não vale investir."
-        : `${total} de 45 · até ${maxCp.toLocaleString("pt-BR")} de PC.`;
+        ? msg("assistant.headline.weak")
+        : msg("assistant.headline.plain", { total, cp: maxCp });
 
   const good = observations.filter((o) => o.tone === "bom").length;
   const bad = observations.filter((o) => o.tone === "ruim").length;

@@ -35,17 +35,42 @@ export const LANGUAGES: readonly LanguageSpec[] = [
 const KEY = "tk:idioma";
 const SHOW_KEY = "tk:traducao";
 
+/**
+ * localStorage que nao derruba o app.
+ *
+ * Nao e paranoia de teste: o Safari em navegacao privada LANCA ao gravar, e
+ * alguns navegadores nao expoem `localStorage` quando cookies estao bloqueados.
+ * Como este modulo le no import, uma excecao aqui deixaria a tela branca antes
+ * do primeiro render — o pior lugar possivel para uma falha.
+ */
+const store = {
+  get(key: string): string | null {
+    try {
+      return globalThis.localStorage?.getItem(key) ?? null;
+    } catch {
+      return null;
+    }
+  },
+  set(key: string, value: string): void {
+    try {
+      globalThis.localStorage?.setItem(key, value);
+    } catch {
+      // Preferencia nao persistida vale mais que app quebrado.
+    }
+  },
+};
+
 /** Palpite inicial pelo idioma do aparelho, caindo em ingles. */
 function detect(): string {
-  const wanted = navigator.language;
+  const wanted = globalThis.navigator?.language ?? "en";
   const exact = LANGUAGES.find((l) => l.code === wanted);
   if (exact) return exact.code;
   const base = LANGUAGES.find((l) => l.code.split("-")[0] === wanted.split("-")[0]);
   return base?.code ?? "en";
 }
 
-let current = localStorage.getItem(KEY) ?? detect();
-let showTranslation = localStorage.getItem(SHOW_KEY) !== "0";
+let current = store.get(KEY) ?? detect();
+let showTranslation = store.get(SHOW_KEY) !== "0";
 const listeners = new Set<() => void>();
 
 /** Quem ja conhece os nomes em ingles nao precisa da segunda linha ocupando espaco. */
@@ -55,7 +80,7 @@ export function getShowTranslation(): boolean {
 
 export function setShowTranslation(value: boolean): void {
   showTranslation = value;
-  localStorage.setItem(SHOW_KEY, value ? "1" : "0");
+  store.set(SHOW_KEY, value ? "1" : "0");
   for (const fn of listeners) fn();
 }
 
@@ -70,14 +95,22 @@ export function useShowTranslation(): boolean {
   );
 }
 
+/** Assinatura crua, para o `useT` reagir a troca de idioma sem duplicar store. */
+export function subscribe(fn: () => void): () => void {
+  listeners.add(fn);
+  return () => {
+    listeners.delete(fn);
+  };
+}
+
 export function getLanguage(): string {
   return current;
 }
 
 export function setLanguage(code: string): void {
   current = code;
-  localStorage.setItem(KEY, code);
-  document.documentElement.lang = code;
+  store.set(KEY, code);
+  if (typeof document !== "undefined") document.documentElement.lang = code;
   for (const fn of listeners) fn();
 }
 

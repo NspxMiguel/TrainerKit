@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 
 import { LANGUAGES, setLanguage, useLanguage } from "../i18n/language.ts";
+import { useT } from "../i18n/t.ts";
 import { InstallGuide } from "../screens/InstallGuide.tsx";
 import { useInstallState } from "../storage/install.ts";
 import { IconDownload, IconGrid, IconSearch } from "../ui/Icons.tsx";
@@ -23,11 +24,12 @@ export function Onboarding() {
   const [guideOpen, setGuideOpen] = useState(false);
   const install = useInstallState();
   const language = useLanguage();
+  const { t } = useT();
 
   const finish = () => updateSetup({ done: true, mode, assistant, name: name.trim() });
 
   return createPortal(
-    <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label="Boas-vindas">
+    <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={t("onb.aria")}>
       {step === 0 && (
         <>
           {/* A mesma marca do icone: tres barras crescentes e a decisao em
@@ -41,12 +43,10 @@ export function Onboarding() {
             TrainerKit
           </h1>
           <p className="tk-body" style={{ lineHeight: 1.6 }}>
-            Um app que responde uma pergunta por vez: esse Pokémon presta, e pra quê.
-            Tudo fica no seu aparelho — sem conta, sem login, e nada é enviado pra
-            lugar nenhum.
+            {t("onb.tagline")}
           </p>
           <div className="tk-overline" style={{ display: "block", marginTop: 26 }}>
-            Idioma
+            {t("settings.language")}
           </div>
           <div className="tk-lang-grid">
             {LANGUAGES.map((l) => (
@@ -66,28 +66,25 @@ export function Onboarding() {
             ))}
           </div>
           <p className="tk-caption" style={{ marginTop: 8, lineHeight: 1.5 }}>
-            Os nomes de ataque aparecem em inglês e, se você escolher outro idioma,
-            também na tradução oficial do jogo — porque nenhuma das duas sozinha
-            serve pra procurar guia e achar no jogo ao mesmo tempo.
+            {t("onb.languageNote")}
           </p>
 
           <label style={{ display: "block", marginTop: 22 }}>
-            <span className="tk-caption">Como posso te chamar?</span>
+            <span className="tk-caption">{t("onb.nameLabel")}</span>
             <div className="tk-search" style={{ marginTop: 6 }}>
               <input
                 type="text"
                 autoComplete="given-name"
-                placeholder="Seu nome ou apelido"
+                placeholder={t("onb.namePlaceholder")}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 maxLength={24}
-                aria-label="Seu nome"
+                aria-label={t("onb.nameAria")}
               />
             </div>
           </label>
           <p className="tk-caption" style={{ marginTop: 8, lineHeight: 1.5 }}>
-            Só pra te cumprimentar na tela inicial. Fica no aparelho e pode ficar em
-            branco.
+            {t("onb.nameNote")}
           </p>
 
           <button
@@ -96,7 +93,7 @@ export function Onboarding() {
             style={{ marginTop: 22 }}
             onClick={() => setStep(1)}
           >
-            Começar
+            {t("onb.start")}
           </button>
         </>
       )}
@@ -104,10 +101,10 @@ export function Onboarding() {
       {step === 1 && (
         <>
           <h2 className="tk-sheet-title" style={{ marginBottom: 6 }}>
-            Como você quer usar?
+            {t("onb.howToUse")}
           </h2>
           <p className="tk-caption" style={{ marginBottom: 18, lineHeight: 1.5 }}>
-            Dá pra trocar depois nos Ajustes.
+            {t("onb.changeLater")}
           </p>
 
           <div style={{ display: "grid", gap: 10 }}>
@@ -120,10 +117,9 @@ export function Onboarding() {
             >
               <IconSearch size={20} />
               <span style={{ flex: 1, minWidth: 0 }}>
-                <span className="tk-option-title">Só consultar</span>
+                <span className="tk-option-title">{t("onb.mode.browse")}</span>
                 <span className="tk-option-detail">
-                  Busca qualquer Pokémon e vê os melhores ataques, o PC máximo e o IV
-                  por print. Não cadastra nada.
+                  {t("onb.mode.browseDetail")}
                 </span>
               </span>
             </button>
@@ -137,10 +133,9 @@ export function Onboarding() {
             >
               <IconGrid size={20} />
               <span style={{ flex: 1, minWidth: 0 }}>
-                <span className="tk-option-title">Montar minha coleção</span>
+                <span className="tk-option-title">{t("onb.mode.collection")}</span>
                 <span className="tk-option-detail">
-                  Salva os seus Pokémon e o app diz o que fazer com cada um: investir,
-                  evoluir, guardar ou transferir.
+                  {t("onb.mode.collectionDetail")}
                 </span>
               </span>
             </button>
@@ -158,10 +153,9 @@ export function Onboarding() {
               {assistant ? "●" : "○"}
             </span>
             <span style={{ flex: 1, minWidth: 0 }}>
-              <span className="tk-option-title">Assistente</span>
+              <span className="tk-option-title">{t("onb.assistant")}</span>
               <span className="tk-option-detail">
-                Dá uma opinião em texto sobre cada Pokémon, em vez de só mostrar
-                número. Funciona no aparelho, sem internet.
+                {t("onb.assistantDetail")}
               </span>
             </span>
           </button>
@@ -172,7 +166,7 @@ export function Onboarding() {
             style={{ marginTop: 26 }}
             onClick={() => setStep(2)}
           >
-            Continuar
+            {t("onb.continue")}
           </button>
         </>
       )}
@@ -180,12 +174,10 @@ export function Onboarding() {
       {step === 2 && (
         <>
           <h2 className="tk-sheet-title" style={{ marginBottom: 6 }}>
-            Uma última coisa
+            {t("onb.lastThing")}
           </h2>
           <p className="tk-caption" style={{ marginBottom: 18, lineHeight: 1.5 }}>
-            {install.platform === "ios"
-              ? "No iPhone isso não é só conveniência: o Safari apaga os dados de sites parados há 7 dias. Instalado, o TrainerKit fica protegido."
-              : "Instalado, ele abre em tela cheia, funciona offline e recebe print direto pelo botão de compartilhar."}
+            {install.platform === "ios" ? t("onb.installIos") : t("onb.installOther")}
           </p>
 
           <button
@@ -194,7 +186,7 @@ export function Onboarding() {
             onClick={() => setGuideOpen(true)}
           >
             <IconDownload size={16} />
-            Ver como instalar
+            {t("onb.seeHowToInstall")}
           </button>
           <button
             type="button"
@@ -202,7 +194,7 @@ export function Onboarding() {
             style={{ marginTop: 10 }}
             onClick={finish}
           >
-            Agora não, abrir o app
+            {t("onb.skipInstall")}
           </button>
 
           {guideOpen && (

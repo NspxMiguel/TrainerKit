@@ -1,6 +1,7 @@
 import { useDeferredValue, useMemo, useState } from "react";
 
 import type { DatasetSpecies } from "../data/useDataset.ts";
+import { useT } from "../i18n/t.ts";
 import { IconSearch } from "./Icons.tsx";
 import { SpeciesTile } from "./SpeciesTile.tsx";
 
@@ -30,6 +31,7 @@ function fold(s: string): string {
 export function SpeciesBrowser({ species, onPick }: Props) {
   const [query, setQuery] = useState("");
   const [limit, setLimit] = useState(PAGE);
+  const { t, language } = useT();
 
   // O campo responde na hora; a lista pode ficar um frame atras sem travar.
   const deferred = useDeferredValue(query);
@@ -70,25 +72,25 @@ export function SpeciesBrowser({ species, onPick }: Props) {
           type="search"
           inputMode="search"
           autoComplete="off"
-          placeholder="Buscar por nome"
+          placeholder={t("pokedex.searchPlaceholder")}
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
             setLimit(PAGE);
           }}
-          aria-label="Buscar espécie"
+          aria-label={t("pokedex.search")}
         />
       </div>
 
       <p className="tk-caption" style={{ margin: "10px 2px 14px" }}>
-        {results.length.toLocaleString("pt-BR")}{" "}
-        {results.length === 1 ? "espécie" : "espécies"}
+        {results.length === 1
+          ? t("pokedex.count.one")
+          : t("pokedex.count.many", { count: results.length.toLocaleString(language) })}
       </p>
 
       {results.length === 0 ? (
         <div className="tk-empty">
-          <div className="tk-empty-title">Nada para “{query}”</div>
-          <p className="tk-body">Tente outro nome.</p>
+          <div className="tk-empty-title">{t("pokedex.noResults", { query })}</div>
         </div>
       ) : (
         <>

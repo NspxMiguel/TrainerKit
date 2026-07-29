@@ -87,7 +87,7 @@ describe.skipIf(!temFixtures)("prints reais", () => {
       const r = scanAppraisalBars({ data, width, height });
 
       if (!r.ok) {
-        console.log(`  ${caso.nome}: FALHOU — ${r.reason}: ${r.detail}`);
+        console.log(`  ${caso.nome}: FALHOU — ${r.reason}`);
         for (const b of r.bars.slice(0, 8)) {
           console.log(
             `     cand x=${b.rect.x} y=${b.rect.y} larg=${b.rect.width} alt=${b.rect.height} val=${b.value}`,

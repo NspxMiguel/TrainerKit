@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 import type { IVs, ScanResult } from "@trainerkit/core";
 
+import { useT, type Key } from "../i18n/t.ts";
 import { scanFile, type ScanOutcome } from "../scan/readImage.ts";
 import { IconDownload } from "./Icons.tsx";
 
@@ -34,7 +35,21 @@ function isDesktop(): boolean {
   return !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
 
+/**
+ * Motivo da falha em texto, por codigo.
+ *
+ * O core devolve so o codigo — ele nao conhece idioma. O mapa vive aqui porque
+ * e aqui que existe dicionario.
+ */
+const FAIL_KEY: Record<string, Key> = {
+  "sem-barras": "scan.fail.noBars",
+  "barra-curta-demais": "scan.fail.tooShort",
+  "barras-insuficientes": "scan.fail.notEnough",
+  "larguras-divergentes": "scan.fail.mismatch",
+};
+
 export function ScanDropzone({ onRead, onFail }: Props) {
+  const { t } = useT();
   const [outcome, setOutcome] = useState<ScanOutcome | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -91,41 +106,42 @@ export function ScanDropzone({ onRead, onFail }: Props) {
         {isDesktop() && !outcome && (
           <div className="tk-banner tk-banner--warn" style={{ marginBottom: 12 }}>
             <div className="tk-banner-text">
-              <div className="tk-banner-title">Você está no computador</div>
-              <p className="tk-banner-body">
-                A leitura foi testada em print tirado no celular. Print de tela de
-                computador quase sempre falha — a interface em volta atrapalha. Se der
-                errado, dá pra preencher à mão.
-              </p>
+              <div className="tk-banner-title">{t("scan.desktopWarning.title")}</div>
+              <p className="tk-banner-body">{t("scan.desktopWarning.body")}</p>
             </div>
           </div>
         )}
 
         {busy ? (
-          <div className="tk-drop-title">Lendo o print…</div>
+          <div className="tk-drop-title">{t("scan.reading")}</div>
         ) : result?.ok ? (
           <>
             <div className="tk-drop-title" style={{ color: "var(--tk-succ)" }}>
-              Li as três barras
+              {t("scan.readAll")}
             </div>
             <div className="tk-caption" style={{ marginTop: 2 }}>
-              Ataque {result.ivs.atk} · Defesa {result.ivs.def} · PS {result.ivs.hp}
+              {t("scan.readValues", {
+                atk: result.ivs.atk,
+                def: result.ivs.def,
+                hp: result.ivs.hp,
+              })}
             </div>
           </>
         ) : result ? (
           <>
             <div className="tk-drop-title" style={{ color: "var(--tk-warn)" }}>
-              Não consegui ler
+              {t("scan.failed")}
             </div>
             <div className="tk-caption" style={{ marginTop: 2, lineHeight: 1.45 }}>
-              {result.detail} Ajuste as barras à mão abaixo.
+              {t(FAIL_KEY[result.reason] ?? "scan.failed")}
+              {t("scan.adjustByHand")}
             </div>
           </>
         ) : (
           <>
-            <div className="tk-drop-title">Anexe o print da avaliação</div>
+            <div className="tk-drop-title">{t("scan.prompt")}</div>
             <div className="tk-caption" style={{ marginTop: 2, lineHeight: 1.45 }}>
-              Aquela tela com as três barras. Ele lê o IV exato e preenche tudo.
+              {t("scan.promptDetail")}
             </div>
           </>
         )}
@@ -144,7 +160,7 @@ export function ScanDropzone({ onRead, onFail }: Props) {
           disabled={busy}
         >
           <IconDownload size={16} />
-          {outcome ? "Trocar print" : "Escolher print"}
+          {outcome ? t("scan.swap") : t("scan.pick")}
         </button>
       </div>
 

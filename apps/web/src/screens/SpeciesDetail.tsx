@@ -2,22 +2,18 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
 import {
-  CONTEXT_LABELS,
-  GREAT_LEAGUE,
-  MASTER_LEAGUE,
-  ULTRA_LEAGUE,
+  CONTEXT_KEYS,
   computeCPAtLevel,
   rankMovesets,
   shadowDamageMultiplier,
-  topSpreads,
   withFrustration,
   type Context,
-  type League,
   type MoveWithPvp,
 } from "@trainerkit/core";
 
 import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
 import { moveLabel, useLanguage, useShowTranslation } from "../i18n/language.ts";
+import { useT, type Key } from "../i18n/t.ts";
 import { useSetup } from "../onboarding/setup.ts";
 import { typeColor, typeName } from "../sprites/provider.ts";
 import { AssistantCard } from "../ui/AssistantCard.tsx";
@@ -31,11 +27,6 @@ interface Props {
 }
 
 const PERFECT = { atk: 15, def: 15, hp: 15 };
-
-const LEAGUES: readonly League[] = [GREAT_LEAGUE, ULTRA_LEAGUE, MASTER_LEAGUE];
-
-/** Quantas linhas do topo mostrar. Dez cabe na tela e ja basta pra caçar. */
-const TOP_SPREADS = 10;
 
 /**
  * O maior stat base que existe no jogo, usado para escalar as barras.
@@ -77,9 +68,9 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
   const [calcOpen, setCalcOpen] = useState(false);
   const [context, setContext] = useState<Context>("general");
   const [shadow, setShadow] = useState(false);
-  const [league, setLeague] = useState<League>(GREAT_LEAGUE);
   const setup = useSetup();
   const language = useLanguage();
+  const { t } = useT();
   useShowTranslation(); // re-renderiza ao ligar/desligar a traducao
 
   useEffect(() => {
@@ -174,16 +165,6 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
 
   // Ranquear 4.096 combinacoes nao e barato; sem memo isso rodaria de novo a
   // cada clique no seletor de moveset, que nao tem nada a ver com a liga.
-  const spreads = useMemo(
-    () => topSpreads(data.cpm, species.baseStats, league, TOP_SPREADS),
-    [data.cpm, species.baseStats, league],
-  );
-
-  // A especie nem encosta no teto da liga: todo mundo sobe ate o nivel maximo e
-  // o teto de PC nao restringe nada. Muda o que ha para explicar embaixo.
-  const semTeto =
-    league.cpCap !== null && (spreads[0]?.level ?? 0) >= data.version.levelCap;
-
   const evolutions = species.evolvesInto
     .map((id) => data.species.find((s) => s.id === id))
     .filter((s): s is DatasetSpecies => s !== undefined);
@@ -191,10 +172,10 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
   return createPortal(
     <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={species.name}>
       <header className="tk-sheet-head">
-        <button type="button" className="tk-sheet-close" onClick={onClose} aria-label="Voltar">
+        <button type="button" className="tk-sheet-close" onClick={onClose} aria-label={t("common.back")}>
           ‹
         </button>
-        <h2 className="tk-sheet-title">Pokédex</h2>
+        <h2 className="tk-sheet-title">{t("pokedex.title")}</h2>
       </header>
 
       <div style={{ display: "flex", gap: 16, alignItems: "flex-start", marginBottom: 22 }}>
@@ -241,7 +222,7 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
         style={{ marginBottom: 22 }}
         onClick={() => setCalcOpen(true)}
       >
-        Calcular IV do meu
+        {t("species.calcIV")}
       </button>
 
       {setup.assistant && (
@@ -254,32 +235,32 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
       )}
 
       <div className="tk-overline" style={{ display: "block", marginTop: 26 }}>
-        Stats base
+        {t("species.baseStats")}
       </div>
       <section className="tk-card" style={{ marginTop: 10, display: "grid", gap: 10 }}>
-        <StatBar label="Ataque" value={species.baseStats.atk} />
-        <StatBar label="Defesa" value={species.baseStats.def} />
-        <StatBar label="PS" value={species.baseStats.hp} />
+        <StatBar label={t("common.attack")} value={species.baseStats.atk} />
+        <StatBar label={t("common.defense")} value={species.baseStats.def} />
+        <StatBar label={t("common.stamina")} value={species.baseStats.hp} />
       </section>
 
       <div className="tk-overline" style={{ display: "block", marginTop: 24 }}>
-        PC máximo com IV perfeito
+        {t("species.maxCP")}
       </div>
       <section className="tk-card" style={{ marginTop: 10 }}>
         <div style={{ display: "flex", gap: 24 }}>
           {[40, 50, data.version.levelCap].map((level) => (
             <div key={level}>
               <div style={{ font: "800 22px/1.1 var(--tk-font)", letterSpacing: "-0.02em" }}>
-                {cpAt(level).toLocaleString("pt-BR")}
+                {cpAt(level).toLocaleString(language)}
               </div>
-              <div className="tk-caption">nível {level}</div>
+              <div className="tk-caption">{t("common.level")} {level}</div>
             </div>
           ))}
         </div>
       </section>
 
       <div className="tk-overline" style={{ display: "block", marginTop: 24 }}>
-        Melhores ataques
+        {t("species.bestMoves")}
       </div>
 
       <div style={{ display: "flex", gap: 6, margin: "10px 0" }}>
@@ -292,13 +273,13 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
             aria-pressed={context === c}
             onClick={() => setContext(c)}
           >
-            {CONTEXT_LABELS[c].title}
+            {t(CONTEXT_KEYS[c].title as Key)}
           </button>
         ))}
       </div>
 
       <p className="tk-caption" style={{ margin: "0 2px 10px", lineHeight: 1.45 }}>
-        {CONTEXT_LABELS[context].detail}
+        {t(CONTEXT_KEYS[context].detail as Key)}
       </p>
 
       {/* Chip, nao botao de bloco: o sombroso e um filtro do que esta abaixo,
@@ -311,23 +292,22 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
         aria-pressed={shadow}
         onClick={() => setShadow((v) => !v)}
       >
-        {shadow ? "✓ sombroso" : "O meu é sombroso"}
+        {shadow ? t("species.shadowToggleOn") : t("species.shadowToggle")}
       </button>
 
       {shadow && (
         <p className="tk-caption" style={{ margin: "0 2px 10px", lineHeight: 1.45 }}>
-          Sombroso bate {Math.round((shadowDamageMultiplier(data.settings.battle) - 1) * 100)}%
-          mais forte, mas isso multiplica todos os ataques igual — a <em>ordem</em> abaixo não
-          muda por causa disso. O que muda é a Frustração, que ocupa um slot e só sai com TM
-          de evento.
+          {t("species.shadowNote", {
+            percent: Math.round((shadowDamageMultiplier(data.settings.battle) - 1) * 100),
+          })}
           {custoDaFrustracao !== null &&
-            ` Se ela for o único carregado, ele rende ${custoDaFrustracao}% menos em PvP.`}
+            t("species.frustrationCost", { percent: custoDaFrustracao })}
         </p>
       )}
 
       <section className="tk-card">
         {movesets.length === 0 ? (
-          <p className="tk-body">Sem dados de ataque para esta espécie.</p>
+          <p className="tk-body">{t("species.noMoves")}</p>
         ) : (
           movesets.slice(0, 5).map((m, i) => (
             <div
@@ -354,7 +334,7 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
                     custa doce e poeira. Dizer qual e faz parte da resposta. */}
                 {m.bait && (
                   <span className="tk-caption" style={{ display: "block" }}>
-                    isca: {moveLabel(m.bait.name, data.moveNames, m.bait.id, language).primary}
+                    {t("species.bait", { move: moveLabel(m.bait.name, data.moveNames, m.bait.id, language).primary })}
                   </span>
                 )}
                 {m.isFrustration && (
@@ -362,12 +342,12 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
                     className="tk-caption"
                     style={{ display: "block", color: "var(--tk-dang)" }}
                   >
-                    preso na Frustração
+                    {t("species.stuckOnFrustration")}
                   </span>
                 )}
                 {m.needsElite && (
                   <span className="tk-caption" style={{ display: "block" }}>
-                    exige TM Elite
+                    {t("species.needsElite")}
                   </span>
                 )}
               </span>
@@ -381,78 +361,14 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
           ))
         )}
         <p className="tk-caption" style={{ marginTop: 12, lineHeight: 1.5 }}>
-          A nota compara os movesets DESTE Pokémon entre si — 100 é o melhor dele,
-          não o melhor do jogo.
-        </p>
-      </section>
-
-      {/* O IV que se procura, por liga.
-          A tela do jogo mostra porcentagem, e porcentagem e a metrica errada
-          aqui: em liga com teto o 100% quase sempre perde. Esta tabela e a
-          resposta pra pergunta que se faz ANTES de capturar. */}
-      <div className="tk-overline" style={{ display: "block", marginTop: 24 }}>
-        Melhores IV por liga
-      </div>
-
-      <div style={{ display: "flex", gap: 6, margin: "10px 0" }}>
-        {LEAGUES.map((l) => (
-          <button
-            key={l.id}
-            type="button"
-            className={`tk-btn ${league.id === l.id ? "tk-btn--primary" : "tk-btn--secondary"}`}
-            style={{ flex: 1, height: 40, fontSize: 12, padding: 0 }}
-            aria-pressed={league.id === l.id}
-            onClick={() => setLeague(l)}
-          >
-            {l.name.replace(" League", "")}
-          </button>
-        ))}
-      </div>
-
-      {/* Grade propria em vez de `tk-row`: sao dez linhas de numeros curtos, e
-          o espacamento de linha de formulario deixava a tabela com mais de mil
-          pixels de altura, com o IV quebrando em duas linhas. */}
-      <section className="tk-card">
-        <div className="tk-spread-head">
-          <span>#</span>
-          <span>Atq</span>
-          <span>Def</span>
-          <span>PS</span>
-          <span>nível</span>
-          <span>PC</span>
-        </div>
-
-        {spreads.map((s) => (
-          <div
-            key={`${s.ivs.atk}-${s.ivs.def}-${s.ivs.hp}`}
-            className={`tk-spread${s.rank === 1 ? " tk-spread--top" : ""}`}
-          >
-            <span>{s.rank}</span>
-            <span>{s.ivs.atk}</span>
-            <span>{s.ivs.def}</span>
-            <span>{s.ivs.hp}</span>
-            <span className="tk-spread-dim">{s.level}</span>
-            <span>{s.cp.toLocaleString("pt-BR")}</span>
-          </div>
-        ))}
-
-        {/* A explicacao segue a TABELA, nao a liga.
-            Azumarill na Ultra pegou este caso: ele nem chega aos 2.500, entao o
-            topo e 15/15/15 — e o texto padrao ficava dizendo que o topo "quase
-            nunca e 15/15/15" logo acima de uma tabela que comeca com 15/15/15. */}
-        <p className="tk-caption" style={{ marginTop: 12, lineHeight: 1.5 }}>
-          {league.cpCap === null
-            ? "Sem teto de PC, nada pune ataque alto: aqui o 100% é o melhor mesmo, e o nível é o único limite."
-            : semTeto
-              ? `${species.name} nem alcança os ${league.cpCap.toLocaleString("pt-BR")} de PC desta liga — no nível ${data.version.levelCap} ele para em ${cpAt(data.version.levelCap).toLocaleString("pt-BR")}. Sem teto pra punir, o 100% volta a ser o melhor, mas entrar aqui já é desvantagem.`
-              : `Com teto de ${league.cpCap.toLocaleString("pt-BR")} de PC, ataque alto infla o PC e obriga a parar num nível mais baixo. Por isso o topo quase nunca é 15/15/15 — e por isso a porcentagem que o jogo mostra engana.`}
+          {t("species.scoreNote")}
         </p>
       </section>
 
       {evolutions.length > 0 && (
         <>
           <div className="tk-overline" style={{ display: "block", marginTop: 24 }}>
-            Evolui para
+            {t("species.evolvesInto")}
           </div>
           <section className="tk-card" style={{ marginTop: 10, display: "grid", gap: 12 }}>
             {evolutions.map((e) => (
@@ -467,7 +383,9 @@ export function SpeciesDetail({ species, data, onClose }: Props) {
                 />
                 <span className="tk-row-label">{e.name}</span>
                 {species.candyToEvolve[e.id] !== undefined && (
-                  <span className="tk-row-value">{species.candyToEvolve[e.id]} doces</span>
+                  <span className="tk-row-value">
+                    {t("species.candy", { count: species.candyToEvolve[e.id]! })}
+                  </span>
                 )}
               </div>
             ))}

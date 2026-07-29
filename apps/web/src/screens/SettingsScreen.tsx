@@ -8,6 +8,7 @@ import {
   useLanguage,
   useShowTranslation,
 } from "../i18n/language.ts";
+import { useT, type Key } from "../i18n/t.ts";
 import { useInstallState } from "../storage/install.ts";
 import { InstallGuide } from "./InstallGuide.tsx";
 import { SpriteSettings } from "./SpriteSettings.tsx";
@@ -20,6 +21,12 @@ interface Props {
 type Theme = "sistema" | "claro" | "escuro";
 
 const THEME_KEY = "tk:tema";
+
+const THEME_KEYS: Record<Theme, Key> = {
+  sistema: "settings.theme.system",
+  claro: "settings.theme.light",
+  escuro: "settings.theme.dark",
+};
 
 function applyTheme(theme: Theme): void {
   const el = document.documentElement;
@@ -38,6 +45,7 @@ export function SettingsScreen({ datasetLabel, persist }: Props) {
   const install = useInstallState();
   const language = useLanguage();
   const showTranslation = useShowTranslation();
+  const { t } = useT();
   const [guideOpen, setGuideOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>(
     () => (localStorage.getItem(THEME_KEY) as Theme | null) ?? "sistema",
@@ -50,43 +58,43 @@ export function SettingsScreen({ datasetLabel, persist }: Props) {
 
   return (
     <>
-      <h1 className="tk-h1">Ajustes</h1>
+      <h1 className="tk-h1">{t("settings.title")}</h1>
 
-      <div className="tk-overline">Aparência</div>
+      <div className="tk-overline">{t("settings.appearance")}</div>
       <section className="tk-card" style={{ marginTop: 10 }}>
         <div style={{ display: "flex", gap: 8 }}>
-          {(["sistema", "claro", "escuro"] as const).map((t) => (
+          {(["sistema", "claro", "escuro"] as const).map((option) => (
             <button
-              key={t}
+              key={option}
               type="button"
-              onClick={() => setTheme(t)}
-              className={`tk-btn ${theme === t ? "tk-btn--primary" : "tk-btn--secondary"}`}
+              onClick={() => setTheme(option)}
+              className={`tk-btn ${theme === option ? "tk-btn--primary" : "tk-btn--secondary"}`}
               style={{ flex: 1, height: 44, padding: 0, fontSize: 13 }}
-              aria-pressed={theme === t}
+              aria-pressed={theme === option}
             >
-              {t[0]!.toUpperCase() + t.slice(1)}
+              {t(THEME_KEYS[option])}
             </button>
           ))}
         </div>
       </section>
 
       <div className="tk-overline" style={{ display: "block", marginTop: 28 }}>
-        Armazenamento
+        {t("settings.storage")}
       </div>
       <section className="tk-card" style={{ marginTop: 10 }}>
         {install.installed ? (
           <div className="tk-row">
-            <span className="tk-row-label">Instalado na tela de início</span>
-            <span className="tk-row-value">Sim</span>
+            <span className="tk-row-label">{t("settings.installed")}</span>
+            <span className="tk-row-value">{t("settings.yes")}</span>
           </div>
         ) : (
           <button type="button" className="tk-row" onClick={() => setGuideOpen(true)}>
-            <span className="tk-row-label">Instalar na tela de início</span>
-            <span className="tk-row-value">ver como ›</span>
+            <span className="tk-row-label">{t("settings.install")}</span>
+            <span className="tk-row-value">{t("settings.seeHow")}</span>
           </button>
         )}
         <div className="tk-row">
-          <span className="tk-row-label">Dados protegidos</span>
+          <span className="tk-row-label">{t("settings.dataProtected")}</span>
           <span
             className="tk-row-value"
             style={
@@ -94,27 +102,28 @@ export function SettingsScreen({ datasetLabel, persist }: Props) {
             }
           >
             {persist === null
-              ? "verificando…"
+              ? t("settings.checking")
               : !persist.supported
-                ? "não suportado"
+                ? t("settings.unsupported")
                 : persist.persisted
-                  ? "sim"
-                  : "não"}
+                  ? t("settings.yes")
+                  : t("settings.no")}
           </span>
         </div>
         {persist?.supported && persist.usageBytes !== null && (
           <div className="tk-row">
-            <span className="tk-row-label">Espaço usado</span>
+            <span className="tk-row-label">{t("settings.spaceUsed")}</span>
             <span className="tk-row-value">
               {formatBytes(persist.usageBytes)}
-              {persist.quotaBytes !== null && ` de ${formatBytes(persist.quotaBytes)}`}
+              {persist.quotaBytes !== null &&
+                t("settings.spaceOf", { total: formatBytes(persist.quotaBytes) })}
             </span>
           </div>
         )}
       </section>
 
       <div className="tk-overline" style={{ display: "block", marginTop: 28 }}>
-        Idioma
+        {t("settings.language")}
       </div>
       <div className="tk-lang-grid">
         {LANGUAGES.map((l) => (
@@ -146,9 +155,9 @@ export function SettingsScreen({ datasetLabel, persist }: Props) {
             {showTranslation ? "●" : "○"}
           </span>
           <span style={{ flex: 1, minWidth: 0 }}>
-            <span className="tk-option-title">Mostrar tradução dos ataques</span>
+            <span className="tk-option-title">{t("settings.showTranslation")}</span>
             <span className="tk-option-detail">
-              Counter (Contra-atacar). Desligado, fica só o inglês.
+              {t("settings.showTranslationDetail")}
             </span>
           </span>
         </button>
@@ -157,29 +166,27 @@ export function SettingsScreen({ datasetLabel, persist }: Props) {
       <SpriteSettings />
 
       <div className="tk-overline" style={{ display: "block", marginTop: 28 }}>
-        Dados do jogo
+        {t("settings.gameData")}
       </div>
       <section className="tk-card" style={{ marginTop: 10 }}>
         <div className="tk-row">
-          <span className="tk-row-label">Versão da base</span>
+          <span className="tk-row-label">{t("settings.datasetVersion")}</span>
           <span className="tk-row-value">{datasetLabel ?? "—"}</span>
         </div>
       </section>
 
       <div className="tk-overline" style={{ display: "block", marginTop: 28 }}>
-        Sobre
+        {t("settings.about")}
       </div>
       <section className="tk-card" style={{ marginTop: 10 }}>
         <p className="tk-caption" style={{ lineHeight: 1.6 }}>
-          App independente feito por fãs, sem vínculo com Scopely Explore (ex-Niantic),
-          The Pokémon Company ou Nintendo. Marcas pertencem aos seus titulares.
+          {t("settings.disclaimer")}
         </p>
         <p className="tk-caption" style={{ lineHeight: 1.6, marginTop: 10 }}>
-          Funciona só por leitura de prints que você fornece. Não acessa os servidores do
-          jogo, e nenhuma imagem sai do aparelho.
+          {t("settings.disclaimer2")}
         </p>
         <p className="tk-caption" style={{ marginTop: 12, color: "var(--tk-txt4)" }}>
-          Versão 0.1.0
+          {t("settings.version", { version: "0.1.0" })}
         </p>
       </section>
 

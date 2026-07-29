@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 
-import { ACTION_LABELS, decide, ivTotalOf } from "@trainerkit/core";
+import { ACTION_KEYS, decide, ivTotalOf } from "@trainerkit/core";
 
 import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
+import { useT, type Key } from "../i18n/t.ts";
 import { exportJson, importJson, removePokemon, useCollection } from "../storage/collection.ts";
 import { IconPlus } from "../ui/Icons.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
@@ -22,6 +23,7 @@ const TONE: Record<string, string> = {
 
 export function CollectionScreen({ dataset }: Props) {
   const { items, reload } = useCollection();
+  const { t, language } = useT();
   const [picking, setPicking] = useState(false);
   const [open, setOpen] = useState<DatasetSpecies | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -72,7 +74,7 @@ export function CollectionScreen({ dataset }: Props) {
     try {
       const count = await importJson(await file.text());
       reload();
-      setMessage(`${count} Pokémon importados.`);
+      setMessage(t("collection.imported", { count }));
     } catch (err) {
       setMessage(err instanceof Error ? err.message : String(err));
     }
@@ -80,19 +82,17 @@ export function CollectionScreen({ dataset }: Props) {
 
   return (
     <>
-      <h1 className="tk-h1">Coleção</h1>
+      <h1 className="tk-h1">{t("collection.title")}</h1>
 
       {rows === null ? (
-        <p className="tk-body">Carregando…</p>
+        <p className="tk-body">{t("common.loading")}</p>
       ) : rows.length === 0 ? (
         <div className="tk-empty">
           <div className="tk-empty-mark">
             <IconPlus size={26} />
           </div>
-          <div className="tk-empty-title">Nenhum Pokémon salvo</div>
-          <p className="tk-body">
-            Escaneie o print da avaliação e salve. O veredito aparece aqui.
-          </p>
+          <div className="tk-empty-title">{t("collection.empty.title")}</div>
+          <p className="tk-body">{t("collection.empty.body")}</p>
         </div>
       ) : (
         <div style={{ display: "grid", gap: 8 }}>
@@ -120,8 +120,9 @@ export function CollectionScreen({ dataset }: Props) {
                     </span>
                     <span className="tk-caption" style={{ display: "block" }}>
                       {ivTotalOf(owned.ivs)}/45
-                      {owned.cp !== null && ` · PC ${owned.cp.toLocaleString("pt-BR")}`}
-                      {owned.level !== null && ` · nível ${owned.level}`}
+                      {owned.cp !== null &&
+                        ` · ${t("common.cp")} ${owned.cp.toLocaleString(language)}`}
+                      {owned.level !== null && ` · ${t("common.level")} ${owned.level}`}
                     </span>
                   </span>
                   <span
@@ -131,13 +132,13 @@ export function CollectionScreen({ dataset }: Props) {
                       flex: "none",
                     }}
                   >
-                    {ACTION_LABELS[verdict.action]}
+                    {t(ACTION_KEYS[verdict.action] as Key)}
                   </span>
                 </button>
                 <button
                   type="button"
                   className="tk-owned-remove"
-                  aria-label={`Remover ${s.name}`}
+                  aria-label={t("common.remove", { name: s.name })}
                   onClick={() => void removePokemon(owned.id)}
                 >
                   ✕
@@ -151,7 +152,7 @@ export function CollectionScreen({ dataset }: Props) {
       {/* Backup fica sempre visivel, nao escondido atras de "avancado": e a
           unica coisa que sobrevive se o navegador despejar os dados. */}
       <div className="tk-overline" style={{ display: "block", marginTop: 28 }}>
-        Backup
+        {t("collection.backup")}
       </div>
       <section className="tk-card" style={{ marginTop: 10 }}>
         <div style={{ display: "flex", gap: 8 }}>
@@ -161,13 +162,13 @@ export function CollectionScreen({ dataset }: Props) {
             style={{ flex: 1, height: 44, fontSize: 13 }}
             onClick={() => void download()}
           >
-            Exportar
+            {t("collection.export")}
           </button>
           <label
             className="tk-btn tk-btn--secondary"
             style={{ flex: 1, height: 44, fontSize: 13, cursor: "pointer" }}
           >
-            Importar
+            {t("collection.import")}
             <input
               type="file"
               accept="application/json,.json"
@@ -190,7 +191,7 @@ export function CollectionScreen({ dataset }: Props) {
       <button
         type="button"
         className="tk-fab"
-        aria-label="Adicionar Pokémon"
+        aria-label={t("collection.add")}
         disabled={!ready}
         onClick={() => setPicking(true)}
       >
