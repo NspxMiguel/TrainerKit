@@ -371,4 +371,6 @@ export const JA: Dict = {
   "spread.noLimit": "上限なし",
   "spread.neverCapped": "{name}はどのリーグのCP上限にも届きません（最大{maxCp}）。つまりどの個体値も最大レベルまで上がり、15/15/15が最良です。ここに選ぶリーグはありません。",
   "spread.titleSimple": "狙うべき個体値",
+  "among.best": "この系統{count}匹の中で最高",
+  "among.rank": "この系統{count}匹中{place}位",
 };

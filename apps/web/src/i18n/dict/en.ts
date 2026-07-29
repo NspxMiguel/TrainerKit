@@ -426,6 +426,8 @@ const EN = {
   "spread.noLimit": "No cap",
   "spread.neverCapped": "{name} never hits any league's CP cap — it maxes at {maxCp}. So every IV goes to top level and 15/15/15 wins. No league to pick here.",
   "spread.titleSimple": "Which IVs to look for",
+  "among.best": "Your best of {count} in this family",
+  "among.rank": "Your #{place} of {count} in this family",
 } as const;
 
 /**
