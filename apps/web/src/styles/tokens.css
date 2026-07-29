@@ -26,12 +26,31 @@
   --tk-txt4: rgba(242, 244, 248, 0.58);
 
   --tk-glass: rgba(10, 12, 17, 0.72);
-  /* Vidro do iOS 26: mais transparente que a barra assente, porque aqui o
-     desfoque e a saturacao e que fazem o trabalho — opacidade alta mataria a
-     refracao e devolveria um retangulo cinza. */
-  --tk-glass-ios: rgba(22, 26, 36, 0.52);
-  --tk-glass-edge: rgba(255, 255, 255, 0.12);
-  --tk-glass-active: rgba(255, 255, 255, 0.1);
+
+  /*
+   * Vidro do iOS 26.
+   *
+   * A Apple e explicita: *"By default, Liquid Glass has no inherent color, and
+   * instead takes on colors from the content directly behind it."* O valor
+   * anterior era `rgba(22, 26, 36, .52)` — cinza-azulado com mais de metade de
+   * opacidade, ou seja, cor PROPRIA cobrindo o que estava atras. Dava um
+   * retangulo fosco, nao vidro.
+   *
+   * Agora e quase transparente. Quem faz o trabalho e o `backdrop-filter`: o
+   * desfoque espalha, a saturacao puxa a cor de tras pra frente, e o brilho
+   * levanta um pouco pra o material nao sumir sobre fundo preto.
+   */
+  --tk-glass-ios: rgba(14, 17, 24, 0.28);
+
+  /* A borda. Nao e contorno: e o canto do vidro pegando luz. */
+  --tk-glass-edge: rgba(255, 255, 255, 0.16);
+  /* Brilho especular do topo, onde a luz bate primeiro. */
+  --tk-glass-sheen: rgba(255, 255, 255, 0.22);
+  /* Reflexo fraco na base, que da espessura a peca. */
+  --tk-glass-rim: rgba(255, 255, 255, 0.07);
+  --tk-glass-active: rgba(255, 255, 255, 0.14);
+  /* Ao ser tocado, o vidro "acende" — a reacao em tempo real que a Apple cita. */
+  --tk-glass-press: rgba(255, 255, 255, 0.22);
   /* Opaco de proposito. Era 0.94, e o `backdrop-filter` da folha escondia os
      6% restantes — tirando o desfoque (que custava um quadro inteiro ao rolar),
      a tela de tras passou a aparecer atras do texto. Vidro de verdade so na
@@ -95,9 +114,14 @@
   --tk-txt4: rgba(16, 19, 25, 0.6);
 
   --tk-glass: rgba(246, 247, 251, 0.82);
-  --tk-glass-ios: rgba(255, 255, 255, 0.58);
-  --tk-glass-edge: rgba(255, 255, 255, 0.7);
-  --tk-glass-active: rgba(0, 0, 0, 0.06);
+  /* No claro o vidro tambem quase nao tem cor — o que muda e de que lado vem a
+     luz: sobre fundo claro o realce e branco puro e o rim e escuro. */
+  --tk-glass-ios: rgba(255, 255, 255, 0.42);
+  --tk-glass-edge: rgba(255, 255, 255, 0.85);
+  --tk-glass-sheen: rgba(255, 255, 255, 0.75);
+  --tk-glass-rim: rgba(16, 19, 25, 0.05);
+  --tk-glass-active: rgba(16, 19, 25, 0.07);
+  --tk-glass-press: rgba(16, 19, 25, 0.12);
   --tk-sheet: #ffffff;
   --tk-elev: #ffffff;
   --tk-code: #edeff5;
@@ -156,9 +180,12 @@
     --tk-txt3: rgba(16, 19, 25, 0.56);
     --tk-txt4: rgba(16, 19, 25, 0.6);
     --tk-glass: rgba(246, 247, 251, 0.82);
-  --tk-glass-ios: rgba(255, 255, 255, 0.58);
-  --tk-glass-edge: rgba(255, 255, 255, 0.7);
-  --tk-glass-active: rgba(0, 0, 0, 0.06);
+    --tk-glass-ios: rgba(255, 255, 255, 0.42);
+    --tk-glass-edge: rgba(255, 255, 255, 0.85);
+    --tk-glass-sheen: rgba(255, 255, 255, 0.75);
+    --tk-glass-rim: rgba(16, 19, 25, 0.05);
+    --tk-glass-active: rgba(16, 19, 25, 0.07);
+    --tk-glass-press: rgba(16, 19, 25, 0.12);
     --tk-sheet: #ffffff;
     --tk-elev: #ffffff;
     --tk-code: #edeff5;
@@ -242,6 +269,15 @@
 
   /* Alvo minimo de toque. Nunca reduzir — e requisito de acessibilidade. */
   --tk-touch: 44px;
+
+  /*
+   * A curva do vidro.
+   *
+   * Sai rapido e assenta devagar, sem passar do ponto. E o comportamento de uma
+   * peca com massa — que e o que a Apple quer dizer com "fluidity". Curva
+   * simetrica (`ease-in-out`) da aquela sensacao de slide de apresentacao.
+   */
+  --tk-ease-glass: cubic-bezier(0.32, 0.72, 0, 1);
 
   --tk-font: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
   --tk-mono: "IBM Plex Mono", ui-monospace, "SF Mono", monospace;
