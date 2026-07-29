@@ -42,7 +42,7 @@ export function App() {
       <div className="tk-shell">
         <main className="tk-main" key={tab}>
           {tab === "inicio" && (
-            <HomeScreen dataset={dataset} persist={persist} />
+            <HomeScreen dataset={dataset} persist={persist} onGo={setTab} />
           )}
           {tab === "pokedex" && <PokedexScreen dataset={dataset} />}
           {tab === "colecao" && <CollectionScreen dataset={dataset} />}

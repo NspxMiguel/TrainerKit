@@ -1189,3 +1189,214 @@
 .tk-ai-wait {
   color: var(--tk-txt4);
 }
+
+/* -------------------------------------------------- resumo da colecao */
+
+/* Tres numeros lado a lado. Sem cartao em volta de proposito: e um respiro
+   entre o titulo e a lista, nao mais um bloco pra ler. */
+.tk-stats {
+  display: flex;
+  gap: var(--tk-s5);
+  padding: var(--tk-s1) 2px var(--tk-s4);
+}
+
+.tk-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tk-stat-n {
+  font: 800 24px/1.05 var(--tk-font);
+  letter-spacing: -0.02em;
+}
+
+.tk-stat-sub {
+  font: 700 13px var(--tk-font);
+  color: var(--tk-txt4);
+}
+
+.tk-stat-l {
+  font: 400 11px var(--tk-font);
+  color: var(--tk-txt3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ------------------------------------------------------------- atalhos */
+
+/*
+ * Grade 2x2 de destinos.
+ *
+ * A cor nao e enfeite: cada bloco herda o tom da coisa pra onde leva — verde
+ * pra raide, azul pra PvP —, e depois de duas semanas de uso a pessoa acerta
+ * o toque sem ler. Foi por isso que o app ganhou isto: o ranking e os counters
+ * existiam ha dias escondidos dentro da Pokedex, e ninguem ia achar.
+ */
+.tk-quickgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--tk-s2);
+}
+
+.tk-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: var(--tk-s4);
+  /* Altura fixa, nao minima: com `min-height` a linha de cima crescia quando
+     uma descricao quebrava em duas linhas, e os quatro blocos ficavam
+     desalinhados dois a dois. */
+  height: 104px;
+  border-radius: var(--tk-r-card);
+  border: 1px solid var(--tk-line);
+  background: var(--tk-surf);
+  text-align: left;
+  overflow: hidden;
+  transition: transform 0.06s var(--tk-ease);
+}
+
+.tk-tile:active {
+  transform: scale(0.98);
+}
+
+.tk-tile-t {
+  font: 700 14px var(--tk-font);
+  margin-top: auto;
+}
+
+.tk-tile-d {
+  font: 400 11px/1.35 var(--tk-font);
+  color: var(--tk-txt3);
+}
+
+.tk-tile--raid {
+  color: var(--tk-succ);
+  background: var(--tk-succ-soft);
+  border-color: var(--tk-succ-line);
+}
+
+.tk-tile--pvp {
+  color: var(--tk-pri);
+  background: var(--tk-pri-soft);
+  border-color: var(--tk-pri-line);
+}
+
+.tk-tile--dex {
+  color: var(--tk-info);
+  background: var(--tk-info-soft);
+  border-color: var(--tk-info-line);
+}
+
+.tk-tile--coll {
+  color: var(--tk-warn);
+  background: var(--tk-warn-soft);
+  border-color: var(--tk-warn-line);
+}
+
+.tk-tile-t,
+.tk-tile-d {
+  color: var(--tk-txt);
+}
+
+.tk-tile-d {
+  color: var(--tk-txt3);
+}
+
+/* ----------------------------------------------------------- dica do dia */
+
+/*
+ * Quase tudo que este app sabe e contraintuitivo, e ficava enterrado em telas
+ * que so se abre depois de ja ter decidido errado. A dica sobe isso pra
+ * primeira tela — e todas saem de dado calculado, nunca de frase decorativa.
+ */
+.tk-tip {
+  display: flex;
+  gap: var(--tk-s3);
+  align-items: flex-start;
+  margin-top: var(--tk-s6);
+  padding: var(--tk-s4);
+  border-radius: var(--tk-r-card);
+  background: var(--tk-surf2);
+  border: 1px solid var(--tk-line);
+}
+
+.tk-tip-mark {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: var(--tk-pri-soft);
+  color: var(--tk-pri);
+}
+
+.tk-tip-label {
+  display: block;
+  font: 600 10px var(--tk-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tk-txt4);
+  margin-bottom: 3px;
+}
+
+.tk-tip-text {
+  display: block;
+  font: 400 13px/1.5 var(--tk-font);
+  color: var(--tk-txt2);
+}
+
+/* ------------------------------------------------- perguntar sobre a colecao */
+
+/*
+ * A primeira versao da IA reescrevia o veredito que o app ja tinha escrito, e
+ * o Miguel perguntou "pra que serve isso?" — a resposta honesta era "pra
+ * pouco". O que um modelo faz e o app nao e entender uma pergunta solta.
+ *
+ * Marcado com borda propria porque a resposta aqui e do MODELO, ao contrario
+ * de todo o resto da tela, que e calculado. A diferenca importa.
+ */
+.tk-ask {
+  padding: var(--tk-s4);
+  border-radius: var(--tk-r-card);
+  background: var(--tk-surf);
+  border: 1px solid var(--tk-pri-line);
+}
+
+.tk-ask-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: var(--tk-s3);
+}
+
+.tk-ask-mark {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: var(--tk-pri-soft);
+  color: var(--tk-pri);
+  flex: none;
+}
+
+.tk-ask-title {
+  font: 700 14px var(--tk-font);
+}
+
+.tk-ask-wait {
+  margin: var(--tk-s3) 0 0;
+  font: 400 13px var(--tk-font);
+  color: var(--tk-txt4);
+}
+
+.tk-ask-answer {
+  margin: var(--tk-s3) 0 0;
+  font: 400 14px/1.55 var(--tk-font);
+  color: var(--tk-txt);
+}

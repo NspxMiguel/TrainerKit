@@ -5,6 +5,7 @@ import { ACTION_KEYS, decide, ivTotalOf } from "@trainerkit/core";
 import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
 import { useT, type Key } from "../i18n/t.ts";
 import { exportJson, importJson, removePokemon, useCollection } from "../storage/collection.ts";
+import { AskBox } from "../ui/AskBox.tsx";
 import { IconPlus } from "../ui/Icons.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 import { SpeciesDetail } from "./SpeciesDetail.tsx";
@@ -146,6 +147,15 @@ export function CollectionScreen({ dataset }: Props) {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* A caixa de perguntas vive AQUI porque e sobre a colecao. So aparece
+          com chave configurada — campo morto dizendo "configure a IA" seria
+          propaganda ocupando espaco de quem nao pediu. */}
+      {ready && items && items.length > 0 && (
+        <div style={{ marginTop: 20 }}>
+          <AskBox items={items} data={dataset.data} />
         </div>
       )}
 
