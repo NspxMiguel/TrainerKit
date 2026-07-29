@@ -1167,3 +1167,25 @@
   border-color: var(--tk-pri-line);
   color: var(--tk-pri-fg);
 }
+
+/* ----------------------------------------------------------- voz do modelo */
+
+/*
+ * O texto do assistente com IA.
+ *
+ * Marcado com barra lateral de proposito: o veredito acima e calculado e
+ * garantido; isto e a mesma conclusao reescrita por um modelo. Parecer igual
+ * apagaria a diferenca — e a diferenca importa quando o app inteiro se apoia em
+ * poder ser conferido.
+ */
+.tk-ai {
+  margin: 12px 0 0;
+  padding-left: 12px;
+  border-left: 2px solid var(--tk-pri-line);
+  font: 400 13px/1.55 var(--tk-font);
+  color: var(--tk-txt2);
+}
+
+.tk-ai-wait {
+  color: var(--tk-txt4);
+}

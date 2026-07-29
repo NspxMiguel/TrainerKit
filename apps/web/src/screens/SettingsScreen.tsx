@@ -12,6 +12,8 @@ import { useT, type Key } from "../i18n/t.ts";
 import { WheelPicker } from "../ui/WheelPicker.tsx";
 import { useInstallState } from "../storage/install.ts";
 import { InstallGuide } from "./InstallGuide.tsx";
+import { AiSettings } from "./AiSettings.tsx";
+import { DataSourceSettings } from "./DataSourceSettings.tsx";
 import { SpriteSettings } from "./SpriteSettings.tsx";
 
 interface Props {
@@ -158,15 +160,9 @@ export function SettingsScreen({ datasetLabel, persist }: Props) {
 
       <SpriteSettings />
 
-      <div className="tk-overline" style={{ display: "block", marginTop: 28 }}>
-        {t("settings.gameData")}
-      </div>
-      <section className="tk-card" style={{ marginTop: 10 }}>
-        <div className="tk-row">
-          <span className="tk-row-label">{t("settings.datasetVersion")}</span>
-          <span className="tk-row-value">{datasetLabel ?? "—"}</span>
-        </div>
-      </section>
+      <DataSourceSettings datasetLabel={datasetLabel} />
+
+      <AiSettings />
 
       <div className="tk-overline" style={{ display: "block", marginTop: 28 }}>
         {t("settings.about")}
