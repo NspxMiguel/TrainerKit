@@ -105,3 +105,12 @@ export function IconDownload(props: IconProps) {
     </Svg>
   );
 }
+
+export function IconCamera(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M3 8.5A1.5 1.5 0 0 1 4.5 7h2L8 4.5h8L17.5 7h2A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5Z" />
+      <circle cx="12" cy="13" r="3.5" />
+    </Svg>
+  );
+}
