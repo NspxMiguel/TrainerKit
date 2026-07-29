@@ -1979,7 +1979,29 @@
   display: grid;
   place-items: center;
   z-index: 9;
-  animation: tk-rise 0.24s var(--tk-ease) both;
+  /*
+   * Keyframe proprio, e nao o `tk-rise` generico.
+   *
+   * `tk-rise` anima `transform: translateY(...)`, e transform nao se soma: a
+   * animacao SUBSTITUI o `translateX(-50%)` que centraliza a tarja. Com `both`
+   * ela nem devolve o valor no fim — a tarja terminava ancorada em `left: 50%`
+   * sem a compensacao, ou seja, meia tela pra direita, vazando pra fora.
+   *
+   * Sempre que um elemento centralizado por `translateX(-50%)` for animado, o
+   * keyframe precisa carregar esse -50% em todos os quadros.
+   */
+  animation: tk-strip-in 0.24s var(--tk-ease) both;
+}
+
+@keyframes tk-strip-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 [data-platform="ios"] .tk-strip {
