@@ -89,29 +89,16 @@ export function typeColor(type: string): string {
   return (TYPE_COLORS[type] ?? FALLBACK_COLORS)[0];
 }
 
-const TYPE_NAMES_PT: Record<string, string> = {
-  normal: "Normal",
-  fighting: "Lutador",
-  flying: "Voador",
-  poison: "Venenoso",
-  ground: "Terrestre",
-  rock: "Pedra",
-  bug: "Inseto",
-  ghost: "Fantasma",
-  steel: "Aço",
-  fire: "Fogo",
-  water: "Água",
-  grass: "Planta",
-  electric: "Elétrico",
-  psychic: "Psíquico",
-  ice: "Gelo",
-  dragon: "Dragão",
-  dark: "Sombrio",
-  fairy: "Fada",
-};
 
-export function typeName(type: string): string {
-  return TYPE_NAMES_PT[type] ?? type;
+/**
+ * Chave de traducao do tipo.
+ *
+ * Os nomes viviam num mapa em portugues aqui dentro, e por isso o app em
+ * ingles mostrava "Lutador" e "Voador" — apareceu no site publicado, nao no
+ * dev. Agora e chave, e o texto mora no dicionario como todo o resto.
+ */
+export function typeKey(type: string): string {
+  return `type.${type}`;
 }
 
 /**
