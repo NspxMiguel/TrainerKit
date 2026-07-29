@@ -253,4 +253,6 @@ export const JA: Dict = {
   "sprites.manifestAria": "マニフェストのURL",
   "sprites.noneActive": "何もダウンロードしません。",
   "sprites.manifestHelp": "マニフェストは {nameField} と {templateField} を持つ JSON です（例：{example}）。.zip ではファイル名で照合します：{byDex} は図鑑番号、{byName} は名前。フォルダは無視されます。",
+  "home.quickScan": "スクショを読み取る",
+  "home.quickScanDetail": "正確な個体値と判定",
 };

@@ -20,6 +20,16 @@
   flex: 1;
   padding: calc(var(--tk-safe-top) + env(safe-area-inset-top)) var(--tk-gutter)
     calc(var(--tk-safe-bottom) + 72px + env(safe-area-inset-bottom));
+}
+
+/* A barra flutuante ocupa mais altura util que a assente: 12px de folga
+   embaixo mais a sombra. Sem isto o ultimo item da lista fica sob o vidro. */
+[data-platform="ios"] .tk-main {
+  padding-bottom: calc(var(--tk-safe-bottom) + 92px + env(safe-area-inset-bottom));
+}
+
+[data-platform="ios"] .tk-fab {
+  bottom: calc(104px + env(safe-area-inset-bottom));
   animation: tk-fade 0.14s var(--tk-ease) both;
 }
 
@@ -108,6 +118,100 @@
 
 .tk-tab-label {
   font: 600 11px var(--tk-font);
+}
+
+/* ------------------------------------------------- barra de abas do iOS 26 */
+
+/*
+ * Liquid Glass.
+ *
+ * No iOS 26 a barra de abas do sistema deixou de ser uma faixa presa na borda e
+ * virou uma capsula FLUTUANTE de vidro: o conteudo por tras aparece desfocado e
+ * mais saturado, a borda de cima tem um brilho especular e a peca projeta
+ * sombra sobre a tela. Um app web que mantem a barra retangular colada embaixo
+ * denuncia na hora que nao e nativo.
+ *
+ * So no iOS de proposito. No Android o padrao e o oposto — a barra do Material
+ * e assente e opaca —, e copiar o vidro da Apple la pareceria igualmente
+ * estrangeiro.
+ *
+ * O efeito e tres camadas: `backdrop-filter` faz a refracao, o `::before`
+ * desenha o realce de cima, e a `box-shadow` interna fecha a borda inferior.
+ * Nao da pra fazer com uma propriedade so.
+ */
+[data-platform="ios"] .tk-tabbar {
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(env(safe-area-inset-bottom) + 12px);
+  width: calc(100% - 2 * var(--tk-gutter));
+  max-width: calc(var(--tk-container) - 2 * var(--tk-gutter));
+  border-radius: 26px;
+  border-top: none;
+  overflow: hidden;
+  padding-bottom: 0;
+
+  /* Mais saturacao que desfoque: e o que faz a cor de tras "vazar" pelo vidro
+     em vez de virar um cinza leitoso. */
+  background: var(--tk-glass-ios);
+  backdrop-filter: blur(28px) saturate(2.2);
+  -webkit-backdrop-filter: blur(28px) saturate(2.2);
+  border: 1px solid var(--tk-glass-edge);
+  box-shadow:
+    0 10px 34px rgba(0, 0, 0, 0.42),
+    0 2px 8px rgba(0, 0, 0, 0.24),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* O realce especular: uma faixa clara na borda de cima, que e o que faz o vidro
+   parecer ter espessura em vez de ser um retangulo translucido. */
+[data-platform="ios"] .tk-tabbar::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 50%;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.16),
+    rgba(255, 255, 255, 0)
+  );
+  pointer-events: none;
+}
+
+[data-platform="ios"] .tk-tab {
+  padding: 9px 0 10px;
+  position: relative;
+}
+
+/* A aba ativa ganha a propria pilula, como no sistema. */
+[data-platform="ios"] .tk-tab[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  inset: 4px 8px;
+  border-radius: 18px;
+  background: var(--tk-glass-active);
+}
+
+[data-platform="ios"] .tk-tab > * {
+  position: relative;
+}
+
+/*
+ * Sem transparencia, sem vidro.
+ *
+ * Quem liga "Reduzir transparencia" nos ajustes de acessibilidade nao esta
+ * pedindo um vidro mais fraco — esta pedindo fundo solido. `backdrop-filter`
+ * aqui e decoracao, e decoracao cede.
+ */
+@media (prefers-reduced-transparency: reduce) {
+  [data-platform="ios"] .tk-tabbar {
+    background: var(--tk-surf);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  [data-platform="ios"] .tk-tabbar::before {
+    display: none;
+  }
 }
 
 /* ------------------------------------------------------------------- avisos */
@@ -918,4 +1022,59 @@
 .tk-wheel-glyph {
   font-size: 18px;
   line-height: 1;
+}
+
+/* --------------------------------------------------------- acao rapida da home */
+
+/*
+ * O caminho curto pro que o app faz.
+ *
+ * Nao e um cartao de informacao com um botao dentro: a linha INTEIRA e o alvo,
+ * como uma celula de lista de sistema. Um toque da home ate a leitura do print.
+ */
+.tk-quick {
+  display: flex;
+  align-items: center;
+  gap: var(--tk-s3);
+  width: 100%;
+  padding: var(--tk-s4);
+  border-radius: var(--tk-r-card);
+  background: var(--tk-surf);
+  border: 1px solid var(--tk-line);
+  text-align: left;
+  transition: transform 0.06s var(--tk-ease);
+}
+
+.tk-quick:active {
+  transform: scale(0.99);
+}
+
+.tk-quick-mark {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: var(--tk-pri-soft);
+  border: 1px solid var(--tk-pri-line);
+  color: var(--tk-pri);
+}
+
+.tk-quick-title {
+  display: block;
+  font: 700 15px var(--tk-font);
+}
+
+.tk-quick-detail {
+  display: block;
+  font: 400 12px var(--tk-font);
+  color: var(--tk-txt3);
+  margin-top: 2px;
+}
+
+.tk-quick-go {
+  flex: none;
+  font: 400 22px/1 var(--tk-font);
+  color: var(--tk-txt4);
 }

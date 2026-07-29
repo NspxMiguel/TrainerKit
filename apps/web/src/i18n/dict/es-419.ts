@@ -253,4 +253,6 @@ export const ES_419: Dict = {
   "sprites.manifestAria": "Dirección del manifiesto",
   "sprites.noneActive": "No se descarga nada.",
   "sprites.manifestHelp": "El manifiesto es un JSON con {nameField} y {templateField} — por ejemplo {example}. En el .zip, el nombre del archivo es lo que coincide: {byDex} por número de Pokédex, {byName} por nombre. Las carpetas se ignoran.",
+  "home.quickScan": "Escanear una captura",
+  "home.quickScanDetail": "IV exactos y un veredicto",
 };

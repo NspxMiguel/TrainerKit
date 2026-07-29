@@ -253,4 +253,6 @@ export const FR: Dict = {
   "sprites.manifestAria": "Adresse du manifeste",
   "sprites.noneActive": "Rien n'est téléchargé.",
   "sprites.manifestHelp": "Le manifeste est un JSON avec {nameField} et {templateField} — par exemple {example}. Dans le .zip, c'est le nom du fichier qui compte : {byDex} par numéro du Pokédex, {byName} par nom. Les dossiers sont ignorés.",
+  "home.quickScan": "Scanner une capture",
+  "home.quickScanDetail": "IV exacts et un verdict",
 };

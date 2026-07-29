@@ -2,17 +2,19 @@ import { useMemo, useState } from "react";
 
 import { ACTION_KEYS, decide, type Action } from "@trainerkit/core";
 
-import type { DatasetState } from "../data/useDataset.ts";
+import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
 import { datasetLabel } from "../data/useDataset.ts";
 import { useT, type Key } from "../i18n/t.ts";
 import { useSetup } from "../onboarding/setup.ts";
 import { useCollection } from "../storage/collection.ts";
 import { useInstallState } from "../storage/install.ts";
 import type { PersistState } from "../storage/persist.ts";
-import { IconAlert, IconPlus } from "../ui/Icons.tsx";
+import { IconAlert, IconCamera, IconPlus } from "../ui/Icons.tsx";
 import { InstallBanner } from "../ui/InstallBanner.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 import { InstallGuide } from "./InstallGuide.tsx";
+import { IVCalculator } from "./IVCalculator.tsx";
+import { SpeciesPicker } from "./SpeciesPicker.tsx";
 
 interface Props {
   dataset: DatasetState;
@@ -50,6 +52,8 @@ export function HomeScreen({ dataset, persist }: Props) {
   const { items } = useCollection();
   const { t, tm, language } = useT();
   const [guideOpen, setGuideOpen] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const [picked, setPicked] = useState<DatasetSpecies | null>(null);
 
   const ready = dataset.status === "ready";
   const data = ready ? dataset.data : null;
@@ -140,34 +144,32 @@ export function HomeScreen({ dataset, persist }: Props) {
 
       {dataset.status === "ready" && (
         <>
-          <section className="tk-card">
-            <div className="tk-overline">{t("home.gameData")}</div>
-            <div style={{ display: "flex", gap: 24, marginTop: 12 }}>
-              <div>
-                <div style={{ font: "800 26px/1.1 var(--tk-font)", letterSpacing: "-0.02em" }}>
-                  {dataset.data.species
-                    .filter((s) => s.cosmeticOf === null)
-                    .length.toLocaleString(language)}
-                </div>
-                <div className="tk-caption">{t("home.species")}</div>
-              </div>
-              <div>
-                <div style={{ font: "800 26px/1.1 var(--tk-font)", letterSpacing: "-0.02em" }}>
-                  {dataset.data.fastMoves.length + dataset.data.chargedMoves.length}
-                </div>
-                <div className="tk-caption">{t("home.moves")}</div>
-              </div>
-              <div>
-                <div style={{ font: "800 26px/1.1 var(--tk-font)", letterSpacing: "-0.02em" }}>
-                  {dataset.data.version.levelCap}
-                </div>
-                <div className="tk-caption">{t("home.maxLevel")}</div>
-              </div>
-            </div>
-            <p className="tk-caption" style={{ marginTop: 14 }}>
-              {t("home.datasetLine", { date: datasetLabel(dataset.data.version) })}
-            </p>
-          </section>
+          {/*
+            O caminho curto pro que o app faz.
+
+            Aqui ficava um cartao com "1.182 especies, 390 ataques, base de
+            28/07". Isso e metadado do BANCO, nao informacao sobre o jogador —
+            ninguem abre um app pra saber quantas linhas ele tem. A versao da
+            base continua em Ajustes, que e onde se procura quando importa.
+
+            No lugar entra a acao: um toque da home ate a leitura do print.
+          */}
+          <button
+            type="button"
+            className="tk-quick"
+            onClick={() => setScanning(true)}
+          >
+            <span className="tk-quick-mark" aria-hidden="true">
+              <IconCamera size={22} />
+            </span>
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span className="tk-quick-title">{t("home.quickScan")}</span>
+              <span className="tk-quick-detail">{t("home.quickScanDetail")}</span>
+            </span>
+            <span className="tk-quick-go" aria-hidden="true">
+              ›
+            </span>
+          </button>
 
           <h2 className="tk-h2">{t("home.yourCollection")}</h2>
 
@@ -243,6 +245,24 @@ export function HomeScreen({ dataset, persist }: Props) {
             </section>
           )}
         </>
+      )}
+
+      {/* Escolher a especie vem ANTES de ler o print, e nao depois: a tela de
+          avaliacao mostra o apelido, nao a especie, entao o app nunca teria como
+          adivinhar. Pedir primeiro elimina a classe inteira de erro. */}
+      {scanning && ready && data && (
+        <SpeciesPicker
+          species={data.species}
+          onPick={(sp) => {
+            setPicked(sp);
+            setScanning(false);
+          }}
+          onClose={() => setScanning(false)}
+        />
+      )}
+
+      {picked && data && (
+        <IVCalculator species={picked} data={data} onClose={() => setPicked(null)} />
       )}
 
       {guideOpen && (
