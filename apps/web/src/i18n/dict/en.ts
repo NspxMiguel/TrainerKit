@@ -222,6 +222,21 @@ const EN = {
     "Works only by reading screenshots you provide. It doesn't touch the game servers, and no image leaves your device.",
   "settings.version": "Version {version}",
 
+  // ------------------------------------------------------- atualizacao
+  "update.title": "New version available",
+  "update.body": "It’s already downloaded. Updating takes a second.",
+  "update.apply": "Update",
+  "update.later": "In {days} days",
+  "update.never": "Stop asking",
+  "settings.updates": "Updates",
+  "settings.checkUpdate": "Check for updates",
+  "settings.upToDate": "You’re on the latest version.",
+  "settings.updateFound": "There’s a new version. The notice is back at the top.",
+  "settings.notifyAgain": "Notify me about updates again",
+  "settings.forceUpdate": "Force update",
+  "settings.forceUpdateDetail": "Last resort if the app is stuck on an old version. Clears the cache and downloads everything again. Your collection is not touched.",
+  "settings.buildOf": "Build of {date}",
+
   // ------------------------------------------------------------------ onboarding
   "onb.aria": "Welcome",
   "onb.tagline": "It tells you what to do with each Pokémon you catch.",

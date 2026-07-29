@@ -13,6 +13,13 @@ import { useT, type Key } from "../i18n/t.ts";
 import { WheelPicker } from "../ui/WheelPicker.tsx";
 import { updateSetup, useSetup } from "../onboarding/setup.ts";
 import { useInstallState } from "../storage/install.ts";
+import {
+  askUpdateAgain,
+  checkForUpdate,
+  forceReinstall,
+  isMutedForever,
+  useUpdate,
+} from "../storage/updates.ts";
 import { InstallGuide } from "./InstallGuide.tsx";
 import { AiSettings } from "./AiSettings.tsx";
 import { DataSourceSettings } from "./DataSourceSettings.tsx";
@@ -56,6 +63,8 @@ function formatBytes(n: number): string {
 }
 
 export function SettingsScreen({ datasetLabel, persist, species }: Props) {
+  const update = useUpdate();
+  const [updateMsg, setUpdateMsg] = useState<string | null>(null);
   const install = useInstallState();
   const language = useLanguage();
   const showTranslation = useShowTranslation();
@@ -213,6 +222,76 @@ export function SettingsScreen({ datasetLabel, persist, species }: Props) {
 
       <AiSettings />
 
+      {/*
+        Atualizacao com estado visivel.
+
+        Um app que se atualiza sozinho e magico quando funciona e enlouquecedor
+        quando nao funciona, porque nao ha nada na tela pra olhar. Aqui da pra
+        ver a data do build, procurar agora, e — se tudo mais falhar — apagar o
+        cache e baixar de novo.
+      */}
+      <div className="tk-overline" style={{ display: "block", marginTop: 28 }}>
+        {t("settings.updates")}
+      </div>
+      <section className="tk-card" style={{ marginTop: 10 }}>
+        <div className="tk-row">
+          <span className="tk-row-label">{t("settings.version", { version: "0.1.0" })}</span>
+          <span className="tk-row-value" style={{ font: "500 11px var(--tk-mono)" }}>
+            {t("settings.buildOf", { date: __TK_BUILD__ })}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          className="tk-btn tk-btn--secondary tk-btn--block"
+          style={{ marginTop: 12 }}
+          disabled={update.checking}
+          onClick={() => {
+            setUpdateMsg(null);
+            void checkForUpdate().then((achou) => {
+              // Se a pessoa tinha silenciado, procurar de propria vontade e
+              // sinal de que quer ver de novo.
+              if (achou) askUpdateAgain();
+              setUpdateMsg(achou ? t("settings.updateFound") : t("settings.upToDate"));
+            });
+          }}
+        >
+          {update.checking ? t("settings.checking") : t("settings.checkUpdate")}
+        </button>
+
+        {updateMsg && (
+          <p className="tk-caption" style={{ marginTop: 10 }}>
+            {updateMsg}
+          </p>
+        )}
+
+        {isMutedForever() && (
+          <button
+            type="button"
+            className="tk-btn tk-btn--ghost tk-btn--block"
+            style={{ height: 38, fontSize: 13, marginTop: 6 }}
+            onClick={() => {
+              askUpdateAgain();
+              setUpdateMsg(null);
+            }}
+          >
+            {t("settings.notifyAgain")}
+          </button>
+        )}
+
+        <p className="tk-caption" style={{ marginTop: 14, lineHeight: 1.55 }}>
+          {t("settings.forceUpdateDetail")}
+        </p>
+        <button
+          type="button"
+          className="tk-btn tk-btn--secondary tk-btn--block"
+          style={{ marginTop: 8 }}
+          onClick={() => void forceReinstall()}
+        >
+          {t("settings.forceUpdate")}
+        </button>
+      </section>
+
       <div className="tk-overline" style={{ display: "block", marginTop: 28 }}>
         {t("settings.about")}
       </div>
@@ -222,9 +301,6 @@ export function SettingsScreen({ datasetLabel, persist, species }: Props) {
         </p>
         <p className="tk-caption" style={{ lineHeight: 1.6, marginTop: 10 }}>
           {t("settings.disclaimer2")}
-        </p>
-        <p className="tk-caption" style={{ marginTop: 12, color: "var(--tk-txt4)" }}>
-          {t("settings.version", { version: "0.1.0" })}
         </p>
       </section>
 

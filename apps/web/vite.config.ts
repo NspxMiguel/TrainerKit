@@ -16,6 +16,17 @@ const base = process.env.TK_BASE ?? "/";
 
 export default defineConfig({
   base,
+  /**
+   * Carimbo de quando este build saiu.
+   *
+   * Existe pra responder "o app atualizou ou nao?" olhando a tela, em vez de
+   * adivinhar. `0.1.0` sozinho nunca muda e por isso nao respondia nada.
+   */
+  define: {
+    __TK_BUILD__: JSON.stringify(
+      new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC",
+    ),
+  },
   resolve: {
     alias: {
       "@trainerkit/core": fileURLToPath(
@@ -60,7 +71,15 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: "autoUpdate",
+      /*
+       * "prompt", nao "autoUpdate".
+       *
+       * O nome engana: em nenhum dos dois o service worker gerado chama
+       * `self.skipWaiting()` sozinho — ele so escuta uma mensagem
+       * `SKIP_WAITING`. Quem decide e o cliente. Com "prompt" isso fica
+       * explicito, e quem manda a mensagem e o botao de atualizar.
+       */
+      registerType: "prompt",
       /*
        * O registro e nosso — ver `src/storage/updates.ts`.
        *

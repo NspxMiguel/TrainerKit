@@ -2032,3 +2032,39 @@
   font: 600 11px var(--tk-font);
   color: var(--tk-txt2);
 }
+
+/* ------------------------------------------------------------ atualizacao */
+
+/*
+ * O aviso de versao nova.
+ *
+ * Cor primaria, nao a de alerta: nao ha nada errado acontecendo — ha algo bom
+ * pronto pra ser pego. Amarelo aqui faria parecer problema.
+ */
+.tk-banner--update {
+  background: var(--tk-pri-soft);
+  border: 1px solid var(--tk-pri-line);
+  color: var(--tk-pri);
+}
+
+/*
+ * A fileira de acoes.
+ *
+ * Sao tres, e em tela estreita elas nao cabem lado a lado — `wrap` deixa a
+ * terceira descer em vez de espremer as tres. O de atualizar vem primeiro
+ * porque e o que quase todo mundo quer; o de nao avisar mais vem por ultimo e
+ * sem peso, porque desligar aviso e decisao que ninguem devia tomar por
+ * engano.
+ */
+.tk-banner-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.tk-banner-acts .tk-btn {
+  height: 36px;
+  font-size: 13px;
+  padding: 0 14px;
+}

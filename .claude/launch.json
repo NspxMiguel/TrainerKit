@@ -4,8 +4,22 @@
     {
       "name": "trainerkit-web",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@trainerkit/web", "dev"],
+      "runtimeArgs": [
+        "--filter",
+        "@trainerkit/web",
+        "dev"
+      ],
       "port": 5273
+    },
+    {
+      "name": "trainerkit-preview",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "@trainerkit/web",
+        "preview"
+      ],
+      "port": 4273
     }
   ]
 }

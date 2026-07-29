@@ -12,6 +12,7 @@ import { detectPlatform } from "./storage/install.ts";
 import { requestPersistence, type PersistState } from "./storage/persist.ts";
 import { IconGrid, IconHome, IconSearch, IconSliders } from "./ui/Icons.tsx";
 import { SpriteDownloadPanel, SpriteDownloadStrip } from "./ui/SpriteDownload.tsx";
+import { UpdateBanner } from "./ui/UpdateBanner.tsx";
 import { useTabBarMinimize } from "./ui/useTabBarMinimize.ts";
 
 export type Tab = "inicio" | "pokedex" | "colecao" | "ajustes";
@@ -65,6 +66,9 @@ export function App() {
     <div className="tk-app">
       <div className="tk-shell">
         <main className="tk-main" key={tab}>
+          {/* Antes de qualquer tela: se ha versao nova, e a primeira coisa que
+              importa — e a unica que explica por que o resto pode estar velho. */}
+          <UpdateBanner />
           {tab === "inicio" && (
             <HomeScreen dataset={dataset} persist={persist} onGo={go} />
           )}
