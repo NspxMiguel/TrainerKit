@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import type { BaseStats } from "@trainerkit/core";
+import type { BaseStats, RankedSpecies } from "@trainerkit/core";
 
 export interface DatasetSpecies {
   id: string;
@@ -58,6 +58,15 @@ export interface Dataset {
    * energia maxima. Nunca digitadas a mao: elas mudam com o jogo, e um numero
    * defasado aqui faz o app mentir com confianca.
    */
+  /**
+   * Rankings pre-calculados no ETL. Opcional porque um dataset customizado,
+   * apontado pelo usuario, pode nao ter — e a tela some em vez de quebrar.
+   */
+  rankings?: {
+    raidOverall: RankedSpecies[];
+    raidByType: Record<string, RankedSpecies[]>;
+    statProductByLeague: Record<"great" | "ultra" | "master", RankedSpecies[]>;
+  };
   settings: {
     battle: {
       sameTypeAttackBonusMultiplier: number;

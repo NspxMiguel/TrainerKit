@@ -5,6 +5,16 @@
  * GAME_MASTER deve quebrar o build, nunca virar `undefined` que atravessa o app
  * e reaparece como veredito errado na tela do usuario.
  */
+import {
+  GREAT_LEAGUE,
+  MASTER_LEAGUE,
+  ULTRA_LEAGUE,
+  rankRaidAttackers,
+  rankStatProduct,
+  type BattleSettings,
+  type SpeciesForRanking,
+} from "@trainerkit/core";
+
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -498,6 +508,53 @@ async function main(): Promise<void> {
   console.log("buscando traducoes oficiais:");
   const moveNames = await fetchMoveNames([...fast, ...charged]);
 
+  /**
+   * Rankings pre-calculados.
+   *
+   * O de stat product varre 4.096 combinacoes de IV por especie por liga —
+   * medido em 3 SEGUNDOS no navegador, o que travaria a tela. E uma conta fixa
+   * sobre dados fixos: pertence ao build, nao ao aparelho de ninguem.
+   *
+   * O de raide sai em 7ms e podia rodar no cliente; vem junto por consistencia,
+   * e porque assim as duas listas envelhecem juntas com o dataset.
+   */
+  const forRanking = species.map((s) => ({
+    id: s.id,
+    name: s.name,
+    types: s.types,
+    baseStats: s.baseStats,
+    fastMoves: [...s.fastMoves, ...s.eliteFastMoves]
+      .map((id) => [...fast, ...charged].find((m) => m.id === id))
+      .filter((m): m is NonNullable<typeof m> => m !== undefined),
+    chargedMoves: [...s.chargedMoves, ...s.eliteChargedMoves]
+      .map((id) => [...fast, ...charged].find((m) => m.id === id))
+      .filter((m): m is NonNullable<typeof m> => m !== undefined),
+    cosmetic: s.cosmeticOf !== null,
+  })) as unknown as SpeciesForRanking[];
+
+  // `extractSettings` devolve o JSON cru do GAME_MASTER, que e `unknown` por
+  // desenho — tipar centenas de campos opcionais seria fingir uma garantia que
+  // a fonte nao da. Aqui a forma que interessa e pequena e ja foi conferida em
+  // runtime pelo `required()`, entao o estreitamento e explicito.
+  const battle = settings.battle as unknown as BattleSettings;
+
+  const raidOverall = rankRaidAttackers(forRanking, cpm, typeChart, TYPE_ORDER, battle, {
+    limit: 30,
+  });
+  const raidByType: Record<string, ReturnType<typeof rankRaidAttackers>> = {};
+  for (const type of TYPE_ORDER) {
+    raidByType[type] = rankRaidAttackers(forRanking, cpm, typeChart, TYPE_ORDER, battle, {
+      attackType: type,
+      limit: 15,
+    });
+  }
+
+  const statProductByLeague = {
+    great: rankStatProduct(forRanking, cpm, GREAT_LEAGUE, { limit: 30 }),
+    ultra: rankStatProduct(forRanking, cpm, ULTRA_LEAGUE, { limit: 30 }),
+    master: rankStatProduct(forRanking, cpm, MASTER_LEAGUE, { limit: 30 }),
+  };
+
   const dataset = {
     typeOrder: TYPE_ORDER,
     version: {
@@ -514,6 +571,11 @@ async function main(): Promise<void> {
     /** Nome oficial do golpe por idioma. O `name` em ingles fica no proprio golpe. */
     moveNames,
     settings,
+    rankings: {
+      raidOverall,
+      raidByType,
+      statProductByLeague,
+    },
   };
 
   await mkdir(OUT_DIR, { recursive: true });
@@ -530,6 +592,7 @@ async function main(): Promise<void> {
       `  idiomas:   ${Object.keys(moveNames).length}`,
       `  tipos:     ${Object.keys(typeChart).length}`,
       `  cpm:       ${cpm.length} niveis (cap ${LEVEL_CAP}, ultimo ${cpm[cpm.length - 1]})`,
+      `  rankings:  ${raidOverall.length} de raide, ${Object.keys(raidByType).length} tipos, 3 ligas`,
       `  saida:     ${(json.length / 1_048_576).toFixed(2)} MB em ${outPath}`,
     ].join("\n"),
   );

@@ -340,6 +340,19 @@ const EN = {
   "raid.hopeless": "Not with this team",
   "raid.hopelessBody": "Not even with a full lobby of 20. These counters don't work against this boss.",
   "raid.frail": "You'll faint and rejoin a few times.",
+  "pokedex.browse": "Search",
+  "pokedex.best": "Best",
+  "rank.raid": "Raid",
+  "rank.pvp": "PvP",
+  "rank.allTypes": "All",
+  "rank.league.great": "Great",
+  "rank.league.ultra": "Ultra",
+  "rank.league.master": "Master",
+  "rank.empty": "Nothing here.",
+  "rank.notTierListTitle": "This is not a tier list",
+  "rank.notTierList": "It ranks stat product at the league cap — how much stat a species squeezes under the CP limit. It's blind to typing, moves and the meta, which is where PvP is decided.",
+  "rank.raidNote": "Damage and bulk against a neutral target, at level 40 with perfect IVs. For a specific boss, use raid counters on its page.",
+  "rank.pvpNote": "Score is relative to first place.",
 } as const;
 
 /**

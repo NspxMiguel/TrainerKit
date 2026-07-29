@@ -1124,3 +1124,46 @@
 .tk-spread > span:nth-child(n + 5) {
   text-align: right;
 }
+
+/* ------------------------------------------------------------------- chips */
+
+/*
+ * Fila de filtros que rola na horizontal.
+ *
+ * Dezoito tipos nao cabem empilhados nem em grade sem virar parede. Rolagem
+ * lateral e o padrao que o sistema ja usa pra isso, e mantem a altura fixa.
+ */
+.tk-chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+  /* Sangra pelas margens: a fila encosta na borda da tela, sinalizando que
+     continua. Cortada no gutter pareceria uma lista que simplesmente acabou. */
+  margin: 0 calc(-1 * var(--tk-gutter));
+  padding-left: var(--tk-gutter);
+  padding-right: var(--tk-gutter);
+}
+
+.tk-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.tk-chip {
+  flex: none;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 16px;
+  background: var(--tk-surf2);
+  border: 1px solid var(--tk-line);
+  font: 600 12px var(--tk-font);
+  color: var(--tk-txt2);
+  white-space: nowrap;
+}
+
+.tk-chip[data-on] {
+  background: var(--tk-pri-soft);
+  border-color: var(--tk-pri-line);
+  color: var(--tk-pri-fg);
+}

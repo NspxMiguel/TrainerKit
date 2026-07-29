@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
 import { useT } from "../i18n/t.ts";
 import { SpeciesBrowser } from "../ui/SpeciesBrowser.tsx";
+import { RankingsScreen } from "./RankingsScreen.tsx";
 import { SpeciesDetail } from "./SpeciesDetail.tsx";
 
 interface Props {
@@ -19,6 +20,7 @@ interface Props {
 export function PokedexScreen({ dataset }: Props) {
   const [selected, setSelected] = useState<DatasetSpecies | null>(null);
   const { t } = useT();
+  const [tab, setTab] = useState<"browse" | "best">("browse");
 
   if (dataset.status === "loading") {
     return (
@@ -41,7 +43,30 @@ export function PokedexScreen({ dataset }: Props) {
   return (
     <>
       <h1 className="tk-h1">{t("pokedex.title")}</h1>
-      <SpeciesBrowser species={dataset.data.species} onPick={setSelected} />
+
+      {/* Buscar e "melhores" sao a mesma pergunta em duas direcoes: uma parte
+          da especie, a outra do objetivo. Por isso dividem a aba em vez de
+          virar uma quarta na barra de baixo. */}
+      <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
+        {(["browse", "best"] as const).map((x) => (
+          <button
+            key={x}
+            type="button"
+            className={`tk-btn ${tab === x ? "tk-btn--primary" : "tk-btn--secondary"}`}
+            style={{ flex: 1, height: 40, fontSize: 13, padding: 0 }}
+            aria-pressed={tab === x}
+            onClick={() => setTab(x)}
+          >
+            {x === "browse" ? t("pokedex.browse") : t("pokedex.best")}
+          </button>
+        ))}
+      </div>
+
+      {tab === "browse" ? (
+        <SpeciesBrowser species={dataset.data.species} onPick={setSelected} />
+      ) : (
+        <RankingsScreen data={dataset.data} onPick={setSelected} />
+      )}
 
       {selected && (
         <SpeciesDetail
