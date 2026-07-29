@@ -5,11 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && pnpm audit:bundle",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "icons": "node --experimental-strip-types scripts/make-icons.ts",
-    "test": "vitest run"
+    "test": "vitest run",
+    "audit:bundle": "tsx scripts/audit-bundle.ts"
   },
   "dependencies": {
     "@trainerkit/core": "workspace:*",
@@ -24,6 +25,7 @@
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^4.3.4",
     "jsdom": "^30.0.0",
+    "tsx": "^4.23.1",
     "typescript": "^5.7.2",
     "vite": "^6.0.7",
     "vite-plugin-pwa": "^0.21.1",

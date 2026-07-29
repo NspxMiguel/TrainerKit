@@ -4,7 +4,18 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
+/**
+ * Caminho base da publicacao.
+ *
+ * No GitHub Pages de projeto o site vive em `/<repo>/`, nao na raiz. O valor
+ * vem do ambiente pra que o mesmo build sirva pra Pages, pra dominio proprio
+ * (base `/`) e pro dev local sem editar arquivo. Um base errado nao quebra o
+ * HTML — quebra os assets e o dataset, com a tela abrindo em branco.
+ */
+const base = process.env.TK_BASE ?? "/";
+
 export default defineConfig({
+  base,
   resolve: {
     alias: {
       "@trainerkit/core": fileURLToPath(
@@ -15,6 +26,36 @@ export default defineConfig({
   server: {
     port: 5273,
     host: true, // expoe na rede local — necessario pra testar no celular de verdade
+  },
+  build: {
+    /**
+     * Separa o que muda do que nao muda.
+     *
+     * Num arquivo so, trocar uma palavra do dicionario invalidava os 570 KB
+     * inteiros no cache de quem ja tinha o app. React e os dicionarios sao
+     * justamente as duas partes que quase nunca mudam junto com o resto —
+     * fatiadas, uma correcao de texto nao obriga ninguem a rebaixar o runtime
+     * de novo.
+     */
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ["react", "react-dom"],
+          i18n: [
+            "./src/i18n/dict/en.ts",
+            "./src/i18n/dict/pt-BR.ts",
+            "./src/i18n/dict/es.ts",
+            "./src/i18n/dict/es-419.ts",
+            "./src/i18n/dict/de.ts",
+            "./src/i18n/dict/fr.ts",
+            "./src/i18n/dict/it.ts",
+            "./src/i18n/dict/ja.ts",
+            "./src/i18n/dict/ko.ts",
+            "./src/i18n/dict/ru.ts",
+          ],
+        },
+      },
+    },
   },
   plugins: [
     react(),
@@ -51,6 +92,10 @@ export default defineConfig({
       },
       devOptions: { enabled: true },
       manifest: {
+        // O escopo e o start_url acompanham o base: instalado a partir de um
+        // subcaminho, o app precisa saber que a casa dele e ali.
+        scope: base,
+        start_url: base,
         name: "TrainerKit",
         short_name: "TrainerKit",
         description:
@@ -60,7 +105,6 @@ export default defineConfig({
         background_color: "#07080B",
         display: "standalone",
         orientation: "portrait",
-        start_url: "/",
         icons: [
           { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
           { src: "/icon-512.png", sizes: "512x512", type: "image/png" },

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import { looksLikeDataset, resolvedDatasetUrl, useDataSource } from "./source.ts";
+
 import type { BaseStats, RankedSpecies } from "@trainerkit/core";
 
 export interface DatasetSpecies {
@@ -86,22 +88,34 @@ export type DatasetState =
 /**
  * Carrega o dataset do jogo.
  *
- * E servido como asset estatico e fica no precache do service worker — depois
- * da primeira visita o app calcula offline. E de proposito que nao ha fallback
- * de rede: se o dataset nao carrega, o app nao tem como decidir nada, e e
- * melhor dizer isso do que exibir numeros errados.
+ * O embarcado e servido como asset estatico e fica no precache do service
+ * worker — depois da primeira visita o app calcula offline. E de proposito que
+ * nao ha fallback de rede: se o dataset nao carrega, o app nao tem como decidir
+ * nada, e e melhor dizer isso do que exibir numeros errados.
+ *
+ * Quando o usuario aponta pra outra fonte, o formato e CONFERIDO antes de
+ * entrar. Sem isso, um JSON qualquer daria tela branca ou — pior — numeros
+ * calculados sobre lixo, que e o unico tipo de erro que este app nao pode
+ * cometer.
  */
 export function useDataset(): DatasetState {
   const [state, setState] = useState<DatasetState>({ status: "loading" });
+  const source = useDataSource();
 
   useEffect(() => {
     let cancelled = false;
+    setState({ status: "loading" });
 
     void (async () => {
+      const url = resolvedDatasetUrl();
       try {
-        const res = await fetch("/dataset/gamedata.json");
+        const res = await fetch(url);
         if (!res.ok) throw new Error(`dataset respondeu ${res.status}`);
         const data = (await res.json()) as Dataset;
+
+        const problem = looksLikeDataset(data);
+        if (problem) throw new Error(problem);
+
         if (!cancelled) setState({ status: "ready", data });
       } catch (err) {
         if (!cancelled) {
@@ -116,7 +130,7 @@ export function useDataset(): DatasetState {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [source]);
 
   return state;
 }

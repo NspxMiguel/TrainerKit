@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { ACTION_KEYS, decide, formatTrace, type VerdictInput } from "@trainerkit/core";
 
+import { explainVerdict, useGroq } from "../ai/groq.ts";
 import { useT, type Key } from "../i18n/t.ts";
 
 const TONE: Record<string, string> = {
@@ -22,7 +23,54 @@ const TONE: Record<string, string> = {
  */
 export function VerdictCard(props: VerdictInput) {
   const verdict = decide(props);
-  const { t, tm } = useT();
+  const { t, tm, language } = useT();
+  const groq = useGroq();
+  const [ai, setAi] = useState<string | null>(null);
+  const [aiError, setAiError] = useState(false);
+  const asked = useRef<string | null>(null);
+
+  /**
+   * A explicacao em texto do modelo, quando o usuario ligou uma chave.
+   *
+   * Ela ACOMPANHA o veredito, nunca o substitui: a frase por regras continua
+   * acima, e o rastro continua atras do botao. Se a chamada falhar, o cartao
+   * fica exatamente como era sem IA — por isso o erro so some com a caixinha em
+   * vez de virar um alerta.
+   */
+  useEffect(() => {
+    if (!groq.key) return;
+    // Uma chamada por veredito, nao por render.
+    const fingerprint = `${props.name}|${verdict.action}|${verdict.confidence.toFixed(3)}`;
+    if (asked.current === fingerprint) return;
+    asked.current = fingerprint;
+
+    const abort = new AbortController();
+    setAi(null);
+    setAiError(false);
+
+    void explainVerdict(
+      {
+        language,
+        species: props.name,
+        action: t(ACTION_KEYS[verdict.action] as Key),
+        confidence: verdict.confidence,
+        reason: tm(verdict.reason),
+        signals: verdict.signals.map((s) => ({
+          rule: s.rule,
+          weight: s.weight,
+          because: tm(s.because),
+        })),
+        ivTotal: props.ivs.atk + props.ivs.def + props.ivs.hp,
+        cp: null,
+      },
+      abort.signal,
+    )
+      .then(setAi)
+      .catch(() => setAiError(true));
+
+    return () => abort.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [groq.key, groq.model, language, props.name, verdict.action, verdict.confidence]);
   const [traceOpen, setTraceOpen] = useState(false);
   const color = TONE[verdict.action] ?? "var(--tk-txt)";
 
@@ -44,6 +92,15 @@ export function VerdictCard(props: VerdictInput) {
       <p className="tk-body" style={{ color: "var(--tk-txt)" }}>
         {tm(verdict.reason)}
       </p>
+
+      {/* A voz do modelo vem DEPOIS da frase por regras, com marca propria: o
+          que o app garante e o veredito; o texto abaixo e so a mesma coisa dita
+          de outro jeito. Misturar os dois apagaria essa diferenca. */}
+      {groq.key && !aiError && (
+        <p className="tk-ai">
+          {ai ?? <span className="tk-ai-wait">{t("ai.thinking")}</span>}
+        </p>
+      )}
 
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 14 }}>
         <div

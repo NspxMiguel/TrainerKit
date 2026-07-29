@@ -1,0 +1,74 @@
+name: Deploy
+
+# O dataset NAO e versionado. Ele e gerado aqui, a cada deploy, a partir do
+# GAME_MASTER publico — o que mantem o repositorio contendo apenas codigo e faz
+# o site publicado nascer com o dado do dia em vez do dia do ultimo commit.
+on:
+  push:
+    branches: [main]
+  # Roda sozinho de madrugada: o jogo muda a cada poucos dias, e um app que
+  # decide com base velha decide errado com confianca.
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Checagem de tipos
+        run: pnpm -r typecheck
+
+      - name: Testes
+        run: pnpm -r test
+
+      # Precisa de rede: baixa o GAME_MASTER (18 MB), transforma e pre-calcula
+      # os rankings. Se a fonte estiver fora do ar, o deploy para aqui — melhor
+      # que publicar sem dado.
+      - name: Gerar o dataset
+        run: pnpm --filter @trainerkit/dataset refresh
+
+      - name: Build
+        # Pages de projeto serve em /<repo>/, nao na raiz. O build tambem roda
+        # a auditoria que falha se alguma arte de terceiros entrar no bundle.
+        env:
+          TK_BASE: /${{ github.event.repository.name }}/
+        run: pnpm --filter ./apps/web build
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
