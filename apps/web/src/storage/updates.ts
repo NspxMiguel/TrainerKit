@@ -185,9 +185,19 @@ export async function forceReinstall(): Promise<void> {
   } catch {
     // Idem pro Cache Storage.
   }
-  // `reload()` normal ja basta: sem service worker e sem cache da API, a
-  // proxima navegacao vai ao servidor.
-  window.location.reload();
+  /*
+   * `reload()` nao basta.
+   *
+   * Sem service worker a navegacao volta pro caminho normal — e o caminho
+   * normal passa pelo cache HTTP, onde o GitHub Pages guardou o `index.html`
+   * com `max-age=600`. O recarregamento devolveria o mesmo HTML apontando pro
+   * mesmo bundle antigo, e o botao de emergencia nao teria emergencia nenhuma.
+   *
+   * Um endereco DIFERENTE nao esta nesse cache. O parametro nao faz nada no
+   * app, e some sozinho no proximo lancamento, porque o `start_url` do manifest
+   * e a raiz.
+   */
+  window.location.replace(`${import.meta.env.BASE_URL}?atualizado=${Date.now()}`);
 }
 
 export function registerServiceWorker(): void {
