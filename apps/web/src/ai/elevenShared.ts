@@ -99,12 +99,20 @@ export async function creditosRestantes(signal?: AbortSignal): Promise<number | 
  */
 export async function elevenSharedSynthesize(
   text: string,
+  /** Voz escolhida na tela. Só vale se estiver no allowlist (ver `getSharedVoice`). */
+  preferida?: string,
   signal?: AbortSignal,
 ): Promise<Blob> {
   const res = await fetch(ELEVEN_PROXY, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text: text.slice(0, ELEVEN_MAX_CHARS), voice: getSharedVoice() }),
+    body: JSON.stringify({
+      text: text.slice(0, ELEVEN_MAX_CHARS),
+      voice:
+        preferida && ELEVEN_SHARED_VOICES.some((v) => v.id === preferida)
+          ? preferida
+          : getSharedVoice(),
+    }),
     ...(signal ? { signal } : {}),
   });
 

@@ -82,15 +82,28 @@ function localeDoEdge(id: string): string {
  * motivo CERTO em vez da minha conclusão errada. Os ids estão no allowlist da
  * função: no dia em que a conta virar paga, é só passar a oferecê-las aqui.
  */
-function dasEleven(): Voz[] {
+function dasEleven(idioma: string): Voz[] {
+  /*
+   * `nativa` só em inglês, e isso é FATO consultado, não estimativa.
+   *
+   * As 21 vozes da biblioteca padrão têm `labels.accent` = american, british ou
+   * australian — sem exceção. Elas falam os outros idiomas pelo modelo
+   * multilíngue, mas com sotaque de quem aprendeu.
+   *
+   * Então pra quem usa o app em inglês elas são a melhor opção da lista; pra
+   * todo o resto elas são "outros idiomas", que é onde a tela já as coloca. Sem
+   * isto, elas apareciam como recomendadas pros dez idiomas por igual — que é
+   * o "voz brasileira falando japa" que ele mandou eu não fazer, só ao contrário.
+   */
+  const ehIngles = idioma.split("-")[0] === "en";
   return ELEVEN_SHARED_VOICES.map((v) => ({
     chave: `eleven-share:${v.id}`,
     motor: "eleven-share" as const,
     id: v.id,
     nome: v.label,
-    sotaque: null,
+    sotaque: "en",
     previa: null,
-    nativa: false,
+    nativa: ehIngles,
     online: true,
     gastaCota: true,
     precisaBaixar: false,
@@ -141,7 +154,7 @@ export function listarVozes(
     });
   }
 
-  vozes.push(...dasEleven());
+  vozes.push(...dasEleven(idioma));
 
   /*
    * Vozes do sistema.
