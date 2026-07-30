@@ -1,16 +1,18 @@
 import { useMemo, useState } from "react";
 
-import { ACTION_KEYS, decide, type Action } from "@trainerkit/core";
+import { ACTION_KEYS, decide, ivTotalOf, type Action, type Verdict } from "@trainerkit/core";
 
 import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
+import { moveLabel, useLanguage } from "../i18n/language.ts";
 import { useT, type Key } from "../i18n/t.ts";
 import type { PokedexIntent } from "../App.tsx";
 import { useSetup } from "../onboarding/setup.ts";
+import { typeColor, typeKey } from "../sprites/provider.ts";
 import { useCollection } from "../storage/collection.ts";
 import { useInstallState } from "../storage/install.ts";
 import type { PersistState } from "../storage/persist.ts";
 import { DidYouKnow } from "../ui/DidYouKnow.tsx";
-import { IconAlert, IconCamera, IconPlus, IconShield, IconSwords, IconTrophy } from "../ui/Icons.tsx";
+import { IconAlert, IconCamera, IconShield, IconSwords, IconTrophy } from "../ui/Icons.tsx";
 import { InstallBanner } from "../ui/InstallBanner.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 import { InstallGuide } from "./InstallGuide.tsx";
@@ -43,15 +45,8 @@ const TONE: Record<Action, string> = {
  */
 const PEDEM_ACAO: readonly Action[] = ["evoluir", "investir", "transferir"];
 
-/**
- * Quantas pendencias caber na home.
- *
- * Duas, nao tres. O Miguel: "na tela inicial, n precisa de scroll, scroll
- * inutil ali". Cada linha custa 40px e a terceira era justamente a que
- * empurrava a tela pra fora do celular — e quem tem tres pendencias abre a aba
- * da colecao, que existe pra isso.
- */
-const PENDENCIAS_NA_HOME = 2;
+/** Quantos sprites cabem na fila antes de ela virar rolagem lateral. */
+const NA_FILA = 12;
 
 function greetingKey(): Key {
   const h = new Date().getHours();
@@ -61,11 +56,87 @@ function greetingKey(): Key {
   return "home.greeting.night";
 }
 
+/**
+ * O destaque da home.
+ *
+ * A home tinha duas acoes cinzas, um cartao cinza e uma dica cinza — o Miguel:
+ * "ficou sem graça / sem cara de Pokémon" e "tudo com o mesmo peso". Estava
+ * certo nas duas: sem nenhum elemento dominante a tela lia como lista de
+ * Ajustes, e num app de Pokemon isso e um erro de identidade, nao de layout.
+ *
+ * Entao a primeira coisa da tela e UM Pokemon, grande, com a cor do tipo dele
+ * atras. E sempre o mais relevante que o app sabe apontar, nunca um enfeite
+ * sorteado:
+ *
+ *   1. o seu que mais pede decisao (e o unico que cobra algo de voce hoje);
+ *   2. sem pendencia, o seu melhor;
+ *   3. sem colecao — ou em modo so consulta — o melhor atacante de raide da
+ *      base, que e informacao de verdade e nao invencao.
+ *
+ * O rotulo diz qual dos tres e, porque um destaque sem rotulo faz a pessoa
+ * adivinhar por que aquele bicho esta ali.
+ */
+function Hero({
+  species,
+  labelKey,
+  linha,
+  tom,
+  onOpen,
+}: {
+  species: DatasetSpecies;
+  labelKey: Key;
+  linha: string;
+  tom?: string | undefined;
+  onOpen: () => void;
+}) {
+  const { t } = useT();
+  const cor = typeColor(species.types[0] ?? "normal");
+
+  return (
+    <button
+      type="button"
+      className="tk-hero"
+      onClick={onOpen}
+      /* A cor do tipo entra por variavel pra ficar so no CSS quem decide como
+         ela e usada — aqui e um veu de 18% atras do sprite, la e o gradiente. */
+      style={{ ["--tk-hero-type" as string]: cor }}
+    >
+      <span className="tk-hero-art" aria-hidden="true">
+        <SpeciesTile
+          spriteId={species.spriteId}
+          dex={species.dex}
+          speciesId={species.id}
+          name={species.name}
+          types={species.types}
+          size={84}
+        />
+      </span>
+
+      <span className="tk-hero-text">
+        <span className="tk-hero-label" style={tom ? { color: tom } : undefined}>
+          {t(labelKey)}
+        </span>
+        <span className="tk-hero-name">{species.name}</span>
+        <span className="tk-hero-meta">
+          #{String(species.dex).padStart(3, "0")} ·{" "}
+          {species.types.map((tp) => t(typeKey(tp) as "type.normal")).join(" · ")}
+        </span>
+        <span className="tk-hero-why">{linha}</span>
+      </span>
+
+      <span className="tk-hero-go" aria-hidden="true">
+        ›
+      </span>
+    </button>
+  );
+}
+
 export function HomeScreen({ dataset, persist, onGo }: Props) {
   const install = useInstallState();
   const setup = useSetup();
   const { items } = useCollection();
-  const { t, tm, language } = useT();
+  const { t, tm } = useT();
+  const language = useLanguage();
   const [guideOpen, setGuideOpen] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [picked, setPicked] = useState<DatasetSpecies | null>(null);
@@ -76,8 +147,9 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
   const data = ready ? dataset.data : null;
   const colecao = setup.mode === "colecao";
 
-  const pendencias = useMemo(() => {
-    if (!data || !items || items.length === 0) return null;
+  /** A colecao com veredito calculado, ordenada: quem pede acao primeiro. */
+  const meus = useMemo(() => {
+    if (!data || !colecao || !items || items.length === 0) return null;
 
     const decided = items.flatMap((owned) => {
       const s = data.species.find((x) => x.id === owned.speciesId);
@@ -98,11 +170,11 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
         shadow: owned.shadow,
       });
 
-      return [{ id: owned.id, species: s, verdict }];
+      return [{ id: owned.id, species: s, verdict, iv: ivTotalOf(owned.ivs) }];
     });
 
-    // Ordena pela ordem de PEDEM_ACAO e, dentro dela, pela confianca: o que o
-    // app tem mais certeza aparece primeiro, porque e o conselho mais util.
+    // Dentro de "pede acao", pela confianca: o conselho de que o app tem mais
+    // certeza vem primeiro, porque e o mais util.
     const agir = decided
       .filter((d) => PEDEM_ACAO.includes(d.verdict.action))
       .sort(
@@ -111,30 +183,69 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
           b.verdict.confidence - a.verdict.confidence,
       );
 
-    return { total: decided.length, agir };
-  }, [items, data]);
+    const porIv = [...decided].sort((a, b) => b.iv - a.iv);
+
+    return {
+      total: decided.length,
+      perfeitos: decided.filter((d) => d.iv === 45).length,
+      agir,
+      porIv,
+      melhor: porIv[0]!,
+    };
+  }, [items, data, colecao]);
 
   /**
-   * O resumo da colecao.
+   * Quem e o destaque, e por que.
    *
-   * Tres numeros que a pessoa quer ver ao abrir o app: quantos tem, quantos sao
-   * 100%, e qual o melhor. Nao decide nada — e o "olha o que eu tenho" que faz
-   * uma colecao ser colecao em vez de planilha.
+   * A ordem e de utilidade, nao de vaidade: o que cobra uma decisao hoje vem
+   * antes do que so e bonito de olhar.
    */
-  const resumo = useMemo(() => {
-    if (!items || items.length === 0 || !data) return null;
-    const comIv = items.map((o) => ({
-      owned: o,
-      total: o.ivs.atk + o.ivs.def + o.ivs.hp,
-      species: data.species.find((s) => s.id === o.speciesId),
-    }));
-    const melhor = comIv.reduce((a, b) => (b.total > a.total ? b : a));
+  const hero = useMemo((): {
+    species: DatasetSpecies;
+    labelKey: Key;
+    linha: string;
+    tom?: string;
+    verdict?: Verdict;
+  } | null => {
+    if (!data) return null;
+
+    const pendente = meus?.agir[0];
+    if (pendente) {
+      return {
+        species: pendente.species,
+        labelKey: ACTION_KEYS[pendente.verdict.action] as Key,
+        linha: tm(pendente.verdict.reason),
+        tom: TONE[pendente.verdict.action],
+        verdict: pendente.verdict,
+      };
+    }
+
+    if (meus) {
+      return {
+        species: meus.melhor.species,
+        labelKey: "home.hero.best",
+        linha: `${meus.melhor.iv}/45 · ${tm(meus.melhor.verdict.reason)}`,
+      };
+    }
+
+    // Sem colecao: o melhor atacante de raide da base. E dado calculado, com
+    // fonte declarada — a alternativa seria sortear um bicho, e sortear e o
+    // tipo de enfeite que faz o resto do app perder credito.
+    const top = data.rankings?.raidOverall[0];
+    const sp = top ? data.species.find((s) => s.id === top.speciesId) : undefined;
+    if (!sp || !top?.fast || !top.charged) return null;
+
+    // Nome do golpe no idioma da pessoa quando ha traducao oficial — o resto do
+    // app faz assim, e um "Poison Jab" solto em portugues destoaria.
+    const nome = (m: { name: string; id: string }) =>
+      moveLabel(m.name, data.moveNames, m.id, language).primary;
+
     return {
-      total: items.length,
-      perfeitos: comIv.filter((x) => x.total === 45).length,
-      melhor,
+      species: sp,
+      labelKey: "home.hero.topRaid",
+      linha: `${nome(top.fast)} + ${nome(top.charged)}`,
     };
-  }, [items, data]);
+  }, [data, meus, tm, language]);
 
   // Armazenamento sem garantia de durabilidade. So avisa quando ha risco real:
   // navegador que suporta modo persistente mas ainda nao concedeu.
@@ -146,8 +257,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
    * O motivo dele e um so, e e de celular: o Safari apaga os dados de origens
    * paradas ha 7 dias, e estar na tela de inicio e o que faz o WebKit conceder
    * armazenamento persistente. No desktop nao ha esse despejo, o navegador ja
-   * fica aberto, e "instale este site" vira uma sugestao estranha — o Miguel
-   * viu isso no PC e a reacao foi exatamente essa.
+   * fica aberto, e "instale este site" vira uma sugestao estranha.
    */
   const showInstall =
     !install.installed && !install.dismissed && install.platform !== "desktop";
@@ -157,21 +267,12 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
 
   return (
     <>
-      {/*
-        Uma linha, nao duas.
-
-        A saudacao ficava sozinha em cima e o nome em 34px embaixo — 74px de
-        altura pra dizer "boa noite". Numa tela que precisa caber inteira, e o
-        primeiro lugar onde procurar espaço, e o texto nem perde nada: "Boa
-        noite, Miguel" e a frase que uma pessoa diria.
-
-        O que NAO podia voltar era o nome do APP aqui: era isso que fazia ler
-        "Boa noite TrainerKit", como se o app fosse o cumprimentado.
-      */}
-      <h1 className="tk-hello">
-        {t(greetingKey())}
-        {setup.name.trim() ? `, ${setup.name.trim()}` : ""}
-      </h1>
+      {/* A saudacao e o nome, nos dois tamanhos de sempre. Ficaram numa linha so
+          de 26px pra economizar altura, e o Miguel notou na hora — o nome e a
+          unica coisa da tela que e sobre ELE, e encolher isso pra caber mais
+          informacao foi trocar a coisa certa pela coisa errada. */}
+      <p className="tk-greeting">{t(greetingKey())}</p>
+      <h1 className="tk-h1 tk-h1--home">{setup.name.trim() || t("home.trainer")}</h1>
 
       {showInstall && (
         <InstallBanner
@@ -208,171 +309,114 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
 
       {dataset.status === "ready" && (
         <>
+          {hero && (
+            <Hero
+              species={hero.species}
+              labelKey={hero.labelKey}
+              linha={hero.linha}
+              tom={hero.tom}
+              onOpen={() => setDetail(hero.species)}
+            />
+          )}
+
           {/*
-            As duas coisas que o app FAZ, uma embaixo da outra.
+            Uma acao principal, uma secundaria.
 
-            O resto da home e consulta e mora nas abas. Ler um print e montar um
-            time sao as unicas acoes que produzem algo — a primeira responde
-            "esse presta?", a segunda devolve uma lista pra levar pra rua.
+            Eram duas linhas identicas, e ai nenhuma das duas era a principal.
+            Ler um print e o que a pessoa faz com o celular na mao no meio da
+            rua; montar time e o que ela faz sentada, planejando. Peso diferente
+            porque a frequencia e diferente.
           */}
-          <div className="tk-acts">
-            <button type="button" className="tk-quick" onClick={() => setScanning(true)}>
-              <span className="tk-quick-mark" aria-hidden="true">
-                <IconCamera size={22} />
-              </span>
-              <span style={{ flex: 1, minWidth: 0 }}>
-                <span className="tk-quick-title">{t("home.quickScan")}</span>
-                <span className="tk-quick-detail">{t("home.quickScanDetail")}</span>
-              </span>
-              <span className="tk-quick-go" aria-hidden="true">
-                ›
-              </span>
-            </button>
+          <button type="button" className="tk-cta" onClick={() => setScanning(true)}>
+            <span className="tk-cta-mark" aria-hidden="true">
+              <IconCamera size={24} />
+            </span>
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span className="tk-cta-title">{t("home.quickScan")}</span>
+              <span className="tk-cta-detail">{t("home.quickScanDetail")}</span>
+            </span>
+          </button>
 
-            <button
-              type="button"
-              className="tk-quick tk-quick--team"
-              onClick={() => setTeamOpen(true)}
-            >
-              <span className="tk-quick-mark" aria-hidden="true">
-                <IconSwords size={22} />
-              </span>
-              <span style={{ flex: 1, minWidth: 0 }}>
-                <span className="tk-quick-title">{t("team.open")}</span>
-                <span className="tk-quick-detail">{t("team.openDetail")}</span>
-              </span>
-              <span className="tk-quick-go" aria-hidden="true">
-                ›
-              </span>
-            </button>
-          </div>
+          <button type="button" className="tk-lite" onClick={() => setTeamOpen(true)}>
+            <IconSwords size={17} />
+            <span className="tk-lite-t">{t("team.open")}</span>
+            <span className="tk-lite-go" aria-hidden="true">
+              ›
+            </span>
+          </button>
 
-          {/* No modo consulta nao existe colecao nem aba pra ela: um bloco
-              vazio apontando pra uma aba que nao esta na tela e so confusao. */}
-          {colecao && (
+          {/* A colecao como FILA de sprites, nao como cartao de texto.
+              Era um bloco com tres numeros, duas linhas de nome e uma frase de
+              rodape — muita leitura pra dizer "olha o que voce tem". A fila diz
+              a mesma coisa de relance, e cada bicho abre com um toque. */}
+          {colecao && meus && (
             <>
-              {/* O quanto pede acao vai no CABEÇALHO da secao, nao numa linha
-                  propria dentro do cartao. Era uma frase de 18px mais 12 de
-                  respiro pra dizer um numero que caberia aqui de graça. */}
+              {/* Um cabecalho de UMA linha.
+                  "SUA COLEÇÃO · 5 SALVOS · 1 SÃO 100% · 4 PEDEM UMA DECISÃO" em
+                  maiuscula monoespacada quebrava em duas e virava uma parede.
+                  Quantos voce tem se conta na fila abaixo; o que precisa estar
+                  escrito e o que COBRA algo de voce. */}
               <div className="tk-overline tk-overline--sec">
                 {t("home.yourCollection")}
-                {pendencias && pendencias.agir.length > 0 && (
+                {meus.agir.length > 0 && (
                   <span className="tk-overline-hot">
                     {" · "}
-                    {pendencias.agir.length === 1
+                    {meus.agir.length === 1
                       ? t("home.needsDecision.one")
-                      : t("home.needsDecision.many", { count: pendencias.agir.length })}
+                      : t("home.needsDecision.many", { count: meus.agir.length })}
                   </span>
                 )}
               </div>
 
-              {/*
-                Resumo e pendencias no MESMO cartao.
-
-                Eram dois blocos com moldura, titulo e respiro proprios, e a
-                pergunta que os dois respondem e uma so: "e a minha colecao,
-                como esta?". Juntos economizam uns 60px — que e a diferenca
-                entre caber na tela e nao caber.
-              */}
-              <section className="tk-card tk-home-coll">
-                {resumo && (
-                  <div className="tk-stats">
-                    <div className="tk-stat">
-                      <span className="tk-stat-n">{resumo.total.toLocaleString(language)}</span>
-                      <span className="tk-stat-l">{t("home.stat.saved")}</span>
-                    </div>
-                    <div className="tk-stat">
-                      <span
-                        className="tk-stat-n"
-                        style={resumo.perfeitos > 0 ? { color: "var(--tk-succ)" } : undefined}
-                      >
-                        {resumo.perfeitos}
-                      </span>
-                      <span className="tk-stat-l">{t("home.stat.perfect")}</span>
-                    </div>
-                    <div className="tk-stat">
-                      <span className="tk-stat-n">
-                        {resumo.melhor.total}
-                        <span className="tk-stat-sub">/45</span>
-                      </span>
-                      <span className="tk-stat-l">
-                        {resumo.melhor.species?.name ?? t("home.stat.best")}
-                      </span>
-                    </div>
-                  </div>
+              <div className="tk-strip-row">
+                {meus.porIv.slice(0, NA_FILA).map((d) => (
+                  <button
+                    key={d.id}
+                    type="button"
+                    className="tk-strip-cell"
+                    data-hot={PEDEM_ACAO.includes(d.verdict.action) || undefined}
+                    style={{ ["--tk-cell-tone" as string]: TONE[d.verdict.action] }}
+                    onClick={() => setDetail(d.species)}
+                    aria-label={`${d.species.name} · ${t(ACTION_KEYS[d.verdict.action] as Key)}`}
+                    title={`${d.species.name} · ${t(ACTION_KEYS[d.verdict.action] as Key)}`}
+                  >
+                    <SpeciesTile
+                      spriteId={d.species.spriteId}
+                      dex={d.species.dex}
+                      speciesId={d.species.id}
+                      name={d.species.name}
+                      types={d.species.types}
+                      size={48}
+                    />
+                  </button>
+                ))}
+                {meus.porIv.length > NA_FILA && (
+                  <button
+                    type="button"
+                    className="tk-strip-more"
+                    onClick={() => onGo("colecao")}
+                  >
+                    +{meus.porIv.length - NA_FILA}
+                  </button>
                 )}
-
-                {!pendencias ? (
-                  <div className="tk-home-empty">
-                    <span className="tk-home-empty-mark" aria-hidden="true">
-                      <IconPlus size={18} />
-                    </span>
-                    <span>
-                      <span className="tk-quick-title">{t("home.empty.title")}</span>
-                      <span className="tk-quick-detail">{t("home.empty.body")}</span>
-                    </span>
-                  </div>
-                ) : pendencias.agir.length === 0 ? (
-                  <div style={{ font: "700 14px var(--tk-font)" }}>
-                    {pendencias.total === 1
-                      ? t("home.nothingPending.one")
-                      : t("home.nothingPending.many", { count: pendencias.total })}
-                  </div>
-                ) : (
-                  <>
-                    {pendencias.agir.slice(0, PENDENCIAS_NA_HOME).map((d) => (
-                      <button
-                        key={d.id}
-                        type="button"
-                        className="tk-pend"
-                        onClick={() => setDetail(d.species)}
-                      >
-                        <SpeciesTile
-                          spriteId={d.species.spriteId}
-                          dex={d.species.dex}
-                          speciesId={d.species.id}
-                          name={d.species.name}
-                          types={d.species.types}
-                          size={36}
-                        />
-                        <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
-                          <span className="tk-pend-name">{d.species.name}</span>
-                          <span className="tk-pend-why">{tm(d.verdict.reason)}</span>
-                        </span>
-                        <span
-                          className="tk-pend-act"
-                          style={{ color: TONE[d.verdict.action] }}
-                        >
-                          {t(ACTION_KEYS[d.verdict.action] as Key)}
-                        </span>
-                      </button>
-                    ))}
-
-                    {/* Texto, nao botao. "Ver as outras" seria um botao pra
-                        aba que esta na barra de baixo, a um toque de aqui — a
-                        mesma redundancia que o Miguel apontou nos atalhos. */}
-                    {pendencias.agir.length > PENDENCIAS_NA_HOME && (
-                      <p className="tk-caption">
-                        {t("home.andMore", {
-                          count: pendencias.agir.length - PENDENCIAS_NA_HOME,
-                        })}
-                      </p>
-                    )}
-                  </>
-                )}
-              </section>
+              </div>
             </>
+          )}
+
+          {/* Sem nada salvo o convite substitui a fila: um espaço vazio com
+              moldura nao convida ninguem. */}
+          {colecao && !meus && (
+            <p className="tk-caption tk-home-nudge">{t("home.empty.body")}</p>
           )}
 
           {/*
             Dois atalhos, nao quatro.
 
             O Miguel: "pq tem um atalho pra pokedex e um atalho para coleção??
-            sendo q simplesmente ja tem a porra do botao". Tinha razao — os dois
-            duplicavam abas que estao na barra de baixo, a um toque de qualquer
-            tela. Estes dois ficam porque levam a uma PERGUNTA que a barra nao
-            faz: o ranking por tipo e o de liga viviam escondidos dentro da
-            Pokedex e ninguem achava sozinho.
+            sendo q simplesmente ja tem a porra do botao". Tinha razao — aqueles
+            duplicavam abas da barra de baixo. Estes ficam porque levam a uma
+            PERGUNTA que a barra nao faz: o ranking por tipo e o de liga viviam
+            escondidos dentro da Pokedex.
           */}
           <div className="tk-overline tk-overline--sec">{t("home.shortcuts")}</div>
           <div className="tk-quickgrid">
@@ -381,7 +425,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
               className="tk-tile tk-tile--raid"
               onClick={() => onGo("pokedex", { view: "best", mode: "raid" })}
             >
-              <IconTrophy size={20} />
+              <IconTrophy size={18} />
               <span className="tk-tile-t">{t("home.go.raidBest")}</span>
               <span className="tk-tile-d">{t("home.go.raidBestDetail")}</span>
             </button>
@@ -390,7 +434,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
               className="tk-tile tk-tile--pvp"
               onClick={() => onGo("pokedex", { view: "best", mode: "pvp" })}
             >
-              <IconShield size={20} />
+              <IconShield size={18} />
               <span className="tk-tile-t">{t("home.go.pvpBest")}</span>
               <span className="tk-tile-d">{t("home.go.pvpBestDetail")}</span>
             </button>
@@ -399,11 +443,9 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
           {/*
             A dica cede a vez pro aviso.
 
-            Ela e o item de menor prioridade da home — o unico que ninguem
-            perde nada por nao ver hoje. Quando ha aviso na tela (instalar,
-            armazenamento em risco) as duas coisas juntas fazem a home rolar, e
-            entre "leia esta dica" e "seus dados podem sumir" nao ha duvida de
-            quem sai.
+            E o item de menor prioridade da home — o unico que ninguem perde
+            nada por nao ver hoje. Entre "leia esta dica" e "seus dados podem
+            sumir" nao ha duvida de quem sai.
           */}
           {!temAviso && <DidYouKnow data={dataset.data} />}
         </>
