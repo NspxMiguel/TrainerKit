@@ -26,6 +26,8 @@ import { typeColor, typeKey } from "../sprites/provider.ts";
 import { AssistantCard } from "../ui/AssistantCard.tsx";
 import { IconSwords } from "../ui/Icons.tsx";
 import { Segmented } from "../ui/Segmented.tsx";
+import { dexSystem, speciesDossier } from "../ai/dossier.ts";
+import { AiBubble } from "../ui/AiBubble.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 import { IVCalculator } from "./IVCalculator.tsx";
 import { RaidCounters } from "./RaidCounters.tsx";
@@ -629,6 +631,26 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies, owned }: 
       )}
       {raidOpen && (
         <RaidCounters boss={species} data={data} onClose={() => setRaidOpen(false)} />
+      )}
+
+      {/*
+        A bolha, com o dossie DESTA especie.
+
+        E o "chatbot ao clicar num Pokémon" que ele pediu. O contexto e o mesmo
+        `speciesDossier` que a Pokedex ja usa — nao ha segundo caminho de dados,
+        entao as duas telas nunca podem discordar sobre o mesmo bicho.
+
+        Fica fora dos dois modais acima de propósito: com o calculador de IV ou
+        os counters abertos, a pergunta seria sobre outra coisa que nao a tela
+        na frente.
+      */}
+      {!calcOpen && !raidOpen && (
+        <AiBubble
+          titulo={species.name}
+          sistema={dexSystem(language)}
+          // `owned` aqui e UM Pokemon (o da tela), nao a colecao — vira lista de um.
+          contexto={speciesDossier(species, data, owned ? [owned] : [], language)}
+        />
       )}
     </div>,
     document.body,

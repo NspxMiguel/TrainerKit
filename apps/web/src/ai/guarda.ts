@@ -18,4 +18,4 @@
  *
  * O `_` no nome impede a Vercel de servir `_guarda.ts` como rota.
  */
-export { filtrar, type Veredito } from "../../../../api/_guarda.ts";
+export { filtrar, filtrarConteudo, type Veredito } from "../../../../api/_guarda.ts";

@@ -4662,3 +4662,176 @@
 .tk-mono--bare::after {
   display: none;
 }
+
+/* ═══════════════════════════════════════════════════ bolha da IA (#42) */
+
+/*
+ * A bolinha flutuante.
+ *
+ * Presa acima da barra de abas, do lado direito — o canto que o polegar alcança
+ * sem atravessar a tela.
+ *
+ * ⚠️ Os 62px sao MEDIDOS na barra montada, nao chutados: `.tk-tabbar` nao tem
+ * altura declarada, ela sai do `min-height: var(--tk-touch)` do `.tk-tab` mais
+ * o padding de 10/12. Eu tinha escrito `var(--tk-tabbar-h)` no primeiro rascunho
+ * inventando uma variavel que nao existe — a bolha teria caido no fallback e
+ * ficado fora do lugar em qualquer mudanca da barra.
+ *
+ * `env(safe-area-inset-bottom)` entra por fora porque a propria barra ja o
+ * aplica como padding interno: sem somar aqui, a bolha subiria junto com a barra
+ * no iPhone e encostaria nela.
+ */
+.tk-bubble {
+  position: fixed;
+  right: max(var(--tk-gutter), env(safe-area-inset-right));
+  bottom: calc(62px + var(--tk-s4) + env(safe-area-inset-bottom));
+  z-index: 40;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--tk-pri);
+  color: var(--tk-on-pri);
+  box-shadow: 0 10px 28px -8px rgba(0, 0, 0, 0.55);
+  transition:
+    transform 0.12s var(--tk-ease),
+    background-color 0.16s var(--tk-ease);
+}
+
+.tk-bubble:active {
+  transform: scale(0.94);
+}
+
+/* Aberta, ela vira o "fechar" da conversa: mesma posicao, outra intencao. */
+.tk-bubble[data-open] {
+  background: var(--tk-surf2);
+  color: var(--tk-txt);
+}
+
+/*
+ * A conversa.
+ *
+ * Folha de baixo pra cima no celular, como toda folha do app — nao um balao
+ * ancorado na bolha. Balao ancorado e desenho de desktop: no celular ele fica
+ * apertado contra o rodape e o teclado o cobre inteiro.
+ */
+.tk-chat {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 41;
+  max-width: var(--tk-container);
+  margin: 0 auto;
+  max-height: min(72dvh, 560px);
+  display: flex;
+  flex-direction: column;
+  background: var(--tk-elev);
+  border-radius: var(--tk-r-card) var(--tk-r-card) 0 0;
+  border: 1px solid var(--tk-line);
+  border-bottom: 0;
+  box-shadow: 0 -18px 44px -14px rgba(0, 0, 0, 0.6);
+  animation: tk-rise 0.24s var(--tk-ease-glass) both;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.tk-chat-top {
+  display: flex;
+  align-items: center;
+  gap: var(--tk-s3);
+  padding: var(--tk-s4) var(--tk-s4) var(--tk-s3);
+  border-bottom: 1px solid var(--tk-line);
+}
+
+.tk-chat-title {
+  font: 700 15px var(--tk-font);
+  color: var(--tk-txt);
+  flex: 1;
+  min-width: 0;
+}
+
+/* O saldo fica no cabecalho e nao num aviso: com 20 por dia, saber quantas
+   sobraram e parte da conversa, nao um erro a ser mostrado no fim. */
+.tk-chat-quota {
+  font: 500 11px var(--tk-mono);
+  color: var(--tk-txt3);
+}
+
+.tk-chat-close {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--tk-surf2);
+  color: var(--tk-txt2);
+  font-size: 13px;
+}
+
+.tk-chat-body {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--tk-s4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--tk-s3);
+}
+
+.tk-chat-hint {
+  font: 400 13px var(--tk-font);
+  color: var(--tk-txt3);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.tk-chat-fala {
+  max-width: 84%;
+  padding: 10px 13px;
+  border-radius: 16px;
+  font: 400 14px var(--tk-font);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.tk-chat-fala[data-de="eu"] {
+  align-self: flex-end;
+  background: var(--tk-pri);
+  color: var(--tk-on-pri);
+  border-bottom-right-radius: 5px;
+}
+
+.tk-chat-fala[data-de="dex"] {
+  align-self: flex-start;
+  background: var(--tk-surf2);
+  color: var(--tk-txt);
+  border-bottom-left-radius: 5px;
+}
+
+.tk-chat-fala[data-pensando] {
+  color: var(--tk-txt3);
+}
+
+.tk-chat-bottom {
+  display: flex;
+  gap: var(--tk-s2);
+  align-items: center;
+  padding: var(--tk-s3) var(--tk-s4) var(--tk-s4);
+  border-top: 1px solid var(--tk-line);
+}
+
+.tk-chat-send {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--tk-pri);
+  color: var(--tk-on-pri);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.tk-chat-send:disabled {
+  background: var(--tk-surf2);
+  color: var(--tk-txt3);
+}
