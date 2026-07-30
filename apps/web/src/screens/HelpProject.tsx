@@ -34,6 +34,32 @@ import { useT } from "../i18n/t.ts";
  * chave pro servidor, a chave fica no aparelho e o servidor deixa de ser usado.
  */
 
+/*
+ * A doacao.
+ *
+ * "bora monetizar o app??? (…) sem se fuder judicialmente obvio. e tbm sem
+ * comprometer experiencia com anuncio."
+ *
+ * ⚠️ O QUE SE COBRA IMPORTA MAIS QUE QUANTO. Os termos da Scopely Explore
+ * proibem usar o conteudo do jogo "for any commercial purpose", e a regra 5.2.2
+ * da Apple fala literalmente em "monetizes access to" conteudo de terceiros —
+ * com direito a exigir do desenvolvedor uma prova de autorizacao que nao existe
+ * e nao pode ser obtida. Vender o app, ou qualquer funcao da analise, e vender
+ * acesso a conteudo derivado do jogo.
+ *
+ * Doacao nao e venda: nao ha contrapartida, logo nao ha transacao sobre o
+ * conteudo. E o que sustenta o PvPoke ha uma decada.
+ *
+ * Por isso a regra que o codigo desta tela precisa preservar: NENHUM recurso
+ * pode depender de ter doado. Nem limite maior, nem funcao extra, nem tirar
+ * anuncio (nao ha anuncio). No dia em que algo aqui olhar pra "doou ou nao",
+ * isto vira venda com outro nome e o argumento inteiro cai.
+ *
+ * O link 404 enquanto o GitHub Sponsors nao estiver habilitado na conta —
+ * habilitar e um passo no site do GitHub, fora do repositorio.
+ */
+const SPONSORS = "https://github.com/sponsors/spxmiguel";
+
 const GROQ_KEYS = "https://console.groq.com/keys";
 const ELEVEN_KEYS = "https://elevenlabs.io/app/settings/api-keys";
 
@@ -50,6 +76,33 @@ export function HelpProject({ onOpenAi }: { onOpenAi: () => void }) {
         </p>
         <p className="tk-caption" style={{ lineHeight: 1.6 }}>
           {t("help.how")}
+        </p>
+      </section>
+
+      <div className="tk-overline" style={{ display: "block", margin: "22px 0 8px" }}>
+        {t("help.donateTitle")}
+      </div>
+
+      <section className="tk-card" style={{ display: "grid", gap: 12 }}>
+        <p className="tk-caption" style={{ lineHeight: 1.6 }}>
+          {t("help.donateBody")}
+        </p>
+        <p className="tk-caption" style={{ lineHeight: 1.6 }}>
+          {t("help.donateWhy")}
+        </p>
+        {/* Secundario, e nao primario: o botao primario desta tela e o que leva
+            a por a propria chave, que ajuda igual e nao custa nada a ninguem.
+            Doacao em destaque maior transformaria um pedido em cobranca. */}
+        <a
+          className="tk-btn tk-btn--secondary tk-btn--block"
+          href={SPONSORS}
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          {t("help.donateBtn")}
+        </a>
+        <p className="tk-caption" style={{ lineHeight: 1.6, opacity: 0.8 }}>
+          {t("help.donateFree")}
         </p>
       </section>
 
