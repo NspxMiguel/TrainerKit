@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 
 import { buildDexEntry, type DexEntry } from "@trainerkit/core";
 
+import { DEX_SYSTEM, speciesDossier } from "../ai/dossier.ts";
 import { chat } from "../ai/provider.ts";
 import { identifySpecies, visionAvailable } from "../ai/vision.ts";
 import { fold } from "../data/fold.ts";
@@ -313,29 +314,36 @@ export function DexMode({ data, onClose, onOpenSpecies }: Props) {
 
   const perguntar = async () => {
     const q = pergunta.trim();
-    if (!q || !ficha) return;
+    // `alvo` no teste tambem: `ficha` deriva dele, mas o TS nao sabe disso — e
+    // sem o alvo nao ha dossie pra montar.
+    if (!q || !ficha || !alvo) return;
 
     setPensando(true);
     setResposta(null);
     try {
+      /*
+        O modelo recebe o DOSSIE, nao a locucao.
+
+        Aqui morava o defeito que o Miguel pegou: eu mandava as oito linhas
+        faladas e escrevia "responda usando SÓ a ficha". Ele perguntou "é bom pra
+        segurar ginásio?" e levou "Não tem esse dado" — sendo que o app calcula
+        exatamente isso no `rankDefenders` desde ontem. A resposta existia e o
+        modelo nao tinha como alcançar.
+
+        Agora vai tudo que o app sabe da especie: aguento como defensor, tabela
+        de tipos com os multiplicadores, posicao nos quatro rankings, melhores
+        golpes por contexto, linha evolutiva, e quais o jogador tem. Continua sem
+        inventar nada — todo numero saiu do `packages/core`.
+      */
       const texto = await chat(
         [
+          { role: "system", content: DEX_SYSTEM },
           {
-            role: "system",
-            content: `Você é a Pokédex do TrainerKit, um app de Pokémon GO.
-
-Responda a pergunta usando SÓ a ficha que receber. Ela foi calculada pelo app.
-
-Regras rígidas:
-- Nunca invente números, movesets, posições nem mecânicas fora da ficha.
-- Se a ficha não responde, diga que não tem esse dado.
-- Não gere, descreva nem ofereça imagens.
-- Tom de aparelho: direto, sem saudação, no máximo 3 frases curtas.
-- Responda no idioma da pergunta.`,
+            role: "user",
+            content: `Dossiê:\n${speciesDossier(alvo, data, items ?? [])}\n\nPergunta: ${q}`,
           },
-          { role: "user", content: `Ficha:\n${locucao.join("\n")}\n\nPergunta: ${q}` },
         ],
-        { temperature: 0.2, maxTokens: 220 },
+        { temperature: 0.2, maxTokens: 260 },
       );
       setResposta(texto);
       if (voz && speechSupported()) void speak(texto, language);
