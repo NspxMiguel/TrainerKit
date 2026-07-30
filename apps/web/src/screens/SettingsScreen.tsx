@@ -14,6 +14,7 @@ import { WheelPicker } from "../ui/WheelPicker.tsx";
 import { Segmented } from "../ui/Segmented.tsx";
 import { SettingsSheet } from "../ui/SettingsSheet.tsx";
 import { FeedbackScreen } from "./FeedbackScreen.tsx";
+import { HelpProject } from "./HelpProject.tsx";
 import { PrivacyScreen } from "./PrivacyScreen.tsx";
 import { updateSetup, useSetup } from "../onboarding/setup.ts";
 import { useAi } from "../ai/provider.ts";
@@ -58,7 +59,8 @@ type Painel =
   | "updates"
   | "about"
   | "privacy"
-  | "feedback";
+  | "feedback"
+  | "help";
 
 const THEME_KEY = "tk:tema";
 
@@ -234,6 +236,7 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
             falam do projeto em si, nao do que ele calcula. */}
         <Linha label={t("privacy.title")} onOpen={() => setPainel("privacy")} />
         <Linha label={t("feedback.title")} onOpen={() => setPainel("feedback")} />
+        <Linha label={t("help.title")} onOpen={() => setPainel("help")} />
       </section>
 
       {/*
@@ -471,6 +474,14 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
       {painel === "privacy" && (
         <SettingsSheet title={t("privacy.title")} onClose={fechar}>
           <PrivacyScreen />
+        </SettingsSheet>
+      )}
+
+      {painel === "help" && (
+        <SettingsSheet title={t("help.title")} onClose={fechar}>
+          {/* O botao leva direto pra tela da chave: instrucao que termina em
+              "va procurar nos Ajustes" e instrucao que ninguem segue. */}
+          <HelpProject onOpenAi={() => setPainel("ai")} />
         </SettingsSheet>
       )}
 
