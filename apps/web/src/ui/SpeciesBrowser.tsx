@@ -8,7 +8,7 @@ import { useT, type Key } from "../i18n/t.ts";
 import { useSetup } from "../onboarding/setup.ts";
 import { typeKey } from "../sprites/provider.ts";
 import { useCollection } from "../storage/collection.ts";
-import { IconSearch } from "./Icons.tsx";
+import { IconFilter, IconSearch } from "./Icons.tsx";
 import { SpeciesTile } from "./SpeciesTile.tsx";
 
 interface Props {
@@ -102,6 +102,16 @@ export function SpeciesBrowser({ data, onPick, initialSort = "dex", simple = fal
   const [sort, setSort] = useState<SortId>(initialSort);
   const [tipo, setTipo] = useState<string | null>(null);
   const [soMeus, setSoMeus] = useState(false);
+
+  /**
+   * O painel de filtro, fechado por padrão.
+   *
+   * `ativos` conta o que está mudando a lista AGORA — e a ordem só conta quando
+   * não é a padrão, senão o ponto ficaria aceso desde a primeira abertura e
+   * pararia de significar alguma coisa.
+   */
+  const [aberto, setAberto] = useState(false);
+  const ativos = (tipo !== null ? 1 : 0) + (soMeus ? 1 : 0) + (sort !== initialSort ? 1 : 0);
   const { t, language } = useT();
   const { items } = useCollection();
   const setup = useSetup();
@@ -228,25 +238,56 @@ export function SpeciesBrowser({ data, onPick, initialSort = "dex", simple = fal
 
   return (
     <>
-      <div className="tk-search">
-        <IconSearch size={18} />
-        <input
-          type="search"
-          inputMode="search"
-          autoComplete="off"
-          placeholder={t("pokedex.searchPlaceholder")}
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            setLimit(PAGE);
-          }}
-          aria-label={t("pokedex.search")}
-        />
+      {/*
+        Busca e filtro na MESMA linha.
+
+        "filtrar na pokedex fico estranho, devia ser um pouco melhor, mais
+        compacto. um botaozinho que voce clica do lado da barra de pesquisa."
+
+        Antes eram dois blocos de chips sempre abertos — ordem e tipo — ocupando
+        meia tela acima da grade. Filtro é coisa que se usa de vez em quando e se
+        lê o tempo todo: aberto por padrão, ele cobra espaço de quem só quer ver
+        os Pokémon, que é o caso comum.
+
+        O ponto no botão acende quando há filtro ativo. Sem isso, esconder o
+        painel esconderia também o fato de a lista estar filtrada — e "cadê o
+        Charizard" com um filtro de tipo esquecido é pior que o painel grande.
+      */}
+      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <div className="tk-search" style={{ flex: 1, minWidth: 0 }}>
+          <IconSearch size={18} />
+          <input
+            type="search"
+            inputMode="search"
+            autoComplete="off"
+            placeholder={t("pokedex.searchPlaceholder")}
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setLimit(PAGE);
+            }}
+            aria-label={t("pokedex.search")}
+          />
+        </div>
+
+        {!simple && (
+          <button
+            type="button"
+            className="tk-filter-btn"
+            data-on={aberto || undefined}
+            aria-expanded={aberto}
+            aria-label={t("filter.filterBy")}
+            onClick={() => setAberto((v) => !v)}
+          >
+            <IconFilter size={18} />
+            {ativos > 0 && <span className="tk-filter-dot" aria-hidden="true" />}
+          </button>
+        )}
       </div>
 
       {/* ------------------------------------------------------------ ordem */}
 
-      {!simple && (
+      {!simple && aberto && (
         <>
       <div className="tk-overline" style={{ display: "block", margin: "14px 0 6px" }}>
         {t("filter.sortBy")}

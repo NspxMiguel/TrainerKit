@@ -30,8 +30,23 @@ export const TTS_PROXY: string = import.meta.env.VITE_TK_TTS_PROXY ?? PADRAO;
  */
 export const EDGE_VOICES: Record<string, ReadonlyArray<{ id: string; label: string }>> = {
   "pt-BR": [
-    { id: "pt-BR-ThalitaMultilingualNeural", label: "Thalita" },
+    /*
+     * Antônio primeiro, Thalita depois — decidido pelo OUVIDO dele, não pela
+     * etiqueta da Microsoft.
+     *
+     * "sotaque de joana parece mais brasileira doq thalita. thalita parece
+     * mexicana." A Microsoft rotula as duas como pt-BR, e eu não tenho como
+     * julgar sotaque; ele tem. A Thalita era a primeira da lista, ou seja, era o
+     * padrão de quem nunca escolheu — e o padrão era justamente a que soa errada
+     * pra quem fala o idioma.
+     *
+     * A Joana que ele citou é voz do SISTEMA (pt-PT no catálogo do aparelho),
+     * não do Edge. Ela continua na lista, uma seção abaixo, com a etiqueta
+     * pt-PT: se ele preferir, é um toque — e a etiqueta continua dizendo a
+     * verdade pra quem é de Portugal.
+     */
     { id: "pt-BR-AntonioNeural", label: "Antônio" },
+    { id: "pt-BR-ThalitaMultilingualNeural", label: "Thalita" },
     /*
      * A Francisca saiu.
      *
