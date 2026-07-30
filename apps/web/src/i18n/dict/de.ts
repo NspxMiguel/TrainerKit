@@ -482,7 +482,7 @@ export const DE: Dict = {
   "dex.cameraStarting": "Kamera wird geöffnet…",
   "dex.cameraStop": "Kamera ausschalten",
   "dex.cameraDenied": "Kamerazugriff wurde verweigert. Erlaube ihn in den Browsereinstellungen, oder schicke ein Foto.",
-  "dex.photo": "Ein Foto benutzen",
+  "dex.photo": "Ein Foto anhängen",
   "dex.photoDetail": "Kamera oder Screenshot — die KI erkennt es",
   "dex.photoNeedsAi": "Erkennung per Foto braucht die Groq-KI in den Einstellungen. Modelle auf dem Gerät sehen noch keine Bilder.",
   "dex.reading": "Lese…",

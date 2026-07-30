@@ -486,7 +486,7 @@ export const IT: Dict = {
   "dex.cameraStarting": "Apertura fotocamera…",
   "dex.cameraStop": "Spegni la fotocamera",
   "dex.cameraDenied": "L’accesso alla fotocamera è stato negato. Consentilo nelle impostazioni del browser, o manda una foto.",
-  "dex.photo": "Usa una foto",
+  "dex.photo": "Allega una foto",
   "dex.photoDetail": "Fotocamera o screenshot — l’IA lo riconosce",
   "dex.photoNeedsAi": "Riconoscere da foto richiede l’IA Groq attiva nelle Impostazioni. I modelli sul dispositivo non vedono ancora le immagini.",
   "dex.reading": "Lettura…",

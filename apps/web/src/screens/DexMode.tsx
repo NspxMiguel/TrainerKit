@@ -622,15 +622,22 @@ export function DexMode({ data, onClose, onOpenSpecies }: Props) {
           </button>
 
           {/*
-            `capture="environment"` abre a camera de tras direto no Android; no
-            iPhone o Safari mostra a folha com Camera e Fototeca, que e melhor
-            ainda — quem quer mandar print escolhe print.
+            SEM `capture`, de propósito.
+
+            Com `capture="environment"` este botao abria a camera do sistema e
+            pedia pra TIRAR uma foto — o mesmo que o botao de cima ja faz, e
+            melhor, dentro do visor. Ficavam dois caminhos pra fotografar e
+            nenhum pra anexar, e quem tinha o print salvo na galeria nao tinha
+            por onde entrar.
+
+            Sem o atributo, `accept="image/*"` abre o seletor: no Android a
+            galeria; no iPhone a folha com Fototeca em cima e o print mais
+            recente em primeiro lugar. Fotografar e o AO VIVO; este e o anexar.
           */}
           <input
             ref={arquivo}
             type="file"
             accept="image/*"
-            capture="environment"
             hidden
             onChange={(e) => {
               const f = e.target.files?.[0];
