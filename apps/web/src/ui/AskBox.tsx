@@ -117,6 +117,7 @@ export function AskBox({ items, data }: Props) {
       const res = await askAboutCollection({
         question: texto,
         facts,
+        total: items.length,
         signal: controller.signal,
       });
       setAnswer(res);

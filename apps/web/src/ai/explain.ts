@@ -25,6 +25,11 @@ Regras rígidas:
 - Nunca invente números, posições, movesets ou mecânicas que não vieram nos
   dados.
 - Não gere, descreva nem ofereça imagens.
+- NUNCA cite o nome interno de uma regra nem o peso dela. "iv.ataque (peso
+  0.61)" é anotação minha, não linguagem de gente: diga o que a regra significa
+  ("o ataque dele é dos altos"), nunca o rótulo.
+- A confiança é o quanto as regras concordaram entre si, não a chance de o
+  veredito estar certo. Não a apresente como probabilidade de acerto.
 - Seja direto. Nada de saudação, nada de "espero ter ajudado".
 - No máximo 3 frases curtas.`;
 
