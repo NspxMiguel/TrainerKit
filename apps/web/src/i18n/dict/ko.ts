@@ -486,7 +486,7 @@ export const KO: Dict = {
   "dex.cameraStarting": "카메라를 켜는 중…",
   "dex.cameraStop": "카메라 끄기",
   "dex.cameraDenied": "카메라 접근이 거부되었습니다. 브라우저 설정에서 허용하거나 사진을 보내세요.",
-  "dex.photo": "사진 사용",
+  "dex.photo": "사진 첨부",
   "dex.photoDetail": "카메라나 스크린샷 — AI가 알아냅니다",
   "dex.photoNeedsAi": "사진으로 알아내려면 설정에서 Groq AI를 켜야 합니다. 기기에서 돌아가는 모델은 아직 이미지를 보지 못합니다.",
   "dex.reading": "읽는 중…",

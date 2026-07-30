@@ -486,7 +486,7 @@ export const JA: Dict = {
   "dex.cameraStarting": "カメラを起動中…",
   "dex.cameraStop": "カメラを切る",
   "dex.cameraDenied": "カメラの使用が拒否されました。ブラウザの設定で許可するか、写真を送ってください。",
-  "dex.photo": "写真を使う",
+  "dex.photo": "写真を添付",
   "dex.photoDetail": "カメラかスクショ — AI が判別します",
   "dex.photoNeedsAi": "写真からの判別には設定で Groq の AI を有効にする必要があります。端末で動くモデルはまだ画像を見られません。",
   "dex.reading": "読み込み中…",

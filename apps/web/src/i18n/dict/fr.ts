@@ -486,7 +486,7 @@ export const FR: Dict = {
   "dex.cameraStarting": "Ouverture de la caméra…",
   "dex.cameraStop": "Éteindre la caméra",
   "dex.cameraDenied": "L’accès à la caméra a été refusé. Autorisez-le dans les réglages du navigateur, ou envoyez une photo.",
-  "dex.photo": "Utiliser une photo",
+  "dex.photo": "Joindre une photo",
   "dex.photoDetail": "Appareil photo ou capture — l’IA l’identifie",
   "dex.photoNeedsAi": "L’identification par photo exige l’IA Groq activée dans les Réglages. Les modèles sur l’appareil ne voient pas encore les images.",
   "dex.reading": "Lecture…",

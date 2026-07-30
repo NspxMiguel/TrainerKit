@@ -539,7 +539,7 @@ const EN = {
   "dex.cameraStarting": "Opening the camera…",
   "dex.cameraStop": "Turn the camera off",
   "dex.cameraDenied": "Camera access was denied. Allow it in the browser settings, or send a photo instead.",
-  "dex.photo": "Use a photo",
+  "dex.photo": "Attach a photo",
   "dex.photoDetail": "Camera or screenshot — the AI identifies it",
   "dex.photoNeedsAi": "Identifying by photo needs the Groq AI turned on in Settings. On-device models here cannot see images yet.",
   "dex.reading": "Reading…",
