@@ -65,39 +65,21 @@ export function DataSourceSettings({ datasetLabel, sources }: Props) {
 
   return (
     <>
-      <div className="tk-overline" style={{ display: "block", marginTop: 28 }}>
-        {t("settings.gameData")}
-      </div>
+      {/*
+        Um assunto, um bloco.
 
-      <p className="tk-caption" style={{ margin: "8px 2px 0", lineHeight: 1.5 }}>
+        Aqui havia DUAS secoes coladas — "Dados do jogo" e "De onde vêm os
+        números" — respondendo a mesma pergunta, e a primeira dizia "o app traz
+        os dele", o que nao responde nada: o app nao PRODUZ numero nenhum, ele
+        junta tres origens. Agora e uma lista com nome, e a versao da base logo
+        acima dela. Sai do proprio dataset, entao apontar pra outra base mostra
+        as fontes DAQUELA base.
+      */}
+      <p className="tk-caption" style={{ margin: "0 2px", lineHeight: 1.5 }}>
         {t("data.what")}
       </p>
 
-      <section className="tk-card" style={{ marginTop: 10 }}>
-        <div className="tk-row">
-          <span className="tk-row-label">{t("settings.datasetVersion")}</span>
-          <span className="tk-row-value">{datasetLabel ?? "—"}</span>
-        </div>
-        <button type="button" className="tk-row" onClick={() => setOpen((v) => !v)}>
-          <span className="tk-row-label">{t("data.source")}</span>
-          <span className="tk-row-value">
-            {custom ? t("data.custom") : t("data.builtin")} ›
-          </span>
-        </button>
-      </section>
-
-      {/*
-        As fontes, com nome.
-        
-        "O app traz os dele" nao respondia a pergunta — o app nao PRODUZ numero
-        nenhum, ele junta tres origens. Dizer quais sao, e o que vem de cada uma,
-        e o minimo pra alguem poder conferir. A lista sai do proprio dataset,
-        entao apontar pra outra base mostra as fontes DAQUELA base.
-      */}
-      <div className="tk-overline" style={{ display: "block", marginTop: 22 }}>
-        {t("data.sourcesTitle")}
-      </div>
-      <section className="tk-card" style={{ marginTop: 10 }}>
+      <section className="tk-card" style={{ marginTop: 12 }}>
         {sources && sources.length > 0 ? (
           <ul className="tk-sources">
             {sources.map((src) => (
@@ -114,6 +96,19 @@ export function DataSourceSettings({ datasetLabel, sources }: Props) {
             {t("data.sourcesNone")}
           </p>
         )}
+
+        <hr className="tk-sep" />
+
+        <div className="tk-row">
+          <span className="tk-row-label">{t("settings.datasetVersion")}</span>
+          <span className="tk-row-value">{datasetLabel ?? "—"}</span>
+        </div>
+        <button type="button" className="tk-row" onClick={() => setOpen((v) => !v)}>
+          <span className="tk-row-label">{t("data.source")}</span>
+          <span className="tk-row-value">
+            {custom ? t("data.custom") : t("data.builtin")} ›
+          </span>
+        </button>
       </section>
 
       {open && (

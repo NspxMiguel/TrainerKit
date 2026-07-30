@@ -38,6 +38,24 @@ const PERFECT: IVs = { atk: 15, def: 15, hp: 15 };
  */
 const UNOBTAINABLE = new Set(["eternatus_eternamax"]);
 
+/**
+ * Especie que so tem Struggle nao entra em ranking nenhum.
+ *
+ * Struggle e o carregado que o jogo poe em quem nao tem carregado — na pratica,
+ * formas que existem no GAME_MASTER mas ainda nao sairam. Scream Tail hoje esta
+ * assim: `splash_fast` + `struggle`, e como o ranking de liga mede so atributo
+ * ela aparecia entre as melhores da Great. O app entao mandava a pessoa caçar um
+ * Pokemon que literalmente nao consegue atacar.
+ *
+ * Nao e filtro de "moveset ruim", e filtro de "nao luta". Quem tem qualquer
+ * outro carregado passa.
+ */
+const STRUGGLE = "struggle";
+
+function podeLutar(s: SpeciesForRanking): boolean {
+  return s.chargedMoves.some((m) => m.id !== STRUGGLE);
+}
+
 export interface RankedSpecies {
   speciesId: string;
   name: string;
@@ -99,7 +117,7 @@ export function rankRaidAttackers(
 
   for (const s of species) {
     if (s.cosmetic || UNOBTAINABLE.has(s.id)) continue;
-    if (s.fastMoves.length === 0 || s.chargedMoves.length === 0) continue;
+    if (s.fastMoves.length === 0 || !podeLutar(s)) continue;
 
     const fastPool = options.attackType
       ? s.fastMoves.filter((m) => m.type === options.attackType)
@@ -170,7 +188,7 @@ export function rankStatProduct(
   const scored: RankedSpecies[] = [];
 
   for (const s of species) {
-    if (s.cosmetic || UNOBTAINABLE.has(s.id)) continue;
+    if (s.cosmetic || UNOBTAINABLE.has(s.id) || !podeLutar(s)) continue;
 
     // O melhor IV da especie NAQUELA liga, nao o 15/15/15: em liga com teto o
     // 100% quase sempre perde, e ranquear por ele daria a lista errada.

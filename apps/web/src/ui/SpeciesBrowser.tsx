@@ -1,5 +1,6 @@
 import { useDeferredValue, useMemo, useState } from "react";
 
+import { fold } from "../data/fold.ts";
 import type { DatasetSpecies } from "../data/useDataset.ts";
 import { useT } from "../i18n/t.ts";
 import { IconSearch } from "./Icons.tsx";
@@ -12,15 +13,6 @@ interface Props {
 
 /** Quantos resultados desenhar de uma vez. 1.182 tiles juntos travam o scroll. */
 const PAGE = 60;
-
-/** Ignora acento e pontuacao: "farfetchd" acha "Farfetch'd". */
-function fold(s: string): string {
-  return s
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // marcas de acento, ja separadas pelo NFD
-    .replace(/[^a-z0-9]/gi, "")
-    .toLowerCase();
-}
 
 /**
  * Busca + grade de especies.

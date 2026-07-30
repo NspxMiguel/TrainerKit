@@ -22,13 +22,9 @@ export function AiSettings() {
 
   return (
     <>
-      <div className="tk-overline" style={{ display: "block", marginTop: 28 }}>
-        {t("ai.title")}
-      </div>
-
-      {/* A explicacao fica ACIMA e sempre visivel, nao escondida dentro do
-          painel: quem nao sabe pra que serve nao vai abrir pra descobrir. */}
-      <p className="tk-caption" style={{ margin: "8px 2px 0", lineHeight: 1.5 }}>
+      {/* O titulo agora e o da folha (`SettingsSheet`): repetir "Assistente com
+          IA" aqui daria dois titulos iguais um embaixo do outro. */}
+      <p className="tk-caption" style={{ margin: "0 2px", lineHeight: 1.5 }}>
         {t("ai.what")}
       </p>
       <p className="tk-caption" style={{ margin: "6px 2px 0", color: "var(--tk-pri)" }}>

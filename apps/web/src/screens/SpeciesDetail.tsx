@@ -24,6 +24,7 @@ import type { OwnedPokemon } from "../storage/collection.ts";
 import { typeColor, typeKey } from "../sprites/provider.ts";
 import { AssistantCard } from "../ui/AssistantCard.tsx";
 import { IconSwords } from "../ui/Icons.tsx";
+import { Segmented } from "../ui/Segmented.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 import { IVCalculator } from "./IVCalculator.tsx";
 import { RaidCounters } from "./RaidCounters.tsx";
@@ -369,19 +370,17 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies, owned }: 
         {t("species.bestMoves")}
       </div>
 
-      <div style={{ display: "flex", gap: 6, margin: "10px 0" }}>
-        {(["general", "raid", "pvp", "rocket"] as const).map((c) => (
-          <button
-            key={c}
-            type="button"
-            className={`tk-btn ${context === c ? "tk-btn--primary" : "tk-btn--secondary"}`}
-            style={{ flex: 1, height: 40, fontSize: 12, padding: 0 }}
-            aria-pressed={context === c}
-            onClick={() => setContext(c)}
-          >
-            {t(CONTEXT_KEYS[c].title as Key)}
-          </button>
-        ))}
+      <div style={{ margin: "10px 0" }}>
+        <Segmented
+          ariaLabel={t("species.bestMoves")}
+          value={context}
+          onChange={setContext}
+          size="compact"
+          options={(["general", "raid", "pvp", "rocket"] as const).map((c) => ({
+            value: c,
+            label: t(CONTEXT_KEYS[c].title as Key),
+          }))}
+        />
       </div>
 
       <p className="tk-caption" style={{ margin: "0 2px 10px", lineHeight: 1.45 }}>
@@ -472,19 +471,20 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies, owned }: 
 
       {/* Um botao so quando so ha uma resposta: nao ha o que escolher. */}
       {leagues.length > 1 && (
-        <div style={{ display: "flex", gap: 6, margin: "10px 0" }}>
-          {leagues.map((l) => (
-            <button
-              key={l.id}
-              type="button"
-              className={`tk-btn ${activeLeague.id === l.id ? "tk-btn--primary" : "tk-btn--secondary"}`}
-              style={{ flex: 1, height: 40, fontSize: 12, padding: 0 }}
-              aria-pressed={activeLeague.id === l.id}
-              onClick={() => setLeague(l)}
-            >
-              {l.id === "master" ? t("spread.noLimit") : l.name.replace(" League", "")}
-            </button>
-          ))}
+        <div style={{ margin: "10px 0" }}>
+          <Segmented
+            ariaLabel={t("spread.title")}
+            value={activeLeague.id}
+            onChange={(id) => {
+              const escolhida = leagues.find((l) => l.id === id);
+              if (escolhida) setLeague(escolhida);
+            }}
+            size="compact"
+            options={leagues.map((l) => ({
+              value: l.id,
+              label: l.id === "master" ? t("spread.noLimit") : l.name.replace(" League", ""),
+            }))}
+          />
         </div>
       )}
 

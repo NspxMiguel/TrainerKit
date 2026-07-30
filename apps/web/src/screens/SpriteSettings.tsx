@@ -78,10 +78,6 @@ export function SpriteSettings({ species }: { species: readonly DatasetSpecies[]
 
   return (
     <>
-      <div className="tk-overline" style={{ display: "block", marginTop: 28 }}>
-        {t("sprites.title")}
-      </div>
-
       <section className="tk-card" style={{ marginTop: 10, display: "grid", gap: 8 }}>
         {BUILTIN.map((id) => {
           const active = settings.source === id;

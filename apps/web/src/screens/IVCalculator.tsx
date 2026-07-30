@@ -21,6 +21,7 @@ import { IVBar } from "../ui/IVBar.tsx";
 import { addPokemon, type OwnedPokemon } from "../storage/collection.ts";
 import { AmongYours } from "../ui/AmongYours.tsx";
 import { AssistantCard } from "../ui/AssistantCard.tsx";
+import { BetaBadge } from "../ui/BetaBadge.tsx";
 import { VerdictCard } from "../ui/VerdictCard.tsx";
 import { ScanDropzone } from "../ui/ScanDropzone.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
@@ -115,7 +116,7 @@ export function IVCalculator({ species, data, onClose, owned }: Props) {
           ‹
         </button>
         <h2 className="tk-sheet-title">{t("iv.title", { name: species.name })}</h2>
-        <span className="tk-beta">{t("common.beta")}</span>
+        <BetaBadge />
       </header>
 
       <div style={{ display: "flex", gap: 14, alignItems: "center", marginBottom: 20 }}>

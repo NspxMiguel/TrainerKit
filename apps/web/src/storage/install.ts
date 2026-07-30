@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { isInstalled, isIos } from "./persist.ts";
+import { isInstalled, isIpad } from "./persist.ts";
 
 /**
  * Evento do Chrome que permite disparar o instalador nativo.
@@ -13,7 +13,16 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-export type Platform = "ios" | "android" | "desktop";
+/**
+ * iPhone e iPad sao plataformas SEPARADAS aqui.
+ *
+ * Os dois rodam iOS/iPadOS e os dois instalam pelo mesmo caminho do Safari,
+ * entao por muito tempo "ios" cobria os dois. Mas o Liquid Glass e a barra
+ * flutuante sao desenho de TELEFONE — num iPad a navegacao vira barra lateral a
+ * partir de 900px, e em retrato o certo e uma barra comum. Sem separar, o iPad
+ * herdava a capsula de vidro sem ter o layout que a justifica.
+ */
+export type Platform = "iphone" | "ipad" | "android" | "desktop";
 
 export function detectPlatform(): Platform {
   /*
@@ -29,10 +38,12 @@ export function detectPlatform(): Platform {
    */
   if (import.meta.env.DEV) {
     const forced = new URLSearchParams(location.search).get("platform");
-    if (forced === "ios" || forced === "android" || forced === "desktop") return forced;
+    if (forced === "iphone" || forced === "ipad" || forced === "android" || forced === "desktop")
+      return forced;
   }
 
-  if (isIos()) return "ios";
+  if (isIpad()) return "ipad";
+  if (/iPhone|iPod/.test(navigator.userAgent)) return "iphone";
   if (/Android/i.test(navigator.userAgent)) return "android";
   return "desktop";
 }

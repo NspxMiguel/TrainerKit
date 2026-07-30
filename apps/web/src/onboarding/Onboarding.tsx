@@ -167,7 +167,9 @@ export function Onboarding() {
             </div>
             <h1 className="tk-onb-title">{t("onb.lastThing")}</h1>
             <p className="tk-onb-sub">
-              {install.platform === "ios" ? t("onb.installIos") : t("onb.installOther")}
+              {install.platform === "iphone" || install.platform === "ipad"
+                ? t("onb.installIos")
+                : t("onb.installOther")}
             </p>
           </>
         )}

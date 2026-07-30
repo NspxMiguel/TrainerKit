@@ -17,13 +17,22 @@ interface Props {
  * origens que passam 7 dias sem interacao, e estar instalado e o que faz o
  * WebKit conceder modo persistente. Por isso o texto muda quando o
  * armazenamento ainda nao esta protegido — ali e aviso, nao sugestao.
+ *
+ * Tinha dois botoes de 36px empilhados abaixo do texto, e eles custavam 46px de
+ * altura numa tela que precisa caber inteira. Agora o aviso INTEIRO abre o
+ * passo a passo e o dispensar e um × no canto — o padrao do sistema pra isto, e
+ * o unico jeito de o aviso caber sem virar duas telas.
  */
 export function InstallBanner({ platform, atRisk, onOpen, onDismiss }: Props) {
-  const urgent = platform === "ios" && atRisk;
+  const urgent = (platform === "iphone" || platform === "ipad") && atRisk;
   const { t } = useT();
 
   return (
-    <div className={`tk-banner ${urgent ? "tk-banner--warn" : "tk-banner--info"}`}>
+    <div className={`tk-banner tk-banner--act ${urgent ? "tk-banner--warn" : "tk-banner--info"}`}>
+      {/* Camada invisivel por cima de tudo: o alvo e o aviso inteiro, e nao um
+          botao dentro dele. Botao dentro de botao nao existe em HTML. */}
+      <button type="button" className="tk-banner-open" onClick={onOpen} aria-label={t("install.banner.how")} />
+
       <IconDownload size={20} />
       <div className="tk-banner-text">
         <div className="tk-banner-title">
@@ -32,25 +41,16 @@ export function InstallBanner({ platform, atRisk, onOpen, onDismiss }: Props) {
         <p className="tk-banner-body">
           {urgent ? t("install.banner.urgentBody") : t("install.banner.body")}
         </p>
-        <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-          <button
-            type="button"
-            className="tk-btn tk-btn--primary"
-            style={{ height: 36, fontSize: 13, padding: "0 14px" }}
-            onClick={onOpen}
-          >
-            {t("install.banner.how")}
-          </button>
-          <button
-            type="button"
-            className="tk-btn tk-btn--secondary"
-            style={{ height: 36, fontSize: 13, padding: "0 14px" }}
-            onClick={onDismiss}
-          >
-            {t("install.banner.later")}
-          </button>
-        </div>
       </div>
+
+      <button
+        type="button"
+        className="tk-banner-x"
+        onClick={onDismiss}
+        aria-label={t("install.banner.later")}
+      >
+        ×
+      </button>
     </div>
   );
 }

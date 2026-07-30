@@ -19,6 +19,7 @@ import { moveLabel, useLanguage } from "../i18n/language.ts";
 import { useT } from "../i18n/t.ts";
 import { useSetup } from "../onboarding/setup.ts";
 import { useCollection } from "../storage/collection.ts";
+import { Segmented } from "../ui/Segmented.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 
 interface Props {
@@ -183,19 +184,17 @@ export function RaidCounters({ boss, data, onClose }: Props) {
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: 6, marginBottom: 18 }}>
-        {TIERS.map((x) => (
-          <button
-            key={String(x)}
-            type="button"
-            className={`tk-btn ${tier === x ? "tk-btn--primary" : "tk-btn--secondary"}`}
-            style={{ flex: 1, height: 38, fontSize: 12, padding: 0 }}
-            aria-pressed={tier === x}
-            onClick={() => setTier(x)}
-          >
-            {x === "mega" ? t("raid.tierMega") : t("raid.tier", { n: x })}
-          </button>
-        ))}
+      <div style={{ marginBottom: 18 }}>
+        <Segmented
+          ariaLabel={t("raid.title")}
+          value={String(tier)}
+          onChange={(v) => setTier(TIERS.find((x) => String(x) === v) ?? tier)}
+          size="compact"
+          options={TIERS.map((x) => ({
+            value: String(x),
+            label: x === "mega" ? t("raid.tierMega") : t("raid.tier", { n: x }),
+          }))}
+        />
       </div>
 
       {/* O veredito da raide vem antes da lista: a pergunta e "eu consigo?",

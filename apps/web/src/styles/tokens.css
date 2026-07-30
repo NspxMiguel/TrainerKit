@@ -40,17 +40,17 @@
    * desfoque espalha, a saturacao puxa a cor de tras pra frente, e o brilho
    * levanta um pouco pra o material nao sumir sobre fundo preto.
    */
-  --tk-glass-ios: rgba(14, 17, 24, 0.28);
+  --tk-glass-ios: rgba(12, 15, 22, 0.18);
 
   /* A borda. Nao e contorno: e o canto do vidro pegando luz. */
-  --tk-glass-edge: rgba(255, 255, 255, 0.16);
+  --tk-glass-edge: rgba(255, 255, 255, 0.22);
   /* Brilho especular do topo, onde a luz bate primeiro. */
-  --tk-glass-sheen: rgba(255, 255, 255, 0.22);
+  --tk-glass-sheen: rgba(255, 255, 255, 0.34);
   /* Reflexo fraco na base, que da espessura a peca. */
-  --tk-glass-rim: rgba(255, 255, 255, 0.07);
-  --tk-glass-active: rgba(255, 255, 255, 0.14);
+  --tk-glass-rim: rgba(255, 255, 255, 0.1);
+  --tk-glass-active: rgba(255, 255, 255, 0.16);
   /* Ao ser tocado, o vidro "acende" — a reacao em tempo real que a Apple cita. */
-  --tk-glass-press: rgba(255, 255, 255, 0.22);
+  --tk-glass-press: rgba(255, 255, 255, 0.26);
   /* Opaco de proposito. Era 0.94, e o `backdrop-filter` da folha escondia os
      6% restantes — tirando o desfoque (que custava um quadro inteiro ao rolar),
      a tela de tras passou a aparecer atras do texto. Vidro de verdade so na
@@ -116,12 +116,12 @@
   --tk-glass: rgba(246, 247, 251, 0.82);
   /* No claro o vidro tambem quase nao tem cor — o que muda e de que lado vem a
      luz: sobre fundo claro o realce e branco puro e o rim e escuro. */
-  --tk-glass-ios: rgba(255, 255, 255, 0.42);
-  --tk-glass-edge: rgba(255, 255, 255, 0.85);
-  --tk-glass-sheen: rgba(255, 255, 255, 0.75);
-  --tk-glass-rim: rgba(16, 19, 25, 0.05);
-  --tk-glass-active: rgba(16, 19, 25, 0.07);
-  --tk-glass-press: rgba(16, 19, 25, 0.12);
+  --tk-glass-ios: rgba(255, 255, 255, 0.3);
+  --tk-glass-edge: rgba(255, 255, 255, 0.9);
+  --tk-glass-sheen: rgba(255, 255, 255, 0.9);
+  --tk-glass-rim: rgba(16, 19, 25, 0.06);
+  --tk-glass-active: rgba(255, 255, 255, 0.55);
+  --tk-glass-press: rgba(255, 255, 255, 0.75);
   --tk-sheet: #ffffff;
   --tk-elev: #ffffff;
   --tk-code: #edeff5;
@@ -180,12 +180,12 @@
     --tk-txt3: rgba(16, 19, 25, 0.56);
     --tk-txt4: rgba(16, 19, 25, 0.6);
     --tk-glass: rgba(246, 247, 251, 0.82);
-    --tk-glass-ios: rgba(255, 255, 255, 0.42);
-    --tk-glass-edge: rgba(255, 255, 255, 0.85);
-    --tk-glass-sheen: rgba(255, 255, 255, 0.75);
-    --tk-glass-rim: rgba(16, 19, 25, 0.05);
-    --tk-glass-active: rgba(16, 19, 25, 0.07);
-    --tk-glass-press: rgba(16, 19, 25, 0.12);
+    --tk-glass-ios: rgba(255, 255, 255, 0.3);
+    --tk-glass-edge: rgba(255, 255, 255, 0.9);
+    --tk-glass-sheen: rgba(255, 255, 255, 0.9);
+    --tk-glass-rim: rgba(16, 19, 25, 0.06);
+    --tk-glass-active: rgba(255, 255, 255, 0.55);
+    --tk-glass-press: rgba(255, 255, 255, 0.75);
     --tk-sheet: #ffffff;
     --tk-elev: #ffffff;
     --tk-code: #edeff5;

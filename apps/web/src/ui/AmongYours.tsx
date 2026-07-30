@@ -4,6 +4,7 @@ import { ivTotalOf, type IVs } from "@trainerkit/core";
 
 import type { DatasetSpecies } from "../data/useDataset.ts";
 import { useT } from "../i18n/t.ts";
+import { useSetup } from "../onboarding/setup.ts";
 import { useCollection } from "../storage/collection.ts";
 
 interface Props {
@@ -35,9 +36,14 @@ interface Props {
  */
 export function AmongYours({ species, ivs, allSpecies, alreadySaved = false }: Props) {
   const { items } = useCollection();
+  const setup = useSetup();
   const { t } = useT();
 
   const posicao = useMemo(() => {
+    // Modo so consulta: nao ha "os seus" pra comparar com. Sobrevive colecao
+    // antiga no IndexedDB de quem trocou de modo, e comparar com ela seria
+    // responder pela colecao que a pessoa acabou de dizer que nao quer ter.
+    if (setup.mode !== "colecao") return null;
     if (!items || items.length === 0) return null;
 
     const familia = species.familyId;
@@ -53,7 +59,7 @@ export function AmongYours({ species, ivs, allSpecies, alreadySaved = false }: P
     const melhores = daFamilia.filter((o) => ivTotalOf(o.ivs) > meu).length;
     // Salvo, ele ja esta em `daFamilia`; ainda nao salvo, entra na conta agora.
     return { total: daFamilia.length + (alreadySaved ? 0 : 1), lugar: melhores + 1 };
-  }, [items, species.familyId, ivs, allSpecies, alreadySaved]);
+  }, [items, setup.mode, species.familyId, ivs, allSpecies, alreadySaved]);
 
   if (!posicao) return null;
 
