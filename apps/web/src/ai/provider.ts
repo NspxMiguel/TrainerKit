@@ -1,7 +1,8 @@
 import { useSyncExternalStore } from "react";
 
 import { getGroqKey, getGroqModel, groqChat } from "./groq.ts";
-import { esgotou, registrarUso } from "./quota.ts";
+import { bloqueio, registrarUso } from "./quota.ts";
+import { filtrar } from "./guarda.ts";
 import {
   DEFAULT_LOCAL_MODEL,
   engineReady,
@@ -105,8 +106,8 @@ function lerProvider(): AiProvider {
    * "por padrao deixa chave publica". O padrao era "desligado", e desligado por
    * padrao significa que ninguem nunca viu o recurso funcionar: pra descobrir que
    * existe IA, a pessoa tinha que entrar nos Ajustes procurando uma coisa que ela
-   * nao sabia estar la. As cinco perguntas por dia (ver `quota.ts`) sao o que
-   * torna isso sustentavel — sem teto, o padrao ligado seria a conta dele.
+   * nao sabia estar la. O teto por dia e por hora (ver `quota.ts`, que traz a
+   * conta do orcamento real da Groq) e o que torna isso sustentavel.
    */
   return sharedAvailable() ? "shared" : "off";
 }
@@ -232,9 +233,38 @@ export function aiReady(): boolean {
  */
 export async function chat(
   messages: readonly ChatMessage[],
-  options: { temperature?: number; maxTokens?: number; signal?: AbortSignal } = {},
+  options: {
+    temperature?: number;
+    maxTokens?: number;
+    signal?: AbortSignal;
+    /**
+     * A pergunta CRUA que o usuario digitou, quando houve uma.
+     *
+     * Passar isto liga o porteiro (`guarda.ts`). Fica aqui, e nao em cada tela,
+     * pra a regra ser uma so: quem esquecer de filtrar teria aberto um buraco
+     * que ninguem veria ate a fatura — ou, no caso da chave gratuita, ate a cota
+     * de todo mundo sumir.
+     *
+     * Telas que montam o texto sozinhas (o "Você sabia", o montador de time) nao
+     * passam nada: nao ha entrada de usuario pra filtrar ali.
+     */
+    pergunta?: string;
+  } = {},
 ): Promise<string> {
   if (provider === "off") throw new Error("ia-desligada");
+
+  /*
+   * O porteiro vem ANTES de tudo, inclusive antes da IA local.
+   *
+   * Na local nao ha cota nem chave pra proteger, mas ha o proposito do app: um
+   * assistente de Pokemon que escreve codigo Python nao e um recurso, e um
+   * vazamento de escopo. E se o filtro so valesse na compartilhada, bastaria
+   * trocar o provedor pra furar — e ai ele nao seria um filtro, seria um enfeite.
+   */
+  if (options.pergunta !== undefined) {
+    const v = filtrar(options.pergunta);
+    if (!v.ok) throw new Error(`filtro-${v.motivo}`);
+  }
 
   if (provider === "local") {
     // Sem `signal`: o web-llm nao aceita cancelamento numa geracao ja iniciada.
@@ -251,9 +281,12 @@ export async function chat(
    * gratuito acaba.
    */
   if (provider === "shared") {
-    // O teto diario, ANTES de gastar a chave dele. Erro proprio pra tela poder
-    // dizer "acabaram as de hoje" em vez de repassar um 429 cru.
-    if (esgotou()) throw new Error("cota-diaria");
+    // O teto, ANTES de gastar a chave dele. Erro proprio pra tela poder dizer
+    // "acabaram as de hoje" em vez de repassar um 429 cru — e "hora" e "dia"
+    // sao mensagens diferentes: uma manda voltar amanha, a outra daqui a pouco.
+    const parou = bloqueio();
+    if (parou === "dia") throw new Error("cota-diaria");
+    if (parou === "hora") throw new Error("cota-hora");
 
     const res = await fetch(AI_PROXY, {
       method: "POST",
@@ -267,7 +300,18 @@ export async function chat(
     });
 
     const corpo = (await res.json().catch(() => ({}))) as { text?: string; error?: string };
-    if (!res.ok) throw new Error(corpo.error ?? `${res.status}`);
+    if (!res.ok) {
+      /*
+       * 429 da GROQ, nao do nosso contador.
+       *
+       * Os limites da Groq sao por ORGANIZACAO: os 100.000 tokens por dia sao o
+       * balde de todo mundo junto. Entao a cota pode acabar la mesmo com a
+       * pessoa tendo perguntas sobrando aqui — e pra quem esta usando isso e a
+       * mesma coisa, entao merece a mesma frase, e nao um "429" cru.
+       */
+      if (res.status === 429) throw new Error("cota-diaria");
+      throw new Error(corpo.error ?? `${res.status}`);
+    }
     if (!corpo.text) throw new Error("resposta vazia");
 
     // So conta DEPOIS de a resposta chegar inteira. Rede caindo no meio nao pode

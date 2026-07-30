@@ -31,8 +31,16 @@ export const TTS_PROXY: string = import.meta.env.VITE_TK_TTS_PROXY ?? PADRAO;
 export const EDGE_VOICES: Record<string, ReadonlyArray<{ id: string; label: string }>> = {
   "pt-BR": [
     { id: "pt-BR-ThalitaMultilingualNeural", label: "Thalita" },
-    { id: "pt-BR-FranciscaNeural", label: "Francisca" },
     { id: "pt-BR-AntonioNeural", label: "Antônio" },
+    /*
+     * A Francisca saiu.
+     *
+     * O Miguel ouviu as tres e disse: "menos a francisca, isso é pt portugal".
+     * A Microsoft rotula ela como pt-BR, mas quem fala o idioma ouve o sotaque —
+     * e nesse julgamento quem manda e o ouvido dele, nao a etiqueta do catalogo.
+     * O id continua no allowlist da funcao: tirar de la quebraria quem ja tinha
+     * escolhido ela, e `getEdgeVoice` ja cai na primeira da lista nesse caso.
+     */
   ],
   en: [
     { id: "en-US-AvaMultilingualNeural", label: "Ava" },

@@ -202,6 +202,8 @@ export async function askAboutCollection({
         content: `Minha coleção:\n${asContext(facts, total)}\n\nPergunta: ${question}`,
       },
     ],
-    { temperature: 0.2, maxTokens: 320, ...(signal ? { signal } : {}) },
+    // `pergunta` liga o porteiro (`guarda.ts`) — so o texto cru do usuario, nunca
+    // o resumo da colecao que eu montei em volta dele.
+    { temperature: 0.2, maxTokens: 320, pergunta: question, ...(signal ? { signal } : {}) },
   );
 }

@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 
 import { buildDexEntry, type DexEntry } from "@trainerkit/core";
 
-import { DEX_SYSTEM, speciesDossier } from "../ai/dossier.ts";
+import { dexSystem, speciesDossier } from "../ai/dossier.ts";
 import { mensagemDeErro } from "../ai/erro.ts";
 import { chat } from "../ai/provider.ts";
 import { identifySpecies, visionAvailable } from "../ai/vision.ts";
@@ -338,13 +338,17 @@ export function DexMode({ data, onClose, onOpenSpecies }: Props) {
       */
       const texto = await chat(
         [
-          { role: "system", content: DEX_SYSTEM },
+          // O idioma DA TELA, nao o da pergunta: quem poe o app em japones
+          // quer resposta em japones mesmo digitando o nome do bicho em ingles.
+          { role: "system", content: dexSystem(language) },
           {
             role: "user",
-            content: `Dossiê:\n${speciesDossier(alvo, data, items ?? [])}\n\nPergunta: ${q}`,
+            content: `Dossiê:\n${speciesDossier(alvo, data, items ?? [], language)}\n\nPergunta: ${q}`,
           },
         ],
-        { temperature: 0.2, maxTokens: 260 },
+        // `pergunta: q` liga o porteiro (ver `guarda.ts`): so o texto CRU que a
+        // pessoa digitou passa pelo filtro, nunca o dossie que eu montei.
+        { temperature: 0.2, maxTokens: 260, pergunta: q },
       );
       setResposta(texto);
       if (voz && speechSupported()) void speak(texto, language);

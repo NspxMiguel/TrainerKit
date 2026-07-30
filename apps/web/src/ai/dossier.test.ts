@@ -91,12 +91,23 @@ describe("aguento de ginasio no texto", () => {
     // O numero que eu inventei. Se ele voltar, volta com esta ordem de grandeza.
     expect(texto).not.toMatch(/5\.1\d\d\.\d\d\d/);
 
-    const m = /melhor parede do jogo \(([\d.]+)\)/.exec(texto);
+    const m = /melhor parede do jogo — marca ([\d.]+)/.exec(texto);
     expect(m, "a comparacao com o Blissey sumiu do dossie").not.toBeNull();
 
     const bulk = Number(m![1]!.replaceAll(".", ""));
     expect(bulk).toBeGreaterThan(50_000);
     expect(bulk).toBeLessThan(70_000);
+  });
+
+  it("o numero do aguento nunca sai sem dizer que e um indice", () => {
+    /*
+     * "O Blissey aguenta 58.633 oq?" — a pergunta do Miguel, e ela e justa: o
+     * numero nao tem unidade. O dossie tem que dizer isso na cara, senao o
+     * modelo apresenta o indice como se fosse vida ou segundos.
+     */
+    const texto = dossie("blissey");
+    expect(texto).toContain("índice de aguento");
+    expect(texto).toContain("NÃO TEM UNIDADE");
   });
 
   it("a lista dos melhores tem numeros que descem junto com a numeracao", () => {
@@ -121,16 +132,27 @@ describe("aguento de ginasio no texto", () => {
   });
 
   it("Dragonite aparece como metade do Blissey, nao como fraco", () => {
-    const m = /(\d+)% do aguento do Blissey/.exec(dossie("dragonite"));
+    const m = /(\d+)% do melhor defensor que existe/.exec(dossie("dragonite"));
     expect(m).not.toBeNull();
     expect(Number(m![1])).toBeGreaterThan(40);
     expect(Number(m![1])).toBeLessThan(60);
   });
 
-  it("o Blissey se compara consigo mesmo em 100%", () => {
-    // Prova que a referencia passa pela MESMA funcao que a especie: se as duas
-    // contas divergirem um dia, este numero deixa de ser 100 na hora.
-    expect(dossie("blissey")).toContain("100% do aguento do Blissey");
+  it("o Blissey nao se compara consigo mesmo", () => {
+    /*
+     * Antes daqui saia "100% do aguento do Blissey" — no dossie DO Blissey. A
+     * frase provava que a referencia passa pela mesma funcao que a especie (era
+     * pra isso que ela existia), mas era ilegivel pra quem le a resposta, e os
+     * testes em outros idiomas mostraram o estrago: em russo o modelo inventou
+     * "aguenta 100% dos ataques do melhor defensor", e em coreano comparou o
+     * Blissey com o Blissey.
+     *
+     * A garantia de que as duas contas nao divergem continua — agora pelo ramo
+     * que so e alcançavel quando `meu` e `ref` batem.
+     */
+    const texto = dossie("blissey");
+    expect(texto).toContain("Este É o melhor defensor de ginásio do jogo");
+    expect(texto).not.toContain("100% do melhor defensor");
   });
 });
 

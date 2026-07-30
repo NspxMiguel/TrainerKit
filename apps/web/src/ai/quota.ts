@@ -1,58 +1,96 @@
 /**
- * As cinco perguntas por dia da chave compartilhada.
+ * O limite da chave compartilhada — e a conta que define qual ele pode ser.
  *
- * "5 vezes pode usar por dia free". A chave e do Miguel e o plano gratuito da
- * Groq e por minuto, nao por dia — sem um teto diario, uma pessoa sozinha
- * consome a cota de todo mundo antes do almoço.
+ * O Miguel: "5 eu acho um limite muito baixo, até pq o groq por em quanto n é
+ * 100% free? dava pra colocar limite por hora, sla, 30 mensagems por hora. nao
+ * sei como funciona o groq... analiza bem."
  *
- * ⚠️ ISTO NAO E SEGURANÇA, E COMBINADO. O contador vive no `localStorage` de quem
- * usa: limpar os dados do navegador zera. Quem quiser furar, fura em dez
- * segundos, e nao adianta eu fingir o contrario num comentario.
+ * ANALISADO. É grátis, sim — mas não é ilimitado, e o teto não é o que parece:
  *
- * O que protege de verdade sao duas outras coisas, e as duas ficam FORA daqui:
+ *   `llama-3.3-70b-versatile`, plano gratuito, medido na página de limites:
+ *     30 RPM · 1.000 RPD · 12.000 TPM · **100.000 TPD**
  *
- *   1. O limite por IP na propria funcao (`api/ai.ts`), que quem chama nao
- *      controla.
- *   2. O teto da Groq: plano gratuito, 8.000 tokens por minuto. Quando estoura,
- *      ela recusa. Nao existe fatura pra estourar.
+ *   E o mais importante: os limites são POR ORGANIZAÇÃO, não por usuário. A
+ *   chave é uma só, então esses 100.000 tokens por dia são o balde de TODO
+ *   MUNDO junto — não de cada pessoa.
  *
- * Entao o papel deste arquivo e ser HONESTO com quem usa direito: mostrar quantas
- * sobraram antes de acabar, em vez de deixar a pessoa levar um 429 no meio de uma
- * pergunta sem entender por que.
+ * Uma pergunta da Pokédex custa, MEDIDO (não estimado): ~1.050 tokens de
+ * entrada (dossiê 1.500 chars + regras 2.065 chars) e ~250 de saída. Uns 1.300.
+ *
+ *   100.000 ÷ 1.300 = **77 perguntas por dia, no mundo inteiro somado.**
+ *   12.000 TPM ÷ 1.300 = **9 perguntas por minuto**, também no total.
+ *
+ * Por isso "30 por hora" não dá: 30/hora numa pessoa são 720 por dia — ela
+ * sozinha consumiria o orçamento do dia INTEIRO nove vezes antes do almoço, e
+ * todo mundo levaria 429 pelo resto do dia.
+ *
+ * O 5/dia anterior estava certo pela conta e errado pela sensação: 77 ÷ 5 dá 15
+ * pessoas por dia, mas ninguém vê essa conta — vê um app que para na quinta
+ * pergunta. Então subi pro que o orçamento aguenta com uma base pequena de
+ * usuários, que é o caso real de um app pessoal:
+ *
+ *   **20 por dia** (77 ÷ 20 ≈ 4 pessoas simultâneas confortáveis)
+ *   **8 por hora** (impede que as 20 do dia virem 20 em dois minutos, e segura
+ *                   a rajada longe do teto por minuto)
+ *
+ * ⚠️ ISTO NÃO É SEGURANÇA, É COMBINADO. Vive no `localStorage`: limpar os dados
+ * zera. Quem quiser furar, fura. Fingir o contrário num comentário seria pior
+ * que não ter comentário.
+ *
+ * O que protege de verdade são outras três coisas, todas fora daqui:
+ *   1. o limite por IP na própria função (`api/ai.ts`), que o cliente não toca;
+ *   2. o filtro de assunto (`guarda.ts`), que corta o uso desviado;
+ *   3. o teto da própria Groq — quando o orçamento do dia acaba, ela devolve
+ *      429 e ninguém passa. Não existe fatura pra estourar.
+ *
+ * E é por isso que o app precisa tratar o 429 da Groq com a MESMA mensagem
+ * deste limite: pode acabar aqui ou lá, e pra quem está usando é a mesma coisa.
  */
 
 const KEY = "tk:ia-cota";
 
-/** O combinado. */
-export const LIMITE_DIARIO = 5;
+/** O combinado por dia. Ver a conta no topo. */
+export const LIMITE_DIARIO = 20;
+
+/** E por hora, pra 20 no dia não virarem 20 num minuto. */
+export const LIMITE_HORA = 8;
 
 interface Registro {
-  /** Dia local no formato `2026-07-30`. */
+  /** Dia local, `2026-07-30`. */
   dia: string;
   usos: number;
+  /** Hora local corrente, 0–23, e quantas nela. */
+  hora: number;
+  usosHora: number;
 }
 
 /*
- * Dia LOCAL, nao UTC.
+ * Dia e hora LOCAIS, não UTC.
  *
- * `toISOString()` daria UTC, e no Brasil isso viraria a cota as 21h — a pessoa
- * perderia as perguntas do fim da noite sem nenhuma explicacao visivel.
- * `sv-SE` porque e o locale que formata como `2026-07-30` sem eu montar a string
- * na mao.
+ * `toISOString()` daria UTC, e no Brasil a cota viraria às 21h — a pessoa
+ * perderia as perguntas do fim da noite sem nenhuma explicação visível.
  */
-function hoje(): string {
-  return new Date().toLocaleDateString("sv-SE");
+function agora(): { dia: string; hora: number } {
+  const d = new Date();
+  return { dia: d.toLocaleDateString("sv-SE"), hora: d.getHours() };
 }
 
 function ler(): Registro {
-  const vazio = { dia: hoje(), usos: 0 };
+  const { dia, hora } = agora();
+  const vazio: Registro = { dia, usos: 0, hora, usosHora: 0 };
   try {
     const cru = globalThis.localStorage?.getItem(KEY);
     if (!cru) return vazio;
     const r = JSON.parse(cru) as Partial<Registro>;
     if (typeof r.dia !== "string" || typeof r.usos !== "number") return vazio;
-    // Virou o dia: zera. Sem isto o contador seria um teto pra vida inteira.
-    return r.dia === vazio.dia ? { dia: r.dia, usos: r.usos } : vazio;
+    // Virou o dia: zera tudo. Virou só a hora: zera só a hora.
+    if (r.dia !== dia) return vazio;
+    return {
+      dia: r.dia,
+      usos: r.usos,
+      hora,
+      usosHora: r.hora === hora && typeof r.usosHora === "number" ? r.usosHora : 0,
+    };
   } catch {
     return vazio;
   }
@@ -62,7 +100,7 @@ function gravar(r: Registro): void {
   try {
     globalThis.localStorage?.setItem(KEY, JSON.stringify(r));
   } catch {
-    /* cota nao persistida vale mais que app quebrado */
+    /* cota não persistida vale mais que app quebrado */
   }
 }
 
@@ -75,23 +113,32 @@ export function onQuotaChange(fn: () => void): () => void {
   };
 }
 
-/** Quantas ainda dao pra usar hoje. */
+/** Quantas ainda dão hoje. */
 export function restantes(): number {
   return Math.max(0, LIMITE_DIARIO - ler().usos);
 }
 
-export function esgotou(): boolean {
-  return restantes() === 0;
+/** Quantas ainda dão nesta hora. */
+export function restantesHora(): number {
+  return Math.max(0, LIMITE_HORA - ler().usosHora);
+}
+
+/** Qual limite bateu — o dia, a hora, ou nenhum. Quem chama precisa saber pra
+ *  dizer "volta amanhã" ou "volta daqui a pouco", que são coisas diferentes. */
+export function bloqueio(): "dia" | "hora" | null {
+  if (restantes() === 0) return "dia";
+  if (restantesHora() === 0) return "hora";
+  return null;
 }
 
 /**
  * Marca uma pergunta usada.
  *
- * Chamado DEPOIS de a resposta chegar, nunca antes: uma falha de rede nao pode
- * gastar a cota de quem nao recebeu nada.
+ * Chamado DEPOIS de a resposta chegar, nunca antes: falha de rede não pode
+ * gastar a cota de quem não recebeu nada.
  */
 export function registrarUso(): void {
   const r = ler();
-  gravar({ dia: r.dia, usos: r.usos + 1 });
+  gravar({ dia: r.dia, usos: r.usos + 1, hora: r.hora, usosHora: r.usosHora + 1 });
   for (const fn of listeners) fn();
 }
