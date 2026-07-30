@@ -86,12 +86,37 @@ interface Mensagem {
 export const config = { runtime: "edge" };
 
 export default async function handler(req: Request): Promise<Response> {
+  /*
+   * CORS, e o preflight junto.
+   *
+   * O app vive em `spxmiguel.github.io` e esta funcao em `trainerkit-ia.vercel.app`
+   * — origens diferentes. Sem estes cabecalhos o navegador recusa a resposta
+   * ANTES de o codigo do app ver qualquer coisa, e tudo que chega na tela e um
+   * "Failed to fetch" sem explicacao. Foi exatamente o que apareceu no primeiro
+   * teste pelo app publicado: o `curl` passava e o navegador nao.
+   *
+   * `Content-Type: application/json` num POST dispara preflight, entao o OPTIONS
+   * tem que responder tambem — so o cabecalho no POST nao bastaria.
+   *
+   * `*` na origem porque o endpoint e publico por desenho: ele nao le cookie nem
+   * sessao, so recebe uma pergunta e devolve texto. Restringir a origem daria
+   * uma sensacao de protecao que nao existe — quem quiser chamar de fora chama
+   * com `curl`, e quem protege de verdade e o limite por IP.
+   */
+  const cors = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Max-Age": "86400",
+  };
+
   const json = (corpo: unknown, status: number) =>
     new Response(JSON.stringify(corpo), {
       status,
-      headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+      headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...cors },
     });
 
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
   if (req.method !== "POST") return json({ error: "use POST" }, 405);
 
   const chave = process.env.GROQ_API_KEY;
