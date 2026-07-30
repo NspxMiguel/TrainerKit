@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useFolha } from "../ui/folha.ts";
 import { createPortal } from "react-dom";
 
 import { buildDexEntry, type DexEntry } from "@trainerkit/core";
@@ -14,7 +15,7 @@ import { useT, type Key } from "../i18n/t.ts";
 import { useSetup } from "../onboarding/setup.ts";
 import { typeColor, typeKey } from "../sprites/provider.ts";
 import { useCollection } from "../storage/collection.ts";
-import { markSeen, useSeenCount, wasSeen } from "../storage/seen.ts";
+import { markSeen, seenIds, useSeenCount, wasSeen } from "../storage/seen.ts";
 import { IconCamera, IconSearch } from "../ui/Icons.tsx";
 import { BetaBadge } from "../ui/BetaBadge.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
@@ -26,6 +27,14 @@ interface Props {
   onClose: () => void;
   /** Abrir a ficha completa da especie — a Pokedex e a porta, nao o destino. */
   onOpenSpecies: (s: DatasetSpecies) => void;
+  /**
+   * Abrir a lista dos capturados.
+   *
+   * "kd a colection ai na pokedex?" — o aparelho contava "CAPTURADOS: 6" e o
+   * numero nao levava a lugar nenhum. Uma Pokedex de verdade e uma LISTA que
+   * voce percorre; o contador sozinho e a capa de um livro que nao abre.
+   */
+  onOpenMine?: (() => void) | undefined;
 }
 
 const LIGAS = ["great", "ultra", "master"] as const;
@@ -56,7 +65,12 @@ const LIGAS = ["great", "ultra", "master"] as const;
  * descricoes do jogo sao obra escrita e nao entram — e a troca saiu boa: altura,
  * peso e "é o 17º atacante de Dragão" e o que muda a decisao de hoje.
  */
-export function DexMode({ data, onClose, onOpenSpecies }: Props) {
+export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
+  /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
+     caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
+     escape volta a piscar, e so aquele. */
+  const { saindo, fechar, sair } = useFolha(onClose);
+
   const { t } = useT();
   const language = useLanguage();
   const { items } = useCollection();
@@ -88,11 +102,11 @@ export function DexMode({ data, onClose, onOpenSpecies }: Props) {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") fechar();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [fechar]);
 
   /**
    * A lista navegavel, em ordem de numero.
@@ -118,6 +132,25 @@ export function DexMode({ data, onClose, onOpenSpecies }: Props) {
     if (setup.mode !== "colecao") return 0;
     return new Set((items ?? []).map((o) => o.speciesId)).size;
   }, [items, setup.mode]);
+
+  /*
+   * VISTOS inclui os CAPTURADOS, porque nao existe capturar sem ter visto.
+   *
+   * O aparelho mostrava "VISTOS: 0 · CAPTURADOS: 6", que e impossivel em
+   * qualquer Pokedex. O registro de vistos so era escrito ao identificar
+   * alguem AQUI dentro, e a colecao mora noutro lugar (IndexedDB) — dois
+   * numeros verdadeiros cada um por si, mentindo juntos.
+   *
+   * A uniao e calculada na hora em vez de gravar os capturados no registro de
+   * vistos: transferir um Pokemon nao deveria "desver" a especie, e gravar
+   * tornaria isso irreversivel. Aqui o numero se corrige sozinho.
+   */
+  const vistosTotal = useMemo(() => {
+    if (setup.mode !== "colecao") return vistos;
+    const uniao = new Set(seenIds());
+    for (const o of items ?? []) uniao.add(o.speciesId);
+    return uniao.size;
+  }, [items, setup.mode, vistos]);
 
   /** Sugestoes por nome. */
   const sugestoes = useMemo(() => {
@@ -376,6 +409,7 @@ export function DexMode({ data, onClose, onOpenSpecies }: Props) {
   return createPortal(
     <div
       className="tk-dex"
+      data-saindo={saindo || undefined}
       /*
        * A casca do aparelho. Trocar por "plain" devolve o visual autoral do app
        * — e o que uma build publicavel usaria, pelo mesmo motivo dos sprites.
@@ -403,7 +437,7 @@ export function DexMode({ data, onClose, onOpenSpecies }: Props) {
         <button
           type="button"
           className="tk-dexdev-close"
-          onClick={onClose}
+          onClick={fechar}
           aria-label={t("common.back")}
         >
           ‹
@@ -421,8 +455,21 @@ export function DexMode({ data, onClose, onOpenSpecies }: Props) {
       */}
       <div className="tk-dexdev-counters">
         <BetaBadge />
-        <span>{t("dex.seen", { n: vistos })}</span>
-        {setup.mode === "colecao" && <span>{t("dex.caught", { n: capturados })}</span>}
+        <span>{t("dex.seen", { n: vistosTotal })}</span>
+        {/*
+          CAPTURADOS abre a lista. Vistos nao, e a assimetria e proposital: a
+          lista dos capturados existe (e a colecao), a dos vistos seria uma tela
+          nova pra um dado que o app registra de raspao. Um numero clicavel ao
+          lado de um que nao e seria pior que os dois inertes.
+        */}
+        {setup.mode === "colecao" &&
+          (onOpenMine ? (
+            <button type="button" className="tk-dexdev-count-btn" onClick={() => sair(onOpenMine)}>
+              {t("dex.caught", { n: capturados })}
+            </button>
+          ) : (
+            <span>{t("dex.caught", { n: capturados })}</span>
+          ))}
       </div>
 
       {/* ---------------------------------------------------------- o visor */}
@@ -456,7 +503,7 @@ export function DexMode({ data, onClose, onOpenSpecies }: Props) {
             <button
               type="button"
               className="tk-dexdev-art"
-              onClick={() => onOpenSpecies(alvo)}
+              onClick={() => sair(() => onOpenSpecies(alvo))}
               aria-label={alvo.name}
             >
               {/* `bare`: dentro do visor a arte fica solta na tela, sem o

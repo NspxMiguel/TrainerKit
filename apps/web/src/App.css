@@ -868,8 +868,8 @@
 .tk-sheet-full {
   position: fixed;
   inset: 0;
-  z-index: 20;
   background: var(--tk-screen);
+  z-index: 20;
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: max(var(--tk-safe-top), calc(env(safe-area-inset-top) + var(--tk-s3)))
@@ -1265,15 +1265,25 @@
 }
 
 /*
- * O balao abre pra ESQUERDA (`right: 0`) porque o selo vive no canto direito do
- * cabecalho: ancorado a esquerda ele sairia da tela. `max-width` em `vw` e nao
- * em px pra caber num aparelho estreito sem empurrar layout.
+ * O balao nao escolhe lado NENHUM aqui — quem posiciona e o JS, medindo.
+ *
+ * ⚠️ Isto era `position: absolute; right: 0`, e o comentario que estava neste
+ * lugar explicava por que: "o selo vive no canto direito do cabecalho, ancorado
+ * a esquerda ele sairia da tela". Era verdade quando o selo so existia no
+ * cabecalho da tela de IV. Ai ele foi pro Modo Pokedex, onde vive no canto
+ * ESQUERDO — e `right: 0` mandou um balao de 277px pra 204px FORA da tela.
+ *
+ * A regra estava certa sobre o caso dela e nao tinha como saber do outro. Por
+ * isso a posicao saiu do CSS: `left`/`top` vem de `getBoundingClientRect` no
+ * `BetaBadge`, preso a viewport. Deixar um lado escrito aqui seria so trocar
+ * qual das duas telas quebra.
  */
 .tk-beta-pop {
-  position: absolute;
-  z-index: 5;
-  top: calc(100% + 8px);
-  right: 0;
+  position: fixed;
+  z-index: 30;
+  /* Valores de partida; o `BetaBadge` sobrescreve antes de pintar. */
+  top: 0;
+  left: 0;
   width: max-content;
   max-width: min(74vw, 300px);
   padding: 11px 13px;
@@ -1318,8 +1328,8 @@
 .tk-onb {
   position: fixed;
   inset: 0;
-  z-index: 20;
   background: var(--tk-screen);
+  z-index: 20;
   display: flex;
   flex-direction: column;
   max-width: var(--tk-container);
@@ -3540,6 +3550,7 @@
 .tk-dex {
   position: fixed;
   inset: 0;
+  background: var(--tk-screen);
   z-index: 30;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -3548,7 +3559,6 @@
   padding: max(var(--tk-safe-top), calc(env(safe-area-inset-top) + var(--tk-s3)))
     var(--tk-gutter) calc(var(--tk-s8) + max(var(--tk-s5), env(safe-area-inset-bottom)));
   animation: tk-rise 0.26s var(--tk-ease-glass) both;
-  background: var(--tk-screen);
 }
 
 /*
@@ -5020,4 +5030,56 @@
 .tk-trade-odds dd {
   margin: 0;
   color: var(--tk-txt2);
+}
+
+/* O contador de capturados abre a lista, entao ele precisa PARECER que abre —
+   sem virar botao de verdade no meio de dois numeros em fonte de terminal. O
+   sublinhado pontilhado e o mesmo vocabulario do resto do aparelho. */
+.tk-dexdev-count-btn {
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-decoration: underline dotted currentColor;
+  text-underline-offset: 4px;
+}
+
+/*
+ * A saida.
+ *
+ * "nao tem fade out ao sair de paginas": toda folha subia com `tk-rise` e sumia
+ * num corte seco, porque o React desmonta o no e nao ha mais o que animar. Quem
+ * segura a tela durante a saida e o `useFolha`; aqui esta so o movimento.
+ *
+ * Mais rapido que a entrada (180ms contra 200-260ms) de propósito. Entrar e
+ * apresentar uma tela nova, e vale o tempo; sair e tirar do caminho uma que a
+ * pessoa ja decidiu abandonar, e ai qualquer demora vira atrito.
+ *
+ * Desce 8px, e nao os 14px da subida: a saida acompanha o gesto sem parecer que
+ * a tela caiu.
+ */
+[data-saindo] {
+  animation: tk-sair 0.18s var(--tk-ease) both;
+  /* Nada de clique durante a saida — a tela ainda esta no DOM e um segundo
+     toque no botao de voltar chegaria numa folha que ja foi embora. */
+  pointer-events: none;
+}
+
+@keyframes tk-sair {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-saindo] {
+    animation: none;
+  }
 }

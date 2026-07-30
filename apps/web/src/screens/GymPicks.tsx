@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useFolha } from "../ui/folha.ts";
 import { createPortal } from "react-dom";
 
 import {
@@ -47,6 +48,11 @@ const NIVEL_PADRAO = 40;
  * escolha do defensor.
  */
 export function GymPicks({ data, onClose, onPickSpecies }: Props) {
+  /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
+     caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
+     escape volta a piscar, e so aquele. */
+  const { saindo, fechar } = useFolha(onClose);
+
   const { t } = useT();
   const { items } = useCollection();
   const setup = useSetup();
@@ -62,11 +68,11 @@ export function GymPicks({ data, onClose, onPickSpecies }: Props) {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") fechar();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [fechar]);
 
   const especiePor = useMemo(() => {
     const m = new Map<string, DatasetSpecies>();
@@ -128,12 +134,12 @@ export function GymPicks({ data, onClose, onPickSpecies }: Props) {
   const nomeTipo = (tp: string) => t(typeKey(tp) as "type.normal");
 
   return createPortal(
-    <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={t("gym.title")}>
+    <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={t("gym.title")} data-saindo={saindo || undefined}>
       <header className="tk-sheet-head">
         <button
           type="button"
           className="tk-sheet-close"
-          onClick={onClose}
+          onClick={fechar}
           aria-label={t("common.back")}
         >
           ‹
@@ -249,7 +255,7 @@ export function GymPicks({ data, onClose, onPickSpecies }: Props) {
         type="button"
         className="tk-btn tk-btn--secondary tk-btn--block"
         style={{ marginTop: 22 }}
-        onClick={onClose}
+        onClick={fechar}
       >
         {t("common.done")}
       </button>

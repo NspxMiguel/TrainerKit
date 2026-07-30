@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useFolha } from "../ui/folha.ts";
 import { createPortal } from "react-dom";
 
 import {
@@ -42,6 +43,11 @@ const TIERS: readonly RaidTier[] = [1, 3, 5, "mega"];
  * e porque voce precisa mesmo.
  */
 export function RaidCounters({ boss, data, onClose }: Props) {
+  /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
+     caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
+     escape volta a piscar, e so aquele. */
+  const { saindo, fechar } = useFolha(onClose);
+
   /*
    * O tier que a especie de fato ocupa, ate onde da pra saber.
    *
@@ -71,11 +77,11 @@ export function RaidCounters({ boss, data, onClose }: Props) {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") fechar();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [fechar]);
 
   const moveById = (id: string): Move | null =>
     data.fastMoves.find((m) => m.id === id) ?? data.chargedMoves.find((m) => m.id === id) ?? null;
@@ -151,12 +157,12 @@ export function RaidCounters({ boss, data, onClose }: Props) {
   const speciesOf = (id: string) => data.species.find((s) => s.id === id);
 
   return createPortal(
-    <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={t("raid.title")}>
+    <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={t("raid.title")} data-saindo={saindo || undefined}>
       <header className="tk-sheet-head">
         <button
           type="button"
           className="tk-sheet-close"
-          onClick={onClose}
+          onClick={fechar}
           aria-label={t("common.back")}
         >
           ‹

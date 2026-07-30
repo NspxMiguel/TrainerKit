@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useFolha } from "../ui/folha.ts";
 import { createPortal } from "react-dom";
 
 import {
@@ -42,6 +43,11 @@ interface Props {
 const LEAGUES = [GREAT_LEAGUE, ULTRA_LEAGUE, MASTER_LEAGUE];
 
 export function IVCalculator({ species, data, onClose, owned }: Props) {
+  /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
+     caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
+     escape volta a piscar, e so aquele. */
+  const { saindo, fechar } = useFolha(onClose);
+
   // Vindo da Colecao, ja nasce com o IV salvo. Sem dono, `null` ate o print ser
   // lido — sem print nao ha o que mostrar.
   const [ivs, setIvs] = useState<IVs | null>(owned?.ivs ?? null);
@@ -66,11 +72,11 @@ export function IVCalculator({ species, data, onClose, owned }: Props) {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") fechar();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [fechar]);
 
 
   const cpNum = Number(cp);
@@ -107,12 +113,13 @@ export function IVCalculator({ species, data, onClose, owned }: Props) {
         que rola, porque ai ha o que ler.
       */
       className={`tk-sheet-full${ivs ? "" : " tk-sheet-full--empty"}`}
+      data-saindo={saindo || undefined}
       role="dialog"
       aria-modal="true"
       aria-label={t("iv.title", { name: species.name })}
     >
       <header className="tk-sheet-head">
-        <button type="button" className="tk-sheet-close" onClick={onClose} aria-label={t("common.back")}>
+        <button type="button" className="tk-sheet-close" onClick={fechar} aria-label={t("common.back")}>
           ‹
         </button>
         <BetaBadge />
@@ -372,7 +379,7 @@ export function IVCalculator({ species, data, onClose, owned }: Props) {
         type="button"
         className="tk-btn tk-btn--secondary tk-btn--block"
         style={{ marginTop: 28 }}
-        onClick={onClose}
+        onClick={fechar}
       >
         {t("common.done")}
       </button>

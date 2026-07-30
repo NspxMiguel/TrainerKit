@@ -171,6 +171,17 @@ export function PokedexScreen({ dataset, intent }: Props) {
             setDexOpen(false);
             setSelected(s);
           }}
+          // O aparelho fecha e a aba ja esta em "Meus": os capturados que ele
+          // contava sao os mesmos desta lista, entao nao ha tela nova nenhuma
+          // pra manter — so parar de esconder a que ja existe.
+          onOpenMine={
+            podeColecao
+              ? () => {
+                  setDexOpen(false);
+                  setAba("meus");
+                }
+              : undefined
+          }
         />
       )}
 

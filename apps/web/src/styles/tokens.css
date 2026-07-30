@@ -12,7 +12,23 @@
 :root,
 [data-tk="dark"] {
   --tk-bg: #07080b;
-  --tk-screen: radial-gradient(120% 80% at 50% -10%, #141a2a 0%, #0a0c11 55%, #07080b 100%);
+  /*
+   * O TAMANHO do gradiente e em `vw`/`vh`, e nao em `%`. Nao e detalhe.
+   *
+   * Porcentagem em gradiente resolve contra a caixa DO ELEMENTO que o pinta. As
+   * telas pintam num `::before` do tamanho da viewport; as folhas cheias, o
+   * Modo Pokedex e o setup pintam numa caixa de `max-width: var(--tk-container)`,
+   * centralizada. Medido numa janela de 820px: 120% dava 984px numa e 744px na
+   * outra — MESMO token, MESMA cor escrita, duas pinturas diferentes, com emenda
+   * visivel na borda da folha e cores diferentes na mesma altura da tela.
+   *
+   * No celular a caixa e a viewport coincidem e nada aparece. Foi por isso que
+   * durou: eu verificava no tamanho onde o bug nao existe.
+   *
+   * ⚠️ Nao troque de volta pra `%` "porque e equivalente". So e equivalente
+   * quando quem pinta ocupa a tela inteira, e tres dos cinco nao ocupam.
+   */
+  --tk-screen: radial-gradient(120vw 80vh at 50% -10%, #141a2a 0%, #0a0c11 55%, #07080b 100%);
 
   --tk-surf: rgba(255, 255, 255, 0.05);
   --tk-surf2: rgba(255, 255, 255, 0.085);
@@ -95,7 +111,7 @@
 
 [data-tk="light"] {
   --tk-bg: #eceef3;
-  --tk-screen: radial-gradient(120% 80% at 50% -10%, #ffffff 0%, #f6f7fb 55%, #f0f2f7 100%);
+  --tk-screen: radial-gradient(120vw 80vh at 50% -10%, #ffffff 0%, #f6f7fb 55%, #f0f2f7 100%);
 
   --tk-surf: #ffffff;
   --tk-surf2: #f1f3f8;
@@ -163,7 +179,7 @@
 @media (prefers-color-scheme: light) {
   :root:not([data-tk="dark"]) {
     --tk-bg: #eceef3;
-    --tk-screen: radial-gradient(120% 80% at 50% -10%, #ffffff 0%, #f6f7fb 55%, #f0f2f7 100%);
+    --tk-screen: radial-gradient(120vw 80vh at 50% -10%, #ffffff 0%, #f6f7fb 55%, #f0f2f7 100%);
     --tk-surf: #ffffff;
     --tk-surf2: #f1f3f8;
     --tk-surf3: rgba(16, 19, 25, 0.11);
