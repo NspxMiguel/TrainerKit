@@ -2071,6 +2071,54 @@
   margin-top: 1px;
 }
 
+/* ------------------------------------------------- as tres acoes do app */
+
+/*
+ * Montar time, Pokedex e Ginasio, numa fileira.
+ *
+ * Empilhadas custavam 46px cada, e a terceira fazia a home voltar a rolar — o
+ * que o Miguel pediu duas vezes pra nao acontecer. Em fileira somam 76px em vez
+ * de 138, e ainda leem melhor: sao as coisas que o app FAZ por voce, lado a
+ * lado, em vez de tres linhas de menu.
+ */
+.tk-acts3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--tk-s2);
+  margin-top: var(--tk-s3);
+}
+
+.tk-act {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 76px;
+  padding: 0 6px;
+  border-radius: var(--tk-r-card);
+  background: var(--tk-surf);
+  border: 1px solid var(--tk-line);
+  color: var(--tk-pri);
+  transition: transform 0.06s var(--tk-ease);
+}
+
+.tk-act:active {
+  transform: scale(0.97);
+}
+
+/* Duas linhas no maximo, centralizado: "Monta um time pra mim" nao cabe em uma
+   coluna de 110px, e cortar com "…" foi exatamente o que ele reclamou na dica. */
+.tk-act-t {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font: 600 11px/1.25 var(--tk-font);
+  color: var(--tk-txt);
+  text-align: center;
+}
+
 /* A acao secundaria: linha leve, sem moldura de cartao. */
 .tk-lite {
   display: flex;
@@ -3469,4 +3517,46 @@
   border: 1px solid var(--tk-dang-line);
   color: var(--tk-dang-fg);
   font-family: var(--tk-mono);
+}
+
+/* ------------------------------------------------------ contador de ginasio */
+
+/*
+ * Mais e menos, com o numero no meio.
+ *
+ * Nao e `<input type="number">`: no celular ele abre teclado pra escolher entre
+ * 1 e 20, e teclado pra isso e trabalho a mais. Dois alvos de 44px resolvem sem
+ * teclado nenhum.
+ */
+.tk-step {
+  display: flex;
+  align-items: center;
+  gap: var(--tk-s4);
+}
+
+.tk-step-btn {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--tk-surf2);
+  border: 1px solid var(--tk-line);
+  color: var(--tk-txt);
+  font: 400 22px/1 var(--tk-font);
+}
+
+.tk-step-btn:active {
+  background: var(--tk-surf3);
+}
+
+.tk-step-btn:disabled {
+  opacity: 0.35;
+}
+
+.tk-step-n {
+  font: 800 28px/1 var(--tk-font);
+  letter-spacing: -0.02em;
+  min-width: 42px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
 }

@@ -39,6 +39,18 @@ const PERFECT: IVs = { atk: 15, def: 15, hp: 15 };
 const UNOBTAINABLE = new Set(["eternatus_eternamax"]);
 
 /**
+ * Da pra pegar este?
+ *
+ * Exportado porque a lista precisa ser UMA. A tela de ginasio montava os
+ * candidatos direto do dataset e por isso anunciava Eternatus (Eternamax) como o
+ * melhor defensor do jogo — um bicho de 505 de defesa que so existe como chefe
+ * de Dynamax. Duas copias da mesma regra viram duas telas que discordam.
+ */
+export function isObtainable(speciesId: string): boolean {
+  return !UNOBTAINABLE.has(speciesId);
+}
+
+/**
  * Especie que so tem Struggle nao entra em ranking nenhum.
  *
  * Struggle e o carregado que o jogo poe em quem nao tem carregado — na pratica,

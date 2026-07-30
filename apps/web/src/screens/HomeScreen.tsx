@@ -18,11 +18,11 @@ import {
   IconSearch,
   IconShield,
   IconSwords,
-  IconTrophy,
 } from "../ui/Icons.tsx";
 import { InstallBanner } from "../ui/InstallBanner.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 import { DexMode } from "./DexMode.tsx";
+import { GymPicks } from "./GymPicks.tsx";
 import { InstallGuide } from "./InstallGuide.tsx";
 import { IVCalculator } from "./IVCalculator.tsx";
 import { SpeciesDetail } from "./SpeciesDetail.tsx";
@@ -183,6 +183,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
   const [picked, setPicked] = useState<DatasetSpecies | null>(null);
   const [teamOpen, setTeamOpen] = useState(false);
   const [dexOpen, setDexOpen] = useState(false);
+  const [gymOpen, setGymOpen] = useState(false);
   const [detail, setDetail] = useState<DatasetSpecies | null>(null);
 
   const ready = dataset.status === "ready";
@@ -410,23 +411,28 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
             </span>
           </button>
 
-          <button type="button" className="tk-lite" onClick={() => setTeamOpen(true)}>
-            <IconSwords size={17} />
-            <span className="tk-lite-t">{t("team.open")}</span>
-            <span className="tk-lite-go" aria-hidden="true">
-              ›
-            </span>
-          </button>
+          {/*
+            As tres acoes secundarias numa fileira, nao empilhadas.
 
-          {/* O modo Pokedex fica junto das outras duas acoes: e a terceira coisa
-              que o app FAZ, e nao um lugar pra onde ele leva. */}
-          <button type="button" className="tk-lite" onClick={() => setDexOpen(true)}>
-            <IconSearch size={17} />
-            <span className="tk-lite-t">{t("dex.open")}</span>
-            <span className="tk-lite-go" aria-hidden="true">
-              ›
-            </span>
-          </button>
+            Cada linha empilhada custava 46px, e a terceira (o ginasio) faria a
+            home voltar a rolar — o que ele pediu duas vezes pra nao acontecer.
+            Em fileira as tres somam 76px em vez de 138, e elas se leem melhor
+            juntas: sao as coisas que o app FAZ por voce, ao lado uma da outra.
+          */}
+          <div className="tk-acts3">
+            <button type="button" className="tk-act" onClick={() => setTeamOpen(true)}>
+              <IconSwords size={19} />
+              <span className="tk-act-t">{t("team.open")}</span>
+            </button>
+            <button type="button" className="tk-act" onClick={() => setDexOpen(true)}>
+              <IconSearch size={19} />
+              <span className="tk-act-t">{t("dex.title")}</span>
+            </button>
+            <button type="button" className="tk-act" onClick={() => setGymOpen(true)}>
+              <IconShield size={19} />
+              <span className="tk-act-t">{t("gym.title")}</span>
+            </button>
+          </div>
 
           {/* A colecao como FILA de sprites, nao como cartao de texto.
               Era um bloco com tres numeros, duas linhas de nome e uma frase de
@@ -493,35 +499,24 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
           )}
 
           {/*
-            Dois atalhos, nao quatro.
+            Os atalhos de "Melhores" sairam.
 
-            O Miguel: "pq tem um atalho pra pokedex e um atalho para coleção??
-            sendo q simplesmente ja tem a porra do botao". Tinha razao — aqueles
-            duplicavam abas da barra de baixo. Estes ficam porque levam a uma
-            PERGUNTA que a barra nao faz: o ranking por tipo e o de liga viviam
-            escondidos dentro da Pokedex.
+            Eram os dois ultimos sobreviventes daquela grade, e o argumento pra
+            manter era que o ranking por tipo vivia escondido dentro da Pokedex.
+            Isso deixou de ser verdade nesta versao: a aba Pokedex abre com
+            "Buscar | Melhores" em cima, entao a lista esta a dois toques de
+            qualquer tela — e o proprio Miguel deu a regra quando tirou os
+            outros: "sendo q simplesmente ja tem a porra do botao".
+
+            E ha um motivo melhor. O que aquelas listas respondiam mal, o app
+            agora responde bem: pra atacar, "Monta um time pra mim" devolve seis
+            nomes com proposito; pra defender, "Ginásio" cruza com a sua
+            colecao. Um ranking de trinta nomes ao lado disso e o passo atras.
+
+            Ficam 130px livres, que e o que faz a home caber com as quatro
+            acoes. Se voce quiser de volta, e um bloco de JSX — mas eu apostaria
+            que nao vai sentir falta.
           */}
-          <div className="tk-overline tk-overline--sec">{t("home.shortcuts")}</div>
-          <div className="tk-quickgrid">
-            <button
-              type="button"
-              className="tk-tile tk-tile--raid"
-              onClick={() => onGo("pokedex", { view: "best", mode: "raid" })}
-            >
-              <IconTrophy size={18} />
-              <span className="tk-tile-t">{t("home.go.raidBest")}</span>
-              <span className="tk-tile-d">{t("home.go.raidBestDetail")}</span>
-            </button>
-            <button
-              type="button"
-              className="tk-tile tk-tile--pvp"
-              onClick={() => onGo("pokedex", { view: "best", mode: "pvp" })}
-            >
-              <IconShield size={18} />
-              <span className="tk-tile-t">{t("home.go.pvpBest")}</span>
-              <span className="tk-tile-d">{t("home.go.pvpBestDetail")}</span>
-            </button>
-          </div>
 
           {/*
             A dica cede a vez pro aviso.
@@ -558,6 +553,17 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
           onClose={() => setTeamOpen(false)}
           onPickSpecies={(s) => {
             setTeamOpen(false);
+            setDetail(s);
+          }}
+        />
+      )}
+
+      {gymOpen && data && (
+        <GymPicks
+          data={data}
+          onClose={() => setGymOpen(false)}
+          onPickSpecies={(s) => {
+            setGymOpen(false);
             setDetail(s);
           }}
         />
