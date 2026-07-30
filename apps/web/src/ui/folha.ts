@@ -34,11 +34,22 @@ export function useFolha(onClose: () => void): {
   /**
    * Sai animado e SO ENTAO faz outra coisa.
    *
-   * Existe porque nem toda saida e um "voltar": no Modo Pokedex, tocar num
-   * resultado abre a ficha da especie e tocar em CAPTURADOS abre a colecao —
-   * nos dois casos quem desmonta o aparelho e o componente de cima, que nao
-   * sabe que ha uma animacao em curso. Sem isto, dois dos caminhos de saida
-   * continuariam piscando enquanto o terceiro desliza.
+   * ⚠️ TODA SAIDA QUE PASSA POR CALLBACK DO PAI PRECISA DISTO, e a lista abaixo
+   * so ficou completa na segunda passada — o que ja diz o quanto e facil
+   * esquecer uma.
+   *
+   * Nem toda saida e um "voltar". Quando a folha entrega um resultado, quem a
+   * desmonta e o componente de cima, que nao sabe que ha animacao em curso:
+   *
+   *   · Modo Pokedex     tocar num resultado abre a ficha da especie
+   *   · Modo Pokedex     tocar em CAPTURADOS abre a colecao
+   *   · Monta um time    tocar num membro abre a ficha dele
+   *   · Ginasio          idem
+   *   · Escolher especie escolher e o proprio objetivo da folha
+   *
+   * O sintoma e traicoeiro porque e PARCIAL: o botao de voltar desliza bonito
+   * e a acao principal pisca. Da pra usar o app por semanas achando que a
+   * animacao "as vezes nao pega".
    */
   sair: (depois: () => void) => void;
 } {

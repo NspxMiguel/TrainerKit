@@ -17,7 +17,7 @@ export function SpeciesPicker({ data, onPick, onClose }: Props) {
   /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
      caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
      escape volta a piscar, e so aquele. */
-  const { saindo, fechar } = useFolha(onClose);
+  const { saindo, fechar, sair } = useFolha(onClose);
 
   const { t } = useT();
   // Trava o scroll do fundo enquanto a folha esta aberta.
@@ -49,7 +49,12 @@ export function SpeciesPicker({ data, onPick, onClose }: Props) {
       </header>
       <h1 className="tk-h1">{t("pokedex.whichPokemon")}</h1>
 
-      <SpeciesBrowser data={data} onPick={onPick} simple />
+      {/* Escolher tambem e SAIR desta folha — quem a desmonta e o componente de
+          cima, que nao sabe da animacao. Sem `sair`, escolher uma especie
+          fazia a folha piscar enquanto voltar deslizava. Mesma armadilha do
+          Modo Pokedex, e a terceira vez que ela aparece: toda saida que passa
+          por callback do pai precisa disto. */}
+      <SpeciesBrowser data={data} onPick={(s) => sair(() => onPick(s))} simple />
     </div>,
     document.body,
   );
