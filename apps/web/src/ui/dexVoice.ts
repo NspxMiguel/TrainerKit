@@ -39,6 +39,33 @@ import { synthesize, ttsAvailable } from "../ai/tts.ts";
 /** Preferencia guardada: quem nao quer voz nao deveria ter que desligar sempre. */
 const VOICE_KEY = "tk:dex-voz";
 
+/**
+ * A voz ESCOLHIDA na mao, quando ha uma.
+ *
+ * A pontuacao automatica acerta na maioria dos aparelhos, mas gosto de voz e
+ * gosto — e o Miguel pediu pra poder escolher. Guardado por `voiceURI`, nao por
+ * nome: dois aparelhos podem ter vozes de nome igual e `voiceURI` e o
+ * identificador de verdade.
+ */
+const VOICE_PICK_KEY = "tk:dex-voz-escolhida";
+
+export function getPickedVoiceUri(): string | null {
+  try {
+    return globalThis.localStorage?.getItem(VOICE_PICK_KEY) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export function setPickedVoiceUri(uri: string | null): void {
+  try {
+    if (uri === null) globalThis.localStorage?.removeItem(VOICE_PICK_KEY);
+    else globalThis.localStorage?.setItem(VOICE_PICK_KEY, uri);
+  } catch {
+    /* preferencia nao persistida vale mais que app quebrado */
+  }
+}
+
 export function voiceOn(): boolean {
   try {
     return globalThis.localStorage?.getItem(VOICE_KEY) !== "0";
@@ -158,6 +185,14 @@ function pickVoice(language: string): SpeechSynthesisVoice | null {
   const vozes = globalThis.speechSynthesis?.getVoices() ?? [];
   if (vozes.length === 0) return null;
 
+  // Escolha manual ganha da automatica. Se a voz sumiu (trocou de aparelho,
+  // desinstalou), cai na pontuacao em vez de ficar muda.
+  const escolhida = getPickedVoiceUri();
+  if (escolhida !== null) {
+    const achada = vozes.find((v) => v.voiceURI === escolhida);
+    if (achada) return achada;
+  }
+
   let melhor: SpeechSynthesisVoice | null = null;
   let melhorNota = -Infinity;
   for (const v of vozes) {
@@ -173,6 +208,74 @@ function pickVoice(language: string): SpeechSynthesisVoice | null {
 /** Qual voz o app escolheu, pra tela poder mostrar. */
 export function chosenVoiceName(language: string): string | null {
   return pickVoice(language)?.name ?? null;
+}
+
+export interface VoiceOption {
+  uri: string;
+  name: string;
+  lang: string;
+  /** A que a pontuacao escolheria sozinha. */
+  recommended: boolean;
+}
+
+/**
+ * As vozes que valem a pena oferecer, na ordem em que valem.
+ *
+ * As caricatas ficam de FORA da lista, nao no fim: oferecer "Grandpa" pra ler
+ * uma ficha de Pokemon nao e opcao, e ninguem que escolhesse ela ficaria
+ * satisfeito. Se a pessoa quiser mesmo, o sistema dela tem esse ajuste.
+ */
+export function listVoices(language: string): VoiceOption[] {
+  const vozes = globalThis.speechSynthesis?.getVoices() ?? [];
+  const melhor = pickVoiceAuto(language);
+
+  return vozes
+    .map((v) => ({ v, nota: notaDaVoz(v, language) }))
+    .filter((x) => x.nota > -1000)
+    .sort((a, b) => b.nota - a.nota)
+    .map(({ v }) => ({
+      uri: v.voiceURI,
+      name: v.name,
+      lang: v.lang,
+      recommended: v.voiceURI === melhor?.voiceURI,
+    }));
+}
+
+/** A escolha automatica, ignorando a manual. Usada pra marcar a recomendada. */
+function pickVoiceAuto(language: string): SpeechSynthesisVoice | null {
+  const vozes = globalThis.speechSynthesis?.getVoices() ?? [];
+  let melhor: SpeechSynthesisVoice | null = null;
+  let melhorNota = -Infinity;
+  for (const v of vozes) {
+    const nota = notaDaVoz(v, language);
+    if (nota > melhorNota) {
+      melhorNota = nota;
+      melhor = v;
+    }
+  }
+  return melhorNota <= -1000 ? null : melhor;
+}
+
+/**
+ * Toca uma frase curta com UMA voz especifica, pra pessoa ouvir antes de decidir.
+ *
+ * "reproduzindo previas ao clicar em cima de um" — sem isso a escolha e as
+ * cegas: nomes como "Luciana" e "Joana" nao dizem nada sobre como soam.
+ */
+export function previewVoice(uri: string, texto: string): void {
+  const synth = globalThis.speechSynthesis;
+  if (!synth) return;
+  synth.cancel();
+
+  const voz = synth.getVoices().find((v) => v.voiceURI === uri);
+  const u = new SpeechSynthesisUtterance(texto);
+  if (voz) {
+    u.voice = voz;
+    u.lang = voz.lang;
+  }
+  u.rate = 0.88;
+  u.pitch = 0.85;
+  synth.speak(u);
 }
 
 export function stopSpeaking(): void {
