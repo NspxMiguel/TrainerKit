@@ -152,6 +152,56 @@ export default async function handler(req: Request): Promise<Response> {
    * Devolve só o número. Nada da resposta da ElevenLabs (plano, e-mail, id de
    * usuário, datas) trafega — não serve pro app e é dado da conta dele.
    */
+  /*
+   * `?vozes=1` — a lista, com idioma e prévia.
+   *
+   * O Miguel: "eleven labs nao tem função de testar vozes... e as vozes nao tao
+   * em portugues, tao em outra lingua. (…) la no eleven labs fala pra qual
+   * lingua q é cada voz."
+   *
+   * Ele está certo nas duas. Eu cravei seis ids de cabeça (Rachel, Domi, Sarah,
+   * Josh, Arnold, Adam) — que são todas vozes INGLESAS — e a tela mostrava só o
+   * nome, sem idioma e sem como ouvir. Escolher voz lendo "Domi" é escolher às
+   * cegas.
+   *
+   * A ElevenLabs já responde as duas coisas: `labels.accent` / `verified_languages`
+   * dizem a língua, e `preview_url` é um MP3 pronto que NÃO consome crédito
+   * nenhum. Ou seja: dá pra ouvir antes de gastar.
+   *
+   * Só o que a tela usa sai daqui. Nada de id de usuário, plano ou datas.
+   */
+  if (req.method === "GET" && new URL(req.url).searchParams.has("vozes")) {
+    const res = await fetch("https://api.elevenlabs.io/v2/voices?page_size=100", {
+      headers: { "xi-api-key": chave },
+    });
+    if (!res.ok) {
+      const t = await res.text().catch(() => "");
+      return json({ error: `elevenlabs ${res.status}: ${t.slice(0, 160)}` }, res.status);
+    }
+    const d = (await res.json()) as {
+      voices?: Array<{
+        voice_id?: string;
+        name?: string;
+        preview_url?: string;
+        labels?: Record<string, string>;
+        verified_languages?: Array<{ language?: string; accent?: string }>;
+      }>;
+    };
+    return json(
+      {
+        voices: (d.voices ?? []).map((v) => ({
+          id: v.voice_id,
+          name: v.name,
+          preview: v.preview_url,
+          accent: v.labels?.accent ?? null,
+          gender: v.labels?.gender ?? null,
+          langs: [...new Set((v.verified_languages ?? []).map((l) => l.language).filter(Boolean))],
+        })),
+      },
+      200,
+    );
+  }
+
   if (req.method === "GET") {
     const { resta, motivo } = await creditosRestantes(chave);
     return json(

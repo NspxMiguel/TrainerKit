@@ -1,4 +1,5 @@
 import { getGroqKey } from "./groq.ts";
+import { AI_PROXY, getProvider } from "./provider.ts";
 
 /**
  * "Que Pokemon e esse?" a partir de uma imagem.
@@ -64,7 +65,18 @@ function toDataUrl(file: File): Promise<string> {
 }
 
 export function visionAvailable(): boolean {
-  return getGroqKey() !== null;
+  /*
+   * ⚠️ Isto dizia `getGroqKey() !== null` — ou seja, a foto SÓ funcionava com
+   * chave própria, e a tela mandava "Falta a chave da Groq" mesmo com a IA
+   * grátis ligada e respondendo o resto do app. O Miguel mandou o print e a
+   * frase: "ao invez de aparecer coloca a chave do groq, usa api free ne".
+   *
+   * Ele estava certo, e o conserto de verdade foi no servidor: a função agora
+   * aceita conteúdo com imagem e o `qwen/qwen3.6-27b` entrou no allowlist.
+   * Verificado contra produção com um sprite real — devolveu "Pikachu".
+   */
+  const p = getProvider();
+  return p === "groq" ? getGroqKey() !== null : p === "shared";
 }
 
 /**
@@ -79,15 +91,22 @@ export async function identifySpecies(
   signal?: AbortSignal,
 ): Promise<string | null> {
   const chave = getGroqKey();
-  if (!chave) throw new Error("sem-chave");
+  const compartilhada = getProvider() === "shared";
+  if (!chave && !compartilhada) throw new Error("sem-chave");
 
   const dataUrl = await toDataUrl(file);
 
-  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+  /*
+   * Compartilhada passa pela FUNÇÃO; chave própria vai direto.
+   *
+   * O corpo é o mesmo nos dois casos — a função repassa o que recebe. A
+   * diferença é só quem carrega a chave, e por isso a URL e o cabeçalho mudam.
+   */
+  const res = await fetch(compartilhada ? AI_PROXY : "https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${chave}`,
+      ...(compartilhada ? {} : { Authorization: `Bearer ${chave}` }),
     },
     body: JSON.stringify({
       model: VISION_MODEL,
@@ -103,7 +122,16 @@ export async function identifySpecies(
        * nada mais; com `none`, veio "Charizard" e ponto.
        */
       reasoning_effort: "none",
-      max_tokens: 40,
+      /*
+       * Os dois nomes, de propósito: a Groq lê `max_tokens` e a minha função lê
+       * `maxTokens`. Mandar só um funcionava num caminho e falhava no outro.
+       *
+       * 400, não 40: com o raciocínio escondido pela função, o modelo gasta
+       * tokens pensando antes de responder. Com 40 a resposta voltou VAZIA —
+       * medido contra produção.
+       */
+      max_tokens: 400,
+      maxTokens: 400,
       messages: [
         { role: "system", content: SYSTEM },
         {

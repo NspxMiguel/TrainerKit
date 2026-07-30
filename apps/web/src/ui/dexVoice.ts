@@ -79,6 +79,35 @@ const KOKORO_PICK_KEY = "tk:dex-voz-kokoro";
  */
 const NEURAL_KEY = "tk:dex-voz-neural";
 
+/**
+ * A ESCOLHA, uma só, no formato `motor:id`.
+ *
+ * Substitui quatro preferências independentes — uma por motor — que juntas
+ * respondiam a uma pergunta só ("qual voz lê a ficha?") e por isso deixavam a
+ * tela com ~30 opções e nenhuma resposta clara. Ver `ai/vozes.ts`.
+ *
+ * Vazio = ninguém escolheu, e aí vale a ordem automática: a primeira
+ * recomendada pro idioma da tela.
+ */
+const ESCOLHA_KEY = "tk:dex-voz-v2";
+
+export function vozEscolhida(): string | null {
+  try {
+    return globalThis.localStorage?.getItem(ESCOLHA_KEY) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export function setVozEscolhida(chave: string | null): void {
+  try {
+    if (chave === null) globalThis.localStorage?.removeItem(ESCOLHA_KEY);
+    else globalThis.localStorage?.setItem(ESCOLHA_KEY, chave);
+  } catch {
+    /* preferencia nao persistida vale mais que app quebrado */
+  }
+}
+
 export function neuralOn(): boolean {
   try {
     return globalThis.localStorage?.getItem(NEURAL_KEY) !== "0";
@@ -392,56 +421,52 @@ export async function speak(text: string, language: string): Promise<void> {
   stopSpeaking();
 
   /*
-   * A ordem: Kokoro, neural, ElevenLabs, Groq, sistema.
+   * UMA voz escolhida, e um caminho pra ela.
    *
-   * Kokoro primeiro porque e a melhor E a mais barata das que rodam sem conta:
-   * no aparelho, sem chave, sem rede, sem cota. So entra se JA estiver
-   * carregado — `speak` nunca dispara um download por conta propria, isso e
-   * decisao de quem aperta o botao nos Ajustes. E so serve ingles.
+   * Antes isto era uma cascata de quatro `if`s, cada um consultando o
+   * interruptor do seu motor: Kokoro carregado? neural ligada? ElevenLabs com
+   * chave? Funcionava, mas ninguém conseguia prever qual voz ia sair — e a tela
+   * de Ajustes tinha que expor os quatro interruptores pra a pessoa ter alguma
+   * chance de controlar o resultado. Era a origem do "totalmente confuso".
    *
-   * A NEURAL (`edgeTts`) vem logo depois, e e a que resolveu o problema: voz
-   * humana em portugues, sem chave, sem conta e sem download. Ela nao vem em
-   * primeiro so porque o Kokoro, quando ja esta carregado, nao usa rede nenhuma
-   * — e voz instantanea e offline ganha de voz que depende de um servidor.
-   *
-   * ElevenLabs COMPARTILHADA vem antes da neural, mas SO se alguem ligou nos
-   * Ajustes — ela nunca entra por conta propria. Sao ~50 leituras por MES pra
-   * todo mundo somado (ver `api/tts11.ts`), e cota assim morre no dia 2 se o app
-   * gastar sem ninguem pedir. Ligou, e porque quis.
-   *
-   * ElevenLabs com CHAVE PROPRIA em seguida: a mesma voz, sem disputar cota com
-   * ninguem.
-   *
-   * O sistema fica por ultimo e nunca deixa de existir: se tudo falhar — sem
-   * rede, cota estourada, chave errada, ou a Microsoft fechando a porta — a
-   * Pokedex fala assim mesmo. E por isso que nenhuma dessas quatro pode ser a
-   * unica.
+   * Agora: a pessoa escolhe UMA voz, e a cascata só existe como PLANO B, pra
+   * quando a escolhida falha (rede caiu, cota acabou, modelo não carregou).
+   * Nunca fica muda — mas também nunca troca de voz sem motivo.
    */
-  if (kokoroReady() && kokoroSupports(language)) {
+  const escolha = vozEscolhida();
+  if (escolha) {
+    const [motor, ...resto] = escolha.split(":");
+    const id = resto.join(":");
     try {
-      const voz = getKokoroVoice() ?? undefined;
-      const blob = await kokoroSynthesize(text, voz ?? defaultKokoroVoice(language));
-      await tocarBlob(blob);
-      ultimoErroTts = null;
-      return;
+      const blob = await porMotor(motor ?? "", id, text, language);
+      if (blob) {
+        await tocarBlob(blob);
+        ultimoErroTts = null;
+        return;
+      }
+      if (motor === "sistema") {
+        await speakWithSystem(text, language, id);
+        ultimoErroTts = null;
+        return;
+      }
     } catch (e) {
+      // Guarda e cai pro plano B. Ficar mudo porque a voz escolhida falhou
+      // seria pior que falar com outra.
       ultimoErroTts = e instanceof Error ? e.message : String(e);
     }
   }
 
   /*
-   * As tres vozes de rede passam pelo CACHE.
+   * PLANO B, na ordem de quem tem menos chance de falhar de novo.
    *
-   * `comCache` procura antes de gerar e guarda depois. Reouvir a mesma ficha
-   * deixa de custar cota — e essa e a economia de verdade numa cota pequena.
-   * Kokoro fica de fora porque roda no aparelho: guardar o que ja e gratis so
-   * ocuparia disco.
+   * Kokoro primeiro quando já está carregado: é a única que não usa rede. Depois
+   * a neural, que é grátis e sem cota. A ElevenLabs NÃO entra aqui — ela custa
+   * de um bolo de ~50 leituras por mês pra todo mundo, e gastar isso num
+   * fallback que ninguém pediu é como essa cota morre no dia 2.
    */
-  if (elevenSharedOn()) {
+  if (kokoroReady() && kokoroSupports(language)) {
     try {
-      const blob = await comCache("11-share", getSharedVoice(), text, () =>
-        elevenSharedSynthesize(text),
-      );
+      const blob = await kokoroSynthesize(text, getKokoroVoice() ?? defaultKokoroVoice(language));
       await tocarBlob(blob);
       ultimoErroTts = null;
       return;
@@ -450,18 +475,7 @@ export async function speak(text: string, language: string): Promise<void> {
     }
   }
 
-  if (elevenAvailable()) {
-    try {
-      const blob = await comCache("11-user", "user", text, () => elevenSynthesize(text));
-      await tocarBlob(blob);
-      ultimoErroTts = null;
-      return;
-    } catch (e) {
-      ultimoErroTts = e instanceof Error ? e.message : String(e);
-    }
-  }
-
-  if (neuralOn() && edgeSupports(language)) {
+  if (edgeSupports(language)) {
     try {
       const blob = await comCache("edge", getEdgeVoice(language), text, () =>
         edgeSynthesize(text, language),
@@ -474,20 +488,33 @@ export async function speak(text: string, language: string): Promise<void> {
     }
   }
 
-  if (ttsAvailable(language)) {
-    try {
-      const blob = await synthesize(text);
-      ultimoErroTts = null;
-      await tocarBlob(blob);
-      return;
-    } catch (e) {
-      // Guarda e cai pro sistema. Ficar muda porque a nuvem falhou seria pior
-      // que falar com voz feia.
-      ultimoErroTts = e instanceof Error ? e.message : String(e);
-    }
-  }
-
   await speakWithSystem(text, language);
+}
+
+/**
+ * Gera pelo motor pedido. `null` = este motor não gera Blob (é o do sistema,
+ * que fala direto pelo navegador e não devolve áudio).
+ */
+async function porMotor(
+  motor: string,
+  id: string,
+  texto: string,
+  idioma: string,
+): Promise<Blob | null> {
+  switch (motor) {
+    case "edge":
+      return comCache("edge", id, texto, () => edgeSynthesize(texto, idioma));
+    case "kokoro":
+      return kokoroSynthesize(texto, id);
+    case "eleven-share":
+      return comCache("11-share", id, texto, () => elevenSharedSynthesize(texto));
+    case "eleven-user":
+      return comCache("11-user", id, texto, () => elevenSynthesize(texto));
+    case "sistema":
+      return null;
+    default:
+      throw new Error(`motor desconhecido: ${motor}`);
+  }
 }
 
 /**
@@ -544,7 +571,12 @@ async function tocarBlob(blob: Blob): Promise<void> {
  * abaixo de 0.8 vira paródia, acima de 1 vira assistente de banco. Nao conserta
  * o timbre (isso e do sistema), so o ritmo.
  */
-async function speakWithSystem(text: string, language: string): Promise<void> {
+async function speakWithSystem(
+  text: string,
+  language: string,
+  /** `voiceURI` específico, quando a pessoa escolheu uma voz do sistema. */
+  uri?: string,
+): Promise<void> {
   const synth = globalThis.speechSynthesis;
   if (!synth) return;
 
@@ -555,7 +587,10 @@ async function speakWithSystem(text: string, language: string): Promise<void> {
     u.lang = language;
     u.rate = 0.88;
     u.pitch = 0.85;
-    const voz = pickVoice(language);
+    // A escolhida ganha de `pickVoice`, que é só o palpite automático.
+    const voz =
+      (uri ? (synth.getVoices().find((v) => v.voiceURI === uri) ?? null) : null) ??
+      pickVoice(language);
     if (voz) u.voice = voz;
 
     // Resolve nos dois casos: `onerror` dispara quando a aba perde o foco no

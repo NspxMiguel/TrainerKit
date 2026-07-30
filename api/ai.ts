@@ -49,7 +49,22 @@
 import { filtrar } from "./_guarda";
 
 /** Modelos que esta funcao aceita. Fora desta lista, 400. */
-const PERMITIDOS = new Set(["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]);
+const PERMITIDOS = new Set([
+  "llama-3.3-70b-versatile",
+  "llama-3.1-8b-instant",
+  /*
+   * Modelos que ENXERGAM, pra a identificacao por foto da Pokedex funcionar na
+   * chave gratuita.
+   *
+   * Sem isto, `vision.ts` falava direto com a Groq usando a chave DO USUARIO — e
+   * a tela dizia "Falta a chave da Groq" mesmo com a IA gratis ligada e
+   * funcionando pro resto. O Miguel viu isso no proprio print: "ao invez de
+   * aparecer coloca a chave do groq, usa api free ne".
+   */
+  "meta-llama/llama-4-scout-17b-16e-instruct",
+  "meta-llama/llama-4-maverick-17b-128e-instruct",
+  "qwen/qwen3.6-27b",
+]);
 
 /**
  * ⚠️ O FURO QUE ISTO FECHA, e como ele apareceu.
@@ -98,12 +113,19 @@ const GUARDA_SISTEMA =
 function textoDoUsuario(messages: Mensagem[]): string {
   return messages
     .filter((m) => m.role !== "system")
-    .map((m) => (typeof m.content === "string" ? m.content : ""))
+    .map(textoDe)
     .join("\n");
 }
 
-/** Teto de entrada. A colecao inteira em contexto da ~6.000; 12.000 e folga. */
+/** Teto de entrada em texto. A colecao inteira em contexto da ~6.000. */
 const MAX_CHARS = 12_000;
+
+/**
+ * Teto quando ha imagem. Uma foto de celular em base64 passa de 1 MB fácil, e
+ * `MAX_CHARS` recusaria toda foto — mas sem teto nenhum a funcao vira upload
+ * aberto. 6 MB cobre uma foto comprimida com folga.
+ */
+const MAX_CHARS_IMAGEM = 6_000_000;
 
 /** Teto de saida. As telas do app pedem no maximo 320. */
 const MAX_TOKENS = 400;
@@ -132,9 +154,40 @@ function excedeu(ip: string): boolean {
   return atual.n > POR_JANELA;
 }
 
+/**
+ * `content` e string OU lista de partes (texto + imagem).
+ *
+ * O formato multimodal da OpenAI/Groq manda `[{type:"text"...},{type:"image_url"...}]`,
+ * e todo lugar que assumia string quebrava calado com ele: o calculo de tamanho
+ * somava `undefined` e o porteiro recebia "" — ou seja, imagem passava sem
+ * NENHUMA checagem de tamanho nem de assunto.
+ */
+type Parte = { type: "text"; text?: string } | { type: "image_url"; image_url?: { url?: string } };
+
 interface Mensagem {
   role: "system" | "user" | "assistant";
-  content: string;
+  content: string | Parte[];
+}
+
+/** O texto de uma mensagem, seja ela simples ou multimodal. */
+function textoDe(m: Mensagem): string {
+  if (typeof m.content === "string") return m.content;
+  if (!Array.isArray(m.content)) return "";
+  return m.content
+    .map((p) => (p.type === "text" ? (p.text ?? "") : ""))
+    .join(" ");
+}
+
+/** Tamanho real, contando a imagem em base64 — que e o que pesa de verdade. */
+function tamanhoDe(m: Mensagem): number {
+  if (typeof m.content === "string") return m.content.length;
+  if (!Array.isArray(m.content)) return 0;
+  return m.content.reduce(
+    (n, p) =>
+      n +
+      (p.type === "text" ? (p.text?.length ?? 0) : (p.image_url?.url?.length ?? 0)),
+    0,
+  );
 }
 
 /*
@@ -215,8 +268,13 @@ export default async function handler(req: Request): Promise<Response> {
     return json({ error: "messages ausente" }, 400);
   }
 
-  const total = messages.reduce((n, m) => n + (typeof m.content === "string" ? m.content.length : 0), 0);
-  if (total > MAX_CHARS) return json({ error: "pergunta grande demais" }, 413);
+  const total = messages.reduce((n, m) => n + tamanhoDe(m), 0);
+  const temImagem = messages.some(
+    (m) => Array.isArray(m.content) && m.content.some((p) => p.type === "image_url"),
+  );
+  if (total > (temImagem ? MAX_CHARS_IMAGEM : MAX_CHARS)) {
+    return json({ error: "pergunta grande demais" }, 413);
+  }
 
   // O porteiro, agora do lado que ninguem pode pular. Ver a nota em GUARDA_SISTEMA.
   const veredito = filtrar(textoDoUsuario(messages));
@@ -242,6 +300,19 @@ export default async function handler(req: Request): Promise<Response> {
        * furar a regex, encontra um modelo ja instruido a recusar.
        */
       messages: [{ role: "system", content: GUARDA_SISTEMA }, ...messages],
+      /*
+       * `reasoning_format: "hidden"` nos modelos que pensam em voz alta.
+       *
+       * O `qwen/qwen3.6-27b` (o unico com visao que a chave alcanca) devolvia a
+       * resposta assim:
+       *
+       *   "<think>\nThe user wants me to identify the Pokemon.\nThe image shows
+       *    Pikachu.\nThe user requested the English name only.\nI need"
+       *
+       * Ou seja: o raciocinio inteiro no lugar do nome, e o teto de tokens
+       * cortando antes da resposta. `hidden` faz a Groq devolver so a conclusao.
+       */
+      ...(modelo.startsWith("qwen/") ? { reasoning_format: "hidden" } : {}),
     }),
   });
 
