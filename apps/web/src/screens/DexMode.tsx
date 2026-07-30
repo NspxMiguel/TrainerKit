@@ -9,7 +9,10 @@ import { fold } from "../data/fold.ts";
 import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
 import { useLanguage } from "../i18n/language.ts";
 import { useT, type Key } from "../i18n/t.ts";
+import { useSetup } from "../onboarding/setup.ts";
 import { typeColor, typeKey } from "../sprites/provider.ts";
+import { useCollection } from "../storage/collection.ts";
+import { markSeen, useSeenCount, wasSeen } from "../storage/seen.ts";
 import { IconCamera, IconSearch } from "../ui/Icons.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 import { beep, setVoiceOn, speak, speechSupported, stopSpeaking, voiceOn } from "../ui/dexVoice.ts";
@@ -26,29 +29,35 @@ const LIGAS = ["great", "ultra", "master"] as const;
 /**
  * Modo Pokedex.
  *
- * A ideia do Miguel, em maiuscula porque ele escreveu assim: "PODERIA FUNCIONAR
- * IGUAL UMA POKEDEX DA SERIE, VC APONTA PRO POKEMON, MANDA PRINT E ETC, E PODE
- * FAZER PERGUNTAS, TALVEZ COM ALGUMA IA AVANÇADA, ATÉ IMITAR A VOZ DA POKEDEX
- * ORIGINAL".
+ * "quero q pareça muito com uma pokedex, até em aparencia, em funcionalidades e
+ * etc". Duas frentes, e as duas estao aqui:
  *
- * O que a Pokedex da serie faz, e o que dá pra fazer aqui:
+ * APARENCIA — a tela e um APARELHO, nao uma pagina: carcaça, lente redonda com
+ * as tres luzinhas, visor com scanline, grade de alto-falante e os botoes de
+ * navegacao embaixo. Ver `.tk-dexdev` no CSS.
  *
- *   APONTA      camera ou print. Precisa de modelo que enxergue, e so a Groq
- *               tem — os que rodam no aparelho sao de texto. A tela diz isso.
- *   IDENTIFICA  o nome que o modelo devolve e CASADO contra o dataset antes de
- *               valer. Sem casar, "sem dados" — nunca a ficha do bicho errado.
- *   ANUNCIA     em voz, com a cadencia de aparelho. Ver `dexVoice.ts`.
- *   CONVERSA    campo de pergunta, respondido com a ficha como contexto.
+ *   ⚠️ E por isso o `data-skin`: o desenho do aparelho e prop da Nintendo/TPC,
+ *   nao dado de jogo. Vale a mesma decisao dos sprites — build pessoal, sem
+ *   publicar. Trocar `data-skin="device"` por `"plain"` devolve o visual autoral
+ *   e nada mais quebra. Fica um atributo, nao uma refatoracao.
  *
- * ⚠️ O texto da ficha e ESCRITO PELO APP, a partir do que o app calculou. As
- * descricoes do jogo ("Machamp tem quatro braços que se movem tão rápido…") sao
- * obra criativa da Pokemon Company e nao entram aqui. Isso saiu melhor do que
- * copiar: "entre os atacantes de Lutador, é o quarto melhor para raides" muda a
- * decisao de quem joga hoje; a descricao original e bonita e nao serve pra nada.
+ * FUNCIONALIDADE — o que uma Pokedex de verdade faz:
+ *   · registra VISTOS separado de CAPTURADOS, e mostra os dois contadores
+ *   · navega POR NUMERO, com anterior e proximo
+ *   · le a ficha em voz alta
+ *   · identifica pela camera ou por print
+ *   · aceita pergunta sobre o que esta na tela
+ *
+ * O texto da ficha continua ESCRITO PELO APP a partir do que ele calculou. As
+ * descricoes do jogo sao obra escrita e nao entram — e a troca saiu boa: altura,
+ * peso e "é o 17º atacante de Dragão" e o que muda a decisao de hoje.
  */
 export function DexMode({ data, onClose, onOpenSpecies }: Props) {
   const { t } = useT();
   const language = useLanguage();
+  const { items } = useCollection();
+  const setup = useSetup();
+  const vistos = useSeenCount();
   const [busca, setBusca] = useState("");
   const [alvo, setAlvo] = useState<DatasetSpecies | null>(null);
   const [lendo, setLendo] = useState(false);
@@ -79,19 +88,44 @@ export function DexMode({ data, onClose, onOpenSpecies }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  /** Sugestoes por nome. Formas cosmeticas ficam fora: mesmos stats, so poluem. */
+  /**
+   * A lista navegavel, em ordem de numero.
+   *
+   * E o que permite anterior/proximo: uma Pokedex e uma lista ordenada, e pular
+   * de bicho em bicho e metade do prazer de ter uma. Formas cosmeticas ficam
+   * fora — dezoito Unown com a mesma ficha nao e navegacao, e ruido.
+   */
+  const ordenadas = useMemo(
+    () =>
+      data.species
+        .filter((s) => s.cosmeticOf === null)
+        .sort((a, b) => a.dex - b.dex || a.id.localeCompare(b.id)),
+    [data.species],
+  );
+
+  /** Registra como visto ao abrir a ficha. E o que a Pokedex do jogo faz. */
+  useEffect(() => {
+    if (alvo) markSeen(alvo.id);
+  }, [alvo]);
+
+  const capturados = useMemo(() => {
+    if (setup.mode !== "colecao") return 0;
+    return new Set((items ?? []).map((o) => o.speciesId)).size;
+  }, [items, setup.mode]);
+
+  /** Sugestoes por nome. */
   const sugestoes = useMemo(() => {
     const q = fold(busca);
     if (q.length < 2) return [];
-    return data.species
-      .filter((s) => s.cosmeticOf === null && fold(s.name).includes(q))
+    return ordenadas
+      .filter((s) => fold(s.name).includes(q))
       .sort((a, b) => {
         const ai = fold(a.name).startsWith(q) ? 0 : 1;
         const bi = fold(b.name).startsWith(q) ? 0 : 1;
         return ai - bi || a.dex - b.dex;
       })
       .slice(0, 6);
-  }, [busca, data.species]);
+  }, [busca, ordenadas]);
 
   /** A ficha, calculada. Nada aqui vem de texto do jogo. */
   const ficha = useMemo((): DexEntry | null => {
@@ -129,16 +163,36 @@ export function DexMode({ data, onClose, onOpenSpecies }: Props) {
    *
    * Cada linha e uma chave de idioma com parametro — o app fala dez idiomas, e
    * concatenar pedaco de frase em codigo quebra em metade deles. A ordem imita a
-   * do aparelho da serie: nome e numero, tipo, o que ele e, e depois os numeros.
+   * do aparelho da serie: nome e numero, tipo, o que ele e, medidas, e o resto.
    */
   const locucao = useMemo((): string[] => {
-    if (!ficha) return [];
+    if (!ficha || !alvo) return [];
 
     const nomeTipo = (tp: string) => t(typeKey(tp) as "type.normal");
     const linhas = [
       t("dex.line.name", { name: ficha.name, dex: ficha.dexNumber }),
       t("dex.line.types", { types: ficha.types.map(nomeTipo).join(" / ") }),
       t(`dex.build.${ficha.build}` as Key),
+    ];
+
+    // Altura e peso, quando a base tem. Sao medidas, e por isso podem estar aqui:
+    // a diferenca entre fato e obra escrita e o que decide o que este app copia.
+    if (alvo.heightDm != null && alvo.weightHg != null) {
+      linhas.push(
+        t("dex.line.size", {
+          height: (alvo.heightDm / 10).toLocaleString(language, {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1,
+          }),
+          weight: (alvo.weightHg / 10).toLocaleString(language, {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1,
+          }),
+        }),
+      );
+    }
+
+    linhas.push(
       t("dex.line.stats", {
         atk: ficha.baseStats.atk,
         def: ficha.baseStats.def,
@@ -149,7 +203,7 @@ export function DexMode({ data, onClose, onOpenSpecies }: Props) {
         level: data.version.levelCap,
       }),
       ficha.evolves ? t("dex.line.evolves") : t("dex.line.final"),
-    ];
+    );
 
     // Ranking so entra quando ele EXISTE na lista. Elogio inventado destruiria a
     // unica coisa que faz o resto do app valer: os numeros serem conferiveis.
@@ -171,7 +225,7 @@ export function DexMode({ data, onClose, onOpenSpecies }: Props) {
     }
 
     return linhas;
-  }, [ficha, t, language, data.version.levelCap]);
+  }, [ficha, alvo, t, language, data.version.levelCap]);
 
   /** Anuncia: bipe, depois a locucao inteira como um texto so. */
   const anunciar = async (linhas: string[]) => {
@@ -181,11 +235,23 @@ export function DexMode({ data, onClose, onOpenSpecies }: Props) {
   };
 
   const escolher = (s: DatasetSpecies) => {
+    stopSpeaking();
     setAlvo(s);
     setBusca("");
     setSemDados(false);
     setErro(null);
     setResposta(null);
+  };
+
+  /** Anterior e proximo por numero — navegacao de Pokedex de verdade. */
+  const pular = (passo: number) => {
+    if (!alvo) return;
+    const i = ordenadas.findIndex((s) => s.id === alvo.id);
+    if (i < 0) return;
+    // Circular: do ultimo pro primeiro. Beco sem saida no fim da lista seria pior
+    // que dar a volta.
+    const proximo = ordenadas[(i + passo + ordenadas.length) % ordenadas.length];
+    if (proximo) escolher(proximo);
   };
 
   /* ----------------------------------------------------------- pela foto */
@@ -206,14 +272,14 @@ export function DexMode({ data, onClose, onOpenSpecies }: Props) {
       // devolver um nome que nao existe, e ai a resposta certa e "sem dados".
       const chave = fold(nome);
       const achou =
-        data.species.find((s) => s.cosmeticOf === null && fold(s.name) === chave) ??
-        data.species.find((s) => s.cosmeticOf === null && fold(s.name).startsWith(chave));
+        ordenadas.find((s) => fold(s.name) === chave) ??
+        ordenadas.find((s) => fold(s.name).startsWith(chave));
 
       if (!achou) {
         setSemDados(true);
         return;
       }
-      setAlvo(achou);
+      escolher(achou);
     } catch (e) {
       setErro(e instanceof Error ? e.message : String(e));
     } finally {
@@ -258,76 +324,211 @@ Regras rígidas:
     }
   };
 
-  const cor = alvo ? typeColor(alvo.types[0] ?? "normal") : "var(--tk-dang)";
+  const cor = alvo ? typeColor(alvo.types[0] ?? "normal") : "#6b7280";
+  const jaTenho = alvo !== null && (items ?? []).some((o) => o.speciesId === alvo.id);
 
   return createPortal(
     <div
       className="tk-dex"
+      /*
+       * A casca do aparelho. Trocar por "plain" devolve o visual autoral do app
+       * — e o que uma build publicavel usaria, pelo mesmo motivo dos sprites.
+       */
+      data-skin="device"
       role="dialog"
       aria-modal="true"
       aria-label={t("dex.title")}
       style={{ ["--tk-dex-type" as string]: cor }}
     >
-      <header className="tk-sheet-head">
+      {/* ------------------------------------------------- a parte de cima */}
+
+      <div className="tk-dexdev-top">
+        {/* A lente grande e as tres luzes. E a assinatura visual do aparelho, e
+            a lente PISCA enquanto ele le — a unica animacao que informa algo. */}
+        <span className="tk-dexdev-lens" data-busy={lendo || pensando || undefined} aria-hidden="true">
+          <span className="tk-dexdev-lens-glint" />
+        </span>
+        <span className="tk-dexdev-leds" aria-hidden="true">
+          <i data-led="red" />
+          <i data-led="yellow" />
+          <i data-led="green" />
+        </span>
+
         <button
           type="button"
-          className="tk-sheet-close"
+          className="tk-dexdev-close"
           onClick={onClose}
           aria-label={t("common.back")}
         >
           ‹
         </button>
-        <h2 className="tk-sheet-title">{t("dex.title")}</h2>
-
-        {/* A luz do aparelho. Pisca enquanto ele "le" — e o unico enfeite da
-            tela, e ele esta dizendo algo: que ha trabalho acontecendo. */}
-        <span className="tk-dex-lamp" data-busy={(lendo || pensando) || undefined} aria-hidden="true" />
-      </header>
-
-      {/* ------------------------------------------------------- a lente */}
-
-      <div className="tk-dex-lens">
-        {alvo ? (
-          <button
-            type="button"
-            className="tk-dex-art"
-            onClick={() => onOpenSpecies(alvo)}
-            aria-label={alvo.name}
-          >
-            <SpeciesTile
-              spriteId={alvo.spriteId}
-              dex={alvo.dex}
-              speciesId={alvo.id}
-              name={alvo.name}
-              types={alvo.types}
-              size={132}
-            />
-          </button>
-        ) : (
-          <div className="tk-dex-empty" aria-hidden="true">
-            <IconCamera size={34} />
-          </div>
-        )}
       </div>
 
-      {/* ------------------------------------------------------ entradas */}
+      {/* O contador de vistos e capturados: a razao de existir uma Pokedex. */}
+      <div className="tk-dexdev-counters">
+        <span>{t("dex.seen", { n: vistos })}</span>
+        {setup.mode === "colecao" && <span>{t("dex.caught", { n: capturados })}</span>}
+      </div>
 
-      {!alvo && (
+      {/* ---------------------------------------------------------- o visor */}
+
+      <div className="tk-dexdev-screen">
+        {alvo ? (
+          <>
+            <button
+              type="button"
+              className="tk-dexdev-art"
+              onClick={() => onOpenSpecies(alvo)}
+              aria-label={alvo.name}
+            >
+              {/* `bare`: dentro do visor a arte fica solta na tela, sem o
+                  selo de gradiente. Com o selo, o bicho aparecia num quadrado
+                  colorido EM CIMA da tela em vez de estar nela. */}
+              <SpeciesTile
+                spriteId={alvo.spriteId}
+                dex={alvo.dex}
+                speciesId={alvo.id}
+                name={alvo.name}
+                types={alvo.types}
+                size={132}
+                bare
+              />
+            </button>
+            {/* Selo de capturado no canto do visor, como o jogo faz. */}
+            {jaTenho && (
+              <span className="tk-dexdev-caught" aria-label={t("dex.caughtMark")}>
+                ●
+              </span>
+            )}
+          </>
+        ) : (
+          <div className="tk-dexdev-idle" aria-hidden="true">
+            <IconCamera size={30} />
+          </div>
+        )}
+        <span className="tk-dexdev-scan" aria-hidden="true" />
+      </div>
+
+      {/* --------------------------------------------------- nome e numero */}
+
+      {ficha && (
+        <div className="tk-dexdev-plate">
+          <span className="tk-dexdev-num">Nº {ficha.dexNumber}</span>
+          <span className="tk-dexdev-nome">{ficha.name}</span>
+          <span className="tk-dexdev-tipos">
+            {ficha.types.map((tp) => (
+              <span key={tp} className="tk-dexdev-tipo" style={{ background: typeColor(tp) }}>
+                {t(typeKey(tp) as "type.normal")}
+              </span>
+            ))}
+          </span>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------- a ficha */}
+
+      {ficha ? (
+        <>
+          <section className="tk-dexdev-entry">
+            {locucao.map((linha) => (
+              <p key={linha}>{linha}</p>
+            ))}
+          </section>
+
+          {/* Os controles do aparelho: navegar, falar, calar. */}
+          <div className="tk-dexdev-pad">
+            <button
+              type="button"
+              className="tk-dexdev-key"
+              onClick={() => pular(-1)}
+              aria-label={t("dex.prev")}
+            >
+              ◀
+            </button>
+            <button
+              type="button"
+              className="tk-dexdev-key tk-dexdev-key--wide"
+              disabled={!speechSupported() || !voz}
+              onClick={() => void anunciar(locucao)}
+            >
+              {t("dex.speak")}
+            </button>
+            <button
+              type="button"
+              className="tk-dexdev-key"
+              onClick={() => pular(1)}
+              aria-label={t("dex.next")}
+            >
+              ▶
+            </button>
+          </div>
+
+          <div className="tk-dexdev-row">
+            <button
+              type="button"
+              className="tk-dexdev-soft"
+              aria-pressed={voz}
+              onClick={() => {
+                const proximo = !voz;
+                setVoz(proximo);
+                setVoiceOn(proximo);
+                if (!proximo) stopSpeaking();
+              }}
+            >
+              {voz ? t("dex.voiceOn") : t("dex.voiceOff")}
+            </button>
+            <button
+              type="button"
+              className="tk-dexdev-soft"
+              onClick={() => {
+                stopSpeaking();
+                setAlvo(null);
+                setResposta(null);
+                setErro(null);
+              }}
+            >
+              {t("dex.pick")}
+            </button>
+          </div>
+
+          {!speechSupported() && (
+            <p className="tk-dexdev-note">{t("dex.noSpeech")}</p>
+          )}
+
+          {/* Conversar com a ficha. */}
+          <div className="tk-search tk-dexdev-ask">
+            <input
+              type="text"
+              placeholder={t("dex.askPlaceholder")}
+              value={pergunta}
+              onChange={(e) => setPergunta(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") void perguntar();
+              }}
+              aria-label={t("dex.ask")}
+            />
+          </div>
+          <button
+            type="button"
+            className="tk-dexdev-key tk-dexdev-key--block"
+            disabled={pensando || pergunta.trim() === ""}
+            onClick={() => void perguntar()}
+          >
+            {pensando ? t("ai.thinking") : t("dex.ask")}
+          </button>
+
+          {resposta && <p className="tk-dexdev-answer">{resposta}</p>}
+        </>
+      ) : (
+        /* ------------------------------------------------------- entradas */
         <>
           <button
             type="button"
-            className="tk-cta"
-            style={{ marginTop: 18 }}
+            className="tk-dexdev-key tk-dexdev-key--block"
             disabled={lendo}
             onClick={() => arquivo.current?.click()}
           >
-            <span className="tk-cta-mark" aria-hidden="true">
-              <IconCamera size={22} />
-            </span>
-            <span style={{ flex: 1, minWidth: 0 }}>
-              <span className="tk-cta-title">{lendo ? t("dex.reading") : t("dex.photo")}</span>
-              <span className="tk-cta-detail">{t("dex.photoDetail")}</span>
-            </span>
+            {lendo ? t("dex.reading") : t("dex.photo")}
           </button>
 
           {/*
@@ -348,19 +549,9 @@ Regras rígidas:
             }}
           />
 
-          {/* Sem chave da Groq a foto nao tem como funcionar, e dizer isso antes
-              e melhor que deixar tentar e falhar. */}
-          {!visionAvailable() && (
-            <p className="tk-caption" style={{ margin: "10px 2px 0", lineHeight: 1.5 }}>
-              {t("dex.photoNeedsAi")}
-            </p>
-          )}
+          {!visionAvailable() && <p className="tk-dexdev-note">{t("dex.photoNeedsAi")}</p>}
 
-          <div className="tk-overline" style={{ display: "block", margin: "22px 0 8px" }}>
-            {t("dex.pick")}
-          </div>
-
-          <div className="tk-search">
+          <div className="tk-search tk-dexdev-ask">
             <IconSearch size={18} />
             <input
               type="search"
@@ -374,144 +565,45 @@ Regras rígidas:
           </div>
 
           {sugestoes.length > 0 && (
-            <div style={{ display: "grid", gap: 6, marginTop: 10 }}>
+            <div className="tk-dexdev-list">
               {sugestoes.map((s) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  className="tk-teamrow"
-                  onClick={() => escolher(s)}
-                >
+                <button key={s.id} type="button" className="tk-dexdev-item" onClick={() => escolher(s)}>
+                  <span className="tk-dexdev-item-n">
+                    {String(s.dex).padStart(3, "0")}
+                  </span>
                   <SpeciesTile
                     spriteId={s.spriteId}
                     dex={s.dex}
                     speciesId={s.id}
                     name={s.name}
                     types={s.types}
-                    size={36}
+                    size={34}
                   />
-                  <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
-                    <span className="tk-teamrow-name">{s.name}</span>
-                    <span className="tk-teamrow-moves">
-                      #{String(s.dex).padStart(3, "0")}
+                  <span className="tk-dexdev-item-nome">{s.name}</span>
+                  {/* Ponto de visto, como o jogo marca na lista. */}
+                  {wasSeen(s.id) && (
+                    <span className="tk-dexdev-item-seen" aria-hidden="true">
+                      ●
                     </span>
-                  </span>
+                  )}
                 </button>
               ))}
             </div>
           )}
 
           {semDados && (
-            <p className="tk-caption tk-dex-nodata" role="status">
+            <p className="tk-dexdev-nodata" role="status">
               {t("dex.notFound")}
             </p>
           )}
         </>
       )}
 
-      {/* --------------------------------------------------------- a ficha */}
+      {erro && <p className="tk-dexdev-nodata">{erro}</p>}
 
-      {ficha && (
-        <>
-          <div className="tk-dex-name">{ficha.name}</div>
-          <div className="tk-dex-sub">
-            #{ficha.dexNumber}
-            {" · "}
-            {ficha.types.map((tp) => t(typeKey(tp) as "type.normal")).join(" · ")}
-          </div>
-
-          <div className="tk-overline" style={{ display: "block", marginTop: 20 }}>
-            {t("dex.entry")}
-          </div>
-          <section className="tk-card tk-dex-entry" style={{ marginTop: 8 }}>
-            {locucao.map((linha) => (
-              <p key={linha}>{linha}</p>
-            ))}
-          </section>
-
-          <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-            <button
-              type="button"
-              className="tk-btn tk-btn--secondary"
-              style={{ flex: 1, height: 42, fontSize: 13 }}
-              disabled={!speechSupported() || !voz}
-              onClick={() => void anunciar(locucao)}
-            >
-              {t("dex.speak")}
-            </button>
-            <button
-              type="button"
-              className="tk-btn tk-btn--secondary"
-              style={{ flex: 1, height: 42, fontSize: 13 }}
-              aria-pressed={voz}
-              onClick={() => {
-                const proximo = !voz;
-                setVoz(proximo);
-                setVoiceOn(proximo);
-                if (!proximo) stopSpeaking();
-              }}
-            >
-              {voz ? t("dex.voiceOn") : t("dex.voiceOff")}
-            </button>
-          </div>
-
-          {!speechSupported() && (
-            <p className="tk-caption" style={{ marginTop: 8 }}>
-              {t("dex.noSpeech")}
-            </p>
-          )}
-
-          {/* Conversar com a ficha. So aparece com IA ligada — um campo morto
-              dizendo "configure a IA" e propaganda ocupando espaco de quem nao
-              pediu. */}
-          <div className="tk-overline" style={{ display: "block", marginTop: 22 }}>
-            {t("dex.ask")}
-          </div>
-          <div className="tk-search" style={{ marginTop: 8 }}>
-            <input
-              type="text"
-              placeholder={t("dex.askPlaceholder")}
-              value={pergunta}
-              onChange={(e) => setPergunta(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") void perguntar();
-              }}
-              aria-label={t("dex.ask")}
-            />
-          </div>
-          <button
-            type="button"
-            className="tk-btn tk-btn--primary tk-btn--block"
-            style={{ marginTop: 8 }}
-            disabled={pensando || pergunta.trim() === ""}
-            onClick={() => void perguntar()}
-          >
-            {pensando ? t("ai.thinking") : t("dex.ask")}
-          </button>
-
-          {resposta && <p className="tk-ai">{resposta}</p>}
-
-          <button
-            type="button"
-            className="tk-btn tk-btn--ghost tk-btn--block"
-            style={{ marginTop: 18 }}
-            onClick={() => {
-              stopSpeaking();
-              setAlvo(null);
-              setResposta(null);
-              setErro(null);
-            }}
-          >
-            {t("dex.pick")}
-          </button>
-        </>
-      )}
-
-      {erro && (
-        <p className="tk-caption" style={{ marginTop: 12, color: "var(--tk-dang)" }}>
-          {erro}
-        </p>
-      )}
+      {/* A grade do alto-falante, no pe do aparelho. Puro enfeite, e e o enfeite
+          que mais faz a coisa parecer um objeto em vez de uma pagina. */}
+      <span className="tk-dexdev-grille" aria-hidden="true" />
     </div>,
     document.body,
   );

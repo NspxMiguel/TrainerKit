@@ -166,6 +166,18 @@ interface OutSpecies {
   /** Id do sprite no PokeAPI. `null` quando nao ha arte — cai no monograma. */
   spriteId: number | null;
   /**
+   * Altura em decimetros e peso em hectogramas, como o jogo guarda.
+   *
+   * Sao MEDIDAS, nao texto: 16 decimetros e "1,6 m" na tela. Entraram porque a
+   * ficha da Pokedex sem altura e peso nao parece ficha de Pokedex, e porque
+   * medida e fato — diferente das descricoes do jogo, que sao obra escrita e por
+   * isso ficam de fora deste app.
+   *
+   * `null` quando o PokeAPI nao tem a forma (algumas formas so do GO).
+   */
+  heightDm: number | null;
+  weightHg: number | null;
+  /**
    * Lendario, mitico ou Ultra Beast.
    *
    * Vem do `pokemonClass` do GAME_MASTER, e serve pra uma coisa so: e essa
@@ -177,6 +189,63 @@ interface OutSpecies {
    * evento), entao isto e o mais perto que da pra chegar sem inventar dado.
    */
   legendary: boolean;
+}
+
+/**
+ * Altura e peso, de um CSV so.
+ *
+ * A alternativa era `/api/v2/pokemon/{id}` por especie: 2.466 requisicoes num
+ * CI, contra uma API publica e gratuita que pede educacao. O repositorio do
+ * PokeAPI publica o mesmo dado em CSV, indexado pelo MESMO id numerico que
+ * `resolveSpriteIds` ja resolve — entao sai de graca em cima de trabalho que ja
+ * era feito.
+ *
+ * Unidades como o jogo guarda: altura em decimetros, peso em hectogramas. A
+ * conversao pra metro e quilo fica na tela, com o separador do idioma.
+ *
+ * Falhar aqui nao e erro: sem os numeros a ficha simplesmente nao mostra a
+ * linha. Nenhum veredito depende disto.
+ */
+async function resolveSizes(species: OutSpecies[]): Promise<number> {
+  let porId: Map<number, { heightDm: number; weightHg: number }>;
+  try {
+    const res = await fetch(
+      "https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv/pokemon.csv",
+    );
+    if (!res.ok) throw new Error(`CSV respondeu ${res.status}`);
+    const texto = await res.text();
+
+    porId = new Map();
+    const linhas = texto.split("\n");
+    // `id,identifier,species_id,height,weight,base_experience,order,is_default`
+    for (const linha of linhas.slice(1)) {
+      const col = linha.split(",");
+      if (col.length < 5) continue;
+      const id = Number(col[0]);
+      const h = Number(col[3]);
+      const w = Number(col[4]);
+      if (!Number.isFinite(id) || !Number.isFinite(h) || !Number.isFinite(w)) continue;
+      porId.set(id, { heightDm: h, weightHg: w });
+    }
+  } catch (err) {
+    console.warn(
+      `AVISO: nao consegui buscar altura/peso (${
+        err instanceof Error ? err.message : String(err)
+      }). A ficha da Pokedex vai sem essas linhas.`,
+    );
+    return 0;
+  }
+
+  let resolvidos = 0;
+  for (const s of species) {
+    if (s.spriteId === null) continue;
+    const tamanho = porId.get(s.spriteId);
+    if (!tamanho) continue;
+    s.heightDm = tamanho.heightDm;
+    s.weightHg = tamanho.weightHg;
+    resolvidos += 1;
+  }
+  return resolvidos;
 }
 
 /**
@@ -400,6 +469,8 @@ function extractSpecies(templates: Template[]): OutSpecies[] {
       candyToEvolve,
       cosmeticOf: null,
       spriteId: null,
+      heightDm: null,
+      weightHg: null,
       legendary:
         s.pokemonClass === "POKEMON_CLASS_LEGENDARY" ||
         s.pokemonClass === "POKEMON_CLASS_MYTHIC" ||
@@ -521,6 +592,9 @@ async function main(): Promise<void> {
   const settings = extractSettings(templates);
 
   const spritesResolved = await resolveSpriteIds(species);
+  // Depois dos sprites de propósito: o CSV e indexado pelo id do PokeAPI, que e
+  // exatamente o que `resolveSpriteIds` acabou de descobrir.
+  const sizesResolved = await resolveSizes(species);
 
   console.log("buscando traducoes oficiais:");
   const moveNames = await fetchMoveNames([...fast, ...charged]);
@@ -623,6 +697,7 @@ async function main(): Promise<void> {
       `  especies:  ${species.length} (${real} reais, ${species.length - real} cosmeticas)`,
       `  ataques:   ${fast.length} rapidos, ${charged.length} carregados`,
       `  sprites:   ${spritesResolved} de ${species.length} resolvidos`,
+      `  tamanhos:  ${sizesResolved} com altura e peso`,
       `  idiomas:   ${Object.keys(moveNames).length}`,
       `  tipos:     ${Object.keys(typeChart).length}`,
       `  cpm:       ${cpm.length} niveis (cap ${LEVEL_CAP}, ultimo ${cpm[cpm.length - 1]})`,

@@ -34,6 +34,12 @@ export interface DatasetSpecies {
   cosmeticOf: string | null;
   /** Id do sprite no PokeAPI, resolvido no ETL. `null` = sem arte, usa monograma. */
   spriteId: number | null;
+  /**
+   * Altura em decimetros e peso em hectogramas, como o jogo guarda.
+   * Opcionais: uma base customizada, apontada pelo usuario, pode nao ter.
+   */
+  heightDm?: number | null;
+  weightHg?: number | null;
   /** Lendario, mitico ou Ultra Beast — a classe que aparece em raide tier 5. */
   legendary?: boolean;
 }
