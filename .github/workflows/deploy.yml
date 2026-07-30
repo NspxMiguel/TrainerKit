@@ -61,6 +61,9 @@ jobs:
         # a auditoria que falha se alguma arte de terceiros entrar no bundle.
         env:
           TK_BASE: /${{ github.event.repository.name }}/
+          # A funcao que guarda a chave compartilhada da IA. Sem esta variavel a
+          # opcao "gratis" nem aparece na tela — e assim que era ate agora.
+          VITE_TK_AI_PROXY: https://trainerkit-ia.vercel.app/api/ai
         run: pnpm --filter ./apps/web build
 
       - uses: actions/configure-pages@v5

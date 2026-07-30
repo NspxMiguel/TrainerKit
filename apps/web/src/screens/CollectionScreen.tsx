@@ -275,7 +275,7 @@ export function CollectionScreen({ dataset }: Props) {
 
       {picking && ready && (
         <SpeciesPicker
-          species={species}
+          data={dataset.data}
           onPick={(s) => {
             setOpen({ species: s });
             setPicking(false);

@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "",
+  "installCommand": "echo 'sem dependencias: a funcao usa so fetch nativo'",
+  "outputDirectory": "public-vercel",
+  "framework": null
+}

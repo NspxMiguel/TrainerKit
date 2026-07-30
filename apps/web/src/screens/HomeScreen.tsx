@@ -539,7 +539,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
           adivinhar. Pedir primeiro elimina a classe inteira de erro. */}
       {scanning && ready && data && (
         <SpeciesPicker
-          species={data.species}
+          data={data}
           onPick={(sp) => {
             setPicked(sp);
             setScanning(false);

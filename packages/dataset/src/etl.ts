@@ -225,6 +225,15 @@ async function resolveSizes(species: OutSpecies[]): Promise<number> {
       const h = Number(col[3]);
       const w = Number(col[4]);
       if (!Number.isFinite(id) || !Number.isFinite(h) || !Number.isFinite(w)) continue;
+      /*
+       * Zero e AUSENCIA de dado, nao uma medida.
+       *
+       * Achado auditando: `eternatus_eternamax` vem com peso 0 no CSV — a forma
+       * de chefe de Dynamax nao tem peso publicado. Guardar isso faria a ficha
+       * da Pokedex anunciar "0 quilos", que e pior que nao dizer nada. Sem o
+       * valor, a linha inteira simplesmente nao aparece.
+       */
+      if (h <= 0 || w <= 0) continue;
       porId.set(id, { heightDm: h, weightHg: w });
     }
   } catch (err) {
