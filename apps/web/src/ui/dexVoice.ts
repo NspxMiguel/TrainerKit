@@ -510,7 +510,7 @@ async function porMotor(
     case "kokoro":
       return kokoroSynthesize(texto, id);
     case "eleven-share":
-      return comCache("11-share", id, texto, () => elevenSharedSynthesize(texto, id));
+      return comCache("11-share", id, texto, () => elevenSharedSynthesize(texto, id, idioma));
     case "eleven-user":
       return comCache("11-user", id, texto, () => elevenSynthesize(texto));
     case "sistema":

@@ -72,17 +72,39 @@ describe("as recomendadas de cada idioma", () => {
     });
   }
 
-  it("as vozes da ElevenLabs só são recomendadas em inglês", () => {
+  it("uma voz da ElevenLabs só é recomendada onde ela é nativa", () => {
     /*
-     * As 21 da biblioteca padrão são todas american/british/australian —
-     * consultado na API, não estimado. Elas falam os outros idiomas pelo modelo
-     * multilíngue, com sotaque. Recomendá-las em japonês seria o mesmo erro que
-     * ele apontou, invertido.
+     * A regra mudou junto com o dado, e vale a pena registrar por quê.
+     *
+     * Este teste dizia "ElevenLabs só em inglês", o que era verdade quando as
+     * únicas vozes da conta eram as 21 da biblioteca padrão — todas
+     * american/british/australian. Depois o Miguel adicionou o Adriano, da Voice
+     * Library, que é brasileiro de verdade. A regra "só em inglês" passou a
+     * esconder a melhor voz em português que o app tem.
+     *
+     * O invariante que importa nunca foi "inglês": é que uma voz só apareça como
+     * recomendada no idioma que ela fala nativamente. Isso vale pro Adriano em
+     * pt-BR e continua barrando a Sarah em japonês.
      */
     for (const idioma of IDIOMAS) {
       const boas = recomendadas(listarVozes(idioma, []));
-      const temEleven = boas.some((v) => v.motor === "eleven-share");
-      expect(temEleven, `ElevenLabs recomendada em ${idioma}`).toBe(idioma === "en");
+      for (const v of boas.filter((x) => x.motor === "eleven-share")) {
+        expect(v.nativa, `${v.nome} recomendada em ${idioma} sem ser nativa`).toBe(true);
+        expect(v.sotaque).toBe(idioma);
+      }
+    }
+  });
+
+  it("coreano e russo caem no ingles em vez de ficar sem opcao", () => {
+    // "coloca opção de usar em ingles quando nao disponivel na sua lingua."
+    // Nenhuma voz da conta declara ko ou ru; sem a saida pro ingles, esses dois
+    // idiomas simplesmente nao veriam a ElevenLabs existir.
+    for (const idioma of ["ko", "ru"]) {
+      const todas = listarVozes(idioma, []);
+      const eleven = todas.filter((v) => v.motor === "eleven-share");
+      expect(eleven.length, `${idioma} ficou sem nenhuma ElevenLabs`).toBeGreaterThan(0);
+      // E nenhuma delas pode se passar por nativa.
+      expect(eleven.every((v) => !v.nativa)).toBe(true);
     }
   });
 });
