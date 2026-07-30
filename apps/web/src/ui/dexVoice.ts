@@ -25,9 +25,15 @@ import { synthesize, ttsAvailable } from "../ai/tts.ts";
  * portugues ela vai de sofrivel a robotica dependendo do aparelho. Mexer em
  * `pitch` nao resolve o timbre.
  *
- * Entao quando ha chave da Groq, a fala passa por TTS de verdade (ver
- * `ai/tts.ts`) e a voz do sistema fica sendo o PLANO B — pra quem nao tem chave,
- * pra quando a rede cai, e pra quando a Groq recusa o modelo. Nunca fica muda.
+ * Entao quando da, a fala passa por TTS de verdade (ver `ai/tts.ts`) e a voz do
+ * sistema fica sendo o PLANO B — pra quem nao tem chave, pra quando a rede cai, e
+ * pra quando a Groq recusa o modelo. Nunca fica muda.
+ *
+ * ⚠️ "Quando da" e mais estreito do que eu esperava, e isso saiu de testar com a
+ * chave do Miguel: o unico TTS no catalogo da Groq e o Orpheus, ele exige aceite
+ * de termos no console, e e SO INGLES. Pra portugues a voz do sistema continua
+ * sendo a certa — voz bonita pronunciando errado e pior que voz feia pronunciando
+ * certo. Ver `tts.ts` pro detalhe.
  */
 
 /** Preferencia guardada: quem nao quer voz nao deveria ter que desligar sempre. */
@@ -155,7 +161,7 @@ export function lastTtsError(): string | null {
 export async function speak(text: string, language: string): Promise<void> {
   stopSpeaking();
 
-  if (ttsAvailable()) {
+  if (ttsAvailable(language)) {
     try {
       const blob = await synthesize(text);
       ultimoErroTts = null;
