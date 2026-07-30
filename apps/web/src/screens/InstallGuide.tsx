@@ -22,17 +22,22 @@ interface Step {
   Glyph?: (props: { size?: number }) => React.ReactElement;
 }
 
+/* O caminho no iPad e o MESMO do iPhone: Safari, Compartilhar, Adicionar a Tela
+   de Inicio. As plataformas se separam pelo desenho da interface, nao por aqui. */
+const PASSOS_SAFARI = {
+  titleKey: "install.ios.title",
+  browserKey: "install.ios.browser",
+  steps: [
+    { textKey: "install.ios.step1", Glyph: GlyphIosShare },
+    { textKey: "install.ios.step2", Glyph: GlyphAddToHome },
+    { textKey: "install.ios.step3" },
+    { textKey: "install.ios.step4" },
+  ],
+} satisfies { titleKey: Key; browserKey: Key; steps: Step[] };
+
 const STEPS: Record<Platform, { titleKey: Key; browserKey: Key; steps: Step[] }> = {
-  ios: {
-    titleKey: "install.ios.title",
-    browserKey: "install.ios.browser",
-    steps: [
-      { textKey: "install.ios.step1", Glyph: GlyphIosShare },
-      { textKey: "install.ios.step2", Glyph: GlyphAddToHome },
-      { textKey: "install.ios.step3" },
-      { textKey: "install.ios.step4" },
-    ],
-  },
+  iphone: PASSOS_SAFARI,
+  ipad: PASSOS_SAFARI,
   android: {
     titleKey: "install.android.title",
     browserKey: "install.android.browser",
@@ -142,7 +147,7 @@ export function InstallGuide({ platform, promptInstall, onClose }: Props) {
                 )}
                 {/* So no primeiro passo do iPhone: e o unico em que a pessoa
                     precisa achar um botao fora do app. */}
-                {platform === "ios" && i === 0 && (
+                {platform !== "android" && platform !== "desktop" && i === 0 && (
                   <SafariBar label={t("install.ios.barAria")} />
                 )}
               </span>

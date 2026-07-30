@@ -2,7 +2,8 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 
 import { useT } from "../i18n/t.ts";
-import { exportJson } from "../storage/collection.ts";
+import { useSetup } from "../onboarding/setup.ts";
+import { exportJson, useCollection } from "../storage/collection.ts";
 import { wipeEverything } from "../storage/wipe.ts";
 import { IconAlert } from "./Icons.tsx";
 
@@ -26,6 +27,17 @@ import { IconAlert } from "./Icons.tsx";
  */
 export function WipeDialog({ onClose }: { onClose: () => void }) {
   const { t } = useT();
+  const setup = useSetup();
+  const { items } = useCollection();
+  /*
+   * Quem nao guarda colecao nao perde colecao.
+   *
+   * A lista dizia "a sua coleção inteira" pra quem escolheu modo so consulta e
+   * nunca salvou um Pokemon. Alem de errado, enfraquece o aviso: uma lista com
+   * um item falso ensina a nao ler a lista. Mesma coisa com o botao de backup —
+   * baixar um arquivo com zero Pokemon dentro nao e rede de seguranca nenhuma.
+   */
+  const temColecao = setup.mode === "colecao" && (items?.length ?? 0) > 0;
   const [confirmando, setConfirmando] = useState(false);
   const [apagando, setApagando] = useState(false);
   const [exportou, setExportou] = useState(false);
@@ -59,7 +71,7 @@ export function WipeDialog({ onClose }: { onClose: () => void }) {
         {/* O que se perde, nomeado. Uma lista curta e concreta assusta na medida
             certa; um paragrafo generico nao assusta e por isso nao protege. */}
         <ul className="tk-wipe-list">
-          <li>{t("wipe.item.collection")}</li>
+          {temColecao && <li>{t("wipe.item.collection")}</li>}
           <li>{t("wipe.item.settings")}</li>
           <li>{t("wipe.item.cache")}</li>
         </ul>
@@ -69,14 +81,16 @@ export function WipeDialog({ onClose }: { onClose: () => void }) {
         </p>
 
         <div style={{ display: "grid", gap: 8, marginTop: 18 }}>
-          {/* O backup vem ANTES do botao vermelho, e some depois de baixado. */}
-          <button
-            type="button"
-            className="tk-btn tk-btn--secondary tk-btn--block"
-            onClick={() => void baixarBackup()}
-          >
-            {exportou ? t("wipe.exported") : t("wipe.exportFirst")}
-          </button>
+          {/* O backup vem ANTES do botao vermelho. */}
+          {temColecao && (
+            <button
+              type="button"
+              className="tk-btn tk-btn--secondary tk-btn--block"
+              onClick={() => void baixarBackup()}
+            >
+              {exportou ? t("wipe.exported") : t("wipe.exportFirst")}
+            </button>
+          )}
 
           <button
             type="button"

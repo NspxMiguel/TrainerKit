@@ -50,10 +50,27 @@ export function isInstalled(): boolean {
   return (navigator as { standalone?: boolean }).standalone === true;
 }
 
+/**
+ * A familia inteira: iPhone, iPad, iPod.
+ *
+ * Serve pro que importa NESTE arquivo — o WebKit despeja dados de origens
+ * paradas ha 7 dias em todos eles igual. Quem precisa distinguir aparelho usa
+ * `isIpad`.
+ */
 export function isIos(): boolean {
+  return /iPhone|iPod/.test(navigator.userAgent) || isIpad();
+}
+
+/**
+ * iPad, inclusive o que mente sobre si.
+ *
+ * Desde o iPadOS 13 o Safari do iPad se apresenta como Mac por padrao: a UA diz
+ * "MacIntel" e nao contem "iPad". O desempate e o toque — nenhum Mac responde
+ * `maxTouchPoints > 1`.
+ */
+export function isIpad(): boolean {
   return (
-    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-    // iPadOS 13+ se apresenta como Mac; o toque desempata.
+    /iPad/.test(navigator.userAgent) ||
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
   );
 }

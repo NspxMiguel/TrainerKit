@@ -4,6 +4,7 @@ import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
 import { moveLabel, useLanguage } from "../i18n/language.ts";
 import { useT } from "../i18n/t.ts";
 import { typeKey } from "../sprites/provider.ts";
+import { Segmented } from "../ui/Segmented.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 
 interface Props {
@@ -56,19 +57,17 @@ export function RankingsScreen({ data, onPick, initialMode = "raid" }: Props) {
           mesmo peso: tres fileiras de botoes identicos empilhadas viram uma
           parede em que nada parece mais importante que nada. Chip menor
           resolve sem esconder a escolha. */}
-      <div className="tk-chips" style={{ marginBottom: 10 }}>
-        {(["raid", "pvp"] as const).map((m) => (
-          <button
-            key={m}
-            type="button"
-            className="tk-chip"
-            data-on={mode === m || undefined}
-            aria-pressed={mode === m}
-            onClick={() => setMode(m)}
-          >
-            {m === "raid" ? t("rank.raid") : t("rank.pvp")}
-          </button>
-        ))}
+      <div style={{ marginBottom: 10 }}>
+        <Segmented
+          ariaLabel={t("pokedex.best")}
+          value={mode}
+          onChange={setMode}
+          size="compact"
+          options={[
+            { value: "raid" as const, label: t("rank.raid") },
+            { value: "pvp" as const, label: t("rank.pvp") },
+          ]}
+        />
       </div>
 
       {mode === "raid" ? (
@@ -94,20 +93,16 @@ export function RankingsScreen({ data, onPick, initialMode = "raid" }: Props) {
           ))}
         </div>
       ) : (
-        <div style={{ display: "flex", gap: 6 }}>
-          {LEAGUES.map((l) => (
-            <button
-              key={l}
-              type="button"
-              className={`tk-btn ${league === l ? "tk-btn--primary" : "tk-btn--secondary"}`}
-              style={{ flex: 1, height: 36, fontSize: 12, padding: 0 }}
-              aria-pressed={league === l}
-              onClick={() => setLeague(l)}
-            >
-              {t(`rank.league.${l}` as "rank.league.great")}
-            </button>
-          ))}
-        </div>
+        <Segmented
+          ariaLabel={t("rank.pvp")}
+          value={league}
+          onChange={setLeague}
+          size="compact"
+          options={LEAGUES.map((l) => ({
+            value: l,
+            label: t(`rank.league.${l}` as "rank.league.great"),
+          }))}
+        />
       )}
 
       {/* O aviso do PvP fica ACIMA da lista, nao numa nota de rodape: quem le a

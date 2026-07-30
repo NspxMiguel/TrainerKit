@@ -3,27 +3,21 @@ import { useMemo, useState } from "react";
 import { ACTION_KEYS, decide, type Action } from "@trainerkit/core";
 
 import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
-import { datasetLabel } from "../data/useDataset.ts";
 import { useT, type Key } from "../i18n/t.ts";
 import type { PokedexIntent } from "../App.tsx";
-import { updateSetup, useSetup } from "../onboarding/setup.ts";
+import { useSetup } from "../onboarding/setup.ts";
 import { useCollection } from "../storage/collection.ts";
 import { useInstallState } from "../storage/install.ts";
 import type { PersistState } from "../storage/persist.ts";
 import { DidYouKnow } from "../ui/DidYouKnow.tsx";
-import {
-  IconAlert,
-  IconCamera,
-  IconPlus,
-  IconSearch,
-  IconShield,
-  IconTrophy,
-} from "../ui/Icons.tsx";
+import { IconAlert, IconCamera, IconPlus, IconShield, IconSwords, IconTrophy } from "../ui/Icons.tsx";
 import { InstallBanner } from "../ui/InstallBanner.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 import { InstallGuide } from "./InstallGuide.tsx";
 import { IVCalculator } from "./IVCalculator.tsx";
+import { SpeciesDetail } from "./SpeciesDetail.tsx";
 import { SpeciesPicker } from "./SpeciesPicker.tsx";
+import { TeamBuilder } from "./TeamBuilder.tsx";
 
 interface Props {
   dataset: DatasetState;
@@ -49,6 +43,16 @@ const TONE: Record<Action, string> = {
  */
 const PEDEM_ACAO: readonly Action[] = ["evoluir", "investir", "transferir"];
 
+/**
+ * Quantas pendencias caber na home.
+ *
+ * Duas, nao tres. O Miguel: "na tela inicial, n precisa de scroll, scroll
+ * inutil ali". Cada linha custa 40px e a terceira era justamente a que
+ * empurrava a tela pra fora do celular — e quem tem tres pendencias abre a aba
+ * da colecao, que existe pra isso.
+ */
+const PENDENCIAS_NA_HOME = 2;
+
 function greetingKey(): Key {
   const h = new Date().getHours();
   if (h < 5) return "home.greeting.lateNight";
@@ -65,9 +69,12 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
   const [guideOpen, setGuideOpen] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [picked, setPicked] = useState<DatasetSpecies | null>(null);
+  const [teamOpen, setTeamOpen] = useState(false);
+  const [detail, setDetail] = useState<DatasetSpecies | null>(null);
 
   const ready = dataset.status === "ready";
   const data = ready ? dataset.data : null;
+  const colecao = setup.mode === "colecao";
 
   const pendencias = useMemo(() => {
     if (!data || !items || items.length === 0) return null;
@@ -145,12 +152,26 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
   const showInstall =
     !install.installed && !install.dismissed && install.platform !== "desktop";
 
+  /** Ha aviso ocupando o topo? Se ha, a dica do dia cede o lugar. */
+  const temAviso = showInstall || (install.installed && atRisk) || dataset.status === "error";
+
   return (
     <>
-      {/* A saudacao e o nome do app estavam empilhados e liam como uma frase
-          so — "Boa noite TrainerKit". Quem cumprimenta e a pessoa, nao o app. */}
-      <p className="tk-greeting">{t(greetingKey())}</p>
-      <h1 className="tk-h1">{setup.name.trim() || t("home.trainer")}</h1>
+      {/*
+        Uma linha, nao duas.
+
+        A saudacao ficava sozinha em cima e o nome em 34px embaixo — 74px de
+        altura pra dizer "boa noite". Numa tela que precisa caber inteira, e o
+        primeiro lugar onde procurar espaço, e o texto nem perde nada: "Boa
+        noite, Miguel" e a frase que uma pessoa diria.
+
+        O que NAO podia voltar era o nome do APP aqui: era isso que fazia ler
+        "Boa noite TrainerKit", como se o app fosse o cumprimentado.
+      */}
+      <h1 className="tk-hello">
+        {t(greetingKey())}
+        {setup.name.trim() ? `, ${setup.name.trim()}` : ""}
+      </h1>
 
       {showInstall && (
         <InstallBanner
@@ -188,151 +209,173 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
       {dataset.status === "ready" && (
         <>
           {/*
-            O caminho curto pro que o app faz.
+            As duas coisas que o app FAZ, uma embaixo da outra.
 
-            Aqui ficava um cartao com "1.182 especies, 390 ataques, base de
-            28/07". Isso e metadado do BANCO, nao informacao sobre o jogador —
-            ninguem abre um app pra saber quantas linhas ele tem. A versao da
-            base continua em Ajustes, que e onde se procura quando importa.
-
-            No lugar entra a acao: um toque da home ate a leitura do print.
+            O resto da home e consulta e mora nas abas. Ler um print e montar um
+            time sao as unicas acoes que produzem algo — a primeira responde
+            "esse presta?", a segunda devolve uma lista pra levar pra rua.
           */}
-          <button
-            type="button"
-            className="tk-quick"
-            onClick={() => setScanning(true)}
-          >
-            <span className="tk-quick-mark" aria-hidden="true">
-              <IconCamera size={22} />
-            </span>
-            <span style={{ flex: 1, minWidth: 0 }}>
-              <span className="tk-quick-title">{t("home.quickScan")}</span>
-              <span className="tk-quick-detail">{t("home.quickScanDetail")}</span>
-            </span>
-            <span className="tk-quick-go" aria-hidden="true">
-              ›
-            </span>
-          </button>
+          <div className="tk-acts">
+            <button type="button" className="tk-quick" onClick={() => setScanning(true)}>
+              <span className="tk-quick-mark" aria-hidden="true">
+                <IconCamera size={22} />
+              </span>
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span className="tk-quick-title">{t("home.quickScan")}</span>
+                <span className="tk-quick-detail">{t("home.quickScanDetail")}</span>
+              </span>
+              <span className="tk-quick-go" aria-hidden="true">
+                ›
+              </span>
+            </button>
+
+            <button
+              type="button"
+              className="tk-quick tk-quick--team"
+              onClick={() => setTeamOpen(true)}
+            >
+              <span className="tk-quick-mark" aria-hidden="true">
+                <IconSwords size={22} />
+              </span>
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span className="tk-quick-title">{t("team.open")}</span>
+                <span className="tk-quick-detail">{t("team.openDetail")}</span>
+              </span>
+              <span className="tk-quick-go" aria-hidden="true">
+                ›
+              </span>
+            </button>
+          </div>
 
           {/* No modo consulta nao existe colecao nem aba pra ela: um bloco
               vazio apontando pra uma aba que nao esta na tela e so confusao. */}
-          {setup.mode === "colecao" && (
+          {colecao && (
             <>
-          <h2 className="tk-h2">{t("home.yourCollection")}</h2>
-
-          {/* Tres numeros que dao gosto de olhar. Nao decidem nada — e o
-              "olha o que eu tenho" que faz colecao ser colecao. */}
-          {resumo && (
-            <div className="tk-stats">
-              <div className="tk-stat">
-                <span className="tk-stat-n">{resumo.total.toLocaleString(language)}</span>
-                <span className="tk-stat-l">{t("home.stat.saved")}</span>
-              </div>
-              <div className="tk-stat">
-                <span
-                  className="tk-stat-n"
-                  style={resumo.perfeitos > 0 ? { color: "var(--tk-succ)" } : undefined}
-                >
-                  {resumo.perfeitos}
-                </span>
-                <span className="tk-stat-l">{t("home.stat.perfect")}</span>
-              </div>
-              <div className="tk-stat">
-                <span className="tk-stat-n">
-                  {resumo.melhor.total}
-                  <span className="tk-stat-sub">/45</span>
-                </span>
-                <span className="tk-stat-l">
-                  {resumo.melhor.species?.name ?? t("home.stat.best")}
-                </span>
-              </div>
-            </div>
-          )}
-
-          {!pendencias ? (
-            <div className="tk-empty">
-              <div className="tk-empty-mark">
-                <IconPlus size={26} />
-              </div>
-              <div className="tk-empty-title">{t("home.empty.title")}</div>
-              <p className="tk-body">{t("home.empty.body")}</p>
-            </div>
-          ) : pendencias.agir.length === 0 ? (
-            <section className="tk-card">
-              <div style={{ font: "700 15px var(--tk-font)" }}>
-                {pendencias.total === 1
-                  ? t("home.nothingPending.one")
-                  : t("home.nothingPending.many", { count: pendencias.total })}
-              </div>
-            </section>
-          ) : (
-            <section className="tk-card" style={{ display: "grid", gap: 12 }}>
-              <div>
-                <div style={{ font: "700 15px var(--tk-font)" }}>
-                  {pendencias.agir.length === 1
-                    ? t("home.needsDecision.one")
-                    : t("home.needsDecision.many", { count: pendencias.agir.length })}
-                </div>
-                <p className="tk-caption" style={{ marginTop: 4 }}>
-                  {pendencias.total === 1
-                    ? t("home.ofSaved.one", { count: pendencias.total })
-                    : t("home.ofSaved.many", { count: pendencias.total })}
-                </p>
-              </div>
-
-              {pendencias.agir.slice(0, 3).map((d) => (
-                <div
-                  key={d.id}
-                  style={{ display: "flex", gap: 12, alignItems: "center" }}
-                >
-                  <SpeciesTile
-                    spriteId={d.species.spriteId}
-                    dex={d.species.dex}
-                    speciesId={d.species.id}
-                    name={d.species.name}
-                    types={d.species.types}
-                    size={40}
-                  />
-                  <span style={{ flex: 1, minWidth: 0 }}>
-                    <span style={{ display: "block", font: "600 14px var(--tk-font)" }}>
-                      {d.species.name}
-                    </span>
-                    <span className="tk-caption" style={{ display: "block" }}>
-                      {tm(d.verdict.reason)}
-                    </span>
+              {/* O quanto pede acao vai no CABEÇALHO da secao, nao numa linha
+                  propria dentro do cartao. Era uma frase de 18px mais 12 de
+                  respiro pra dizer um numero que caberia aqui de graça. */}
+              <div className="tk-overline tk-overline--sec">
+                {t("home.yourCollection")}
+                {pendencias && pendencias.agir.length > 0 && (
+                  <span className="tk-overline-hot">
+                    {" · "}
+                    {pendencias.agir.length === 1
+                      ? t("home.needsDecision.one")
+                      : t("home.needsDecision.many", { count: pendencias.agir.length })}
                   </span>
-                  <span
-                    style={{
-                      font: "700 12px var(--tk-font)",
-                      color: TONE[d.verdict.action],
-                      flex: "none",
-                    }}
-                  >
-                    {t(ACTION_KEYS[d.verdict.action] as Key)}
-                  </span>
-                </div>
-              ))}
+                )}
+              </div>
 
-              {pendencias.agir.length > 3 && (
-                <p className="tk-caption">
-                  {t("home.andMore", { count: pendencias.agir.length - 3 })}
-                </p>
-              )}
-            </section>
-          )}
+              {/*
+                Resumo e pendencias no MESMO cartao.
+
+                Eram dois blocos com moldura, titulo e respiro proprios, e a
+                pergunta que os dois respondem e uma so: "e a minha colecao,
+                como esta?". Juntos economizam uns 60px — que e a diferenca
+                entre caber na tela e nao caber.
+              */}
+              <section className="tk-card tk-home-coll">
+                {resumo && (
+                  <div className="tk-stats">
+                    <div className="tk-stat">
+                      <span className="tk-stat-n">{resumo.total.toLocaleString(language)}</span>
+                      <span className="tk-stat-l">{t("home.stat.saved")}</span>
+                    </div>
+                    <div className="tk-stat">
+                      <span
+                        className="tk-stat-n"
+                        style={resumo.perfeitos > 0 ? { color: "var(--tk-succ)" } : undefined}
+                      >
+                        {resumo.perfeitos}
+                      </span>
+                      <span className="tk-stat-l">{t("home.stat.perfect")}</span>
+                    </div>
+                    <div className="tk-stat">
+                      <span className="tk-stat-n">
+                        {resumo.melhor.total}
+                        <span className="tk-stat-sub">/45</span>
+                      </span>
+                      <span className="tk-stat-l">
+                        {resumo.melhor.species?.name ?? t("home.stat.best")}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {!pendencias ? (
+                  <div className="tk-home-empty">
+                    <span className="tk-home-empty-mark" aria-hidden="true">
+                      <IconPlus size={18} />
+                    </span>
+                    <span>
+                      <span className="tk-quick-title">{t("home.empty.title")}</span>
+                      <span className="tk-quick-detail">{t("home.empty.body")}</span>
+                    </span>
+                  </div>
+                ) : pendencias.agir.length === 0 ? (
+                  <div style={{ font: "700 14px var(--tk-font)" }}>
+                    {pendencias.total === 1
+                      ? t("home.nothingPending.one")
+                      : t("home.nothingPending.many", { count: pendencias.total })}
+                  </div>
+                ) : (
+                  <>
+                    {pendencias.agir.slice(0, PENDENCIAS_NA_HOME).map((d) => (
+                      <button
+                        key={d.id}
+                        type="button"
+                        className="tk-pend"
+                        onClick={() => setDetail(d.species)}
+                      >
+                        <SpeciesTile
+                          spriteId={d.species.spriteId}
+                          dex={d.species.dex}
+                          speciesId={d.species.id}
+                          name={d.species.name}
+                          types={d.species.types}
+                          size={36}
+                        />
+                        <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                          <span className="tk-pend-name">{d.species.name}</span>
+                          <span className="tk-pend-why">{tm(d.verdict.reason)}</span>
+                        </span>
+                        <span
+                          className="tk-pend-act"
+                          style={{ color: TONE[d.verdict.action] }}
+                        >
+                          {t(ACTION_KEYS[d.verdict.action] as Key)}
+                        </span>
+                      </button>
+                    ))}
+
+                    {/* Texto, nao botao. "Ver as outras" seria um botao pra
+                        aba que esta na barra de baixo, a um toque de aqui — a
+                        mesma redundancia que o Miguel apontou nos atalhos. */}
+                    {pendencias.agir.length > PENDENCIAS_NA_HOME && (
+                      <p className="tk-caption">
+                        {t("home.andMore", {
+                          count: pendencias.agir.length - PENDENCIAS_NA_HOME,
+                        })}
+                      </p>
+                    )}
+                  </>
+                )}
+              </section>
             </>
           )}
 
-          {/* Atalhos.
-              A home tinha uma acao so e sobrava meia tela vazia. Estes levam
-              direto pras respostas que o app sabe dar e que ninguem descobria
-              sozinho — o ranking e os counters viviam a dois toques de
-              distancia, escondidos dentro da Pokedex. */}
-          <h2 className="tk-h2">{t("home.shortcuts")}</h2>
+          {/*
+            Dois atalhos, nao quatro.
+
+            O Miguel: "pq tem um atalho pra pokedex e um atalho para coleção??
+            sendo q simplesmente ja tem a porra do botao". Tinha razao — os dois
+            duplicavam abas que estao na barra de baixo, a um toque de qualquer
+            tela. Estes dois ficam porque levam a uma PERGUNTA que a barra nao
+            faz: o ranking por tipo e o de liga viviam escondidos dentro da
+            Pokedex e ninguem achava sozinho.
+          */}
+          <div className="tk-overline tk-overline--sec">{t("home.shortcuts")}</div>
           <div className="tk-quickgrid">
-            {/* Cada atalho leva a intencao junto. Sem isso os tres primeiros
-                abriam a mesma tela — a busca por nome — e so o texto do botao
-                mudava. */}
             <button
               type="button"
               className="tk-tile tk-tile--raid"
@@ -351,51 +394,18 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
               <span className="tk-tile-t">{t("home.go.pvpBest")}</span>
               <span className="tk-tile-d">{t("home.go.pvpBestDetail")}</span>
             </button>
-            <button
-              type="button"
-              className="tk-tile tk-tile--dex"
-              onClick={() => onGo("pokedex", { view: "browse" })}
-            >
-              <IconSearch size={20} />
-              <span className="tk-tile-t">{t("home.go.search")}</span>
-              <span className="tk-tile-d">{t("home.go.searchDetail")}</span>
-            </button>
-            {/*
-              No modo consulta este atalho era mentira.
-
-              Ele dizia "Coleção · Tudo que você salvou" pra quem escolheu NAO
-              salvar nada, e levava pra Pokedex — outra tela, com outro nome.
-              Prometer uma coisa e entregar outra e o tipo de detalhe que faz o
-              app parecer mal encaixado.
-
-              Agora ele oferece o que de fato falta: LIGAR a coleção. Era a
-              única forma de mudar de ideia sem ir cavar nos Ajustes.
-            */}
-            <button
-              type="button"
-              className="tk-tile tk-tile--coll"
-              onClick={() => {
-                if (setup.mode === "colecao") {
-                  onGo("colecao");
-                  return;
-                }
-                updateSetup({ mode: "colecao" });
-                onGo("colecao");
-              }}
-            >
-              <IconPlus size={20} />
-              <span className="tk-tile-t">
-                {setup.mode === "colecao" ? t("home.go.collection") : t("home.go.startCollection")}
-              </span>
-              <span className="tk-tile-d">
-                {setup.mode === "colecao"
-                  ? t("home.go.collectionDetail")
-                  : t("home.go.startCollectionDetail")}
-              </span>
-            </button>
           </div>
 
-          <DidYouKnow data={dataset.data} />
+          {/*
+            A dica cede a vez pro aviso.
+
+            Ela e o item de menor prioridade da home — o unico que ninguem
+            perde nada por nao ver hoje. Quando ha aviso na tela (instalar,
+            armazenamento em risco) as duas coisas juntas fazem a home rolar, e
+            entre "leia esta dica" e "seus dados podem sumir" nao ha duvida de
+            quem sai.
+          */}
+          {!temAviso && <DidYouKnow data={dataset.data} />}
         </>
       )}
 
@@ -415,6 +425,26 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
 
       {picked && data && (
         <IVCalculator species={picked} data={data} onClose={() => setPicked(null)} />
+      )}
+
+      {teamOpen && data && (
+        <TeamBuilder
+          data={data}
+          onClose={() => setTeamOpen(false)}
+          onPickSpecies={(s) => {
+            setTeamOpen(false);
+            setDetail(s);
+          }}
+        />
+      )}
+
+      {detail && data && (
+        <SpeciesDetail
+          species={detail}
+          data={data}
+          onClose={() => setDetail(null)}
+          onPickSpecies={setDetail}
+        />
       )}
 
       {guideOpen && (

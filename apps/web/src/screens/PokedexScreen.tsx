@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { PokedexIntent } from "../App.tsx";
 import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
 import { useT } from "../i18n/t.ts";
+import { Segmented } from "../ui/Segmented.tsx";
 import { SpeciesBrowser } from "../ui/SpeciesBrowser.tsx";
 import { RankingsScreen } from "./RankingsScreen.tsx";
 import { SpeciesDetail } from "./SpeciesDetail.tsx";
@@ -57,19 +58,16 @@ export function PokedexScreen({ dataset, intent }: Props) {
       {/* Buscar e "melhores" sao a mesma pergunta em duas direcoes: uma parte
           da especie, a outra do objetivo. Por isso dividem a aba em vez de
           virar uma quarta na barra de baixo. */}
-      <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
-        {(["browse", "best"] as const).map((x) => (
-          <button
-            key={x}
-            type="button"
-            className={`tk-btn ${tab === x ? "tk-btn--primary" : "tk-btn--secondary"}`}
-            style={{ flex: 1, height: 40, fontSize: 13, padding: 0 }}
-            aria-pressed={tab === x}
-            onClick={() => setTab(x)}
-          >
-            {x === "browse" ? t("pokedex.browse") : t("pokedex.best")}
-          </button>
-        ))}
+      <div style={{ marginBottom: 14 }}>
+        <Segmented
+          ariaLabel={t("pokedex.title")}
+          value={tab}
+          onChange={setTab}
+          options={[
+            { value: "browse" as const, label: t("pokedex.browse") },
+            { value: "best" as const, label: t("pokedex.best") },
+          ]}
+        />
       </div>
 
       {tab === "browse" ? (

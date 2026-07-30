@@ -58,7 +58,7 @@ export function App() {
 
   // O recolhimento e comportamento do iOS 26. No Android a barra do Material e
   // assente e nao se mexe — recolher la pareceria bug, nao refinamento.
-  const minimized = useTabBarMinimize(detectPlatform() === "ios");
+  const minimized = useTabBarMinimize(detectPlatform() === "iphone");
 
   const species = dataset.status === "ready" ? dataset.data.species : [];
 

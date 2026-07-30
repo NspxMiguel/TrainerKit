@@ -58,11 +58,11 @@
 
 /* A barra flutuante ocupa mais altura util que a assente: 12px de folga
    embaixo mais a sombra. Sem isto o ultimo item da lista fica sob o vidro. */
-[data-platform="ios"] .tk-main {
+[data-platform="iphone"] .tk-main {
   padding-bottom: calc(84px + max(var(--tk-s5), env(safe-area-inset-bottom)));
 }
 
-[data-platform="ios"] .tk-fab {
+[data-platform="iphone"] .tk-fab {
   bottom: calc(104px + env(safe-area-inset-bottom));
   animation: tk-fade 0.14s var(--tk-ease) both;
 }
@@ -80,6 +80,19 @@
   margin: var(--tk-s1) 0 var(--tk-s6);
 }
 
+/*
+ * A saudacao da home, numa linha.
+ *
+ * Era `.tk-greeting` de 13px em cima e `.tk-h1` de 34px embaixo: 74px de altura
+ * pra dizer "boa noite". Aqui e 26px numa linha — ainda e o maior texto da
+ * tela, ainda e o primeiro que se le, e sobra espaço pro que o app tem a dizer.
+ */
+.tk-hello {
+  font: 800 26px/1.15 var(--tk-font);
+  letter-spacing: -0.02em;
+  margin: 0 0 var(--tk-s4);
+}
+
 .tk-h2 {
   font: 800 17px/1.2 var(--tk-font);
   letter-spacing: -0.01em;
@@ -91,6 +104,25 @@
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--tk-txt4);
+}
+
+/*
+ * Cabecalho de secao na home.
+ *
+ * Substitui o `.tk-h2` de 17px em negrito. Nao e so por altura: com dois `h2`
+ * de 17px na tela — "Sua coleção" e "Atalhos" — eles competiam com o nome do
+ * treinador em 34px e a tela ficava com tres niveis de titulo em 400px. A
+ * versao pequena separa as secoes sem disputar atencao.
+ */
+.tk-overline--sec {
+  display: block;
+  margin: var(--tk-s4) 0 var(--tk-s2);
+}
+
+/* O contador de pendencias mora no cabecalho da secao. Cor pra ele nao virar
+   mais uma palavra cinza numa linha que ja e toda cinza. */
+.tk-overline-hot {
+  color: var(--tk-warn);
 }
 
 .tk-body {
@@ -186,7 +218,7 @@
  * So no iOS de proposito. No Android o padrao e o oposto — a barra do Material
  * e assente e opaca —, e copiar o vidro da Apple la pareceria estrangeiro.
  */
-[data-platform="ios"] .tk-tabbar {
+[data-platform="iphone"] .tk-tabbar {
   left: 50%;
   transform: translateX(-50%);
   bottom: calc(env(safe-area-inset-bottom) + 12px);
@@ -216,8 +248,19 @@
    * reconhecer o que esta atras, so distorcido. 12px preserva a forma; a
    * saturacao e o contraste devolvem a cor e o desenho que o desfoque comeu.
    */
-  backdrop-filter: blur(12px) saturate(2.4) contrast(1.08) brightness(1.12);
-  -webkit-backdrop-filter: blur(12px) saturate(2.4) contrast(1.08) brightness(1.12);
+  /*
+   * O conteudo tem que ATRAVESSAR o vidro.
+   *
+   * A Apple resume assim: *"allow your content to infuse them and shine
+   * through"*. Cada ponto de desfoque e de opacidade cobra um pedaco desse
+   * "shine through" — 8px e o ponto em que ainda da pra reconhecer a forma do
+   * que passa por tras, que e a diferenca entre vidro e vidro fosco.
+   *
+   * O trabalho pesado nao e o blur: e a SATURACAO. Ela devolve a cor que o
+   * desfoque lava, e e o que faz a cor de tras parecer estar dentro da peca.
+   */
+  backdrop-filter: blur(8px) saturate(3) contrast(1.12) brightness(1.16);
+  -webkit-backdrop-filter: blur(8px) saturate(3) contrast(1.12) brightness(1.16);
   border: 1px solid var(--tk-glass-edge);
   box-shadow:
     0 12px 32px rgba(0, 0, 0, 0.34),
@@ -249,7 +292,7 @@
  * melhor nao ter o anel.
  */
 @supports (mask-composite: exclude) or (-webkit-mask-composite: xor) {
-  [data-platform="ios"] .tk-tabbar::after {
+  [data-platform="iphone"] .tk-tabbar::after {
     content: "";
     position: absolute;
     inset: 0;
@@ -275,7 +318,7 @@
  * parecer vidro CURVO e a luz concentrada onde a superficie mais se inclina:
  * forte no alto e um retorno fraco embaixo, com o meio quase limpo.
  */
-[data-platform="ios"] .tk-tabbar::before {
+[data-platform="iphone"] .tk-tabbar::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -345,7 +388,7 @@
   z-index: 2;
 }
 
-[data-platform="ios"] .tk-tab {
+[data-platform="iphone"] .tk-tab {
   padding: 9px 0 10px;
   position: relative;
   /* Acima do anel de borda (::after) e da pilula, senao o vidro passa por cima
@@ -400,13 +443,13 @@
  * O que encolhe e a ALTURA e o rotulo — os icones ficam. Sumir com a navegacao
  * inteira economizaria mais espaco e custaria orientacao.
  */
-[data-platform="ios"] .tk-tabbar {
+[data-platform="iphone"] .tk-tabbar {
   transition:
     transform 0.34s var(--tk-ease-glass),
     box-shadow 0.34s var(--tk-ease-glass);
 }
 
-[data-platform="ios"] .tk-tabbar .tk-tab-label {
+[data-platform="iphone"] .tk-tabbar .tk-tab-label {
   max-height: 16px;
   overflow: hidden;
   /* `transform` precisa continuar na lista: esta regra sobrescreve a transicao
@@ -419,13 +462,13 @@
     margin-top 0.3s var(--tk-ease-glass);
 }
 
-[data-platform="ios"] .tk-tabbar[data-min] .tk-tab-label {
+[data-platform="iphone"] .tk-tabbar[data-min] .tk-tab-label {
   max-height: 0;
   opacity: 0;
   margin-top: -3px;
 }
 
-[data-platform="ios"] .tk-tabbar[data-min] {
+[data-platform="iphone"] .tk-tabbar[data-min] {
   /* Recolhida ela nao so encolhe: se afasta e projeta sombra menor, como uma
      peca que recuou no eixo Z. */
   transform: translateX(-50%) translateY(6px);
@@ -467,7 +510,7 @@
   z-index: 8;
 }
 
-[data-platform="ios"] .tk-scroll-edge {
+[data-platform="iphone"] .tk-scroll-edge {
   height: calc(96px + env(safe-area-inset-bottom));
 }
 
@@ -481,14 +524,14 @@
  * effects."* Aqui o vidro e decoracao, e decoracao cede.
  */
 @media (prefers-reduced-transparency: reduce) {
-  [data-platform="ios"] .tk-tabbar {
+  [data-platform="iphone"] .tk-tabbar {
     background: var(--tk-elev);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
 
-  [data-platform="ios"] .tk-tabbar::before,
-  [data-platform="ios"] .tk-tabbar::after {
+  [data-platform="iphone"] .tk-tabbar::before,
+  [data-platform="iphone"] .tk-tabbar::after {
     display: none;
   }
 
@@ -533,6 +576,49 @@
   font: 400 12px/1.45 var(--tk-font);
   color: var(--tk-txt2);
   margin-top: 2px;
+}
+
+/*
+ * Aviso que E um botao.
+ *
+ * O convite de instalar tinha dois botoes de 36px abaixo do texto, custando
+ * 46px de altura numa home que precisa caber inteira. O aviso inteiro virou o
+ * alvo, com a camada invisivel abaixo — o mesmo recurso da linha da colecao,
+ * porque botao dentro de botao nao existe em HTML.
+ */
+.tk-banner--act {
+  position: relative;
+  align-items: center;
+  padding-right: 40px;
+}
+
+.tk-banner-open {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: none;
+  border: 0;
+  border-radius: inherit;
+}
+
+.tk-banner-open:active {
+  background: var(--tk-surf);
+}
+
+/* Acima da camada invisivel, senao dispensar viraria "ver como". */
+.tk-banner-x {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--tk-txt3);
+  font: 300 21px/1 var(--tk-font);
 }
 
 /* ------------------------------------------------------------------ vazios */
@@ -645,6 +731,19 @@
 .tk-row-value {
   font: 400 13px var(--tk-font);
   color: var(--tk-txt3);
+}
+
+/* Linha destrutiva no indice de Ajustes. Apagar tudo estava enterrado no fim da
+   secao de atualizacoes; sozinho e em vermelho ele nao se confunde com o resto. */
+.tk-row[data-tone="danger"] .tk-row-label,
+.tk-row[data-tone="danger"] .tk-row-value {
+  color: var(--tk-dang-fg);
+}
+
+/* O toque some por um instante em vez de piscar cor: e uma lista, nao um botao,
+   e o retorno tem que ser da LINHA que foi tocada. */
+.tk-row:active {
+  opacity: 0.55;
 }
 
 /* ------------------------------------------------------ selo de especie */
@@ -1057,9 +1156,20 @@
   font: 700 14px/1.3 var(--tk-font);
 }
 
-/* Selo BETA — o escaneador ainda esta sendo calibrado contra prints reais. */
-.tk-beta {
+/*
+ * Selo BETA — o escaneador ainda esta sendo calibrado contra prints reais.
+ *
+ * Toca (ou passa o mouse) e ele explica: testado num iPhone 17 Pro e num Poco
+ * X3 Pro. A palavra sozinha avisava que algo pode dar errado sem dizer o que.
+ */
+.tk-beta-wrap {
+  position: relative;
   align-self: center;
+  flex: none;
+}
+
+.tk-beta {
+  display: block;
   font: 700 10px var(--tk-mono);
   letter-spacing: 0.12em;
   padding: 3px 7px;
@@ -1067,6 +1177,43 @@
   background: var(--tk-warn-soft);
   border: 1px solid var(--tk-warn-line);
   color: var(--tk-warn);
+}
+
+/*
+ * O balao abre pra ESQUERDA (`right: 0`) porque o selo vive no canto direito do
+ * cabecalho: ancorado a esquerda ele sairia da tela. `max-width` em `vw` e nao
+ * em px pra caber num aparelho estreito sem empurrar layout.
+ */
+.tk-beta-pop {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 8px);
+  right: 0;
+  width: max-content;
+  max-width: min(74vw, 300px);
+  padding: 11px 13px;
+  border-radius: 14px;
+  background: var(--tk-elev);
+  border: 1px solid var(--tk-line);
+  box-shadow: var(--tk-e3);
+  font: 500 12px/1.5 var(--tk-font);
+  color: var(--tk-txt2);
+  text-align: left;
+  letter-spacing: normal;
+  animation: tk-pop 220ms var(--tk-ease-glass) both;
+}
+
+@keyframes tk-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tk-beta-pop {
+    animation: none;
+  }
 }
 
 /* ------------------------------------------------------------- onboarding */
@@ -1604,7 +1751,9 @@
   align-items: center;
   gap: var(--tk-s3);
   width: 100%;
-  padding: var(--tk-s4);
+  /* 13px, nao 16: a linha inteira ja tem 70px de alvo, muito acima dos 44
+     minimos, e na home cada pixel vertical esta em disputa. */
+  padding: 13px var(--tk-s4);
   border-radius: var(--tk-r-card);
   background: var(--tk-surf);
   border: 1px solid var(--tk-line);
@@ -1618,9 +1767,9 @@
 
 .tk-quick-mark {
   flex: none;
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
   display: grid;
   place-items: center;
   background: var(--tk-pri-soft);
@@ -1644,6 +1793,91 @@
   flex: none;
   font: 400 22px/1 var(--tk-font);
   color: var(--tk-txt4);
+}
+
+/* As duas acoes da home, empilhadas com um respiro so entre elas. */
+.tk-acts {
+  display: grid;
+  gap: var(--tk-s2);
+}
+
+/* ------------------------------------------------- colecao na home */
+
+/*
+ * Resumo e pendencias no mesmo cartao.
+ *
+ * Eram dois blocos, cada um com moldura, titulo e respiro proprios, para
+ * responder a MESMA pergunta: "e a minha colecao, como esta?". Juntos custam
+ * uns 60px menos — que era exatamente o que faltava pra home caber na tela.
+ */
+.tk-home-coll {
+  display: grid;
+  gap: 10px;
+}
+
+/* Dentro do cartao o respiro em volta ja e do cartao: os numeros nao precisam
+   do proprio. */
+.tk-home-coll .tk-stats {
+  padding: 0;
+}
+
+.tk-home-empty {
+  display: flex;
+  align-items: center;
+  gap: var(--tk-s3);
+}
+
+.tk-home-empty-mark {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: var(--tk-surf2);
+  border: 1px solid var(--tk-line);
+  color: var(--tk-txt3);
+}
+
+/*
+ * Uma pendencia.
+ *
+ * Era `<div>` com o nome e o motivo, e nada acontecia ao tocar — o app dizia
+ * "evoluir este" e nao levava a ele. Agora a linha inteira abre o Pokemon, que
+ * e para onde a frase aponta.
+ */
+.tk-pend {
+  display: flex;
+  align-items: center;
+  gap: var(--tk-s3);
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: 0;
+  transition: opacity 0.1s var(--tk-ease);
+}
+
+.tk-pend:active {
+  opacity: 0.6;
+}
+
+.tk-pend-name {
+  display: block;
+  font: 600 14px var(--tk-font);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tk-pend-why {
+  display: block;
+  font: 400 12px/1.35 var(--tk-font);
+  color: var(--tk-txt3);
+}
+
+.tk-pend-act {
+  flex: none;
+  font: 700 12px var(--tk-font);
 }
 
 /* --------------------------------------------------- tabela de IV por liga */
@@ -1735,6 +1969,82 @@
   color: var(--tk-pri-fg);
 }
 
+/* --------------------------------------------------------------- segmento */
+
+/*
+ * Escolher uma entre duas ou tres, sempre igual.
+ *
+ * O app tinha tres desenhos pra esta MESMA pergunta: `tk-btn--primary` de 44px
+ * nos Ajustes, `tk-btn` de 36px com fonte 12 nos Rankings, `tk-chip` no
+ * raide/PvP. Cada um passava sozinho e o conjunto parecia costurado de pedaços.
+ * Isto e a peça única.
+ *
+ * `isolation: isolate` cria contexto de empilhamento proprio: sem isso o
+ * `z-index` da pilha competiria com o resto da tela, e ela e um detalhe interno
+ * — nao tem por que participar da ordem geral da pagina.
+ */
+.tk-segment {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: repeat(var(--tk-seg-n, 2), 1fr);
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--tk-surf2);
+  border: 1px solid var(--tk-line);
+}
+
+/*
+ * A forma que viaja.
+ *
+ * `left` fixo e `transform` pra mover: mexer em `left` faria o navegador
+ * recalcular layout a cada frame, `transform` roda no compositor. O mesmo
+ * motivo pelo qual a pilula da barra de abas se move assim.
+ */
+.tk-segment-pill {
+  position: absolute;
+  z-index: 0;
+  inset: 3px auto 3px 3px;
+  width: calc((100% - 6px) / var(--tk-seg-n, 2));
+  border-radius: 999px;
+  background: var(--tk-elev);
+  box-shadow: var(--tk-e1);
+  transform: translateX(calc(var(--tk-seg-i, 0) * 100%));
+  transition: transform 340ms var(--tk-ease-glass);
+}
+
+.tk-segment-btn {
+  position: relative;
+  z-index: 1;
+  height: 38px;
+  min-width: 0;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--tk-txt3);
+  font: 600 13px var(--tk-font);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 200ms var(--tk-ease-glass);
+}
+
+.tk-segment-btn[data-on] {
+  color: var(--tk-txt);
+}
+
+.tk-segment[data-compact] .tk-segment-btn {
+  height: 32px;
+  font-size: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tk-segment-pill {
+    transition: none;
+  }
+}
+
 /* ----------------------------------------------------------- voz do modelo */
 
 /*
@@ -1813,11 +2123,11 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 2px;
-  padding: var(--tk-s4);
-  /* Altura fixa, nao minima: com `min-height` a linha de cima crescia quando
-     uma descricao quebrava em duas linhas, e os quatro blocos ficavam
-     desalinhados dois a dois. */
-  height: 104px;
+  padding: var(--tk-s3) var(--tk-s4);
+  /* Altura fixa, nao minima: com `min-height` um bloco cresce quando a
+     descricao quebra em duas linhas, e a fila fica desalinhada. Eram 104px
+     quando havia quatro blocos em 2x2; com dois numa fila so, 92 basta. */
+  height: 92px;
   border-radius: var(--tk-r-card);
   border: 1px solid var(--tk-line);
   background: var(--tk-surf);
@@ -1883,9 +2193,9 @@
 .tk-tip {
   display: flex;
   gap: var(--tk-s3);
-  align-items: flex-start;
-  margin-top: var(--tk-s6);
-  padding: var(--tk-s4);
+  align-items: center;
+  margin-top: var(--tk-s4);
+  padding: var(--tk-s3) var(--tk-s4);
   border-radius: var(--tk-r-card);
   background: var(--tk-surf2);
   border: 1px solid var(--tk-line);
@@ -1911,9 +2221,20 @@
   margin-bottom: 3px;
 }
 
+/*
+ * Tres linhas, no maximo.
+ *
+ * A dica mais longa (o exemplo de IV em liga com teto) ocupava cinco linhas e
+ * era ela, sozinha, que fazia a home rolar. Cortar no fim e melhor que tirar a
+ * dica: as primeiras linhas ja dizem a coisa contraintuitiva, e o resto e
+ * exemplo.
+ */
 .tk-tip-text {
-  display: block;
-  font: 400 13px/1.5 var(--tk-font);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font: 400 12.5px/1.45 var(--tk-font);
   color: var(--tk-txt2);
 }
 
@@ -2186,7 +2507,7 @@
   }
 }
 
-[data-platform="ios"] .tk-strip {
+[data-platform="iphone"] .tk-strip {
   bottom: calc(96px + env(safe-area-inset-bottom));
 }
 
@@ -2196,7 +2517,7 @@
   bottom: calc(122px + env(safe-area-inset-bottom));
 }
 
-[data-tk-strip][data-platform="ios"] .tk-fab {
+[data-tk-strip][data-platform="iphone"] .tk-fab {
   bottom: calc(142px + env(safe-area-inset-bottom));
 }
 
@@ -2468,7 +2789,7 @@
   /* A barra deixa de ser flutuante e vira coluna: ela some do rodape, entao o
      conteudo nao precisa mais reservar espaco embaixo. */
   .tk-main,
-  [data-platform="ios"] .tk-main {
+  [data-platform="iphone"] .tk-main {
     flex: 1;
     min-width: 0;
     /*
@@ -2485,7 +2806,7 @@
   }
 
   .tk-tabbar,
-  [data-platform="ios"] .tk-tabbar {
+  [data-platform="iphone"] .tk-tabbar {
     /* Antes do conteudo. No DOM o <main> vem primeiro porque no celular a barra
        fica embaixo; deitado ela precisa ficar a esquerda, e `order` resolve sem
        mexer na ordem de leitura nem no foco do teclado. */
@@ -2511,7 +2832,7 @@
   /* Deitada, a aba e icone + rotulo lado a lado, alinhados a esquerda — a
      mesma leitura de uma lista, que e o que uma barra lateral e. */
   .tk-tab,
-  [data-platform="ios"] .tk-tab {
+  [data-platform="iphone"] .tk-tab {
     flex-direction: row;
     justify-content: flex-start;
     gap: var(--tk-s3);
@@ -2519,7 +2840,7 @@
   }
 
   .tk-tab-label,
-  [data-platform="ios"] .tk-tabbar .tk-tab-label {
+  [data-platform="iphone"] .tk-tabbar .tk-tab-label {
     font-size: 14px;
     max-height: none;
   }
@@ -2543,13 +2864,13 @@
   }
 
   .tk-fab,
-  [data-platform="ios"] .tk-fab {
+  [data-platform="iphone"] .tk-fab {
     bottom: var(--tk-s8);
     right: max(var(--tk-gutter), calc(50vw - 1180px / 2 + var(--tk-gutter)));
   }
 
   .tk-strip,
-  [data-platform="ios"] .tk-strip {
+  [data-platform="iphone"] .tk-strip {
     bottom: var(--tk-s5);
     max-width: 420px;
   }
@@ -2573,11 +2894,11 @@
 /* A barra lateral so recolhe no celular. Numa coluna fixa, encolher ao rolar
    nao ganharia espaco nenhum e so tiraria o rotulo do lugar. */
 @media (min-width: 900px) {
-  [data-platform="ios"] .tk-tabbar[data-min] {
+  [data-platform="iphone"] .tk-tabbar[data-min] {
     transform: none;
   }
 
-  [data-platform="ios"] .tk-tabbar[data-min] .tk-tab-label {
+  [data-platform="iphone"] .tk-tabbar[data-min] .tk-tab-label {
     max-height: none;
     opacity: 1;
     margin-top: 0;
@@ -2657,4 +2978,71 @@
 
 .tk-sources a {
   font: 600 13px var(--tk-font);
+}
+
+/* ------------------------------------------------------------ montar time */
+
+/* O botao do time nao pode competir com o de escanear: mesma forma, tom
+   secundario. Escanear e o que se faz toda hora; montar time e o que se faz
+   uma vez por objetivo. */
+.tk-quick--team {
+  background: var(--tk-sec-soft);
+  border-color: var(--tk-sec-line);
+}
+
+.tk-quick--team .tk-quick-mark {
+  background: var(--tk-sec-soft);
+  border-color: var(--tk-sec-line);
+  color: var(--tk-sec);
+}
+
+.tk-teamrow {
+  display: flex;
+  align-items: center;
+  gap: var(--tk-s3);
+  padding: var(--tk-s3);
+  border-radius: var(--tk-r-input);
+  background: var(--tk-surf);
+  border: 1px solid var(--tk-line);
+  transition: transform 0.08s var(--tk-ease-glass);
+}
+
+.tk-teamrow:active {
+  transform: scale(0.985);
+}
+
+/* Quem voce ja tem fica marcado na BORDA, nao no fundo: a lista continua
+   legivel como lista, e o olho ainda separa os dois grupos de longe. */
+.tk-teamrow[data-have] {
+  border-color: var(--tk-succ-line);
+}
+
+.tk-teamrow-n {
+  flex: none;
+  width: 18px;
+  font: 700 12px var(--tk-mono);
+  color: var(--tk-txt4);
+}
+
+.tk-teamrow-name {
+  display: block;
+  font: 700 14px/1.25 var(--tk-font);
+}
+
+.tk-teamrow-moves {
+  display: block;
+  font: 400 11px/1.35 var(--tk-font);
+  color: var(--tk-txt3);
+  margin-top: 2px;
+}
+
+.tk-teamrow-tag {
+  flex: none;
+  font: 700 11px var(--tk-font);
+  color: var(--tk-warn);
+  text-transform: lowercase;
+}
+
+.tk-teamrow[data-have] .tk-teamrow-tag {
+  color: var(--tk-succ);
 }
