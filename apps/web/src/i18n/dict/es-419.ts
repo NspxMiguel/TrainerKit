@@ -72,6 +72,8 @@ export const ES_419: Dict = {
   "install.why.iosImportant": "Safari borra datos tras 7 días parados. Instalada, deja de hacerlo.",
   "install.now": "Instalar ahora",
   "pokedex.title": "Pokédex",
+  "pokedex.all": "Todos",
+  "pokedex.mine": "Míos",
   "filter.sortBy": "Ordenar por",
   "filter.filterBy": "Filtrar",
   "filter.sort.dex": "Número",

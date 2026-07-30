@@ -79,6 +79,8 @@ export const PT_BR: Dict = {
   "install.now": "Instalar agora",
 
   "pokedex.title": "Pokédex",
+  "pokedex.all": "Todos",
+  "pokedex.mine": "Meus",
   "filter.sortBy": "Ordenar por",
   "filter.filterBy": "Filtrar",
   "filter.sort.dex": "Número",

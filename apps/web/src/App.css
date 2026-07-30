@@ -3529,6 +3529,31 @@
    */
   background: var(--tk-screen);
   color: #fff;
+
+  /*
+   * ⚠️ A GEOMETRIA DA CARCAÇA, EM DUAS VARIAVEIS — e nao em dois numeros soltos.
+   *
+   * "alinha os negocio da pokedex, ta meio desalinhado". Medido na tela montada,
+   * antes: a placa comecava a 12px da borda e o conteudo a 22px, o que dava 10px
+   * de folga nos lados; no topo a placa comecava a 38px e o conteudo a 52px, o
+   * que dava 14px. Nenhum dos dois estava "errado" sozinho — eles simplesmente
+   * nunca se falaram, porque o `padding` do conteudo e o `inset` da placa foram
+   * escritos em lugares diferentes, cada um com o proprio numero.
+   *
+   * Folga desigual em volta de uma placa arredondada e exatamente o que o olho
+   * le como "desalinhado", mesmo sem conseguir apontar o que.
+   *
+   * Agora as duas medidas saem daqui, e o padding do conteudo e CALCULADO a
+   * partir delas. Mudar a moldura passa a ser mudar um numero, e a folga
+   * continua igual dos quatro lados sozinha.
+   */
+  --tk-dex-borda: 12px;
+  --tk-dex-folga: 16px;
+  --tk-dex-topo: calc(var(--tk-safe-top) * 0.5 + var(--tk-s3));
+
+  padding-left: calc(var(--tk-dex-borda) + var(--tk-dex-folga));
+  padding-right: calc(var(--tk-dex-borda) + var(--tk-dex-folga));
+  padding-top: calc(var(--tk-dex-topo) + var(--tk-dex-folga));
 }
 
 /*
@@ -3540,7 +3565,8 @@
 .tk-dex[data-skin="device"]::before {
   content: "";
   position: absolute;
-  inset: calc(var(--tk-safe-top) * 0.5 + var(--tk-s3)) var(--tk-s3)
+  /* As MESMAS variaveis do conteudo acima — e o que mantem a folga igual. */
+  inset: var(--tk-dex-topo) var(--tk-dex-borda)
     calc(var(--tk-s5) + env(safe-area-inset-bottom));
   border-radius: 28px;
   background:

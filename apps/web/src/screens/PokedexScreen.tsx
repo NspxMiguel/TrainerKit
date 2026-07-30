@@ -5,6 +5,9 @@ import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
 import { useT } from "../i18n/t.ts";
 import { IconCamera } from "../ui/Icons.tsx";
 import { SpeciesBrowser, type SortId } from "../ui/SpeciesBrowser.tsx";
+import { useSetup } from "../onboarding/setup.ts";
+import { Segmented } from "../ui/Segmented.tsx";
+import { CollectionScreen } from "./CollectionScreen.tsx";
 import { DexMode } from "./DexMode.tsx";
 import { SpeciesDetail } from "./SpeciesDetail.tsx";
 
@@ -25,6 +28,29 @@ export function PokedexScreen({ dataset, intent }: Props) {
   const [selected, setSelected] = useState<DatasetSpecies | null>(null);
   const [dexOpen, setDexOpen] = useState(false);
   const { t } = useT();
+  const setup = useSetup();
+
+  /*
+   * TODOS ou MEUS, na mesma aba.
+   *
+   * "o colection n seria mais legal, se ele fizesse parte do pokedex mode?
+   * faria muito mais sentido nao acha??" — faria, e ele estava certo sobre o
+   * problema: o app separava em duas abas o que e UMA pergunta ("qual
+   * Pokémon?"), e a Pokédex do jogo mostra visto e capturado no mesmo lugar.
+   *
+   * ⚠️ O QUE EU **NAO** FIZ, e por que: nao dava pra simplesmente usar o filtro
+   * "Só os meus" que ja existia. Ele filtra ESPECIES; a colecao lista
+   * EXEMPLARES. Quem tem tres Bulbasaur com IV diferente ve um so no filtro, e o
+   * IV e o veredito — que sao a razao de a colecao existir — nao teriam onde
+   * aparecer. Merge ingenuo aqui perderia informacao em silencio.
+   *
+   * Entao sao duas listas de verdade, atras de um seletor: "Todos" percorre o
+   * jogo inteiro, "Meus" mostra os seus com IV e veredito. Uma aba, uma
+   * pergunta, duas respostas.
+   */
+  const podeColecao = setup.mode === "colecao";
+  const [aba, setAba] = useState<"todos" | "meus">("todos");
+  const meus = podeColecao && aba === "meus";
 
   if (dataset.status === "loading") {
     return (
@@ -47,6 +73,21 @@ export function PokedexScreen({ dataset, intent }: Props) {
   return (
     <>
       <h1 className="tk-h1">{t("pokedex.title")}</h1>
+
+      {podeColecao && (
+        <div style={{ margin: "0 0 12px" }}>
+          <Segmented
+            ariaLabel={t("pokedex.title")}
+            value={aba}
+            onChange={setAba}
+            size="compact"
+            options={[
+              { value: "todos" as const, label: t("pokedex.all") },
+              { value: "meus" as const, label: t("pokedex.mine") },
+            ]}
+          />
+        </div>
+      )}
 
       {/*
         O modo Pokedex mora AQUI, e nao na home.
@@ -81,13 +122,17 @@ export function PokedexScreen({ dataset, intent }: Props) {
         filtro ao invés de simplesmente melhores". E a mesma pergunta ("qual
         Pokemon?") com a resposta ordenada pelo que importa naquele momento.
       */}
-      <SpeciesBrowser
-        data={dataset.data}
-        onPick={setSelected}
-        {...(intent?.view === "best"
-          ? { initialSort: (intent.mode === "raid" ? "raid" : "great") as SortId }
-          : {})}
-      />
+      {meus ? (
+        <CollectionScreen dataset={dataset} embutida />
+      ) : (
+        <SpeciesBrowser
+          data={dataset.data}
+          onPick={setSelected}
+          {...(intent?.view === "best"
+            ? { initialSort: (intent.mode === "raid" ? "raid" : "great") as SortId }
+            : {})}
+        />
+      )}
 
       {dexOpen && (
         <DexMode

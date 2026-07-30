@@ -72,6 +72,8 @@ export const KO: Dict = {
   "install.why.iosImportant": "Safari는 7일 방치 후 데이터를 지웁니다. 추가하면 멈춥니다.",
   "install.now": "지금 설치",
   "pokedex.title": "포켓덱스",
+  "pokedex.all": "전체",
+  "pokedex.mine": "내 것",
   "filter.sortBy": "정렬",
   "filter.filterBy": "필터",
   "filter.sort.dex": "도감 번호",

@@ -26,7 +26,14 @@ interface Props {
   dataset: DatasetState;
   persist: PersistState | null;
   /** A home leva pras outras abas — atalho e atalho, nao decoracao. */
-  onGo: (tab: "pokedex" | "colecao", intent?: PokedexIntent) => void;
+  /*
+   * So "pokedex": a Colecao virou um modo dentro dela.
+   *
+   * O tipo mudou de propósito em vez de eu aceitar `"colecao"` e traduzir aqui —
+   * assim o compilador aponta quem ainda navega pra uma aba que nao existe, que
+   * foi exatamente como estes dois usos apareceram.
+   */
+  onGo: (tab: "pokedex", intent?: PokedexIntent) => void;
 }
 
 const TONE: Record<Action, string> = {
@@ -488,7 +495,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
                   <button
                     type="button"
                     className="tk-strip-more"
-                    onClick={() => onGo("colecao")}
+                    onClick={() => onGo("pokedex")}
                   >
                     +{meus.porIv.length - NA_FILA}
                   </button>

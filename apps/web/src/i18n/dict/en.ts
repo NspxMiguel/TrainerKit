@@ -94,6 +94,8 @@ const EN = {
 
   // -------------------------------------------------------------------- pokedex
   "pokedex.title": "Pokédex",
+  "pokedex.all": "All",
+  "pokedex.mine": "Mine",
   "filter.sortBy": "Sort by",
   "filter.filterBy": "Filter",
   "filter.sort.dex": "Number",
