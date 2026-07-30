@@ -9,7 +9,7 @@
     "dev": "pnpm --filter @trainerkit/web dev",
     "build": "pnpm -r build",
     "test": "pnpm -r test",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck && tsc -p api --noEmit"
   },
   "dependencies": {
     "ws": "^8.18.0"

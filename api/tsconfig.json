@@ -1,0 +1,33 @@
+{
+  // As funcoes da Vercel, que ate agora nao eram checadas por ninguem.
+  //
+  // ⚠️ `api/` ficou de FORA de todo typecheck do repositorio desde o inicio:
+  // `apps/web/tsconfig.json` inclui so `src/**`, e os outros pacotes nem olham
+  // pra ca. `pnpm -r typecheck` dizia "Done" com dois erros de tipo de pe.
+  //
+  // Eles so apareciam no build da Vercel — que termina "ready" mesmo assim,
+  // entao ninguem lia. E justamente o codigo que guarda as chaves e o filtro de
+  // assunto: o pedaco que menos pode quebrar calado.
+  //
+  // `moduleResolution: "bundler"` de proposito, e nao "nodenext": e o que
+  // descreve como a Vercel de fato empacota isto. Com "nodenext" o compilador
+  // exigiria `./_guarda.js` no import — e a Vercel REJEITA extensao no
+  // especificador. Duas ferramentas com regras opostas sobre a mesma linha;
+  // vale a que roda em producao.
+  "compilerOptions": {
+    "target": "ES2022",
+    // Sem `types: ["node"]`: `@types/node` nao e dependencia deste diretorio,
+    // e as funcoes so usam `process.env` e as APIs web padrao. `DOM` cobre
+    // `Response`, `fetch` e `URL`, que e o que elas de fato tocam.
+    "lib": ["ES2022", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": true
+  },
+  "include": ["**/*.ts"]
+}
