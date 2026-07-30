@@ -1,140 +1,153 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import {
-  KOKORO_MB,
-  ensureKokoro,
-  kokoroReady,
-  kokoroSupports,
-  kokoroVoicesFor,
-  onKokoroChange,
-  type KokoroProgress,
-} from "../ai/kokoro.ts";
-import {
-  ELEVEN_SHARED_VOICES,
-  creditosRestantes,
-  elevenSharedOn,
-  getSharedVoice,
-  setElevenSharedOn,
-  setSharedVoice,
-} from "../ai/elevenShared.ts";
-import {
-  edgeSupports,
-  edgeVoicesFor,
-  getEdgeVoice,
-  setEdgeVoice,
-} from "../ai/edgeTts.ts";
-import {
-  ELEVEN_VOICES,
-  elevenAvailable,
-  getElevenVoice,
-  setElevenKey,
-  setElevenVoice,
-} from "../ai/elevenlabs.ts";
+import { KOKORO_MB, ensureKokoro, kokoroReady, onKokoroChange, type KokoroProgress } from "../ai/kokoro.ts";
+import { creditosRestantes } from "../ai/elevenShared.ts";
+import { elevenAvailable, setElevenKey } from "../ai/elevenlabs.ts";
+import { listarVozes, outras, recomendadas, type Voz } from "../ai/vozes.ts";
 import { useLanguage } from "../i18n/language.ts";
 import { useT } from "../i18n/t.ts";
 import {
-  getKokoroVoice,
-  getPickedVoiceUri,
-  neuralOn,
-  setNeuralOn,
   listVoices,
-  previewVoice,
-  setKokoroVoice,
-  setPickedVoiceUri,
   setVoiceOn,
+  setVozEscolhida,
   speak,
   speechSupported,
   stopSpeaking,
   voiceOn,
-  type VoiceOption,
+  vozEscolhida,
 } from "../ui/dexVoice.ts";
 
 /**
- * Escolher a voz da Pokedex, ouvindo antes.
+ * Uma pergunta, uma lista.
  *
- * "coloca nas configurações pro usuario escolher a voz. reproduzindo previas ao
- * clicar em cima de um."
+ * O Miguel: "voz da pokedex totalmente confuso. organiza ai. tem umas 30 opcao
+ * de voz e ninguem sabe oq é de vdd."
  *
- * A prévia nao e enfeite: os nomes que o sistema da ("Luciana", "Joana",
- * "Samantha") nao dizem nada sobre como soam, e escolher voz lendo nome e
- * escolher as cegas. Tocar ao tocar resolve — e e por isso que a lista TOCA em
- * vez de so marcar.
+ * A tela anterior estava organizada por MOTOR: uma seção pro Kokoro (com botão
+ * de baixar 95 MB), uma pra neural (com interruptor), uma pra ElevenLabs (com
+ * campo de chave, mais um interruptor de chave compartilhada, mais lista de voz),
+ * e uma pras vozes do sistema. Quatro interruptores independentes que juntos
+ * respondiam a UMA pergunta — e como nenhum deles sozinho decidia o resultado,
+ * não dava pra prever qual voz ia sair.
  *
- * As vozes caricatas da Apple (Eddy, Grandma, Zarvox…) nao aparecem aqui. Foram
- * elas que causaram o "leitor paia": a versao antiga pegava a primeira do idioma
- * e caia em cima delas. Oferecer agora seria oferecer o proprio defeito.
+ * Agora: uma lista, ordenada, com a resposta certa em primeiro lugar. O motor
+ * virou etiqueta embaixo do nome, junto com o que a pessoa precisa saber pra
+ * escolher — sotaque, se gasta cota, se funciona offline.
+ *
+ * O que sumiu de propósito:
+ *   · o interruptor da voz neural — ela é só mais uma voz na lista agora;
+ *   · o interruptor da ElevenLabs compartilhada — idem;
+ *   · a lista separada de vozes do sistema.
+ *
+ * O que ficou embaixo, como CONFIGURAÇÃO e não como escolha de voz: o download
+ * do Kokoro e o campo de chave da ElevenLabs. Os dois são coisas que a pessoa
+ * faz uma vez, não toda vez.
  */
 export function VoiceSettings() {
   const { t } = useT();
   const language = useLanguage();
-  const [vozes, setVozes] = useState<VoiceOption[]>([]);
-  const [escolhida, setEscolhida] = useState<string | null>(getPickedVoiceUri);
   const [ligada, setLigada] = useState(voiceOn);
+  const [escolha, setEscolha] = useState<string | null>(vozEscolhida);
+  const [sistema, setSistema] = useState<Array<{ voiceURI: string; name: string; lang: string }>>([]);
   const [kokoro, setKokoro] = useState(kokoroReady);
-  const [kokoroVoz, setKokoroVoz] = useState(getKokoroVoice);
   const [baixando, setBaixando] = useState<KokoroProgress | null>(null);
   const [erro, setErro] = useState<string | null>(null);
-  const [neural, setNeural] = useState(neuralOn);
-  const [share11, setShare11] = useState(elevenSharedOn);
-  const [voz11share, setVoz11share] = useState(getSharedVoice);
-  /** `undefined` = ainda perguntando; `null` = nao consegui saber; numero = saldo. */
+  const [chave11, setChave11] = useState("");
+  const [tem11, setTem11] = useState(elevenAvailable);
   const [saldo11, setSaldo11] = useState<number | null | undefined>(undefined);
-  const [edgeVoz, setEdgeVoz] = useState(() => getEdgeVoice(language));
 
-  // O motor avisa quando termina de carregar: sem isto a lista de vozes boas
-  // so apareceria na proxima vez que a tela abrisse.
   useEffect(() => onKokoroChange(() => setKokoro(kokoroReady())), []);
 
   /*
-   * O saldo da ElevenLabs compartilhada, perguntado ao abrir a tela.
+   * As vozes do sistema chegam ASSÍNCRONAS.
    *
-   * Vem do servidor, que pergunta pra propria ElevenLabs — nao e estimativa
-   * minha. Com ~50 leituras por MES pra todo mundo, saber quanto sobrou antes de
-   * apertar e a diferenca entre um recurso limitado e um recurso quebrado.
+   * `getVoices()` costuma vir vazio na primeira chamada e só popula depois do
+   * evento — foi por isso que a lista antiga às vezes abria sem nenhuma voz do
+   * aparelho. `listVoices` já trata isso; aqui só re-consulto no evento.
    */
   useEffect(() => {
+    const carregar = () =>
+      setSistema(listVoices(language).map((v) => ({ voiceURI: v.uri, name: v.name, lang: v.lang })));
+    carregar();
+    globalThis.speechSynthesis?.addEventListener?.("voiceschanged", carregar);
+    return () => globalThis.speechSynthesis?.removeEventListener?.("voiceschanged", carregar);
+  }, [language]);
+
+  useEffect(() => {
     const ctrl = new AbortController();
-    void creditosRestantes(ctrl.signal).then((n) => setSaldo11(n));
+    void creditosRestantes(ctrl.signal).then(setSaldo11);
     return () => ctrl.abort();
   }, []);
 
-  const vozesBoas = kokoroVoicesFor(language);
-  const [chave11, setChave11] = useState("");
-  const [tem11, setTem11] = useState(elevenAvailable);
-  const [voz11, setVoz11] = useState(getElevenVoice);
+  useEffect(() => () => stopSpeaking(), []);
 
-  /*
-   * A lista chega VAZIA na primeira chamada em varios navegadores.
+  const todas = useMemo(() => listarVozes(language, sistema), [language, sistema]);
+  const boas = useMemo(() => recomendadas(todas), [todas]);
+  const resto = useMemo(() => outras(todas), [todas]);
+
+  /** Nenhuma escolha salva = vale a primeira recomendada, e a tela mostra isso. */
+  const ativa = escolha ?? boas[0]?.chave ?? null;
+
+  /**
+   * A etiqueta de cada voz: tudo que decide a escolha, numa linha.
    *
-   * `getVoices()` e preenchido de forma assincrona e avisa por
-   * `voiceschanged`. Sem escutar esse evento, a tela abriria sem opcao nenhuma
-   * no primeiro acesso e so funcionaria na segunda vez — que e o tipo de bug
-   * que a pessoa descreve como "às vezes não aparece".
+   * Sotaque primeiro porque é o defeito mais audível — foi o que ele pegou em
+   * "as vozes nao tao em portugues, tao em outra lingua".
    */
-  useEffect(() => {
-    const atualizar = () => setVozes(listVoices(language));
-    atualizar();
-
-    const synth = globalThis.speechSynthesis;
-    synth?.addEventListener("voiceschanged", atualizar);
-    return () => {
-      synth?.removeEventListener("voiceschanged", atualizar);
-      stopSpeaking();
-    };
-  }, [language]);
-
-  if (!speechSupported()) {
-    return (
-      <p className="tk-caption" style={{ margin: "0 2px", lineHeight: 1.5 }}>
-        {t("dex.noSpeech")}
-      </p>
+  const etiqueta = (v: Voz): string => {
+    const partes: string[] = [];
+    if (v.sotaque && v.sotaque !== language) partes.push(v.sotaque);
+    else if (!v.nativa) partes.push(t("voice.tag.foreign"));
+    partes.push(
+      v.motor === "edge"
+        ? t("voice.tag.neural")
+        : v.motor === "kokoro"
+          ? t("voice.tag.device")
+          : v.motor === "sistema"
+            ? t("voice.tag.system")
+            : t("voice.tag.eleven"),
     );
-  }
+    if (v.gastaCota) partes.push(t("voice.tag.quota"));
+    if (!v.online) partes.push(t("voice.tag.offline"));
+    if (v.precisaBaixar && !kokoro) partes.push(t("voice.tag.needsDownload"));
+    return partes.join(" · ");
+  };
+
+  const escolher = (v: Voz) => {
+    setEscolha(v.chave);
+    setVozEscolhida(v.chave);
+    // Toca com o motor de verdade: a prévia tem que soar como vai soar na
+    // Pokédex, não como a voz do sistema.
+    void speak(t("voice.sample"), language);
+  };
+
+  const linha = (v: Voz) => (
+    <button
+      key={v.chave}
+      type="button"
+      className="tk-option"
+      data-active={ativa === v.chave || undefined}
+      aria-pressed={ativa === v.chave}
+      disabled={v.gastaCota && saldo11 === 0}
+      onClick={() => escolher(v)}
+    >
+      <span className="tk-option-mark" aria-hidden="true">
+        {ativa === v.chave ? "●" : "○"}
+      </span>
+      <span style={{ flex: 1, minWidth: 0 }}>
+        <span className="tk-option-title">{v.nome}</span>
+        <span className="tk-option-detail">{etiqueta(v)}</span>
+      </span>
+      <span className="tk-voice-play" aria-hidden="true">
+        ▶
+      </span>
+    </button>
+  );
 
   return (
     <>
-      <p className="tk-caption" style={{ margin: "0 2px", lineHeight: 1.5 }}>
-        {t("voice.what")}
+      <p className="tk-caption" style={{ margin: "0 2px 14px", lineHeight: 1.5 }}>
+        {t("voice.intro")}
       </p>
 
       <button
@@ -142,7 +155,6 @@ export function VoiceSettings() {
         className="tk-option"
         data-active={ligada || undefined}
         aria-pressed={ligada}
-        style={{ marginTop: 12 }}
         onClick={() => {
           const proximo = !ligada;
           setLigada(proximo);
@@ -159,275 +171,99 @@ export function VoiceSettings() {
         </span>
       </button>
 
-      {/* --------------------------------------------- a voz que resolveu */}
+      {!speechSupported() && <p className="tk-dexdev-note">{t("dex.noSpeech")}</p>}
 
-      {/*
-        A voz neural online vem PRIMEIRO de todas.
+      {/* ------------------------------------------------ as que valem a pena */}
 
-        E a unica das quatro que junta as tres coisas que ele pediu: humana,
-        gratis e sem configurar nada. Kokoro so fala ingles (o `kokoro-js`
-        fonemiza sempre em ingles — ver a nota la), ElevenLabs pede chave e e
-        paga, e a do sistema em portugues e a Luciana, que foi o comeco desta
-        conversa. Nao ha download nem permissao: abrir a tela e apertar ▶ ja
-        toca a voz de verdade.
-      */}
-      {edgeSupports(language) && (
+      {boas.length > 0 && (
         <>
           <div className="tk-overline" style={{ display: "block", margin: "22px 0 8px" }}>
-            {t("voice.online")}
+            {t("voice.forYourLanguage")}
           </div>
-
-          <button
-            type="button"
-            className="tk-option"
-            data-active={neural || undefined}
-            aria-pressed={neural}
-            onClick={() => {
-              const proximo = !neural;
-              setNeural(proximo);
-              setNeuralOn(proximo);
-              if (proximo) void speak(t("voice.sample"), language);
-            }}
-          >
-            <span className="tk-option-mark" aria-hidden="true">
-              {neural ? "●" : "○"}
-            </span>
-            <span style={{ flex: 1, minWidth: 0 }}>
-              <span className="tk-option-title">{t("voice.onlineTitle")}</span>
-              <span className="tk-option-detail">{t("voice.onlineDetail")}</span>
-            </span>
-          </button>
-
-          {neural && (
-            <div style={{ display: "grid", gap: 6, marginTop: 6 }}>
-              {edgeVoicesFor(language).map((v) => {
-                const ativa = edgeVoz === v.id;
-                return (
-                  <button
-                    key={v.id}
-                    type="button"
-                    className="tk-option"
-                    data-active={ativa || undefined}
-                    aria-pressed={ativa}
-                    onClick={() => {
-                      setEdgeVoz(v.id);
-                      setEdgeVoice(v.id);
-                      // A previa passa pelo motor de verdade: tem que soar como
-                      // vai soar na Pokedex, nao como a voz do sistema.
-                      void speak(t("voice.sample"), language);
-                    }}
-                  >
-                    <span className="tk-option-mark" aria-hidden="true">
-                      {ativa ? "●" : "○"}
-                    </span>
-                    <span style={{ flex: 1, minWidth: 0 }}>
-                      <span className="tk-option-title">{v.label}</span>
-                      <span className="tk-option-detail">{t("voice.onlineTag")}</span>
-                    </span>
-                    <span className="tk-voice-play" aria-hidden="true">
-                      ▶
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          <div style={{ display: "grid", gap: 6 }}>{boas.map(linha)}</div>
         </>
       )}
 
-      {/* ------------------------------------------------- a voz de verdade */}
+      {/* --------------------------------------------------------- as outras */}
 
-      {/*
-        Kokoro vem depois: no aparelho e offline, mas so em ingles.
-        
-        "bem ruim luciana e joana... quero vozes reais, vozes boas estilo eleven
-        labs. mas gratis obvio". As vozes do sistema tem teto — sao de uma
-        geracao anterior de sintese, e escolher a melhor delas nao muda isso.
-        Kokoro e TTS neural rodando aqui mesmo: sem chave, sem conta, sem
-        servidor, e com voz brasileira de verdade.
-      */}
-      {kokoroSupports(language) && (
+      {resto.length > 0 && (
         <>
           <div className="tk-overline" style={{ display: "block", margin: "22px 0 8px" }}>
-            {t("voice.neural")}
+            {t("voice.otherLanguages")}
           </div>
+          {/*
+            O aviso que faltava.
 
-          {!kokoro ? (
-            <section className="tk-card" style={{ display: "grid", gap: 10 }}>
-              <p className="tk-caption" style={{ lineHeight: 1.5 }}>
-                {t("voice.neuralWhat")}
-              </p>
-              <div className="tk-row">
-                <span className="tk-row-label">{t("ai.local.size")}</span>
-                <span className="tk-row-value">
-                  {t("ai.local.aboutMb", { mb: KOKORO_MB.toLocaleString(language) })}
-                </span>
-              </div>
-
-              {baixando ? (
-                <>
-                  <div className="tk-meter">
-                    <div
-                      className="tk-meter-fill"
-                      style={{
-                        width: `${Math.round((baixando.fraction ?? 0) * 100)}%`,
-                        background: "var(--tk-pri)",
-                      }}
-                    />
-                  </div>
-                  <p className="tk-caption">{baixando.text}</p>
-                </>
-              ) : (
-                <button
-                  type="button"
-                  className="tk-btn tk-btn--primary tk-btn--block"
-                  onClick={() => {
-                    setErro(null);
-                    setBaixando({ fraction: 0, text: t("ai.local.starting") });
-                    void ensureKokoro(setBaixando)
-                      .then(() => setBaixando(null))
-                      .catch((e: unknown) => {
-                        setBaixando(null);
-                        setErro(e instanceof Error ? e.message : String(e));
-                      });
-                  }}
-                >
-                  {t("voice.neuralGet")}
-                </button>
-              )}
-
-              {erro && (
-                <p className="tk-caption" style={{ color: "var(--tk-dang)" }}>
-                  {erro}
-                </p>
-              )}
-            </section>
-          ) : (
-            <div style={{ display: "grid", gap: 6 }}>
-              {vozesBoas.map((v, i) => {
-                const ativa = kokoroVoz === null ? i === 0 : kokoroVoz === v.id;
-                return (
-                  <button
-                    key={v.id}
-                    type="button"
-                    className="tk-option"
-                    data-active={ativa || undefined}
-                    aria-pressed={ativa}
-                    onClick={() => {
-                      setKokoroVoz(v.id);
-                      setKokoroVoice(v.id);
-                      // Toca com o motor de verdade, nao com o do sistema: a
-                      // previa tem que soar como vai soar.
-                      void speak(t("voice.sample"), language);
-                    }}
-                  >
-                    <span className="tk-option-mark" aria-hidden="true">
-                      {ativa ? "●" : "○"}
-                    </span>
-                    <span style={{ flex: 1, minWidth: 0 }}>
-                      <span className="tk-option-title">{v.label}</span>
-                      <span className="tk-option-detail">{t("voice.neuralTag")}</span>
-                    </span>
-                    <span className="tk-voice-play" aria-hidden="true">
-                      ▶
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+            As 21 vozes da biblioteca padrão da ElevenLabs são todas american,
+            british ou australian — consultei a API dela. Elas FALAM português,
+            mas com sotaque de quem aprendeu, e a tela antiga não dizia isso em
+            lugar nenhum. Ele descobriu ouvindo.
+          */}
+          <p className="tk-caption" style={{ margin: "0 2px 8px", lineHeight: 1.5 }}>
+            {t("voice.otherLanguagesWhy")}
+          </p>
+          <div style={{ display: "grid", gap: 6 }}>{resto.map(linha)}</div>
         </>
       )}
 
-      {/* ---------------------------------------------- ElevenLabs, com chave */}
+      {/* ------------------------------------------------------ configurações */}
 
-      {/*
-        A voz que ele pediu pelo nome, e a unica com portugues humano.
-        
-        Aparece depois do Kokoro porque custa cota: 10.000 caracteres por mes no
-        plano gratuito, e uma ficha da Pokedex gasta uns 400. Quem usa o app em
-        ingles fica bem servido pelo Kokoro sem gastar credito nenhum.
-      */}
-      <div className="tk-overline" style={{ display: "block", margin: "22px 0 8px" }}>
-        {t("voice.eleven")}
+      <div className="tk-overline" style={{ display: "block", margin: "26px 0 8px" }}>
+        {t("voice.setup")}
       </div>
 
-      {/*
-        A compartilhada vem ANTES da caixa de chave, e vem DESLIGADA.
-
-        Antes porque é a que a pessoa pode usar agora, sem criar conta. Desligada
-        porque são ~50 leituras por MÊS pra todos os usuários somados — ligar
-        sozinho gastaria a cota de todo mundo em quem nem pediu. Ver `tts11.ts`.
-
-        O saldo aparece na própria linha: com um teto desse tamanho, descobrir
-        que acabou apertando o botão faria o app parecer quebrado por 28 dias.
-      */}
-      <button
-        type="button"
-        className="tk-option"
-        data-active={share11 || undefined}
-        aria-pressed={share11}
-        disabled={saldo11 === 0}
-        onClick={() => {
-          const proximo = !share11;
-          setShare11(proximo);
-          setElevenSharedOn(proximo);
-          if (proximo) void speak(t("voice.sample"), language);
-        }}
-      >
-        <span className="tk-option-mark" aria-hidden="true">
-          {share11 ? "●" : "○"}
-        </span>
-        <span style={{ flex: 1, minWidth: 0 }}>
-          <span className="tk-option-title">{t("voice.elevenShared")}</span>
-          <span className="tk-option-detail">
-            {saldo11 === undefined
-              ? t("common.loading")
-              : saldo11 === null
-                ? t("voice.elevenSharedDetail")
-                : saldo11 === 0
-                  ? t("voice.elevenSharedOut")
-                  : t("voice.elevenSharedLeft", { n: Math.floor(saldo11 / 400) })}
-          </span>
-        </span>
-      </button>
-
-      {share11 && (
-        <div style={{ display: "grid", gap: 6, marginTop: 6, marginBottom: 6 }}>
-          {ELEVEN_SHARED_VOICES.map((v) => {
-            const ativa = voz11share === v.id;
-            return (
-              <button
-                key={v.id}
-                type="button"
-                className="tk-option"
-                data-active={ativa || undefined}
-                aria-pressed={ativa}
-                onClick={() => {
-                  setVoz11share(v.id);
-                  setSharedVoice(v.id);
-                  // Sem prévia automática aqui: cada toque custa da cota do mês
-                  // de todo mundo. Trocar a voz é escolha, ouvir é outro gesto.
-                }}
-              >
-                <span className="tk-option-mark" aria-hidden="true">
-                  {ativa ? "●" : "○"}
-                </span>
-                <span style={{ flex: 1, minWidth: 0 }}>
-                  <span className="tk-option-title">{v.label}</span>
-                  <span className="tk-option-detail">{t("voice.elevenTag")}</span>
-                </span>
-              </button>
-            );
-          })}
-        </div>
+      {/* Kokoro: um download, uma vez. Não é escolha de voz — é o que faz as
+          vozes dele aparecerem na lista de cima. */}
+      {!kokoro && (
+        <section className="tk-card" style={{ display: "grid", gap: 10, marginBottom: 10 }}>
+          <p className="tk-caption" style={{ lineHeight: 1.5 }}>
+            {t("voice.neuralWhat")}
+          </p>
+          <div className="tk-row">
+            <span className="tk-row-label">{t("ai.local.size")}</span>
+            <span className="tk-row-value">
+              {t("ai.local.aboutMb", { mb: KOKORO_MB.toLocaleString(language) })}
+            </span>
+          </div>
+          {baixando ? (
+            <>
+              <div className="tk-meter">
+                <div
+                  className="tk-meter-fill"
+                  style={{
+                    width: `${Math.round((baixando.fraction ?? 0) * 100)}%`,
+                    background: "var(--tk-pri)",
+                  }}
+                />
+              </div>
+              <p className="tk-caption">{baixando.text}</p>
+            </>
+          ) : (
+            <button
+              type="button"
+              className="tk-btn tk-btn--primary tk-btn--block"
+              onClick={() => {
+                setErro(null);
+                setBaixando({ fraction: 0, text: t("ai.local.starting") });
+                void ensureKokoro(setBaixando)
+                  .then(() => setBaixando(null))
+                  .catch((e: unknown) => {
+                    setBaixando(null);
+                    setErro(e instanceof Error ? e.message : String(e));
+                  });
+              }}
+            >
+              {t("voice.neuralGet")}
+            </button>
+          )}
+        </section>
       )}
 
+      {/* ElevenLabs: a chave própria, pra quem quer sem cota compartilhada. */}
       <section className="tk-card" style={{ display: "grid", gap: 10 }}>
         <p className="tk-caption" style={{ lineHeight: 1.5 }}>
           {t("voice.elevenWhat")}
         </p>
-
         <div className="tk-search" style={{ height: 44 }}>
           <input
             type="password"
@@ -439,7 +275,6 @@ export function VoiceSettings() {
             aria-label={t("voice.elevenKey")}
           />
         </div>
-
         <div style={{ display: "flex", gap: 8 }}>
           <button
             type="button"
@@ -448,8 +283,8 @@ export function VoiceSettings() {
             disabled={chave11.trim() === ""}
             onClick={() => {
               setElevenKey(chave11);
-              setChave11("");
               setTem11(true);
+              setChave11("");
             }}
           >
             {t("ai.save")}
@@ -467,105 +302,12 @@ export function VoiceSettings() {
             {t("ai.clear")}
           </button>
         </div>
-
-        {tem11 &&
-          ELEVEN_VOICES.map((v) => (
-            <button
-              key={v.id}
-              type="button"
-              className="tk-option"
-              data-active={voz11 === v.id || undefined}
-              aria-pressed={voz11 === v.id}
-              onClick={() => {
-                setVoz11(v.id);
-                setElevenVoice(v.id);
-                void speak(t("voice.sample"), language);
-              }}
-            >
-              <span className="tk-option-mark" aria-hidden="true">
-                {voz11 === v.id ? "●" : "○"}
-              </span>
-              <span style={{ flex: 1, minWidth: 0 }}>
-                <span className="tk-option-title">{v.label}</span>
-                <span className="tk-option-detail">{t("voice.elevenTag")}</span>
-              </span>
-              <span className="tk-voice-play" aria-hidden="true">
-                ▶
-              </span>
-            </button>
-          ))}
       </section>
 
-      {vozes.length === 0 ? (
-        <p className="tk-caption" style={{ margin: "14px 2px 0", lineHeight: 1.5 }}>
-          {t("voice.none")}
+      {erro && (
+        <p className="tk-caption" style={{ color: "var(--tk-dang)", marginTop: 10 }}>
+          {erro}
         </p>
-      ) : (
-        <>
-          <div className="tk-overline" style={{ display: "block", margin: "22px 0 8px" }}>
-            {kokoro && kokoroSupports(language) ? t("voice.system") : t("voice.pick")}
-          </div>
-
-          <div style={{ display: "grid", gap: 6 }}>
-            {vozes.map((v) => {
-              const ativa =
-                escolhida === null ? v.recommended : escolhida === v.uri;
-              return (
-                <button
-                  key={v.uri}
-                  type="button"
-                  className="tk-option"
-                  data-active={ativa || undefined}
-                  aria-pressed={ativa}
-                  onClick={() => {
-                    // Escolhe E toca: o toque serve pras duas coisas de uma vez,
-                    // que e o que ele pediu.
-                    setEscolhida(v.uri);
-                    setPickedVoiceUri(v.uri);
-                    previewVoice(v.uri, t("voice.sample"));
-                  }}
-                >
-                  <span className="tk-option-mark" aria-hidden="true">
-                    {ativa ? "●" : "○"}
-                  </span>
-                  <span style={{ flex: 1, minWidth: 0 }}>
-                    <span className="tk-option-title">
-                      {v.name}
-                      {v.recommended && (
-                        <span className="tk-voice-rec"> · {t("voice.recommended")}</span>
-                      )}
-                    </span>
-                    <span className="tk-option-detail">{v.lang}</span>
-                  </span>
-                  <span className="tk-voice-play" aria-hidden="true">
-                    ▶
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {escolhida !== null && (
-            <button
-              type="button"
-              className="tk-btn tk-btn--ghost tk-btn--block"
-              style={{ height: 38, fontSize: 13, marginTop: 10 }}
-              onClick={() => {
-                setEscolhida(null);
-                setPickedVoiceUri(null);
-              }}
-            >
-              {t("voice.auto")}
-            </button>
-          )}
-
-          {/* No iPhone da pra baixar vozes melhores, e o app passa a preferi-las
-              sozinho porque elas pontuam mais alto. Dizer onde e mais util que
-              qualquer ajuste que eu possa fazer no codigo. */}
-          <p className="tk-caption" style={{ margin: "16px 2px 0", lineHeight: 1.5 }}>
-            {t("voice.better")}
-          </p>
-        </>
       )}
     </>
   );
