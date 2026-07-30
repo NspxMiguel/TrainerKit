@@ -69,12 +69,78 @@ function movesetsDe(
 }
 
 /**
+ * Onde cada atributo cai, comparado ao jogo inteiro.
+ *
+ * ⚠️ O defeito que isto conserta: eu mandava "Ataque 129" e o modelo respondeu
+ * "o alto ataque de Blissey". Numero cru nao diz se e muito ou pouco, e o modelo
+ * chuta — normalmente pra cima, porque a pergunta era elogiosa. Chutar a
+ * MAGNITUDE de um numero certo e tao errado quanto inventar o numero.
+ *
+ * Agora cada atributo vem com a faixa dele, calculada sobre as especies reais do
+ * proprio dataset. 129 de ataque deixa de ser "129" e passa a ser
+ * "129 (baixo: maior que 27% das espécies)". Nao ha o que chutar.
+ *
+ * Os cortes (10/30/70/90) sao arbitrarios como toda faixa, mas o PERCENTIL que
+ * acompanha nao e: quem quiser conferir, confere.
+ */
+function faixas(data: Dataset) {
+  const reais = data.species.filter((s) => s.cosmeticOf === null && isObtainable(s.id));
+  const ordenar = (k: "atk" | "def" | "hp") =>
+    reais.map((s) => s.baseStats[k]).sort((a, b) => a - b);
+
+  const listas = { atk: ordenar("atk"), def: ordenar("def"), hp: ordenar("hp") };
+
+  return (k: "atk" | "def" | "hp", valor: number): string => {
+    const v = listas[k];
+    if (valor >= v[v.length - 1]!) return `${valor} (o maior do jogo)`;
+
+    const abaixo = v.filter((x) => x < valor).length;
+    // Piso, nao arredondamento: com 1.181 espécies, arredondar dava
+    // "maior que 100% das espécies" pra quem tem uma acima — uma frase que se
+    // contradiz sozinha.
+    const pct = Math.floor((abaixo / v.length) * 100);
+    const rotulo =
+      pct < 10
+        ? "muito baixo"
+        : pct < 30
+          ? "baixo"
+          : pct < 70
+            ? "mediano"
+            : pct < 90
+              ? "alto"
+              : "muito alto";
+    return `${valor} (${rotulo}: maior que ${pct}% das espécies)`;
+  };
+}
+
+/**
  * Aguento como defensor, pela MESMA funcao que a tela do Ginasio usa.
  *
  * Extraido pra que a especie e a referencia (Blissey) passem pelo mesmo caminho:
  * duas contas parecidas em lugares diferentes e como dois numeros nascem
  * divergentes.
  */
+/**
+ * O numero pelo qual `rankDefenders` ORDENA.
+ *
+ * ⚠️ Bug que so apareceu quando eu imprimi o dossie inteiro e li: a lista dos
+ * melhores defensores saia "4º Arceus (Steel) 39.789, 5º Giratina 44.763". A
+ * ordem estava certa e o numero ao lado era outro — eu ordenava por um valor e
+ * mostrava outro.
+ *
+ * `rankDefenders` classifica por `bulk / incomingAverage`, porque aguentar muito
+ * e ser fraco a tudo se cancelam. Giratina tem menos defesa x vida que Arceus e
+ * ainda assim segura mais, porque resiste a mais coisa. Eu mostrava so o `bulk`.
+ *
+ * Uma lista numerada cujos numeros nao explicam a numeracao e pior que nenhuma
+ * lista: o modelo le a contradicao e ou repete ela, ou "conserta" reordenando
+ * por conta propria. Esta funcao e a MESMA conta da linha 140 de `gym.ts`,
+ * escrita a partir dos dois campos que o tipo expoe.
+ */
+function aguentoEfetivo(d: { bulk: number; incomingAverage: number }): number {
+  return d.bulk / d.incomingAverage;
+}
+
 function defenderBulk(species: DatasetSpecies | undefined, data: Dataset) {
   if (!species) return null;
   return (
@@ -113,8 +179,11 @@ export function speciesDossier(
 
   linhas.push(`Nome: ${species.name} (nº ${species.dex})`);
   linhas.push(`Tipos: ${species.types.join(" / ")}`);
+  const faixa = faixas(data);
   linhas.push(
-    `Atributos base: ataque ${species.baseStats.atk}, defesa ${species.baseStats.def}, resistência ${species.baseStats.hp}`,
+    `Atributos base: ataque ${faixa("atk", species.baseStats.atk)}; ` +
+      `defesa ${faixa("def", species.baseStats.def)}; ` +
+      `resistência ${faixa("hp", species.baseStats.hp)}`,
   );
 
   if (species.heightDm != null && species.weightHg != null) {
@@ -169,15 +238,19 @@ export function speciesDossier(
       data,
     );
 
+    const meu = aguentoEfetivo(comoDefensor);
+    const ref = referencia ? aguentoEfetivo(referencia) : 0;
+
     const emPercentual =
-      referencia && referencia.bulk > 0
-        ? ` — ${Math.round((comoDefensor.bulk / referencia.bulk) * 100)}% do aguento do Blissey, ` +
-          `que é a melhor parede do jogo (${Math.round(referencia.bulk).toLocaleString("pt-BR")})`
+      ref > 0
+        ? ` — ${Math.round((meu / ref) * 100)}% do aguento do Blissey, ` +
+          `que é a melhor parede do jogo (${Math.round(ref).toLocaleString("pt-BR")})`
         : "";
 
     linhas.push(
-      `Como defensor de ginásio: aguento (defesa x vida) ${Math.round(comoDefensor.bulk).toLocaleString("pt-BR")} ` +
-        `no nível ${NIVEL_REF} com IV perfeito${emPercentual}. ` +
+      `Como defensor de ginásio: aguento ${Math.round(meu).toLocaleString("pt-BR")} ` +
+        `(defesa x vida ${Math.round(comoDefensor.bulk).toLocaleString("pt-BR")}, dividido pelo dano que a ` +
+        `tabela de tipos deixa ele sofrer) no nível ${NIVEL_REF} com IV perfeito${emPercentual}. ` +
         `Dano médio que recebe pela tabela de tipos: ${comoDefensor.incomingAverage.toFixed(2)}x. ` +
         `Lembre: num defensor o ATAQUE não conta — ele não escolhe golpe nem mira fraqueza.`,
     );
@@ -215,9 +288,9 @@ export function speciesDossier(
   ).slice(0, TOPO);
 
   linhas.push(
-    `Melhores defensores de ginásio do jogo (aguento no nível ${NIVEL_REF}, IV perfeito): ` +
+    `Melhores defensores de ginásio do jogo (mesmo aguento acima, nível ${NIVEL_REF}, IV perfeito): ` +
       melhoresDefensores
-        .map((d, i) => `${i + 1}º ${d.name} ${Math.round(d.bulk).toLocaleString("pt-BR")}`)
+        .map((d, i) => `${i + 1}º ${d.name} ${Math.round(aguentoEfetivo(d)).toLocaleString("pt-BR")}`)
         .join(", "),
   );
 
@@ -336,6 +409,13 @@ Regras rígidas:
 - Você NÃO PODE inventar números, golpes, posições ou mecânicas. Se algo não
   estiver na sua memória, diga o que você sabe de mais próximo em vez de recusar
   — e nunca explique que "não foi fornecido".
+- NUNCA chame um número de alto, baixo, bom ou ruim por conta própria. Cada
+  atributo já vem com a faixa dele e o percentil; use ESSA palavra. Um ataque de
+  129 marcado como "baixo" é baixo, mesmo que 129 pareça um número grande —
+  chutar a magnitude de um número certo erra tanto quanto inventar o número.
+- Comparações só valem contra o que está na sua memória (o Blissey de
+  referência, os melhores do jogo). Não compare com um Pokémon que você não
+  recebeu.
 - Não gere, descreva nem ofereça imagens.
 - Tom de aparelho: direto, informativo, sem saudação e sem se despedir.
 - No máximo 4 frases curtas. Responda no idioma da pergunta.`;

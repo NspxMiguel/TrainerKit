@@ -46,8 +46,19 @@ export interface CollectionFact {
  * A colecao virada em fatos, pronta pra virar contexto.
  *
  * Limitada a 60 Pokemon por chamada: uma colecao de 500 estouraria o contexto e
- * a conta de quem paga. Os escolhidos sao os de maior IV — numa pergunta do
- * tipo "qual o melhor", o 63o melhor nunca e a resposta.
+ * a conta de quem paga.
+ *
+ * ⚠️ COMO EU ESCOLHIA ERRADO: eu mandava os 60 de MAIOR IV, com a justificativa
+ * de que "numa pergunta do tipo 'qual o melhor', o 63o melhor nunca e a
+ * resposta". Verdade — e irrelevante pra metade das perguntas que este arquivo
+ * existe pra responder. "O que eu transfiro?" esta no docstring do modulo como
+ * pergunta-alvo, e pra ela os 60 de maior IV sao exatamente a fatia errada: o
+ * modelo respondia com o pior DOS MELHORES, com toda a confianca, sem ter como
+ * saber que os piores de verdade tinham sido cortados antes de ele ver.
+ *
+ * Agora o corte pega os DOIS extremos — os melhores e os piores — porque as
+ * perguntas vem dos dois lados. E o meio, que some, some sabendo: o contexto
+ * declara quantos existem e quantos chegaram (ver `asContext`).
  */
 export function collectionFacts(
   items: readonly OwnedPokemon[],
@@ -94,7 +105,13 @@ export function collectionFacts(
     ];
   });
 
-  return facts.sort((a, b) => b.ivTotal - a.ivTotal).slice(0, limit);
+  const porIv = facts.sort((a, b) => b.ivTotal - a.ivTotal);
+  if (porIv.length <= limit) return porIv;
+
+  // Dois tercos do topo, um terco do fundo: "qual o melhor" e mais comum que
+  // "o que eu transfiro", mas nenhuma das duas pode ficar sem material.
+  const topo = Math.ceil((limit * 2) / 3);
+  return [...porIv.slice(0, topo), ...porIv.slice(-(limit - topo))];
 }
 
 const SYSTEM = `Você é o assistente do TrainerKit, um app de Pokémon GO.
@@ -109,6 +126,11 @@ Regras rígidas:
 - Nunca invente números, Pokémon, movesets ou mecânicas. Se a resposta não está
   nos dados, diga que não sabe.
 - Posição menor é melhor. Um #12 na Great é excelente; um #3000 é ruim.
+- Se o cabeçalho disser que você está vendo só parte da coleção, responda pelo
+  que viu e avise numa frase curta que olhou só os extremos. Nunca diga "o
+  melhor que você tem" ou "o pior que você tem" como se tivesse visto todos.
+- Não chame um IV de bom ou ruim pelo número solto: 45/45 é perfeito, 0/45 é o
+  pior possível, e a média de um Pokémon selvagem é perto de 22.
 - Não gere, descreva nem ofereça imagens.
 - Responda no idioma da pergunta.
 - Curto: no máximo 4 frases. Cite os nomes e os números que sustentam a
@@ -116,8 +138,16 @@ Regras rígidas:
 - Nada de saudação nem de "espero ter ajudado".`;
 
 /** Monta o contexto compacto. Uma linha por Pokemon, sem JSON — gasta menos. */
-function asContext(facts: readonly CollectionFact[]): string {
-  return facts
+function asContext(facts: readonly CollectionFact[], total: number): string {
+  const cabecalho =
+    facts.length < total
+      ? `O jogador tem ${total} Pokémon. Você está vendo ${facts.length}: os de maior ` +
+        `e os de menor IV. O meio da coleção não chegou até você.\n`
+      : `Coleção completa do jogador, ${total} Pokémon:\n`;
+
+  return (
+    cabecalho +
+    facts
     .map((f) => {
       const partes = [
         f.name,
@@ -133,12 +163,19 @@ function asContext(facts: readonly CollectionFact[]): string {
       ].filter(Boolean);
       return `- ${partes.join(" · ")}`;
     })
-    .join("\n");
+      .join("\n")
+  );
 }
 
 export interface AskOptions {
   question: string;
   facts: readonly CollectionFact[];
+  /**
+   * Quantos o jogador tem DE VERDADE. Separado de `facts.length` porque `facts`
+   * pode ser um recorte, e o modelo precisa saber disso pra nao responder "o
+   * pior que voce tem e X" quando X e so o pior que ele viu.
+   */
+  total: number;
   signal?: AbortSignal;
 }
 
@@ -152,6 +189,7 @@ export interface AskOptions {
 export async function askAboutCollection({
   question,
   facts,
+  total,
   signal,
 }: AskOptions): Promise<string> {
   if (facts.length === 0) throw new Error("colecao vazia");
@@ -161,7 +199,7 @@ export async function askAboutCollection({
       { role: "system", content: SYSTEM },
       {
         role: "user",
-        content: `Minha coleção:\n${asContext(facts)}\n\nPergunta: ${question}`,
+        content: `Minha coleção:\n${asContext(facts, total)}\n\nPergunta: ${question}`,
       },
     ],
     { temperature: 0.2, maxTokens: 320, ...(signal ? { signal } : {}) },
