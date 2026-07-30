@@ -81,16 +81,15 @@
 }
 
 /*
- * A saudacao da home, numa linha.
+ * Na home o nome mantem os 34px, com respiro menor embaixo.
  *
- * Era `.tk-greeting` de 13px em cima e `.tk-h1` de 34px embaixo: 74px de altura
- * pra dizer "boa noite". Aqui e 26px numa linha — ainda e o maior texto da
- * tela, ainda e o primeiro que se le, e sobra espaço pro que o app tem a dizer.
+ * Uma versao encolheu isto pra 26px numa linha, pra ganhar 44px de altura, e o
+ * Miguel notou na hora: "a saudação encolheu". O nome e a unica coisa da tela
+ * que e sobre ELE — trocar isso por mais informacao foi trocar a coisa certa
+ * pela errada. O que se corta pra caber e informacao, nunca a identidade.
  */
-.tk-hello {
-  font: 800 26px/1.15 var(--tk-font);
-  letter-spacing: -0.02em;
-  margin: 0 0 var(--tk-s4);
+.tk-h1--home {
+  margin-bottom: var(--tk-s4);
 }
 
 .tk-h2 {
@@ -123,6 +122,13 @@
    mais uma palavra cinza numa linha que ja e toda cinza. */
 .tk-overline-hot {
   color: var(--tk-warn);
+}
+
+/* Os numeros da colecao, no mesmo cabecalho e um tom abaixo: sao contexto, nao
+   manchete. Eram tres numeros de 24px disputando a tela com o destaque. */
+.tk-overline-dim {
+  color: var(--tk-txt3);
+  opacity: 0.72;
 }
 
 .tk-body {
@@ -1795,89 +1801,277 @@
   color: var(--tk-txt4);
 }
 
-/* As duas acoes da home, empilhadas com um respiro so entre elas. */
-.tk-acts {
-  display: grid;
-  gap: var(--tk-s2);
-}
-
-/* ------------------------------------------------- colecao na home */
+/* --------------------------------------------------- destaque da home */
 
 /*
- * Resumo e pendencias no mesmo cartao.
+ * UM Pokemon, grande, com a cor do tipo atras.
  *
- * Eram dois blocos, cada um com moldura, titulo e respiro proprios, para
- * responder a MESMA pergunta: "e a minha colecao, como esta?". Juntos custam
- * uns 60px menos — que era exatamente o que faltava pra home caber na tela.
+ * A home tinha duas acoes cinzas, um cartao cinza e uma dica cinza. O Miguel:
+ * "tudo com o mesmo peso" e "ficou sem graça / sem cara de Pokémon" — as duas
+ * coisas eram o mesmo defeito. Sem nada dominante a tela lia como lista de
+ * Ajustes, e num app de Pokemon isso e erro de identidade, nao de layout.
+ *
+ * A cor vem do TIPO, entao ela e informacao e nao enfeite: quem abre o app ja
+ * sabe pelo tom se o destaque de hoje e um Dragao ou um Fantasma.
  */
-.tk-home-coll {
-  display: grid;
-  gap: 10px;
-}
-
-/* Dentro do cartao o respiro em volta ja e do cartao: os numeros nao precisam
-   do proprio. */
-.tk-home-coll .tk-stats {
-  padding: 0;
-}
-
-.tk-home-empty {
+.tk-hero {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: var(--tk-s3);
+  gap: var(--tk-s4);
+  width: 100%;
+  padding: var(--tk-s4);
+  border-radius: var(--tk-r-card);
+  text-align: left;
+  overflow: hidden;
+  border: 1px solid var(--tk-line2);
+  /*
+   * `color-mix` em vez de opacidade no elemento: opacidade apagaria o texto
+   * junto. Assim so o fundo recebe a cor do tipo, e o contraste do nome
+   * continua o do tema.
+   */
+  background:
+    linear-gradient(
+      120deg,
+      color-mix(in srgb, var(--tk-hero-type, var(--tk-pri)) 26%, transparent),
+      color-mix(in srgb, var(--tk-hero-type, var(--tk-pri)) 6%, transparent) 62%,
+      transparent
+    ),
+    var(--tk-surf);
+  transition: transform 0.08s var(--tk-ease);
 }
 
-.tk-home-empty-mark {
+.tk-hero:active {
+  transform: scale(0.985);
+}
+
+/*
+ * O brilho atras do sprite.
+ *
+ * Sem ele o sprite flutua num canto do cartao; com ele parece apoiado em algo,
+ * que e o que faz o bloco virar um retrato em vez de uma linha de lista.
+ */
+.tk-hero-art {
+  position: relative;
   flex: none;
-  width: 34px;
-  height: 34px;
-  border-radius: 11px;
   display: grid;
   place-items: center;
-  background: var(--tk-surf2);
-  border: 1px solid var(--tk-line);
-  color: var(--tk-txt3);
 }
 
-/*
- * Uma pendencia.
- *
- * Era `<div>` com o nome e o motivo, e nada acontecia ao tocar — o app dizia
- * "evoluir este" e nao levava a ele. Agora a linha inteira abre o Pokemon, que
- * e para onde a frase aponta.
- */
-.tk-pend {
-  display: flex;
-  align-items: center;
-  gap: var(--tk-s3);
-  width: 100%;
-  padding: 0;
-  background: none;
-  border: 0;
-  transition: opacity 0.1s var(--tk-ease);
+.tk-hero-art::before {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--tk-hero-type, var(--tk-pri)) 34%, transparent),
+    transparent 70%
+  );
 }
 
-.tk-pend:active {
-  opacity: 0.6;
+.tk-hero-art > * {
+  position: relative;
 }
 
-.tk-pend-name {
+.tk-hero-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.tk-hero-label {
   display: block;
-  font: 600 14px var(--tk-font);
+  font: 700 10px var(--tk-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tk-txt4);
+}
+
+.tk-hero-name {
+  display: block;
+  font: 800 22px/1.15 var(--tk-font);
+  letter-spacing: -0.02em;
+  margin-top: 3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.tk-pend-why {
+.tk-hero-meta {
   display: block;
-  font: 400 12px/1.35 var(--tk-font);
+  font: 500 11px var(--tk-font);
   color: var(--tk-txt3);
+  margin-top: 2px;
 }
 
-.tk-pend-act {
+/* Duas linhas no maximo: o motivo do veredito e uma frase, nao um paragrafo. */
+.tk-hero-why {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font: 400 12px/1.4 var(--tk-font);
+  color: var(--tk-txt2);
+  margin-top: 6px;
+}
+
+.tk-hero-go {
   flex: none;
-  font: 700 12px var(--tk-font);
+  align-self: center;
+  font: 400 22px/1 var(--tk-font);
+  color: var(--tk-txt4);
+}
+
+/* ------------------------------------------------------ acao principal */
+
+/*
+ * A acao que a pessoa faz na rua, com o celular na mao.
+ *
+ * Era uma linha cinza igual a de montar time, e ai nenhuma das duas era a
+ * principal. Ler um print acontece dezenas de vezes por semana; montar time
+ * acontece sentado, planejando. Peso diferente porque a frequencia e diferente.
+ */
+.tk-cta {
+  display: flex;
+  align-items: center;
+  gap: var(--tk-s3);
+  width: 100%;
+  margin-top: var(--tk-s3);
+  padding: 14px var(--tk-s4);
+  border-radius: var(--tk-r-card);
+  text-align: left;
+  color: var(--tk-on-pri);
+  background: var(--tk-pri);
+  border: 1px solid var(--tk-pri);
+  transition: transform 0.08s var(--tk-ease);
+}
+
+.tk-cta:active {
+  transform: scale(0.985);
+  background: var(--tk-pri-p);
+}
+
+.tk-cta-mark {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  /* Vidro sobre a cor, nao outra cor: uma segunda cor aqui competiria com o
+     destaque logo acima, que ja carrega a cor do tipo. */
+  background: rgb(255 255 255 / 0.18);
+}
+
+.tk-cta-title {
+  display: block;
+  font: 700 16px var(--tk-font);
+}
+
+.tk-cta-detail {
+  display: block;
+  font: 400 12px var(--tk-font);
+  opacity: 0.78;
+  margin-top: 1px;
+}
+
+/* A acao secundaria: linha leve, sem moldura de cartao. */
+.tk-lite {
+  display: flex;
+  align-items: center;
+  gap: var(--tk-s3);
+  width: 100%;
+  min-height: var(--tk-touch);
+  margin-top: 2px;
+  padding: 0 var(--tk-s4);
+  color: var(--tk-txt2);
+  background: none;
+  border: 0;
+  text-align: left;
+}
+
+.tk-lite:active {
+  opacity: 0.55;
+}
+
+.tk-lite-t {
+  flex: 1;
+  font: 600 14px var(--tk-font);
+}
+
+.tk-lite-go {
+  flex: none;
+  font: 400 20px/1 var(--tk-font);
+  color: var(--tk-txt4);
+}
+
+/* --------------------------------------------------- fila da colecao */
+
+/*
+ * A colecao como fila de sprites, nao como cartao de texto.
+ *
+ * Era um bloco com tres numeros, duas linhas de nome, uma etiqueta de veredito
+ * e uma frase de rodape — muita leitura pra dizer "olha o que voce tem". A fila
+ * diz a mesma coisa de relance, cabe em 56px, e cada bicho abre com um toque.
+ * Os numeros que valiam a pena foram pro cabecalho da secao.
+ */
+.tk-strip-row {
+  display: flex;
+  gap: var(--tk-s2);
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 4px;
+  /* Sangra pelas margens: a fila encosta na borda da tela, sinalizando que
+     continua. Cortada no gutter pareceria uma lista que simplesmente acabou. */
+  margin: 0 calc(-1 * var(--tk-gutter));
+  padding-left: var(--tk-gutter);
+  padding-right: var(--tk-gutter);
+}
+
+.tk-strip-row::-webkit-scrollbar {
+  display: none;
+}
+
+.tk-strip-cell {
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: 16px;
+  line-height: 0;
+}
+
+.tk-strip-cell:active {
+  opacity: 0.6;
+}
+
+/*
+ * Quem pede decisao ganha um anel na cor do veredito.
+ *
+ * E o unico jeito de a fila continuar sendo lista de caça em vez de album: sem
+ * marca nenhuma, os cinco sprites teriam todos o mesmo peso e a informacao de
+ * "este cobra algo de voce" se perderia.
+ */
+.tk-strip-cell[data-hot] {
+  box-shadow: 0 0 0 2px var(--tk-bg), 0 0 0 4px var(--tk-cell-tone, var(--tk-pri));
+}
+
+.tk-strip-more {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: var(--tk-surf2);
+  border: 1px solid var(--tk-line);
+  color: var(--tk-txt3);
+  font: 700 13px var(--tk-mono);
+}
+
+/* Sem nada salvo, um convite de uma linha — moldura em volta de vazio nao
+   convida ninguem. */
+.tk-home-nudge {
+  margin: var(--tk-s4) 2px 0;
+  line-height: 1.5;
 }
 
 /* --------------------------------------------------- tabela de IV por liga */
@@ -2067,41 +2261,6 @@
   color: var(--tk-txt4);
 }
 
-/* -------------------------------------------------- resumo da colecao */
-
-/* Tres numeros lado a lado. Sem cartao em volta de proposito: e um respiro
-   entre o titulo e a lista, nao mais um bloco pra ler. */
-.tk-stats {
-  display: flex;
-  gap: var(--tk-s5);
-  padding: var(--tk-s1) 2px var(--tk-s4);
-}
-
-.tk-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.tk-stat-n {
-  font: 800 24px/1.05 var(--tk-font);
-  letter-spacing: -0.02em;
-}
-
-.tk-stat-sub {
-  font: 700 13px var(--tk-font);
-  color: var(--tk-txt4);
-}
-
-.tk-stat-l {
-  font: 400 11px var(--tk-font);
-  color: var(--tk-txt3);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 /* ------------------------------------------------------------- atalhos */
 
 /*
@@ -2145,9 +2304,17 @@
   margin-top: auto;
 }
 
+/*
+ * A descricao reserva duas linhas SEMPRE.
+ *
+ * "Melhores atacantes por tipo" quebra em duas e "Quem aguenta sob o teto" cabe
+ * em uma, entao os dois titulos ficavam em alturas diferentes lado a lado. Com
+ * a altura reservada eles alinham em qualquer idioma — e sao dez.
+ */
 .tk-tile-d {
   font: 400 11px/1.35 var(--tk-font);
   color: var(--tk-txt3);
+  min-height: 2.7em;
 }
 
 .tk-tile--raid {
@@ -2222,18 +2389,15 @@
 }
 
 /*
- * Tres linhas, no maximo.
+ * Sem corte.
  *
- * A dica mais longa (o exemplo de IV em liga com teto) ocupava cinco linhas e
- * era ela, sozinha, que fazia a home rolar. Cortar no fim e melhor que tirar a
- * dica: as primeiras linhas ja dizem a coisa contraintuitiva, e o resto e
- * exemplo.
+ * Uma versao cortava a dica em duas linhas com "…" pra caber, e o Miguel: "a
+ * dica cortada com …". Ele esta certo — frase cortada no meio parece defeito, e
+ * a dica existe justamente pra ser lida. As dicas foram reescritas curtas o
+ * bastante pra caber; se um dia uma nao couber, encurta a dica, nao a caixa.
  */
 .tk-tip-text {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
+  display: block;
   font: 400 12.5px/1.45 var(--tk-font);
   color: var(--tk-txt2);
 }
