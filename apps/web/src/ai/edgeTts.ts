@@ -154,23 +154,62 @@ export function setEdgeVoice(id: string | null): void {
  * Nao toca nada: no iPhone o audio so pode comecar dentro de um gesto do
  * usuario, e essa regra e de quem tem o clique na mao.
  */
+/**
+ * Texto que pode viajar na URL — e portanto ser guardado no CDN.
+ *
+ * ⚠️ A regra e estreita de propósito. GET vira cache compartilhado, e cache
+ * compartilhado significa que a URL fica em log de CDN, em historico e em
+ * qualquer proxy no caminho. Entao so entra aqui texto que o PROPRIO APP
+ * escreveu sobre uma especie — a ficha da Pokedex, que e identica pra todo mundo
+ * que abrir o mesmo bicho no mesmo idioma.
+ *
+ * Resposta de IA NUNCA: ela pode citar a colecao de quem perguntou ("o seu
+ * Blissey com IV 98%"), e isso e dado do usuario. Continua no POST, sem cache.
+ *
+ * O limite de 700 tambem e proposital: acima disso a URL codificada passa de
+ * ~2.000 caracteres, que e onde proxies e CDNs comecam a recusar. Texto maior
+ * cai no POST sozinho, sem quebrar nada.
+ */
+const MAX_URL_CHARS = 700;
+
 export async function edgeSynthesize(
   text: string,
   language: string,
   /** A escolhida na tela. Ignorada se não for deste idioma — ver `getEdgeVoice`. */
   preferida?: string,
+  /**
+   * `true` = o texto veio do app (ficha da Pokédex) e pode ser cacheado no CDN
+   * pra todos os usuários. Quem chama decide, e o padrão é o caminho privado.
+   */
+  compartilhavel = false,
   signal?: AbortSignal,
 ): Promise<Blob> {
   const voz = getEdgeVoice(language, preferida);
   if (voz === "") throw new Error("idioma sem voz neural");
 
-  const res = await fetch(TTS_PROXY, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    // 1.200 e o teto da funcao; cortar aqui evita um 413 previsivel.
-    body: JSON.stringify({ text: text.slice(0, 1200), voice: voz }),
-    ...(signal ? { signal } : {}),
-  });
+  // 1.200 e o teto da funcao; cortar aqui evita um 413 previsivel.
+  const corte = text.slice(0, 1200);
+
+  /*
+   * GET quando da, POST quando nao da.
+   *
+   * O GET e o que permite o CDN guardar: mesma voz + mesmo texto = mesma URL, e
+   * a partir da segunda pessoa o audio sai do cache sem custar nada nem acordar
+   * a funcao. Foi o que ele pediu — "ele fica tipo em cache apos alguem usar".
+   */
+  const podeCachear = compartilhavel && corte.length <= MAX_URL_CHARS;
+
+  const res = podeCachear
+    ? await fetch(
+        `${TTS_PROXY}?v=${encodeURIComponent(voz)}&t=${encodeURIComponent(corte)}`,
+        { method: "GET", ...(signal ? { signal } : {}) },
+      )
+    : await fetch(TTS_PROXY, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: corte, voice: voz }),
+        ...(signal ? { signal } : {}),
+      });
 
   if (!res.ok) {
     const corpo = (await res.json().catch(() => ({}))) as { error?: string };
