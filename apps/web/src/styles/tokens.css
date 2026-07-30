@@ -140,21 +140,42 @@
 
   --tk-ph: radial-gradient(70% 70% at 35% 25%, rgba(16, 19, 25, 0.09), rgba(16, 19, 25, 0.03));
   --tk-avatar: linear-gradient(150deg, #dee4ef, #c8d1e1);
-  --tk-brand: linear-gradient(150deg, #2e6be6, #7c5ce6);
+  --tk-brand: linear-gradient(150deg, #2a62d6, #7c5ce6);
 
-  --tk-pri: #2e6be6;
+  --tk-pri: #2a62d6;
   --tk-pri-h: #4a82f0;
   --tk-pri-p: #2457c4;
   --tk-pri-fg: #1f55c8;
   --tk-on-pri: #ffffff;
-  --tk-pri-soft: rgba(46, 107, 230, 0.1);
-  --tk-pri-line: rgba(46, 107, 230, 0.28);
-  --tk-pri-soft2: linear-gradient(140deg, rgba(46, 107, 230, 0.1), rgba(124, 92, 230, 0.06));
+  --tk-pri-soft: rgba(42, 98, 214, 0.1);
+  --tk-pri-line: rgba(42, 98, 214, 0.28);
+  --tk-pri-soft2: linear-gradient(140deg, rgba(42, 98, 214, 0.1), rgba(124, 92, 230, 0.06));
 
-  --tk-succ: #0b8a5f;
+  /*
+   * ⚠️ ESTES DOIS SAO MAIS ESCUROS QUE O "natural", e por medicao.
+   *
+   * O verde era #0b8a5f e o azul #2e6be6. Medidos contra o fundo do tema claro
+   * (#eceef3), que e o pior caso porque e onde o texto solto cai:
+   *
+   *   #0b8a5f  3.76   ✗   e o "POWER UP" do cartao da home, em 10px
+   *   #2e6be6  4.15   ✗   e "Pokédex" na barra de abas, em 11px
+   *
+   * O minimo do WCAG AA pra texto pequeno e 4.5, e o proprio prototipo fixou
+   * "contraste ≥4.5:1" como regra do design system. Os dois menores textos do
+   * app furavam a regra que o app escreveu — no tema que se usa na rua, com sol
+   * na tela, que e exatamente quando contraste deixa de ser detalhe.
+   *
+   * Os valores novos sao o ajuste MINIMO que passa nas tres superficies onde
+   * esses tokens pousam (branco, --tk-surf2 e o fundo). Escurecer mais deixaria
+   * a marca mais sombria sem ganho de leitura.
+   *
+   * O azul tambem e fundo de botao com texto branco: #2a62d6 leva o branco
+   * sobre ele de 4.81 pra 5.50, entao o mesmo ajuste melhora os dois lados.
+   */
+  --tk-succ: #097a52;
   --tk-on-succ: #ffffff;
-  --tk-succ-soft: rgba(11, 138, 95, 0.1);
-  --tk-succ-line: rgba(11, 138, 95, 0.26);
+  --tk-succ-soft: rgba(9, 122, 82, 0.1);
+  --tk-succ-line: rgba(9, 122, 82, 0.26);
 
   --tk-warn: #8a5a00;
   --tk-warn-soft: rgba(138, 90, 0, 0.09);
@@ -202,19 +223,19 @@
     --tk-shadow: rgba(16, 19, 25, 0.16);
     --tk-ph: radial-gradient(70% 70% at 35% 25%, rgba(16, 19, 25, 0.09), rgba(16, 19, 25, 0.03));
     --tk-avatar: linear-gradient(150deg, #dee4ef, #c8d1e1);
-    --tk-brand: linear-gradient(150deg, #2e6be6, #7c5ce6);
-    --tk-pri: #2e6be6;
+    --tk-brand: linear-gradient(150deg, #2a62d6, #7c5ce6);
+    --tk-pri: #2a62d6;
     --tk-pri-h: #4a82f0;
     --tk-pri-p: #2457c4;
     --tk-pri-fg: #1f55c8;
     --tk-on-pri: #ffffff;
-    --tk-pri-soft: rgba(46, 107, 230, 0.1);
-    --tk-pri-line: rgba(46, 107, 230, 0.28);
-    --tk-pri-soft2: linear-gradient(140deg, rgba(46, 107, 230, 0.1), rgba(124, 92, 230, 0.06));
-    --tk-succ: #0b8a5f;
+    --tk-pri-soft: rgba(42, 98, 214, 0.1);
+    --tk-pri-line: rgba(42, 98, 214, 0.28);
+    --tk-pri-soft2: linear-gradient(140deg, rgba(42, 98, 214, 0.1), rgba(124, 92, 230, 0.06));
+    --tk-succ: #097a52;
     --tk-on-succ: #ffffff;
-    --tk-succ-soft: rgba(11, 138, 95, 0.1);
-    --tk-succ-line: rgba(11, 138, 95, 0.26);
+    --tk-succ-soft: rgba(9, 122, 82, 0.1);
+    --tk-succ-line: rgba(9, 122, 82, 0.26);
     --tk-warn: #8a5a00;
     --tk-warn-soft: rgba(138, 90, 0, 0.09);
     --tk-warn-line: rgba(138, 90, 0, 0.24);
