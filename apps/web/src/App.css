@@ -5083,3 +5083,26 @@
     animation: none;
   }
 }
+
+/*
+ * O selo de troca na GRADE.
+ *
+ * A lista tem espaco pra "VALE TROCAR" por extenso; a celula da grade nao tem.
+ * Mesmo raciocinio do ponto do veredito ao lado: numa grade nao cabe texto, mas
+ * cabe a informacao. Canto oposto ao ponto pra os dois nunca se encostarem.
+ */
+.tk-owned-swap {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 3px;
+  border-radius: 9px;
+  background: var(--tk-pri-soft);
+  border: 1px solid var(--tk-pri-line);
+  color: var(--tk-pri-fg);
+  font: 700 11px/16px var(--tk-font);
+  text-align: center;
+  pointer-events: none;
+}

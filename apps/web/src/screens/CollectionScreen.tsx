@@ -167,6 +167,21 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
             if (!s || !verdict) return null;
 
             /*
+              A troca e calculada AQUI, e nao dentro de cada ramo.
+              
+              Ela nascia so no ramo da LISTA — e a grade e a vista padrao. A
+              etiqueta que o Miguel pediu tres vezes ficava invisivel pra quem
+              nunca trocou de vista, que e todo mundo. Bug meu, do mesmo dia em
+              que a etiqueta entrou.
+            */
+            const troca = avaliarTroca({
+              ivs: owned.ivs,
+              baseStats: s.baseStats,
+              lucky: owned.lucky,
+              shadow: owned.shadow,
+            });
+
+            /*
               GRADE: a mesma ficha da aba Pokedex, mais o que so a colecao sabe
               — o IV e a cor do veredito. O nome vira o IV porque numa grade da
               colecao a pergunta nao e "qual bicho e esse" (a arte responde), e
@@ -203,6 +218,15 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
                     }}
                     aria-label={t(ACTION_KEYS[verdict.action] as Key)}
                   />
+                  {/* Na grade nao cabe "VALE TROCAR", mas cabe o simbolo — o
+                      mesmo raciocinio do ponto do veredito logo acima. O texto
+                      inteiro vai no `aria-label`, entao quem usa leitor de tela
+                      ouve a frase e nao um caractere solto. */}
+                  {troca.vale && (
+                    <span className="tk-owned-swap" aria-label={t("trade.tag")}>
+                      ⇄
+                    </span>
+                  )}
                 </button>
               );
             }
@@ -250,12 +274,7 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
                       do veredito. Ela nao concorre com ele: o veredito diz o que
                       fazer com este bicho, a etiqueta diz que existe uma saida a
                       mais. Do lado do veredito viraria uma segunda ordem. */}
-                  {avaliarTroca({
-                    ivs: owned.ivs,
-                    baseStats: s.baseStats,
-                    lucky: owned.lucky,
-                    shadow: owned.shadow,
-                  }).vale && (
+                  {troca.vale && (
                     <span className="tk-tag-trade">{t("trade.tag")}</span>
                   )}
                 </span>
