@@ -27,7 +27,20 @@ import {
  * e o que permitiu acrescentar o local sem tocar em nenhuma tela.
  */
 
-export type AiProvider = "off" | "groq" | "local";
+export type AiProvider = "off" | "groq" | "local" | "shared";
+
+/**
+ * A URL da funcao que guarda a chave compartilhada.
+ *
+ * Vem do build (`VITE_TK_AI_PROXY`). VAZIA por padrao, e isso e proposital: sem a
+ * funcao publicada, a opcao "gratis" nem aparece na tela. Oferecer um botao que
+ * responde 503 seria pior que nao ter o botao.
+ */
+export const AI_PROXY: string = import.meta.env.VITE_TK_AI_PROXY ?? "";
+
+export function sharedAvailable(): boolean {
+  return AI_PROXY !== "";
+}
 
 export interface ChatMessage {
   role: "system" | "user" | "assistant";
@@ -57,6 +70,10 @@ const store = {
 function lerProvider(): AiProvider {
   const raw = store.get(PROVIDER_KEY);
   if (raw === "groq" || raw === "local" || raw === "off") return raw;
+  // "shared" so vale se a funcao existe neste build: quem escolheu compartilhada
+  // e depois recebeu um build sem proxy cai pra desligado, em vez de tentar
+  // falar com uma URL vazia.
+  if (raw === "shared") return sharedAvailable() ? "shared" : "off";
 
   /*
    * Migracao de quem ja tinha chave da Groq.
@@ -148,6 +165,16 @@ export function useAi(): AiState {
     return { provider: atual, localModel: modelo, ready: chave !== "", needsDownload: false };
   }
 
+  // Compartilhada: pronta se o build tem proxy. Nao ha chave nem download.
+  if (atual === "shared") {
+    return {
+      provider: atual,
+      localModel: modelo,
+      ready: sharedAvailable(),
+      needsDownload: false,
+    };
+  }
+
   if (atual === "local") {
     const podeRodar = hasWebGPU();
     return {
@@ -163,6 +190,7 @@ export function useAi(): AiState {
 
 /** A IA vai responder se alguem pedir? Usado pelas telas que a oferecem. */
 export function aiReady(): boolean {
+  if (provider === "shared") return sharedAvailable();
   if (provider === "groq") return getGroqKey() !== null;
   // Mesma correcao do hook: WebGPU sem modelo carregado nao responde nada.
   if (provider === "local") return hasWebGPU() && engineReady(localModel);
@@ -187,6 +215,31 @@ export async function chat(
     // Cancelar aqui seria mentira, e mentira em codigo de rede vira bug de
     // memoria depois.
     return localChat(localModel, messages, options);
+  }
+
+  /*
+   * Compartilhada: a chave fica no servidor e o navegador nunca a ve.
+   *
+   * O erro da funcao sobe inteiro — o 429 dela diz "use a sua chave ou a IA no
+   * aparelho", que e exatamente o que a pessoa precisa ler quando o limite
+   * gratuito acaba.
+   */
+  if (provider === "shared") {
+    const res = await fetch(AI_PROXY, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messages,
+        temperature: options.temperature,
+        maxTokens: options.maxTokens,
+      }),
+      ...(options.signal ? { signal: options.signal } : {}),
+    });
+
+    const corpo = (await res.json().catch(() => ({}))) as { text?: string; error?: string };
+    if (!res.ok) throw new Error(corpo.error ?? `${res.status}`);
+    if (!corpo.text) throw new Error("resposta vazia");
+    return corpo.text;
   }
 
   const chave = getGroqKey();

@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 
+import { setGroqKey } from "../ai/groq.ts";
+import { hasWebGPU } from "../ai/local.ts";
+import { setProvider, sharedAvailable, type AiProvider } from "../ai/provider.ts";
 import { useT } from "../i18n/t.ts";
 import { InstallGuide } from "../screens/InstallGuide.tsx";
 import { useInstallState } from "../storage/install.ts";
@@ -18,7 +21,7 @@ import { updateSetup, type UsageMode } from "./setup.ts";
  * quem quiser trocar acha em Ajustes. Pedir idioma na primeira tela era pedir
  * uma decisao que o sistema ja tinha tomado.
  */
-type StepId = "boas-vindas" | "modo" | "instalar";
+type StepId = "boas-vindas" | "modo" | "ia" | "instalar";
 
 export function Onboarding() {
   const [step, setStep] = useState(0);
@@ -31,6 +34,8 @@ export function Onboarding() {
   const [name, setName] = useState("");
   const [mode, setMode] = useState<UsageMode>("consulta");
   const [assistant, setAssistant] = useState(true);
+  const [iaEscolha, setIaEscolha] = useState<AiProvider>("off");
+  const [chave, setChave] = useState("");
   const [guideOpen, setGuideOpen] = useState(false);
   const install = useInstallState();
   const { t } = useT();
@@ -43,14 +48,35 @@ export function Onboarding() {
    * enquanto sugeria que ele criasse um. Nao e so um passo inutil: destroi a
    * confianca, porque o app claramente nao sabe onde esta rodando.
    */
+  /*
+   * O passo da IA entra no setup.
+   *
+   * "no setup pergunta da groq api key. deixa o setup mais completo". Ele esta
+   * certo: a IA era a unica escolha do app que ficava escondida em Ajustes, e
+   * quem nunca abriu Ajustes nunca soube que existia. Perguntar aqui tambem e o
+   * lugar honesto pra dizer o preco de cada opcao — chave propria, modelo no
+   * aparelho, ou nada.
+   */
   const steps: StepId[] = install.installed
-    ? ["boas-vindas", "modo"]
-    : ["boas-vindas", "modo", "instalar"];
+    ? ["boas-vindas", "modo", "ia"]
+    : ["boas-vindas", "modo", "ia", "instalar"];
 
   const current = steps[step]!;
   const last = step === steps.length - 1;
 
-  const finish = () => updateSetup({ done: true, mode, assistant, name: name.trim() });
+  const finish = () => {
+    /*
+     * A escolha de IA e gravada AQUI, no fim do setup — nao a cada toque.
+     *
+     * Se fosse gravando a cada clique, quem passeasse pelas opcoes ligaria e
+     * desligaria o provedor varias vezes, e no caso do local isso descarrega e
+     * recarrega a GPU sem motivo.
+     */
+    const limpa = chave.trim();
+    if (iaEscolha === "groq" && limpa !== "") setGroqKey(limpa);
+    setProvider(iaEscolha === "groq" && limpa === "" ? "off" : iaEscolha);
+    updateSetup({ done: true, mode, assistant, name: name.trim() });
+  };
 
   const go = (delta: 1 | -1) => {
     setDir(delta);
@@ -156,6 +182,102 @@ export function Onboarding() {
                   <span className="tk-option-detail">{t("onb.assistantDetail")}</span>
                 </span>
               </button>
+            </div>
+          </>
+        )}
+
+        {current === "ia" && (
+          <>
+            <h1 className="tk-onb-title">{t("onb.ai.title")}</h1>
+            <p className="tk-onb-sub">{t("onb.ai.sub")}</p>
+
+            <div className="tk-onb-options">
+              <button
+                type="button"
+                className="tk-option"
+                data-active={iaEscolha === "off" || undefined}
+                aria-pressed={iaEscolha === "off"}
+                onClick={() => setIaEscolha("off")}
+              >
+                <span className="tk-option-mark" aria-hidden="true">
+                  {iaEscolha === "off" ? "●" : "○"}
+                </span>
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span className="tk-option-title">{t("onb.ai.off")}</span>
+                  <span className="tk-option-detail">{t("onb.ai.offDetail")}</span>
+                </span>
+              </button>
+
+              {/* Gratis com limite: so aparece se a funcao existe neste build. */}
+              {sharedAvailable() && (
+                <button
+                  type="button"
+                  className="tk-option"
+                  data-active={iaEscolha === "shared" || undefined}
+                  aria-pressed={iaEscolha === "shared"}
+                  onClick={() => setIaEscolha("shared")}
+                >
+                  <span className="tk-option-mark" aria-hidden="true">
+                    {iaEscolha === "shared" ? "●" : "○"}
+                  </span>
+                  <span style={{ flex: 1, minWidth: 0 }}>
+                    <span className="tk-option-title">{t("onb.ai.shared")}</span>
+                    <span className="tk-option-detail">{t("onb.ai.sharedDetail")}</span>
+                  </span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                className="tk-option"
+                data-active={iaEscolha === "groq" || undefined}
+                aria-pressed={iaEscolha === "groq"}
+                onClick={() => setIaEscolha("groq")}
+              >
+                <span className="tk-option-mark" aria-hidden="true">
+                  {iaEscolha === "groq" ? "●" : "○"}
+                </span>
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span className="tk-option-title">{t("onb.ai.groq")}</span>
+                  <span className="tk-option-detail">{t("onb.ai.groqDetail")}</span>
+                </span>
+              </button>
+
+              {/* O campo aparece SÓ quando ele escolhe a Groq: um campo de chave
+                  de API sempre visivel assusta quem nao quer IA nenhuma. */}
+              {iaEscolha === "groq" && (
+                <div className="tk-search tk-onb-field" style={{ marginTop: 0 }}>
+                  <input
+                    type="password"
+                    autoComplete="off"
+                    spellCheck={false}
+                    placeholder="gsk_…"
+                    value={chave}
+                    onChange={(e) => setChave(e.target.value)}
+                    aria-label={t("ai.keyAria")}
+                  />
+                </div>
+              )}
+
+              {/* So oferece o modelo local onde ele realmente roda. Prometer e
+                  falhar depois de 1,7 GB de download seria cruel. */}
+              {hasWebGPU() && (
+                <button
+                  type="button"
+                  className="tk-option"
+                  data-active={iaEscolha === "local" || undefined}
+                  aria-pressed={iaEscolha === "local"}
+                  onClick={() => setIaEscolha("local")}
+                >
+                  <span className="tk-option-mark" aria-hidden="true">
+                    {iaEscolha === "local" ? "●" : "○"}
+                  </span>
+                  <span style={{ flex: 1, minWidth: 0 }}>
+                    <span className="tk-option-title">{t("onb.ai.local")}</span>
+                    <span className="tk-option-detail">{t("onb.ai.localDetail")}</span>
+                  </span>
+                </button>
+              )}
             </div>
           </>
         )}

@@ -15,6 +15,7 @@ import { useCollection } from "../storage/collection.ts";
 import { markSeen, useSeenCount, wasSeen } from "../storage/seen.ts";
 import { IconCamera, IconSearch } from "../ui/Icons.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
+import { supportsCamera, useCamera } from "../ui/useCamera.ts";
 import { beep, setVoiceOn, speak, speechSupported, stopSpeaking, voiceOn } from "../ui/dexVoice.ts";
 
 interface Props {
@@ -68,14 +69,16 @@ export function DexMode({ data, onClose, onOpenSpecies }: Props) {
   const [resposta, setResposta] = useState<string | null>(null);
   const [pensando, setPensando] = useState(false);
   const arquivo = useRef<HTMLInputElement>(null);
+  const camera = useCamera();
 
   useEffect(() => {
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = previous;
-      // Sair da tela cala o aparelho. Voz continuando depois de a tela fechar e
-      // o tipo de bug que faz alguem desinstalar o app no meio da rua.
+      // Sair da tela cala o aparelho E apaga a camera. Voz continuando (ou pior,
+      // luz da camera acesa) depois de a tela fechar e o tipo de bug que faz
+      // alguem desinstalar o app no meio da rua.
       stopSpeaking();
     };
   }, []);
@@ -254,6 +257,25 @@ export function DexMode({ data, onClose, onOpenSpecies }: Props) {
     if (proximo) escolher(proximo);
   };
 
+  /* -------------------------------------------------------- ao vivo */
+
+  /**
+   * Congela o quadro atual e identifica.
+   *
+   * Nao analisa CONTINUAMENTE de propósito: o limite gratuito da Groq e 8.000
+   * tokens por minuto e cada imagem custa uns 2.500 — analisar a cada segundo
+   * gastaria a cota em tres segundos e depois falharia sem parar. Entao a pessoa
+   * aponta, ve o que a lente ve, e aperta quando esta enquadrado.
+   */
+  const lerAoVivo = async () => {
+    const quadro = await camera.grab();
+    if (!quadro) return;
+    await lerFoto(quadro);
+    // Achou: desliga a camera. Deixar a luz acesa atras da ficha e o tipo de
+    // coisa que faz alguem desconfiar do app.
+    camera.stop();
+  };
+
   /* ----------------------------------------------------------- pela foto */
 
   const lerFoto = async (file: File) => {
@@ -373,7 +395,30 @@ Regras rígidas:
       {/* ---------------------------------------------------------- o visor */}
 
       <div className="tk-dexdev-screen">
-        {alvo ? (
+        {/*
+          A camera AO VIVO dentro do visor.
+          
+          "nao funcionando modo live da pokedex. so tem opcao de usar foto" — e
+          verdade: `<input capture>` abre o app de camera do sistema, tira uma
+          foto e volta. Nao e apontar, e fotografar. Aqui o video roda DENTRO do
+          visor, entao a tela mostra o que a lente ve antes de dizer o nome — que
+          e o que o aparelho da serie faz.
+
+          `playsInline` e obrigatorio: sem ele o Safari joga o video em tela cheia
+          nativa e engole a interface toda.
+        */}
+        <video
+          ref={camera.videoRef}
+          className="tk-dexdev-video"
+          data-on={camera.state === "on" || undefined}
+          playsInline
+          muted
+          autoPlay
+        />
+
+        {camera.state === "on" ? (
+          <span className="tk-dexdev-reticle" aria-hidden="true" />
+        ) : alvo ? (
           <>
             <button
               type="button"
@@ -522,6 +567,43 @@ Regras rígidas:
       ) : (
         /* ------------------------------------------------------- entradas */
         <>
+          {/* AO VIVO primeiro, foto depois: apontar e o que ele pediu, e mandar
+              print e o caminho alternativo pra quem ja tem a imagem salva. */}
+          {supportsCamera() && (
+            <button
+              type="button"
+              className="tk-dexdev-key tk-dexdev-key--block"
+              disabled={lendo || camera.state === "starting"}
+              onClick={() => {
+                if (camera.state === "on") void lerAoVivo();
+                else camera.start();
+              }}
+            >
+              {camera.state === "on"
+                ? lendo
+                  ? t("dex.reading")
+                  : t("dex.scanNow")
+                : camera.state === "starting"
+                  ? t("dex.cameraStarting")
+                  : t("dex.live")}
+            </button>
+          )}
+
+          {camera.state === "on" && (
+            <button
+              type="button"
+              className="tk-dexdev-soft"
+              style={{ width: "100%", marginTop: 8 }}
+              onClick={camera.stop}
+            >
+              {t("dex.cameraStop")}
+            </button>
+          )}
+
+          {camera.state === "denied" && (
+            <p className="tk-dexdev-note">{t("dex.cameraDenied")}</p>
+          )}
+
           <button
             type="button"
             className="tk-dexdev-key tk-dexdev-key--block"

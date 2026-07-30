@@ -4350,3 +4350,70 @@
 .tk-ask-send:active:not(:disabled) {
   background: var(--tk-pri-p);
 }
+
+/* ------------------------------------------------ camera ao vivo no visor */
+
+/*
+ * O video dentro do visor.
+ *
+ * Escondido por padrao e revelado por `data-on`: um `<video>` sem stream mostra
+ * um retangulo preto, e isso apagaria o brilho do tipo que fica atras do sprite.
+ *
+ * `object-fit: cover` porque o visor e mais largo que alto e a camera do celular
+ * e o contrario — sem isso o quadro apareceria com tarjas nas laterais.
+ */
+.tk-dexdev-video {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+}
+
+.tk-dexdev-video[data-on] {
+  display: block;
+}
+
+/*
+ * A mira.
+ *
+ * Quatro cantos, nao um quadrado inteiro: canto sugere "enquadre aqui" sem
+ * cobrir o que a lente ve. E a pulsacao diz que o aparelho esta ATIVO — parada,
+ * a mira pareceria uma decoracao impressa no vidro.
+ */
+.tk-dexdev-reticle {
+  position: absolute;
+  z-index: 2;
+  inset: 22% 26%;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--tk-visor-ink, #b8f2c8), var(--tk-visor-ink, #b8f2c8)) left top,
+    linear-gradient(var(--tk-visor-ink, #b8f2c8), var(--tk-visor-ink, #b8f2c8)) left top,
+    linear-gradient(var(--tk-visor-ink, #b8f2c8), var(--tk-visor-ink, #b8f2c8)) right top,
+    linear-gradient(var(--tk-visor-ink, #b8f2c8), var(--tk-visor-ink, #b8f2c8)) right top,
+    linear-gradient(var(--tk-visor-ink, #b8f2c8), var(--tk-visor-ink, #b8f2c8)) left bottom,
+    linear-gradient(var(--tk-visor-ink, #b8f2c8), var(--tk-visor-ink, #b8f2c8)) left bottom,
+    linear-gradient(var(--tk-visor-ink, #b8f2c8), var(--tk-visor-ink, #b8f2c8)) right bottom,
+    linear-gradient(var(--tk-visor-ink, #b8f2c8), var(--tk-visor-ink, #b8f2c8)) right bottom;
+  background-repeat: no-repeat;
+  background-size:
+    18px 2px, 2px 18px,
+    18px 2px, 2px 18px,
+    18px 2px, 2px 18px,
+    18px 2px, 2px 18px;
+  animation: tk-reticle 1.6s ease-in-out infinite;
+}
+
+@keyframes tk-reticle {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tk-dexdev-reticle {
+    animation: none;
+  }
+}

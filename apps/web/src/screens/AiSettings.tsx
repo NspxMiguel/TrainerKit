@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { GROQ_MODELS, setGroqKey, setGroqModel, useGroq } from "../ai/groq.ts";
+import { setGroqKey, useGroq } from "../ai/groq.ts";
 import {
   DEFAULT_LOCAL_MODEL,
   LOCAL_MODELS,
@@ -9,7 +9,13 @@ import {
   hasWebGPU,
   type LoadProgress,
 } from "../ai/local.ts";
-import { setLocalModel, setProvider, useAi, type AiProvider } from "../ai/provider.ts";
+import {
+  setLocalModel,
+  setProvider,
+  sharedAvailable,
+  useAi,
+  type AiProvider,
+} from "../ai/provider.ts";
 import { useLanguage } from "../i18n/language.ts";
 import { useT } from "../i18n/t.ts";
 import { Segmented } from "../ui/Segmented.tsx";
@@ -68,8 +74,13 @@ export function AiSettings() {
         ariaLabel={t("ai.title")}
         value={ai.provider}
         onChange={(p: AiProvider) => setProvider(p)}
+        /* A opcao compartilhada so existe se este build tem proxy. Um botao que
+           responde 503 seria pior que nao ter o botao. */
         options={[
           { value: "off" as const, label: t("ai.off") },
+          ...(sharedAvailable()
+            ? [{ value: "shared" as const, label: t("ai.provider.shared") }]
+            : []),
           { value: "groq" as const, label: t("ai.provider.groq") },
           { value: "local" as const, label: t("ai.provider.local") },
         ]}
@@ -81,6 +92,16 @@ export function AiSettings() {
         <p className="tk-caption" style={{ margin: "14px 2px 0", lineHeight: 1.5 }}>
           {t("ai.offDetail")}
         </p>
+      )}
+
+      {/* ------------------------------------------------------ compartilhada */}
+
+      {ai.provider === "shared" && (
+        <section className="tk-card" style={{ marginTop: 14 }}>
+          <p className="tk-caption" style={{ lineHeight: 1.5 }}>
+            {t("ai.sharedDetail")}
+          </p>
+        </section>
       )}
 
       {/* --------------------------------------------------------------- groq */}
@@ -129,14 +150,19 @@ export function AiSettings() {
             </button>
           </div>
 
-          <Segmented
-            ariaLabel={t("ai.title")}
-            value={groq.model}
-            onChange={setGroqModel}
-            size="compact"
-            options={GROQ_MODELS.map((m) => ({ value: m.id, label: m.label }))}
-          />
+          {/*
+            A escolha de modelo saiu.
 
+            "quem coloca key do groq n deve escolher modelo" — e ele esta certo
+            por um motivo que eu deveria ter visto: a pessoa nao tem como decidir
+            isso. Ela nao sabe qual dos dois responde melhor pra esta tarefa, e
+            escolher errado piora o app sem ela entender por que. O app sabe, e
+            escolher e trabalho do app.
+
+            O escolhido e o `llama-3.3-70b-versatile`: a tarefa aqui e reescrever
+            texto curto a partir de dados ja calculados, e o 70B erra menos que o
+            8B nisso sem custo perceptivel de tempo no plano gratuito.
+          */}
           <p className="tk-caption" style={{ lineHeight: 1.5 }}>
             {t("ai.help")}
           </p>

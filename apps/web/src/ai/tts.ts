@@ -13,23 +13,33 @@ import { getGroqKey } from "./groq.ts";
  * texto. Zero configuracao a mais pra quem ja ligou a IA, e o plano gratuito da
  * Groq cobre narracao de ficha com folga.
  *
- * ⚠️ O QUE EU CONSEGUI VERIFICAR, e o que nao:
+ * ⚠️ VERIFICADO COM A CHAVE DELE, e o resultado mudou o plano:
  *
- *   VERIFIQUEI  o endpoint existe. `POST /openai/v1/audio/speech` sem chave
- *               responde 401 "Invalid API Key", enquanto uma rota inventada
- *               responde 404 "Unknown request URL" — ou seja, a rota e real.
+ *   `playai-tts` ESTA DESCONTINUADO. A Groq responde 400
+ *   "model_decommissioned". Era o que eu tinha escrito de memoria, e nunca teria
+ *   funcionado.
  *
- *   NAO VERIFIQUEI  o nome exato do modelo e das vozes, porque isso exige uma
- *               chave e eu nao tenho a do Miguel. Por isso o codigo NAO trava:
- *               se o modelo ou a voz estiverem errados, a mensagem de erro da
- *               Groq sobe pra tela inteira (ela lista as vozes validas) e a
- *               narracao cai na voz do sistema. Falhar barulhento e melhor que
- *               um botao de falar que nao fala.
+ *   O que existe no catalogo e `canopylabs/orpheus-v1-english` — Orpheus, TTS de
+ *   verdade, e bom. Mas ele responde 400 "model_terms_required": o ADMIN DA ORG
+ *   precisa aceitar os termos em console.groq.com/playground?model=canopylabs%2F
+ *   orpheus-v1-english. Eu nao aceito termos em nome de ninguem, entao isto fica
+ *   pro Miguel — um clique, uma vez.
+ *
+ *   ⚠️ E ele e SO INGLES. Lendo portugues, a pronuncia sai errada. Por isso o app
+ *   so usa Orpheus quando o idioma da interface e ingles; em qualquer outro a voz
+ *   do sistema continua sendo a certa, mesmo sendo mais feia. Voz bonita falando
+ *   errado e pior que voz feia falando certo.
  */
 
-/** Modelo e voz padrao. Trocaveis pela tela quando a Groq recusar estes. */
-export const GROQ_TTS_MODEL = "playai-tts";
-export const GROQ_TTS_VOICE = "Fritz-PlayAI";
+/**
+ * Modelo de TTS. VERIFICADO no catalogo da conta.
+ *
+ * Exige aceite de termos no console (uma vez, pelo dono da conta) e e so ingles.
+ */
+export const GROQ_TTS_MODEL = "canopylabs/orpheus-v1-english";
+
+/** Voz padrao do Orpheus. Se a Groq recusar, o erro dela lista as validas. */
+export const GROQ_TTS_VOICE = "tara";
 
 const VOICE_KEY = "tk:tts-voz";
 
@@ -49,8 +59,15 @@ export function setTtsVoice(voice: string): void {
   }
 }
 
-export function ttsAvailable(): boolean {
-  return getGroqKey() !== null;
+/**
+ * O TTS bom vale pra este idioma?
+ *
+ * Orpheus e so ingles. Usar ele pra ler portugues daria uma voz bonita
+ * pronunciando errado — pior que a voz do sistema, que ao menos sabe as regras do
+ * idioma. Entao a checagem inclui o idioma, nao so a chave.
+ */
+export function ttsAvailable(language: string): boolean {
+  return getGroqKey() !== null && language.toLowerCase().startsWith("en");
 }
 
 /**

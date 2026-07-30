@@ -19,20 +19,20 @@ import type { ChatMessage } from "./provider.ts";
  */
 
 const KEY = "tk:groq";
-const MODEL_KEY = "tk:groq-modelo";
 
 /**
- * Modelos que valem a pena aqui.
+ * O modelo, escolhido pelo app.
  *
- * A tarefa e reescrever texto curto a partir de dados estruturados — nao exige
- * raciocinio pesado, e latencia importa mais que capacidade. Por isso o padrao
- * e o menor: numa tela que ja tem a resposta pronta, um assistente que demora
- * tres segundos e pior que nao ter.
+ * "quem coloca key do groq n deve escolher modelo". Ele esta certo, e o motivo e
+ * melhor que economia de tela: a pessoa NAO TEM COMO decidir isso. Ela nao sabe
+ * qual responde melhor pra esta tarefa, e escolher errado piora o app sem ela
+ * entender por que. Antes eram dois botoes e o padrao era o 8B.
+ *
+ * VERIFICADO no catalogo da conta do Miguel via `/v1/models`: os dois existem. O
+ * escolhido e o 70B — a tarefa e reescrever texto curto a partir de dados que o
+ * app ja calculou, e ele erra menos nisso sem custo perceptivel de tempo.
  */
-export const GROQ_MODELS = [
-  { id: "llama-3.1-8b-instant", label: "Llama 3.1 8B" },
-  { id: "llama-3.3-70b-versatile", label: "Llama 3.3 70B" },
-] as const;
+const MODEL = "llama-3.3-70b-versatile";
 
 const store = {
   get(k: string): string | null {
@@ -53,7 +53,6 @@ const store = {
 };
 
 let apiKey = store.get(KEY);
-let model = store.get(MODEL_KEY) ?? GROQ_MODELS[0].id;
 const listeners = new Set<() => void>();
 const emit = () => {
   for (const fn of listeners) fn();
@@ -70,13 +69,7 @@ export function setGroqKey(value: string | null): void {
 }
 
 export function getGroqModel(): string {
-  return model;
-}
-
-export function setGroqModel(value: string): void {
-  model = value;
-  store.set(MODEL_KEY, value);
-  emit();
+  return MODEL;
 }
 
 /**
@@ -88,19 +81,20 @@ export function setGroqModel(value: string): void {
  * muda de verdade.
  */
 export function useGroq(): { key: string | null; model: string } {
-  const snapshot = useSyncExternalStore(
+  // O snapshot e so a chave agora: o modelo e constante, e um valor constante num
+  // `useSyncExternalStore` nao muda nada — so daria trabalho de comparacao.
+  const key = useSyncExternalStore(
     (fn) => {
       listeners.add(fn);
       return () => {
         listeners.delete(fn);
       };
     },
-    () => `${apiKey ?? ""}\u0000${model}`,
-    () => `\u0000${GROQ_MODELS[0].id}`,
+    () => apiKey ?? "",
+    () => "",
   );
 
-  const [key, chosen] = snapshot.split("\u0000");
-  return { key: key === "" ? null : (key ?? null), model: chosen ?? GROQ_MODELS[0].id };
+  return { key: key === "" ? null : key, model: MODEL };
 }
 
 /**
