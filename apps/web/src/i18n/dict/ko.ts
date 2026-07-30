@@ -485,7 +485,7 @@ export const KO: Dict = {
   "voice.intro": "목소리를 고르세요. 눌러서 미리 들어볼 수 있습니다.",
   "voice.forYourLanguage": "이 언어를 쓰는 목소리",
   "voice.otherLanguages": "다른 언어",
-  "voice.otherLanguagesWhy": "이 목소리들은 외국어 억양으로 말합니다. ElevenLabs 무료 라이브러리는 전부 미국·영국·호주 목소리입니다.",
+  "voice.otherLanguagesWhy": "이 목소리들은 외국어 억양으로 말합니다. ElevenLabs의 Voice Library에는 커뮤니티 목소리가 있지만, 무료 요금제로는 API에서 쓸 수 없습니다.",
   "voice.setup": "설정",
   "voice.tag.foreign": "외국어 억양",
   "voice.tag.neural": "뉴럴",

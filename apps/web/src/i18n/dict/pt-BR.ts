@@ -511,7 +511,7 @@ export const PT_BR: Dict = {
   "voice.intro": "Escolha uma voz. Toque numa pra ouvir antes de decidir.",
   "voice.forYourLanguage": "FALAM O SEU IDIOMA",
   "voice.otherLanguages": "OUTROS IDIOMAS",
-  "voice.otherLanguagesWhy": "Estas falam português, mas com sotaque de outro idioma. As vozes da ElevenLabs são todas americanas, britânicas ou australianas — não existe voz brasileira na biblioteca gratuita dela.",
+  "voice.otherLanguagesWhy": "Estas falam o seu idioma com sotaque de outro. A ElevenLabs TEM vozes brasileiras, feitas por usuários na Voice Library — mas o plano gratuito não deixa usá-las pela API, só com assinatura paga.",
   "voice.setup": "CONFIGURAÇÃO",
   "voice.tag.foreign": "sotaque estrangeiro",
   "voice.tag.neural": "neural",

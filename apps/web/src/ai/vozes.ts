@@ -63,12 +63,24 @@ function localeDoEdge(id: string): string {
 /**
  * As vozes da ElevenLabs compartilhada.
  *
- * ⚠️ `nativa: false` SEMPRE, e isto não é pessimismo: consultei a API dela
- * (`/v2/voices`) e as 21 vozes da biblioteca padrão são todas `american`,
- * `british` ou `australian`. Nenhuma é brasileira. Várias são "verificadas" pra
- * português — o que significa que pronunciam, não que soam nativas.
+ * ⚠️ `nativa: false` SEMPRE — e a razão mudou depois que o Miguel me corrigiu.
  *
- * Marcar como nativa seria repetir na tela o erro que ele ouviu no áudio.
+ * Eu tinha consultado `/v2/voices` (a biblioteca PADRÃO da conta: 21 vozes,
+ * todas american/british/australian) e concluído que "não existe voz brasileira
+ * na ElevenLabs gratuita". Escrevi isso na tela do app. Estava errado: eu olhei
+ * num lugar e afirmei sobre outro.
+ *
+ * Ele disse que existiam, e existem — `/v1/shared-voices?language=pt` devolve 40
+ * vozes pt-BR com sotaque `brazilian`, feitas por usuários. Adriano tem 125 mil
+ * usos.
+ *
+ * Só que usá-las pela API esbarra nisto, testado contra a chave dele:
+ *
+ *   402 paid_plan_required — "Free users cannot use library voices via the API."
+ *
+ * Então elas ficam de fora enquanto a conta for gratuita, e a tela agora diz o
+ * motivo CERTO em vez da minha conclusão errada. Os ids estão no allowlist da
+ * função: no dia em que a conta virar paga, é só passar a oferecê-las aqui.
  */
 function dasEleven(): Voz[] {
   return ELEVEN_SHARED_VOICES.map((v) => ({

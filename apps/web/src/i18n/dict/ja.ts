@@ -485,7 +485,7 @@ export const JA: Dict = {
   "voice.intro": "声を選んでください。タップすると decide 前に試聴できます。",
   "voice.forYourLanguage": "この言語を話す声",
   "voice.otherLanguages": "他の言語の声",
-  "voice.otherLanguagesWhy": "これらは外国語なまりで話します。ElevenLabs の無料ライブラリは米・英・豪の声だけです。",
+  "voice.otherLanguagesWhy": "これらは外国語なまりで話します。ElevenLabs の Voice Library にはコミュニティ製の音声がありますが、無料プランでは API から使えません（有料プランのみ）。",
   "voice.setup": "設定",
   "voice.tag.foreign": "外国語なまり",
   "voice.tag.neural": "ニューラル",

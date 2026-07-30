@@ -538,7 +538,7 @@ const EN = {
   "voice.intro": "Pick a voice. Tap one to hear it before deciding.",
   "voice.forYourLanguage": "SPEAK YOUR LANGUAGE",
   "voice.otherLanguages": "OTHER LANGUAGES",
-  "voice.otherLanguagesWhy": "These speak your language with a foreign accent. ElevenLabs' free library is entirely American, British and Australian voices.",
+  "voice.otherLanguagesWhy": "These speak your language with a foreign accent. ElevenLabs does have community voices for other languages in its Voice Library — but the free plan cannot use them through the API, only paid ones can.",
   "voice.setup": "SETUP",
   "voice.tag.foreign": "foreign accent",
   "voice.tag.neural": "neural",
