@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 
-import { ACTION_KEYS, decide, ivTotalOf } from "@trainerkit/core";
+import { ACTION_KEYS, avaliarTroca, decide, ivTotalOf } from "@trainerkit/core";
 
 import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
 import { useT, type Key } from "../i18n/t.ts";
@@ -246,6 +246,18 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
                   {owned.cp !== null &&
                     ` · ${t("common.cp")} ${owned.cp.toLocaleString(language)}`}
                   {owned.level !== null && ` · ${t("common.level")} ${owned.level}`}
+                  {/* A etiqueta de troca vive na linha dos NUMEROS, nao ao lado
+                      do veredito. Ela nao concorre com ele: o veredito diz o que
+                      fazer com este bicho, a etiqueta diz que existe uma saida a
+                      mais. Do lado do veredito viraria uma segunda ordem. */}
+                  {avaliarTroca({
+                    ivs: owned.ivs,
+                    baseStats: s.baseStats,
+                    lucky: owned.lucky,
+                    shadow: owned.shadow,
+                  }).vale && (
+                    <span className="tk-tag-trade">{t("trade.tag")}</span>
+                  )}
                 </span>
 
                 {/*

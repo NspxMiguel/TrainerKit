@@ -455,12 +455,21 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
               <div className="tk-overline tk-overline--sec">
                 {t("home.yourCollection")}
                 {meus.agir.length > 0 && (
-                  <span className="tk-overline-hot">
+                  <>
+                    {/* O separador fica FORA do destaque, e nao por estilo.
+                        Ele morava dentro, e saia "SUA COLEÇÃO· 4 PEDEM UMA
+                        DECISÃO", grudado. A causa nao esta aqui: uma regra la
+                        embaixo do CSS deu `display: inline-block` a este span
+                        pra poder anima-lo, e caixa inline-block COME o proprio
+                        espaco inicial. Fora dela o espaco e texto normal e
+                        sobrevive a qualquer regra de animacao futura. */}
                     {" · "}
-                    {meus.agir.length === 1
-                      ? t("home.needsDecision.one")
-                      : t("home.needsDecision.many", { count: meus.agir.length })}
-                  </span>
+                    <span className="tk-overline-hot">
+                      {meus.agir.length === 1
+                        ? t("home.needsDecision.one")
+                        : t("home.needsDecision.many", { count: meus.agir.length })}
+                    </span>
+                  </>
                 )}
               </div>
 
@@ -495,7 +504,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
                   <button
                     type="button"
                     className="tk-strip-more"
-                    onClick={() => onGo("pokedex")}
+                    onClick={() => onGo("pokedex", { view: "mine" })}
                   >
                     +{meus.porIv.length - NA_FILA}
                   </button>
