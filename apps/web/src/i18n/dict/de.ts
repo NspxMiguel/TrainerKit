@@ -508,6 +508,7 @@ export const DE: Dict = {
   "gym.emptyCollection": "Speichere erst ein paar Pokémon, dann wird das eine Liste deiner eigenen.",
   "gym.howBuilt": "Sortiert nach effektiver Verteidigung mal Ausdauer auf dem jeweiligen Level, geteilt durch das, was die Typentabelle zulässt — und ohne wiederholten Primärtyp, damit ein Angreifer nicht alle sechs wegräumt. Motivationsverlust und Andrang in deiner Arena werden nicht simuliert: das steht nicht in den Spieldaten, und raten wäre erfinden.",
   "voice.title": "Pokédex-Stimme",
+  "voice.substituida": "Die gewählte Stimme hat nicht geantwortet. Vorgelesen hat {voz} — die App bleibt nicht stumm, tut aber auch nicht so, als wäre es deine Wahl gewesen.",
   "voice.neural": "Echte Stimme",
   "voice.online": "MENSCHLICHE STIMME",
   "voice.onlineTitle": "Neuronale Stimme",

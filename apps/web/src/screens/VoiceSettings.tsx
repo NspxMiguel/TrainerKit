@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import { KOKORO_MB, ensureKokoro, kokoroReady, onKokoroChange, type KokoroProgress } from "../ai/kokoro.ts";
 import { creditosRestantes } from "../ai/elevenShared.ts";
@@ -7,12 +7,14 @@ import { listarVozes, outras, recomendadas, type Voz } from "../ai/vozes.ts";
 import { useLanguage } from "../i18n/language.ts";
 import { useT } from "../i18n/t.ts";
 import {
+  assinarSubstituicao,
   listVoices,
   setVoiceOn,
   setVozEscolhida,
   speak,
   speechSupported,
   stopSpeaking,
+  ultimaSubstituicao,
   voiceOn,
   vozEscolhida,
 } from "../ui/dexVoice.ts";
@@ -43,6 +45,21 @@ import {
  * do Kokoro e o campo de chave da ElevenLabs. Os dois são coisas que a pessoa
  * faz uma vez, não toda vez.
  */
+/**
+ * O nome do motor como a PESSOA o ve na lista, nao como o codigo o chama.
+ *
+ * Dizer "quem leu foi edge" nao ajuda ninguem: `edge` e detalhe de
+ * implementacao, e a propria tela ja decidiu ha tempos que motor e etiqueta,
+ * nao categoria.
+ */
+const NOME_MOTOR: Record<string, string> = {
+  edge: "neural",
+  kokoro: "Kokoro",
+  sistema: "sistema",
+  "eleven-share": "ElevenLabs",
+  "eleven-user": "ElevenLabs",
+};
+
 export function VoiceSettings() {
   const { t } = useT();
   const language = useLanguage();
@@ -121,6 +138,19 @@ export function VoiceSettings() {
     void speak(t("voice.sample"), language);
   };
 
+  /*
+   * Se a prévia foi lida por OUTRA voz, a tela diz.
+   *
+   * Era o buraco que fez o Miguel achar que Brian, Eric e Adriano eram a mesma
+   * voz: o Adriano devolve 402 (voz de biblioteca em plano gratuito), o app
+   * caía calado pra neural, e o rótulo continuava dizendo "Adriano". Ele não
+   * tinha como saber sem comparar os áudios byte a byte — que foi o que eu
+   * acabei tendo que fazer.
+   *
+   * A escolha dele não é desfeita: só fica dito quem leu de verdade.
+   */
+  const substituida = useSyncExternalStore(assinarSubstituicao, ultimaSubstituicao, () => null);
+
   const linha = (v: Voz) => (
     <button
       key={v.chave}
@@ -172,6 +202,13 @@ export function VoiceSettings() {
       </button>
 
       {!speechSupported() && <p className="tk-dexdev-note">{t("dex.noSpeech")}</p>}
+
+      {/* Quem LEU de verdade, quando não foi quem a pessoa escolheu. */}
+      {substituida && (
+        <p className="tk-dexdev-note" role="status">
+          {t("voice.substituida", { voz: NOME_MOTOR[substituida.usada] ?? substituida.usada })}
+        </p>
+      )}
 
       {/* ------------------------------------------------ as que valem a pena */}
 

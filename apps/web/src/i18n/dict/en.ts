@@ -565,6 +565,7 @@ const EN = {
   "gym.emptyCollection": "Save a few Pokémon first and this becomes a list of yours.",
   "gym.howBuilt": "Ranked by effective defence times stamina at the level each one has, divided by how much the type chart lets it suffer — and with no repeated primary type, so one attacker cannot sweep all six. It does not model motivation decay or how busy your gyms are: that is not in the game data, and guessing it would be inventing.",
   "voice.title": "Pokédex voice",
+  "voice.substituida": "The voice you picked didn't answer. {voz} read it instead — the app won't go silent, but it won't pretend it was your choice either.",
   "voice.neural": "Real voice",
   "voice.online": "HUMAN VOICE",
   "voice.onlineTitle": "Neural voice",
