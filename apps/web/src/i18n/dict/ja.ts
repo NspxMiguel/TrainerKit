@@ -156,6 +156,8 @@ export const JA: Dict = {
   "verdict.howIGotHere": "この結論に至った理由",
   "verdict.hide": "隠す",
   "collection.title": "コレクション",
+  "collection.asGrid": "グリッド表示",
+  "collection.asList": "リスト表示",
   "collection.empty.title": "保存されたポケモンはありません",
   "collection.empty.body": "評価画面のスクショを読み込ませて保存してください。判定はここに出ます。",
   "collection.add": "ポケモンを追加",

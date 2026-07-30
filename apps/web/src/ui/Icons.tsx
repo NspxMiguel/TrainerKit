@@ -180,3 +180,21 @@ export function IconFilter(props: IconProps) {
     </Svg>
   );
 }
+
+/**
+ * Lista: o par do `IconGrid`, pro alternador de vista da Colecao.
+ *
+ * Os dois icones tem que ler como UM controle que troca de estado, e nao como
+ * dois botoes diferentes — por isso mesma grade, mesmo traco, e a diferenca e
+ * so a arrumacao dos elementos.
+ */
+export function IconList(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M8 6h12M8 12h12M8 18h12" />
+      <circle cx="4" cy="6" r="1" />
+      <circle cx="4" cy="12" r="1" />
+      <circle cx="4" cy="18" r="1" />
+    </Svg>
+  );
+}

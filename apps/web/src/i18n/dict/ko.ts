@@ -156,6 +156,8 @@ export const KO: Dict = {
   "verdict.howIGotHere": "이 결론에 이른 과정",
   "verdict.hide": "숨기기",
   "collection.title": "컬렉션",
+  "collection.asGrid": "그리드 보기",
+  "collection.asList": "목록 보기",
   "collection.empty.title": "저장된 포켓몬이 없습니다",
   "collection.empty.body": "평가 화면 스크린샷을 읽히고 저장하세요. 판정이 여기 나옵니다.",
   "collection.add": "포켓몬 추가",

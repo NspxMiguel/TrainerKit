@@ -156,6 +156,8 @@ export const FR: Dict = {
   "verdict.howIGotHere": "Comment j'y arrive",
   "verdict.hide": "Masquer",
   "collection.title": "Collection",
+  "collection.asGrid": "Vue grille",
+  "collection.asList": "Vue liste",
   "collection.empty.title": "Aucun Pokémon enregistré",
   "collection.empty.body": "Scanne la capture de l'évaluation et enregistre. Le verdict apparaît ici.",
   "collection.add": "Ajouter un Pokémon",
