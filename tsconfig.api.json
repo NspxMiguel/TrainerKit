@@ -1,6 +1,14 @@
 {
   // As funcoes da Vercel, que ate agora nao eram checadas por ninguem.
   //
+  // ⚠️ ESTE ARQUIVO MORA NA RAIZ, e nao em `api/`. Nao e arrumacao.
+  //
+  // A primeira versao era `api/tsconfig.json`, e a VERCEL o adotou no build
+  // dela — que instala com `--omit=dev`, entao `@types/node` nao existe la.
+  // Resultado: eu trocava dois erros de tipo por cinco (`process`, `Buffer`,
+  // `node:crypto`), todos falsos, todos so no build remoto. O typecheck e a
+  // NOSSA porta, e nao a dela: fora de `api/`, a Vercel nao o enxerga.
+  //
   // ⚠️ `api/` ficou de FORA de todo typecheck do repositorio desde o inicio:
   // `apps/web/tsconfig.json` inclui so `src/**`, e os outros pacotes nem olham
   // pra ca. `pnpm -r typecheck` dizia "Done" com dois erros de tipo de pe.
@@ -16,10 +24,16 @@
   // vale a que roda em producao.
   "compilerOptions": {
     "target": "ES2022",
-    // Sem `types: ["node"]`: `@types/node` nao e dependencia deste diretorio,
-    // e as funcoes so usam `process.env` e as APIs web padrao. `DOM` cobre
-    // `Response`, `fetch` e `URL`, que e o que elas de fato tocam.
     "lib": ["ES2022", "DOM"],
+    // `process`, `Buffer` e `node:crypto` sao usados de verdade em `api/tts.ts`,
+    // que roda no runtime Node.
+    //
+    // `typeRoots` apontando pro pacote web porque a RAIZ do monorepo nao declara
+    // `@types/node` — quem declara sao `apps/web` e `packages/dataset`, e o pnpm
+    // nao iça dependencia pra raiz. Sem isto o compilador nao acha os tipos e
+    // reclama de `process` num arquivo que roda em Node de verdade.
+    "typeRoots": ["./apps/web/node_modules/@types", "./node_modules/@types"],
+    "types": ["node"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
@@ -29,5 +43,5 @@
     "skipLibCheck": true,
     "allowImportingTsExtensions": true
   },
-  "include": ["**/*.ts"]
+  "include": ["api/**/*.ts"]
 }
