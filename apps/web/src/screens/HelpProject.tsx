@@ -1,5 +1,9 @@
-import { useT } from "../i18n/t.ts";
+import { useState } from "react";
+
 import { LIMITE_DIARIO } from "../ai/quota.ts";
+import { getGroqKey, setGroqKey } from "../ai/groq.ts";
+import { elevenAvailable, setElevenKey } from "../ai/elevenlabs.ts";
+import { useT } from "../i18n/t.ts";
 
 /**
  * "Ajude o projeto" — e por que ele NÃO recebe a sua chave.
@@ -31,9 +35,12 @@ import { LIMITE_DIARIO } from "../ai/quota.ts";
  */
 
 const GROQ_KEYS = "https://console.groq.com/keys";
+const ELEVEN_KEYS = "https://elevenlabs.io/app/settings/api-keys";
 
 export function HelpProject({ onOpenAi }: { onOpenAi: () => void }) {
   const { t } = useT();
+  const [temGroq, setTemGroq] = useState(() => getGroqKey() !== null);
+  const [tem11, setTem11] = useState(elevenAvailable);
 
   return (
     <>
@@ -73,6 +80,82 @@ export function HelpProject({ onOpenAi }: { onOpenAi: () => void }) {
           {t("help.openSettings")}
         </button>
       </section>
+
+      {/*
+        TIRAR a chave, e o passo que importa mais depois dele.
+
+        "tem q ter um negocio de tirar a key das ia do ajude o projeto tambem
+        né.... e ensinar como apagar a key no proprio painel (mais seguro)".
+
+        Ele tem razao, e a ordem que ele deu e a ordem certa: apagar aqui limpa o
+        APARELHO, o que e util mas nao e seguranca. Se a chave ja vazou — print,
+        aparelho emprestado, backup — apagar do `localStorage` nao a invalida:
+        ela continua funcionando pra quem tiver o valor.
+
+        Quem invalida de verdade e o painel do provedor. Por isso os dois botoes
+        aparecem juntos, e o texto diz qual dos dois e o que resolve.
+      */}
+      {(temGroq || tem11) && (
+        <>
+          <div className="tk-overline" style={{ display: "block", margin: "22px 0 8px" }}>
+            {t("help.removeTitle")}
+          </div>
+
+          <section className="tk-card" style={{ display: "grid", gap: 12 }}>
+            <p className="tk-caption" style={{ lineHeight: 1.6 }}>
+              {t("help.removeBody")}
+            </p>
+
+            {temGroq && (
+              <>
+                <button
+                  type="button"
+                  className="tk-btn tk-btn--secondary tk-btn--block"
+                  onClick={() => {
+                    setGroqKey(null);
+                    setTemGroq(false);
+                  }}
+                >
+                  {t("help.removeGroq")}
+                </button>
+                <a
+                  className="tk-caption"
+                  href={GROQ_KEYS}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  style={{ lineHeight: 1.6 }}
+                >
+                  {t("help.revokeGroq")}
+                </a>
+              </>
+            )}
+
+            {tem11 && (
+              <>
+                <button
+                  type="button"
+                  className="tk-btn tk-btn--secondary tk-btn--block"
+                  onClick={() => {
+                    setElevenKey(null);
+                    setTem11(false);
+                  }}
+                >
+                  {t("help.removeEleven")}
+                </button>
+                <a
+                  className="tk-caption"
+                  href={ELEVEN_KEYS}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  style={{ lineHeight: 1.6 }}
+                >
+                  {t("help.revokeEleven")}
+                </a>
+              </>
+            )}
+          </section>
+        </>
+      )}
 
       {/*
         A pergunta que ele fez, respondida na tela.

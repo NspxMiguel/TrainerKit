@@ -2222,7 +2222,28 @@
   gap: var(--tk-s2);
   overflow-x: auto;
   scrollbar-width: none;
-  padding-bottom: 4px;
+
+  /*
+   * ⚠️ FOLGA EM CIMA E EMBAIXO, e nao so embaixo.
+   *
+   * Aqui estava `padding-bottom: 4px` sozinho, e era o bug que o Miguel vinha
+   * apontando ha muito tempo — "o your colection ta por cima dos pokemons, meio
+   * bugadinho isso".
+   *
+   * O anel do veredito e desenhado com `box-shadow: 0 0 0 4px`, que se estende
+   * 4px PRA FORA da caixa do elemento. Como esta fila e um contentor de rolagem
+   * (`overflow-x: auto`), tudo que passa da borda dela e CORTADO. Medido na tela
+   * montada: folga no topo 0px, folga embaixo 4px — ou seja, o anel inteiro de
+   * cima sumia, e a linha ficava colada na etiqueta "SUA COLEÇÃO".
+   *
+   * Nao era sobreposicao de texto, como parecia: era o anel decapitado. Por isso
+   * eu nao achava olhando o layout — o espacamento estava certo, o que estava
+   * errado era o contentor comer a sombra.
+   *
+   * 5px, e nao 4: o `box-shadow` cai num pixel fracionario em telas 3x.
+   */
+  padding-top: 5px;
+  padding-bottom: 5px;
   /* Sangra pelas margens: a fila encosta na borda da tela, sinalizando que
      continua. Cortada no gutter pareceria uma lista que simplesmente acabou. */
   margin: 0 calc(-1 * var(--tk-gutter));
