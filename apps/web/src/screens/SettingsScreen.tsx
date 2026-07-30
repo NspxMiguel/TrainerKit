@@ -13,6 +13,8 @@ import { useT, type Key } from "../i18n/t.ts";
 import { WheelPicker } from "../ui/WheelPicker.tsx";
 import { Segmented } from "../ui/Segmented.tsx";
 import { SettingsSheet } from "../ui/SettingsSheet.tsx";
+import { FeedbackScreen } from "./FeedbackScreen.tsx";
+import { PrivacyScreen } from "./PrivacyScreen.tsx";
 import { updateSetup, useSetup } from "../onboarding/setup.ts";
 import { useAi } from "../ai/provider.ts";
 import { chosenVoiceName, voiceOn } from "../ui/dexVoice.ts";
@@ -54,7 +56,9 @@ type Painel =
   | "ai"
   | "storage"
   | "updates"
-  | "about";
+  | "about"
+  | "privacy"
+  | "feedback";
 
 const THEME_KEY = "tk:tema";
 
@@ -226,6 +230,10 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
           onOpen={() => setPainel("updates")}
         />
         <Linha label={t("settings.about")} onOpen={() => setPainel("about")} />
+        {/* Privacidade e Feedback ficam junto do Sobre: sao as tres coisas que
+            falam do projeto em si, nao do que ele calcula. */}
+        <Linha label={t("privacy.title")} onOpen={() => setPainel("privacy")} />
+        <Linha label={t("feedback.title")} onOpen={() => setPainel("feedback")} />
       </section>
 
       {/*
@@ -457,6 +465,18 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
               {t("settings.forceUpdate")}
             </button>
           </section>
+        </SettingsSheet>
+      )}
+
+      {painel === "privacy" && (
+        <SettingsSheet title={t("privacy.title")} onClose={fechar}>
+          <PrivacyScreen />
+        </SettingsSheet>
+      )}
+
+      {painel === "feedback" && (
+        <SettingsSheet title={t("feedback.title")} onClose={fechar}>
+          <FeedbackScreen />
         </SettingsSheet>
       )}
 

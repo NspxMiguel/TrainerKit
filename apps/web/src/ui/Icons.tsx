@@ -160,3 +160,23 @@ export function IconSpark(props: IconProps) {
     </Svg>
   );
 }
+
+/**
+ * Filtro: os tres cursores, o MESMO desenho do icone de Ajustes.
+ *
+ * Deliberadamente nao e um funil. O funil e o simbolo mais comum pra filtro, mas
+ * neste app ele apareceria a dois toques de um icone de cursores que faz a mesma
+ * coisa conceitual — escolher como a lista se comporta. Dois simbolos pra uma
+ * ideia e o tipo de coisa que faz uma interface parecer costurada de pedacos, que
+ * e exatamente a reclamacao que este trabalho veio atender.
+ */
+export function IconFilter(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h10M18 18h2" />
+      <circle cx="16" cy="6" r="2" />
+      <circle cx="10" cy="12" r="2" />
+      <circle cx="16" cy="18" r="2" />
+    </Svg>
+  );
+}

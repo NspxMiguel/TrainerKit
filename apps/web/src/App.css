@@ -4478,3 +4478,123 @@
   font: 400 12px/1 var(--tk-font);
   color: var(--tk-txt4);
 }
+
+/*
+ * O botao de filtro, do lado da busca.
+ *
+ * Mesma altura e mesmo raio do `.tk-search` pra os dois lerem como UMA linha, e
+ * nao como dois controles que por acaso ficaram lado a lado. Foi o pedido:
+ * "um botaozinho que voce clica do lado da barra de pesquisa".
+ */
+.tk-filter-btn {
+  position: relative;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--tk-line);
+  border-radius: var(--tk-r-md);
+  background: var(--tk-elev);
+  color: var(--tk-txt2);
+  transition:
+    color 200ms var(--tk-ease-glass),
+    background 200ms var(--tk-ease-glass);
+}
+
+.tk-filter-btn[data-on] {
+  background: var(--tk-pri);
+  border-color: var(--tk-pri);
+  color: #fff;
+}
+
+/* O ponto: a lista esta filtrada mesmo com o painel fechado. Sem ele, esconder
+   o painel esconderia tambem o motivo de faltar bicho na grade. */
+.tk-filter-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--tk-pri);
+  box-shadow: 0 0 0 2px var(--tk-elev);
+}
+
+.tk-filter-btn[data-on] .tk-filter-dot {
+  background: #fff;
+  box-shadow: 0 0 0 2px var(--tk-pri);
+}
+
+/*
+ * O selo do tipo, no tema CLARO.
+ *
+ * "esses back dos pokemon no modo claro fico estranho... parece ser feito pro
+ * modo escuro." Ele acertou a causa: os pares de cor do `typeGradient` foram
+ * escolhidos olhando o app escuro, onde um verde saturado tem contraste com o
+ * fundo e o sprite descansa em cima dele. Sobre um cartao branco esse mesmo
+ * verde vira um bloco pesado, e a grade inteira fica com cara de adesivo colado.
+ *
+ * Conserto em CSS, e nao no `typeGradient`, por um motivo: o gradiente e estilo
+ * INLINE (vem do tipo do Pokemon, calculado em JS), entao trocar a cor exigiria
+ * o JS conhecer o tema — e passar tema pra dentro de uma funcao de dados e o
+ * comeco de um emaranhado. Um veu por cima resolve no lugar certo.
+ *
+ * O que o veu faz: clareia e tira saturacao, mantendo a COR do tipo legivel (ela
+ * ainda informa: verde e Planta, vermelho e Fogo). A sombra interna tambem
+ * afrouxa — ela existia pra dar volume contra fundo escuro e no claro so sujava.
+ */
+/*
+ * ⚠️ O `:not([data-tk="dark"])` TEM que ficar DENTRO do `@media`, e eu errei isso
+ * na primeira tentativa: escrito solto, ele casa sempre que o atributo nao e
+ * exatamente "dark" — inclusive no tema escuro por preferencia do sistema, que
+ * nao escreve atributo nenhum. Resultado na tela: o veu branco clareando as
+ * fichas em cima do fundo preto.
+ *
+ * O `tokens.css` ja usava essa dupla (regra explicita + `:not` dentro do media)
+ * e eu copiei so metade dela. Seguir a convencao que ja existia teria evitado.
+ */
+[data-tk="light"] .tk-mono {
+  position: relative;
+  box-shadow: inset 0 -8px 14px -8px rgba(0, 0, 0, 0.18);
+}
+
+[data-tk="light"] .tk-mono::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.34);
+  pointer-events: none;
+}
+
+/* O sprite fica ACIMA do veu: clarear o fundo nao pode desbotar o bicho. */
+[data-tk="light"] .tk-mono img {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-tk="dark"]) .tk-mono {
+    position: relative;
+    box-shadow: inset 0 -8px 14px -8px rgba(0, 0, 0, 0.18);
+  }
+
+  :root:not([data-tk="dark"]) .tk-mono::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.34);
+    pointer-events: none;
+  }
+
+  :root:not([data-tk="dark"]) .tk-mono img {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+/* Dentro do visor da Pokedex nao ha veu: la o fundo e a tela verde do aparelho,
+   e o `bare` ja tirou o selo. */
+.tk-mono--bare::after {
+  display: none;
+}
