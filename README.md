@@ -6,7 +6,7 @@ There are enough calculators already. You attach the appraisal screenshot, "96.4
 
 TrainerKit answers that — and shows its work.
 
-**[Open the app →](https://spxmiguel.github.io/TrainerKit/)**
+**[Open the app →](https://trainerkit.vercel.app/)**
 
 Installable PWA, offline-first. No account, no server, nothing leaving your device.
 

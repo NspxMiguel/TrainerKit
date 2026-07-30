@@ -5,6 +5,7 @@
   "type": "module",
   "packageManager": "pnpm@11.17.0",
   "scripts": {
+    "publicar": "bash scripts/publicar.sh",
     "dev": "pnpm --filter @trainerkit/web dev",
     "build": "pnpm -r build",
     "test": "pnpm -r test",
