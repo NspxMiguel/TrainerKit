@@ -1,3 +1,5 @@
+import { synthesize, ttsAvailable } from "../ai/tts.ts";
+
 /**
  * A voz da Pokedex.
  *
@@ -17,6 +19,15 @@
  * arquivo nenhum.
  *
  * Homenagem, nao imitacao. E funciona no iPhone e no Android sem baixar nada.
+ *
+ * ⚠️ ATUALIZACAO: "o narrador da pokex fico paia po". Ele esta certo, e o motivo
+ * nao tem conserto por ajuste: `SpeechSynthesis` usa a voz do SISTEMA, e em
+ * portugues ela vai de sofrivel a robotica dependendo do aparelho. Mexer em
+ * `pitch` nao resolve o timbre.
+ *
+ * Entao quando ha chave da Groq, a fala passa por TTS de verdade (ver
+ * `ai/tts.ts`) e a voz do sistema fica sendo o PLANO B — pra quem nao tem chave,
+ * pra quando a rede cai, e pra quando a Groq recusa o modelo. Nunca fica muda.
  */
 
 /** Preferencia guardada: quem nao quer voz nao deveria ter que desligar sempre. */
@@ -95,17 +106,91 @@ function pickVoice(language: string): SpeechSynthesisVoice | null {
 }
 
 export function stopSpeaking(): void {
+  pararAudio();
   globalThis.speechSynthesis?.cancel();
 }
 
 /**
- * Fala o texto com a entrega de aparelho.
+ * O audio que esta tocando agora.
+ *
+ * Guardado no modulo porque `stopSpeaking` precisa alcancar ele de qualquer
+ * tela — e porque dois `speak()` seguidos nao podem virar duas vozes por cima
+ * uma da outra, que foi o primeiro bug que apareceu ao trocar de bicho rapido
+ * com a navegacao de anterior/proximo.
+ */
+let tocando: HTMLAudioElement | null = null;
+let urlAtual: string | null = null;
+
+function pararAudio(): void {
+  if (tocando) {
+    tocando.pause();
+    tocando.src = "";
+    tocando = null;
+  }
+  if (urlAtual) {
+    URL.revokeObjectURL(urlAtual);
+    urlAtual = null;
+  }
+}
+
+/**
+ * Erro da ultima tentativa de TTS, pra tela poder mostrar.
+ *
+ * A Groq lista as vozes validas na mensagem de erro quando a voz esta errada, e
+ * eu nao pude verificar o nome delas sem a chave — entao essa mensagem e o
+ * caminho pra descobrir, e engoli-la deixaria o Miguel adivinhando.
+ */
+let ultimoErroTts: string | null = null;
+
+export function lastTtsError(): string | null {
+  return ultimoErroTts;
+}
+
+/**
+ * Fala. Com voz boa se der, com a do sistema se nao.
+ *
+ * A ordem importa: tenta a Groq primeiro e SÓ cai pro sistema em falha. O
+ * contrario (tocar a do sistema enquanto baixa a boa) daria duas vozes.
+ */
+export async function speak(text: string, language: string): Promise<void> {
+  stopSpeaking();
+
+  if (ttsAvailable()) {
+    try {
+      const blob = await synthesize(text);
+      ultimoErroTts = null;
+      const url = URL.createObjectURL(blob);
+      urlAtual = url;
+      const audio = new Audio(url);
+      tocando = audio;
+      await new Promise<void>((resolve) => {
+        // Resolve nos dois casos: sem isto, um audio que falha em tocar deixaria
+        // a promessa pendurada e o botao "Falar" desabilitado pra sempre.
+        audio.onended = () => resolve();
+        audio.onerror = () => resolve();
+        void audio.play().catch(() => resolve());
+      });
+      pararAudio();
+      return;
+    } catch (e) {
+      // Guarda e cai pro sistema. Ficar muda porque a nuvem falhou seria pior
+      // que falar com voz feia.
+      ultimoErroTts = e instanceof Error ? e.message : String(e);
+    }
+  }
+
+  await speakWithSystem(text, language);
+}
+
+/**
+ * O plano B: a voz do sistema, com a entrega de aparelho.
  *
  * `rate` 0.88 e `pitch` 0.85: mais lento e mais grave que a fala natural, que e
  * o que faz soar anunciado em vez de conversado. Nao mexer nisso sem ouvir —
- * abaixo de 0.8 vira paródia, acima de 1 vira assistente de banco.
+ * abaixo de 0.8 vira paródia, acima de 1 vira assistente de banco. Nao conserta
+ * o timbre (isso e do sistema), so o ritmo.
  */
-export async function speak(text: string, language: string): Promise<void> {
+async function speakWithSystem(text: string, language: string): Promise<void> {
   const synth = globalThis.speechSynthesis;
   if (!synth) return;
 

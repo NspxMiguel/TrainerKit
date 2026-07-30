@@ -3,8 +3,10 @@ import { useState } from "react";
 import type { PokedexIntent } from "../App.tsx";
 import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
 import { useT } from "../i18n/t.ts";
+import { IconCamera } from "../ui/Icons.tsx";
 import { Segmented } from "../ui/Segmented.tsx";
 import { SpeciesBrowser } from "../ui/SpeciesBrowser.tsx";
+import { DexMode } from "./DexMode.tsx";
 import { RankingsScreen } from "./RankingsScreen.tsx";
 import { SpeciesDetail } from "./SpeciesDetail.tsx";
 
@@ -23,6 +25,7 @@ interface Props {
  */
 export function PokedexScreen({ dataset, intent }: Props) {
   const [selected, setSelected] = useState<DatasetSpecies | null>(null);
+  const [dexOpen, setDexOpen] = useState(false);
   const { t } = useT();
   /*
    * O estado inicial basta — nao precisa de efeito pra sincronizar.
@@ -70,6 +73,31 @@ export function PokedexScreen({ dataset, intent }: Props) {
         />
       </div>
 
+      {/*
+        O modo Pokedex mora AQUI, e nao na home.
+        
+        Ele estava como um dos tres botoes de acao da tela inicial, chamado
+        "Pokédex" — do lado de uma ABA chamada Pokédex. O Miguel: "2 funcoes com
+        o msm nome, pokedex e pokedex". Era a mesma redundancia que ele ja tinha
+        apontado nos atalhos, e eu criei de novo.
+
+        Aqui nao ha duas: a aba e a Pokedex, e este botao abre o APARELHO — que e
+        outra coisa que a mesma aba faz, no lugar onde a pessoa ja esta olhando
+        Pokemon.
+      */}
+      <button
+        type="button"
+        className="tk-dexopen"
+        onClick={() => setDexOpen(true)}
+      >
+        <span className="tk-dexopen-lens" aria-hidden="true" />
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span className="tk-dexopen-t">{t("dex.open")}</span>
+          <span className="tk-dexopen-d">{t("dex.openDetail")}</span>
+        </span>
+        <IconCamera size={20} />
+      </button>
+
       {tab === "browse" ? (
         <SpeciesBrowser species={dataset.data.species} onPick={setSelected} />
       ) : (
@@ -77,6 +105,17 @@ export function PokedexScreen({ dataset, intent }: Props) {
           data={dataset.data}
           onPick={setSelected}
           {...(intent?.view === "best" ? { initialMode: intent.mode } : {})}
+        />
+      )}
+
+      {dexOpen && (
+        <DexMode
+          data={dataset.data}
+          onClose={() => setDexOpen(false)}
+          onOpenSpecies={(s) => {
+            setDexOpen(false);
+            setSelected(s);
+          }}
         />
       )}
 

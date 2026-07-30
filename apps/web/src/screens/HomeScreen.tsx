@@ -12,16 +12,9 @@ import { setDoneAction, useCollection } from "../storage/collection.ts";
 import { useInstallState } from "../storage/install.ts";
 import type { PersistState } from "../storage/persist.ts";
 import { DidYouKnow } from "../ui/DidYouKnow.tsx";
-import {
-  IconAlert,
-  IconCamera,
-  IconSearch,
-  IconShield,
-  IconSwords,
-} from "../ui/Icons.tsx";
+import { IconAlert, IconCamera, IconShield, IconSwords } from "../ui/Icons.tsx";
 import { InstallBanner } from "../ui/InstallBanner.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
-import { DexMode } from "./DexMode.tsx";
 import { GymPicks } from "./GymPicks.tsx";
 import { InstallGuide } from "./InstallGuide.tsx";
 import { IVCalculator } from "./IVCalculator.tsx";
@@ -182,7 +175,6 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
   const [scanning, setScanning] = useState(false);
   const [picked, setPicked] = useState<DatasetSpecies | null>(null);
   const [teamOpen, setTeamOpen] = useState(false);
-  const [dexOpen, setDexOpen] = useState(false);
   const [gymOpen, setGymOpen] = useState(false);
   const [detail, setDetail] = useState<DatasetSpecies | null>(null);
 
@@ -419,14 +411,22 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
             Em fileira as tres somam 76px em vez de 138, e elas se leem melhor
             juntas: sao as coisas que o app FAZ por voce, ao lado uma da outra.
           */}
-          <div className="tk-acts3">
+          {/*
+            DUAS acoes, nao tres.
+
+            A terceira era "Pokédex" — do lado de uma ABA chamada Pokédex. O
+            Miguel: "2 funcoes com o msm nome, pokedex e pokedex". O aparelho
+            mudou pra dentro da aba Pokedex, que e onde ele pertence, e aqui
+            sobraram as duas coisas que NAO existem em aba nenhuma: montar time
+            e escolher quem fica no ginasio.
+
+            Em duas colunas o rotulo tambem para de quebrar: "Monta um time pra
+            mim" em coluna de 110px virava tres linhas.
+          */}
+          <div className="tk-acts2">
             <button type="button" className="tk-act" onClick={() => setTeamOpen(true)}>
               <IconSwords size={19} />
               <span className="tk-act-t">{t("team.open")}</span>
-            </button>
-            <button type="button" className="tk-act" onClick={() => setDexOpen(true)}>
-              <IconSearch size={19} />
-              <span className="tk-act-t">{t("dex.title")}</span>
             </button>
             <button type="button" className="tk-act" onClick={() => setGymOpen(true)}>
               <IconShield size={19} />
@@ -458,13 +458,18 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
               </div>
 
               <div className="tk-strip-row">
-                {meus.porIv.slice(0, NA_FILA).map((d) => (
+                {meus.porIv.slice(0, NA_FILA).map((d, i) => (
                   <button
                     key={d.id}
                     type="button"
                     className="tk-strip-cell"
                     data-hot={(!d.feito && PEDEM_ACAO.includes(d.verdict.action)) || undefined}
-                    style={{ ["--tk-cell-tone" as string]: TONE[d.verdict.action] }}
+                    style={{
+                      ["--tk-cell-tone" as string]: TONE[d.verdict.action],
+                      // Indice da cascata: a fila entra da esquerda pra direita,
+                      // o que ja diz que ela rola.
+                      ["--tk-i" as string]: i,
+                    }}
                     onClick={() => setDetail(d.species)}
                     aria-label={`${d.species.name} · ${t(ACTION_KEYS[d.verdict.action] as Key)}`}
                     title={`${d.species.name} · ${t(ACTION_KEYS[d.verdict.action] as Key)}`}
@@ -564,17 +569,6 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
           onClose={() => setGymOpen(false)}
           onPickSpecies={(s) => {
             setGymOpen(false);
-            setDetail(s);
-          }}
-        />
-      )}
-
-      {dexOpen && data && (
-        <DexMode
-          data={data}
-          onClose={() => setDexOpen(false)}
-          onOpenSpecies={(s) => {
-            setDexOpen(false);
             setDetail(s);
           }}
         />

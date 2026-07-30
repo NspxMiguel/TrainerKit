@@ -107,12 +107,16 @@ export function CollectionScreen({ dataset }: Props) {
           <p className="tk-body">{t("collection.empty.body")}</p>
         </div>
       ) : (
-        <div style={{ display: "grid", gap: 8 }}>
-          {rows.map(({ owned, species: s, verdict }) => {
+        <div className="tk-cascade" style={{ display: "grid", gap: 8 }}>
+          {rows.map(({ owned, species: s, verdict }, i) => {
             if (!s || !verdict) return null;
 
             return (
-              <div key={owned.id} className="tk-owned">
+              <div
+                key={owned.id}
+                className="tk-owned"
+                style={{ ["--tk-i" as string]: i }}
+              >
                 {/*
                   Abrir e a acao da LINHA inteira, entao ela e uma camada
                   invisivel por cima de tudo — e nao um botao que precisa
@@ -254,6 +258,10 @@ export function CollectionScreen({ dataset }: Props) {
           </p>
         )}
       </section>
+
+      {/* Reserva a altura do botao flutuante: sem isto ele cobria o "Importar"
+          quando a tela estava rolada ate o fim. */}
+      <span className="tk-fab-clear" aria-hidden="true" />
 
       <button
         type="button"

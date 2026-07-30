@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 
 import { askAboutCollection, collectionFacts } from "../ai/ask.ts";
+import { ensureEngine, type LoadProgress } from "../ai/local.ts";
 import { useAi } from "../ai/provider.ts";
 import type { Dataset } from "../data/useDataset.ts";
 import { useT } from "../i18n/t.ts";
@@ -29,12 +30,77 @@ export function AskBox({ items, data }: Props) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abort = useRef<AbortController | null>(null);
+  const [baixando, setBaixando] = useState<LoadProgress | null>(null);
 
   const facts = useMemo(() => collectionFacts(items, data), [items, data]);
 
-  // So aparece se a IA vai de fato responder — escolhida E pronta. Groq sem
-  // chave e local sem WebGPU estao escolhidas e nao respondem.
-  if (!ai.ready || items.length === 0) return null;
+  if (items.length === 0) return null;
+  // Nem pronta nem baixavel (desligada, ou Groq sem chave, ou sem WebGPU): a
+  // caixa nao aparece. Campo morto dizendo "configure a IA" e propaganda
+  // ocupando espaco de quem nao pediu.
+  if (!ai.ready && !ai.needsDownload) return null;
+
+  /*
+   * Escolheu IA local e ainda nao baixou o modelo.
+   *
+   * Antes `ready` dizia sim so por existir WebGPU, entao a caixa aparecia
+   * normal, a primeira pergunta disparava 900 MB em SILENCIO e ela ficava
+   * parada — era o "chat nao funcionando". Agora o estado aparece, com botao e
+   * barra, e o download acontece porque alguem pediu.
+   */
+  if (ai.needsDownload) {
+    return (
+      <section className="tk-ask">
+        <div className="tk-ask-head">
+          <IconSpark size={17} />
+          <span>{t("ask.title")}</span>
+        </div>
+
+        {baixando ? (
+          <>
+            <div className="tk-meter" style={{ marginTop: 10 }}>
+              <div
+                className="tk-meter-fill"
+                style={{
+                  width: `${Math.round((baixando.fraction ?? 0) * 100)}%`,
+                  background: "var(--tk-pri)",
+                }}
+              />
+            </div>
+            <p className="tk-ask-wait">{baixando.text}</p>
+          </>
+        ) : (
+          <>
+            <p className="tk-caption" style={{ marginTop: 8, lineHeight: 1.5 }}>
+              {t("ask.needsDownload")}
+            </p>
+            <button
+              type="button"
+              className="tk-btn tk-btn--primary tk-btn--block"
+              style={{ marginTop: 10 }}
+              onClick={() => {
+                setBaixando({ fraction: 0, text: t("ai.local.starting") });
+                void ensureEngine(ai.localModel, setBaixando)
+                  .then(() => setBaixando(null))
+                  .catch((e: unknown) => {
+                    setBaixando(null);
+                    setError(e instanceof Error ? e.message : String(e));
+                  });
+              }}
+            >
+              {t("ai.local.download")}
+            </button>
+          </>
+        )}
+
+        {error && (
+          <p className="tk-ask-answer" style={{ color: "var(--tk-dang)" }}>
+            {t("ask.failed", { reason: error })}
+          </p>
+        )}
+      </section>
+    );
+  }
 
   const ask = async (q: string) => {
     const texto = q.trim();
@@ -86,6 +152,15 @@ export function AskBox({ items, data }: Props) {
             if (e.key === "Enter") void ask(question);
           }}
         />
+        <button
+          type="button"
+          className="tk-ask-send"
+          aria-label={t("ask.send")}
+          disabled={busy || question.trim() === ""}
+          onClick={() => void ask(question)}
+        >
+          ↑
+        </button>
       </div>
 
       {!answer && !busy && (

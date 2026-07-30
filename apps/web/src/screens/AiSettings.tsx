@@ -10,6 +10,7 @@ import {
   type LoadProgress,
 } from "../ai/local.ts";
 import { setLocalModel, setProvider, useAi, type AiProvider } from "../ai/provider.ts";
+import { useLanguage } from "../i18n/language.ts";
 import { useT } from "../i18n/t.ts";
 import { Segmented } from "../ui/Segmented.tsx";
 
@@ -22,13 +23,15 @@ import { Segmented } from "../ui/Segmented.tsx";
  * privacidade.
  *
  * O padrao e DESLIGADO, e o download do modelo local nunca comeca sozinho: o
- * tamanho aparece antes, em megabytes, e a pessoa aperta. Um app que consome 900
- * MB do plano de dados de alguem sem avisar e um app que se desinstala.
+ * tamanho aparece antes e a pessoa aperta. Um app que consome 1,7 GB do plano de
+ * dados de alguem sem avisar e um app que se desinstala — e 1,7 GB e o numero
+ * MEDIDO do menor modelo, nao os 879 MB que esta tela dizia antes.
  */
 export function AiSettings() {
   const groq = useGroq();
   const ai = useAi();
   const { t } = useT();
+  const language = useLanguage();
   const [draft, setDraft] = useState("");
   const [progress, setProgress] = useState<LoadProgress | null>(null);
   const [erro, setErro] = useState<string | null>(null);
@@ -149,7 +152,7 @@ export function AiSettings() {
 
             iOS 26+, Chrome/Android 121+, Chrome e Edge no desktop. Em qualquer
             outro lugar o modelo simplesmente nao roda — e melhor dizer isso do
-            que deixar a pessoa baixar 900 MB pra descobrir depois.
+            que deixar a pessoa baixar 1,7 GB pra descobrir depois.
           */}
           {!webgpu ? (
             <div className="tk-banner tk-banner--warn" style={{ margin: 0 }}>
@@ -176,12 +179,25 @@ export function AiSettings() {
                 options={LOCAL_MODELS.map((m) => ({ value: m.id, label: m.label }))}
               />
 
-              {/* O tamanho vem ANTES do botao, sempre. E o unico numero que
-                  importa pra decisao, e esconde-lo seria a definicao de pegadinha. */}
+              {/*
+                O tamanho vem ANTES do botao, sempre — e agora com o numero
+                CERTO. Antes esta linha mostrava `vramMB` (memoria de video)
+                chamando de "primeiro download", e o download real do 1B passou
+                de 1.670 MB: quase o dobro do que estava escrito. Onde eu nao
+                medi, a tela diz "mais de 1 GB" em vez de inventar.
+              */}
               <div className="tk-row">
                 <span className="tk-row-label">{t("ai.local.size")}</span>
                 <span className="tk-row-value">
-                  {t("ai.local.aboutMb", { mb: modeloLocal.vramMB.toLocaleString() })}
+                  {modeloLocal.downloadMB === null
+                    ? t("ai.local.overGb")
+                    : t("ai.local.aboutMb", { mb: modeloLocal.downloadMB.toLocaleString(language) })}
+                </span>
+              </div>
+              <div className="tk-row">
+                <span className="tk-row-label">{t("ai.local.vram")}</span>
+                <span className="tk-row-value">
+                  {t("ai.local.aboutMb", { mb: modeloLocal.vramMB.toLocaleString(language) })}
                 </span>
               </div>
 
@@ -216,6 +232,12 @@ export function AiSettings() {
 
               <p className="tk-caption" style={{ lineHeight: 1.5 }}>
                 {t("ai.local.cacheNote")}
+              </p>
+              {/* Testado: o 1B respondeu "não sabe qual é o melhor pra raide sem
+                  saber a posição nas ligas de PvP" — uma recusa confusa, com os
+                  dados na mao. Prometer paridade com a Groq seria mentira. */}
+              <p className="tk-caption" style={{ lineHeight: 1.5, color: "var(--tk-warn)" }}>
+                {t("ai.local.weaker")}
               </p>
             </>
           )}
