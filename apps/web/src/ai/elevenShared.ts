@@ -46,13 +46,42 @@ export const ELEVEN_VOICES: Record<
   string,
   ReadonlyArray<{ id: string; label: string; nativa: boolean }>
 > = {
-  // Adriano e a UNICA com sotaque brasileiro — veio da Voice Library.
+  /*
+   * ⚠️ NENHUMA VOZ DE BIBLIOTECA AQUI. Ver a nota grande logo abaixo.
+   *
+   * O Adriano saiu desta lista. Ele era a primeira opcao do portugues, marcado
+   * `nativa: true` como "o unico brasileiro de verdade" — e nunca falou uma
+   * palavra. Voz de Voice Library num plano gratuito devolve 402 na API, a
+   * chamada falhava, o app caia calado pra voz neural, e o rotulo "Adriano"
+   * ficava em cima de outra voz.
+   *
+   * Era isso que o Miguel ouviu como "voz de brian e adriano e eric =": Brian e
+   * Eric sao diferentes de verdade (audios de 35.152 e 30.973 bytes), o Adriano
+   * e que era os outros dois.
+   *
+   * O id continua no allowlist de `api/tts11.ts`: no dia em que a conta virar
+   * paga, e so devolver a linha aqui.
+   */
   "pt-BR": [
-    { id: "hwnuNyWkl9DjdTFykrN6", label: "Adriano", nativa: true },
-    { id: "IKne3meq5aSn9XLyUdCD", label: "Charlie", nativa: false },
     { id: "nPczCjzI2devNBz1zQrb", label: "Brian", nativa: false },
-    { id: "cjVigY5qzO86Huf0OWal", label: "Eric", nativa: false },
+    { id: "cgSgspJ2msm6clMCkdW9", label: "Jessica", nativa: false },
   ],
+  /*
+   * So o ingles ganha a lista inteira, e isso nao e favoritismo.
+   *
+   * As 22 vozes da conta sao TODAS american/british/australian — conferido em
+   * `/v2/voices`, uma por uma. Em ingles elas sao nativas e soam claramente
+   * diferentes entre si, entao seis opcoes sao seis escolhas de verdade.
+   *
+   * Nos outros idiomas elas leem pelo modelo multilingue, com sotaque de quem
+   * aprendeu — e ai tres vozes masculinas americanas lendo portugues soam a
+   * mesma coisa pra quem escuta. Oferecer tres era vender escolha que nao
+   * existe, e cada uma dessas leituras sai de um bolo de ~50 por MES.
+   *
+   * Entao fora do ingles ficam DUAS, uma de cada genero — que e a unica
+   * diferenca que o ouvido pega quando o sotaque e o mesmo. Quem quiser voz da
+   * propria lingua tem a neural, que e nativa, gratis e sem cota.
+   */
   en: [
     { id: "EXAVITQu4vr4xnSDxMaL", label: "Sarah", nativa: true },
     { id: "pNInz6obpgDQGcFmaJgB", label: "Adam", nativa: true },
@@ -64,37 +93,34 @@ export const ELEVEN_VOICES: Record<
   es: [
     { id: "CwhRBWXzGAHq8TQ4Fs17", label: "Roger", nativa: false },
     { id: "XrExE9yKIg1WjnnlVkGX", label: "Matilda", nativa: false },
-    { id: "cjVigY5qzO86Huf0OWal", label: "Eric", nativa: false },
   ],
   "es-419": [
     { id: "CwhRBWXzGAHq8TQ4Fs17", label: "Roger", nativa: false },
     { id: "XrExE9yKIg1WjnnlVkGX", label: "Matilda", nativa: false },
-    { id: "cjVigY5qzO86Huf0OWal", label: "Eric", nativa: false },
   ],
   fr: [
-    { id: "FGY2WhTYpPnrIDTdsKH5", label: "Laura", nativa: false },
-    { id: "Xb7hH8MSUJpSbSDYk0k2", label: "Alice", nativa: false },
     { id: "N2lVS1w4EtoT3dr4eOWO", label: "Callum", nativa: false },
+    { id: "FGY2WhTYpPnrIDTdsKH5", label: "Laura", nativa: false },
   ],
   de: [
-    { id: "pFZP5JQG7iQjIQuC4Bku", label: "Lily", nativa: false },
     { id: "onwK4e9ZLuTAKqWW03F9", label: "Daniel", nativa: false },
-    { id: "TX3LPaxmHKxFdv7VOQHJ", label: "Liam", nativa: false },
+    { id: "pFZP5JQG7iQjIQuC4Bku", label: "Lily", nativa: false },
   ],
   it: [
     { id: "SAz9YHcvj6GT2YYXdXww", label: "River", nativa: false },
-    { id: "pFZP5JQG7iQjIQuC4Bku", label: "Lily", nativa: false },
     { id: "XrExE9yKIg1WjnnlVkGX", label: "Matilda", nativa: false },
   ],
   ja: [
     { id: "JBFqnCBsd6RMkjVDRZzb", label: "George", nativa: false },
     { id: "cgSgspJ2msm6clMCkdW9", label: "Jessica", nativa: false },
   ],
-  // ko e ru: nenhuma voz da conta declara esses idiomas. Lista vazia e a
-  // resposta honesta — o motor neural cobre os dois com voz nativa.
+  // Coreano e russo continuam VAZIOS: nenhuma voz da conta declara esses
+  // idiomas, e inventar uma entrada aqui seria repetir o erro dos ids de
+  // memoria. Nesses dois a lista mostra so a neural, que cobre os dois.
   ko: [],
   ru: [],
 };
+
 
 /** Compatibilidade: o allowlist da funcao aceita qualquer id que apareca acima. */
 export const ELEVEN_SHARED_VOICES = ELEVEN_VOICES.en!;

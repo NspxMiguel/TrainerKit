@@ -412,6 +412,56 @@ export function lastTtsError(): string | null {
 }
 
 /**
+ * Quando a voz escolhida NAO foi a que falou.
+ *
+ * ⚠️ Este e o registro que faltava, e a ausencia dele custou duas rodadas.
+ *
+ * "voz de brian e adriano e eric =." Nao sao iguais: Brian e Eric geram audios
+ * diferentes (35.152 e 30.973 bytes, hashes distintos). Quem soava igual aos
+ * outros era o Adriano — porque ele NUNCA FALA. Medido contra a API publicada:
+ *
+ *   POST /api/tts11  voice=hwnuNyWkl9DjdTFykrN6 (Adriano)
+ *     → 402 paid_plan_required
+ *       "Free users cannot use library voices via the API."
+ *
+ * O `speak` pegava a excecao, guardava em `ultimoErroTts`, caia pro plano B — e
+ * o plano B, ao dar certo, fazia `ultimoErroTts = null`. A falha era apagada
+ * pelo proprio sucesso do substituto. Pior: `lastTtsError` era exportado e
+ * NINGUEM o lia, entao mesmo antes de ser apagado ele nao aparecia em lugar
+ * nenhum. Escolher "Adriano" e ouvir a voz neural, sem uma palavra de aviso, e
+ * exatamente o bug do "sarah ta com voz de homem" de novo: o rotulo mentindo
+ * por causa de um fallback silencioso.
+ *
+ * O plano B continua existindo — ficar mudo seria pior. O que muda e que ele
+ * para de fingir que nada aconteceu.
+ */
+let substituicao: { pedida: string; usada: string } | null = null;
+
+const ouvintesVoz = new Set<() => void>();
+
+function avisarVoz(): void {
+  for (const fn of ouvintesVoz) fn();
+}
+
+export function assinarSubstituicao(fn: () => void): () => void {
+  ouvintesVoz.add(fn);
+  return () => {
+    ouvintesVoz.delete(fn);
+  };
+}
+
+/** `null` quando a voz que falou foi a que a pessoa escolheu. */
+export function ultimaSubstituicao(): { pedida: string; usada: string } | null {
+  return substituicao;
+}
+
+function registrarSucesso(motorUsado: string, pedida: string | null): void {
+  ultimoErroTts = null;
+  substituicao = pedida && pedida !== motorUsado ? { pedida, usada: motorUsado } : null;
+  avisarVoz();
+}
+
+/**
  * Fala. Com voz boa se der, com a do sistema se nao.
  *
  * A ordem importa: tenta a Groq primeiro e SÓ cai pro sistema em falha. O
@@ -445,6 +495,7 @@ export async function speak(
    * Nunca fica muda — mas também nunca troca de voz sem motivo.
    */
   const escolha = vozEscolhida();
+  const motorPedido = escolha ? (escolha.split(":")[0] ?? null) : null;
   if (escolha) {
     const [motor, ...resto] = escolha.split(":");
     const id = resto.join(":");
@@ -452,17 +503,18 @@ export async function speak(
       const blob = await porMotor(motor ?? "", id, text, language, compartilhavel);
       if (blob) {
         await tocarBlob(blob);
-        ultimoErroTts = null;
+        registrarSucesso(motor ?? "", motorPedido);
         return;
       }
       if (motor === "sistema") {
         await speakWithSystem(text, language, id);
-        ultimoErroTts = null;
+        registrarSucesso("sistema", motorPedido);
         return;
       }
     } catch (e) {
       // Guarda e cai pro plano B. Ficar mudo porque a voz escolhida falhou
-      // seria pior que falar com outra.
+      // seria pior que falar com outra — mas o plano B nao pode APAGAR isto,
+      // que era o que acontecia antes de `registrarSucesso` existir.
       ultimoErroTts = e instanceof Error ? e.message : String(e);
     }
   }
@@ -479,7 +531,7 @@ export async function speak(
     try {
       const blob = await kokoroSynthesize(text, getKokoroVoice() ?? defaultKokoroVoice(language));
       await tocarBlob(blob);
-      ultimoErroTts = null;
+      registrarSucesso("kokoro", motorPedido);
       return;
     } catch (e) {
       ultimoErroTts = e instanceof Error ? e.message : String(e);
@@ -492,7 +544,7 @@ export async function speak(
         edgeSynthesize(text, language, undefined, compartilhavel),
       );
       await tocarBlob(blob);
-      ultimoErroTts = null;
+      registrarSucesso("edge", motorPedido);
       return;
     } catch (e) {
       ultimoErroTts = e instanceof Error ? e.message : String(e);
@@ -500,6 +552,7 @@ export async function speak(
   }
 
   await speakWithSystem(text, language);
+  registrarSucesso("sistema", motorPedido);
 }
 
 /**

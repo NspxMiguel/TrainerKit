@@ -538,6 +538,7 @@ export const PT_BR: Dict = {
   "gym.emptyCollection": "Salve alguns Pokémon primeiro e isto vira uma lista dos seus.",
   "gym.howBuilt": "Ordenado por defesa efetiva vezes vida no nível que cada um tem, dividido pelo quanto a tabela de tipos deixa ele sofrer — e sem repetir tipo primário, pra um atacante só não limpar os seis. Não simula perda de motivação nem o movimento do seu ginásio: isso não está nos dados do jogo, e chutar seria inventar.",
   "voice.title": "Voz da Pokédex",
+  "voice.substituida": "A voz escolhida não respondeu. Quem leu foi {voz} — o app não fica mudo, mas também não finge que foi a sua escolha.",
   "voice.neural": "Voz de verdade",
   "voice.online": "VOZ HUMANA",
   "voice.onlineTitle": "Voz neural",
