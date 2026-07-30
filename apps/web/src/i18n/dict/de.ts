@@ -610,6 +610,7 @@ export const DE: Dict = {
   "team.have": "hast du",
   "team.hunt": "noch fangen",
   "team.howBuilt": "Aufgebaut aus den Attackentypen, die der Boss nicht abwehrt, mit dem besten Angreifer je Typ, ohne wiederholten Primärtyp, damit nicht das ganze Team an derselben Attacke stirbt. Keine Meta-Tierlist — die App hat keine Daten darüber, was gespielt wird.",
+  "team.eliteNote": "✦ braucht eine Elite-TM — einer der seltensten Gegenstände im Spiel. Ohne sie nimm die zweitbeste Attacke der Art.",
   "team.howBuiltPvp": "Sortiert nach Statuswert-Produkt unter dem WP-Limit der Liga — wer am meisten Angriff, Verteidigung und KP ins Limit presst. Blind für Typ, Attacken und Meta, wo PvP eigentlich entschieden wird. Die App hat keine Daten darüber, was gespielt wird.",
   "tip.title": "Wusstest du",
   "tip.capped": "In gedeckelter Liga verliert der 100% meist: bester {name} für Great ist {atk}/{def}/{hp}.",

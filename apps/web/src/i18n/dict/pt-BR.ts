@@ -640,6 +640,7 @@ export const PT_BR: Dict = {
   "team.have": "você tem",
   "team.hunt": "ir buscar",
   "team.howBuilt": "Montado a partir dos tipos de golpe que o chefe não resiste, pegando o melhor atacante de cada, sem repetir tipo primário pra o time não cair inteiro pro mesmo golpe. Não é tier list do meta — o app não tem dado nenhum sobre o que as pessoas usam.",
+  "team.eliteNote": "✦ só entra com MT Elite — dos itens mais raros do jogo. Sem ela, use o segundo melhor golpe da espécie.",
   "team.howBuiltPvp": "Ordenado por produto de atributos sob o teto de PC da liga — quem espreme mais ataque, defesa e PS dentro do limite. É cego a tipo, golpe e meta, que é justamente onde PvP se decide. O app não tem dado nenhum sobre o que as pessoas usam.",
   "tip.title": "Você sabia",
   "tip.capped": "Em liga com teto o 100% costuma perder: o melhor {name} pra Great é {atk}/{def}/{hp}.",
