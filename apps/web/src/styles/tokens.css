@@ -121,7 +121,27 @@
 
   --tk-txt: #101319;
   --tk-txt2: rgba(16, 19, 25, 0.74);
-  --tk-txt3: rgba(16, 19, 25, 0.56);
+  /*
+   * ⚠️ 0.6 e nao 0.56, e a diferenca e passar ou nao passar.
+   *
+   * `--tk-txt3` e o cinza de TODA legenda do app: o detalhe abaixo de cada
+   * opcao, "IV exato e um veredito" sob o botao de escanear, o texto da
+   * privacidade, os rodapes. Nao e um caso isolado como o "POWER UP" — e a
+   * segunda cor mais usada da interface.
+   *
+   * Medido a 0.56 sobre os tres fundos do tema claro:
+   *
+   *   #eceef3 (fundo) 4.08 ✗    #ffffff 4.24 ✗    #f1f3f8 4.11 ✗
+   *
+   * Reprovava nos TRES. A 0.6 passa nos tres (4.61 / 4.87 / 4.68), que e o
+   * menor passo de 0.02 que resolve — subir mais apagaria a hierarquia entre
+   * `--tk-txt2` e este, que e a razao de os dois existirem.
+   *
+   * No tema escuro o mesmo token da 4.82 a 4.93: passa, e por isso fica como
+   * esta. Os dois temas nao precisam do mesmo numero, precisam do mesmo
+   * RESULTADO.
+   */
+  --tk-txt3: rgba(16, 19, 25, 0.6);
   --tk-txt4: rgba(16, 19, 25, 0.6);
 
   --tk-glass: rgba(246, 247, 251, 0.82);
@@ -208,7 +228,7 @@
     --tk-line2: rgba(16, 19, 25, 0.2);
     --tk-txt: #101319;
     --tk-txt2: rgba(16, 19, 25, 0.74);
-    --tk-txt3: rgba(16, 19, 25, 0.56);
+    --tk-txt3: rgba(16, 19, 25, 0.6);
     --tk-txt4: rgba(16, 19, 25, 0.6);
     --tk-glass: rgba(246, 247, 251, 0.82);
     --tk-glass-ios: rgba(255, 255, 255, 0.3);
