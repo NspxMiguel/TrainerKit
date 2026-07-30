@@ -78,16 +78,46 @@ const INJECAO = [
 ];
 
 /**
+ * "Faz isto pra mim", nas duas conjugacoes.
+ *
+ * ⚠️ Uma lista so, usada por TODOS os padroes abaixo, e isso e o ponto.
+ *
+ * Antes cada regex escrevia os proprios verbos, e elas divergiram: uma tinha
+ * "crie" e nenhuma tinha "cria". "cria um site em html e css pra mim" nao batia
+ * em padrao nenhum — vinha sendo barrada por ACIDENTE, pelo detector de base64
+ * quebrado (26 letras sem pontuacao). O teste dela passava pelo motivo errado.
+ *
+ * Imperativo e indicativo se escrevem os dois no chat, e frequentemente sem
+ * acento: "escreva", "escreve", "faca", "faz". Meia lista deixa passar metade
+ * dos pedidos.
+ */
+const PEDIR =
+  "(escrev[ae]|cri[ae]|faz|faca|ger[ae]|gere|mont[ae]|monte|implementa?|implemente|" +
+  "corrig[ei]|corrija|refator[ae]|otimiz[ae]|programa?|write|create|generate|build|make|debug\\w*)";
+
+/** Linguagens e tecnologias. Tambem uma lista so, pelo mesmo motivo. */
+const LINGUAGEM =
+  "(python|javascript|typescript|java|c\\+\\+|c#|sql|html|css|php|rust|kotlin|swift|golang|bash|shell|react|node)";
+
+/** O que se pede quando se pede codigo. */
+const ARTEFATO =
+  "(codigo|code|script|funcao|function|classe|class|programa|app|site|api|regex|algoritmo|algorithm)";
+
+/**
  * Assuntos que claramente não são Pokémon GO.
  *
  * Programação em primeiro lugar porque foi o exemplo dele, e porque é o desvio
  * de uso mais provável numa chave gratuita.
+ *
+ * As tres primeiras cobrem as tres ordens em que o pedido aparece: artefato
+ * antes da linguagem, linguagem antes do verbo, e verbo antes de qualquer um
+ * dos dois. Faltava a terceira, e era a mais natural de todas.
  */
 const FORA = [
   // Programação — o caso que ele citou.
-  /\b(codigo|code|script|funcao|function|programa)\b.*\b(python|javascript|java|c\+\+|sql|html|css|php|rust|go|typescript)\b/,
-  /\b(python|javascript|typescript|sql|html|css|php|rust|kotlin|swift)\b.*\b(codigo|code|script|escreva|write|faca|crie|create)\b/,
-  /\b(escreva|crie|faca|gere|write|create|generate|implemente|debug\w*|corrija)\b.*\b(codigo|code|script|funcao|function|classe|class|programa|app|site|api|regex)\b/,
+  new RegExp(`\\b${ARTEFATO}\\b.*\\b${LINGUAGEM}\\b`),
+  new RegExp(`\\b${LINGUAGEM}\\b.*\\b(${ARTEFATO.slice(1, -1)}|${PEDIR.slice(1, -1)})\\b`),
+  new RegExp(`\\b${PEDIR}\\b.*\\b(${ARTEFATO.slice(1, -1)}|${LINGUAGEM.slice(1, -1)})\\b`),
   /\bstack ?overflow\b|\bgit(hub)?\b|\bnpm\b|\bdocker\b/,
   // Escola e trabalho.
   /\b(redacao|dissertacao|monografia|tcc|resumo do livro|essay|homework|dever de casa)\b/,
@@ -172,10 +202,73 @@ export function filtrarConteudo(texto: string): Veredito {
    * qual já tinha removido o morse, e o teste passou reto.
    */
   const cru = pergunta.trim();
+  /*
+   * ⚠️ CODIFICACAO PRECISA PARECER CODIFICACAO, e nao so "texto sem pontuacao".
+   *
+   * O detector de base64 era `/^[A-Za-z0-9+/]{24,}={0,2}$/` sobre o texto sem
+   * espacos. Parece razoavel e esta errado de um jeito devastador: TODA frase
+   * de 24+ letras vira uma sequencia de `[A-Za-z]` quando se tiram os espacos.
+   *
+   *   "qual o melhor ataque do dragonite"    → 28 letras → acusada de INJECAO
+   *   "qual o melhor moveset do dragonite"   → 29 letras → acusada de INJECAO
+   *   "what is the best attack for dragonite" → 31 letras → acusada de INJECAO
+   *
+   * E o app respondia "fora do assunto: este endpoint so responde sobre Pokemon
+   * GO" pra pergunta mais comum que existe sobre Pokemon GO. Escapavam so as
+   * frases curtas ou com acento/interrogacao — "esse blissey presta?" passava,
+   * o que fazia o bug parecer aleatorio em vez de sistematico.
+   *
+   * O cabecalho deste arquivo diz, em maiuscula, que o filtro NAO PODE recusar
+   * pergunta legitima, e que falso positivo custa o usuario. A regra violava a
+   * propria doutrina do arquivo, e nenhum teste pegou porque os casos de teste
+   * eram curtos.
+   *
+   * O conserto e exigir o que base64 de verdade tem e prosa nao tem: tamanho
+   * multiplo de 4, MAIUSCULA e minuscula na mesma palavra, e pelo menos um
+   * digito ou simbolo. Um payload base64 de mais de 20 caracteres praticamente
+   * sempre tem os tres; uma frase em portugues nao tem nenhum.
+   *
+   * O mesmo raciocinio vale pro hex: exigir ao menos um digito. Sem isso,
+   * qualquer frase escrita so com as letras de "a" a "f" seria hex — raro, mas
+   * a correcao e de graca.
+   */
+  /*
+   * ⚠️ O ESPACO E A DISCRIMINANTE. Nao a forma das letras.
+   *
+   * A primeira versao juntava tudo (`cru.replace(/\s/g, "")`) e perguntava se o
+   * resultado parecia base64. Toda frase de 24+ letras parece. Exigir maiuscula,
+   * minuscula e digito junto reduziu, mas nao resolveu:
+   *
+   *   "esse IV 14/15/13 e bom pra Great League"
+   *     → 32 caracteres, multiplo de 4, tem IV maiusculo, tem minuscula,
+   *       tem digito, tem "/" — e a barra vem do IV. Base64 perfeito.
+   *
+   * Escrever IV como "14/15/13" e o jeito NORMAL de escrever IV neste app.
+   *
+   * A diferenca de verdade entre prosa e texto codificado nao esta nas letras:
+   * esta em que prosa tem ESPACO e um blob codificado e um token so. Entao a
+   * pergunta certa nao e "o texto inteiro parece base64" — e "existe aqui uma
+   * PALAVRA de 24+ caracteres que parece base64". Nenhuma lingua humana tem.
+   *
+   * Isso tambem torna as regras de tamanho desnecessarias e o filtro mais
+   * previsivel: ele para de depender de quanto a pessoa escreveu.
+   */
+  const tokens = cru.split(/\s+/);
+
   const ehMorse = /^[.‐-―/ ]{12,}$/.test(cru) || /[.-]{6,}/.test(cru.replace(/ /g, ""));
   const ehBinario = /^[01\s]{16,}$/.test(cru);
-  const ehHex = /^(0x)?[0-9a-f\s]{24,}$/i.test(cru);
-  const ehBase64 = /^[A-Za-z0-9+/]{24,}={0,2}$/.test(cru.replace(/\s/g, ""));
+  const ehHex = tokens.some(
+    (t) => t.length >= 24 && /^(0x)?[0-9a-f]+$/i.test(t) && /[0-9]/.test(t),
+  );
+  const ehBase64 = tokens.some(
+    (t) =>
+      t.length >= 24 &&
+      t.length % 4 === 0 &&
+      /^[A-Za-z0-9+/]+={0,2}$/.test(t) &&
+      /[A-Z]/.test(t) &&
+      /[a-z]/.test(t) &&
+      /[0-9+/]/.test(t),
+  );
   if (ehMorse || ehBinario || ehHex || ehBase64) return { ok: false, motivo: "injecao" };
 
   for (const p of INJECAO) if (p.test(n)) return { ok: false, motivo: "injecao" };
