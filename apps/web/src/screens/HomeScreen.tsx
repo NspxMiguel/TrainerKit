@@ -8,7 +8,7 @@ import { useT, type Key } from "../i18n/t.ts";
 import type { PokedexIntent } from "../App.tsx";
 import { useSetup } from "../onboarding/setup.ts";
 import { typeColor, typeKey } from "../sprites/provider.ts";
-import { useCollection } from "../storage/collection.ts";
+import { setDoneAction, useCollection } from "../storage/collection.ts";
 import { useInstallState } from "../storage/install.ts";
 import type { PersistState } from "../storage/persist.ts";
 import { DidYouKnow } from "../ui/DidYouKnow.tsx";
@@ -82,25 +82,35 @@ function Hero({
   linha,
   tom,
   onOpen,
+  feito,
+  onToggleFeito,
 }: {
   species: DatasetSpecies;
   labelKey: Key;
   linha: string;
   tom?: string | undefined;
   onOpen: () => void;
+  /** Presente so quando o destaque e um veredito pendente de um bicho seu. */
+  feito?: boolean | undefined;
+  onToggleFeito?: (() => void) | undefined;
 }) {
   const { t } = useT();
   const cor = typeColor(species.types[0] ?? "normal");
 
   return (
-    <button
-      type="button"
+    <div
       className="tk-hero"
-      onClick={onOpen}
       /* A cor do tipo entra por variavel pra ficar so no CSS quem decide como
-         ela e usada — aqui e um veu de 18% atras do sprite, la e o gradiente. */
+         ela e usada — aqui e um veu atras do sprite, la e o gradiente. */
       style={{ ["--tk-hero-type" as string]: cor }}
     >
+      {/*
+        Camada invisivel: abrir e a acao do bloco INTEIRO, e nao de um botao
+        dentro dele. Botao dentro de botao nao existe em HTML, e era o que
+        impedia o "ja fiz" de morar aqui — que e exatamente onde ele faltava.
+      */}
+      <button type="button" className="tk-hero-open" onClick={onOpen} aria-label={species.name} />
+
       <span className="tk-hero-art" aria-hidden="true">
         <SpeciesTile
           spriteId={species.spriteId}
@@ -122,12 +132,35 @@ function Hero({
           {species.types.map((tp) => t(typeKey(tp) as "type.normal")).join(" · ")}
         </span>
         <span className="tk-hero-why">{linha}</span>
+
+        {/*
+          "Ja fiz isso", na coisa mais visivel da tela.
+
+          O Miguel, duas vezes: "ainda continua essa desgraça de investir sem
+          jeito de tirar isso". Estava certo — o botao existia SO na linha da
+          Colecao, escondido num rotulo colorido, e o destaque da home anunciava
+          INVESTIR sem oferecer nada. Aqui ele fica ao lado do aviso que cobra.
+        */}
+        {onToggleFeito && (
+          <button
+            type="button"
+            className="tk-done tk-done--hero"
+            data-done={feito || undefined}
+            aria-pressed={feito ?? false}
+            onClick={onToggleFeito}
+          >
+            <span className="tk-done-mark" aria-hidden="true">
+              {feito ? "✓" : "○"}
+            </span>
+            {feito ? t("collection.done") : t("collection.markDone")}
+          </button>
+        )}
       </span>
 
       <span className="tk-hero-go" aria-hidden="true">
         ›
       </span>
-    </button>
+    </div>
   );
 }
 
@@ -170,13 +203,32 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
         shadow: owned.shadow,
       });
 
-      return [{ id: owned.id, species: s, verdict, iv: ivTotalOf(owned.ivs) }];
+      return [
+        {
+          id: owned.id,
+          species: s,
+          verdict,
+          iv: ivTotalOf(owned.ivs),
+          // Cumprido so quando a acao marcada e a MESMA que o veredito indica
+          // hoje: subiu de nivel e virou "evoluir"? Volta a cobrar, porque e
+          // outra coisa a fazer.
+          feito: owned.doneAction === verdict.action,
+        },
+      ];
     });
 
-    // Dentro de "pede acao", pela confianca: o conselho de que o app tem mais
-    // certeza vem primeiro, porque e o mais util.
+    /*
+     * O que JA FOI FEITO sai da lista.
+     *
+     * Aqui estava o defeito que o Miguel reclamou duas vezes: "essa desgraça de
+     * investir sem jeito de tirar isso". Havia jeito — o rotulo na linha da
+     * Colecao era um botao — mas a home nao olhava pra ele. Marcava como feito
+     * e o "INVESTIR" continuava no destaque, com o anel aceso na fila. Marcar
+     * nao tirava nada da vista, e um botao que nao muda a tela e o mesmo que
+     * botao que nao existe.
+     */
     const agir = decided
-      .filter((d) => PEDEM_ACAO.includes(d.verdict.action))
+      .filter((d) => !d.feito && PEDEM_ACAO.includes(d.verdict.action))
       .sort(
         (a, b) =>
           PEDEM_ACAO.indexOf(a.verdict.action) - PEDEM_ACAO.indexOf(b.verdict.action) ||
@@ -206,6 +258,9 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
     linha: string;
     tom?: string;
     verdict?: Verdict;
+    /** Id na colecao, presente so quando o destaque cobra uma acao. */
+    ownedId?: string;
+    feito?: boolean;
   } | null => {
     if (!data) return null;
 
@@ -217,6 +272,8 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
         linha: tm(pendente.verdict.reason),
         tom: TONE[pendente.verdict.action],
         verdict: pendente.verdict,
+        ownedId: pendente.id,
+        feito: false,
       };
     }
 
@@ -316,6 +373,13 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
               linha={hero.linha}
               tom={hero.tom}
               onOpen={() => setDetail(hero.species)}
+              feito={hero.feito}
+              {...(hero.ownedId !== undefined && hero.verdict
+                ? {
+                    onToggleFeito: () =>
+                      void setDoneAction(hero.ownedId!, hero.verdict!.action),
+                  }
+                : {})}
             />
           )}
 
@@ -374,7 +438,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
                     key={d.id}
                     type="button"
                     className="tk-strip-cell"
-                    data-hot={PEDEM_ACAO.includes(d.verdict.action) || undefined}
+                    data-hot={(!d.feito && PEDEM_ACAO.includes(d.verdict.action)) || undefined}
                     style={{ ["--tk-cell-tone" as string]: TONE[d.verdict.action] }}
                     onClick={() => setDetail(d.species)}
                     aria-label={`${d.species.name} · ${t(ACTION_KEYS[d.verdict.action] as Key)}`}

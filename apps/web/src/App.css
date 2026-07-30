@@ -1820,7 +1820,9 @@
   align-items: center;
   gap: var(--tk-s4);
   width: 100%;
-  padding: var(--tk-s4);
+  /* 13px, nao 16: o "ja fiz isso" acrescentou 40px de altura ao bloco, e a home
+     precisa continuar cabendo inteira. */
+  padding: 13px var(--tk-s4);
   border-radius: var(--tk-r-card);
   text-align: left;
   overflow: hidden;
@@ -1920,6 +1922,100 @@
   align-self: center;
   font: 400 22px/1 var(--tk-font);
   color: var(--tk-txt4);
+}
+
+/* A camada que abre o destaque. Fica ABAIXO do "ja fiz" por z-index, senao ela
+   engoliria o toque dele. */
+.tk-hero-open {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: none;
+  border: 0;
+  border-radius: inherit;
+}
+
+.tk-hero-open:active {
+  background: rgb(255 255 255 / 0.05);
+}
+
+.tk-hero-art,
+.tk-hero-text,
+.tk-hero-go {
+  position: relative;
+  z-index: 2;
+}
+
+/* Dentro do destaque so o BOTAO recebe toque; o resto do texto deixa passar
+   pra camada de abrir. Sem isto, tocar no nome nao abriria nada. */
+.tk-hero-text {
+  pointer-events: none;
+}
+
+.tk-hero-text .tk-done {
+  pointer-events: auto;
+}
+
+/* ------------------------------------------------------------- ja fiz isso */
+
+/*
+ * "Ja fiz isso".
+ *
+ * O Miguel reclamou duas vezes do mesmo: "essa desgraça de investir sem jeito
+ * de tirar isso". Havia jeito — o rotulo colorido na linha da Colecao era um
+ * botao — mas nada nele dizia isso, e a home nem olhava pro que fora marcado.
+ * Agora e um botao com forma de botao, marca de alternancia, e aparece nos tres
+ * lugares onde o veredito cobra: destaque da home, linha da Colecao e o cartao
+ * do veredito.
+ */
+.tk-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: start;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--tk-surf2);
+  border: 1px solid var(--tk-line2);
+  color: var(--tk-txt2);
+  font: 600 12px var(--tk-font);
+  white-space: nowrap;
+  transition:
+    opacity 0.14s var(--tk-ease),
+    transform 0.08s var(--tk-ease);
+}
+
+.tk-done:active {
+  transform: scale(0.95);
+}
+
+/* Feito: perde a cor e o peso. O aviso cumprido nao deve competir com nada. */
+.tk-done[data-done] {
+  color: var(--tk-txt4);
+  font-weight: 500;
+  border-color: var(--tk-line);
+  background: none;
+}
+
+.tk-done-mark {
+  font: 700 12px/1 var(--tk-mono);
+  opacity: 0.85;
+}
+
+.tk-done--hero {
+  margin-top: 8px;
+}
+
+/* No cartao do veredito ele ocupa a largura toda: ali e uma acao da tela, nao
+   um detalhe de canto. */
+.tk-card > .tk-done {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: 40px;
+  margin-top: 14px;
+  font-size: 13px;
 }
 
 /* ------------------------------------------------------ acao principal */

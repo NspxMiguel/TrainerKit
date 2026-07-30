@@ -182,8 +182,14 @@ export function CollectionScreen({ dataset }: Props) {
                     )
                   }
                 >
+                  {/* O "○" e o que faz o rotulo LER como botao. Sem ele era uma
+                      palavra colorida, e o Miguel passou semanas sem descobrir
+                      que dava pra tocar: "sem jeito de tirar isso". */}
+                  <span className="tk-done-mark" aria-hidden="true">
+                    {owned.doneAction === verdict.action ? "✓" : "○"}
+                  </span>
                   {owned.doneAction === verdict.action
-                    ? `✓ ${t("collection.done")}`
+                    ? t("collection.done")
                     : t(ACTION_KEYS[verdict.action] as Key)}
                 </button>
 

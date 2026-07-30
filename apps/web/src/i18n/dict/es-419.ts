@@ -419,7 +419,7 @@ export const ES_419: Dict = {
   "team.howBuilt": "Armado con los tipos de ataque que el jefe no resiste, tomando el mejor atacante de cada uno, sin repetir tipo primario para que el equipo no caiga entero ante el mismo ataque. No es una tier list del meta — la app no tiene datos de lo que la gente usa.",
   "team.howBuiltPvp": "Ordenado por producto de estadísticas bajo el tope de PC de la liga — quién mete más ataque, defensa y PS dentro del límite. Es ciego al tipo, al ataque y al meta, que es donde se decide el PvP. La app no tiene datos de lo que la gente usa.",
   "tip.title": "¿Sabías?",
-  "tip.capped": "En liga con límite el 100% suele perder. El mejor {name} para Great es {atk}/{def}/{hp} — ataque casi cero.",
+  "tip.capped": "En liga con tope el 100% suele perder: el mejor {name} para Great es {atk}/{def}/{hp}.",
   "tip.raidAttack": "Para incursiones, ataque 15 vale más que un IV total alto. Los otros dos casi no mueven el daño.",
   "tip.shadow": "Oscuro pega un 20% más pero recibe un 17% más. Quien estorba de verdad es Frustración.",
   "tip.rocket": "Los líderes de Rocket siempre bloquean tus dos primeros cargados. Usa el barato como cebo.",

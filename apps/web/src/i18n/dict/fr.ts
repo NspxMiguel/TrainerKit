@@ -419,7 +419,7 @@ export const FR: Dict = {
   "team.howBuilt": "Composée à partir des types d’attaque auxquels le boss ne résiste pas, avec le meilleur attaquant de chacun, sans type principal répété pour que l’équipe ne tombe pas entière sur la même attaque. Ce n’est pas un tier list du méta — l’app n’a aucune donnée sur ce que les gens jouent.",
   "team.howBuiltPvp": "Classée par produit de statistiques sous le plafond de PC de la ligue — qui rentre le plus d’attaque, de défense et de PV dans la limite. Aveugle au type, aux attaques et au méta, là où le PvP se décide vraiment. L’app n’a aucune donnée sur ce que les gens jouent.",
   "tip.title": "Le savais-tu",
-  "tip.capped": "En ligue plafonnée, le 100% perd souvent. Le meilleur {name} pour Great est {atk}/{def}/{hp} — attaque presque nulle.",
+  "tip.capped": "En ligue plafonnée le 100% perd souvent : le meilleur {name} pour Great est {atk}/{def}/{hp}.",
   "tip.raidAttack": "En raid, attaque 15 vaut plus qu'un total d'IV élevé. Les deux autres bougent à peine les dégâts.",
   "tip.shadow": "Un Obscur frappe 20% plus fort mais encaisse 17% de plus. Le vrai problème, c'est Frustration.",
   "tip.rocket": "Les leaders Rocket bloquent toujours tes deux premières attaques chargées. Appâte avec la moins chère.",

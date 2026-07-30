@@ -419,7 +419,7 @@ export const IT: Dict = {
   "team.howBuilt": "Costruita dai tipi di mossa a cui il boss non resiste, prendendo il miglior attaccante di ognuno, senza ripetere il tipo primario così la squadra non cade tutta con la stessa mossa. Non è una tier list del meta — l’app non ha dati su cosa usa la gente.",
   "team.howBuiltPvp": "Ordinata per prodotto delle statistiche sotto il tetto di PL della lega — chi infila più attacco, difesa e PS nel limite. È cieca a tipo, mosse e meta, dove il PvP si decide davvero. L’app non ha dati su cosa usa la gente.",
   "tip.title": "Lo sapevi",
-  "tip.capped": "In lega con tetto il 100% di solito perde. Il miglior {name} per Great è {atk}/{def}/{hp} — attacco quasi zero.",
+  "tip.capped": "In lega con tetto il 100% spesso perde: il miglior {name} per Great è {atk}/{def}/{hp}.",
   "tip.raidAttack": "Nei raid, attacco 15 vale più di un totale IV alto. Gli altri due quasi non spostano il danno.",
   "tip.shadow": "Un Ombra colpisce il 20% più forte ma incassa il 17% in più. Il vero problema è Frustrazione.",
   "tip.rocket": "I capi Rocket bloccano sempre le tue prime due mosse caricate. Usa quella economica come esca.",
