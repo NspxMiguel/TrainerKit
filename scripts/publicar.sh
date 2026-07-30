@@ -47,6 +47,19 @@ mkdir -p "$PALCO"
 cp -R "$RAIZ/apps/web/dist/." "$PALCO/"
 cp "$RAIZ/deploy/vercel-web.json" "$PALCO/vercel.json"
 
+# ⚠️ VINCULAR ANTES DE PUBLICAR, e este passo nao e burocracia.
+#
+# Sem ele, `vercel deploy --yes` num diretorio sem vinculo nao pergunta nada:
+# cria um projeto NOVO com o nome da pasta. Foi o que aconteceu na primeira vez
+# que rodei isto — nasceu um "trainerkit-publicar" e o `trainerkit.vercel.app`
+# continuou servindo o build anterior. O deploy dizia "ready" e o site nao
+# mudava, que e o pior tipo de sucesso.
+#
+# `--project` fixa o destino pelo NOME, entao nao ha id de projeto copiado pra
+# dentro do repositorio pra ficar velho.
+echo "→ vinculando o palco ao projeto trainerkit"
+(cd "$PALCO" && vercel link --project trainerkit --yes >/dev/null)
+
 echo "→ app  → trainerkit.vercel.app"
 (cd "$PALCO" && vercel deploy --prod --yes)
 
