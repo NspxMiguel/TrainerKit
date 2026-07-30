@@ -231,6 +231,15 @@ interface Req {
   method?: string;
   headers: Record<string, string | string[] | undefined>;
   body?: unknown;
+  /**
+   * O caminho + query, como o Node entrega.
+   *
+   * Faltava, e o codigo ja usava (`new URL(req.url ?? "", ...)` no caminho GET
+   * cacheavel). Nenhum typecheck local olhava `api/`, entao o erro so aparecia
+   * no build da Vercel — onde ninguem le, porque o deploy termina "ready" do
+   * mesmo jeito.
+   */
+  url?: string;
 }
 interface Res {
   status: (n: number) => Res;
