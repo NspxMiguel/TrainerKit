@@ -1,3 +1,4 @@
+import { edgeSupports, edgeSynthesize } from "../ai/edgeTts.ts";
 import { elevenAvailable, elevenSynthesize } from "../ai/elevenlabs.ts";
 import {
   KOKORO_VOICES,
@@ -58,6 +59,35 @@ const VOICE_PICK_KEY = "tk:dex-voz-escolhida";
 
 /** Voz do Kokoro escolhida (`pf_dora`, `am_michael`…). Vazio = usa a primeira. */
 const KOKORO_PICK_KEY = "tk:dex-voz-kokoro";
+
+/**
+ * A voz neural, LIGADA por padrao.
+ *
+ * Padrao ligado porque ela nao pede nada: sem chave, sem conta, sem download,
+ * sem permissao. Se ela precisasse de qualquer uma dessas quatro coisas, o
+ * padrao teria que ser desligado — foi o criterio do modelo local e continua
+ * valendo. Aqui nao precisa, entao deixar desligada seria esconder a unica voz
+ * boa do app atras de um interruptor que ninguem ia procurar.
+ *
+ * Desligar cai pra voz do sistema, que funciona offline.
+ */
+const NEURAL_KEY = "tk:dex-voz-neural";
+
+export function neuralOn(): boolean {
+  try {
+    return globalThis.localStorage?.getItem(NEURAL_KEY) !== "0";
+  } catch {
+    return true;
+  }
+}
+
+export function setNeuralOn(on: boolean): void {
+  try {
+    globalThis.localStorage?.setItem(NEURAL_KEY, on ? "1" : "0");
+  } catch {
+    /* preferencia nao persistida vale mais que app quebrado */
+  }
+}
 
 export function getKokoroVoice(): string | null {
   try {
@@ -356,25 +386,41 @@ export async function speak(text: string, language: string): Promise<void> {
   stopSpeaking();
 
   /*
-   * A ordem: Kokoro, ElevenLabs, Groq, sistema.
+   * A ordem: Kokoro, neural, ElevenLabs, Groq, sistema.
    *
    * Kokoro primeiro porque e a melhor E a mais barata das que rodam sem conta:
    * no aparelho, sem chave, sem rede, sem cota. So entra se JA estiver
    * carregado — `speak` nunca dispara um download por conta propria, isso e
    * decisao de quem aperta o botao nos Ajustes. E so serve ingles.
    *
-   * ElevenLabs em seguida: e a que ele pediu pelo nome e a unica com portugues
-   * humano de verdade, mas consome cota de um plano gratuito pequeno. Vir
-   * depois do Kokoro significa que quem usa o app em ingles nao gasta credito a
-   * toa.
+   * A NEURAL (`edgeTts`) vem logo depois, e e a que resolveu o problema: voz
+   * humana em portugues, sem chave, sem conta e sem download. Ela nao vem em
+   * primeiro so porque o Kokoro, quando ja esta carregado, nao usa rede nenhuma
+   * — e voz instantanea e offline ganha de voz que depende de um servidor.
+   *
+   * ElevenLabs em seguida: e a que ele pediu pelo nome, mas consome cota de um
+   * plano gratuito pequeno e pede chave. Depois das duas gratuitas, entao.
    *
    * O sistema fica por ultimo e nunca deixa de existir: se tudo falhar — sem
-   * rede, cota estourada, chave errada — a Pokedex fala assim mesmo.
+   * rede, cota estourada, chave errada, ou a Microsoft fechando a porta — a
+   * Pokedex fala assim mesmo. E por isso que nenhuma dessas quatro pode ser a
+   * unica.
    */
   if (kokoroReady() && kokoroSupports(language)) {
     try {
       const voz = getKokoroVoice() ?? undefined;
       const blob = await kokoroSynthesize(text, voz ?? defaultKokoroVoice(language));
+      await tocarBlob(blob);
+      ultimoErroTts = null;
+      return;
+    } catch (e) {
+      ultimoErroTts = e instanceof Error ? e.message : String(e);
+    }
+  }
+
+  if (neuralOn() && edgeSupports(language)) {
+    try {
+      const blob = await edgeSynthesize(text, language);
       await tocarBlob(blob);
       ultimoErroTts = null;
       return;

@@ -10,6 +10,12 @@ import {
   type KokoroProgress,
 } from "../ai/kokoro.ts";
 import {
+  edgeSupports,
+  edgeVoicesFor,
+  getEdgeVoice,
+  setEdgeVoice,
+} from "../ai/edgeTts.ts";
+import {
   ELEVEN_VOICES,
   elevenAvailable,
   getElevenVoice,
@@ -21,6 +27,8 @@ import { useT } from "../i18n/t.ts";
 import {
   getKokoroVoice,
   getPickedVoiceUri,
+  neuralOn,
+  setNeuralOn,
   listVoices,
   previewVoice,
   setKokoroVoice,
@@ -58,6 +66,8 @@ export function VoiceSettings() {
   const [kokoroVoz, setKokoroVoz] = useState(getKokoroVoice);
   const [baixando, setBaixando] = useState<KokoroProgress | null>(null);
   const [erro, setErro] = useState<string | null>(null);
+  const [neural, setNeural] = useState(neuralOn);
+  const [edgeVoz, setEdgeVoz] = useState(() => getEdgeVoice(language));
 
   // O motor avisa quando termina de carregar: sem isto a lista de vozes boas
   // so apareceria na proxima vez que a tela abrisse.
@@ -124,10 +134,86 @@ export function VoiceSettings() {
         </span>
       </button>
 
+      {/* --------------------------------------------- a voz que resolveu */}
+
+      {/*
+        A voz neural online vem PRIMEIRO de todas.
+
+        E a unica das quatro que junta as tres coisas que ele pediu: humana,
+        gratis e sem configurar nada. Kokoro so fala ingles (o `kokoro-js`
+        fonemiza sempre em ingles — ver a nota la), ElevenLabs pede chave e e
+        paga, e a do sistema em portugues e a Luciana, que foi o comeco desta
+        conversa. Nao ha download nem permissao: abrir a tela e apertar ▶ ja
+        toca a voz de verdade.
+      */}
+      {edgeSupports(language) && (
+        <>
+          <div className="tk-overline" style={{ display: "block", margin: "22px 0 8px" }}>
+            {t("voice.online")}
+          </div>
+
+          <button
+            type="button"
+            className="tk-option"
+            data-active={neural || undefined}
+            aria-pressed={neural}
+            onClick={() => {
+              const proximo = !neural;
+              setNeural(proximo);
+              setNeuralOn(proximo);
+              if (proximo) void speak(t("voice.sample"), language);
+            }}
+          >
+            <span className="tk-option-mark" aria-hidden="true">
+              {neural ? "●" : "○"}
+            </span>
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span className="tk-option-title">{t("voice.onlineTitle")}</span>
+              <span className="tk-option-detail">{t("voice.onlineDetail")}</span>
+            </span>
+          </button>
+
+          {neural && (
+            <div style={{ display: "grid", gap: 6, marginTop: 6 }}>
+              {edgeVoicesFor(language).map((v) => {
+                const ativa = edgeVoz === v.id;
+                return (
+                  <button
+                    key={v.id}
+                    type="button"
+                    className="tk-option"
+                    data-active={ativa || undefined}
+                    aria-pressed={ativa}
+                    onClick={() => {
+                      setEdgeVoz(v.id);
+                      setEdgeVoice(v.id);
+                      // A previa passa pelo motor de verdade: tem que soar como
+                      // vai soar na Pokedex, nao como a voz do sistema.
+                      void speak(t("voice.sample"), language);
+                    }}
+                  >
+                    <span className="tk-option-mark" aria-hidden="true">
+                      {ativa ? "●" : "○"}
+                    </span>
+                    <span style={{ flex: 1, minWidth: 0 }}>
+                      <span className="tk-option-title">{v.label}</span>
+                      <span className="tk-option-detail">{t("voice.onlineTag")}</span>
+                    </span>
+                    <span className="tk-voice-play" aria-hidden="true">
+                      ▶
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </>
+      )}
+
       {/* ------------------------------------------------- a voz de verdade */}
 
       {/*
-        Kokoro vem PRIMEIRO, antes da lista do sistema.
+        Kokoro vem depois: no aparelho e offline, mas so em ingles.
         
         "bem ruim luciana e joana... quero vozes reais, vozes boas estilo eleven
         labs. mas gratis obvio". As vozes do sistema tem teto — sao de uma
