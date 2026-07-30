@@ -38,6 +38,28 @@ const MODELO = "eleven_flash_v2_5";
  * pra vozes clonadas, se ele criar alguma um dia.
  */
 const VOZES = new Set([
+  /*
+   * BRASILEIRAS, da Voice Library — as que o Miguel disse que existiam e eu
+   * tinha dito que não.
+   *
+   * Eu havia consultado `/v2/voices`, que é a biblioteca PADRÃO da conta: 21
+   * vozes, todas american/british/australian. Concluí "não existe voz brasileira
+   * na biblioteca gratuita" e escrevi isso na tela do app, com todas as letras.
+   * Estava errado — eu tinha olhado num lugar e afirmado sobre outro.
+   *
+   * `/v1/shared-voices?language=pt` devolve 40 vozes pt-BR de verdade, com
+   * sotaque `brazilian`, criadas e compartilhadas por outros usuários. Estas
+   * seis são as mais usadas (o número é `cloned_by_count`, quantas contas as
+   * adicionaram — Adriano tem 125 mil).
+   */
+  "hwnuNyWkl9DjdTFykrN6", // Adriano — grave, brasileiro
+  "Qrdut83w0Cr152Yb4Xn3", // Paulo — expressivo, brasileiro
+  "oJebhZNaPllxk6W0LSBA", // Carla — narradora, brasileira
+  "GDzHdQOi6jjf8zaXhCYD", // Raquel — expressiva, brasileira
+  "4za2kOXGgUd57HRSQ1fn", // Lendário — animado, brasileiro
+  "MZxV5lN3cv7hi1376O0m", // Ana Dias — formal, brasileira
+
+  // Biblioteca padrão (inglês), pra quem usa o app em outro idioma.
   "21m00Tcm4TlvDq8ikWAM", // Rachel
   "AZnzlk1XvdvUeBnXmlld", // Domi
   "EXAVITQu4vr4xnSDxMaL", // Sarah
@@ -170,6 +192,55 @@ export default async function handler(req: Request): Promise<Response> {
    *
    * Só o que a tela usa sai daqui. Nada de id de usuário, plano ou datas.
    */
+  /*
+   * `?compartilhadas=1` — a Voice Library, onde estão as vozes brasileiras.
+   *
+   * O Miguel: "eleven labs tem sim vozes brasileiras... tem uma função de criar
+   * voz e compartilhar com os outros, e ai sim tem brasileiro".
+   *
+   * Ele está certo e eu tinha olhado no lugar errado. `/v2/voices` devolve a
+   * biblioteca PADRÃO da conta — 21 vozes, todas american/british/australian.
+   * As vozes de verdade em português estão na Voice Library pública
+   * (`/v1/shared-voices`), criadas por outros usuários e filtráveis por idioma.
+   */
+  if (req.method === "GET" && new URL(req.url).searchParams.has("compartilhadas")) {
+    const lang = new URL(req.url).searchParams.get("lang") ?? "pt";
+    const res = await fetch(
+      `https://api.elevenlabs.io/v1/shared-voices?page_size=40&language=${encodeURIComponent(lang)}&sort=trending`,
+      { headers: { "xi-api-key": chave } },
+    );
+    if (!res.ok) {
+      const t = await res.text().catch(() => "");
+      return json({ error: `elevenlabs ${res.status}: ${t.slice(0, 200)}` }, res.status);
+    }
+    const d = (await res.json()) as {
+      voices?: Array<{
+        voice_id?: string;
+        name?: string;
+        preview_url?: string;
+        accent?: string;
+        language?: string;
+        locale?: string;
+        gender?: string;
+        cloned_by_count?: number;
+      }>;
+    };
+    return json(
+      {
+        voices: (d.voices ?? []).map((v) => ({
+          id: v.voice_id,
+          name: v.name,
+          preview: v.preview_url,
+          accent: v.accent ?? null,
+          locale: v.locale ?? v.language ?? null,
+          gender: v.gender ?? null,
+          usos: v.cloned_by_count ?? 0,
+        })),
+      },
+      200,
+    );
+  }
+
   if (req.method === "GET" && new URL(req.url).searchParams.has("vozes")) {
     const res = await fetch("https://api.elevenlabs.io/v2/voices?page_size=100", {
       headers: { "xi-api-key": chave },

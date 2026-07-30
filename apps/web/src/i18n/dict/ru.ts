@@ -485,7 +485,7 @@ export const RU: Dict = {
   "voice.intro": "Выберите голос. Нажмите, чтобы послушать перед выбором.",
   "voice.forYourLanguage": "ГОВОРЯТ НА ВАШЕМ ЯЗЫКЕ",
   "voice.otherLanguages": "ДРУГИЕ ЯЗЫКИ",
-  "voice.otherLanguagesWhy": "Эти говорят с иностранным акцентом. Бесплатная библиотека ElevenLabs состоит только из американских, британских и австралийских голосов.",
+  "voice.otherLanguagesWhy": "Эти говорят с иностранным акцентом. В Voice Library у ElevenLabs есть голоса от сообщества — но бесплатный тариф не может использовать их через API, только платный.",
   "voice.setup": "НАСТРОЙКА",
   "voice.tag.foreign": "иностранный акцент",
   "voice.tag.neural": "нейронный",

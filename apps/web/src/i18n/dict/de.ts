@@ -481,7 +481,7 @@ export const DE: Dict = {
   "voice.intro": "Wähle eine Stimme. Tippe eine an, um sie vorher zu hören.",
   "voice.forYourLanguage": "SPRECHEN DEINE SPRACHE",
   "voice.otherLanguages": "ANDERE SPRACHEN",
-  "voice.otherLanguagesWhy": "Diese sprechen deine Sprache mit fremdem Akzent. Die kostenlose Bibliothek von ElevenLabs besteht komplett aus amerikanischen, britischen und australischen Stimmen.",
+  "voice.otherLanguagesWhy": "Diese sprechen deine Sprache mit fremdem Akzent. ElevenLabs HAT Community-Stimmen in seiner Voice Library — aber der Gratis-Tarif kann sie nicht über die API nutzen, nur bezahlte.",
   "voice.setup": "EINRICHTUNG",
   "voice.tag.foreign": "fremder Akzent",
   "voice.tag.neural": "neuronal",
