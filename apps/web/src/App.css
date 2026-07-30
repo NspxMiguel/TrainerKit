@@ -2263,11 +2263,17 @@
 
 /* Grade fixa em vez de linha de formulario: sao dez linhas de numeros curtos,
    e o espacamento do `.tk-row` estourava a altura e quebrava o IV em duas. */
+/*
+ * Quatro colunas, nao seis: `#`, IV, nivel, PC.
+ *
+ * As tres colunas separadas de Atq/Def/PS viraram uma so no formato `14/15/13`
+ * — a forma como todo jogador escreve IV. Ver a nota em `SpeciesDetail`.
+ */
 .tk-spread-head,
 .tk-spread {
   display: grid;
-  grid-template-columns: 24px repeat(3, 1fr) 44px 52px;
-  gap: 6px;
+  grid-template-columns: 24px 1fr 44px 52px;
+  gap: 10px;
   align-items: center;
 }
 
@@ -2296,7 +2302,7 @@
 }
 
 .tk-spread-dim,
-.tk-spread-head > span:nth-child(n + 5) {
+.tk-spread-head > span:nth-child(n + 3) {
   color: var(--tk-txt3);
 }
 
@@ -3468,9 +3474,50 @@
   --tk-visor: #101c14;
   --tk-visor-ink: #b8f2c8;
 
+  /*
+   * ⚠️ O FUNDO DA TELA CONTINUA SENDO O DO APP. O vermelho e do APARELHO.
+   *
+   * "nao primeiro um fundo preto, e dps um fundo rosa choque" — e antes disso
+   * ele ja tinha dito que a Pokedex e a unica que PODE ser diferente ("tem q ser
+   * diferente de querer"). As duas coisas sao verdade ao mesmo tempo, e a
+   * contradicao so existia porque a carcaça pintava a tela inteira de borda a
+   * borda: ai ela deixa de parecer um objeto e passa a parecer outro app.
+   *
+   * Agora o vermelho vive numa placa arredondada, com respiro em volta e sombra
+   * embaixo, sobre o fundo normal do app. E o mesmo desenho de todo cartao do
+   * TrainerKit — muda so o que esta DENTRO dele. O aparelho continua vermelho e
+   * continua destoando de propósito, mas destoa como um objeto em cima da mesa,
+   * e nao como uma troca de contexto.
+   */
+  background: var(--tk-screen);
+  color: #fff;
+}
+
+/*
+ * A placa: e ela que carrega o vermelho.
+ *
+ * `::before` em vez de um `<div>` porque a carcaça e decoracao pura — nao tem
+ * conteudo, nao recebe toque e nao deveria existir no DOM pra leitor de tela.
+ */
+.tk-dex[data-skin="device"]::before {
+  content: "";
+  position: absolute;
+  inset: calc(var(--tk-safe-top) * 0.5 + var(--tk-s3)) var(--tk-s3)
+    calc(var(--tk-s5) + env(safe-area-inset-bottom));
+  border-radius: 28px;
   background:
     linear-gradient(180deg, var(--tk-shell-light) 0%, var(--tk-shell) 22%, var(--tk-shell-dark) 100%);
-  color: #fff;
+  box-shadow:
+    0 18px 40px -12px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* O conteudo fica ACIMA da placa. Sem isto o `::before` cobriria tudo. */
+.tk-dex[data-skin="device"] > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* ---------------------------------------------------------- parte de cima */

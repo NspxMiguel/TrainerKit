@@ -330,3 +330,80 @@ export const CONTEXT_KEYS: Record<Context, { title: string; detail: string }> = 
   pvp: { title: "context.pvp.title", detail: "context.pvp.detail" },
   rocket: { title: "context.rocket.title", detail: "context.rocket.detail" },
 };
+
+/**
+ * Contextos que dao EXATAMENTE a mesma recomendacao, agrupados.
+ *
+ * O Miguel: "tem alguns pokemon, tipo o eternatus, que sla, raide, pra tudo e
+ * pvp sao iguais, so muda pra rocket. entao, daria pra unificar todos q sao
+ * iguais. pra n deixar diversos botoes, que no final sao exatamente iguais".
+ *
+ * Ele descreveu uma questao de interface, mas a decisao e de DADO: so o core
+ * sabe se dois contextos coincidem, e isso muda de especie pra especie. O
+ * Eternatus tem um golpe carregado que domina em qualquer criterio, entao
+ * "raide", "PvP" e "tudo" devolvem a mesma lista; um Pokemon com um carregado
+ * barato e um caro devolve listas diferentes e precisa dos tres botoes.
+ *
+ * Quatro botoes que respondem a mesma coisa nao sao quatro opcoes — sao quatro
+ * chances de a pessoa achar que perdeu alguma coisa ao nao clicar em todos.
+ *
+ * A COMPARACAO E POR IDENTIDADE DE GOLPE, nao por nota. Duas listas com os
+ * mesmos golpes na mesma ordem sao a mesma recomendacao, mesmo que as notas
+ * sejam diferentes — a nota so ordena dentro do proprio contexto e nunca aparece
+ * pro usuario. Comparar nota deixaria contextos identicos separados por causa de
+ * uma casa decimal que ninguem ve.
+ *
+ * `bait` entra na chave porque no Rocket ele MUDA a jogada: mesmo par de golpes
+ * com iscas diferentes sao recomendacoes diferentes.
+ */
+const CONTEXT_ORDER: readonly Context[] = ["general", "raid", "pvp", "rocket"];
+
+/** Quantos conjuntos comparar. A tela mostra cinco; comparar alem disso separaria
+ *  contextos por causa de uma linha que ninguem chega a ver. */
+const COMPARE_TOP = 5;
+
+function movesetKey(sets: readonly Moveset[]): string {
+  return sets
+    .slice(0, COMPARE_TOP)
+    .map((m) => `${m.fast.id}>${m.charged.id}${m.bait ? `+${m.bait.id}` : ""}`)
+    .join("|");
+}
+
+export interface ContextGroup {
+  /** Os contextos que compartilham esta recomendacao, na ordem canonica. */
+  contexts: Context[];
+  /** A lista, identica para todos eles. */
+  movesets: Moveset[];
+}
+
+/**
+ * Roda os quatro contextos e junta os que coincidem.
+ *
+ * Devolve sempre pelo menos um grupo. Quando os quatro coincidem, e um grupo so
+ * — e ai a tela nem precisa desenhar seletor.
+ */
+export function groupIdenticalContexts(
+  fastMoves: readonly MoveWithPvp[],
+  chargedMoves: readonly MoveWithPvp[],
+  input: ScoreInput,
+): ContextGroup[] {
+  const grupos: ContextGroup[] = [];
+  const porChave = new Map<string, ContextGroup>();
+
+  for (const context of CONTEXT_ORDER) {
+    const movesets = rankMovesets(fastMoves, chargedMoves, context, input);
+    const chave = movesetKey(movesets);
+
+    const existente = porChave.get(chave);
+    if (existente) {
+      existente.contexts.push(context);
+      continue;
+    }
+
+    const novo: ContextGroup = { contexts: [context], movesets };
+    porChave.set(chave, novo);
+    grupos.push(novo);
+  }
+
+  return grupos;
+}

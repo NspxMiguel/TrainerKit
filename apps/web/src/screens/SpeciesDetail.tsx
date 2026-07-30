@@ -7,6 +7,7 @@ import {
   MASTER_LEAGUE,
   ULTRA_LEAGUE,
   computeCPAtLevel,
+  groupIdenticalContexts,
   rankMovesets,
   shadowDamageMultiplier,
   topSpreads,
@@ -138,10 +139,21 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies, owned }: 
   // aplicar um multiplicador: e a Frustracao que muda a recomendacao.
   const frustration = moveById("frustration");
   const chargedPool = collect(species.chargedMoves, species.eliteChargedMoves);
-  const movesets = rankMovesets(
+  /*
+   * Os quatro contextos, com os que coincidem JUNTOS.
+   *
+   * "daria pra unificar todos q sao iguais. pra n deixar diversos botoes, que no
+   * final sao exatamente iguais." A decisao e de dado, nao de layout: quem sabe
+   * se dois contextos coincidem e o core, e a resposta muda por especie.
+   *
+   * Eternatus: "Tudo" e "Raide" dao as MESMAS cinco linhas e viram um botao so;
+   * PvP tem o mesmo primeiro lugar mas ordem diferente abaixo, entao continua
+   * separado — unificar ali esconderia uma diferenca de verdade.
+   * Machamp: os quatro diferem, e os quatro botoes continuam.
+   */
+  const grupos = groupIdenticalContexts(
     collect(species.fastMoves, species.eliteFastMoves),
     shadow ? withFrustration(chargedPool, frustration) : chargedPool,
-    context,
     {
       attackerTypes: species.types,
       chart: data.typeChart,
@@ -149,6 +161,12 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies, owned }: 
       stabMultiplier: 1.2,
     },
   );
+
+  /** O grupo que contem o contexto escolhido. Sempre existe: todo contexto cai
+   *  em exatamente um grupo (garantido por teste no core). */
+  const grupoAtivo = grupos.find((g) => g.contexts.includes(context)) ?? grupos[0]!;
+  const movesets = grupoAtivo.movesets;
+
 
   // Quanto custa continuar com a Frustracao.
   //
@@ -370,21 +388,38 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies, owned }: 
         {t("species.bestMoves")}
       </div>
 
-      <div style={{ margin: "10px 0" }}>
-        <Segmented
-          ariaLabel={t("species.bestMoves")}
-          value={context}
-          onChange={setContext}
-          size="compact"
-          options={(["general", "raid", "pvp", "rocket"] as const).map((c) => ({
-            value: c,
-            label: t(CONTEXT_KEYS[c].title as Key),
-          }))}
-        />
-      </div>
+      {/*
+        Um botao por GRUPO, e nenhum quando ha grupo unico.
+
+        Seletor com uma opcao so nao e escolha, e enfeite que ocupa espaco e
+        sugere que existe outra coisa pra ver.
+      */}
+      {grupos.length > 1 && (
+        <div style={{ margin: "10px 0" }}>
+          <Segmented
+            ariaLabel={t("species.bestMoves")}
+            value={grupoAtivo.contexts[0]!}
+            onChange={setContext}
+            size="compact"
+            options={grupos.map((g) => ({
+              value: g.contexts[0]!,
+              // "Tudo · Raide" quando dois contextos caem no mesmo lugar. O
+              // rotulo composto e o que explica por que ha tres botoes e nao
+              // quatro — sem ele, pareceria que um sumiu.
+              label: g.contexts.map((c) => t(CONTEXT_KEYS[c].title as Key)).join(" · "),
+            }))}
+          />
+        </div>
+      )}
 
       <p className="tk-caption" style={{ margin: "0 2px 10px", lineHeight: 1.45 }}>
-        {t(CONTEXT_KEYS[context].detail as Key)}
+        {grupoAtivo.contexts.length > 1
+          ? t("species.sameForAll", {
+              contexts: grupoAtivo.contexts
+                .map((c) => t(CONTEXT_KEYS[c].title as Key))
+                .join(", "),
+            })
+          : t(CONTEXT_KEYS[grupoAtivo.contexts[0]!].detail as Key)}
       </p>
 
       {/* Chip, nao botao de bloco: o sombroso e um filtro do que esta abaixo,
@@ -510,11 +545,21 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies, owned }: 
         </section>
       ) : (
       <section className="tk-card">
-        <div className="tk-spread-head">
+      {/*
+        UMA coluna de IV, no formato 14/15/13.
+
+        "na opção melhores iv por liga nao mostra o iv? kkk" — mostrava, e era
+        impossivel de ler. As tres colunas se chamavam "Atq / Def / PS", que sao
+        EXATAMENTE as palavras que o app usa pra atributo base duas secoes acima.
+        Entao "Atq 0" nao parecia um IV zero, parecia um ataque zero — que seria
+        absurdo, e por isso ninguem lia como IV.
+
+        `14/15/13` e como todo jogador escreve IV, dentro e fora do jogo. A forma
+        carrega o significado sem precisar de rotulo explicando.
+      */}
+      <div className="tk-spread-head">
           <span>{t("spread.rank")}</span>
-          <span>{t("spread.atk")}</span>
-          <span>{t("spread.def")}</span>
-          <span>{t("spread.hp")}</span>
+          <span>{t("spread.ivs")}</span>
           <span>{t("spread.level")}</span>
           <span>{t("spread.cp")}</span>
         </div>
@@ -525,9 +570,9 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies, owned }: 
             className={`tk-spread${sp.rank === 1 ? " tk-spread--top" : ""}`}
           >
             <span>{sp.rank}</span>
-            <span>{sp.ivs.atk}</span>
-            <span>{sp.ivs.def}</span>
-            <span>{sp.ivs.hp}</span>
+            <span>
+              {sp.ivs.atk}/{sp.ivs.def}/{sp.ivs.hp}
+            </span>
             <span className="tk-spread-dim">{sp.level}</span>
             <span>{sp.cp.toLocaleString(language)}</span>
           </div>
