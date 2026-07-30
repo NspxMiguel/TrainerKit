@@ -14,7 +14,7 @@ import { WheelPicker } from "../ui/WheelPicker.tsx";
 import { Segmented } from "../ui/Segmented.tsx";
 import { SettingsSheet } from "../ui/SettingsSheet.tsx";
 import { updateSetup, useSetup } from "../onboarding/setup.ts";
-import { useGroq } from "../ai/groq.ts";
+import { useAi } from "../ai/provider.ts";
 import { SOURCE_KEYS, useSpriteSettings } from "../sprites/settings.ts";
 import { useInstallState } from "../storage/install.ts";
 import {
@@ -116,7 +116,7 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
   const language = useLanguage();
   const showTranslation = useShowTranslation();
   const sprites = useSpriteSettings();
-  const groq = useGroq();
+  const ai = useAi();
   const { t } = useT();
   const setup = useSetup();
   const [guideOpen, setGuideOpen] = useState(false);
@@ -179,7 +179,13 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
         />
         <Linha
           label={t("ai.title")}
-          value={groq.key ? t("ai.on") : t("ai.off")}
+          value={
+            ai.provider === "off"
+              ? t("ai.off")
+              : ai.provider === "local"
+                ? t("ai.provider.local")
+                : t("ai.provider.groq")
+          }
           onOpen={() => setPainel("ai")}
         />
       </section>

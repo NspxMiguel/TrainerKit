@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 
-import { useGroq } from "../ai/groq.ts";
 import { askAboutCollection, collectionFacts } from "../ai/ask.ts";
+import { useAi } from "../ai/provider.ts";
 import type { Dataset } from "../data/useDataset.ts";
 import { useT } from "../i18n/t.ts";
 import type { OwnedPokemon } from "../storage/collection.ts";
@@ -22,7 +22,7 @@ interface Props {
  * ajustes" seria propaganda ocupando espaco de quem nao pediu.
  */
 export function AskBox({ items, data }: Props) {
-  const groq = useGroq();
+  const ai = useAi();
   const { t } = useT();
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<string | null>(null);
@@ -32,7 +32,9 @@ export function AskBox({ items, data }: Props) {
 
   const facts = useMemo(() => collectionFacts(items, data), [items, data]);
 
-  if (!groq.key || items.length === 0) return null;
+  // So aparece se a IA vai de fato responder — escolhida E pronta. Groq sem
+  // chave e local sem WebGPU estao escolhidas e nao respondem.
+  if (!ai.ready || items.length === 0) return null;
 
   const ask = async (q: string) => {
     const texto = q.trim();
@@ -49,8 +51,6 @@ export function AskBox({ items, data }: Props) {
       const res = await askAboutCollection({
         question: texto,
         facts,
-        apiKey: groq.key!,
-        model: groq.model,
         signal: controller.signal,
       });
       setAnswer(res);

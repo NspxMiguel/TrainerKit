@@ -13,6 +13,7 @@
     "audit:bundle": "tsx scripts/audit-bundle.ts"
   },
   "dependencies": {
+    "@mlc-ai/web-llm": "^0.2.84",
     "@trainerkit/core": "workspace:*",
     "dexie": "^4.0.11",
     "fflate": "^0.8.3",

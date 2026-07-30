@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { ACTION_KEYS, decide, formatTrace, type VerdictInput } from "@trainerkit/core";
 
-import { explainVerdict, useGroq } from "../ai/groq.ts";
+import { explainVerdict } from "../ai/explain.ts";
+import { useAi } from "../ai/provider.ts";
 import { useT, type Key } from "../i18n/t.ts";
 import { setDoneAction, useCollection, type OwnedPokemon } from "../storage/collection.ts";
 
@@ -38,7 +39,7 @@ export function VerdictCard({ owned, ...props }: Props) {
   const verdict = decide(props);
   const { t, tm, language } = useT();
   const { items } = useCollection();
-  const groq = useGroq();
+  const motor = useAi();
   const [ai, setAi] = useState<string | null>(null);
   const [aiError, setAiError] = useState(false);
   const asked = useRef<string | null>(null);
@@ -52,7 +53,7 @@ export function VerdictCard({ owned, ...props }: Props) {
    * vez de virar um alerta.
    */
   useEffect(() => {
-    if (!groq.key) return;
+    if (!motor.ready) return;
     // Uma chamada por veredito, nao por render.
     const fingerprint = `${props.name}|${verdict.action}|${verdict.confidence.toFixed(3)}`;
     if (asked.current === fingerprint) return;
@@ -84,7 +85,7 @@ export function VerdictCard({ owned, ...props }: Props) {
 
     return () => abort.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [groq.key, groq.model, language, props.name, verdict.action, verdict.confidence]);
+  }, [motor.ready, motor.provider, motor.localModel, language, props.name, verdict.action, verdict.confidence]);
   const [traceOpen, setTraceOpen] = useState(false);
   const color = TONE[verdict.action] ?? "var(--tk-txt)";
 
@@ -115,7 +116,7 @@ export function VerdictCard({ owned, ...props }: Props) {
       {/* A voz do modelo vem DEPOIS da frase por regras, com marca propria: o
           que o app garante e o veredito; o texto abaixo e so a mesma coisa dita
           de outro jeito. Misturar os dois apagaria essa diferenca. */}
-      {groq.key && !aiError && (
+      {motor.ready && !aiError && (
         <p className="tk-ai">
           {ai ?? <span className="tk-ai-wait">{t("ai.thinking")}</span>}
         </p>

@@ -10,6 +10,7 @@ import {
 
 import type { Dataset } from "../data/useDataset.ts";
 import type { OwnedPokemon } from "../storage/collection.ts";
+import { chat } from "./provider.ts";
 
 /**
  * Perguntar sobre a propria colecao, com suas palavras.
@@ -138,50 +139,31 @@ function asContext(facts: readonly CollectionFact[]): string {
 export interface AskOptions {
   question: string;
   facts: readonly CollectionFact[];
-  apiKey: string;
-  model: string;
   signal?: AbortSignal;
 }
 
+/**
+ * Nao recebe mais chave nem modelo.
+ *
+ * Quem decide de onde vem a resposta e `provider.ts` — Groq com a chave do
+ * usuario, ou o modelo rodando na GPU do aparelho. Esta funcao so monta a
+ * pergunta, e ela e a mesma nos dois casos.
+ */
 export async function askAboutCollection({
   question,
   facts,
-  apiKey,
-  model,
   signal,
 }: AskOptions): Promise<string> {
   if (facts.length === 0) throw new Error("colecao vazia");
 
-  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model,
-      temperature: 0.2,
-      max_tokens: 320,
-      messages: [
-        { role: "system", content: SYSTEM },
-        {
-          role: "user",
-          content: `Minha coleção:\n${asContext(facts)}\n\nPergunta: ${question}`,
-        },
-      ],
-    }),
-    ...(signal ? { signal } : {}),
-  });
-
-  if (!res.ok) {
-    const detail = await res.text().catch(() => "");
-    throw new Error(`${res.status} ${detail.slice(0, 120)}`);
-  }
-
-  const json = (await res.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-  const text = json.choices?.[0]?.message?.content?.trim();
-  if (!text) throw new Error("resposta vazia");
-  return text;
+  return chat(
+    [
+      { role: "system", content: SYSTEM },
+      {
+        role: "user",
+        content: `Minha coleção:\n${asContext(facts)}\n\nPergunta: ${question}`,
+      },
+    ],
+    { temperature: 0.2, maxTokens: 320, ...(signal ? { signal } : {}) },
+  );
 }

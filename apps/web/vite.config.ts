@@ -52,6 +52,15 @@ export default defineConfig({
       output: {
         manualChunks: {
           react: ["react", "react-dom"],
+          /*
+           * O web-llm num pedaco proprio, com nome fixo.
+           *
+           * Sao 6 MB de JavaScript, e o service worker pre-cacheia tudo que
+           * encontra em `dist` — sem isto, TODO usuario baixaria 6 MB pra ter
+           * uma opcao que a maioria nunca liga. Nome fixo (nao `webllm-[hash]`)
+           * porque `globIgnores` la embaixo precisa poder acertar nele.
+           */
+          webllm: ["@mlc-ai/web-llm"],
           i18n: [
             "./src/i18n/dict/en.ts",
             "./src/i18n/dict/pt-BR.ts",
@@ -94,7 +103,15 @@ export default defineConfig({
       // offline mas nao consegue calcular nada.
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,png,woff2,json}"],
-        maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
+        /*
+         * O motor de IA local NAO entra no pre-cache.
+         *
+         * Ele so e buscado quando alguem escolhe "no aparelho" nos Ajustes, e
+         * a partir dai o navegador o guarda normalmente. Pre-cachear seria
+         * cobrar 6 MB de quem deixou a IA desligada — que e o padrao.
+         */
+        globIgnores: ["**/webllm*.js"],
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         runtimeCaching: [
           {
             // Sprites sao buscados sob demanda e ficam guardados. Baixar as
