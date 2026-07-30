@@ -124,6 +124,31 @@ export function filtrar(bruta: string): Veredito {
   const pergunta = bruta.trim();
   if (pergunta === "") return { ok: false, motivo: "vazia" };
   if (pergunta.length > MAX) return { ok: false, motivo: "longa" };
+  return filtrarConteudo(pergunta);
+}
+
+/**
+ * Só a parte de ABUSO: assunto e injeção. Sem limite de tamanho, sem "vazia".
+ *
+ * ⚠️ Isto existe por um bug que so apareceu com a bolha de conversa montada: eu
+ * rodava `filtrar` no SERVIDOR sobre todo o texto do usuario — que inclui o
+ * dossie que o proprio app monta, com ~1.500 caracteres. O teto de 500, que faz
+ * todo sentido pra uma PERGUNTA, rejeitava o contexto do app.
+ *
+ * Na tela: "vale a pena evoluir ele?" voltou "fora do assunto: este endpoint so
+ * responde sobre Pokemon GO". Uma pergunta perfeitamente valida, barrada pelo
+ * meu proprio filtro, com a mensagem errada ainda por cima.
+ *
+ * A causa e de desenho: `filtrar` fazia dois trabalhos diferentes. Validar uma
+ * PERGUNTA (tamanho, vazia) e detectar ABUSO (assunto, injecao) sao coisas
+ * distintas, e so a segunda faz sentido sobre um texto que o app gerou.
+ *
+ * O tamanho do payload continua limitado — por `MAX_CHARS` em `api/ai.ts`, que
+ * e o lugar certo: la o teto e do PEDIDO, nao da pergunta.
+ */
+export function filtrarConteudo(texto: string): Veredito {
+  const pergunta = texto.trim();
+  if (pergunta === "") return { ok: false, motivo: "vazia" };
 
   const n = normalizar(pergunta);
 

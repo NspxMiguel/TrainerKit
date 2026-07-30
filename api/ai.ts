@@ -46,7 +46,7 @@
  * O reexport em `apps/web/src/ai/guarda.ts` usa a forma COM extensao pelo mesmo
  * motivo invertido.
  */
-import { filtrar } from "./_guarda";
+import { filtrarConteudo } from "./_guarda";
 
 /** Modelos que esta funcao aceita. Fora desta lista, 400. */
 const PERMITIDOS = new Set([
@@ -277,7 +277,10 @@ export default async function handler(req: Request): Promise<Response> {
   }
 
   // O porteiro, agora do lado que ninguem pode pular. Ver a nota em GUARDA_SISTEMA.
-  const veredito = filtrar(textoDoUsuario(messages));
+  // `filtrarConteudo`, nao `filtrar`: o texto aqui inclui o dossie que o app
+  // monta, e o teto de 500 caracteres da pergunta rejeitaria ele. O tamanho do
+  // pedido ja e limitado por MAX_CHARS acima.
+  const veredito = filtrarConteudo(textoDoUsuario(messages));
   if (!veredito.ok) {
     return json({ error: `fora do assunto: este endpoint so responde sobre Pokemon GO` }, 422);
   }

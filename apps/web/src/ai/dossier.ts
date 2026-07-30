@@ -470,6 +470,68 @@ export function speciesDossier(
       return alvo ? `${alvo.name}${doces ? ` (${doces} doces)` : ""}` : id;
     });
     linhas.push(`Evolui para: ${nomes.join(", ")}`);
+
+    /*
+     * A LINHA INTEIRA, e a FORMA FINAL — nao so o proximo passo.
+     *
+     * ⚠️ Perguntei "vale a pena evoluir ele?" na ficha do Bulbasaur e o modelo
+     * respondeu, com razao: "não tenho informações sobre a linha evolutiva
+     * completa do Bulbasaur". Ele estava certo — o dossie dizia "Evolui para:
+     * Ivysaur" e parava ali.
+     *
+     * E um passo so nao responde a pergunta. Quem pergunta se vale evoluir quer
+     * saber onde a linha TERMINA: evoluir um Bulbasaur so vale a pena porque no
+     * fim tem um Venusaur, e o que decide e o quanto o Venusaur presta.
+     *
+     * Entao a linha completa entra, com o PC maximo da forma final — que e o
+     * numero que muda a decisao.
+     */
+    /*
+     * ⚠️ SO quando a linha e RETA. Linha que se divide nao tem "forma final".
+     *
+     * Meu primeiro rascunho seguia sempre o primeiro ramo, e o Eevee saiu assim:
+     *
+     *   "Linha evolutiva completa: Eevee → Vaporeon. A forma final é Vaporeon
+     *    (…) É ELA que decide se vale a pena evoluir."
+     *
+     * Mentira com toda a confianca do mundo: o Eevee tem OITO evolucoes, e
+     * Vaporeon e so a primeira da lista. Eu tinha ate escrito no comentario que
+     * pegava "so o primeiro ramo" — e mesmo assim rotulei o resultado de
+     * "completa". O comentario sabia; o texto que chega no modelo, nao.
+     *
+     * Quando ha ramos, a linha "Evolui para" acima ja lista todos, e ela e a
+     * resposta certa. Acrescentar uma escolha arbitraria seria pior que nao ter.
+     */
+    const cadeia: string[] = [];
+    const visto = new Set<string>([species.id]);
+    let atual: DatasetSpecies | undefined = species;
+    let temRamo = false;
+
+    while (atual && atual.evolvesInto.length > 0) {
+      if (atual.evolvesInto.length > 1) {
+        temRamo = true;
+        break;
+      }
+      const proximoId: string | undefined = atual.evolvesInto[0];
+      if (!proximoId || visto.has(proximoId)) break;
+      visto.add(proximoId);
+      const proximo: DatasetSpecies | undefined = data.species.find((x) => x.id === proximoId);
+      if (!proximo) break;
+      cadeia.push(proximo.name);
+      atual = proximo;
+    }
+
+    if (!temRamo && cadeia.length > 0 && atual) {
+      const pcFinal = computeCPAtLevel(data.cpm, atual.baseStats, PERFEITO, NIVEL_REF);
+      linhas.push(
+        `Linha evolutiva completa: ${species.name} → ${cadeia.join(" → ")}. ` +
+          `A forma final é ${atual.name}: ataque ${faixa("atk", atual.baseStats.atk)}, ` +
+          `defesa ${faixa("def", atual.baseStats.def)}, ` +
+          `resistência ${faixa("hp", atual.baseStats.hp)}, ` +
+          `PC máximo ${Math.round(pcFinal)} no nível ${NIVEL_REF} com IV perfeito. ` +
+          `É ELA que decide se vale a pena evoluir.`,
+      );
+    }
   } else {
     linhas.push("Não evolui mais: é forma final.");
   }
@@ -502,7 +564,31 @@ export function speciesDossier(
           .join("; "),
     );
   } else {
-    linhas.push("O jogador não tem nenhum desta espécie na coleção.");
+    /*
+     * ⚠️ A frase e a mesma; o que mudou e o que vem DEPOIS dela.
+     *
+     * Antes era so "O jogador não tem nenhum desta espécie na coleção." — e o
+     * modelo tratou isso como A resposta. Perguntei "vale a pena evoluir ele?"
+     * na ficha do Bulbasaur e levei:
+     *
+     *   "Não há Bulbasaur na coleção do jogador, então não há o que evoluir."
+     *
+     * Tecnicamente verdadeiro e completamente inutil. Quem esta lendo a ficha de
+     * uma especie na Pokedex esta perguntando sobre A ESPECIE — se vale a pena
+     * evoluir um Bulbasaur, em geral. A ausencia na colecao e contexto, nao
+     * impedimento.
+     *
+     * O erro e da mesma familia de todos os outros deste arquivo: o modelo
+     * respondeu com precisao a pergunta errada, porque o texto que eu mandei
+     * fazia a informacao errada parecer a mais importante.
+     */
+    linhas.push(
+      "O jogador não tem nenhum desta espécie na coleção. " +
+        "Isso NÃO impede a resposta: perguntas sobre esta espécie devem ser " +
+        "respondidas em geral, como se fosse um exemplar qualquer dela. Só " +
+        "mencione a ausência se a pergunta for especificamente sobre o que o " +
+        "jogador possui.",
+    );
   }
 
   return linhas.join("\n");
