@@ -132,7 +132,8 @@ Regras rígidas:
 - Não chame um IV de bom ou ruim pelo número solto: 45/45 é perfeito, 0/45 é o
   pior possível, e a média de um Pokémon selvagem é perto de 22.
 - Não gere, descreva nem ofereça imagens.
-- Responda no idioma da pergunta.
+- Responda SEMPRE no idioma pedido no cabeçalho, nunca no idioma que você achou
+  que a pergunta estava.
 - Curto: no máximo 4 frases. Cite os nomes e os números que sustentam a
   resposta, sem virar tabela.
 - Nada de saudação nem de "espero ter ajudado".`;
@@ -176,6 +177,11 @@ export interface AskOptions {
    * pior que voce tem e X" quando X e so o pior que ele viu.
    */
   total: number;
+  /**
+   * O idioma escolhido em Ajustes. Obrigatorio de propósito: com `?` ele viraria
+   * opcional e a proxima tela a chamar isto esqueceria, que e como o bug nasceu.
+   */
+  language: string;
   signal?: AbortSignal;
 }
 
@@ -186,17 +192,50 @@ export interface AskOptions {
  * usuario, ou o modelo rodando na GPU do aparelho. Esta funcao so monta a
  * pergunta, e ela e a mesma nos dois casos.
  */
+/**
+ * O idioma vai ESCRITO, e nao adivinhado.
+ *
+ * ⚠️ "Responda no idioma da pergunta" parecia bastar e nao basta. Perguntei
+ * "vale purificar" — portugues — e a resposta veio em espanhol: ""Purificar" se
+ * refiere a la funcion de purificar un Pokemon...". Duas palavras que existem
+ * identicas nos dois idiomas nao carregam informacao suficiente pro modelo
+ * decidir, e ele chutou.
+ *
+ * O app SABE o idioma: e a escolha da pessoa em Ajustes, e a mesma que pinta a
+ * tela inteira. Pedir pro modelo inferir do texto e jogar fora um dado que ja
+ * esta na mao — e a `dexSystem` ja fazia certo desde o bug do alemao misturado.
+ * Esta era a outra porta da IA, e ficou de fora daquela correcao.
+ */
+function cabecalhoIdioma(language: string): string {
+  const nome = NOMES_IDIOMA[language] ?? "Portuguese (Brazil)";
+  return `Answer in ${nome}. Every word of your reply must be in ${nome}.\n\n`;
+}
+
+const NOMES_IDIOMA: Record<string, string> = {
+  "pt-BR": "Portuguese (Brazil)",
+  en: "English",
+  es: "Spanish (Spain)",
+  "es-419": "Spanish (Latin America)",
+  fr: "French",
+  de: "German",
+  it: "Italian",
+  ja: "Japanese",
+  ko: "Korean",
+  ru: "Russian",
+};
+
 export async function askAboutCollection({
   question,
   facts,
   total,
+  language,
   signal,
 }: AskOptions): Promise<string> {
   if (facts.length === 0) throw new Error("colecao vazia");
 
   return chat(
     [
-      { role: "system", content: SYSTEM },
+      { role: "system", content: cabecalhoIdioma(language) + SYSTEM },
       {
         role: "user",
         content: `Minha coleção:\n${asContext(facts, total)}\n\nPergunta: ${question}`,
