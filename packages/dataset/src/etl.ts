@@ -558,18 +558,30 @@ async function main(): Promise<void> {
   const raidOverall = rankRaidAttackers(forRanking, cpm, typeChart, TYPE_ORDER, battle, {
     limit: 30,
   });
+  /*
+   * 40 por tipo, nao 15.
+   *
+   * Quinze cobria a tela de rankings, onde ninguem le a 16a linha. Mas a ficha
+   * da Pokedex diz "entre os atacantes de Lutador, é o número N" — e com limite
+   * 15 essa frase nunca aparecia pra Machamp, Conkeldurr, Hariyama: as quinze
+   * primeiras vagas sao todas de lendario e Mega. O jogador comum nao tem
+   * nenhum dos quinze, e a linha mais util da ficha sumia justamente pra quem
+   * ela servia. Custa alguns KB no dataset.
+   */
   const raidByType: Record<string, ReturnType<typeof rankRaidAttackers>> = {};
   for (const type of TYPE_ORDER) {
     raidByType[type] = rankRaidAttackers(forRanking, cpm, typeChart, TYPE_ORDER, battle, {
       attackType: type,
-      limit: 15,
+      limit: 40,
     });
   }
 
+  // Mesmo motivo do de raide: a ficha cita a posicao na liga, e 30 vagas sao
+  // poucas pra um jogador se achar nelas.
   const statProductByLeague = {
-    great: rankStatProduct(forRanking, cpm, GREAT_LEAGUE, { limit: 30 }),
-    ultra: rankStatProduct(forRanking, cpm, ULTRA_LEAGUE, { limit: 30 }),
-    master: rankStatProduct(forRanking, cpm, MASTER_LEAGUE, { limit: 30 }),
+    great: rankStatProduct(forRanking, cpm, GREAT_LEAGUE, { limit: 60 }),
+    ultra: rankStatProduct(forRanking, cpm, ULTRA_LEAGUE, { limit: 60 }),
+    master: rankStatProduct(forRanking, cpm, MASTER_LEAGUE, { limit: 60 }),
   };
 
   const dataset = {

@@ -12,9 +12,17 @@ import { setDoneAction, useCollection } from "../storage/collection.ts";
 import { useInstallState } from "../storage/install.ts";
 import type { PersistState } from "../storage/persist.ts";
 import { DidYouKnow } from "../ui/DidYouKnow.tsx";
-import { IconAlert, IconCamera, IconShield, IconSwords, IconTrophy } from "../ui/Icons.tsx";
+import {
+  IconAlert,
+  IconCamera,
+  IconSearch,
+  IconShield,
+  IconSwords,
+  IconTrophy,
+} from "../ui/Icons.tsx";
 import { InstallBanner } from "../ui/InstallBanner.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
+import { DexMode } from "./DexMode.tsx";
 import { InstallGuide } from "./InstallGuide.tsx";
 import { IVCalculator } from "./IVCalculator.tsx";
 import { SpeciesDetail } from "./SpeciesDetail.tsx";
@@ -174,6 +182,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
   const [scanning, setScanning] = useState(false);
   const [picked, setPicked] = useState<DatasetSpecies | null>(null);
   const [teamOpen, setTeamOpen] = useState(false);
+  const [dexOpen, setDexOpen] = useState(false);
   const [detail, setDetail] = useState<DatasetSpecies | null>(null);
 
   const ready = dataset.status === "ready";
@@ -409,6 +418,16 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
             </span>
           </button>
 
+          {/* O modo Pokedex fica junto das outras duas acoes: e a terceira coisa
+              que o app FAZ, e nao um lugar pra onde ele leva. */}
+          <button type="button" className="tk-lite" onClick={() => setDexOpen(true)}>
+            <IconSearch size={17} />
+            <span className="tk-lite-t">{t("dex.open")}</span>
+            <span className="tk-lite-go" aria-hidden="true">
+              ›
+            </span>
+          </button>
+
           {/* A colecao como FILA de sprites, nao como cartao de texto.
               Era um bloco com tres numeros, duas linhas de nome e uma frase de
               rodape — muita leitura pra dizer "olha o que voce tem". A fila diz
@@ -539,6 +558,17 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
           onClose={() => setTeamOpen(false)}
           onPickSpecies={(s) => {
             setTeamOpen(false);
+            setDetail(s);
+          }}
+        />
+      )}
+
+      {dexOpen && data && (
+        <DexMode
+          data={data}
+          onClose={() => setDexOpen(false)}
+          onOpenSpecies={(s) => {
+            setDexOpen(false);
             setDetail(s);
           }}
         />

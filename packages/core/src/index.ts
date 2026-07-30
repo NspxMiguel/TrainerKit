@@ -12,4 +12,5 @@ export * from "./verdict.js";
 export * from "./message.js";
 export * from "./counters.js";
 export * from "./rankings.js";
+export * from "./dex.js";
 export * from "./team.js";
