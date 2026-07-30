@@ -2095,9 +2095,16 @@
  * de 138, e ainda leem melhor: sao as coisas que o app FAZ por voce, lado a
  * lado, em vez de tres linhas de menu.
  */
-.tk-acts3 {
+/*
+ * Duas colunas, nao tres.
+ *
+ * Eram tres, e a do meio era "Pokédex" — do lado de uma ABA chamada Pokédex. O
+ * aparelho foi pra dentro da aba, e com duas colunas o rotulo tambem para de
+ * quebrar: "Monta um time pra mim" numa coluna de 110px virava tres linhas.
+ */
+.tk-acts2 {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr 1fr;
   gap: var(--tk-s2);
   margin-top: var(--tk-s3);
 }
@@ -4128,4 +4135,218 @@
   background: var(--tk-surf);
   font: 400 13px/1.6 var(--tk-font);
   color: var(--tk-txt2);
+}
+
+/* -------------------------------------------- abrir o aparelho na Pokedex */
+
+/*
+ * A porta de entrada do modo Pokedex, dentro da aba Pokedex.
+ *
+ * Traz a lente do aparelho em miniatura de propósito: e a assinatura visual
+ * dele, e quem ja abriu uma vez reconhece o botao pela bolinha azul antes de ler
+ * o texto.
+ */
+.tk-dexopen {
+  display: flex;
+  align-items: center;
+  gap: var(--tk-s3);
+  width: 100%;
+  margin-bottom: var(--tk-s4);
+  padding: 12px var(--tk-s4);
+  border-radius: var(--tk-r-card);
+  text-align: left;
+  color: var(--tk-txt);
+  background: linear-gradient(120deg, rgb(183 34 42 / 0.24), rgb(183 34 42 / 0.06) 60%, transparent),
+    var(--tk-surf);
+  border: 1px solid var(--tk-line2);
+  transition: transform 0.06s var(--tk-ease);
+}
+
+.tk-dexopen:active {
+  transform: scale(0.99);
+}
+
+.tk-dexopen-lens {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 34% 30%, #7fd4ff 0%, #2f7fd6 46%, #14396b 100%);
+  border: 3px solid #f3f4f6;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.4);
+}
+
+.tk-dexopen-t {
+  display: block;
+  font: 700 15px var(--tk-font);
+}
+
+.tk-dexopen-d {
+  display: block;
+  font: 400 12px var(--tk-font);
+  color: var(--tk-txt3);
+  margin-top: 1px;
+}
+
+/* ------------------------------------------ consertos da tela de Colecao */
+
+/*
+ * Os chips de sugestao vazavam o cartao.
+ *
+ * `.tk-chips` tem margem negativa de propósito: ela existe pra a fila encostar
+ * na borda da TELA e sinalizar que continua. Dentro de um cartao com respiro
+ * proprio, essa mesma margem joga os chips por cima da borda arredondada — no
+ * print do Miguel o ultimo chip aparece cortado atravessando a moldura.
+ *
+ * Aqui a sangria passa a ser do CARTAO, nao da tela.
+ */
+.tk-ask .tk-chips {
+  margin: 8px calc(-1 * var(--tk-s4)) 0;
+  padding-left: var(--tk-s4);
+  padding-right: var(--tk-s4);
+}
+
+/*
+ * Espaço pro botao flutuante nao cobrir o conteudo.
+ *
+ * O `+` e `position: fixed` a 84px do rodape, e o respiro de baixo do `.tk-main`
+ * so contava a barra de abas. Rolando ate o fim da Colecao, ele cobria o botao
+ * "Importar" — visivel no print. 76px e a altura dele mais folga.
+ *
+ * Elemento em vez de `padding` no `.tk-main`: so esta tela tem botao flutuante,
+ * e reservar o espaço nas outras deixaria um vazio sem motivo no fim de todas.
+ */
+.tk-fab-clear {
+  display: block;
+  height: 76px;
+}
+
+/* ============================================================== animacoes */
+
+/*
+ * "coloca animacoes e etc" — e antes disso, duas vezes: "n deixa com cara de ia".
+ *
+ * A regra que separa as duas coisas: animacao que INFORMA fica, animacao que
+ * enfeita sai. Cada uma daqui responde a uma pergunta que a pessoa faria:
+ *
+ *   "trocou de tela?"        a nova entra subindo, curta
+ *   "esta lista e nova?"     os itens aparecem em cascata, 22ms de diferenca
+ *   "esse numero mudou?"     ele pulsa uma vez
+ *
+ * Nada gira, nada quica, nada tem `ease-in-out` de slide de apresentacao. Tudo
+ * abaixo de 300ms, tudo em `transform` e `opacity` (as duas unicas propriedades
+ * que o navegador anima sem recalcular layout), e tudo desligado em
+ * `prefers-reduced-motion`.
+ */
+
+/*
+ * Cascata.
+ *
+ * `--tk-i` vem do React com o indice da linha. O atraso maximo trava em 8 itens:
+ * numa lista de trinta, o trigesimo entraria meio segundo depois e a lista
+ * pareceria travada em vez de animada.
+ */
+@keyframes tk-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.tk-cascade > * {
+  animation: tk-in-up 0.26s var(--tk-ease-glass) both;
+  animation-delay: calc(min(var(--tk-i, 0), 8) * 22ms);
+}
+
+/* O destaque da home entra junto com a tela, um tico depois do texto. */
+.tk-hero {
+  animation: tk-in-up 0.3s var(--tk-ease-glass) both;
+  animation-delay: 40ms;
+}
+
+.tk-cta {
+  animation: tk-in-up 0.3s var(--tk-ease-glass) both;
+  animation-delay: 80ms;
+}
+
+.tk-acts2 {
+  animation: tk-in-up 0.3s var(--tk-ease-glass) both;
+  animation-delay: 110ms;
+}
+
+/*
+ * A fila de sprites entra da esquerda pra direita.
+ *
+ * Aqui a cascata diz algo extra: que a fila ROLA. Ver os primeiros entrarem em
+ * sequencia sugere que ha mais fora da tela, o que uma fila parada nao comunica.
+ */
+.tk-strip-row .tk-strip-cell {
+  animation: tk-in-up 0.24s var(--tk-ease-glass) both;
+  animation-delay: calc(min(var(--tk-i, 0), 8) * 26ms);
+}
+
+/*
+ * O numero que mudou pulsa uma vez.
+ *
+ * Serve pro contador de pendencias: marcar um veredito como feito muda "4 pedem
+ * uma decisao" pra "3", e sem nada a pessoa nao ve que o toque dela fez efeito.
+ * `scale` de 1.12 e o limite — acima disso vira comemoracao.
+ */
+@keyframes tk-bump {
+  40% {
+    transform: scale(1.12);
+  }
+}
+
+.tk-overline-hot {
+  display: inline-block;
+  animation: tk-bump 0.34s var(--tk-ease-glass);
+}
+
+/* A folha cheia entra subindo; o fundo dela nao anima (repintar a tela inteira
+   a cada frame e o que fazia o app parecer travado antes). */
+.tk-sheet-full,
+.tk-dex {
+  animation: tk-in-up 0.28s var(--tk-ease-glass) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tk-cascade > *,
+  .tk-hero,
+  .tk-cta,
+  .tk-acts2,
+  .tk-strip-row .tk-strip-cell,
+  .tk-overline-hot,
+  .tk-sheet-full,
+  .tk-dex {
+    animation: none;
+  }
+}
+
+/*
+ * Botao de enviar na caixa de pergunta.
+ *
+ * A caixa dependia SÓ do Enter. No computador funciona; no celular o teclado
+ * mostra "return" e muita gente nao associa aquilo a enviar — e como nao havia
+ * botao nenhum, a caixa parecia nao fazer nada. Era metade do "chat nao
+ * funcionando".
+ */
+.tk-ask-send {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 0;
+  background: var(--tk-pri);
+  color: var(--tk-on-pri);
+  font: 700 16px/1 var(--tk-font);
+  transition: opacity 0.14s var(--tk-ease);
+}
+
+.tk-ask-send:disabled {
+  opacity: 0.35;
+}
+
+.tk-ask-send:active:not(:disabled) {
+  background: var(--tk-pri-p);
 }
