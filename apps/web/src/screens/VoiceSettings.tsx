@@ -10,6 +10,14 @@ import {
   type KokoroProgress,
 } from "../ai/kokoro.ts";
 import {
+  ELEVEN_SHARED_VOICES,
+  creditosRestantes,
+  elevenSharedOn,
+  getSharedVoice,
+  setElevenSharedOn,
+  setSharedVoice,
+} from "../ai/elevenShared.ts";
+import {
   edgeSupports,
   edgeVoicesFor,
   getEdgeVoice,
@@ -67,11 +75,28 @@ export function VoiceSettings() {
   const [baixando, setBaixando] = useState<KokoroProgress | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [neural, setNeural] = useState(neuralOn);
+  const [share11, setShare11] = useState(elevenSharedOn);
+  const [voz11share, setVoz11share] = useState(getSharedVoice);
+  /** `undefined` = ainda perguntando; `null` = nao consegui saber; numero = saldo. */
+  const [saldo11, setSaldo11] = useState<number | null | undefined>(undefined);
   const [edgeVoz, setEdgeVoz] = useState(() => getEdgeVoice(language));
 
   // O motor avisa quando termina de carregar: sem isto a lista de vozes boas
   // so apareceria na proxima vez que a tela abrisse.
   useEffect(() => onKokoroChange(() => setKokoro(kokoroReady())), []);
+
+  /*
+   * O saldo da ElevenLabs compartilhada, perguntado ao abrir a tela.
+   *
+   * Vem do servidor, que pergunta pra propria ElevenLabs — nao e estimativa
+   * minha. Com ~50 leituras por MES pra todo mundo, saber quanto sobrou antes de
+   * apertar e a diferenca entre um recurso limitado e um recurso quebrado.
+   */
+  useEffect(() => {
+    const ctrl = new AbortController();
+    void creditosRestantes(ctrl.signal).then((n) => setSaldo11(n));
+    return () => ctrl.abort();
+  }, []);
 
   const vozesBoas = kokoroVoicesFor(language);
   const [chave11, setChave11] = useState("");
@@ -326,6 +351,77 @@ export function VoiceSettings() {
       <div className="tk-overline" style={{ display: "block", margin: "22px 0 8px" }}>
         {t("voice.eleven")}
       </div>
+
+      {/*
+        A compartilhada vem ANTES da caixa de chave, e vem DESLIGADA.
+
+        Antes porque é a que a pessoa pode usar agora, sem criar conta. Desligada
+        porque são ~50 leituras por MÊS pra todos os usuários somados — ligar
+        sozinho gastaria a cota de todo mundo em quem nem pediu. Ver `tts11.ts`.
+
+        O saldo aparece na própria linha: com um teto desse tamanho, descobrir
+        que acabou apertando o botão faria o app parecer quebrado por 28 dias.
+      */}
+      <button
+        type="button"
+        className="tk-option"
+        data-active={share11 || undefined}
+        aria-pressed={share11}
+        disabled={saldo11 === 0}
+        onClick={() => {
+          const proximo = !share11;
+          setShare11(proximo);
+          setElevenSharedOn(proximo);
+          if (proximo) void speak(t("voice.sample"), language);
+        }}
+      >
+        <span className="tk-option-mark" aria-hidden="true">
+          {share11 ? "●" : "○"}
+        </span>
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span className="tk-option-title">{t("voice.elevenShared")}</span>
+          <span className="tk-option-detail">
+            {saldo11 === undefined
+              ? t("common.loading")
+              : saldo11 === null
+                ? t("voice.elevenSharedDetail")
+                : saldo11 === 0
+                  ? t("voice.elevenSharedOut")
+                  : t("voice.elevenSharedLeft", { n: Math.floor(saldo11 / 400) })}
+          </span>
+        </span>
+      </button>
+
+      {share11 && (
+        <div style={{ display: "grid", gap: 6, marginTop: 6, marginBottom: 6 }}>
+          {ELEVEN_SHARED_VOICES.map((v) => {
+            const ativa = voz11share === v.id;
+            return (
+              <button
+                key={v.id}
+                type="button"
+                className="tk-option"
+                data-active={ativa || undefined}
+                aria-pressed={ativa}
+                onClick={() => {
+                  setVoz11share(v.id);
+                  setSharedVoice(v.id);
+                  // Sem prévia automática aqui: cada toque custa da cota do mês
+                  // de todo mundo. Trocar a voz é escolha, ouvir é outro gesto.
+                }}
+              >
+                <span className="tk-option-mark" aria-hidden="true">
+                  {ativa ? "●" : "○"}
+                </span>
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span className="tk-option-title">{v.label}</span>
+                  <span className="tk-option-detail">{t("voice.elevenTag")}</span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       <section className="tk-card" style={{ display: "grid", gap: 10 }}>
         <p className="tk-caption" style={{ lineHeight: 1.5 }}>
