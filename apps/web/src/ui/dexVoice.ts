@@ -1,4 +1,10 @@
-import { edgeSupports, edgeSynthesize } from "../ai/edgeTts.ts";
+import { audioEmCache, guardarAudio } from "../ai/cacheAudio.ts";
+import { edgeSupports, edgeSynthesize, getEdgeVoice } from "../ai/edgeTts.ts";
+import {
+  elevenSharedOn,
+  elevenSharedSynthesize,
+  getSharedVoice,
+} from "../ai/elevenShared.ts";
 import { elevenAvailable, elevenSynthesize } from "../ai/elevenlabs.ts";
 import {
   KOKORO_VOICES,
@@ -398,8 +404,13 @@ export async function speak(text: string, language: string): Promise<void> {
    * primeiro so porque o Kokoro, quando ja esta carregado, nao usa rede nenhuma
    * — e voz instantanea e offline ganha de voz que depende de um servidor.
    *
-   * ElevenLabs em seguida: e a que ele pediu pelo nome, mas consome cota de um
-   * plano gratuito pequeno e pede chave. Depois das duas gratuitas, entao.
+   * ElevenLabs COMPARTILHADA vem antes da neural, mas SO se alguem ligou nos
+   * Ajustes — ela nunca entra por conta propria. Sao ~50 leituras por MES pra
+   * todo mundo somado (ver `api/tts11.ts`), e cota assim morre no dia 2 se o app
+   * gastar sem ninguem pedir. Ligou, e porque quis.
+   *
+   * ElevenLabs com CHAVE PROPRIA em seguida: a mesma voz, sem disputar cota com
+   * ninguem.
    *
    * O sistema fica por ultimo e nunca deixa de existir: se tudo falhar — sem
    * rede, cota estourada, chave errada, ou a Microsoft fechando a porta — a
@@ -418,9 +429,19 @@ export async function speak(text: string, language: string): Promise<void> {
     }
   }
 
-  if (neuralOn() && edgeSupports(language)) {
+  /*
+   * As tres vozes de rede passam pelo CACHE.
+   *
+   * `comCache` procura antes de gerar e guarda depois. Reouvir a mesma ficha
+   * deixa de custar cota — e essa e a economia de verdade numa cota pequena.
+   * Kokoro fica de fora porque roda no aparelho: guardar o que ja e gratis so
+   * ocuparia disco.
+   */
+  if (elevenSharedOn()) {
     try {
-      const blob = await edgeSynthesize(text, language);
+      const blob = await comCache("11-share", getSharedVoice(), text, () =>
+        elevenSharedSynthesize(text),
+      );
       await tocarBlob(blob);
       ultimoErroTts = null;
       return;
@@ -431,7 +452,20 @@ export async function speak(text: string, language: string): Promise<void> {
 
   if (elevenAvailable()) {
     try {
-      const blob = await elevenSynthesize(text);
+      const blob = await comCache("11-user", "user", text, () => elevenSynthesize(text));
+      await tocarBlob(blob);
+      ultimoErroTts = null;
+      return;
+    } catch (e) {
+      ultimoErroTts = e instanceof Error ? e.message : String(e);
+    }
+  }
+
+  if (neuralOn() && edgeSupports(language)) {
+    try {
+      const blob = await comCache("edge", getEdgeVoice(language), text, () =>
+        edgeSynthesize(text, language),
+      );
       await tocarBlob(blob);
       ultimoErroTts = null;
       return;
@@ -454,6 +488,26 @@ export async function speak(text: string, language: string): Promise<void> {
   }
 
   await speakWithSystem(text, language);
+}
+
+/**
+ * Procura no cache; so gera se nao achou; guarda o que gerou.
+ *
+ * Falha do cache nunca impede a fala: `audioEmCache` e `guardarAudio` engolem
+ * os proprios erros e devolvem null / nada. O pior caso e gastar cota de novo,
+ * nunca ficar mudo.
+ */
+async function comCache(
+  motor: string,
+  voz: string,
+  texto: string,
+  gerar: () => Promise<Blob>,
+): Promise<Blob> {
+  const guardado = await audioEmCache(motor, voz, texto);
+  if (guardado) return guardado;
+  const novo = await gerar();
+  await guardarAudio(motor, voz, texto, novo);
+  return novo;
 }
 
 /** A voz padrao do idioma quando ninguem escolheu. */
