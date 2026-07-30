@@ -198,12 +198,16 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
         />
         <Linha
           label={t("ai.title")}
+          /* Os quatro casos, nomeados. Antes o `shared` caia no `else` e o
+             indice anunciava "Groq" pra quem estava na chave compartilhada. */
           value={
             ai.provider === "off"
               ? t("ai.off")
               : ai.provider === "local"
                 ? t("ai.provider.local")
-                : t("ai.provider.groq")
+                : ai.provider === "shared"
+                  ? t("ai.provider.shared")
+                  : t("ai.provider.groq")
           }
           onOpen={() => setPainel("ai")}
         />
