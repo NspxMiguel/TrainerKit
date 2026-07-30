@@ -1,5 +1,7 @@
 import { useSyncExternalStore } from "react";
 
+import type { ChatMessage } from "./provider.ts";
+
 /**
  * O assistente com modelo de linguagem.
  *
@@ -102,82 +104,31 @@ export function useGroq(): { key: string | null; model: string } {
 }
 
 /**
- * O que o modelo pode e nao pode fazer.
+ * Transporte da Groq. So isso.
  *
- * A proibicao de imagem nao e zelo excessivo: gerar arte de Pokemon a pedido
- * transformaria quem publica o app em DISTRIBUIDOR dessa arte, que e
- * exatamente o risco que o projeto inteiro foi desenhado pra evitar. Como aqui
- * o modelo so devolve texto, a regra e barata — mas fica escrita porque um dia
- * alguem vai querer trocar por um modelo multimodal.
+ * O que o modelo deve fazer (o `system`, as regras, o formato) NAO mora aqui —
+ * mora em quem faz a pergunta, porque e a mesma pergunta quando o modelo roda no
+ * aparelho. Sem essa separacao, ligar IA local exigiria duplicar cada prompt.
  */
-const SYSTEM = `Você é o assistente do TrainerKit, um app de Pokémon GO.
-
-Você NÃO analisa Pokémon. O app já calculou tudo e vai te entregar o veredito
-pronto com as regras que levaram a ele. Seu único trabalho é transformar esses
-dados em duas ou três frases naturais, no idioma pedido.
-
-Regras rígidas:
-- Nunca contradiga os números que receber. Se o veredito diz "transferir", você
-  explica por que transferir.
-- Nunca invente números, posições, movesets ou mecânicas que não vieram nos
-  dados.
-- Não gere, descreva nem ofereça imagens.
-- Seja direto. Nada de saudação, nada de "espero ter ajudado".
-- No máximo 3 frases curtas.`;
-
-export interface ExplainInput {
-  language: string;
-  species: string;
-  action: string;
-  confidence: number;
-  reason: string;
-  signals: Array<{ rule: string; weight: number; because: string }>;
-  ivTotal: number;
-  cp: number | null;
-}
-
-/**
- * Pede ao modelo que explique o veredito.
- *
- * Lanca em erro de rede ou chave invalida — quem chama decide o que mostrar. O
- * app continua inteiro sem isto: a explicacao por regras ja esta na tela, e o
- * modelo so a deixa mais fluida.
- */
-export async function explainVerdict(
-  input: ExplainInput,
-  signal?: AbortSignal,
+export async function groqChat(
+  apiKey: string,
+  model: string,
+  messages: readonly ChatMessage[],
+  options: { temperature?: number; maxTokens?: number; signal?: AbortSignal } = {},
 ): Promise<string> {
-  if (!apiKey) throw new Error("sem chave");
-
-  const body = {
-    model,
-    temperature: 0.4,
-    max_tokens: 220,
-    messages: [
-      { role: "system", content: SYSTEM },
-      {
-        role: "user",
-        content: [
-          `Idioma da resposta: ${input.language}`,
-          `Pokémon: ${input.species}`,
-          `IV: ${input.ivTotal} de 45${input.cp === null ? "" : ` · PC ${input.cp}`}`,
-          `Veredito: ${input.action} (confiança ${Math.round(input.confidence * 100)}%)`,
-          `Motivo principal: ${input.reason}`,
-          "Regras que pesaram:",
-          ...input.signals.map((s) => `- ${s.rule} (peso ${s.weight.toFixed(2)}): ${s.because}`),
-        ].join("\n"),
-      },
-    ],
-  };
-
   const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
-    body: JSON.stringify(body),
-    ...(signal ? { signal } : {}),
+    body: JSON.stringify({
+      model,
+      temperature: options.temperature ?? 0.3,
+      max_tokens: options.maxTokens ?? 320,
+      messages,
+    }),
+    ...(options.signal ? { signal: options.signal } : {}),
   });
 
   if (!res.ok) {
