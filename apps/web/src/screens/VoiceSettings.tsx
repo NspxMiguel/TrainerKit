@@ -1,13 +1,32 @@
 import { useEffect, useState } from "react";
 
+import {
+  KOKORO_MB,
+  ensureKokoro,
+  kokoroReady,
+  kokoroSupports,
+  kokoroVoicesFor,
+  onKokoroChange,
+  type KokoroProgress,
+} from "../ai/kokoro.ts";
+import {
+  ELEVEN_VOICES,
+  elevenAvailable,
+  getElevenVoice,
+  setElevenKey,
+  setElevenVoice,
+} from "../ai/elevenlabs.ts";
 import { useLanguage } from "../i18n/language.ts";
 import { useT } from "../i18n/t.ts";
 import {
+  getKokoroVoice,
   getPickedVoiceUri,
   listVoices,
   previewVoice,
+  setKokoroVoice,
   setPickedVoiceUri,
   setVoiceOn,
+  speak,
   speechSupported,
   stopSpeaking,
   voiceOn,
@@ -35,6 +54,19 @@ export function VoiceSettings() {
   const [vozes, setVozes] = useState<VoiceOption[]>([]);
   const [escolhida, setEscolhida] = useState<string | null>(getPickedVoiceUri);
   const [ligada, setLigada] = useState(voiceOn);
+  const [kokoro, setKokoro] = useState(kokoroReady);
+  const [kokoroVoz, setKokoroVoz] = useState(getKokoroVoice);
+  const [baixando, setBaixando] = useState<KokoroProgress | null>(null);
+  const [erro, setErro] = useState<string | null>(null);
+
+  // O motor avisa quando termina de carregar: sem isto a lista de vozes boas
+  // so apareceria na proxima vez que a tela abrisse.
+  useEffect(() => onKokoroChange(() => setKokoro(kokoroReady())), []);
+
+  const vozesBoas = kokoroVoicesFor(language);
+  const [chave11, setChave11] = useState("");
+  const [tem11, setTem11] = useState(elevenAvailable);
+  const [voz11, setVoz11] = useState(getElevenVoice);
 
   /*
    * A lista chega VAZIA na primeira chamada em varios navegadores.
@@ -92,6 +124,196 @@ export function VoiceSettings() {
         </span>
       </button>
 
+      {/* ------------------------------------------------- a voz de verdade */}
+
+      {/*
+        Kokoro vem PRIMEIRO, antes da lista do sistema.
+        
+        "bem ruim luciana e joana... quero vozes reais, vozes boas estilo eleven
+        labs. mas gratis obvio". As vozes do sistema tem teto — sao de uma
+        geracao anterior de sintese, e escolher a melhor delas nao muda isso.
+        Kokoro e TTS neural rodando aqui mesmo: sem chave, sem conta, sem
+        servidor, e com voz brasileira de verdade.
+      */}
+      {kokoroSupports(language) && (
+        <>
+          <div className="tk-overline" style={{ display: "block", margin: "22px 0 8px" }}>
+            {t("voice.neural")}
+          </div>
+
+          {!kokoro ? (
+            <section className="tk-card" style={{ display: "grid", gap: 10 }}>
+              <p className="tk-caption" style={{ lineHeight: 1.5 }}>
+                {t("voice.neuralWhat")}
+              </p>
+              <div className="tk-row">
+                <span className="tk-row-label">{t("ai.local.size")}</span>
+                <span className="tk-row-value">
+                  {t("ai.local.aboutMb", { mb: KOKORO_MB.toLocaleString(language) })}
+                </span>
+              </div>
+
+              {baixando ? (
+                <>
+                  <div className="tk-meter">
+                    <div
+                      className="tk-meter-fill"
+                      style={{
+                        width: `${Math.round((baixando.fraction ?? 0) * 100)}%`,
+                        background: "var(--tk-pri)",
+                      }}
+                    />
+                  </div>
+                  <p className="tk-caption">{baixando.text}</p>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  className="tk-btn tk-btn--primary tk-btn--block"
+                  onClick={() => {
+                    setErro(null);
+                    setBaixando({ fraction: 0, text: t("ai.local.starting") });
+                    void ensureKokoro(setBaixando)
+                      .then(() => setBaixando(null))
+                      .catch((e: unknown) => {
+                        setBaixando(null);
+                        setErro(e instanceof Error ? e.message : String(e));
+                      });
+                  }}
+                >
+                  {t("voice.neuralGet")}
+                </button>
+              )}
+
+              {erro && (
+                <p className="tk-caption" style={{ color: "var(--tk-dang)" }}>
+                  {erro}
+                </p>
+              )}
+            </section>
+          ) : (
+            <div style={{ display: "grid", gap: 6 }}>
+              {vozesBoas.map((v, i) => {
+                const ativa = kokoroVoz === null ? i === 0 : kokoroVoz === v.id;
+                return (
+                  <button
+                    key={v.id}
+                    type="button"
+                    className="tk-option"
+                    data-active={ativa || undefined}
+                    aria-pressed={ativa}
+                    onClick={() => {
+                      setKokoroVoz(v.id);
+                      setKokoroVoice(v.id);
+                      // Toca com o motor de verdade, nao com o do sistema: a
+                      // previa tem que soar como vai soar.
+                      void speak(t("voice.sample"), language);
+                    }}
+                  >
+                    <span className="tk-option-mark" aria-hidden="true">
+                      {ativa ? "●" : "○"}
+                    </span>
+                    <span style={{ flex: 1, minWidth: 0 }}>
+                      <span className="tk-option-title">{v.label}</span>
+                      <span className="tk-option-detail">{t("voice.neuralTag")}</span>
+                    </span>
+                    <span className="tk-voice-play" aria-hidden="true">
+                      ▶
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ---------------------------------------------- ElevenLabs, com chave */}
+
+      {/*
+        A voz que ele pediu pelo nome, e a unica com portugues humano.
+        
+        Aparece depois do Kokoro porque custa cota: 10.000 caracteres por mes no
+        plano gratuito, e uma ficha da Pokedex gasta uns 400. Quem usa o app em
+        ingles fica bem servido pelo Kokoro sem gastar credito nenhum.
+      */}
+      <div className="tk-overline" style={{ display: "block", margin: "22px 0 8px" }}>
+        {t("voice.eleven")}
+      </div>
+
+      <section className="tk-card" style={{ display: "grid", gap: 10 }}>
+        <p className="tk-caption" style={{ lineHeight: 1.5 }}>
+          {t("voice.elevenWhat")}
+        </p>
+
+        <div className="tk-search" style={{ height: 44 }}>
+          <input
+            type="password"
+            autoComplete="off"
+            spellCheck={false}
+            placeholder={tem11 ? "••••••••" : "sk_…"}
+            value={chave11}
+            onChange={(e) => setChave11(e.target.value)}
+            aria-label={t("voice.elevenKey")}
+          />
+        </div>
+
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            type="button"
+            className="tk-btn tk-btn--primary"
+            style={{ flex: 1, height: 44, fontSize: 14 }}
+            disabled={chave11.trim() === ""}
+            onClick={() => {
+              setElevenKey(chave11);
+              setChave11("");
+              setTem11(true);
+            }}
+          >
+            {t("ai.save")}
+          </button>
+          <button
+            type="button"
+            className="tk-btn tk-btn--secondary"
+            style={{ flex: 1, height: 44, fontSize: 14 }}
+            disabled={!tem11}
+            onClick={() => {
+              setElevenKey(null);
+              setTem11(false);
+            }}
+          >
+            {t("ai.clear")}
+          </button>
+        </div>
+
+        {tem11 &&
+          ELEVEN_VOICES.map((v) => (
+            <button
+              key={v.id}
+              type="button"
+              className="tk-option"
+              data-active={voz11 === v.id || undefined}
+              aria-pressed={voz11 === v.id}
+              onClick={() => {
+                setVoz11(v.id);
+                setElevenVoice(v.id);
+                void speak(t("voice.sample"), language);
+              }}
+            >
+              <span className="tk-option-mark" aria-hidden="true">
+                {voz11 === v.id ? "●" : "○"}
+              </span>
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span className="tk-option-title">{v.label}</span>
+                <span className="tk-option-detail">{t("voice.elevenTag")}</span>
+              </span>
+              <span className="tk-voice-play" aria-hidden="true">
+                ▶
+              </span>
+            </button>
+          ))}
+      </section>
+
       {vozes.length === 0 ? (
         <p className="tk-caption" style={{ margin: "14px 2px 0", lineHeight: 1.5 }}>
           {t("voice.none")}
@@ -99,7 +321,7 @@ export function VoiceSettings() {
       ) : (
         <>
           <div className="tk-overline" style={{ display: "block", margin: "22px 0 8px" }}>
-            {t("voice.pick")}
+            {kokoro && kokoroSupports(language) ? t("voice.system") : t("voice.pick")}
           </div>
 
           <div style={{ display: "grid", gap: 6 }}>

@@ -61,6 +61,16 @@ export default defineConfig({
            * porque `globIgnores` la embaixo precisa poder acertar nele.
            */
           webllm: ["@mlc-ai/web-llm"],
+          /*
+           * Mesmo motivo do web-llm: o motor de voz neural e pesado e so e
+           * buscado por quem aperta "Baixar a voz".
+           *
+           * SO `kokoro-js` aqui. O `@huggingface/transformers` e dependencia
+           * dele, nao do app, e com o node_modules estrito do pnpm o Rollup nao
+           * consegue resolver esse nome a partir daqui — dava "Could not resolve
+           * entry module". Listando so a raiz, o grafo dela vem junto sozinho.
+           */
+          kokoro: ["kokoro-js"],
           i18n: [
             "./src/i18n/dict/en.ts",
             "./src/i18n/dict/pt-BR.ts",
@@ -110,7 +120,7 @@ export default defineConfig({
          * a partir dai o navegador o guarda normalmente. Pre-cachear seria
          * cobrar 6 MB de quem deixou a IA desligada — que e o padrao.
          */
-        globIgnores: ["**/webllm*.js"],
+        globIgnores: ["**/webllm*.js", "**/kokoro*.js"],
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         runtimeCaching: [
           {

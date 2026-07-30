@@ -5,3 +5,12 @@ allowBuilds:
   # O postinstall do esbuild baixa o binario nativo da plataforma. Sem isto o
   # Vite nao roda.
   esbuild: true
+  # Os tres abaixo chegam junto com `kokoro-js` -> `@huggingface/transformers`,
+  # e sao todos do caminho de NODE: `onnxruntime-node` compila o runtime nativo,
+  # `sharp` compila processamento de imagem, `protobufjs` gera codigo no
+  # postinstall. O TrainerKit roda o Kokoro no NAVEGADOR (onnxruntime-web, via
+  # WebGPU ou WASM), entao nenhum dos tres e usado — compila-los seria minutos
+  # de build e centenas de MB pra nada.
+  onnxruntime-node: false
+  protobufjs: false
+  sharp: false
