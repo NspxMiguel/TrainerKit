@@ -3306,3 +3306,167 @@
 .tk-teamrow[data-have] .tk-teamrow-tag {
   color: var(--tk-succ);
 }
+
+/* ================================================================ Pokedex */
+
+/*
+ * Modo Pokedex.
+ *
+ * A ideia do Miguel: um aparelho que voce aponta, que identifica e que FALA. O
+ * desenho segue o da serie sem copiar nada dela: a lente redonda em cima com a
+ * arte dentro, a luz que pisca enquanto le, e a ficha em texto embaixo.
+ *
+ * A cor vem do tipo do bicho que esta na lente, entao o aparelho "muda de
+ * humor" a cada especie — e informacao, nao enfeite.
+ */
+.tk-dex {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--tk-screen);
+  max-width: var(--tk-container);
+  margin: 0 auto;
+  padding: max(var(--tk-safe-top), calc(env(safe-area-inset-top) + var(--tk-s3)))
+    var(--tk-gutter) calc(var(--tk-s8) + max(var(--tk-s5), env(safe-area-inset-bottom)));
+  animation: tk-rise 0.26s var(--tk-ease-glass) both;
+}
+
+/* A luz de estado. Verde parada, e pulsando enquanto ele le ou pensa. */
+.tk-dex-lamp {
+  align-self: center;
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--tk-succ);
+  box-shadow: 0 0 10px var(--tk-succ);
+}
+
+.tk-dex-lamp[data-busy] {
+  background: var(--tk-warn);
+  box-shadow: 0 0 10px var(--tk-warn);
+  animation: tk-lamp 0.9s linear infinite;
+}
+
+@keyframes tk-lamp {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tk-dex-lamp[data-busy] {
+    animation: none;
+  }
+}
+
+/*
+ * A lente.
+ *
+ * Circulo com a cor do tipo por tras da arte. O `radial-gradient` no `::before`
+ * e o que da a sensacao de vidro iluminado por dentro — sem ele o sprite fica
+ * colado num circulo chapado.
+ */
+.tk-dex-lens {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 200px;
+  margin-top: var(--tk-s4);
+  border-radius: var(--tk-r-card);
+  overflow: hidden;
+  border: 1px solid var(--tk-line2);
+  background: var(--tk-surf);
+}
+
+.tk-dex-lens::before {
+  content: "";
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--tk-dex-type, var(--tk-pri)) 42%, transparent),
+    transparent 68%
+  );
+}
+
+.tk-dex-art {
+  position: relative;
+  padding: 0;
+  border: 0;
+  background: none;
+  line-height: 0;
+  animation: tk-dex-in 0.42s var(--tk-ease-glass) both;
+}
+
+/* A arte ENTRA na lente. E o momento em que o aparelho reconheceu algo, e o
+   unico lugar do app onde uma animacao de entrada carrega significado. */
+@keyframes tk-dex-in {
+  from {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tk-dex-art {
+    animation: none;
+  }
+}
+
+.tk-dex-empty {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  border-radius: 999px;
+  border: 1px dashed var(--tk-line2);
+  color: var(--tk-txt4);
+}
+
+.tk-dex-name {
+  font: 800 30px/1.1 var(--tk-font);
+  letter-spacing: -0.03em;
+  margin-top: var(--tk-s4);
+}
+
+.tk-dex-sub {
+  font: 500 12px var(--tk-mono);
+  color: var(--tk-txt3);
+  margin-top: 4px;
+}
+
+/*
+ * A ficha, uma frase por linha.
+ *
+ * Monoespacada de propósito: e a leitura de um aparelho, e a fonte diz isso
+ * antes de qualquer palavra. Uma frase por paragrafo porque e assim que a voz
+ * entrega — o que se le e o que se ouve, na mesma ordem.
+ */
+.tk-dex-entry {
+  display: grid;
+  gap: 8px;
+}
+
+.tk-dex-entry p {
+  /* `margin: 0` explicito: o `gap` do grid ja da o respiro, e a margem padrao do
+     `<p>` somava a ele — as frases ficavam com o dobro de espaco entre si. */
+  margin: 0;
+  font: 400 13px/1.5 var(--tk-mono);
+  color: var(--tk-txt2);
+}
+
+.tk-dex-nodata {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: var(--tk-r-input);
+  background: var(--tk-dang-soft);
+  border: 1px solid var(--tk-dang-line);
+  color: var(--tk-dang-fg);
+  font-family: var(--tk-mono);
+}
