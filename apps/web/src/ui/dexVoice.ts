@@ -417,7 +417,18 @@ export function lastTtsError(): string | null {
  * A ordem importa: tenta a Groq primeiro e SÓ cai pro sistema em falha. O
  * contrario (tocar a do sistema enquanto baixa a boa) daria duas vozes.
  */
-export async function speak(text: string, language: string): Promise<void> {
+export async function speak(
+  text: string,
+  language: string,
+  /**
+   * `true` só para texto que o APP escreveu — a ficha da Pokédex.
+   *
+   * Liga o caminho cacheável no CDN (ver `edgeTts`), o que faz a mesma ficha
+   * custar zero a partir da segunda pessoa que a ouvir. Resposta de IA nunca
+   * passa `true`: ela pode citar a coleção de quem perguntou.
+   */
+  compartilhavel = false,
+): Promise<void> {
   stopSpeaking();
 
   /*
@@ -438,7 +449,7 @@ export async function speak(text: string, language: string): Promise<void> {
     const [motor, ...resto] = escolha.split(":");
     const id = resto.join(":");
     try {
-      const blob = await porMotor(motor ?? "", id, text, language);
+      const blob = await porMotor(motor ?? "", id, text, language, compartilhavel);
       if (blob) {
         await tocarBlob(blob);
         ultimoErroTts = null;
@@ -478,7 +489,7 @@ export async function speak(text: string, language: string): Promise<void> {
   if (edgeSupports(language)) {
     try {
       const blob = await comCache("edge", getEdgeVoice(language), text, () =>
-        edgeSynthesize(text, language),
+        edgeSynthesize(text, language, undefined, compartilhavel),
       );
       await tocarBlob(blob);
       ultimoErroTts = null;
@@ -500,12 +511,13 @@ async function porMotor(
   id: string,
   texto: string,
   idioma: string,
+  compartilhavel = false,
 ): Promise<Blob | null> {
   switch (motor) {
     case "edge":
       // `id` e so PREFERENCIA: `edgeSynthesize` descarta o que nao for do idioma.
       return comCache("edge", getEdgeVoice(idioma, id), texto, () =>
-        edgeSynthesize(texto, idioma, id),
+        edgeSynthesize(texto, idioma, id, compartilhavel),
       );
     case "kokoro":
       return kokoroSynthesize(texto, id);

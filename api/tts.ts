@@ -242,7 +242,7 @@ interface Res {
 
 export default async function handler(req: Req, res: Res): Promise<void> {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   res.setHeader("Access-Control-Max-Age", "86400");
 
@@ -250,8 +250,30 @@ export default async function handler(req: Req, res: Res): Promise<void> {
     res.status(204).end();
     return;
   }
-  if (req.method !== "POST") {
-    res.status(405).json({ error: "use POST" });
+  /*
+   * GET = a MESMA sintese, mas guardavel no CDN.
+   *
+   * O Miguel: "tem como mandar as vozes pra um servidor? ai n precisa ficar o
+   * tempo todo gerando dnv (…) ele fica tipo em cache apos alguem usar aquilo".
+   *
+   * O cache que ja existia (`cacheAudio.ts`) e por APARELHO: so ajuda quem
+   * reouve a mesma ficha. O dele e outro e melhor — a ficha do Blissey em
+   * portugues e IDENTICA pra todo mundo, entao quem ouvir primeiro deveria pagar
+   * pelos outros.
+   *
+   * Nao precisa de banco nem de storage: basta a resposta ser cacheavel, e pra
+   * isso ela precisa ser um GET com URL estavel. Mesmo texto + mesma voz = mesma
+   * URL = o CDN da Vercel serve sem nem acordar a funcao.
+   *
+   * ⚠️ SO PARA TEXTO DO APP. Quem chama decide, e o cliente so usa este caminho
+   * pra ficha da Pokedex — texto que o proprio app escreveu sobre uma especie.
+   * Resposta de IA nunca vem por aqui: ela pode citar a colecao de quem
+   * perguntou, e dado de usuario em URL fica em log de CDN, em historico e em
+   * qualquer proxy no caminho. Aquilo continua no POST, sem cache.
+   */
+  const ehGet = req.method === "GET";
+  if (!ehGet && req.method !== "POST") {
+    res.status(405).json({ error: "use GET ou POST" });
     return;
   }
 
@@ -262,13 +284,21 @@ export default async function handler(req: Req, res: Res): Promise<void> {
     return;
   }
 
-  const corpo = (typeof req.body === "string" ? JSON.parse(req.body) : req.body) as {
-    text?: unknown;
-    voice?: unknown;
-  };
+  let texto = "";
+  let voz = "";
 
-  const texto = typeof corpo?.text === "string" ? corpo.text.trim() : "";
-  const voz = typeof corpo?.voice === "string" ? corpo.voice : "";
+  if (ehGet) {
+    const url = new URL(req.url ?? "", "http://localhost");
+    texto = (url.searchParams.get("t") ?? "").trim();
+    voz = url.searchParams.get("v") ?? "";
+  } else {
+    const corpo = (typeof req.body === "string" ? JSON.parse(req.body) : req.body) as {
+      text?: unknown;
+      voice?: unknown;
+    };
+    texto = typeof corpo?.text === "string" ? corpo.text.trim() : "";
+    voz = typeof corpo?.voice === "string" ? corpo.voice : "";
+  }
 
   if (texto === "") {
     res.status(400).json({ error: "text ausente" });
@@ -286,9 +316,21 @@ export default async function handler(req: Req, res: Res): Promise<void> {
   try {
     const mp3 = await sintetizar(texto, voz);
     res.setHeader("Content-Type", "audio/mpeg");
-    // Cache curto no CDN: a mesma ficha lida duas vezes nao precisa de duas
-    // idas ao servico. `s-maxage` so vale pro CDN, e nao guarda nada no aparelho.
-    res.setHeader("Cache-Control", "public, s-maxage=3600");
+    /*
+     * Um ANO no CDN pro caminho GET, e nada pro POST.
+     *
+     * `immutable` porque a chave e o proprio conteudo: mesma voz + mesmo texto
+     * produzem o mesmo audio, entao a resposta nunca "muda" — se o texto mudar,
+     * a URL muda junto e vira outra entrada.
+     *
+     * `s-maxage` so instrui o CDN; o aparelho nao guarda nada por aqui (disso ja
+     * cuida o `cacheAudio.ts`, que e local). E o POST fica `no-store` de
+     * propósito: e por ele que passa a resposta de IA.
+     */
+    res.setHeader(
+      "Cache-Control",
+      ehGet ? "public, s-maxage=31536000, max-age=0, immutable" : "no-store",
+    );
     res.status(200).send(mp3);
   } catch (e) {
     // O erro sobe legivel: quando isto quebrar, quem for depurar precisa saber

@@ -236,7 +236,12 @@ export function DexMode({ data, onClose, onOpenSpecies }: Props) {
   const anunciar = async (linhas: string[]) => {
     if (!voz || !speechSupported()) return;
     await beep();
-    await speak(linhas.join(" "), language);
+    /*
+      `true` = pode ir pro cache compartilhado do CDN.
+      A ficha do Blissey em portugues e IDENTICA pra todo mundo que abrir o mesmo
+      bicho no mesmo idioma — entao quem ouvir primeiro paga pelos outros.
+    */
+    await speak(linhas.join(" "), language, true);
   };
 
   const escolher = (s: DatasetSpecies) => {
@@ -351,6 +356,11 @@ export function DexMode({ data, onClose, onOpenSpecies }: Props) {
         { temperature: 0.2, maxTokens: 260, pergunta: q },
       );
       setResposta(texto);
+      /*
+        SEM `true` aqui, de propósito: esta e a resposta da IA, e ela pode citar
+        a colecao de quem perguntou. Dado de usuario nao vai pra URL, porque URL
+        de cache fica em log de CDN e em qualquer proxy do caminho.
+      */
       if (voz && speechSupported()) void speak(texto, language);
     } catch (e) {
       setErro(mensagemDeErro(e, t));
