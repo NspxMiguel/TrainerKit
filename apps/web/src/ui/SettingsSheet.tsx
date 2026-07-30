@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from "react";
+import { useFolha } from "./folha.ts";
 import { createPortal } from "react-dom";
 
 import { useT } from "../i18n/t.ts";
@@ -23,6 +24,11 @@ interface Props {
  * ganha a tela inteira quando e a vez dele.
  */
 export function SettingsSheet({ title, onClose, children }: Props) {
+  /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
+     caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
+     escape volta a piscar, e so aquele. */
+  const { saindo, fechar } = useFolha(onClose);
+
   const { t } = useT();
 
   useEffect(() => {
@@ -35,14 +41,14 @@ export function SettingsSheet({ title, onClose, children }: Props) {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") fechar();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [fechar]);
 
   return createPortal(
-    <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={title}>
+    <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={title} data-saindo={saindo || undefined}>
       {/*
         A volta EM CIMA, o titulo alinhado com o resto do app.
         
@@ -60,7 +66,7 @@ export function SettingsSheet({ title, onClose, children }: Props) {
         <button
           type="button"
           className="tk-sheet-close"
-          onClick={onClose}
+          onClick={fechar}
           aria-label={t("common.back")}
         >
           ‹

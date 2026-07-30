@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useFolha } from "../ui/folha.ts";
 import { createPortal } from "react-dom";
 
 import {
@@ -53,6 +54,11 @@ const SUGESTOES = 6;
  * e a tela diz qual e a conta.
  */
 export function TeamBuilder({ data, onClose, onPickSpecies }: Props) {
+  /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
+     caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
+     escape volta a piscar, e so aquele. */
+  const { saindo, fechar } = useFolha(onClose);
+
   const { t } = useT();
   const language = useLanguage();
   const { items } = useCollection();
@@ -75,11 +81,11 @@ export function TeamBuilder({ data, onClose, onPickSpecies }: Props) {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") fechar();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [fechar]);
 
   const especiePor = useMemo(() => {
     const m = new Map<string, DatasetSpecies>();
@@ -260,12 +266,12 @@ export function TeamBuilder({ data, onClose, onPickSpecies }: Props) {
   const semAlvo = goal === "raid" && alvos.length === 0;
 
   return createPortal(
-    <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={t("team.title")}>
+    <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={t("team.title")} data-saindo={saindo || undefined}>
       <header className="tk-sheet-head">
         <button
           type="button"
           className="tk-sheet-close"
-          onClick={onClose}
+          onClick={fechar}
           aria-label={t("common.back")}
         >
           ‹
@@ -520,7 +526,7 @@ export function TeamBuilder({ data, onClose, onPickSpecies }: Props) {
         type="button"
         className="tk-btn tk-btn--secondary tk-btn--block"
         style={{ marginTop: 22 }}
-        onClick={onClose}
+        onClick={fechar}
       >
         {t("common.done")}
       </button>

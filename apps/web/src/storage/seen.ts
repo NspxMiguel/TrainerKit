@@ -66,6 +66,20 @@ export function seenCount(): number {
   return vistos.size;
 }
 
+/**
+ * Os ids vistos, pra quem precisa CRUZAR com outra fonte.
+ *
+ * O aparelho mostrava "VISTOS: 0 · CAPTURADOS: 6": este registro so sabe de
+ * quem foi identificado no Modo Pokedex, e a colecao mora em IndexedDB. Contar
+ * os dois separados nao junta — e por isso `seenCount()` sozinho nao serve la.
+ *
+ * Devolve uma copia: entregar o `Set` interno deixaria qualquer chamador mexer
+ * no registro sem passar por `markSeen`, e sem avisar ninguem.
+ */
+export function seenIds(): ReadonlySet<string> {
+  return new Set(vistos);
+}
+
 export function useSeenCount(): number {
   return useSyncExternalStore(
     (fn) => {

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useFolha } from "../ui/folha.ts";
 import { createPortal } from "react-dom";
 
 import {
@@ -87,6 +88,11 @@ function StatBar({ label, value }: { label: string; value: number }) {
 }
 
 export function SpeciesDetail({ species, data, onClose, onPickSpecies, owned }: Props) {
+  /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
+     caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
+     escape volta a piscar, e so aquele. */
+  const { saindo, fechar } = useFolha(onClose);
+
   const [calcOpen, setCalcOpen] = useState(false);
   const [raidOpen, setRaidOpen] = useState(false);
   const [context, setContext] = useState<Context>("general");
@@ -107,11 +113,11 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies, owned }: 
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") fechar();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [fechar]);
 
   const cpAt = (level: number) =>
     computeCPAtLevel(data.cpm, species.baseStats, PERFECT, level);
@@ -261,7 +267,7 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies, owned }: 
     .filter((s): s is DatasetSpecies => s !== undefined);
 
   return createPortal(
-    <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={species.name}>
+    <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={species.name} data-saindo={saindo || undefined}>
       {/*
         Sem titulo no cabecalho.
 
@@ -277,7 +283,7 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies, owned }: 
         <button
           type="button"
           className="tk-sheet-close"
-          onClick={onClose}
+          onClick={fechar}
           aria-label={t("common.back")}
         >
           ‹

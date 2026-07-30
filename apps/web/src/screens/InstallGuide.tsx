@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useFolha } from "../ui/folha.ts";
 import { createPortal } from "react-dom";
 
 import { useT, type Key } from "../i18n/t.ts";
@@ -96,6 +97,11 @@ function SafariBar({ label }: { label: string }) {
 
 /** Passo a passo de instalação, separado por sistema. */
 export function InstallGuide({ platform, promptInstall, onClose }: Props) {
+  /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
+     caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
+     escape volta a piscar, e so aquele. */
+  const { saindo, fechar } = useFolha(onClose);
+
   useEffect(() => {
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -106,23 +112,23 @@ export function InstallGuide({ platform, promptInstall, onClose }: Props) {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") fechar();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [fechar]);
 
   const { t } = useT();
   const guide = STEPS[platform];
 
   return (
     createPortal(
-      <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={t(guide.titleKey)}>
+      <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={t(guide.titleKey)} data-saindo={saindo || undefined}>
         <header className="tk-sheet-head">
           <button
             type="button"
             className="tk-sheet-close"
-            onClick={onClose}
+            onClick={fechar}
             aria-label={t("common.close")}
           >
             ‹
@@ -162,7 +168,7 @@ export function InstallGuide({ platform, promptInstall, onClose }: Props) {
             style={{ marginTop: 20 }}
             onClick={() => {
               void promptInstall().then((accepted) => {
-                if (accepted) onClose();
+                if (accepted) fechar();
               });
             }}
           >
@@ -174,7 +180,7 @@ export function InstallGuide({ platform, promptInstall, onClose }: Props) {
           type="button"
           className="tk-btn tk-btn--secondary tk-btn--block"
           style={{ marginTop: 10 }}
-          onClick={onClose}
+          onClick={fechar}
         >
           {t("common.close")}
         </button>
