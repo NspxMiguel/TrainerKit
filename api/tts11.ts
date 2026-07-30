@@ -60,12 +60,28 @@ const VOZES = new Set([
   "MZxV5lN3cv7hi1376O0m", // Ana Dias — formal, brasileira
 
   // Biblioteca padrão (inglês), pra quem usa o app em outro idioma.
-  "21m00Tcm4TlvDq8ikWAM", // Rachel
-  "AZnzlk1XvdvUeBnXmlld", // Domi
-  "EXAVITQu4vr4xnSDxMaL", // Sarah
-  "TxGEqnHWrfWFTfGW9XjX", // Josh
-  "VR6AewLTigWG4xSOukaG", // Arnold
-  "pNInz6obpgDQGcFmaJgB", // Adam
+  /*
+   * ⚠️ Rachel, Domi, Josh e Arnold SAIRAM: nao existem nesta conta. Eu os havia
+   * escrito de memoria, e pedi-los falhava — e a falha caia calada noutra voz,
+   * fazendo o rotulo mentir. Estes vieram de `/v2/voices`.
+   */
+  "EXAVITQu4vr4xnSDxMaL", // Sarah, feminina, americana
+  "pNInz6obpgDQGcFmaJgB", // Adam, masculino, americano
+  "hpp4J3VqNfWAUOO0d1Us", // Bella
+  "CwhRBWXzGAHq8TQ4Fs17", // Roger
+  "FGY2WhTYpPnrIDTdsKH5", // Laura
+  "IKne3meq5aSn9XLyUdCD", // Charlie
+  "JBFqnCBsd6RMkjVDRZzb", // George
+  "N2lVS1w4EtoT3dr4eOWO", // Callum
+  "SAz9YHcvj6GT2YYXdXww", // River
+  "TX3LPaxmHKxFdv7VOQHJ", // Liam
+  "Xb7hH8MSUJpSbSDYk0k2", // Alice
+  "XrExE9yKIg1WjnnlVkGX", // Matilda
+  "cgSgspJ2msm6clMCkdW9", // Jessica
+  "cjVigY5qzO86Huf0OWal", // Eric
+  "nPczCjzI2devNBz1zQrb", // Brian
+  "onwK4e9ZLuTAKqWW03F9", // Daniel
+  "pFZP5JQG7iQjIQuC4Bku", // Lily
 ]);
 
 /** Teto de texto. Curto de propósito: ver a conta no topo. */

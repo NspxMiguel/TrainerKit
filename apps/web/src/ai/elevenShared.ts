@@ -22,15 +22,82 @@ export const ELEVEN_PROXY: string = import.meta.env.VITE_TK_TTS11_PROXY ?? PADRA
 const LIGADA_KEY = "tk:dex-11-compartilhada";
 const VOZ_KEY = "tk:dex-11-voz";
 
-/** As mesmas da allowlist da funcao: pedir outra volta 400. */
-export const ELEVEN_SHARED_VOICES = [
-  { id: "EXAVITQu4vr4xnSDxMaL", label: "Sarah" },
-  { id: "21m00Tcm4TlvDq8ikWAM", label: "Rachel" },
-  { id: "AZnzlk1XvdvUeBnXmlld", label: "Domi" },
-  { id: "pNInz6obpgDQGcFmaJgB", label: "Adam" },
-  { id: "TxGEqnHWrfWFTfGW9XjX", label: "Josh" },
-  { id: "VR6AewLTigWG4xSOukaG", label: "Arnold" },
-] as const;
+/**
+ * As vozes REAIS da conta, por idioma — buscadas na API, nao escritas de cabeca.
+ *
+ * ⚠️ O QUE ESTAVA AQUI ERA INVENTADO, e o Miguel pegou pelo ouvido: "os nomes
+ * tao errados kkk, sarah ta com voz de homem".
+ *
+ * Eu tinha cravado seis pares nome/id de memoria. Conferindo contra
+ * `/v2/voices`: QUATRO DOS SEIS IDS NAO EXISTEM na conta (Rachel, Domi, Josh,
+ * Arnold). So Sarah e Adam eram reais.
+ *
+ * E o efeito nao foi "essa voz nao funciona" — foi pior. Pedir um id inexistente
+ * falhava, a cadeia de voz caia calada pra proxima opcao, e saia OUTRA voz com o
+ * rotulo da primeira. Ele tocou "Sarah" e ouviu um homem porque quem falou foi o
+ * Antonio, do motor neural. O rotulo mentia por causa do fallback silencioso.
+ *
+ * Agora os ids, os nomes e o genero vem da API, e a lista e POR IDIOMA: cada voz
+ * so aparece onde a ElevenLabs declara `verified_languages`. Coreano e russo
+ * ficam sem — nenhuma voz da conta cobre esses dois, e inventar seria repetir o
+ * erro.
+ */
+export const ELEVEN_VOICES: Record<
+  string,
+  ReadonlyArray<{ id: string; label: string; nativa: boolean }>
+> = {
+  // Adriano e a UNICA com sotaque brasileiro — veio da Voice Library.
+  "pt-BR": [
+    { id: "hwnuNyWkl9DjdTFykrN6", label: "Adriano", nativa: true },
+    { id: "IKne3meq5aSn9XLyUdCD", label: "Charlie", nativa: false },
+    { id: "nPczCjzI2devNBz1zQrb", label: "Brian", nativa: false },
+    { id: "cjVigY5qzO86Huf0OWal", label: "Eric", nativa: false },
+  ],
+  en: [
+    { id: "EXAVITQu4vr4xnSDxMaL", label: "Sarah", nativa: true },
+    { id: "pNInz6obpgDQGcFmaJgB", label: "Adam", nativa: true },
+    { id: "hpp4J3VqNfWAUOO0d1Us", label: "Bella", nativa: true },
+    { id: "JBFqnCBsd6RMkjVDRZzb", label: "George", nativa: true },
+    { id: "Xb7hH8MSUJpSbSDYk0k2", label: "Alice", nativa: true },
+    { id: "cgSgspJ2msm6clMCkdW9", label: "Jessica", nativa: true },
+  ],
+  es: [
+    { id: "CwhRBWXzGAHq8TQ4Fs17", label: "Roger", nativa: false },
+    { id: "XrExE9yKIg1WjnnlVkGX", label: "Matilda", nativa: false },
+    { id: "cjVigY5qzO86Huf0OWal", label: "Eric", nativa: false },
+  ],
+  "es-419": [
+    { id: "CwhRBWXzGAHq8TQ4Fs17", label: "Roger", nativa: false },
+    { id: "XrExE9yKIg1WjnnlVkGX", label: "Matilda", nativa: false },
+    { id: "cjVigY5qzO86Huf0OWal", label: "Eric", nativa: false },
+  ],
+  fr: [
+    { id: "FGY2WhTYpPnrIDTdsKH5", label: "Laura", nativa: false },
+    { id: "Xb7hH8MSUJpSbSDYk0k2", label: "Alice", nativa: false },
+    { id: "N2lVS1w4EtoT3dr4eOWO", label: "Callum", nativa: false },
+  ],
+  de: [
+    { id: "pFZP5JQG7iQjIQuC4Bku", label: "Lily", nativa: false },
+    { id: "onwK4e9ZLuTAKqWW03F9", label: "Daniel", nativa: false },
+    { id: "TX3LPaxmHKxFdv7VOQHJ", label: "Liam", nativa: false },
+  ],
+  it: [
+    { id: "SAz9YHcvj6GT2YYXdXww", label: "River", nativa: false },
+    { id: "pFZP5JQG7iQjIQuC4Bku", label: "Lily", nativa: false },
+    { id: "XrExE9yKIg1WjnnlVkGX", label: "Matilda", nativa: false },
+  ],
+  ja: [
+    { id: "JBFqnCBsd6RMkjVDRZzb", label: "George", nativa: false },
+    { id: "cgSgspJ2msm6clMCkdW9", label: "Jessica", nativa: false },
+  ],
+  // ko e ru: nenhuma voz da conta declara esses idiomas. Lista vazia e a
+  // resposta honesta — o motor neural cobre os dois com voz nativa.
+  ko: [],
+  ru: [],
+};
+
+/** Compatibilidade: o allowlist da funcao aceita qualquer id que apareca acima. */
+export const ELEVEN_SHARED_VOICES = ELEVEN_VOICES.en!;
 
 /** Teto da funcao. Cortar aqui evita um 413 previsivel. */
 export const ELEVEN_MAX_CHARS = 400;
@@ -61,10 +128,48 @@ export function setElevenSharedOn(on: boolean): void {
   store.set(LIGADA_KEY, on ? "1" : "0");
 }
 
-export function getSharedVoice(): string {
+/**
+ * As vozes deste idioma — e o INGLES como saida quando ele nao tem nenhuma.
+ *
+ * O Miguel: "coloca opção de usar em ingles quando nao disponivel na sua lingua.
+ * pra todos os idiomas tem q ve ne pae".
+ *
+ * Coreano e russo nao tem NENHUMA voz da ElevenLabs nesta conta. Sem esta saida,
+ * quem usa o app nessas duas linguas simplesmente nao veria a opcao existir —
+ * e "nao existe" e uma resposta pior que "existe, com sotaque ingles", porque a
+ * segunda a pessoa pode escutar e decidir sozinha.
+ *
+ * A regra continua a mesma do motor neural: a voz so e usada se estiver na lista
+ * de ALGUM idioma conhecido. O que muda e que a lista de recurso e o ingles em
+ * vez de vazio.
+ */
+export function vozesDoIdioma(
+  idioma: string,
+): ReadonlyArray<{ id: string; label: string; nativa: boolean }> {
+  const proprias = ELEVEN_VOICES[idioma] ?? [];
+  if (proprias.length > 0) return proprias;
+
+  /*
+   * ⚠️ Ao cair pro ingles, `nativa` vira FALSO — sempre.
+   *
+   * As entradas do ingles sao `nativa: true`, o que e verdade EM INGLES. Sem
+   * este mapa elas chegavam em coreano ainda marcadas como nativas, e a tela
+   * mostrava a Sarah debaixo de "falam o seu idioma" pra quem usa o app em
+   * coreano. Foi o teste dos idiomas que pegou, nao eu.
+   *
+   * A saida existe pra dar opcao a quem nao tem nenhuma, nao pra mentir sobre
+   * o sotaque dela.
+   */
+  return (ELEVEN_VOICES.en ?? []).map((v) => ({ ...v, nativa: false }));
+}
+
+export function getSharedVoice(idioma = "en"): string {
+  const lista = vozesDoIdioma(idioma);
   const salva = store.get(VOZ_KEY);
-  if (salva && ELEVEN_SHARED_VOICES.some((v) => v.id === salva)) return salva;
-  return ELEVEN_SHARED_VOICES[0].id;
+  // A escolha so vale se for deste idioma: preferencia de outra lingua e
+  // exatamente como uma voz acaba falando o idioma errado.
+  if (salva && lista.some((v) => v.id === salva)) return salva;
+  return lista[0]?.id ?? "";
 }
 
 export function setSharedVoice(id: string): void {
@@ -99,8 +204,9 @@ export async function creditosRestantes(signal?: AbortSignal): Promise<number | 
  */
 export async function elevenSharedSynthesize(
   text: string,
-  /** Voz escolhida na tela. Só vale se estiver no allowlist (ver `getSharedVoice`). */
+  /** Voz escolhida na tela. Só vale se for do idioma — ver `getSharedVoice`. */
   preferida?: string,
+  idioma = "en",
   signal?: AbortSignal,
 ): Promise<Blob> {
   const res = await fetch(ELEVEN_PROXY, {
@@ -109,9 +215,9 @@ export async function elevenSharedSynthesize(
     body: JSON.stringify({
       text: text.slice(0, ELEVEN_MAX_CHARS),
       voice:
-        preferida && ELEVEN_SHARED_VOICES.some((v) => v.id === preferida)
+        preferida && vozesDoIdioma(idioma).some((v) => v.id === preferida)
           ? preferida
-          : getSharedVoice(),
+          : getSharedVoice(idioma),
     }),
     ...(signal ? { signal } : {}),
   });

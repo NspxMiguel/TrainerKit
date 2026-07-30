@@ -1,5 +1,5 @@
 import { EDGE_VOICES } from "./edgeTts.ts";
-import { ELEVEN_SHARED_VOICES } from "./elevenShared.ts";
+import { vozesDoIdioma } from "./elevenShared.ts";
 import { KOKORO_VOICES } from "./kokoro.ts";
 
 /**
@@ -95,15 +95,15 @@ function dasEleven(idioma: string): Voz[] {
    * isto, elas apareciam como recomendadas pros dez idiomas por igual — que é
    * o "voz brasileira falando japa" que ele mandou eu não fazer, só ao contrário.
    */
-  const ehIngles = idioma.split("-")[0] === "en";
-  return ELEVEN_SHARED_VOICES.map((v) => ({
+  return vozesDoIdioma(idioma).map((v) => ({
     chave: `eleven-share:${v.id}`,
     motor: "eleven-share" as const,
     id: v.id,
     nome: v.label,
-    sotaque: "en",
+    sotaque: v.nativa ? idioma : "en",
     previa: null,
-    nativa: ehIngles,
+    // `nativa` vem da tabela, voz a voz: so o Adriano e brasileiro de verdade.
+    nativa: v.nativa,
     online: true,
     gastaCota: true,
     precisaBaixar: false,
