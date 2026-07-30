@@ -71,7 +71,19 @@ interface Mensagem {
   content: string;
 }
 
-export const config = { runtime: "nodejs" };
+/*
+ * `edge`, nao `nodejs`.
+ *
+ * Eu escrevi o handler no formato web — `(req: Request) => Response` — e
+ * declarei runtime `nodejs`, que espera `(req, res)` e so termina quando alguem
+ * chama `res.end()`. Ninguem chamava: a funcao pendurava ate o teto e devolvia
+ * FUNCTION_INVOCATION_TIMEOUT, com 504 em toda chamada. So apareceu ao bater no
+ * endereco publicado.
+ *
+ * `edge` e o runtime cujo contrato E este, e ainda cai melhor pra um proxy fino:
+ * comeca em milissegundos e roda perto de quem chamou.
+ */
+export const config = { runtime: "edge" };
 
 export default async function handler(req: Request): Promise<Response> {
   const json = (corpo: unknown, status: number) =>

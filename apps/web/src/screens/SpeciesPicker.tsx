@@ -1,18 +1,18 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 
-import type { DatasetSpecies } from "../data/useDataset.ts";
+import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
 import { useT } from "../i18n/t.ts";
 import { SpeciesBrowser } from "../ui/SpeciesBrowser.tsx";
 
 interface Props {
-  species: DatasetSpecies[];
+  data: Dataset;
   onPick: (s: DatasetSpecies) => void;
   onClose: () => void;
 }
 
 /** Primeiro passo do cadastro: qual especie. Reusa a mesma busca da Pokedex. */
-export function SpeciesPicker({ species, onPick, onClose }: Props) {
+export function SpeciesPicker({ data, onPick, onClose }: Props) {
   const { t } = useT();
   // Trava o scroll do fundo enquanto a folha esta aberta.
   useEffect(() => {
@@ -43,7 +43,7 @@ export function SpeciesPicker({ species, onPick, onClose }: Props) {
         <h2 className="tk-sheet-title">{t("pokedex.whichPokemon")}</h2>
       </header>
 
-      <SpeciesBrowser species={species} onPick={onPick} />
+      <SpeciesBrowser data={data} onPick={onPick} simple />
     </div>,
     document.body,
   );

@@ -46,3 +46,8 @@ packages/dataset/raw/
 # segundos, entao versionar so traria o incomodo de um diff de 1 MB a cada
 # atualizacao do jogo.
 apps/web/public/dataset/
+.vercel
+
+# Vinculo local do projeto Vercel (id do projeto e da org). Nao e segredo, mas e
+# especifico da maquina e nao serve pra mais ninguem.
+.vercel
