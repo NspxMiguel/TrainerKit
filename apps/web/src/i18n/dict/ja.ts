@@ -72,6 +72,8 @@ export const JA: Dict = {
   "install.why.iosImportant": "Safari は7日放置でデータを消します。追加すれば止まります。",
   "install.now": "今すぐインストール",
   "pokedex.title": "ポケデックス",
+  "pokedex.all": "すべて",
+  "pokedex.mine": "手持ち",
   "filter.sortBy": "並び替え",
   "filter.filterBy": "絞り込み",
   "filter.sort.dex": "図鑑番号",

@@ -72,6 +72,8 @@ export const FR: Dict = {
   "install.why.iosImportant": "Safari efface les données après 7 jours d'inactivité. Installé, il arrête.",
   "install.now": "Installer maintenant",
   "pokedex.title": "Pokédex",
+  "pokedex.all": "Tous",
+  "pokedex.mine": "Les miens",
   "filter.sortBy": "Trier par",
   "filter.filterBy": "Filtrer",
   "filter.sort.dex": "Numéro",

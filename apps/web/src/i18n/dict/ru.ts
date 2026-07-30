@@ -72,6 +72,8 @@ export const RU: Dict = {
   "install.why.iosImportant": "Safari стирает данные после 7 дней простоя. Установленное — нет.",
   "install.now": "Установить сейчас",
   "pokedex.title": "Покедекс",
+  "pokedex.all": "Все",
+  "pokedex.mine": "Мои",
   "filter.sortBy": "Сортировка",
   "filter.filterBy": "Фильтр",
   "filter.sort.dex": "Номер",

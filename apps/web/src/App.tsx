@@ -15,7 +15,17 @@ import { SpriteDownloadPanel, SpriteDownloadStrip } from "./ui/SpriteDownload.ts
 import { UpdateBanner } from "./ui/UpdateBanner.tsx";
 import { useTabBarMinimize } from "./ui/useTabBarMinimize.ts";
 
-export type Tab = "inicio" | "pokedex" | "colecao" | "ajustes";
+/*
+ * Tres abas, nao quatro.
+ *
+ * A Colecao virou um modo DENTRO da Pokedex ("Todos" / "Meus"). Ver a nota em
+ * `PokedexScreen`: as duas abas respondiam a mesma pergunta, e a Pokedex do jogo
+ * mostra visto e capturado no mesmo lugar.
+ *
+ * `"colecao"` sai do tipo de propósito: assim o compilador aponta qualquer lugar
+ * que ainda tente navegar pra ela, em vez de a navegacao falhar calada.
+ */
+export type Tab = "inicio" | "pokedex" | "ajustes";
 
 /**
  * Com que pergunta a pessoa chegou na Pokedex.
@@ -35,7 +45,6 @@ const TABS: ReadonlyArray<{
   // Consulta pura, sem cadastro: nem todo mundo quer catalogar a colecao, as
   // vezes a pergunta e so "esse Pokemon presta?".
   { id: "pokedex", labelKey: "nav.pokedex", Icon: IconSearch },
-  { id: "colecao", labelKey: "nav.collection", Icon: IconGrid },
   { id: "ajustes", labelKey: "nav.settings", Icon: IconSliders },
 ];
 
@@ -62,7 +71,15 @@ export function App() {
 
   const species = dataset.status === "ready" ? dataset.data.species : [];
 
-  const visibleTabs = TABS.filter((x) => setup.mode === "colecao" || x.id !== "colecao");
+  /*
+   * As tres abas sempre aparecem.
+   *
+   * Antes a aba Colecao era escondida no modo consulta (`setup.mode !==
+   * "colecao"`). Ela nao existe mais como aba — virou o modo "Meus" DENTRO da
+   * Pokedex — e quem esconde esse modo agora e a propria `PokedexScreen`, que e
+   * quem sabe se ha colecao pra mostrar.
+   */
+  const visibleTabs = TABS;
   const activeIndex = visibleTabs.findIndex((x) => x.id === tab);
 
   return (
@@ -76,7 +93,6 @@ export function App() {
             <HomeScreen dataset={dataset} persist={persist} onGo={go} />
           )}
           {tab === "pokedex" && <PokedexScreen dataset={dataset} intent={intent} />}
-          {tab === "colecao" && <CollectionScreen dataset={dataset} />}
           {tab === "ajustes" && (
             <SettingsScreen
               datasetLabel={

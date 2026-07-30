@@ -19,6 +19,8 @@ import { SpeciesDetail } from "./SpeciesDetail.tsx";
 import { SpeciesPicker } from "./SpeciesPicker.tsx";
 
 interface Props {
+  /** Dentro da aba Pokédex: sem título próprio, pra não repetir o de cima. */
+  embutida?: boolean;
   dataset: DatasetState;
 }
 
@@ -29,7 +31,7 @@ const TONE: Record<string, string> = {
   transferir: "var(--tk-dang)",
 };
 
-export function CollectionScreen({ dataset }: Props) {
+export function CollectionScreen({ dataset, embutida = false }: Props) {
   const { items, reload } = useCollection();
   const { t, language } = useT();
   const [picking, setPicking] = useState(false);
@@ -117,10 +119,21 @@ export function CollectionScreen({ dataset }: Props) {
         colecao era a unica tela do app que mostrava Pokemon em lista, e essa
         divergencia sozinha ja fazia as duas parecerem apps diferentes.
       */}
+      {/*
+        Sem titulo quando embutida.
+
+        Dentro da aba Pokedex ela aparece debaixo de um `<h1>Pokédex</h1>`, e um
+        segundo titulo logo abaixo ("Coleção") e a redundancia que ele vem
+        cobrando o app inteiro — dois nomes pra um lugar so. O seletor
+        "Todos/Meus" ja diz onde a pessoa esta.
+      */}
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <h1 className="tk-h1" style={{ flex: 1, minWidth: 0 }}>
-          {t("collection.title")}
-        </h1>
+        {!embutida && (
+          <h1 className="tk-h1" style={{ flex: 1, minWidth: 0 }}>
+            {t("collection.title")}
+          </h1>
+        )}
+        {embutida && <span style={{ flex: 1 }} />}
         {rows !== null && rows.length > 0 && (
           <button
             type="button"
