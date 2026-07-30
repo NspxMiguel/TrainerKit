@@ -341,3 +341,52 @@ export function estimateRaid(counters: readonly Counter[], boss: RaidBossInput):
 export function bossCatchCP(boss: RaidBossInput, cpm: CpmTable, level = 20): number {
   return computeCP(boss.baseStats, { atk: 10, def: 10, hp: 10 }, cpmForLevel(cpm, level));
 }
+
+/** O piso de IV de quem sai de uma raide. Nao existe chefe capturado abaixo disto. */
+const PISO_IV_RAIDE = 10;
+
+/** Nivel de captura: 20 no normal, 25 quando o clima favorece o tipo do chefe. */
+const NIVEL_NORMAL = 20;
+const NIVEL_CLIMA = 25;
+
+export interface FaixaDeCaptura {
+  /** PC do pior IV possivel (10/10/10) e do perfeito (15/15/15), no nivel 20. */
+  normal: { min: number; max: number };
+  /** O mesmo com clima favoravel, que sobe a captura pro nivel 25. */
+  comClima: { min: number; max: number };
+}
+
+/**
+ * Em que PC o chefe sai, e qual seria o 100%.
+ *
+ * ⚠️ Isto e o que transforma numero em DECISAO, e por isso existe.
+ *
+ * Quem derruba uma raide ve um PC e tem que decidir na hora se vale gastar as
+ * bolas douradas. O jogo nao diz nada — e o app tinha a conta pronta e nao
+ * mostrava: `bossCatchCP` existia desde sempre em `counters.ts` e nenhuma tela
+ * o chamava.
+ *
+ * Com a faixa na mao, o PC vira resposta: um chefe que sai no MAXIMO da faixa
+ * e 15/15/15, ponto final. Nao precisa escanear, nao precisa avaliar, nao
+ * precisa nem capturar pra saber.
+ *
+ * As duas faixas porque o clima muda o nivel de captura de 20 pra 25, e um PC
+ * "alto demais" pra faixa normal nao e erro de leitura — e clima favoravel.
+ * Mostrar so uma faria a pessoa achar que o app errou.
+ */
+export function bossCatchRange(boss: RaidBossInput, cpm: CpmTable): FaixaDeCaptura {
+  const pc = (iv: number, nivel: number) =>
+    computeCP(
+      boss.baseStats,
+      { atk: iv, def: iv, hp: iv },
+      cpmForLevel(cpm, nivel),
+    );
+
+  return {
+    normal: { min: pc(PISO_IV_RAIDE, NIVEL_NORMAL), max: pc(MAX_IV_RAIDE, NIVEL_NORMAL) },
+    comClima: { min: pc(PISO_IV_RAIDE, NIVEL_CLIMA), max: pc(MAX_IV_RAIDE, NIVEL_CLIMA) },
+  };
+}
+
+/** O teto de IV, que e o mesmo do jogo inteiro. */
+const MAX_IV_RAIDE = 15;

@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import {
   RAID_TIERS,
   bossCP,
+  bossCatchRange,
   estimateRaid,
   rankCounters,
   rankMovesets,
@@ -189,6 +190,43 @@ export function RaidCounters({ boss, data, onClose }: Props) {
           </div>
         </div>
       </div>
+
+      {/*
+        Em que PC ele sai — a pergunta que se faz DEPOIS de ganhar.
+        
+        A conta ja existia em `counters.ts` (`bossCatchCP`) e nenhuma tela a
+        chamava. Com a faixa escrita, o PC vira resposta em vez de numero: quem
+        derruba a raide olha o circulo, compara com o maximo, e sabe se vale
+        gastar as bolas douradas — sem avaliar, sem escanear, sem capturar.
+        
+        A linha do clima nao e detalhe: com clima favoravel a captura sobe pro
+        nivel 25 e a faixa inteira muda. Sem ela, um PC "alto demais" pareceria
+        erro do app.
+      */}
+      {(() => {
+        const faixa = bossCatchRange(bossInput, data.cpm);
+        return (
+          <>
+            <div className="tk-overline" style={{ display: "block", margin: "18px 0 8px" }}>
+              {t("raid.catchTitle")}
+            </div>
+            <section className="tk-card" style={{ marginBottom: 18 }}>
+              <p className="tk-body" style={{ margin: 0 }}>
+                {t("raid.catchBody", {
+                  min: faixa.normal.min.toLocaleString(language),
+                  max: faixa.normal.max.toLocaleString(language),
+                })}
+              </p>
+              <p className="tk-caption" style={{ margin: "8px 0 0", lineHeight: 1.5 }}>
+                {t("raid.catchWeather", {
+                  min: faixa.comClima.min.toLocaleString(language),
+                  max: faixa.comClima.max.toLocaleString(language),
+                })}
+              </p>
+            </section>
+          </>
+        );
+      })()}
 
       <div style={{ marginBottom: 18 }}>
         <Segmented
