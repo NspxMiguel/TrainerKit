@@ -82,7 +82,7 @@ export function TeamBuilder({ data, onClose, onPickSpecies }: Props) {
   /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
      caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
      escape volta a piscar, e so aquele. */
-  const { saindo, fechar } = useFolha(onClose);
+  const { saindo, fechar, sair } = useFolha(onClose);
 
   const { t } = useT();
   const language = useLanguage();
@@ -515,7 +515,7 @@ export function TeamBuilder({ data, onClose, onPickSpecies }: Props) {
                   type="button"
                   className="tk-teamrow"
                   data-have={(marcaColecao && jaTenho) || undefined}
-                  onClick={() => onPickSpecies(sp)}
+                  onClick={() => sair(() => onPickSpecies(sp))}
                 >
                   <span className="tk-teamrow-n">{i + 1}</span>
                   <SpeciesTile
