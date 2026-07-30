@@ -51,3 +51,8 @@ apps/web/public/dataset/
 # Vinculo local do projeto Vercel (id do projeto e da org). Nao e segredo, mas e
 # especifico da maquina e nao serve pra mais ninguem.
 .vercel
+
+# A Vercel instala a funcao com `npm install` (ver vercel.json), e o npm gera
+# este arquivo. O lockfile de verdade do repo e o pnpm-lock.yaml — dois
+# lockfiles no mesmo repo e a receita pra versoes divergirem sem ninguem ver.
+package-lock.json
