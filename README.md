@@ -1,133 +1,125 @@
 # TrainerKit
 
-Um app de Pokémon GO que **decide** em vez de só mostrar números.
+**A Pokémon GO companion that decides, instead of just showing numbers.**
 
-Já existem calculadoras demais. Você anexa o print da avaliação, aparece
-"96,4%", e a pergunta continua sem resposta: *e daí?* Vale investir? Vale
-evoluir? Dá pra transferir sem se arrepender?
+There are enough calculators already. You attach the appraisal screenshot, "96.4%" shows up, and the real question is still unanswered: *so what?* Worth powering up? Worth evolving? Can I transfer it without regretting it?
 
-O TrainerKit responde isso — e mostra por quê.
+TrainerKit answers that — and shows its work.
 
-**[Abrir o app →](https://spxmiguel.github.io/TrainerKit/)**
+**[Open the app →](https://spxmiguel.github.io/TrainerKit/)**
 
-PWA offline-first. Sem conta, sem servidor, sem dado saindo do aparelho.
+Installable PWA, offline-first. No account, no server, nothing leaving your device.
+
+## Install
+
+It's a website, so there is nothing to download.
+
+**iPhone / iPad** — open it in **Safari**, tap Share, then *Add to Home Screen*.
+
+> On iOS this isn't optional. Safari erases the storage of any site left untouched for 7 days, and that would take your collection with it. Added to the Home Screen, it stays.
+
+**Android** — open it in Chrome, menu ⋮, then *Install app*.
+
+**Computer** — Chrome, Edge and Brave show an install icon in the address bar.
+
+Follows the system's light/dark theme automatically.
+
+## What's included
+
+| | |
+| --- | --- |
+| **Appraisal scan** | The three bars are geometry, not text — the app counts filled segments and returns the **exact** IV. Not OCR, so there is no "almost right": either it read them, or it says it couldn't. Validated against 26 real screenshots, 240p to 4K. |
+| **Verdict** | Power up, evolve, keep or transfer, with a one-line reason and a confidence bar that is literally how much the rules agree with each other. When two pull opposite ways it drops, as it should. |
+| **The trace** | Every verdict opens into named rules with weights. The engine was built to be explainable — an app that asks you to trust it without checking is just another app. |
+| **Raids** | DPS, TDO and an efficiency rating per moveset, plus the best counters **from your own collection**. If it says you need three people, you need three people. |
+| **PvP** | Stat product under each league's CP cap, and best movesets per league. Labelled as what it is: stat product, not a tier list. |
+| **Gyms** | Who actually holds one: defense × stamina, divided by what the type chart lets it take. |
+| **Pokédex mode** | The device. Point the camera, hear the entry read out loud, ask questions about what's on screen. |
+| **10 languages** | pt-BR, English, Spanish (Spain and LatAm), French, German, Italian, Japanese, Korean, Russian — interface, Pokémon names and move names. |
+
+## The math is checked against the game, not against itself
+
+- Max CP at level 40 with perfect IVs, for species whose value is public (Machamp 3056, Dragonite 3792, Tyranitar 3834, Rhydon 3179).
+- Base stats are validated through an **independent** path — the conversion Pokémon GO makes from the main series (`baseStamina = floor(1.75 × HP + 50)`). Without it, an ETL bug would go unnoticed by staying internally consistent.
+- Level cap is **55**, not 50. The CPM table has 55 entries and ends at `0.8653`; half levels come from a quadratic mean, not an arithmetic one.
+- Raid boss CP reproduces the game's: tier 5 Mewtwo gives 54,148.
+
+## Data
+
+Game data comes from `alexelgt/game_masters`, which mirrors the real `GAME_MASTER` every 1–3 days. The better-known `PokeMiners` mirror is months behind — using it would have meant an app that looks fine while giving stale verdicts.
+
+The 18.8 MB raw file is processed **in CI**, never on your phone, and ships as one compact JSON. You can also point the app at a different `gamedata.json` in Settings, so it isn't tied to me: if I stop updating, you switch the source and carry on.
+
+[DATA.md](DATA.md) documents where each piece comes from, including what this project deliberately does not redistribute.
+
+## Privacy
+
+Your collection lives in your browser (IndexedDB). It is never uploaded. No analytics, no tracking cookie, no account.
+
+Something only leaves the device when you use the AI or the voice — and the in-app privacy screen names every service and exactly what it receives. Both can be turned off, and both have an on-device option that needs no internet at all.
+
+The app also **ships no Pokémon artwork**. By default each species shows a badge in its type colour with two initials; images are an optional source you point at yourself.
+
+## Requirements
+
+- Node 22 or later
+- pnpm 11
+
+## Build from source
+
+```bash
+git clone https://github.com/spxmiguel/TrainerKit.git   # download the source
+cd TrainerKit
+pnpm install                                            # install dependencies
+pnpm --filter @trainerkit/dataset refresh               # download GAME_MASTER and build the dataset (~15s, needs network)
+pnpm dev                                                # start the dev server on http://localhost:5273
+```
+
+The dev server also listens on the local network, so you can open it on your phone using the machine's IP — which is the only way to test the camera and the screenshot reader properly.
+
+| Command | What it does |
+| --- | --- |
+| `pnpm -r test` | 209 tests |
+| `pnpm -r typecheck` | TypeScript across all three packages |
+| `pnpm --filter ./apps/web build` | Production build + bundle audit |
+
+The dataset step is separate on purpose: it hits the network and takes a while, and nothing else in the repo depends on it being fresh.
+
+## Structure
+
+```
+packages/
+├── core/                # pure TypeScript, zero DOM — every number in the app
+│   ├── cp.ts               # CP formula and the CPM table (up to level 55)
+│   ├── iv.ts               # IV solver: species + CP + HP + appraisal -> combinations
+│   ├── scan.ts             # reads the appraisal bars off a screenshot
+│   ├── verdict.ts          # the decision engine: named rules, weights, trace
+│   ├── raid.ts             # DPS, TDO, efficiency rating
+│   ├── pvp.ts              # stat product per league
+│   ├── gym.ts              # defender bulk against the type chart
+│   ├── counters.ts         # best counters from your own collection
+│   └── moves.ts            # best moveset per context (raid, PvP, Rocket)
+└── dataset/             # CI-only ETL: GAME_MASTER -> compact JSON + rankings
+apps/
+└── web/                 # the PWA (Vite + React 19)
+    └── src/ai/             # AI and voice: prompts, topic filter, quota, TTS engines
+api/                     # Vercel edge functions (shared AI key, voice)
+```
+
+`packages/core` imports no React, no `window` and no `fetch`. It takes data and returns results — that's what makes it genuinely testable, and what lets the math survive a change of platform.
+
+It also **writes no text**: it returns a translation key plus the numbers. The interface builds the sentence, because the interface knows the language. Ten languages, and the compiler breaks the build if one of them forgets a key.
+
+## Not affiliated
+
+TrainerKit is an independent fan-made app, not affiliated with, sponsored or endorsed by Scopely Explore (formerly Niantic), The Pokémon Company, Nintendo, Creatures Inc. or GAME FREAK. Pokémon, Pokémon GO and character names are trademarks of their respective owners.
+
+It works exclusively from screenshots you provide, and **does not access, modify or communicate with the game's servers**. It is not monetised.
+
+## License
+
+MIT — see [LICENSE](LICENSE). The license covers this repository's code; game data and Pokémon names belong to their respective owners.
 
 ---
 
-## O que ele faz
-
-**Lê o print da avaliação.** As três barras são geometria, não texto — o app
-conta os blocos preenchidos e devolve o IV **exato**. Não é OCR, então não
-existe "quase certo": ou ele leu, ou diz que não conseguiu. Validado em 26
-prints reais, de 240p a 4K.
-
-**Dá um veredito.** Investir, evoluir, guardar ou transferir, com uma frase de
-motivo e uma barra de confiança que é literalmente o quanto as regras concordam
-entre si. Quando duas puxam pra lados opostos, ela cai — e deve cair.
-
-**Mostra o rastro.** Todo veredito abre em regras nomeadas com peso:
-
-```
-decide(machamp)
-├─ evolucao.pendente..... +0.70
-├─ pvp.rank.............. +0.90
-└─ veredito.............. 0.56
-```
-
-Isso não é enfeite: o motor foi construído para ser explicável. Um app que manda
-você confiar sem poder conferir é só mais um app.
-
-**Melhores ataques por objetivo** — raide, PvP, uso geral e Rocket. O contexto
-Rocket recomenda um *par*: os líderes bloqueiam seus dois primeiros carregados,
-então a resposta é isca barata + finalizador forte.
-
-**Counters de raide da sua coleção.** Não "os melhores do jogo" — os **seus**.
-Se ele disser que precisa de três pessoas, é porque precisa.
-
-**Rankings** dos melhores do jogo por tipo de ataque. A lista de PvP é rotulada
-como o que é: stat product, não tier list.
-
-## Rodando localmente
-
-```bash
-pnpm install
-pnpm --filter @trainerkit/dataset refresh   # baixa o GAME_MASTER e gera o dataset
-pnpm --filter ./apps/web dev
-```
-
-O `refresh` leva ~15s e precisa de rede. O app sobe em `http://localhost:5273` e
-escuta na rede local, então dá pra abrir no celular pelo IP da máquina.
-
-| Comando | O que faz |
-|---|---|
-| `pnpm -r typecheck` | Checagem de tipos nos três pacotes |
-| `pnpm -r test` | 116 testes |
-| `pnpm --filter ./apps/web build` | Build de produção + auditoria do bundle |
-| `pnpm --filter ./apps/web icons` | Regera os ícones a partir dos tokens |
-
-## Como está organizado
-
-```
-packages/core/      TypeScript puro, zero DOM. Toda a matemática e as regras.
-packages/dataset/   ETL: GAME_MASTER → JSON compacto + rankings pré-calculados.
-apps/web/           O PWA (Vite + React 19).
-```
-
-`packages/core` não importa React, `window` nem `fetch`. Recebe dados, devolve
-resultados. É o que o torna testável de verdade — e o que faz a matemática
-sobreviver a uma eventual troca de plataforma.
-
-O core também **não escreve texto**: devolve chave de tradução mais os números.
-Quem monta a frase é a interface, que sabe o idioma. São 10 idiomas, e o
-compilador quebra o build se algum esquecer uma chave.
-
-## Matemática conferida contra o jogo, não contra si mesma
-
-- PC máximo no nível 40 com IV perfeito, para espécies cujo valor é público
-  (Machamp 3056, Dragonite 3792, Tyranitar 3834, Rhydon 3179…).
-- Os stats base são validados por um caminho **independente** — a conversão que
-  o Pokémon GO faz a partir da série principal
-  (`baseStamina = floor(1.75 × HP + 50)`). Sem isso, um erro no ETL passaria
-  despercebido por continuar internamente consistente.
-- O nível máximo é **55**, não 50. A tabela de CPM tem 55 entradas e termina em
-  `0.8653`; meios níveis vêm de média quadrática, não aritmética.
-- O PC de chefe de raide reproduz o do jogo: Mewtwo tier 5 dá 54.148.
-
-## Imagens e dados são seus
-
-O app **não embarca arte de Pokémon**. Por padrão cada espécie aparece com um
-selo na cor do tipo e as iniciais.
-
-Se quiser imagens, aponta uma fonte nos Ajustes — um link de manifesto ou um
-`.zip`. O mesmo vale para os **dados do jogo**: dá pra apontar outro
-`gamedata.json`, conferido antes de valer. Assim o app não fica preso a mim — se
-eu parar de atualizar a base, você troca a fonte e segue.
-
-## Assistente com IA (opcional)
-
-Dá pra ligar uma chave da [Groq](https://console.groq.com) nos Ajustes. Ela fica
-no seu aparelho e vai direto pro provedor: não há servidor no meio e não há
-cobrança.
-
-Ele **não analisa nada** — o veredito já foi calculado aqui, com o rastro de
-regras. O modelo só reescreve em linguagem natural. Isso é desenho, não
-limitação: um modelo que recebesse só "Machamp 96%" inventaria a análise.
-
-## Licença
-
-Código sob [MIT](LICENSE).
-
-Os dados do jogo têm outra origem e outra situação. **[DATA.md](DATA.md)**
-documenta a procedência de cada um, incluindo o que este projeto
-deliberadamente não redistribui.
-
-## Aviso
-
-TrainerKit é um app independente feito por fãs e não é afiliado, patrocinado ou
-endossado por Scopely Explore (ex-Niantic), The Pokémon Company, Nintendo,
-Creatures Inc. ou GAME FREAK. Pokémon, Pokémon GO e os nomes de personagens são
-marcas de seus respectivos titulares.
-
-O app funciona exclusivamente por leitura de capturas de tela fornecidas pelo
-usuário e **não acessa, modifica ou se comunica com os servidores do jogo**.
-Não é monetizado.
+Made by [@spxmiguel](https://github.com/spxmiguel)

@@ -38,13 +38,34 @@ button {
   cursor: pointer;
 }
 
-a {
+/*
+ * Link é azul — MENOS quando ele é um botão.
+ *
+ * ⚠️ O `:not(.tk-btn)` não é preciosismo, é conserto de um bug que apareceu na
+ * tela: o botão "Escrever pra mim" ficava EM BRANCO ao passar o mouse.
+ *
+ * O motivo é especificidade. `a:hover` vale (0,1,1); `.tk-btn--primary`, que
+ * pinta o texto de branco, vale (0,1,0). No hover o link ganhava e pintava o
+ * texto de `--tk-pri-h` — azul sobre o fundo azul do botão. Texto branco virava
+ * texto invisível.
+ *
+ * Dava pra remendar com `.tk-btn--primary:hover { color: … }`, e seria remendo:
+ * qualquer `<a class="tk-btn">` futuro nasceria com o mesmo defeito e alguém
+ * teria que descobrir de novo. Excluir os botões aqui resolve na origem — um
+ * link que virou botão deixa de ser tratado como link.
+ */
+a:not(.tk-btn) {
   color: var(--tk-pri);
   text-decoration: none;
 }
 
-a:hover {
+a:not(.tk-btn):hover {
   color: var(--tk-pri-h);
+}
+
+/* Botão que por acaso é `<a>`: sem sublinhado, e a cor é a da classe do botão. */
+a.tk-btn {
+  text-decoration: none;
 }
 
 /* Foco visivel em anel de 2px na cor primaria — requisito do prototipo. */
