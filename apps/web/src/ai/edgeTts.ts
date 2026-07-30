@@ -91,17 +91,36 @@ export function edgeVoicesFor(language: string): ReadonlyArray<{ id: string; lab
   return EDGE_VOICES[language] ?? [];
 }
 
-export function getEdgeVoice(language: string): string {
+/**
+ * A voz que vai falar, garantidamente DO IDIOMA pedido.
+ *
+ * ⚠️ Esta função é a trava contra o defeito que o Miguel nomeou: "PEGA AS VOZES
+ * DA TAL LINGUA, NAO USAR UMA VOZ BRASILEIRA FALANDO JAPA".
+ *
+ * A regra é uma só e vale pra qualquer origem: uma voz só é usada se estiver na
+ * lista DAQUELE idioma. Preferência salva que não está na lista é descartada, e
+ * cai na primeira do idioma. Não existe caminho por onde um id de outro idioma
+ * chegue ao sintetizador — nem por preferência velha, nem por parâmetro.
+ *
+ * `preferida` existe porque a tela agora guarda a escolha num lugar só
+ * (`tk:dex-voz-v2`), e ela precisa chegar até aqui.
+ */
+export function getEdgeVoice(language: string, preferida?: string): string {
+  const lista = edgeVoicesFor(language);
+
+  // 1) o que a tela pediu agora, se for deste idioma
+  if (preferida && lista.some((v) => v.id === preferida)) return preferida;
+
+  // 2) a preferência antiga (usuários que escolheram antes da tela nova)
   let salva: string | null = null;
   try {
     salva = globalThis.localStorage?.getItem(ESCOLHA_KEY) ?? null;
   } catch {
     /* preferencia nao lida vale mais que app quebrado */
   }
-  const lista = edgeVoicesFor(language);
-  // A escolha so vale se for do idioma atual: quem escolheu "Antônio" e depois
-  // trocou o app pra japones nao quer ouvir japones com voz brasileira.
   if (salva && lista.some((v) => v.id === salva)) return salva;
+
+  // 3) a primeira do idioma. Nunca uma de outro.
   return lista[0]?.id ?? "";
 }
 
@@ -123,9 +142,11 @@ export function setEdgeVoice(id: string | null): void {
 export async function edgeSynthesize(
   text: string,
   language: string,
+  /** A escolhida na tela. Ignorada se não for deste idioma — ver `getEdgeVoice`. */
+  preferida?: string,
   signal?: AbortSignal,
 ): Promise<Blob> {
-  const voz = getEdgeVoice(language);
+  const voz = getEdgeVoice(language, preferida);
   if (voz === "") throw new Error("idioma sem voz neural");
 
   const res = await fetch(TTS_PROXY, {

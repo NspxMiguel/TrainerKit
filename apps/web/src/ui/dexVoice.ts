@@ -503,11 +503,14 @@ async function porMotor(
 ): Promise<Blob | null> {
   switch (motor) {
     case "edge":
-      return comCache("edge", id, texto, () => edgeSynthesize(texto, idioma));
+      // `id` e so PREFERENCIA: `edgeSynthesize` descarta o que nao for do idioma.
+      return comCache("edge", getEdgeVoice(idioma, id), texto, () =>
+        edgeSynthesize(texto, idioma, id),
+      );
     case "kokoro":
       return kokoroSynthesize(texto, id);
     case "eleven-share":
-      return comCache("11-share", id, texto, () => elevenSharedSynthesize(texto));
+      return comCache("11-share", id, texto, () => elevenSharedSynthesize(texto, id));
     case "eleven-user":
       return comCache("11-user", id, texto, () => elevenSynthesize(texto));
     case "sistema":
