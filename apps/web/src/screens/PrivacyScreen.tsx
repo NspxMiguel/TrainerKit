@@ -83,6 +83,12 @@ export function PrivacyScreen() {
         t("privacy.third.none"),
       ])}
 
+      {/* A doacao vem ANTES da transferencia internacional, e nao depois: o
+          GitHub tambem esta nos EUA, e a secao seguinte fala justamente disso.
+          Ler "nada de pagamento passa por aqui" e so entao "tudo isto fica fora
+          do Brasil" e a ordem que responde a pergunta na hora em que ela nasce. */}
+      {bloco(t("privacy.donate.title"), [t("privacy.donate.body")])}
+
       {bloco(t("privacy.transfer.title"), [t("privacy.transfer.body")])}
       {bloco(t("privacy.rights.title"), [t("privacy.rights.body")])}
       {bloco(t("privacy.minors.title"), [t("privacy.minors.body")])}
