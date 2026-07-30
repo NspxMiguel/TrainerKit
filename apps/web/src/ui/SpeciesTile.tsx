@@ -12,6 +12,16 @@ interface Props {
   /** 44 lista · 48 home · 64 galeria · 92 grade · 116 detalhe (escala do prototipo). */
   size?: number;
   shiny?: boolean;
+  /**
+   * Sem o selo em volta: so a arte, solta.
+   *
+   * Existe pro visor da Pokedex. Lá o tile com gradiente do tipo e cantos
+   * arredondados brigava com o desenho — o bicho aparecia dentro de um quadrado
+   * colorido em cima da tela verde, em vez de estar NA tela. O monograma
+   * continua sendo o que aparece enquanto a imagem carrega; ele so perde a
+   * moldura.
+   */
+  bare?: boolean;
 }
 
 /**
@@ -22,7 +32,15 @@ interface Props {
  * tile nunca fica vazio nem "pula" de tamanho — o gradiente do tipo ja ocupa o
  * espaco final desde o primeiro frame.
  */
-export function SpeciesTile({ spriteId, dex, speciesId = "", name, types, size = 64 }: Props) {
+export function SpeciesTile({
+  spriteId,
+  dex,
+  speciesId = "",
+  name,
+  types,
+  size = 64,
+  bare = false,
+}: Props) {
   const url = useSpriteUrl({ spriteId, dex, speciesId });
 
   // Guardamos QUAL url carregou, nao um booleano.
@@ -40,13 +58,13 @@ export function SpeciesTile({ spriteId, dex, speciesId = "", name, types, size =
 
   return (
     <div
-      className="tk-mono"
+      className={`tk-mono${bare ? " tk-mono--bare" : ""}`}
       style={{
         width: size,
         height: size,
         // Raio = 1/3 do lado, como o prototipo especifica.
-        borderRadius: Math.round(size / 3),
-        background: typeGradient(types),
+        borderRadius: bare ? 0 : Math.round(size / 3),
+        background: bare ? "none" : typeGradient(types),
         fontSize: Math.round(size * 0.27),
         position: "relative",
       }}
@@ -72,13 +90,17 @@ export function SpeciesTile({ spriteId, dex, speciesId = "", name, types, size =
           onError={() => setFailedUrl(url)}
           style={{
             position: "absolute",
-            inset: "8%",
-            width: "84%",
-            height: "84%",
+            // Sem moldura a arte usa o quadro inteiro: os 8% de recuo existiam
+            // pra ela nao encostar na borda do selo, e sem selo nao ha borda.
+            inset: bare ? 0 : "8%",
+            width: bare ? "100%" : "84%",
+            height: bare ? "100%" : "84%",
             objectFit: "contain",
             opacity: loaded ? 1 : 0,
             transition: "opacity .18s ease",
-            filter: "drop-shadow(0 2px 6px rgba(0,0,0,.35))",
+            filter: bare
+              ? "drop-shadow(0 3px 10px rgba(0,0,0,.55))"
+              : "drop-shadow(0 2px 6px rgba(0,0,0,.35))",
           }}
         />
       )}

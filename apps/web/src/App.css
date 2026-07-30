@@ -775,6 +775,20 @@
   object-fit: contain;
 }
 
+/*
+ * Sem selo: so a arte.
+ *
+ * A borda e a sombra interna do `.tk-mono` desenhavam um quadrado fantasma em
+ * volta do bicho dentro do visor da Pokedex — dava pra ver o contorno em cima da
+ * tela verde. `bare` tira as duas; o monograma continua servindo de espera
+ * enquanto a imagem carrega.
+ */
+.tk-mono--bare {
+  border: 0;
+  box-shadow: none;
+  overflow: visible;
+}
+
 /* ------------------------------------------------------------ folha cheia */
 
 /*
@@ -3358,14 +3372,18 @@
 /* ================================================================ Pokedex */
 
 /*
- * Modo Pokedex.
+ * A Pokedex como APARELHO.
  *
- * A ideia do Miguel: um aparelho que voce aponta, que identifica e que FALA. O
- * desenho segue o da serie sem copiar nada dela: a lente redonda em cima com a
- * arte dentro, a luz que pisca enquanto le, e a ficha em texto embaixo.
+ * "quero q pareça muito com uma pokedex, até em aparencia". Uma pagina com um
+ * sprite grande nao parece; um objeto com carcaça, lente, luzes, visor afundado
+ * e grade de alto-falante parece. O que faz a diferenca nao e nenhum detalhe
+ * sozinho — e o conjunto, e principalmente as sombras: `inset` faz o visor
+ * afundar e a carcaça levantar, que e o que o olho le como "coisa fisica".
  *
- * A cor vem do tipo do bicho que esta na lente, entao o aparelho "muda de
- * humor" a cada especie — e informacao, nao enfeite.
+ * ⚠️ O desenho do aparelho e prop da Nintendo/TPC, nao dado de jogo. Vale a
+ * mesma decisao dos sprites: build pessoal, sem publicar. Tudo aqui esta atras
+ * de `[data-skin="device"]`, entao uma build publicavel troca um atributo no
+ * React e volta ao visual autoral do app — nao ha nada a refatorar.
  */
 .tk-dex {
   position: fixed;
@@ -3373,77 +3391,218 @@
   z-index: 30;
   overflow-y: auto;
   overscroll-behavior: contain;
-  background: var(--tk-screen);
   max-width: var(--tk-container);
   margin: 0 auto;
   padding: max(var(--tk-safe-top), calc(env(safe-area-inset-top) + var(--tk-s3)))
     var(--tk-gutter) calc(var(--tk-s8) + max(var(--tk-s5), env(safe-area-inset-bottom)));
   animation: tk-rise 0.26s var(--tk-ease-glass) both;
+  background: var(--tk-screen);
 }
 
-/* A luz de estado. Verde parada, e pulsando enquanto ele le ou pensa. */
-.tk-dex-lamp {
-  align-self: center;
-  flex: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  background: var(--tk-succ);
-  box-shadow: 0 0 10px var(--tk-succ);
+/*
+ * A carcaça.
+ *
+ * Vermelho nos dois temas: e a cor do OBJETO, nao do app. Um aparelho que muda
+ * de cor com o tema do sistema deixa de parecer um aparelho.
+ */
+.tk-dex[data-skin="device"] {
+  --tk-shell: #b7222a;
+  --tk-shell-dark: #8d171e;
+  --tk-shell-light: #d6474f;
+  --tk-visor: #101c14;
+  --tk-visor-ink: #b8f2c8;
+
+  background:
+    linear-gradient(180deg, var(--tk-shell-light) 0%, var(--tk-shell) 22%, var(--tk-shell-dark) 100%);
+  color: #fff;
 }
 
-.tk-dex-lamp[data-busy] {
-  background: var(--tk-warn);
-  box-shadow: 0 0 10px var(--tk-warn);
-  animation: tk-lamp 0.9s linear infinite;
-}
+/* ---------------------------------------------------------- parte de cima */
 
-@keyframes tk-lamp {
-  50% {
-    opacity: 0.25;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tk-dex-lamp[data-busy] {
-    animation: none;
-  }
+.tk-dex[data-skin="device"] .tk-dexdev-top {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--tk-s4);
+  min-height: 62px;
 }
 
 /*
  * A lente.
  *
- * Circulo com a cor do tipo por tras da arte. O `radial-gradient` no `::before`
- * e o que da a sensacao de vidro iluminado por dentro — sem ele o sprite fica
- * colado num circulo chapado.
+ * Azul, com anel branco e um brilho fora de centro. O brilho e o que a faz
+ * parecer vidro em vez de circulo pintado — sem ele o resto do desenho nao
+ * convence.
  */
-.tk-dex-lens {
+.tk-dex[data-skin="device"] .tk-dexdev-lens {
+  position: relative;
+  flex: none;
+  width: 54px;
+  height: 54px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 34% 30%, #7fd4ff 0%, #2f7fd6 46%, #14396b 100%);
+  border: 4px solid #f3f4f6;
+  box-shadow:
+    0 2px 5px rgb(0 0 0 / 0.45),
+    inset 0 0 12px rgb(0 0 0 / 0.5);
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-lens-glint {
+  position: absolute;
+  top: 7px;
+  left: 9px;
+  width: 15px;
+  height: 11px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.75);
+  filter: blur(1px);
+}
+
+/* Pisca enquanto le ou pensa: e a unica animacao da tela que informa algo. */
+.tk-dex[data-skin="device"] .tk-dexdev-lens[data-busy] {
+  animation: tk-dex-blink 0.85s ease-in-out infinite;
+}
+
+@keyframes tk-dex-blink {
+  50% {
+    filter: brightness(1.7);
+  }
+}
+
+/* As tres luzes ao lado da lente. */
+.tk-dex[data-skin="device"] .tk-dexdev-leds {
+  display: flex;
+  gap: 7px;
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-leds i {
+  width: 13px;
+  height: 13px;
+  border-radius: 999px;
+  border: 2px solid rgb(0 0 0 / 0.28);
+  box-shadow: inset 0 1px 2px rgb(255 255 255 / 0.55);
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-leds i[data-led="red"] {
+  background: #e2453c;
+}
+.tk-dex[data-skin="device"] .tk-dexdev-leds i[data-led="yellow"] {
+  background: #ecc94b;
+}
+.tk-dex[data-skin="device"] .tk-dexdev-leds i[data-led="green"] {
+  background: #48bb78;
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-close {
+  margin-left: auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 0;
+  background: rgb(0 0 0 / 0.22);
+  color: #fff;
+  font: 400 26px/1 var(--tk-font);
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-close:active {
+  background: rgb(0 0 0 / 0.38);
+}
+
+/* Vistos e capturados: a razao de existir uma Pokedex. */
+.tk-dex[data-skin="device"] .tk-dexdev-counters {
+  display: flex;
+  gap: var(--tk-s4);
+  margin-top: var(--tk-s3);
+  font: 700 10px var(--tk-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.82);
+}
+
+/* --------------------------------------------------------------- o visor */
+
+/*
+ * Visor afundado na carcaça.
+ *
+ * `inset` na sombra e o truque inteiro: sombra pra dentro le como buraco,
+ * sombra pra fora le como bloco em cima. Com moldura clara em volta, o olho
+ * completa o resto.
+ */
+.tk-dex[data-skin="device"] .tk-dexdev-screen {
   position: relative;
   display: grid;
   place-items: center;
-  height: 200px;
-  margin-top: var(--tk-s4);
-  border-radius: var(--tk-r-card);
+  height: 186px;
+  margin-top: var(--tk-s3);
+  padding: 10px;
+  border-radius: 14px;
   overflow: hidden;
-  border: 1px solid var(--tk-line2);
-  background: var(--tk-surf);
+  background:
+    radial-gradient(
+      circle at 50% 45%,
+      color-mix(in srgb, var(--tk-dex-type, #6b7280) 40%, transparent),
+      transparent 70%
+    ),
+    var(--tk-visor);
+  border: 8px solid #eceef3;
+  box-shadow:
+    inset 0 3px 14px rgb(0 0 0 / 0.75),
+    0 1px 0 rgb(255 255 255 / 0.3);
 }
 
-.tk-dex-lens::before {
+/*
+ * As linhas de varredura.
+ *
+ * Duas camadas: as listras fixas (a "tela") e uma faixa que desce devagar. E o
+ * que faz o visor parecer aceso em vez de ser um retangulo escuro com um bicho
+ * dentro.
+ */
+.tk-dex[data-skin="device"] .tk-dexdev-scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.05) 0 1px,
+      transparent 1px 3px
+    );
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-scan::after {
   content: "";
   position: absolute;
-  width: 200px;
-  height: 200px;
-  border-radius: 999px;
-  background: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--tk-dex-type, var(--tk-pri)) 42%, transparent),
-    transparent 68%
+  left: 0;
+  right: 0;
+  height: 38%;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgb(184 242 200 / 0.09) 55%,
+    transparent
   );
+  animation: tk-dex-sweep 3.4s linear infinite;
 }
 
-.tk-dex-art {
+@keyframes tk-dex-sweep {
+  from {
+    transform: translateY(-110%);
+  }
+  to {
+    transform: translateY(280%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tk-dex[data-skin="device"] .tk-dexdev-scan::after,
+  .tk-dex[data-skin="device"] .tk-dexdev-lens[data-busy] {
+    animation: none;
+  }
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-art {
   position: relative;
+  z-index: 1;
   padding: 0;
   border: 0;
   background: none;
@@ -3451,112 +3610,522 @@
   animation: tk-dex-in 0.42s var(--tk-ease-glass) both;
 }
 
-/* A arte ENTRA na lente. E o momento em que o aparelho reconheceu algo, e o
-   unico lugar do app onde uma animacao de entrada carrega significado. */
+/* A arte ENTRA no visor: e o momento em que o aparelho reconheceu algo. */
 @keyframes tk-dex-in {
   from {
     opacity: 0;
-    transform: scale(0.82);
+    transform: scale(0.8);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tk-dex-art {
+  .tk-dex[data-skin="device"] .tk-dexdev-art {
     animation: none;
   }
 }
 
-.tk-dex-empty {
+/* Selo de capturado, como o jogo marca. */
+.tk-dex[data-skin="device"] .tk-dexdev-caught {
+  position: absolute;
+  z-index: 2;
+  top: 8px;
+  right: 10px;
+  font: 700 15px/1 var(--tk-mono);
+  color: #ff5f5f;
+  text-shadow: 0 0 8px rgb(255 95 95 / 0.7);
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-idle {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  border-radius: 999px;
+  border: 1px dashed rgb(184 242 200 / 0.35);
+  color: rgb(184 242 200 / 0.5);
+}
+
+/* --------------------------------------------------------- nome e numero */
+
+.tk-dex[data-skin="device"] .tk-dexdev-plate {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: var(--tk-s3);
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgb(0 0 0 / 0.2);
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-num {
+  font: 700 12px var(--tk-mono);
+  color: rgb(255 255 255 / 0.7);
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-nome {
+  font: 800 22px/1 var(--tk-font);
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-tipos {
+  display: flex;
+  gap: 5px;
+  margin-left: auto;
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-tipo {
+  padding: 3px 8px;
+  border-radius: 999px;
+  font: 700 10px var(--tk-font);
+  color: #fff;
+}
+
+/* ---------------------------------------------------------------- a ficha */
+
+/*
+ * A ficha, na cor do visor.
+ *
+ * Monoespacada e verde sobre escuro: e leitura de aparelho, e a fonte diz isso
+ * antes de qualquer palavra. Uma frase por paragrafo porque e assim que a voz
+ * entrega — o que se le e o que se ouve, na mesma ordem.
+ */
+.tk-dex[data-skin="device"] .tk-dexdev-entry {
+  display: grid;
+  gap: 7px;
+  margin-top: var(--tk-s3);
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--tk-visor);
+  border: 3px solid #eceef3;
+  box-shadow: inset 0 2px 10px rgb(0 0 0 / 0.6);
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-entry p {
+  margin: 0;
+  font: 400 12.5px/1.55 var(--tk-mono);
+  color: var(--tk-visor-ink);
+}
+
+/* --------------------------------------------------------- os controles */
+
+.tk-dex[data-skin="device"] .tk-dexdev-pad {
+  display: grid;
+  grid-template-columns: 56px 1fr 56px;
+  gap: 8px;
+  margin-top: var(--tk-s4);
+}
+
+/*
+ * Tecla de aparelho.
+ *
+ * A sombra dura embaixo (`0 3px 0`) e o que da altura de botao fisico, e ela
+ * DESAPARECE no toque junto com um deslocamento de 3px — o botao afunda de
+ * verdade. Transicao suave aqui estragaria: tecla de plastico nao tem easing.
+ */
+.tk-dex[data-skin="device"] .tk-dexdev-key {
+  min-height: 46px;
+  border-radius: 12px;
+  border: 0;
+  background: #2b2f38;
+  color: #fff;
+  font: 700 13px var(--tk-font);
+  box-shadow: 0 3px 0 #14161b;
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-key:active {
+  transform: translateY(3px);
+  box-shadow: none;
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-key:disabled {
+  opacity: 0.45;
+  box-shadow: 0 3px 0 #14161b;
+  transform: none;
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-key--block {
+  display: block;
+  width: 100%;
+  margin-top: var(--tk-s3);
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-soft {
+  min-height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.3);
+  background: rgb(0 0 0 / 0.16);
+  color: #fff;
+  font: 600 12px var(--tk-font);
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-soft:active {
+  background: rgb(0 0 0 / 0.32);
+}
+
+/* --------------------------------------------------------------- listas */
+
+.tk-dex[data-skin="device"] .tk-dexdev-ask {
+  margin-top: var(--tk-s3);
+  background: rgb(0 0 0 / 0.2);
+  border-color: rgb(255 255 255 / 0.24);
+  color: #fff;
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-ask input {
+  color: #fff;
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-ask input::placeholder {
+  color: rgb(255 255 255 / 0.55);
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-list {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  border: 0;
+  background: rgb(0 0 0 / 0.18);
+  color: #fff;
+  text-align: left;
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-item:active {
+  background: rgb(0 0 0 / 0.34);
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-item-n {
+  flex: none;
+  width: 30px;
+  font: 700 11px var(--tk-mono);
+  color: rgb(255 255 255 / 0.6);
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-item-nome {
+  flex: 1;
+  min-width: 0;
+  font: 600 14px var(--tk-font);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-item-seen {
+  flex: none;
+  font: 700 11px/1 var(--tk-mono);
+  color: #8ef0a8;
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-note {
+  margin: 10px 2px 0;
+  font: 400 12px/1.5 var(--tk-font);
+  color: rgb(255 255 255 / 0.78);
+}
+
+.tk-dex[data-skin="device"] .tk-dexdev-nodata {
+  margin-top: 12px;
+  padding: 11px 13px;
+  border-radius: 10px;
+  background: rgb(0 0 0 / 0.28);
+  border: 1px solid rgb(255 255 255 / 0.22);
+  font: 400 12.5px/1.5 var(--tk-mono);
+  color: #ffd7d7;
+}
+
+/* A resposta do modelo: mesma tinta do visor, com barra na lateral pra separar
+   o que o modelo escreveu do que o app calculou. */
+.tk-dex[data-skin="device"] .tk-dexdev-answer {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border-left: 3px solid var(--tk-visor-ink);
+  background: var(--tk-visor);
+  font: 400 12.5px/1.6 var(--tk-mono);
+  color: var(--tk-visor-ink);
+}
+
+/* A grade do alto-falante. Puro enfeite, e e o enfeite que mais faz a coisa
+   parecer um objeto: `repeating-radial-gradient` desenha os furinhos sem imagem. */
+.tk-dex[data-skin="device"] .tk-dexdev-grille {
+  display: block;
+  height: 22px;
+  margin-top: var(--tk-s5);
+  border-radius: 6px;
+  background-image: radial-gradient(circle, rgb(0 0 0 / 0.36) 1.2px, transparent 1.6px);
+  background-size: 9px 9px;
+  opacity: 0.85;
+}
+
+/* ------------------------------------------------- Pokedex sem a carcaça */
+
+/*
+ * `data-skin="plain"`: o mesmo ecra, com o visual autoral do app.
+ *
+ * Isto existe pra a promessa do outro bloco ser VERDADE. Eu tinha escrito que
+ * "trocar `device` por `plain` devolve o visual autoral", e nao devolvia nada —
+ * todo o CSS estava presa ao seletor `device`, entao `plain` renderizava os
+ * elementos sem estilo nenhum. Uma saida de emergencia que nao foi testada nao e
+ * saida.
+ *
+ * Aqui a lente, as luzes e a grade do alto-falante SOMEM (sao elas o desenho do
+ * prop), e o resto usa os tokens do app. Funcionalidade identica: vistos,
+ * capturados, anterior/proximo, voz, foto, pergunta.
+ */
+.tk-dex[data-skin="plain"] .tk-dexdev-lens,
+.tk-dex[data-skin="plain"] .tk-dexdev-leds,
+.tk-dex[data-skin="plain"] .tk-dexdev-grille {
+  display: none;
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-top {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-close {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--tk-line);
+  background: var(--tk-surf);
+  color: var(--tk-txt);
+  font: 400 24px/1 var(--tk-font);
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-counters {
+  display: flex;
+  gap: var(--tk-s4);
+  margin-top: var(--tk-s3);
+  font: 600 11px var(--tk-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tk-txt4);
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-screen {
   position: relative;
   display: grid;
   place-items: center;
-  width: 84px;
-  height: 84px;
+  height: 186px;
+  margin-top: var(--tk-s3);
+  border-radius: var(--tk-r-card);
+  overflow: hidden;
+  border: 1px solid var(--tk-line2);
+  background:
+    radial-gradient(
+      circle at 50% 45%,
+      color-mix(in srgb, var(--tk-dex-type, var(--tk-pri)) 32%, transparent),
+      transparent 70%
+    ),
+    var(--tk-surf);
+}
+
+/* Sem scanline: ela e parte do desenho do aparelho, nao do app. */
+.tk-dex[data-skin="plain"] .tk-dexdev-scan {
+  display: none;
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-art {
+  padding: 0;
+  border: 0;
+  background: none;
+  line-height: 0;
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-caught {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font: 700 15px/1 var(--tk-mono);
+  color: var(--tk-succ);
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-idle {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
   border-radius: 999px;
   border: 1px dashed var(--tk-line2);
   color: var(--tk-txt4);
 }
 
-.tk-dex-name {
-  font: 800 30px/1.1 var(--tk-font);
-  letter-spacing: -0.03em;
+.tk-dex[data-skin="plain"] .tk-dexdev-plate {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-top: var(--tk-s4);
 }
 
-.tk-dex-sub {
+.tk-dex[data-skin="plain"] .tk-dexdev-num {
   font: 500 12px var(--tk-mono);
   color: var(--tk-txt3);
-  margin-top: 4px;
 }
 
-/*
- * A ficha, uma frase por linha.
- *
- * Monoespacada de propósito: e a leitura de um aparelho, e a fonte diz isso
- * antes de qualquer palavra. Uma frase por paragrafo porque e assim que a voz
- * entrega — o que se le e o que se ouve, na mesma ordem.
- */
-.tk-dex-entry {
+.tk-dex[data-skin="plain"] .tk-dexdev-nome {
+  font: 800 26px/1.1 var(--tk-font);
+  letter-spacing: -0.03em;
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-tipos {
+  display: flex;
+  gap: 5px;
+  margin-left: auto;
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-tipo {
+  padding: 4px 9px;
+  border-radius: var(--tk-r-chip);
+  font: 700 10px var(--tk-font);
+  color: #fff;
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-entry {
   display: grid;
   gap: 8px;
+  margin-top: var(--tk-s4);
+  padding: var(--tk-s4);
+  border-radius: var(--tk-r-card);
+  background: var(--tk-surf);
+  border: 1px solid var(--tk-line);
 }
 
-.tk-dex-entry p {
-  /* `margin: 0` explicito: o `gap` do grid ja da o respiro, e a margem padrao do
-     `<p>` somava a ele — as frases ficavam com o dobro de espaco entre si. */
+.tk-dex[data-skin="plain"] .tk-dexdev-entry p {
   margin: 0;
   font: 400 13px/1.5 var(--tk-mono);
   color: var(--tk-txt2);
 }
 
-.tk-dex-nodata {
-  margin-top: 14px;
+.tk-dex[data-skin="plain"] .tk-dexdev-pad {
+  display: grid;
+  grid-template-columns: 56px 1fr 56px;
+  gap: 8px;
+  margin-top: var(--tk-s4);
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-key {
+  min-height: 44px;
+  border-radius: var(--tk-r-input);
+  border: 1px solid var(--tk-line);
+  background: var(--tk-surf2);
+  color: var(--tk-txt);
+  font: 600 13px var(--tk-font);
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-key:active {
+  background: var(--tk-surf3);
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-key:disabled {
+  opacity: 0.4;
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-key--block {
+  display: block;
+  width: 100%;
+  margin-top: var(--tk-s3);
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-soft {
+  min-height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--tk-line);
+  background: none;
+  color: var(--tk-txt2);
+  font: 600 12px var(--tk-font);
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-ask {
+  margin-top: var(--tk-s3);
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-list {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--tk-r-input);
+  border: 1px solid var(--tk-line);
+  background: var(--tk-surf);
+  color: var(--tk-txt);
+  text-align: left;
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-item-n {
+  flex: none;
+  width: 30px;
+  font: 500 11px var(--tk-mono);
+  color: var(--tk-txt3);
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-item-nome {
+  flex: 1;
+  min-width: 0;
+  font: 600 14px var(--tk-font);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-item-seen {
+  flex: none;
+  font: 700 11px/1 var(--tk-mono);
+  color: var(--tk-succ);
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-note {
+  margin: 10px 2px 0;
+  font: 400 12px/1.5 var(--tk-font);
+  color: var(--tk-txt3);
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-nodata {
+  margin-top: 12px;
   padding: 12px 14px;
   border-radius: var(--tk-r-input);
   background: var(--tk-dang-soft);
   border: 1px solid var(--tk-dang-line);
+  font: 400 12.5px/1.5 var(--tk-mono);
   color: var(--tk-dang-fg);
-  font-family: var(--tk-mono);
 }
 
-/* ------------------------------------------------------ contador de ginasio */
-
-/*
- * Mais e menos, com o numero no meio.
- *
- * Nao e `<input type="number">`: no celular ele abre teclado pra escolher entre
- * 1 e 20, e teclado pra isso e trabalho a mais. Dois alvos de 44px resolvem sem
- * teclado nenhum.
- */
-.tk-step {
-  display: flex;
-  align-items: center;
-  gap: var(--tk-s4);
-}
-
-.tk-step-btn {
-  flex: none;
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  background: var(--tk-surf2);
-  border: 1px solid var(--tk-line);
-  color: var(--tk-txt);
-  font: 400 22px/1 var(--tk-font);
-}
-
-.tk-step-btn:active {
-  background: var(--tk-surf3);
-}
-
-.tk-step-btn:disabled {
-  opacity: 0.35;
-}
-
-.tk-step-n {
-  font: 800 28px/1 var(--tk-font);
-  letter-spacing: -0.02em;
-  min-width: 42px;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
+.tk-dex[data-skin="plain"] .tk-dexdev-answer {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: var(--tk-r-card);
+  border-left: 3px solid var(--tk-pri);
+  background: var(--tk-surf);
+  font: 400 13px/1.6 var(--tk-font);
+  color: var(--tk-txt2);
 }
