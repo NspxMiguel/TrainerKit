@@ -93,22 +93,86 @@ export async function beep(): Promise<void> {
 }
 
 /**
- * Escolhe a voz do sistema.
+ * Vozes de NOVIDADE da Apple.
  *
- * Prefere a do idioma pedido. A lista chega VAZIA na primeira chamada em vários
- * navegadores — ela e preenchida de forma assincrona — e por isso quem chama
- * aceita `null` e deixa o sistema escolher: uma voz padrao lendo portugues e
- * melhor que silencio esperando a lista.
+ * ⚠️ Aqui estava o "leitor paia" e eu levei tres rodadas pra achar, porque
+ * procurei no lugar errado: culpei o timbre do sistema quando o defeito era
+ * ESCOLHA. `getVoices()` devolve 180 vozes, dez delas em portugues, e a versao
+ * anterior pegava a PRIMEIRA que casasse o idioma. A primeira, em ordem
+ * alfabetica, e "Eddy (Portuguese (Brazil))" — uma das vozes caricatas que a
+ * Apple embarca pra brincadeira. "Luciana", a voz séria de pt-BR, estava na
+ * mesma lista o tempo todo.
+ *
+ * A lista e por nome porque esses nomes sao estaveis entre versoes do iOS e do
+ * macOS, e porque nao ha nenhum campo na API que diga "esta e de brincadeira".
+ */
+const NOVIDADE = new Set([
+  "albert", "bad news", "bahh", "bells", "boing", "bubbles", "cellos", "eddy",
+  "flo", "fred", "good news", "grandma", "grandpa", "jester", "junior", "kathy",
+  "organ", "ralph", "reed", "rocko", "sandy", "shelley", "superstar", "trinoids",
+  "whisper", "wobble", "zarvox",
+]);
+
+/** O nome sem o idioma entre parenteses: "Eddy (Portuguese (Brazil))" -> "eddy". */
+function nomeBase(v: SpeechSynthesisVoice): string {
+  return v.name.split("(")[0]!.trim().toLowerCase();
+}
+
+/**
+ * Nota da voz. Maior e melhor.
+ *
+ * Sinais, do mais forte pro mais fraco:
+ *   · novidade da Apple e eliminatorio — sao piores que qualquer alternativa
+ *   · Siri e as variantes Enhanced/Premium sao as boas de verdade, e o usuario
+ *     pode baixa-las em Ajustes → Acessibilidade → Conteudo falado
+ *   · idioma exato (pt-BR) ganha do idioma raiz (pt-PT lendo brasileiro)
+ *   · voz local nao depende de rede e nao tem atraso
+ */
+function notaDaVoz(v: SpeechSynthesisVoice, language: string): number {
+  if (NOVIDADE.has(nomeBase(v))) return -1000;
+
+  let nota = 0;
+  const nome = v.name.toLowerCase();
+  if (nome.includes("siri")) nota += 300;
+  if (nome.includes("premium") || nome.includes("enhanced")) nota += 200;
+
+  const alvo = language.toLowerCase();
+  const lang = v.lang.toLowerCase().replace("_", "-");
+  if (lang === alvo) nota += 100;
+  else if (lang.split("-")[0] === alvo.split("-")[0]) nota += 50;
+  else return -1000; // idioma errado nunca serve
+
+  if (v.localService) nota += 10;
+  if (v.default) nota += 5;
+  return nota;
+}
+
+/**
+ * Escolhe a MELHOR voz do sistema, nao a primeira.
+ *
+ * A lista chega VAZIA na primeira chamada em varios navegadores — ela e
+ * preenchida de forma assincrona — e por isso quem chama aceita `null` e deixa o
+ * sistema escolher.
  */
 function pickVoice(language: string): SpeechSynthesisVoice | null {
   const vozes = globalThis.speechSynthesis?.getVoices() ?? [];
   if (vozes.length === 0) return null;
 
-  const exata = vozes.find((v) => v.lang.toLowerCase() === language.toLowerCase());
-  if (exata) return exata;
+  let melhor: SpeechSynthesisVoice | null = null;
+  let melhorNota = -Infinity;
+  for (const v of vozes) {
+    const nota = notaDaVoz(v, language);
+    if (nota > melhorNota) {
+      melhorNota = nota;
+      melhor = v;
+    }
+  }
+  return melhorNota <= -1000 ? null : melhor;
+}
 
-  const raiz = language.split("-")[0]!.toLowerCase();
-  return vozes.find((v) => v.lang.toLowerCase().startsWith(raiz)) ?? null;
+/** Qual voz o app escolheu, pra tela poder mostrar. */
+export function chosenVoiceName(language: string): string | null {
+  return pickVoice(language)?.name ?? null;
 }
 
 export function stopSpeaking(): void {
