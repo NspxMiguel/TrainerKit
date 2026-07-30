@@ -614,6 +614,7 @@ export const FR: Dict = {
   "team.have": "vous l’avez",
   "team.hunt": "à attraper",
   "team.howBuilt": "Composée à partir des types d’attaque auxquels le boss ne résiste pas, avec le meilleur attaquant de chacun, sans type principal répété pour que l’équipe ne tombe pas entière sur la même attaque. Ce n’est pas un tier list du méta — l’app n’a aucune donnée sur ce que les gens jouent.",
+  "team.eliteNote": "✦ nécessite une CT Élite, l’un des objets les plus rares du jeu. Sans elle, prenez la deuxième meilleure capacité de l’espèce.",
   "team.howBuiltPvp": "Classée par produit de statistiques sous le plafond de PC de la ligue — qui rentre le plus d’attaque, de défense et de PV dans la limite. Aveugle au type, aux attaques et au méta, là où le PvP se décide vraiment. L’app n’a aucune donnée sur ce que les gens jouent.",
   "tip.title": "Le savais-tu",
   "tip.capped": "En ligue plafonnée le 100% perd souvent : le meilleur {name} pour Great est {atk}/{def}/{hp}.",

@@ -667,6 +667,7 @@ const EN = {
   "team.have": "you have",
   "team.hunt": "go catch",
   "team.howBuilt": "Built from the attack types the boss does not resist, taking the best attacker of each, with no repeated primary type so the whole team does not fall to the same move. It is not a meta tier list — the app has no data on what people actually run.",
+  "team.eliteNote": "✦ needs an Elite TM — one of the rarest items in the game. Without one, use the species' next best move.",
   "team.howBuiltPvp": "Ranked by stat product under the league CP cap — who squeezes the most attack, defence and HP into the limit. It is blind to type, moves and meta, which is where PvP is actually decided. The app has no data on what people run.",
   "tip.title": "Did you know",
   "tip.capped": "In a capped league the 100% usually loses: the best {name} for Great is {atk}/{def}/{hp}.",

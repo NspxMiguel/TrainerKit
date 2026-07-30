@@ -614,6 +614,7 @@ export const IT: Dict = {
   "team.have": "ce l’hai",
   "team.hunt": "da prendere",
   "team.howBuilt": "Costruita dai tipi di mossa a cui il boss non resiste, prendendo il miglior attaccante di ognuno, senza ripetere il tipo primario così la squadra non cade tutta con la stessa mossa. Non è una tier list del meta — l’app non ha dati su cosa usa la gente.",
+  "team.eliteNote": "✦ richiede una MT Elite, uno degli oggetti più rari del gioco. Senza, usa la seconda mossa migliore della specie.",
   "team.howBuiltPvp": "Ordinata per prodotto delle statistiche sotto il tetto di PL della lega — chi infila più attacco, difesa e PS nel limite. È cieca a tipo, mosse e meta, dove il PvP si decide davvero. L’app non ha dati su cosa usa la gente.",
   "tip.title": "Lo sapevi",
   "tip.capped": "In lega con tetto il 100% spesso perde: il miglior {name} per Great è {atk}/{def}/{hp}.",

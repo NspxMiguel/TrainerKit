@@ -53,6 +53,31 @@ const SUGESTOES = 6;
  * facil: bastava escrever uma lista bonita. Entao o time sai de conta declarada
  * e a tela diz qual e a conta.
  */
+/**
+ * O golpe so existe com MT Elite?
+ *
+ * ⚠️ Sem isto o app dava um conselho que a pessoa nao tem como seguir.
+ *
+ * Pra Mewtwo, o time montado punha Xerneas em primeiro com "Geomancy +
+ * Megahorn". Conferido no dataset: Geomancy e mesmo golpe rapido do Xerneas —
+ * mas esta em `eliteFastMoves`, ou seja, so entra com uma MT Elite de Ataque
+ * Rapido, que e dos itens mais raros do jogo. "Vai capturar esse, com esse
+ * golpe" vira instrucao impossivel pra quase todo mundo, e o app nao dizia.
+ *
+ * O core ja calculava `needsElite` em `moves.ts` desde sempre. Ninguem
+ * mostrava — o dado existia e morria no caminho, que e o mesmo padrao do
+ * `lastTtsError` que ninguem lia.
+ */
+const ELITE = "✦";
+
+function marcarElite(
+  sp: { eliteFastMoves: readonly string[]; eliteChargedMoves: readonly string[] },
+  fastId: string,
+  chargedId: string,
+): boolean {
+  return sp.eliteFastMoves.includes(fastId) || sp.eliteChargedMoves.includes(chargedId);
+}
+
 export function TeamBuilder({ data, onClose, onPickSpecies }: Props) {
   /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
      caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
@@ -177,7 +202,8 @@ export function TeamBuilder({ data, onClose, onPickSpecies }: Props) {
         if (r.fast && r.charged) {
           const nome = (m: { name: string; id: string }) =>
             moveLabel(m.name, data.moveNames, m.id, language).primary;
-          movesets.set(r.speciesId, `${nome(r.fast)} + ${nome(r.charged)}`);
+          const elite = marcarElite(sp, r.fast.id, r.charged.id) ? ` ${ELITE}` : "";
+          movesets.set(r.speciesId, `${nome(r.fast)} + ${nome(r.charged)}${elite}`);
         } else {
           movesets.delete(r.speciesId);
         }
@@ -227,7 +253,8 @@ export function TeamBuilder({ data, onClose, onPickSpecies }: Props) {
 
       const nome = (m: { name: string; id: string }) =>
         moveLabel(m.name, data.moveNames, m.id, language).primary;
-      out.set(p.speciesId, `${nome(best.fast)} + ${nome(best.charged)}`);
+      const elite = marcarElite(sp, best.fast.id, best.charged.id) ? ` ${ELITE}` : "";
+      out.set(p.speciesId, `${nome(best.fast)} + ${nome(best.charged)}${elite}`);
     }
     return out;
   }, [goal, time, especiePor, data, language]);
@@ -515,6 +542,14 @@ export function TeamBuilder({ data, onClose, onPickSpecies }: Props) {
               );
             })}
           </div>
+
+          {/* A nota da MT Elite so aparece se ALGUEM do time precisar de uma.
+              Explicar um simbolo que nao esta na tela e ruido. */}
+          {time.some((p) => (movesetsPvp.get(p.speciesId) ?? movesets.get(p.speciesId) ?? "").includes(ELITE)) && (
+            <p className="tk-caption" style={{ marginTop: 14, lineHeight: 1.6 }}>
+              {t("team.eliteNote")}
+            </p>
+          )}
 
           <p className="tk-caption" style={{ marginTop: 16, lineHeight: 1.6 }}>
             {goal === "raid" ? t("team.howBuilt") : t("team.howBuiltPvp")}
