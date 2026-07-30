@@ -1,3 +1,10 @@
+import { elevenAvailable, elevenSynthesize } from "../ai/elevenlabs.ts";
+import {
+  KOKORO_VOICES,
+  kokoroReady,
+  kokoroSupports,
+  kokoroSynthesize,
+} from "../ai/kokoro.ts";
 import { synthesize, ttsAvailable } from "../ai/tts.ts";
 
 /**
@@ -48,6 +55,26 @@ const VOICE_KEY = "tk:dex-voz";
  * identificador de verdade.
  */
 const VOICE_PICK_KEY = "tk:dex-voz-escolhida";
+
+/** Voz do Kokoro escolhida (`pf_dora`, `am_michael`…). Vazio = usa a primeira. */
+const KOKORO_PICK_KEY = "tk:dex-voz-kokoro";
+
+export function getKokoroVoice(): string | null {
+  try {
+    return globalThis.localStorage?.getItem(KOKORO_PICK_KEY) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export function setKokoroVoice(id: string | null): void {
+  try {
+    if (id === null) globalThis.localStorage?.removeItem(KOKORO_PICK_KEY);
+    else globalThis.localStorage?.setItem(KOKORO_PICK_KEY, id);
+  } catch {
+    /* preferencia nao persistida vale mais que app quebrado */
+  }
+}
 
 export function getPickedVoiceUri(): string | null {
   try {
@@ -328,22 +355,50 @@ export function lastTtsError(): string | null {
 export async function speak(text: string, language: string): Promise<void> {
   stopSpeaking();
 
+  /*
+   * A ordem: Kokoro, ElevenLabs, Groq, sistema.
+   *
+   * Kokoro primeiro porque e a melhor E a mais barata das que rodam sem conta:
+   * no aparelho, sem chave, sem rede, sem cota. So entra se JA estiver
+   * carregado — `speak` nunca dispara um download por conta propria, isso e
+   * decisao de quem aperta o botao nos Ajustes. E so serve ingles.
+   *
+   * ElevenLabs em seguida: e a que ele pediu pelo nome e a unica com portugues
+   * humano de verdade, mas consome cota de um plano gratuito pequeno. Vir
+   * depois do Kokoro significa que quem usa o app em ingles nao gasta credito a
+   * toa.
+   *
+   * O sistema fica por ultimo e nunca deixa de existir: se tudo falhar — sem
+   * rede, cota estourada, chave errada — a Pokedex fala assim mesmo.
+   */
+  if (kokoroReady() && kokoroSupports(language)) {
+    try {
+      const voz = getKokoroVoice() ?? undefined;
+      const blob = await kokoroSynthesize(text, voz ?? defaultKokoroVoice(language));
+      await tocarBlob(blob);
+      ultimoErroTts = null;
+      return;
+    } catch (e) {
+      ultimoErroTts = e instanceof Error ? e.message : String(e);
+    }
+  }
+
+  if (elevenAvailable()) {
+    try {
+      const blob = await elevenSynthesize(text);
+      await tocarBlob(blob);
+      ultimoErroTts = null;
+      return;
+    } catch (e) {
+      ultimoErroTts = e instanceof Error ? e.message : String(e);
+    }
+  }
+
   if (ttsAvailable(language)) {
     try {
       const blob = await synthesize(text);
       ultimoErroTts = null;
-      const url = URL.createObjectURL(blob);
-      urlAtual = url;
-      const audio = new Audio(url);
-      tocando = audio;
-      await new Promise<void>((resolve) => {
-        // Resolve nos dois casos: sem isto, um audio que falha em tocar deixaria
-        // a promessa pendurada e o botao "Falar" desabilitado pra sempre.
-        audio.onended = () => resolve();
-        audio.onerror = () => resolve();
-        void audio.play().catch(() => resolve());
-      });
-      pararAudio();
+      await tocarBlob(blob);
       return;
     } catch (e) {
       // Guarda e cai pro sistema. Ficar muda porque a nuvem falhou seria pior
@@ -355,8 +410,34 @@ export async function speak(text: string, language: string): Promise<void> {
   await speakWithSystem(text, language);
 }
 
+/** A voz padrao do idioma quando ninguem escolheu. */
+function defaultKokoroVoice(language: string): string {
+  const vozes = KOKORO_VOICES[language] ?? [];
+  return vozes[0]?.id ?? "af_heart";
+}
+
 /**
- * O plano B: a voz do sistema, com a entrega de aparelho.
+ * Toca um Blob de audio ate o fim.
+ *
+ * Compartilhado por Kokoro e Groq. Resolve tambem no erro: sem isso, um audio
+ * que falha em tocar deixaria a promessa pendurada e o botao "Falar"
+ * desabilitado pra sempre.
+ */
+async function tocarBlob(blob: Blob): Promise<void> {
+  const url = URL.createObjectURL(blob);
+  urlAtual = url;
+  const audio = new Audio(url);
+  tocando = audio;
+  await new Promise<void>((resolve) => {
+    audio.onended = () => resolve();
+    audio.onerror = () => resolve();
+    void audio.play().catch(() => resolve());
+  });
+  pararAudio();
+}
+
+/**
+ * O plano C: a voz do sistema, com a entrega de aparelho.
  *
  * `rate` 0.88 e `pitch` 0.85: mais lento e mais grave que a fala natural, que e
  * o que faz soar anunciado em vez de conversado. Nao mexer nisso sem ouvir —

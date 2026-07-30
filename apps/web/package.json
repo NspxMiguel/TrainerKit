@@ -17,6 +17,7 @@
     "@trainerkit/core": "workspace:*",
     "dexie": "^4.0.11",
     "fflate": "^0.8.3",
+    "kokoro-js": "^1.2.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
