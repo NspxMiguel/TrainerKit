@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 
 import { getGroqKey, getGroqModel, groqChat } from "./groq.ts";
+import { esgotou, registrarUso } from "./quota.ts";
 import {
   DEFAULT_LOCAL_MODEL,
   engineReady,
@@ -32,11 +33,25 @@ export type AiProvider = "off" | "groq" | "local" | "shared";
 /**
  * A URL da funcao que guarda a chave compartilhada.
  *
- * Vem do build (`VITE_TK_AI_PROXY`). VAZIA por padrao, e isso e proposital: sem a
- * funcao publicada, a opcao "gratis" nem aparece na tela. Oferecer um botao que
- * responde 503 seria pior que nao ter o botao.
+ * O PADRAO E A FUNCAO PUBLICADA, e nao vazio.
+ *
+ * Antes isto so vinha de `VITE_TK_AI_PROXY`, definida unicamente no workflow do
+ * GitHub. Consequencia que o Miguel achou abrindo os Ajustes: no `pnpm dev` a
+ * opcao "Grátis" simplesmente NAO EXISTIA — "kd publico?". O app publicado tinha
+ * o recurso e o app em que eu trabalho, nao. Toda vez que eu conferia uma tela de
+ * IA, conferia a versao errada.
+ *
+ * A URL nao e segredo: ela ja esta escrita no bundle publicado, que qualquer um
+ * baixa. O segredo e a CHAVE, e ela mora numa variavel de ambiente da Vercel, do
+ * outro lado desta URL. Tratar um endereco publico como se fosse credencial so
+ * escondia o recurso de mim mesmo.
+ *
+ * A variavel continua valendo e sobrescreve — e o que aponta um build pra uma
+ * funcao de teste sem tocar em codigo.
  */
-export const AI_PROXY: string = import.meta.env.VITE_TK_AI_PROXY ?? "";
+const AI_PROXY_PADRAO = "https://trainerkit-ia.vercel.app/api/ai";
+
+export const AI_PROXY: string = import.meta.env.VITE_TK_AI_PROXY ?? AI_PROXY_PADRAO;
 
 export function sharedAvailable(): boolean {
   return AI_PROXY !== "";
@@ -82,7 +97,18 @@ function lerProvider(): AiProvider {
    * ja tinha uma, ela continua com a IA funcionando — cair pra "desligado" num
    * update seria tirar um recurso que ela ligou de propósito.
    */
-  return getGroqKey() ? "groq" : "off";
+  if (getGroqKey()) return "groq";
+
+  /*
+   * Sem escolha nenhuma: LIGADA na compartilhada.
+   *
+   * "por padrao deixa chave publica". O padrao era "desligado", e desligado por
+   * padrao significa que ninguem nunca viu o recurso funcionar: pra descobrir que
+   * existe IA, a pessoa tinha que entrar nos Ajustes procurando uma coisa que ela
+   * nao sabia estar la. As cinco perguntas por dia (ver `quota.ts`) sao o que
+   * torna isso sustentavel — sem teto, o padrao ligado seria a conta dele.
+   */
+  return sharedAvailable() ? "shared" : "off";
 }
 
 let provider = lerProvider();
@@ -225,6 +251,10 @@ export async function chat(
    * gratuito acaba.
    */
   if (provider === "shared") {
+    // O teto diario, ANTES de gastar a chave dele. Erro proprio pra tela poder
+    // dizer "acabaram as de hoje" em vez de repassar um 429 cru.
+    if (esgotou()) throw new Error("cota-diaria");
+
     const res = await fetch(AI_PROXY, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -239,6 +269,10 @@ export async function chat(
     const corpo = (await res.json().catch(() => ({}))) as { text?: string; error?: string };
     if (!res.ok) throw new Error(corpo.error ?? `${res.status}`);
     if (!corpo.text) throw new Error("resposta vazia");
+
+    // So conta DEPOIS de a resposta chegar inteira. Rede caindo no meio nao pode
+    // consumir uma das cinco de quem nao leu nada.
+    registrarUso();
     return corpo.text;
   }
 

@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 
+import { mensagemDeErro } from "../ai/erro.ts";
 import { askAboutCollection, collectionFacts } from "../ai/ask.ts";
 import { ensureEngine, type LoadProgress } from "../ai/local.ts";
 import { useAi } from "../ai/provider.ts";
@@ -84,7 +85,7 @@ export function AskBox({ items, data }: Props) {
                   .then(() => setBaixando(null))
                   .catch((e: unknown) => {
                     setBaixando(null);
-                    setError(e instanceof Error ? e.message : String(e));
+                    setError(mensagemDeErro(e, t));
                   });
               }}
             >
@@ -123,7 +124,7 @@ export function AskBox({ items, data }: Props) {
       setAnswer(res);
     } catch (err) {
       if ((err as Error).name !== "AbortError") {
-        setError(err instanceof Error ? err.message : String(err));
+        setError(mensagemDeErro(err, t));
       }
     } finally {
       setBusy(false);

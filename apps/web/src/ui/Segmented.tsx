@@ -49,6 +49,10 @@ export function Segmented<T extends string>({
       role="group"
       aria-label={ariaLabel}
       data-compact={size === "compact" || undefined}
+      /* Quantas opcoes, pro CSS poder apertar a fonte quando sao muitas. Ver a
+         nota em `.tk-segment[data-n]` — com a quarta opcao ("Grátis"), o rotulo
+         "No aparelho" passou a sair "No apar…". */
+      data-n={options.length}
       style={
         {
           "--tk-seg-n": options.length,
