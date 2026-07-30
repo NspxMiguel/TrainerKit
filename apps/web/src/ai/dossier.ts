@@ -1,6 +1,7 @@
 import {
   computeCPAtLevel,
   effectiveness,
+  isObtainable,
   rankDefenders,
   rankMovesets,
   type MoveWithPvp,
@@ -36,6 +37,9 @@ const PERFEITO = { atk: 15, def: 15, hp: 15 };
 
 /** Quantos golpes listar por contexto. Tres ja mostra o padrao sem virar tabela. */
 const MOVESETS = 3;
+
+/** Quantos nomes no topo do jogo. Cinco da pra comparar sem virar tabela. */
+const TOPO = 5;
 
 function movesetsDe(
   species: DatasetSpecies,
@@ -179,6 +183,52 @@ export function speciesDossier(
     );
   }
 
+  /* ------------------------------------------------- com quem se compara */
+
+  /*
+   * O TOPO do jogo entra junto.
+   *
+   * "O dossiê não fornece informações sobre outros Pokémon, então não é possível
+   * comparar" — foi a resposta que ele levou ao perguntar "o melhor pokemon para
+   * segurar ginasio?". E o modelo estava certo: eu mandava a especie sozinha.
+   * Perguntar "qual o melhor" e a pergunta mais natural que existe numa Pokedex,
+   * e ela precisa de uma lista pra ser respondida.
+   *
+   * Cinco nomes de cada, calculados aqui — nao uma opiniao minha sobre quem e
+   * bom.
+   */
+  const melhoresDefensores = rankDefenders(
+    data.species
+      .filter((sp) => sp.cosmeticOf === null && isObtainable(sp.id))
+      .map((sp) => ({
+        id: sp.id,
+        speciesId: sp.id,
+        name: sp.name,
+        types: sp.types,
+        baseStats: sp.baseStats,
+        ivs: PERFEITO,
+        level: NIVEL_REF,
+      })),
+    data.cpm,
+    data.typeChart,
+    data.typeOrder,
+  ).slice(0, TOPO);
+
+  linhas.push(
+    `Melhores defensores de ginásio do jogo (aguento no nível ${NIVEL_REF}, IV perfeito): ` +
+      melhoresDefensores
+        .map((d, i) => `${i + 1}º ${d.name} ${Math.round(d.bulk).toLocaleString("pt-BR")}`)
+        .join(", "),
+  );
+
+  const topoRaide = (data.rankings?.raidOverall ?? []).slice(0, TOPO);
+  if (topoRaide.length > 0) {
+    linhas.push(
+      `Melhores atacantes de raide do jogo: ` +
+        topoRaide.map((r, i) => `${i + 1}º ${r.name}`).join(", "),
+    );
+  }
+
   /* ------------------------------------------------------------- rankings */
 
   const tipoPrimario = species.types[0] ?? "normal";
@@ -268,19 +318,24 @@ export function speciesDossier(
  */
 export const DEX_SYSTEM = `Você é a Pokédex do TrainerKit, um app de Pokémon GO.
 
-Você recebe um dossiê com tudo que o app calculou sobre este Pokémon: atributos,
-tabela de tipos, aguento como defensor de ginásio, posição nos rankings de raide
-e das três ligas, melhores golpes, linha evolutiva, e o que o jogador tem dele.
+Sua memória sobre este Pokémon inclui: atributos, tabela de tipos, aguento como
+defensor de ginásio, posição nos rankings de raide e das três ligas, melhores
+golpes, linha evolutiva, o que o jogador tem dele, e os melhores do jogo em
+defesa e em ataque de raide para comparação.
 
-Responda a pergunta a partir do dossiê.
+Responda a pergunta a partir dele.
 
 Regras rígidas:
+- NUNCA cite o dossiê, "os dados fornecidos", "as informações que recebi" ou
+  qualquer coisa parecida. Você É a Pokédex: esses números são a SUA memória, não
+  um documento que alguém te passou. Diga "Dragonite aguenta 29.795", nunca "de
+  acordo com o dossiê, Dragonite aguenta 29.795".
 - Você PODE raciocinar sobre os dados e tirar conclusões deles. "Aguento alto e
   só duas fraquezas, então segura ginásio bem" é uma resposta correta e é
   exatamente o que se espera de você.
-- Você NÃO PODE inventar números, golpes, posições ou mecânicas que não estejam
-  no dossiê. Se o dossiê realmente não cobre a pergunta, diga o que ele cobre de
-  mais próximo em vez de só recusar.
+- Você NÃO PODE inventar números, golpes, posições ou mecânicas. Se algo não
+  estiver na sua memória, diga o que você sabe de mais próximo em vez de recusar
+  — e nunca explique que "não foi fornecido".
 - Não gere, descreva nem ofereça imagens.
 - Tom de aparelho: direto, informativo, sem saudação e sem se despedir.
 - No máximo 4 frases curtas. Responda no idioma da pergunta.`;

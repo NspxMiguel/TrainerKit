@@ -4,6 +4,15 @@
   justify-content: center;
   /* O fundo saiu daqui — ver a camada fixa abaixo. */
   background: var(--tk-bg);
+
+  /*
+   * Nada empurra a pagina de lado. Nunca.
+   *
+   * `clip` e nao `hidden`: `hidden` cria um contexto de rolagem e quebraria o
+   * `position: sticky` da barra lateral em tela grande. `clip` corta sem criar
+   * rolagem nenhuma — que e exatamente o que se quer aqui.
+   */
+  overflow-x: clip;
 }
 
 /*
@@ -2181,6 +2190,17 @@
  * Os numeros que valiam a pena foram pro cabecalho da secao.
  */
 .tk-strip-row {
+  /*
+   * O rolar deste bloco NAO contagia a pagina.
+   *
+   * Sem `overscroll-behavior-x: contain`, arrastar a fila depois do fim faz o
+   * iOS continuar o gesto no documento — e a tela inteira desliza de lado. Com
+   * as margens negativas que a fila usa pra sangrar ate a borda, o resultado e
+   * a tela inicial aparecendo torta, com pedacos de conteudo na lateral. Foi o
+   * "ainda bugado a tela inicial" que eu nao conseguia reproduzir no
+   * computador, porque no computador nao ha gesto de arrastar.
+   */
+  overscroll-behavior-x: contain;
   display: flex;
   gap: var(--tk-s2);
   overflow-x: auto;
@@ -2294,6 +2314,17 @@
  * lateral e o padrao que o sistema ja usa pra isso, e mantem a altura fixa.
  */
 .tk-chips {
+  /*
+   * O rolar deste bloco NAO contagia a pagina.
+   *
+   * Sem `overscroll-behavior-x: contain`, arrastar a fila depois do fim faz o
+   * iOS continuar o gesto no documento — e a tela inteira desliza de lado. Com
+   * as margens negativas que a fila usa pra sangrar ate a borda, o resultado e
+   * a tela inicial aparecendo torta, com pedacos de conteudo na lateral. Foi o
+   * "ainda bugado a tela inicial" que eu nao conseguia reproduzir no
+   * computador, porque no computador nao ha gesto de arrastar.
+   */
+  overscroll-behavior-x: contain;
   display: flex;
   gap: 6px;
   overflow-x: auto;
@@ -4416,4 +4447,16 @@
   .tk-dexdev-reticle {
     animation: none;
   }
+}
+
+/* Marca da voz recomendada e o triangulo de tocar, na lista de vozes. */
+.tk-voice-rec {
+  font: 500 11px var(--tk-font);
+  color: var(--tk-succ);
+}
+
+.tk-voice-play {
+  flex: none;
+  font: 400 12px/1 var(--tk-font);
+  color: var(--tk-txt4);
 }

@@ -15,6 +15,7 @@ import { Segmented } from "../ui/Segmented.tsx";
 import { SettingsSheet } from "../ui/SettingsSheet.tsx";
 import { updateSetup, useSetup } from "../onboarding/setup.ts";
 import { useAi } from "../ai/provider.ts";
+import { chosenVoiceName, voiceOn } from "../ui/dexVoice.ts";
 import { SOURCE_KEYS, useSpriteSettings } from "../sprites/settings.ts";
 import { useInstallState } from "../storage/install.ts";
 import {
@@ -28,6 +29,7 @@ import { InstallGuide } from "./InstallGuide.tsx";
 import { AiSettings } from "./AiSettings.tsx";
 import { DataSourceSettings } from "./DataSourceSettings.tsx";
 import { SpriteSettings } from "./SpriteSettings.tsx";
+import { VoiceSettings } from "./VoiceSettings.tsx";
 import { WipeDialog } from "../ui/WipeDialog.tsx";
 
 interface Props {
@@ -42,7 +44,17 @@ interface Props {
 type Theme = "sistema" | "claro" | "escuro";
 
 /** Qual assunto esta aberto. `null` e o indice. */
-type Painel = "look" | "usage" | "lang" | "images" | "data" | "ai" | "storage" | "updates" | "about";
+type Painel =
+  | "look"
+  | "usage"
+  | "lang"
+  | "images"
+  | "voice"
+  | "data"
+  | "ai"
+  | "storage"
+  | "updates"
+  | "about";
 
 const THEME_KEY = "tk:tema";
 
@@ -167,6 +179,13 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
           label={t("sprites.title")}
           value={fonteDeImagem}
           onOpen={() => setPainel("images")}
+        />
+        {/* A voz fica junto do resto da aparencia: e como o app se apresenta,
+            nao um detalhe da Pokedex. */}
+        <Linha
+          label={t("voice.title")}
+          value={voiceOn() ? (chosenVoiceName(language) ?? t("settings.yes")) : t("ai.off")}
+          onOpen={() => setPainel("voice")}
         />
       </section>
 
@@ -299,6 +318,12 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
       {painel === "images" && (
         <SettingsSheet title={t("sprites.title")} onClose={fechar}>
           <SpriteSettings species={species} />
+        </SettingsSheet>
+      )}
+
+      {painel === "voice" && (
+        <SettingsSheet title={t("voice.title")} onClose={fechar}>
+          <VoiceSettings />
         </SettingsSheet>
       )}
 
