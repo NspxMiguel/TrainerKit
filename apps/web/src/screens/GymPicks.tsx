@@ -138,8 +138,8 @@ export function GymPicks({ data, onClose, onPickSpecies }: Props) {
         >
           ‹
         </button>
-        <h2 className="tk-sheet-title">{t("gym.title")}</h2>
       </header>
+      <h1 className="tk-h1">{t("gym.title")}</h1>
 
       {/*
         A conta da moeda vem ANTES da lista.

@@ -842,11 +842,17 @@
   animation: tk-rise 0.2s var(--tk-ease) both;
 }
 
+/*
+ * So a volta. O titulo saiu daqui e virou `.tk-h1`, igual ao das telas.
+ *
+ * Ver a nota em `SettingsSheet`: o titulo da folha comecava 40px mais a direita
+ * e 8px menor que o das telas, e isso fazia o app parecer trocar de identidade
+ * ao entrar em qualquer assunto.
+ */
 .tk-sheet-head {
   display: flex;
   align-items: center;
-  gap: var(--tk-s2);
-  margin-bottom: var(--tk-s5);
+  margin-bottom: var(--tk-s1);
 }
 
 .tk-sheet-close {
@@ -860,11 +866,7 @@
   place-items: center;
 }
 
-.tk-sheet-title {
-  font: 800 26px/1.1 var(--tk-font);
-  letter-spacing: -0.02em;
-  margin: 0;
-}
+/* `.tk-sheet-title` ficou sem uso: a folha usa `.tk-h1` agora. */
 
 /* ------------------------------------------------------------------ busca */
 
@@ -2038,7 +2040,20 @@
   background: none;
 }
 
+/*
+ * A bolinha do veredito, com respiro.
+ *
+ * ⚠️ Sem o `margin-right` isto saia "○Keep" e "○Power up" colados, sem espaco
+ * nenhum — o Miguel: "os nomes colado nessa bolinha". Em fonte pequena e
+ * monoespacada o simbolo grudava na palavra e virava um borrao que nem lia como
+ * duas coisas.
+ *
+ * `inline-block` junto: sem ele o `margin` num inline puro se comporta diferente
+ * conforme o que vem antes, e o espaco variava de linha pra linha.
+ */
 .tk-done-mark {
+  display: inline-block;
+  margin-right: 5px;
   font: 700 12px/1 var(--tk-mono);
   opacity: 0.85;
 }

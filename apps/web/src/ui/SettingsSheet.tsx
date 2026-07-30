@@ -43,6 +43,19 @@ export function SettingsSheet({ title, onClose, children }: Props) {
 
   return createPortal(
     <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={title}>
+      {/*
+        A volta EM CIMA, o titulo alinhado com o resto do app.
+        
+        Antes os dois dividiam uma linha, e o titulo comecava depois do botao. O
+        Miguel: "compara o settings com o about ou o privacy". Medido: em
+        Ajustes o titulo comeca a 22px e tem 34px; na folha comecava a 62px e
+        tinha 26px. Ao entrar numa folha o titulo PULAVA 40px pra direita e
+        encolhia — o app parecia trocar de identidade a cada toque.
+
+        Agora a folha usa o mesmo `.tk-h1` das telas, na mesma margem, e a volta
+        vive numa linha propria acima. Entrar num assunto deixa de ser uma
+        mudanca de layout e passa a ser so mais conteudo.
+      */}
       <header className="tk-sheet-head">
         <button
           type="button"
@@ -52,8 +65,8 @@ export function SettingsSheet({ title, onClose, children }: Props) {
         >
           ‹
         </button>
-        <h2 className="tk-sheet-title">{title}</h2>
       </header>
+      <h1 className="tk-h1">{title}</h1>
 
       {children}
     </div>,

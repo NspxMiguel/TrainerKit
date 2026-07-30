@@ -13,6 +13,7 @@ import {
   useCollection,
 } from "../storage/collection.ts";
 import { AskBox } from "../ui/AskBox.tsx";
+import { setEmGrade, useEmGrade } from "../ui/vistaColecao.ts";
 import { IconGrid, IconList, IconPlus } from "../ui/Icons.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 import { SpeciesDetail } from "./SpeciesDetail.tsx";
@@ -42,20 +43,7 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
   );
   const [message, setMessage] = useState<string | null>(null);
 
-  /**
-   * Grade ou lista — e a escolha fica salva.
-   *
-   * Grade por padrao: e a "cara de Pokedex" que ele pediu, e e a vista que a
-   * aba Pokedex ja usa. Quem prefere ver IV e veredito escritos troca uma vez e
-   * o app lembra.
-   */
-  const [grade, setGrade] = useState(() => {
-    try {
-      return globalThis.localStorage?.getItem("tk:colecao-grade") !== "0";
-    } catch {
-      return true;
-    }
-  });
+  const grade = useEmGrade();
 
   const ready = dataset.status === "ready";
   const species = ready ? dataset.data.species : [];
@@ -127,13 +115,24 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
         cobrando o app inteiro — dois nomes pra um lugar so. O seletor
         "Todos/Meus" ja diz onde a pessoa esta.
       */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        {!embutida && (
-          <h1 className="tk-h1" style={{ flex: 1, minWidth: 0 }}>
-            {t("collection.title")}
-          </h1>
-        )}
-        {embutida && <span style={{ flex: 1 }} />}
+      {/*
+        ⚠️ Embutida, esta linha NAO existe.
+
+        Ela era `<h1>` + botao de vista. Sem o titulo, sobrava um botao de 44px
+        sozinho com 287px de vazio a esquerda, flutuando acima da lista — "o
+        negocio ali voando de lista ou grade", nas palavras dele. Eu tinha
+        escondido o titulo e deixado a linha inteira de pe, com um espacador no
+        lugar dele.
+
+        Dentro da Pokedex o alternador vai pra linha do seletor "Todos/Meus", que
+        e onde as escolhas de vista daquela tela ja moram. Ver `PokedexScreen`.
+      */}
+      <div
+        style={{ display: embutida ? "none" : "flex", alignItems: "center", gap: 10 }}
+      >
+        <h1 className="tk-h1" style={{ flex: 1, minWidth: 0 }}>
+          {t("collection.title")}
+        </h1>
         {rows !== null && rows.length > 0 && (
           <button
             type="button"
@@ -141,12 +140,7 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
             aria-label={t(grade ? "collection.asList" : "collection.asGrid")}
             title={t(grade ? "collection.asList" : "collection.asGrid")}
             onClick={() => {
-              setGrade((v) => !v);
-              try {
-                globalThis.localStorage?.setItem("tk:colecao-grade", grade ? "0" : "1");
-              } catch {
-                /* preferencia nao persistida vale mais que app quebrado */
-              }
+              setEmGrade(!grade);
             }}
           >
             {grade ? <IconList size={18} /> : <IconGrid size={18} />}

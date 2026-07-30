@@ -270,8 +270,8 @@ export function TeamBuilder({ data, onClose, onPickSpecies }: Props) {
         >
           ‹
         </button>
-        <h2 className="tk-sheet-title">{t("team.title")}</h2>
       </header>
+      <h1 className="tk-h1">{t("team.title")}</h1>
 
       {/* Pra quê, antes de contra quem: um time de raide e um time de PvP nao
           se parecem nem um pouco, e perguntar o tipo do chefe pra quem quer

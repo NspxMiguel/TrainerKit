@@ -127,8 +127,8 @@ export function InstallGuide({ platform, promptInstall, onClose }: Props) {
           >
             ‹
           </button>
-          <h2 className="tk-sheet-title">{t(guide.titleKey)}</h2>
         </header>
+        <h1 className="tk-h1">{t(guide.titleKey)}</h1>
 
         <p className="tk-caption" style={{ margin: "18px 2px 12px", lineHeight: 1.5 }}>
           {t(guide.browserKey)}

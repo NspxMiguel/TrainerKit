@@ -115,9 +115,9 @@ export function IVCalculator({ species, data, onClose, owned }: Props) {
         <button type="button" className="tk-sheet-close" onClick={onClose} aria-label={t("common.back")}>
           ‹
         </button>
-        <h2 className="tk-sheet-title">{t("iv.title", { name: species.name })}</h2>
         <BetaBadge />
       </header>
+      <h1 className="tk-h1">{t("iv.title", { name: species.name })}</h1>
 
       <div style={{ display: "flex", gap: 14, alignItems: "center", marginBottom: 20 }}>
         <SpeciesTile
