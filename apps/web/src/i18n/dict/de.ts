@@ -415,7 +415,7 @@ export const DE: Dict = {
   "team.howBuilt": "Aufgebaut aus den Attackentypen, die der Boss nicht abwehrt, mit dem besten Angreifer je Typ, ohne wiederholten Primärtyp, damit nicht das ganze Team an derselben Attacke stirbt. Keine Meta-Tierlist — die App hat keine Daten darüber, was gespielt wird.",
   "team.howBuiltPvp": "Sortiert nach Statuswert-Produkt unter dem WP-Limit der Liga — wer am meisten Angriff, Verteidigung und KP ins Limit presst. Blind für Typ, Attacken und Meta, wo PvP eigentlich entschieden wird. Die App hat keine Daten darüber, was gespielt wird.",
   "tip.title": "Wusstest du",
-  "tip.capped": "In einer Liga mit Grenze verliert das 100% meistens. Das beste {name} für Great ist {atk}/{def}/{hp} — Angriff fast null.",
+  "tip.capped": "In gedeckelter Liga verliert der 100% meist: bester {name} für Great ist {atk}/{def}/{hp}.",
   "tip.raidAttack": "Für Raids zählt Angriff 15 mehr als eine hohe IV-Summe. Die anderen beiden bewegen den Schaden kaum.",
   "tip.shadow": "Crypto schlägt 20% härter, kassiert aber 17% mehr. Das eigentliche Problem ist Frustration.",
   "tip.rocket": "Rocket-Anführer blocken immer deine ersten zwei Lade-Attacken. Köder mit der billigen.",

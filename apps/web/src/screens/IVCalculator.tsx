@@ -210,6 +210,7 @@ export function IVCalculator({ species, data, onClose, owned }: Props) {
 
       <div style={{ marginTop: 20 }}>
         <VerdictCard
+          owned={owned}
           name={species.name}
           baseStats={species.baseStats}
           ivs={ivs}
