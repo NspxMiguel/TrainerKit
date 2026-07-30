@@ -24,10 +24,31 @@ export function mensagemDeErro(
   switch (bruto) {
     case "cota-diaria":
       return t("ai.err.dailyQuota");
+    case "cota-hora":
+      return t("ai.err.hourQuota");
     case "sem-chave":
       return t("ai.err.noKey");
     case "ia-desligada":
       return t("ai.err.off");
+
+    /*
+     * O porteiro (`guarda.ts`).
+     *
+     * Cada motivo tem frase propria porque sao situacoes diferentes pra quem
+     * esta do outro lado: quem pediu codigo Python precisa saber que o app so
+     * fala de Pokemon; quem escreveu uma pergunta de 700 caracteres precisa
+     * saber que e pra encurtar. Uma mensagem generica faria os dois acharem que
+     * o app quebrou.
+     */
+    case "filtro-fora-do-assunto":
+      return t("ai.err.offTopic");
+    case "filtro-injecao":
+      return t("ai.err.offTopic");
+    case "filtro-longa":
+      return t("ai.err.tooLong");
+    case "filtro-vazia":
+      return t("ai.err.empty");
+
     default:
       return bruto;
   }

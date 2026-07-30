@@ -83,7 +83,7 @@ function movesetsDe(
  * Os cortes (10/30/70/90) sao arbitrarios como toda faixa, mas o PERCENTIL que
  * acompanha nao e: quem quiser conferir, confere.
  */
-function faixas(data: Dataset) {
+function faixas(data: Dataset, idioma: string) {
   const reais = data.species.filter((s) => s.cosmeticOf === null && isObtainable(s.id));
   const ordenar = (k: "atk" | "def" | "hp") =>
     reais.map((s) => s.baseStats[k]).sort((a, b) => a - b);
@@ -104,7 +104,27 @@ function faixas(data: Dataset) {
    */
   const genero = { atk: "m", def: "f", hp: "f" } as const;
 
-  const ROTULOS = {
+  /*
+   * Em português, com gênero. Fora dele, EM INGLÊS.
+   *
+   * ⚠️ A segunda metade desta frase é um conserto, não uma escolha de estilo.
+   * Com as faixas em português e a ordem de "traduza", o alemão saiu assim:
+   *
+   *   "Seine Verteidigung ist MEDIANA mit 169. (…) einen AGUENTOwert von 58.633.
+   *    Seine Verteidigung ist also sehr stark"
+   *
+   * Duas falhas na mesma frase: copiou a palavra portuguesa crua, e depois
+   * contradisse a si mesmo chamando de "sehr stark" (muito forte) a defesa que
+   * ele acabou de marcar como mediana. Palavra que o modelo não entende no meio
+   * do texto ele ou copia, ou ignora — e ignorar a faixa traz de volta
+   * exatamente o bug do "alto ataque de Blissey".
+   *
+   * Inglês resolve os dois: é a língua-ponte de qualquer modelo, os adjetivos
+   * não flexionam (adeus gênero), e "low" ele traduz certo pra alemão sempre.
+   * Não é o idioma do usuário — é o idioma dos DADOS, e o cabeçalho do sistema
+   * já manda escrever a resposta na língua da tela.
+   */
+  const ROTULOS_PT = {
     muitoBaixo: { m: "muito baixo", f: "muito baixa" },
     baixo: { m: "baixo", f: "baixa" },
     mediano: { m: "mediano", f: "mediana" },
@@ -112,14 +132,30 @@ function faixas(data: Dataset) {
     muitoAlto: { m: "muito alto", f: "muito alta" },
   } as const;
 
+  const ROTULOS_EN = {
+    muitoBaixo: { m: "very low", f: "very low" },
+    baixo: { m: "low", f: "low" },
+    mediano: { m: "average", f: "average" },
+    alto: { m: "high", f: "high" },
+    muitoAlto: { m: "very high", f: "very high" },
+  } as const;
+
+  const ROTULOS = idioma === "pt-BR" ? ROTULOS_PT : ROTULOS_EN;
+  const maiorDoJogo =
+    idioma === "pt-BR"
+      ? (g: "m" | "f") => `${g === "f" ? "a" : "o"} maior do jogo`
+      : () => "the highest in the game";
+  const maiorQue =
+    idioma === "pt-BR"
+      ? (pct: number) => `maior que ${pct}% das espécies`
+      : (pct: number) => `higher than ${pct}% of all species`;
+
   return (k: "atk" | "def" | "hp", valor: number): string => {
     const v = listas[k];
     const g = genero[k];
 
     // "o maior do jogo" pra ataque, "a maior do jogo" pra defesa e resistência.
-    if (valor >= v[v.length - 1]!) {
-      return `${valor} (${g === "f" ? "a" : "o"} maior do jogo)`;
-    }
+    if (valor >= v[v.length - 1]!) return `${valor} (${maiorDoJogo(g)})`;
 
     const abaixo = v.filter((x) => x < valor).length;
     // Piso, nao arredondamento: com 1.181 espécies, arredondar dava
@@ -137,7 +173,7 @@ function faixas(data: Dataset) {
               ? ROTULOS.alto
               : ROTULOS.muitoAlto;
 
-    return `${valor} (${rotulo[g]}: maior que ${pct}% das espécies)`;
+    return `${valor} (${rotulo[g]}: ${maiorQue(pct)})`;
   };
 }
 
@@ -201,13 +237,20 @@ export function speciesDossier(
   species: DatasetSpecies,
   data: Dataset,
   owned: readonly OwnedPokemon[] = [],
+  /**
+   * O idioma da RESPOSTA — que decide o idioma das faixas aqui dentro.
+   *
+   * Fora do português elas saem em inglês, pra o modelo não copiar palavra
+   * portuguesa crua pro meio da resposta. Ver a nota em `faixas`.
+   */
+  idioma = "pt-BR",
 ): string {
   const linhas: string[] = [];
   const nomeTipo = (t: string) => t;
 
   linhas.push(`Nome: ${species.name} (nº ${species.dex})`);
   linhas.push(`Tipos: ${species.types.join(" / ")}`);
-  const faixa = faixas(data);
+  const faixa = faixas(data, idioma);
   linhas.push(
     `Atributos base: ataque ${faixa("atk", species.baseStats.atk)}; ` +
       `defesa ${faixa("def", species.baseStats.def)}; ` +
@@ -269,18 +312,78 @@ export function speciesDossier(
     const meu = aguentoEfetivo(comoDefensor);
     const ref = referencia ? aguentoEfetivo(referencia) : 0;
 
-    const emPercentual =
-      ref > 0
-        ? ` — ${Math.round((meu / ref) * 100)}% do aguento do Blissey, ` +
-          `que é a melhor parede do jogo (${Math.round(ref).toLocaleString("pt-BR")})`
-        : "";
+    /*
+     * "O Blissey aguenta 58.633 oq?"
+     *
+     * Pergunta do Miguel, olhando a resposta na tela — e ele matou a charada
+     * sozinho. 58.633 nao e pontos de vida, nem segundos, nem golpes. E um
+     * INDICE: defesa x vida dividido pelo dano medio que a tabela de tipos
+     * deixa ele sofrer. Sozinho nao quer dizer nada; so serve pra comparar um
+     * Pokemon com outro.
+     *
+     * Eu escrevia "aguento 58.633" como se fosse medida, e o modelo repetiu do
+     * jeito que chegou. Mesmo erro de classe do "ataque 129" sem escala: numero
+     * sem referencia obriga quem le a inventar o significado.
+     *
+     * Agora o dossie diz o que o numero e, e a regra em DEX_SYSTEM proibe
+     * solta-lo sem a comparacao do lado.
+     */
+    const pt = idioma === "pt-BR";
+    const num = (n: number) => Math.round(n).toLocaleString(pt ? "pt-BR" : "en-US");
 
+    /*
+     * O próprio Blissey não se compara consigo mesmo.
+     *
+     * ⚠️ "100% do melhor defensor que existe" é uma frase que o modelo não sabe
+     * ler quando a espécie É o melhor defensor. Saiu isto, testando:
+     *
+     *   russo:   "pode aguentar 100% dos ataques do melhor defensor do jogo"
+     *            — inventou um significado pro índice
+     *   coreano: "o mesmo nível do Blissey, o melhor defensor" — comparando o
+     *            Blissey com o Blissey
+     *
+     * Os dois estão certos em achar a frase estranha: ela É estranha. Quando a
+     * espécie é a referência, o que há pra dizer é que ela É o teto.
+     */
+    const ehAReferencia = ref > 0 && Math.abs(meu - ref) < 0.5;
+
+    const emPercentual =
+      ref <= 0
+        ? ""
+        : ehAReferencia
+          ? pt
+            ? ` Este É o melhor defensor de ginásio do jogo — nenhum outro chega perto; ele é o teto da escala.`
+            : ` THIS IS the best gym defender in the game — nothing else comes close; it is the top of the scale.`
+          : pt
+            ? ` Na mesma escala, o Blissey — a melhor parede do jogo — marca ${num(ref)}, ` +
+              `então este aqui é ${Math.round((meu / ref) * 100)}% do melhor defensor que existe.`
+            : ` On the same scale Blissey, the best wall in the game, scores ${num(ref)}, ` +
+              `so this one is ${Math.round((meu / ref) * 100)}% of the best defender there is.`;
+
+    /*
+     * A linha inteira em inglês fora do português.
+     *
+     * ⚠️ "aguento" era a última palavra portuguesa solta na resposta em alemão:
+     * saía "einen AGUENTOwert von 58.633". Mesmo motivo das faixas — palavra que
+     * o modelo não reconhece ele copia crua. "Bulk index" ele traduz certo pra
+     * qualquer uma das dez línguas.
+     */
     linhas.push(
-      `Como defensor de ginásio: aguento ${Math.round(meu).toLocaleString("pt-BR")} ` +
-        `(defesa x vida ${Math.round(comoDefensor.bulk).toLocaleString("pt-BR")}, dividido pelo dano que a ` +
-        `tabela de tipos deixa ele sofrer) no nível ${NIVEL_REF} com IV perfeito${emPercentual}. ` +
-        `Dano médio que recebe pela tabela de tipos: ${comoDefensor.incomingAverage.toFixed(2)}x. ` +
-        `Lembre: num defensor o ATAQUE não conta — ele não escolhe golpe nem mira fraqueza.`,
+      pt
+        ? `Como defensor de ginásio: índice de aguento ${num(meu)}. ` +
+            `ESTE NÚMERO NÃO TEM UNIDADE — não é vida, não é tempo, não é dano. É uma escala de ` +
+            `comparação entre Pokémon: defesa x vida (${num(comoDefensor.bulk)}) ` +
+            `dividido pelo dano que a tabela de tipos deixa ele sofrer, no nível ${NIVEL_REF} com IV perfeito.` +
+            `${emPercentual} ` +
+            `Dano médio que recebe pela tabela de tipos: ${comoDefensor.incomingAverage.toFixed(2)}x. ` +
+            `Lembre: num defensor o ATAQUE não conta — ele não escolhe golpe nem mira fraqueza.`
+        : `As a gym defender: bulk index ${num(meu)}. ` +
+            `THIS NUMBER HAS NO UNIT — it is not HP, not time, not damage. It is a comparison scale ` +
+            `between Pokemon: defense x stamina (${num(comoDefensor.bulk)}) divided by the damage the ` +
+            `type chart lets it take, at level ${NIVEL_REF} with perfect IVs.` +
+            `${emPercentual} ` +
+            `Average damage taken from the type chart: ${comoDefensor.incomingAverage.toFixed(2)}x. ` +
+            `Remember: for a defender ATTACK does not count — it picks no move and targets no weakness.`,
     );
   }
 
@@ -429,8 +532,15 @@ Responda a pergunta a partir dele.
 Regras rígidas:
 - NUNCA cite o dossiê, "os dados fornecidos", "as informações que recebi" ou
   qualquer coisa parecida. Você É a Pokédex: esses números são a SUA memória, não
-  um documento que alguém te passou. Diga "Dragonite aguenta 29.795", nunca "de
-  acordo com o dossiê, Dragonite aguenta 29.795".
+  um documento que alguém te passou. Diga "Dragonite segura bem", nunca "de
+  acordo com o dossiê, Dragonite segura bem".
+- O ÍNDICE DE AGUENTO não tem unidade. Não é vida, não é tempo, não é dano — é
+  só uma escala pra comparar Pokémon entre si. Então NUNCA escreva "aguenta
+  58.633" e pare aí: quem lê pergunta "58.633 o quê?", e está certo em
+  perguntar. Diga sempre a comparação, que é o que significa alguma coisa: "é a
+  melhor parede do jogo", "aguenta metade do que um Blissey aguenta", "51% do
+  melhor defensor que existe". Se for citar o número, chame de "índice" e ponha
+  a comparação na mesma frase.
 - Você PODE raciocinar sobre os dados e tirar conclusões deles. "Aguento alto e
   só duas fraquezas, então segura ginásio bem" é uma resposta correta e é
   exatamente o que se espera de você.
@@ -452,4 +562,78 @@ Regras rígidas:
   recebeu.
 - Não gere, descreva nem ofereça imagens.
 - Tom de aparelho: direto, informativo, sem saudação e sem se despedir.
-- No máximo 4 frases curtas. Responda no idioma da pergunta.`;
+- No máximo 4 frases curtas.`;
+
+/**
+ * O idioma da resposta, dito ANTES de tudo e pelo nome.
+ *
+ * ⚠️ ISTO ESTAVA QUEBRADO, e só apareceu porque o Miguel perguntou "testou a ia
+ * em outros idiomas tbm?". Não tinha testado. Testei, e:
+ *
+ *   pergunta em inglês  → resposta em PORTUGUÊS
+ *   pergunta em japonês → resposta em PORTUGUÊS
+ *   pergunta em alemão  → "Blissey hat einen BAIXO Angriff und eine MEDIANA
+ *                          Verteidigung (…) einen hohen AGUENTOwert"
+ *
+ * O alemão é o caso que explica os três: as regras acima e o dossiê inteiro são
+ * 2.000 caracteres de português, e a instrução de idioma era UMA frase no fim de
+ * tudo. O modelo seguiu a massa, não a linha. E as palavras de faixa ("baixo",
+ * "mediana") são strings portuguesas cravadas no dossiê — ele copiou como
+ * chegaram, colando português no meio do alemão.
+ *
+ * Duas correções, e as duas importam:
+ *   1. O idioma vem no TOPO e pelo NOME ("English"), não como "o idioma da
+ *      pergunta" — que obriga o modelo a inferir antes de obedecer.
+ *   2. As palavras de faixa são declaradas como português A TRADUZIR, com a
+ *      ordem preservada. Sem isso, "mediana" vira "mediana" em qualquer língua.
+ *
+ * O dossiê continua em português de propósito: é a MESMA string pra todos os
+ * idiomas, então cai no cache de prefixo da Groq (que não conta pro limite) e
+ * não multiplica por dez a superfície onde eu posso errar um número.
+ */
+const NOMES: Record<string, string> = {
+  "pt-BR": "Portuguese (Brazil)",
+  en: "English",
+  es: "Spanish (Spain)",
+  "es-419": "Spanish (Latin America)",
+  fr: "French",
+  de: "German",
+  it: "Italian",
+  ja: "Japanese",
+  ko: "Korean",
+  ru: "Russian",
+};
+
+export function dexSystem(language: string): string {
+  const nome = NOMES[language] ?? "Portuguese (Brazil)";
+
+  // Português cai no prompt original sem cabeçalho: é o idioma em que ele já
+  // está escrito, e uma instrução redundante só gastaria tokens.
+  if (language === "pt-BR") return DEX_SYSTEM;
+
+  /*
+   * A lista de palavras PROIBIDAS, e não só a de traduções.
+   *
+   * ⚠️ Traduzir não bastou. Mesmo com o dossiê já em inglês, o alemão saiu com
+   * "einen sehr hohen AGUENTOwert" — e a palavra não vinha mais do dossiê, vinha
+   * DESTAS REGRAS, que continuam escritas em português e citam "índice de
+   * aguento" ao explicar que ele não tem unidade.
+   *
+   * O modelo não distingue "português que eu devo obedecer" de "português que eu
+   * posso copiar". Então a instrução deixa de ser "traduza" e passa a ser
+   * "estas palavras não podem aparecer na sua resposta", que é verificável por
+   * quem lê — inclusive por mim, no teste.
+   */
+  return (
+    `WRITE YOUR ENTIRE ANSWER IN ${nome.toUpperCase()}.\n` +
+    `The notes below are written in Portuguese. They are DATA, not your output language.\n` +
+    `NEVER let these Portuguese words appear in your answer, not even inside a compound ` +
+    `word: aguento, baixo, baixa, mediano, mediana, alto, alta, resistência, ataque, defesa.\n` +
+    `Use the ${nome} equivalent instead: "muito baixo" = very low, "baixo" = low, ` +
+    `"mediano/mediana" = average, "alto/alta" = high, "muito alto/alta" = very high, ` +
+    `"índice de aguento" = bulk index.\n` +
+    `Keep each band's meaning exactly — never promote a low or average stat to a high one ` +
+    `while translating, and never call a Pokemon strong in a stat the notes marked as ` +
+    `average.\n\n${DEX_SYSTEM}`
+  );
+}
