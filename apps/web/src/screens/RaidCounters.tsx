@@ -161,8 +161,8 @@ export function RaidCounters({ boss, data, onClose }: Props) {
         >
           ‹
         </button>
-        <h2 className="tk-sheet-title">{t("raid.title")}</h2>
       </header>
+      <h1 className="tk-h1">{t("raid.title")}</h1>
 
       <div style={{ display: "flex", gap: 14, alignItems: "center", marginBottom: 18 }}>
         <SpeciesTile

@@ -3,7 +3,8 @@ import { useState } from "react";
 import type { PokedexIntent } from "../App.tsx";
 import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
 import { useT } from "../i18n/t.ts";
-import { IconCamera } from "../ui/Icons.tsx";
+import { IconCamera, IconGrid, IconList } from "../ui/Icons.tsx";
+import { setEmGrade, useEmGrade } from "../ui/vistaColecao.ts";
 import { SpeciesBrowser, type SortId } from "../ui/SpeciesBrowser.tsx";
 import { useSetup } from "../onboarding/setup.ts";
 import { Segmented } from "../ui/Segmented.tsx";
@@ -51,6 +52,7 @@ export function PokedexScreen({ dataset, intent }: Props) {
   const podeColecao = setup.mode === "colecao";
   const [aba, setAba] = useState<"todos" | "meus">("todos");
   const meus = podeColecao && aba === "meus";
+  const emGrade = useEmGrade();
 
   if (dataset.status === "loading") {
     return (
@@ -75,17 +77,39 @@ export function PokedexScreen({ dataset, intent }: Props) {
       <h1 className="tk-h1">{t("pokedex.title")}</h1>
 
       {podeColecao && (
-        <div style={{ margin: "0 0 12px" }}>
-          <Segmented
-            ariaLabel={t("pokedex.title")}
-            value={aba}
-            onChange={setAba}
-            size="compact"
-            options={[
-              { value: "todos" as const, label: t("pokedex.all") },
-              { value: "meus" as const, label: t("pokedex.mine") },
-            ]}
-          />
+        /*
+          O seletor e o alternador de vista na MESMA linha.
+          
+          O alternador vivia dentro da Colecao, ao lado do titulo dela. Sem o
+          titulo (a Colecao esta embutida aqui), ele ficava sozinho com quase
+          300px de vazio ao lado. Aqui ele fica junto do "Todos/Meus", que e
+          onde as escolhas de vista desta tela ja moram — e so aparece em
+          "Meus", porque a lista de "Todos" ja tem grade fixa.
+        */
+        <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "0 0 12px" }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <Segmented
+              ariaLabel={t("pokedex.title")}
+              value={aba}
+              onChange={setAba}
+              size="compact"
+              options={[
+                { value: "todos" as const, label: t("pokedex.all") },
+                { value: "meus" as const, label: t("pokedex.mine") },
+              ]}
+            />
+          </div>
+          {meus && (
+            <button
+              type="button"
+              className="tk-filter-btn"
+              aria-label={t(emGrade ? "collection.asList" : "collection.asGrid")}
+              title={t(emGrade ? "collection.asList" : "collection.asGrid")}
+              onClick={() => setEmGrade(!emGrade)}
+            >
+              {emGrade ? <IconList size={18} /> : <IconGrid size={18} />}
+            </button>
+          )}
         </div>
       )}
 

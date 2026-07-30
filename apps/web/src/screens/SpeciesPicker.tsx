@@ -40,8 +40,8 @@ export function SpeciesPicker({ data, onPick, onClose }: Props) {
         <button type="button" className="tk-sheet-close" onClick={onClose} aria-label={t("common.close")}>
           ‹
         </button>
-        <h2 className="tk-sheet-title">{t("pokedex.whichPokemon")}</h2>
       </header>
+      <h1 className="tk-h1">{t("pokedex.whichPokemon")}</h1>
 
       <SpeciesBrowser data={data} onPick={onPick} simple />
     </div>,
