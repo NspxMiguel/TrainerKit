@@ -5,6 +5,7 @@ import { askAboutCollection, collectionFacts } from "../ai/ask.ts";
 import { ensureEngine, type LoadProgress } from "../ai/local.ts";
 import { useAi } from "../ai/provider.ts";
 import type { Dataset } from "../data/useDataset.ts";
+import { useLanguage } from "../i18n/language.ts";
 import { useT } from "../i18n/t.ts";
 import type { OwnedPokemon } from "../storage/collection.ts";
 import { IconSpark } from "./Icons.tsx";
@@ -26,6 +27,7 @@ interface Props {
 export function AskBox({ items, data }: Props) {
   const ai = useAi();
   const { t } = useT();
+  const language = useLanguage();
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -119,6 +121,9 @@ export function AskBox({ items, data }: Props) {
         question: texto,
         facts,
         total: items.length,
+        // O idioma da pessoa, nao o que o modelo achar que a pergunta esta.
+        // "vale purificar" voltou em espanhol antes disto existir.
+        language,
         signal: controller.signal,
       });
       setAnswer(res);

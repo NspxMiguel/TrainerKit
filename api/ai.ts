@@ -112,10 +112,28 @@ const GUARDA_SISTEMA =
    * nao reconhece "CP". Sao os mesmos que saem de `common.cp` e
    * `common.stamina` nos dicionarios.
    */
+  /*
+   * ⚠️ A SIGLA VEM COM O QUE ELA QUER DIZER, em cada idioma.
+   *
+   * A versao anterior listava so as letras ("Combat Power appears as CP, PC, WP
+   * or PL") e o modelo passou a responder — mas inventando: "was bedeutet wp"
+   * voltou "WP steht für Wehrpunkte oder Wehrpower". Nao existe. Em alemao e
+   * Wettkampfpunkte.
+   *
+   * Dar a sigla sem o significado e pedir pro modelo preencher a lacuna, e ele
+   * preenche com o que soa plausivel. O padrao e o mesmo de sempre neste
+   * projeto: o defeito quase nunca esta no modelo, esta no contexto que eu dei.
+   */
   "The app writes stat labels in the user's language, and a question asking what " +
   "one of them means IS a Pokemon GO question — always answer it, never refuse " +
-  "it. Combat Power appears as CP, PC, WP or PL; Hit Points as HP, PS, PV or KP; " +
-  "IV means Individual Values, 0 to 15 per stat and 45 total.\n" +
+  "it. Use exactly these expansions, never invent one:\n" +
+  "Combat Power — CP (English, Japanese, Korean, Russian), PC = Poder de Combate " +
+  "(Portuguese, Spanish) / Points de Combat (French), WP = Wettkampfpunkte " +
+  "(German), PL = Potenza Lotta (Italian).\n" +
+  "Hit Points — HP (English, Japanese, Korean, Russian), PS = Pontos de Saude / " +
+  "Puntos de Salud (Portuguese, Spanish) or Punti Salute (Italian), PV = Points " +
+  "de Vie (French), KP = Kraftpunkte (German).\n" +
+  "IV means Individual Values: 0 to 15 per stat, 45 total.\n" +
   "This assistant is only reachable from inside the app, so a short or vague " +
   "question is about the game by default. When unsure, answer.\n" +
   "Refuse everything else in one short sentence, in the user's language: writing " +
@@ -253,10 +271,15 @@ export default async function handler(req: Request): Promise<Response> {
     "Access-Control-Max-Age": "86400",
   };
 
-  const json = (corpo: unknown, status: number) =>
+  const json = (corpo: unknown, status: number, extra?: Record<string, string>) =>
     new Response(JSON.stringify(corpo), {
       status,
-      headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...cors },
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-store",
+        ...cors,
+        ...extra,
+      },
     });
 
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
@@ -274,9 +297,23 @@ export default async function handler(req: Request): Promise<Response> {
     req.headers.get("x-real-ip") ??
     "desconhecido";
   if (excedeu(ip)) {
+    /*
+     * ⚠️ ESTE LIMITE E POR MINUTO, e a mensagem dizia outra coisa.
+     *
+     * `POR_JANELA` = 8 numa janela de 60s. Ao testar a IA com uma bateria de
+     * perguntas eu bati nele na nona, e a resposta foi "limite da chave
+     * compartilhada atingido. Use a sua chave da Groq ou a IA no aparelho" —
+     * que descreve o teto DIARIO, nao este. Quem le isso entende que a cota
+     * acabou e vai configurar uma chave propria sem precisar; bastava esperar
+     * um minuto.
+     *
+     * O `Retry-After` vai junto porque um numero e melhor que um adjetivo, e
+     * porque e o cabecalho que o proprio HTTP tem pra isto.
+     */
     return json(
-      { error: "limite da chave compartilhada atingido. Use a sua chave da Groq ou a IA no aparelho." },
+      { error: "muitas perguntas em pouco tempo. Espere um minuto e tente de novo.", retryAfter: 60 },
       429,
+      { "Retry-After": "60" },
     );
   }
 
