@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 
 import {
   CONTEXT_KEYS,
+  avaliarTroca,
   GREAT_LEAGUE,
   MASTER_LEAGUE,
   ULTRA_LEAGUE,
@@ -296,9 +297,7 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies, owned }: 
             Antes ficava um bloco vazio neste ponto porque a dex e os tipos
             comecavam alinhados ao topo, e o olho procurava o nome no vazio. */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ font: "800 22px/1.15 var(--tk-font)", letterSpacing: "-0.02em" }}>
-            {species.name}
-          </div>
+          <h1 className="tk-h1 tk-h1--ao-lado">{species.name}</h1>
           <div className="tk-species-dex" style={{ margin: "4px 0 10px" }}>
             #{String(species.dex).padStart(3, "0")}
           </div>
@@ -340,6 +339,24 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies, owned }: 
           levelCap={data.version.levelCap}
         />
       )}
+
+      {/*
+        Trocar vem DEPOIS do veredito, e a ordem importa.
+
+        A pergunta "vale trocar?" e uma segunda opiniao sobre uma decisao que o
+        "O que eu acho" ja tomou — e no caso mais util as duas discordam de
+        propósito: especie boa com IV ruim leva "Transferir", e a troca e
+        justamente o que se faz EM VEZ de transferir. Ler a etiqueta antes do
+        veredito inverteria a conversa.
+
+        So aparece quando ha UM Pokemon concreto: "vale trocar?" nao existe pra
+        uma especie, e sim pro IV deste exemplar. Na Pokedex sem colecao o bloco
+        some inteiro em vez de mostrar numeros genericos.
+
+        O caso bloqueado (sombroso, sortudo) tambem aparece, com o motivo — nao
+        saber POR QUE a etiqueta nao veio e o que faz parecer que o app esqueceu.
+      */}
+      {owned && <BlocoTroca owned={owned} baseStats={species.baseStats} />}
 
       <div className="tk-overline" style={{ display: "block", marginTop: 26 }}>
         {t("species.baseStats")}
@@ -654,5 +671,69 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies, owned }: 
       )}
     </div>,
     document.body,
+  );
+}
+
+/**
+ * O bloco de troca.
+ *
+ * Tres cenarios em vez de um numero so, porque o resultado da troca depende de
+ * quem esta do outro lado — e isso o app nao tem como saber. Mostrar "vale a
+ * pena" sem dizer sob qual amizade seria a mesma promessa vaga que o app existe
+ * pra nao fazer.
+ *
+ * A chance de a troca SAIR sortuda nao aparece em lugar nenhum, de proposito:
+ * ela depende de tempo de amizade, de Lucky Friends e da data de captura dos
+ * dois Pokemon. Chutar uma porcentagem ali seria inventar precisao — o que se
+ * mostra e o cenario, "se sair sortudo, e isto".
+ */
+function BlocoTroca({
+  owned,
+  baseStats,
+}: {
+  owned: OwnedPokemon;
+  baseStats: DatasetSpecies["baseStats"];
+}) {
+  const { t, tm } = useT();
+  const language = useLanguage();
+  /*
+   * A media sai com virgula ou ponto conforme o idioma, e sem ".0".
+   *
+   * `toFixed(1)` escrevia "24.0/45 na média" em portugues: ponto decimal errado
+   * pro idioma e uma casa decimal que nao existe (a media do piso 1 e 24 cravado).
+   * Quem tem casa de verdade e so o sortudo, 40,5.
+   */
+  const media = (n: number) => n.toLocaleString(language, { maximumFractionDigits: 1 });
+  const troca = avaliarTroca({
+    ivs: owned.ivs,
+    baseStats,
+    lucky: owned.lucky,
+    shadow: owned.shadow,
+  });
+
+  return (
+    <>
+      <div className="tk-overline" style={{ display: "block", marginTop: 26 }}>
+        {t("trade.title")}
+      </div>
+      <section className="tk-card" style={{ marginTop: 10 }}>
+        <p className="tk-body" style={{ margin: 0 }}>
+          {troca.vale && <span className="tk-tag-trade">{t("trade.tag")}</span>}
+          {tm(troca.motivo)}
+        </p>
+        {/* Os cenarios so aparecem quando trocar e possivel. Num sombroso eles
+            seriam uma tabela sobre algo que nao pode acontecer. */}
+        {troca.vale && (
+          <dl className="tk-trade-odds">
+            <dt>{t("trade.friend")}</dt>
+            <dd>{t("trade.odds", { media: media(troca.amigo.media) })}</dd>
+            <dt>{t("trade.bestFriend")}</dt>
+            <dd>{t("trade.odds", { media: media(troca.melhorAmigo.media) })}</dd>
+            <dt>{t("trade.lucky")}</dt>
+            <dd>{t("trade.luckyOdds", { media: media(troca.sortudo.media) })}</dd>
+          </dl>
+        )}
+      </section>
+    </>
   );
 }

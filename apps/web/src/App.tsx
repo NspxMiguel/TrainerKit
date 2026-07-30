@@ -34,7 +34,18 @@ export type Tab = "inicio" | "pokedex" | "ajustes";
  * BUSCA — a lista de espécies em ordem de número, que não é o que o atalho
  * prometeu. Levar junto a intenção é o que faz o atalho chegar onde diz.
  */
-export type PokedexIntent = { view: "browse" } | { view: "best"; mode: "raid" | "pvp" };
+export type PokedexIntent =
+  | { view: "browse" }
+  | { view: "best"; mode: "raid" | "pvp" }
+  /**
+   * "os MEUS", nao a especie.
+   *
+   * O `+3` no fim da fila da home dizia "mais tres SEUS" e abria a Pokedex em
+   * "Todos" — a lista das 1.000 especies do jogo, onde os seus tres nao estao
+   * em lugar nenhum. Era a mesma falha dos atalhos antigos: o botao prometia um
+   * destino e a navegacao entregava outro, porque so o nome da aba viajava.
+   */
+  | { view: "mine" };
 
 const TABS: ReadonlyArray<{
   id: Tab;

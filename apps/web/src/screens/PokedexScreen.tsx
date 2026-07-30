@@ -50,7 +50,12 @@ export function PokedexScreen({ dataset, intent }: Props) {
    * pergunta, duas respostas.
    */
   const podeColecao = setup.mode === "colecao";
-  const [aba, setAba] = useState<"todos" | "meus">("todos");
+  // Quem chegou pelo `+3` da home pediu OS SEUS; abrir em "Todos" seria
+  // responder outra pergunta. O `key={tab}` na `App` remonta esta tela a cada
+  // troca de aba, entao o valor inicial e lido de novo em toda navegacao.
+  const [aba, setAba] = useState<"todos" | "meus">(
+    podeColecao && intent?.view === "mine" ? "meus" : "todos",
+  );
   const meus = podeColecao && aba === "meus";
   const emGrade = useEmGrade();
 

@@ -51,7 +51,13 @@ export type MessageKey =
   | "assistant.headline.topLeague"
   | "assistant.headline.weak"
   | "assistant.headline.plain"
-  | "assistant.headline.speciesOnly";
+  | "assistant.headline.speciesOnly"
+  // ---- troca
+  | "trade.yes"
+  | "trade.no.alreadyGood"
+  | "trade.no.species"
+  | "trade.no.shadow"
+  | "trade.no.traded";
 
 export interface Message {
   key: MessageKey;

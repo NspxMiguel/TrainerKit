@@ -107,6 +107,22 @@
 }
 
 /*
+ * O titulo que divide a linha com o sprite.
+ *
+ * Na ficha da especie o nome fica AO LADO da arte, entao ele nao pode ter os
+ * 34px nem a margem de baixo dos outros — mas continua sendo o titulo da tela.
+ * Era uma `<div>` com `font: 800 22px` escrito na mao no JSX: sem `h1`, o
+ * leitor de tela nao achava titulo nenhum na tela mais visitada do app, e a
+ * tipografia ficava fora da escala, livre pra divergir na proxima mexida.
+ */
+.tk-h1--ao-lado {
+  font-size: 22px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+/*
  * Na home o nome mantem os 34px, com respiro menor embaixo.
  *
  * Uma versao encolheu isto pra 26px numa linha, pra ganhar 44px de altura, e o
@@ -827,12 +843,33 @@
  *
  * E o efeito nem aparecia: `--tk-sheet` e 0.94 de opacidade. Estava-se pagando
  * caro por 6% de transparencia que ninguem enxerga.
+ *
+ * ⚠️ O FUNDO E O MESMO DAS TELAS, e isso e a correcao mais importante daqui.
+ *
+ * Era `var(--tk-sheet)`, um cinza-azulado CHAPADO (#12151c), enquanto todo o
+ * resto do app usa o degrade `--tk-screen`, que sai de #141a2a no topo e chega
+ * a #07080b embaixo. Medido: `rgb(18,21,28)` na folha contra `rgb(7,8,11)` no
+ * app. Tocar em Sobre, Privacidade, Instalar, IV, Counters, Time ou Ginasio
+ * repintava a tela INTEIRA de outra cor — e a diferenca crescia conforme
+ * rolava, porque um lado e degrade e o outro nao.
+ *
+ * Era a "quebra de continuidade" que o Miguel apontava ha varias sessoes: "nao
+ * primeiro um fundo preto, e dps um fundo rosa choque". Eu ja tinha corrigido
+ * a mesma costura em DOIS vizinhos — o `.tk-onb` (a nota logo acima dele diz
+ * isso com todas as letras) e o `.tk-dex` — e deixei de fora justamente a
+ * classe que serve OITO telas. Consertar o sintoma onde ele aparece, em vez da
+ * regra que o causa, e o que fez isso durar tanto.
+ *
+ * O token `--tk-sheet` foi APAGADO junto, nos dois temas. Guardar uma cor de
+ * fundo alternativa que ninguem usa e o convite pra alguem "restaurar" isto
+ * daqui a tres meses sem saber que era o bug. Folha cheia e `inset: 0` — cobre
+ * tudo, logo E uma tela, e tela nenhuma tem cor propria neste app.
  */
 .tk-sheet-full {
   position: fixed;
   inset: 0;
   z-index: 20;
-  background: var(--tk-sheet);
+  background: var(--tk-screen);
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: max(var(--tk-safe-top), calc(env(safe-area-inset-top) + var(--tk-s3)))
@@ -4936,4 +4973,51 @@
   height: 9px;
   border-radius: 50%;
   box-shadow: 0 0 0 2px var(--tk-surf);
+}
+
+/*
+ * A etiqueta de troca.
+ *
+ * "Tag de trocar (IV melhor, chance de lucky, bom pra bicho ruim de IV mas boa
+ * espécie)" — pedida tres vezes, e ela e uma ETIQUETA de propósito: fica na
+ * linha dos numeros, em caixa alta pequena, sem cor de veredito. O veredito ja
+ * ocupa o lugar da ordem ("Investir", "Transferir"); se a troca aparecesse com
+ * o mesmo peso visual, o cartao passaria a dar duas ordens ao mesmo tempo.
+ */
+.tk-tag-trade {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 7px;
+  border-radius: var(--tk-r-chip);
+  background: var(--tk-pri-soft);
+  border: 1px solid var(--tk-pri-line);
+  color: var(--tk-pri-fg);
+  font: 700 10px/1.5 var(--tk-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  /* Espaco a direita porque o texto do motivo vem logo depois na ficha, e
+     `inline-block` come o espaco em branco que o JSX escreveria ali. Foi
+     exatamente assim que "SUA COLEÇÃO· 4" ficou grudado. */
+  margin-right: 6px;
+  vertical-align: 1px;
+}
+
+/* Os tres cenarios de troca: rotulo e numero, sem tabela. Grid de duas colunas
+   porque `dl` solto empilha `dt` e `dd` em linhas separadas. */
+.tk-trade-odds {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 12px;
+  margin: 12px 0 0;
+  font: 400 12px/1.4 var(--tk-font);
+}
+
+.tk-trade-odds dt {
+  color: var(--tk-txt3);
+  white-space: nowrap;
+}
+
+.tk-trade-odds dd {
+  margin: 0;
+  color: var(--tk-txt2);
 }

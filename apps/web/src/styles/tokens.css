@@ -51,11 +51,6 @@
   --tk-glass-active: rgba(255, 255, 255, 0.16);
   /* Ao ser tocado, o vidro "acende" — a reacao em tempo real que a Apple cita. */
   --tk-glass-press: rgba(255, 255, 255, 0.26);
-  /* Opaco de proposito. Era 0.94, e o `backdrop-filter` da folha escondia os
-     6% restantes — tirando o desfoque (que custava um quadro inteiro ao rolar),
-     a tela de tras passou a aparecer atras do texto. Vidro de verdade so na
-     barra de abas, onde ele nao rola junto. */
-  --tk-sheet: #12151c;
   --tk-elev: #181b23;
   --tk-code: #05070c;
   --tk-scrim: rgba(4, 5, 10, 0.6);
@@ -122,7 +117,6 @@
   --tk-glass-rim: rgba(16, 19, 25, 0.06);
   --tk-glass-active: rgba(255, 255, 255, 0.55);
   --tk-glass-press: rgba(255, 255, 255, 0.75);
-  --tk-sheet: #ffffff;
   --tk-elev: #ffffff;
   --tk-code: #edeff5;
   --tk-scrim: rgba(16, 19, 25, 0.32);
@@ -186,7 +180,6 @@
     --tk-glass-rim: rgba(16, 19, 25, 0.06);
     --tk-glass-active: rgba(255, 255, 255, 0.55);
     --tk-glass-press: rgba(255, 255, 255, 0.75);
-    --tk-sheet: #ffffff;
     --tk-elev: #ffffff;
     --tk-code: #edeff5;
     --tk-scrim: rgba(16, 19, 25, 0.32);
