@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { buildDexEntry, type DexEntry } from "@trainerkit/core";
 
 import { DEX_SYSTEM, speciesDossier } from "../ai/dossier.ts";
+import { mensagemDeErro } from "../ai/erro.ts";
 import { chat } from "../ai/provider.ts";
 import { identifySpecies, visionAvailable } from "../ai/vision.ts";
 import { fold } from "../data/fold.ts";
@@ -304,7 +305,7 @@ export function DexMode({ data, onClose, onOpenSpecies }: Props) {
       }
       escolher(achou);
     } catch (e) {
-      setErro(e instanceof Error ? e.message : String(e));
+      setErro(mensagemDeErro(e, t));
     } finally {
       setLendo(false);
     }
@@ -348,7 +349,7 @@ export function DexMode({ data, onClose, onOpenSpecies }: Props) {
       setResposta(texto);
       if (voz && speechSupported()) void speak(texto, language);
     } catch (e) {
-      setErro(e instanceof Error ? e.message : String(e));
+      setErro(mensagemDeErro(e, t));
     } finally {
       setPensando(false);
     }

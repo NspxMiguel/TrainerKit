@@ -90,9 +90,36 @@ function faixas(data: Dataset) {
 
   const listas = { atk: ordenar("atk"), def: ordenar("def"), hp: ordenar("hp") };
 
+  /*
+   * O GENERO de cada atributo.
+   *
+   * "ataque" e masculino; "defesa" e "resistência" sao femininos. Enquanto o
+   * rotulo era so masculino, o modelo copiava a palavra como ela chegava e
+   * escrevia "sua defesa é mediano" — vi isso na tela, na resposta sobre o
+   * Blissey. Ele nao errou portugues: repetiu o meu.
+   *
+   * Concordancia e do texto que EU escrevo. Pedir no prompt "concorde o genero"
+   * seria empurrar pro modelo um trabalho que uma tabela de duas colunas resolve
+   * sem chance de erro.
+   */
+  const genero = { atk: "m", def: "f", hp: "f" } as const;
+
+  const ROTULOS = {
+    muitoBaixo: { m: "muito baixo", f: "muito baixa" },
+    baixo: { m: "baixo", f: "baixa" },
+    mediano: { m: "mediano", f: "mediana" },
+    alto: { m: "alto", f: "alta" },
+    muitoAlto: { m: "muito alto", f: "muito alta" },
+  } as const;
+
   return (k: "atk" | "def" | "hp", valor: number): string => {
     const v = listas[k];
-    if (valor >= v[v.length - 1]!) return `${valor} (o maior do jogo)`;
+    const g = genero[k];
+
+    // "o maior do jogo" pra ataque, "a maior do jogo" pra defesa e resistência.
+    if (valor >= v[v.length - 1]!) {
+      return `${valor} (${g === "f" ? "a" : "o"} maior do jogo)`;
+    }
 
     const abaixo = v.filter((x) => x < valor).length;
     // Piso, nao arredondamento: com 1.181 espécies, arredondar dava
@@ -101,15 +128,16 @@ function faixas(data: Dataset) {
     const pct = Math.floor((abaixo / v.length) * 100);
     const rotulo =
       pct < 10
-        ? "muito baixo"
+        ? ROTULOS.muitoBaixo
         : pct < 30
-          ? "baixo"
+          ? ROTULOS.baixo
           : pct < 70
-            ? "mediano"
+            ? ROTULOS.mediano
             : pct < 90
-              ? "alto"
-              : "muito alto";
-    return `${valor} (${rotulo}: maior que ${pct}% das espécies)`;
+              ? ROTULOS.alto
+              : ROTULOS.muitoAlto;
+
+    return `${valor} (${rotulo[g]}: maior que ${pct}% das espécies)`;
   };
 }
 
@@ -410,11 +438,12 @@ Regras rígidas:
   estiver na sua memória, diga o que você sabe de mais próximo em vez de recusar
   — e nunca explique que "não foi fornecido".
 - Cada atributo já vem com UMA palavra entre parênteses: muito baixo, baixo,
-  mediano, alto ou muito alto. Ao falar daquele atributo, use ESSA palavra. Usar
-  outra é tão errado quanto inventar o número — e vale também no meio de uma
-  frase elogiosa: se a defesa está marcada "mediano", ela não vira "alta" só
-  porque o resto do Pokémon é bom, e não vira "alta" por estar na mesma frase
-  que outro atributo que é alto. Cite atributos medianos separadamente ou não os
+  mediano, alto ou muito alto (no feminino para defesa e resistência: baixa,
+  mediana, alta). Ao falar daquele atributo, use ESSA palavra, como ela está
+  escrita. Usar outra é tão errado quanto inventar o número — e vale também no
+  meio de uma frase elogiosa: se a defesa está marcada "mediana", ela não vira
+  "alta" só porque o resto do Pokémon é bom, e não vira "alta" por estar na mesma
+  frase que outro atributo que é alto. Cite atributos medianos separadamente ou não os
   cite.
 - Não invente adjetivo pra número nenhum. Se a memória não deu a palavra, dê o
   número e siga.

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 
 import { setGroqKey, useGroq } from "../ai/groq.ts";
 import {
@@ -16,6 +16,7 @@ import {
   useAi,
   type AiProvider,
 } from "../ai/provider.ts";
+import { LIMITE_DIARIO, onQuotaChange, restantes } from "../ai/quota.ts";
 import { useLanguage } from "../i18n/language.ts";
 import { useT } from "../i18n/t.ts";
 import { Segmented } from "../ui/Segmented.tsx";
@@ -42,6 +43,9 @@ export function AiSettings() {
   const [progress, setProgress] = useState<LoadProgress | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const webgpu = hasWebGPU();
+  // Reassina a cota: gastar uma pergunta na Pokedex tem que mexer neste numero
+  // sem precisar reabrir a tela.
+  const sobram = useSyncExternalStore(onQuotaChange, restantes, () => LIMITE_DIARIO);
 
   const modeloLocal =
     LOCAL_MODELS.find((m) => m.id === ai.localModel) ??
@@ -97,7 +101,26 @@ export function AiSettings() {
       {/* ------------------------------------------------------ compartilhada */}
 
       {ai.provider === "shared" && (
-        <section className="tk-card" style={{ marginTop: 14 }}>
+        <section className="tk-card" style={{ marginTop: 14, display: "grid", gap: 10 }}>
+          {/*
+            Quantas sobraram, ANTES de acabar.
+
+            Mesma regra do tamanho do download do modelo local: o numero aparece
+            enquanto ainda da pra decidir. Descobrir o limite batendo nele, no
+            meio de uma pergunta, e o jeito de transformar um limite razoavel em
+            sensacao de app quebrado.
+          */}
+          <div className="tk-row">
+            <span className="tk-row-label">{t("ai.quota.today")}</span>
+            <span
+              className="tk-row-value"
+              style={sobram === 0 ? { color: "var(--tk-warn)" } : undefined}
+            >
+              {sobram === 0
+                ? t("ai.quota.none")
+                : t("ai.quota.left", { n: sobram, total: LIMITE_DIARIO })}
+            </span>
+          </div>
           <p className="tk-caption" style={{ lineHeight: 1.5 }}>
             {t("ai.sharedDetail")}
           </p>

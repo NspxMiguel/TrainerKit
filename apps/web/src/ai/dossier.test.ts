@@ -52,7 +52,24 @@ describe("escala dos atributos", () => {
   it("o extremo e dito pelo nome em vez de virar 100%", () => {
     // Blissey tem 496 de resistencia, o maior do jogo. Com arredondamento isto
     // saia "maior que 100% das espécies" — uma frase que se contradiz sozinha.
-    expect(dossie("blissey")).toContain("resistência 496 (o maior do jogo)");
+    expect(dossie("blissey")).toContain("resistência 496 (a maior do jogo)");
+  });
+
+  it("a faixa concorda com o genero do atributo", () => {
+    /*
+     * "Sua defesa é mediano" — resposta real da Pokedex, na tela, depois de eu
+     * ter consertado o resto. O modelo nao errou portugues: ele copiou a palavra
+     * do meu texto, que vinha sempre no masculino. Concordancia e do texto que
+     * eu escrevo, nao do modelo que o le.
+     */
+    const linha = dossie("blissey")
+      .split("\n")
+      .find((l) => l.startsWith("Atributos base:"))!;
+
+    expect(linha).toContain("defesa 169 (mediana:");
+    expect(linha).not.toContain("(mediano");
+    // Ataque e masculino e continua masculino.
+    expect(linha).toContain("ataque 129 (baixo:");
   });
 
   it("nenhum atributo de nenhuma especie afirma ser maior que 100%", () => {
@@ -64,7 +81,7 @@ describe("escala dos atributos", () => {
   it("os extremos conhecidos caem nas faixas certas", () => {
     // Mewtwo e ataque de elite; Shedinja tem 1 de vida, o piso do jogo.
     expect(dossie("mewtwo")).toContain("ataque 300 (muito alto:");
-    expect(dossie("shedinja")).toContain("resistência 1 (muito baixo:");
+    expect(dossie("shedinja")).toContain("resistência 1 (muito baixa:");
   });
 });
 
