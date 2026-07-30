@@ -16,6 +16,7 @@ import { typeColor, typeKey } from "../sprites/provider.ts";
 import { useCollection } from "../storage/collection.ts";
 import { markSeen, useSeenCount, wasSeen } from "../storage/seen.ts";
 import { IconCamera, IconSearch } from "../ui/Icons.tsx";
+import { BetaBadge } from "../ui/BetaBadge.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 import { supportsCamera, useCamera } from "../ui/useCamera.ts";
 import { beep, setVoiceOn, speak, speechSupported, stopSpeaking, voiceOn } from "../ui/dexVoice.ts";
@@ -410,7 +411,16 @@ export function DexMode({ data, onClose, onOpenSpecies }: Props) {
       </div>
 
       {/* O contador de vistos e capturados: a razao de existir uma Pokedex. */}
+      {/*
+        BETA junto dos contadores.
+        
+        O modo Pokedex e a tela com mais coisa nova e menos rodagem: camera,
+        identificacao por foto, voz neural e conversa com a IA — cada uma com um
+        jeito proprio de falhar em aparelho que eu nao tenho. Marcar isso e mais
+        honesto que deixar a pessoa descobrir sozinha que a camera nao abriu.
+      */}
       <div className="tk-dexdev-counters">
+        <BetaBadge />
         <span>{t("dex.seen", { n: vistos })}</span>
         {setup.mode === "colecao" && <span>{t("dex.caught", { n: capturados })}</span>}
       </div>
