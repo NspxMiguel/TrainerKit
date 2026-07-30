@@ -2,8 +2,25 @@
   min-height: 100dvh;
   display: flex;
   justify-content: center;
-  /* O fundo saiu daqui — ver a camada fixa abaixo. */
-  background: var(--tk-bg);
+  /*
+   * SEM fundo aqui. O gradiente e a camada fixa `::before` logo abaixo.
+   *
+   * ⚠️ Isto estava `background: var(--tk-bg)` — cor CHAPADA e opaca — com o
+   * comentario "o fundo saiu daqui" logo acima. O comentario dizia a intencao e
+   * a linha fazia o contrario, e o resultado era invisivel de ler no codigo mas
+   * obvio na tela: a camada `::before` tem `z-index: -1`, entao ela pinta ANTES
+   * do fundo do proprio `.tk-app`. O gradiente existia, era calculado, e ficava
+   * coberto por uma cor solida em cima.
+   *
+   * O efeito visivel — o que o Miguel fotografou lado a lado: as ABAS ficavam
+   * pretas chapadas (#07080b), enquanto a ficha da especie e as folhas de
+   * Ajustes, que pintam `--tk-screen` diretamente, mostravam o azul do
+   * gradiente. Duas telas do mesmo app com fundos diferentes, sem nada no codigo
+   * dizendo que era de propósito. Nao era.
+   *
+   * `--tk-bg` continua no `body` como cor de base: e o que aparece no bounce da
+   * rolagem no iOS e atras da area segura, onde a camada fixa nao alcança.
+   */
 
   /*
    * Nada empurra a pagina de lado. Nunca.
