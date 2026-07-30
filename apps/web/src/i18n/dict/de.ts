@@ -156,6 +156,8 @@ export const DE: Dict = {
   "verdict.howIGotHere": "Wie ich darauf komme",
   "verdict.hide": "Ausblenden",
   "collection.title": "Sammlung",
+  "collection.asGrid": "Rasteransicht",
+  "collection.asList": "Listenansicht",
   "collection.empty.title": "Kein Pokémon gespeichert",
   "collection.empty.body": "Scanne den Screenshot der Bewertung und speichere. Das Urteil erscheint hier.",
   "collection.add": "Pokémon hinzufügen",

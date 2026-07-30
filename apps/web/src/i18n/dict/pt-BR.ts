@@ -171,6 +171,8 @@ export const PT_BR: Dict = {
   "verdict.hide": "Esconder",
 
   "collection.title": "Coleção",
+  "collection.asGrid": "Ver em grade",
+  "collection.asList": "Ver em lista",
   "collection.empty.title": "Nenhum Pokémon salvo",
   "collection.empty.body": "Escaneie o print da avaliação e salve. O veredito aparece aqui.",
   "collection.add": "Adicionar Pokémon",

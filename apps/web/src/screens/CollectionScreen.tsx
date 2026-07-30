@@ -13,7 +13,7 @@ import {
   useCollection,
 } from "../storage/collection.ts";
 import { AskBox } from "../ui/AskBox.tsx";
-import { IconPlus } from "../ui/Icons.tsx";
+import { IconGrid, IconList, IconPlus } from "../ui/Icons.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 import { SpeciesDetail } from "./SpeciesDetail.tsx";
 import { SpeciesPicker } from "./SpeciesPicker.tsx";
@@ -39,6 +39,21 @@ export function CollectionScreen({ dataset }: Props) {
     null,
   );
   const [message, setMessage] = useState<string | null>(null);
+
+  /**
+   * Grade ou lista — e a escolha fica salva.
+   *
+   * Grade por padrao: e a "cara de Pokedex" que ele pediu, e e a vista que a
+   * aba Pokedex ja usa. Quem prefere ver IV e veredito escritos troca uma vez e
+   * o app lembra.
+   */
+  const [grade, setGrade] = useState(() => {
+    try {
+      return globalThis.localStorage?.getItem("tk:colecao-grade") !== "0";
+    } catch {
+      return true;
+    }
+  });
 
   const ready = dataset.status === "ready";
   const species = ready ? dataset.data.species : [];
@@ -94,7 +109,37 @@ export function CollectionScreen({ dataset }: Props) {
 
   return (
     <>
-      <h1 className="tk-h1">{t("collection.title")}</h1>
+      {/*
+        Titulo e o alternador de vista na MESMA linha.
+
+        "#43 Coleção com cara de Pokédex de verdade". A cara de Pokedex e a
+        GRADE — e a aba Pokedex ja tem uma, com o mesmo desenho de ficha. A
+        colecao era a unica tela do app que mostrava Pokemon em lista, e essa
+        divergencia sozinha ja fazia as duas parecerem apps diferentes.
+      */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <h1 className="tk-h1" style={{ flex: 1, minWidth: 0 }}>
+          {t("collection.title")}
+        </h1>
+        {rows !== null && rows.length > 0 && (
+          <button
+            type="button"
+            className="tk-filter-btn"
+            aria-label={t(grade ? "collection.asList" : "collection.asGrid")}
+            title={t(grade ? "collection.asList" : "collection.asGrid")}
+            onClick={() => {
+              setGrade((v) => !v);
+              try {
+                globalThis.localStorage?.setItem("tk:colecao-grade", grade ? "0" : "1");
+              } catch {
+                /* preferencia nao persistida vale mais que app quebrado */
+              }
+            }}
+          >
+            {grade ? <IconList size={18} /> : <IconGrid size={18} />}
+          </button>
+        )}
+      </div>
 
       {rows === null ? (
         <p className="tk-body">{t("common.loading")}</p>
@@ -107,9 +152,53 @@ export function CollectionScreen({ dataset }: Props) {
           <p className="tk-body">{t("collection.empty.body")}</p>
         </div>
       ) : (
-        <div className="tk-cascade" style={{ display: "grid", gap: 8 }}>
+        <div
+          className={grade ? "tk-species-grid tk-cascade" : "tk-cascade"}
+          style={grade ? undefined : { display: "grid", gap: 8 }}
+        >
           {rows.map(({ owned, species: s, verdict }, i) => {
             if (!s || !verdict) return null;
+
+            /*
+              GRADE: a mesma ficha da aba Pokedex, mais o que so a colecao sabe
+              — o IV e a cor do veredito. O nome vira o IV porque numa grade da
+              colecao a pergunta nao e "qual bicho e esse" (a arte responde), e
+              sim "esse aqui presta?".
+            */
+            if (grade) {
+              return (
+                <button
+                  key={owned.id}
+                  type="button"
+                  className="tk-species-cell tk-owned-cell"
+                  style={{ ["--tk-i" as string]: i }}
+                  onClick={() => setOpen({ species: s, owned })}
+                >
+                  <SpeciesTile
+                    spriteId={s.spriteId}
+                    dex={s.dex}
+                    speciesId={s.id}
+                    name={s.name}
+                    types={s.types}
+                    size={64}
+                  />
+                  <span className="tk-species-name">{s.name}</span>
+                  <span className="tk-owned-iv">{ivTotalOf(owned.ivs)}/45</span>
+                  {/* O ponto do veredito: a mesma cor da lista, sem a palavra.
+                      Numa grade nao cabe texto, mas cabe a informacao. */}
+                  <span
+                    className="tk-owned-dot"
+                    style={{
+                      background:
+                        owned.doneAction === verdict.action
+                          ? "var(--tk-txt3)"
+                          : TONE[verdict.action],
+                    }}
+                    aria-label={t(ACTION_KEYS[verdict.action] as Key)}
+                  />
+                </button>
+              );
+            }
 
             return (
               <div

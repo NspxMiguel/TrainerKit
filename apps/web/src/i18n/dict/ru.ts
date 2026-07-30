@@ -156,6 +156,8 @@ export const RU: Dict = {
   "verdict.howIGotHere": "Как я к этому пришёл",
   "verdict.hide": "Скрыть",
   "collection.title": "Коллекция",
+  "collection.asGrid": "Сеткой",
+  "collection.asList": "Списком",
   "collection.empty.title": "Нет сохранённых покемонов",
   "collection.empty.body": "Отсканируй скриншот оценки и сохрани. Вердикт появится здесь.",
   "collection.add": "Добавить покемона",

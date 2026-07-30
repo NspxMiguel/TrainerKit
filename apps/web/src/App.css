@@ -4835,3 +4835,43 @@
   background: var(--tk-surf2);
   color: var(--tk-txt3);
 }
+
+/* ────────────────────────────────── coleção em grade (#43) */
+
+/*
+ * A ficha da colecao na grade: e a mesma `.tk-species-cell` da aba Pokedex,
+ * mais duas coisas que so a colecao sabe — o IV e a cor do veredito.
+ *
+ * Reusar a classe em vez de escrever outra e o ponto do exercicio: as duas telas
+ * mostram Pokemon, entao tem que mostrar igual. A colecao era a unica em lista, e
+ * essa divergencia sozinha ja fazia parecerem apps diferentes.
+ */
+.tk-owned-cell {
+  position: relative;
+}
+
+.tk-owned-iv {
+  font: 600 11px var(--tk-mono);
+  color: var(--tk-txt3);
+}
+
+/*
+ * O ponto do veredito.
+ *
+ * Na lista o veredito e uma palavra colorida; numa grade nao cabe texto, mas
+ * cabe a INFORMACAO. Cinza quando ja foi feito — mesma regra da lista, onde a
+ * cor sai e vira ✓.
+ *
+ * ⚠️ Cor NUNCA sozinha: o `aria-label` carrega a palavra ("Investir",
+ * "Transferir"), entao quem nao distingue as cores continua tendo a resposta.
+ * E a mesma regra do prototipo que proibe veredito so por cor.
+ */
+.tk-owned-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--tk-surf);
+}

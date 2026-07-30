@@ -192,6 +192,8 @@ const EN = {
 
   // ------------------------------------------------------------------- colecao
   "collection.title": "Collection",
+  "collection.asGrid": "Grid view",
+  "collection.asList": "List view",
   "collection.empty.title": "No Pokémon saved",
   "collection.empty.body": "Scan the appraisal screenshot and save it. The verdict shows up here.",
   "collection.add": "Add Pokémon",

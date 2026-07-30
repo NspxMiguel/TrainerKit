@@ -156,6 +156,8 @@ export const ES_419: Dict = {
   "verdict.howIGotHere": "Cómo llegué a esto",
   "verdict.hide": "Ocultar",
   "collection.title": "Colección",
+  "collection.asGrid": "Ver en cuadrícula",
+  "collection.asList": "Ver en lista",
   "collection.empty.title": "Ningún Pokémon guardado",
   "collection.empty.body": "Escanea la captura de la valoración y guárdalo. El veredicto aparece aquí.",
   "collection.add": "Agregar Pokémon",
