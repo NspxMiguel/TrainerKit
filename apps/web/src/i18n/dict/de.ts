@@ -224,6 +224,8 @@ export const DE: Dict = {
   "faxina.preso.raide": "Dein bester Raid-Angreifer.",
   "collection.asGrid": "Rasteransicht",
   "collection.asList": "Listenansicht",
+  "collection.asGridShort": "Raster",
+  "collection.asListShort": "Liste",
   "collection.empty.title": "Kein Pokémon gespeichert",
   "collection.empty.body": "Scanne den Screenshot der Bewertung und speichere. Das Urteil erscheint hier.",
   "collection.add": "Pokémon hinzufügen",

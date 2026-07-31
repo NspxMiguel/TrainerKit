@@ -224,6 +224,8 @@ export const RU: Dict = {
   "faxina.preso.raide": "Ваш лучший атакующий для рейдов.",
   "collection.asGrid": "Сеткой",
   "collection.asList": "Списком",
+  "collection.asGridShort": "Сетка",
+  "collection.asListShort": "Список",
   "collection.empty.title": "Нет сохранённых покемонов",
   "collection.empty.body": "Отсканируй скриншот оценки и сохрани. Вердикт появится здесь.",
   "collection.add": "Добавить покемона",

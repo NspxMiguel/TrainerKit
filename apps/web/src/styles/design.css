@@ -3407,3 +3407,140 @@
 .tk-meu-motivo--perguntando {
   display: block;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   A CAIXA DE PERGUNTAS: sem rolagem lateral, e no mesmo raio do resto
+   ═══════════════════════════════════════════════════════════════════════════
+
+   "esses negocio ali em baixo, o meio cortado ali no canto fico estranho. nao
+   faz o usuario ter q dar scroll na horizontal, meio paia" — e "arredonda".
+
+   As sugestões eram uma FILA que rola de lado, então a terceira aparecia pela
+   metade encostada na borda. Meia palavra cortada não é um convite a rolar: é
+   um defeito de recorte, e foi assim que ele leu.
+
+   Quebrar em linhas resolve sem tirar nada — são três sugestões curtas, e duas
+   linhas cabem de sobra. A rolagem lateral existe pra fila LONGA e de item
+   igual (a tira de Pokémon da home); aqui os itens são frases, e frase cortada
+   ninguém reconhece pela metade.
+*/
+.tk-ask .tk-chips {
+  flex-wrap: wrap;
+  overflow-x: visible;
+  /* Sem a rolagem, as margens negativas que faziam a fila sangrar até a borda
+     passam a empurrar os chips pra fora do cartão. */
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/*
+ * O raio do cartão de perguntas, igual ao dos outros.
+ *
+ * Ele usava `--tk-r-card` (22px) enquanto `.tk-card` usa 28. Vinte e dois no
+ * meio de vinte e oitos não lê como "outro componente", lê como canto mal
+ * feito — que é exatamente a palavra que ele usou.
+ */
+.tk-ask {
+  border-radius: 28px;
+}
+
+/* O alternador de vista com a palavra do lado. Ver a nota no `PokedexScreen`. */
+.tk-filter-btn--rotulo {
+  width: auto;
+  min-width: 44px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font: 600 12.5px/1 var(--tk-font);
+  color: var(--tk-txt2);
+  white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FOLHA BAIXA — o seletor do sistema, pra ajustes de uma escolha só
+   ═══════════════════════════════════════════════════════════════════════════
+
+   "idioma abre tela inteira la nas configuraçÕes."
+
+   Uma tela cheia, com título de 34px e volta no topo, pra mostrar UMA roda de
+   escolha. Nos dois sistemas isso é uma folha baixa: sobe, cobre um terço, e
+   sai — e o conteúdo de trás continua à vista, que é o que diz "isto é um
+   ajuste, não um lugar aonde você foi".
+*/
+.tk-baixo-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: var(--tk-scrim);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  display: flex;
+  align-items: flex-end;
+  animation: tk-fade 0.18s var(--tk-ease-out) both;
+}
+
+.tk-baixo {
+  width: 100%;
+  max-width: var(--tk-container);
+  margin: 0 auto;
+  background: var(--tk-elev);
+  border-radius: 28px 28px 0 0;
+  border-top: 1px solid var(--tk-line);
+  padding: 8px var(--tk-gutter) calc(16px + env(safe-area-inset-bottom));
+  box-shadow: 0 -18px 48px rgb(0 0 0 / 38%);
+  animation: tk-sobe 0.24s var(--tk-ease-out) both;
+}
+
+.tk-baixo[data-saindo],
+.tk-baixo-scrim[data-saindo] {
+  animation-direction: reverse;
+}
+
+.tk-baixo-alca {
+  display: block;
+  width: 38px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--tk-line2);
+  margin: 0 auto 10px;
+}
+
+.tk-baixo-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.tk-baixo-titulo {
+  font: 700 17px/1.2 var(--tk-font);
+  color: var(--tk-txt);
+}
+
+/* "OK" na cor de ação do app, e com alvo de 44px — é o único jeito de sair sem
+   ser pelo gesto ou pelo toque fora. */
+.tk-baixo-ok {
+  min-height: 44px;
+  padding: 0 4px;
+  background: none;
+  border: 0;
+  font: 600 16px/1 var(--tk-font);
+  color: var(--tk-ultra-fg);
+}
+
+@keyframes tk-sobe {
+  from {
+    transform: translateY(18px);
+    opacity: 0;
+  }
+}
+
+@keyframes tk-fade {
+  from {
+    opacity: 0;
+  }
+}

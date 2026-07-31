@@ -224,6 +224,8 @@ export const ES_419: Dict = {
   "faxina.preso.raide": "Tu mejor atacante de incursiones.",
   "collection.asGrid": "Ver en cuadrícula",
   "collection.asList": "Ver en lista",
+  "collection.asGridShort": "Cuadrícula",
+  "collection.asListShort": "Lista",
   "collection.empty.title": "Ningún Pokémon guardado",
   "collection.empty.body": "Escanea la captura de la valoración y guárdalo. El veredicto aparece aquí.",
   "collection.add": "Agregar Pokémon",

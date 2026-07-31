@@ -224,6 +224,8 @@ export const KO: Dict = {
   "faxina.preso.raide": "당신의 최고 레이드 공격수.",
   "collection.asGrid": "그리드 보기",
   "collection.asList": "목록 보기",
+  "collection.asGridShort": "격자",
+  "collection.asListShort": "목록",
   "collection.empty.title": "저장된 포켓몬이 없습니다",
   "collection.empty.body": "평가 화면 스크린샷을 읽히고 저장하세요. 판정이 여기 나옵니다.",
   "collection.add": "포켓몬 추가",

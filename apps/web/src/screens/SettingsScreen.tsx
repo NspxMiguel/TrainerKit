@@ -300,8 +300,10 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
         </SettingsSheet>
       )}
 
+      {/* Folha BAIXA: uma roda de escolha não justifica uma tela inteira. Ver a
+          nota em `SettingsSheet`. */}
       {painel === "lang" && (
-        <SettingsSheet title={t("settings.language")} onClose={fechar}>
+        <SettingsSheet title={t("settings.language")} onClose={fechar} compacta>
           {/* Roda em vez de grade: dez idiomas viravam vinte botoes ocupando
               meia tela. O idioma ja vem detectado do aparelho — isto aqui e a
               excecao, nao o caminho principal. */}
