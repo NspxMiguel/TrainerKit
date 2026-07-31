@@ -3706,6 +3706,20 @@
   padding-left: calc(var(--tk-dex-borda) + var(--tk-dex-folga));
   padding-right: calc(var(--tk-dex-borda) + var(--tk-dex-folga));
   padding-top: calc(var(--tk-dex-topo) + var(--tk-dex-folga));
+
+  /*
+   * Coluna, pra a grade do alto-falante poder descer ate o pe com
+   * `margin-top: auto`. Em bloco ela ficava colada na busca e sobrava meia
+   * placa vazia embaixo.
+   *
+   * `align-items: stretch` esta escrito de propósito, e nao por acaso: trocar
+   * `display: block` por `flex` sem declarar o alinhamento e exatamente o que
+   * encolheu os filhos do hero da home hoje mais cedo. Aqui a intencao e a
+   * mesma de antes — filho ocupa a largura — entao ela vai dita.
+   */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 
 /*
@@ -3830,6 +3844,16 @@
 /* Vistos e capturados: a razao de existir uma Pokedex. */
 .tk-dex[data-skin="device"] .tk-dexdev-counters {
   display: flex;
+  /*
+   * ⚠️ `center`, e nao o `stretch` que o flex da de graca.
+   *
+   * A fileira mistura tres alturas: o selo BETA (pilula de 26px), texto solto e
+   * um botao. Esticados, cada um centralizava o proprio texto numa caixa de
+   * altura diferente — tres linhas de base em tres lugares, no meio de uma
+   * fileira que deveria ler como UM instrumento. Era o que fazia o painel
+   * parecer montado as pressas.
+   */
+  align-items: center;
   gap: var(--tk-s4);
   margin-top: var(--tk-s3);
   font: 700 10px var(--tk-mono);
@@ -4179,12 +4203,19 @@
   color: var(--tk-visor-ink);
 }
 
-/* A grade do alto-falante. Puro enfeite, e e o enfeite que mais faz a coisa
-   parecer um objeto: `repeating-radial-gradient` desenha os furinhos sem imagem. */
+/*
+ * A grade do alto-falante. Puro enfeite, e e o enfeite que mais faz a coisa
+ * parecer um objeto: `radial-gradient` desenha os furinhos sem imagem.
+ *
+ * ⚠️ `margin-top: auto` a empurra pro PE da carcaça. Antes ela vinha logo
+ * depois da busca e sobrava meia placa vermelha vazia embaixo — o aparelho
+ * parecia cortado no meio. No pe, o vermelho que sobra deixa de ser "espaco
+ * que faltou preencher" e passa a ser corpo do aparelho, que e o que ele e.
+ */
 .tk-dex[data-skin="device"] .tk-dexdev-grille {
   display: block;
   height: 22px;
-  margin-top: var(--tk-s5);
+  margin-top: auto;
   border-radius: 6px;
   background-image: radial-gradient(circle, rgb(0 0 0 / 0.36) 1.2px, transparent 1.6px);
   background-size: 9px 9px;
@@ -5129,6 +5160,9 @@
   font: inherit;
   color: inherit;
   letter-spacing: inherit;
+  /* Herdado explicitamente: sem isto o botao saia em caixa alta e baixa
+     ("Capturados: 6") ao lado de um irmao em versal ("VISTOS: 6"). */
+  text-transform: inherit;
   padding: 0;
   border: 0;
   background: none;
