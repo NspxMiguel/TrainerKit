@@ -1,3 +1,23 @@
+/*
+ * ⚠️ TUDO NESTE ARQUIVO ESTA NA CAMADA `legado`, e isso inverte quem manda.
+ *
+ * Regra do CSS: estilo SEM camada ganha de estilo EM camada, seja qual for a
+ * especificidade. Entao qualquer regra do `design.css` — que nao tem camada —
+ * vence qualquer regra daqui, mesmo uma escrita com tres seletores e `!important`
+ * de intencao.
+ *
+ * Por que isto existe: o redesenho do Claude Design passou a ser a BASE, e este
+ * arquivo passou a ser o que ainda nao foi portado. Sem a camada, portar uma
+ * tela significava caçar e apagar as regras antigas dela primeiro — e eu criei
+ * duas duplicatas silenciosas fazendo exatamente isso na barra de abas: uma cor
+ * antiga que ganhava por vir depois, e um `font` que zerava o `font-size` de
+ * cima. Com a camada, a regra nova ganha sem eu precisar achar a velha.
+ *
+ * Este arquivo so encolhe. Quando uma tela e portada, as regras dela saem
+ * daqui — mas o app nunca fica quebrado no meio do caminho, porque o que ainda
+ * nao foi portado continua funcionando por baixo.
+ */
+@layer legado {
 .tk-app {
   min-height: 100dvh;
   display: flex;
@@ -199,41 +219,129 @@
 /* ------------------------------------------------------------------- tab bar */
 
 .tk-tabbar {
+  /*
+   * A barra FLUTUA. Nao encosta em borda nenhuma.
+   *
+   * Receita literal do handoff: 26px de cada lado, 24px do rodape, 58px de
+   * altura, pilula completa. E a diferenca entre "barra de navegacao web" e
+   * "barra do sistema" — a de baixo toca as bordas, esta pousa sobre o
+   * conteudo.
+   *
+   * ⚠️ SEM `overflow: hidden`. O item ativo TRANSBORDA 4px pra cima e pra
+   * baixo (66px numa barra de 58px), e e justamente o transbordo que da a
+   * impressao de peca de vidro pousada em cima. Cortar mata o efeito inteiro.
+   */
   position: fixed;
-  bottom: 0;
-  width: 100%;
-  max-width: var(--tk-container);
-  display: grid;
-  /* Quantas abas existem vem do React como variavel; o layout continua aqui.
-     No modo consulta sao 3, com colecao ligada sao 4. */
-  grid-template-columns: repeat(var(--tk-tabs, 3), 1fr);
-  background: var(--tk-glass);
-  backdrop-filter: blur(20px) saturate(1.6);
-  -webkit-backdrop-filter: blur(20px) saturate(1.6);
-  border-top: 1px solid var(--tk-line);
-  padding-bottom: env(safe-area-inset-bottom);
-  z-index: 10;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  width: min(calc(100% - 52px), calc(var(--tk-container) - 52px));
+  height: 58px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  background: var(--tk-glass-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 0.5px solid var(--tk-glass-border);
+  box-shadow:
+    0 14px 36px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.14);
+  z-index: 50;
+  transition:
+    opacity 0.22s var(--tk-ease-out),
+    transform 0.28s var(--tk-ease-out);
+}
+
+/*
+ * Some quando uma folha de tela cheia abre.
+ *
+ * Por baixo de uma folha ela viraria uma mancha borrada no canto, sem funcao —
+ * o vidro dela pega o que esta ATRAS, e atras passa a ser a folha.
+ */
+.tk-tabbar[data-oculta] {
+  opacity: 0;
+  transform: translateX(-50%) translateY(12px);
+  pointer-events: none;
 }
 
 .tk-tab {
+  /*
+   * O item ativo E a bolha. Nao ha elemento viajante.
+   *
+   * Eu ia implementar uma pilula absoluta medida em JS. O desenho resolve
+   * melhor: cada item anima `flex`, `height` e `margin`, e o ativo cresce
+   * (`flex: 1.25`), estica pra 66px e ganha vidro proprio. Zero medicao, zero
+   * dessincronia entre a pilula e o item — eles sao a mesma coisa.
+   */
+  flex: 1;
+  height: 58px;
+  margin: 0;
+  border-radius: 999px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  /* Alvo minimo de 44px — requisito de acessibilidade, nunca reduzir. */
-  min-height: var(--tk-touch);
-  padding: 10px 0 12px;
-  color: var(--tk-txt3);
-  transition: color 0.12s var(--tk-ease);
+  gap: 2px;
+  background: none;
+  border: 0;
+  color: var(--tk-text);
+  font-weight: 500;
+  transition:
+    flex 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    height 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    margin 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.28s ease-out,
+    box-shadow 0.28s ease-out,
+    color 0.28s ease-out;
 }
 
 .tk-tab[aria-current="page"] {
-  color: var(--tk-pri);
+  flex: 1.25;
+  height: 66px;
+  margin: -4px 0;
+  color: var(--tk-ultra-fg-strong);
+  font-weight: 600;
+  /*
+   * A refracao: luz forte em cima, retorno mais fraco embaixo, e dois fios
+   * laterais. Sao quatro `inset` porque vidro real nao tem UMA quina iluminada
+   * — tem a de cima pegando a luz e as outras devolvendo menos.
+   */
+  background: rgba(16, 18, 26, 0.3);
+  backdrop-filter: blur(8px) saturate(160%);
+  -webkit-backdrop-filter: blur(8px) saturate(160%);
+  box-shadow:
+    inset 0 2.5px 4px -1.5px rgba(255, 255, 255, 0.45),
+    inset 0 -2.5px 4px -1.5px rgba(255, 255, 255, 0.28),
+    inset 3px 0 4px -2px rgba(255, 255, 255, 0.16),
+    inset -3px 0 4px -2px rgba(255, 255, 255, 0.16),
+    0 6px 16px rgba(0, 0, 0, 0.35);
 }
 
+/*
+ * A cor do ativo mora no bloco de cima, junto do vidro.
+ *
+ * Havia aqui um segundo `.tk-tab[aria-current="page"] { color: var(--tk-pri) }`
+ * — mesma especificidade, mais abaixo no arquivo, entao ganhava. Medido no
+ * navegador: o ativo saia `rgb(79,140,255)`, o azul ANTIGO, com o violeta do
+ * redesenho escrito trinta linhas acima sem efeito nenhum.
+ *
+ * Eu criei esta duplicata na mesma edicao em que portei a barra. E o mesmo
+ * defeito que passei o dia inteiro caçando neste arquivo: dois lugares
+ * dizendo a mesma coisa, e so um sendo lido.
+ */
+
 .tk-tab-label {
-  font: 600 11px var(--tk-font);
+  /*
+   * ⚠️ `font` de uma vez, e nao `font-size` + `font`.
+   *
+   * Eu tinha acrescentado `font-size: 10px` ANTES do atalho `font: 600 11px`.
+   * O atalho reseta tudo que ele nao menciona e define o que menciona: os 10px
+   * morriam ali, silenciosamente, e o rotulo continuava em 11px.
+   *
+   * 10px e o valor do redesenho — e o que faz caber "Pokédex" na aba estreita.
+   */
+  font: 500 10px/1.1 var(--tk-font);
 }
 
 /* ------------------------------------------------- barra de abas do iOS 26 */
@@ -408,33 +516,15 @@
  * curvas paralelas. Os 18px antigos deixavam a pilula mais "quadrada" que a
  * moldura, e o olho pega isso mesmo sem saber nomear.
  */
-.tk-tab-pill {
-  position: absolute;
-  top: 4px;
-  bottom: 4px;
-  left: 8px;
-  width: calc(100% / var(--tk-tabs) - 16px);
-  border-radius: 26px;
-  /*
-   * A pilula tambem e vidro, nao um retangulo branco por cima.
-   *
-   * Ela fica SOBRE a barra, entao nao pode so clarear: precisa de quina
-   * propria. O `inset` de cima e o fio de luz, o de baixo e o retorno, e o
-   * fundo continua quase transparente — assim ela parece uma peca pousada no
-   * vidro, e nao uma mancha pintada nele.
-   */
-  background: var(--tk-glass-active);
-  box-shadow:
-    inset 0 1px 0 var(--tk-glass-sheen),
-    inset 0 -1px 0 var(--tk-glass-rim),
-    0 1px 3px rgba(0, 0, 0, 0.18);
-  transform: translateX(calc(var(--tk-tab-i) * (100% + 16px)));
-  transition:
-    transform 0.42s var(--tk-ease-glass),
-    background-color 0.2s var(--tk-ease);
-  pointer-events: none;
-  z-index: 2;
-}
+/*
+ * `.tk-tab-pill` FOI EMBORA.
+ *
+ * Era uma pilula absoluta posicionada por `calc(100% / var(--tk-tabs))`, o que
+ * so funciona com todas as abas do mesmo tamanho. No redesenho o item ativo
+ * cresce (`flex: 1.25`), entao a conta passaria a errar o alvo em toda troca —
+ * e a correcao seria medir em JS. O desenho tornou as duas coisas
+ * desnecessarias: a bolha e o proprio item.
+ */
 
 [data-platform="iphone"] .tk-tab {
   padding: 9px 0 10px;
@@ -5105,4 +5195,6 @@
   font: 700 11px/16px var(--tk-font);
   text-align: center;
   pointer-events: none;
+}
+
 }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 /**
  * Sair de uma tela também é uma animação.
@@ -56,6 +56,16 @@ export function useFolha(onClose: () => void): {
   const [saindo, setSaindo] = useState(false);
   const timer = useRef<number | null>(null);
 
+  // Enquanto esta folha existe, a barra de abas fica escondida.
+  useEffect(() => {
+    abertas += 1;
+    mudou();
+    return () => {
+      abertas -= 1;
+      mudou();
+    };
+  }, []);
+
   // Desmontar no meio da saida (o pai fechou sozinho) nao pode deixar um
   // `setTimeout` de pe chamando `onClose` numa tela que ja nao existe.
   useEffect(
@@ -83,4 +93,36 @@ export function useFolha(onClose: () => void): {
   const fechar = useCallback(() => sair(onClose), [sair, onClose]);
 
   return { saindo, fechar, sair };
+}
+
+/**
+ * Ha alguma folha de tela cheia aberta?
+ *
+ * A barra de abas SOME quando uma folha abre — regra do redesenho, e ela existe
+ * porque a barra flutua a 24px do rodape com vidro proprio: por baixo de uma
+ * folha ela viraria uma mancha borrada no canto, sem funcao.
+ *
+ * O contador mora aqui, e nao numa store separada, porque `useFolha` ja e
+ * chamado por TODAS as nove folhas — e o unico lugar por onde nenhuma passa
+ * sem passar. Uma store nova exigiria lembrar de registrar cada uma, que e
+ * exatamente o tipo de "lembrar" que ja falhou tres vezes neste arquivo.
+ */
+let abertas = 0;
+const ouvintesFolha = new Set<() => void>();
+
+function mudou(): void {
+  for (const fn of ouvintesFolha) fn();
+}
+
+export function useTemFolha(): boolean {
+  return useSyncExternalStore(
+    (fn) => {
+      ouvintesFolha.add(fn);
+      return () => {
+        ouvintesFolha.delete(fn);
+      };
+    },
+    () => abertas > 0,
+    () => false,
+  );
 }

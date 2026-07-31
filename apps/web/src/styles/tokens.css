@@ -92,6 +92,15 @@
   --tk-v-guardar: #ffc55c;
   --tk-v-transferir: #9aa6b8;
 
+  /* ── movimento do redesenho ──────────────────────────────────────────────
+     Saida SEMPRE mais rapida que a entrada: ninguem espera pra sair de algo. */
+  --tk-ease-out: cubic-bezier(0.32, 0.72, 0, 1);
+  --tk-ease-inout: cubic-bezier(0.4, 0, 0.2, 1);
+  --tk-dur-micro: 200ms;
+  --tk-dur-base: 300ms;
+  --tk-dur-sheet: 440ms;
+  --tk-dur-exit: 180ms;
+
   --tk-bg: #0a0c10;
   /*
    * O TAMANHO do gradiente e em `vw`/`vh`, e nao em `%`. Nao e detalhe.

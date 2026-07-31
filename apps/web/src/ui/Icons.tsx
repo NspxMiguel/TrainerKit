@@ -198,3 +198,52 @@ export function IconList(props: IconProps) {
     </Svg>
   );
 }
+
+/*
+ * ─── Icones da barra de abas: PREENCHIDOS ────────────────────────────────────
+ *
+ * Os `path` sao os do handoff do Claude Design, copiados literalmente. Nao sao
+ * desenho meu e nao valia redesenhar: o preenchido (estilo SF Symbols `.fill`)
+ * e o que faz a barra parecer do sistema, e traco de 2px na mesma barra parece
+ * um app web tentando imitar um nativo.
+ *
+ * `currentColor` em vez das cores fixas do mockup, pra que ativo e inativo
+ * saiam do CSS e nao de duas copias do mesmo icone.
+ */
+
+export function IconHomeFill(props: IconProps) {
+  const s = props.size ?? 20;
+  return (
+    <svg width={s} height={s} viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M11.33 3.53a1 1 0 0 1 1.34 0l7.5 6.7a1 1 0 0 1 .33.74v8.83c0 .66-.54 1.2-1.2 1.2h-4.05v-5.9a1 1 0 0 0-1-1h-4.5a1 1 0 0 0-1 1V21H4.7c-.66 0-1.2-.54-1.2-1.2V10.97a1 1 0 0 1 .33-.74l7.5-6.7z"
+      />
+    </svg>
+  );
+}
+
+export function IconGridFill(props: IconProps) {
+  const s = props.size ?? 20;
+  return (
+    <svg width={s} height={s} viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3.5" y="3.5" width="7.5" height="7.5" rx="2.4" fill="currentColor" />
+      <rect x="13" y="3.5" width="7.5" height="7.5" rx="2.4" fill="currentColor" />
+      <rect x="3.5" y="13" width="7.5" height="7.5" rx="2.4" fill="currentColor" />
+      <rect x="13" y="13" width="7.5" height="7.5" rx="2.4" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function IconGearFill(props: IconProps) {
+  const s = props.size ?? 20;
+  return (
+    <svg width={s} height={s} viewBox="0 0 16 16" aria-hidden="true">
+      <path
+        fill="currentColor"
+        fillRule="evenodd"
+        d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"
+      />
+    </svg>
+  );
+}

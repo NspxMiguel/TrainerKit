@@ -10,9 +10,10 @@ import { SettingsScreen } from "./screens/SettingsScreen.tsx";
 import { useT, type Key } from "./i18n/t.ts";
 import { detectPlatform } from "./storage/install.ts";
 import { requestPersistence, type PersistState } from "./storage/persist.ts";
-import { IconGrid, IconHome, IconSearch, IconSliders } from "./ui/Icons.tsx";
+import { IconGearFill, IconGridFill, IconHomeFill } from "./ui/Icons.tsx";
 import { SpriteDownloadPanel, SpriteDownloadStrip } from "./ui/SpriteDownload.tsx";
 import { UpdateBanner } from "./ui/UpdateBanner.tsx";
+import { useTemFolha } from "./ui/folha.ts";
 import { useTabBarMinimize } from "./ui/useTabBarMinimize.ts";
 
 /*
@@ -50,13 +51,13 @@ export type PokedexIntent =
 const TABS: ReadonlyArray<{
   id: Tab;
   labelKey: Key;
-  Icon: typeof IconHome;
+  Icon: typeof IconHomeFill;
 }> = [
-  { id: "inicio", labelKey: "nav.home", Icon: IconHome },
+  { id: "inicio", labelKey: "nav.home", Icon: IconHomeFill },
   // Consulta pura, sem cadastro: nem todo mundo quer catalogar a colecao, as
   // vezes a pergunta e so "esse Pokemon presta?".
-  { id: "pokedex", labelKey: "nav.pokedex", Icon: IconSearch },
-  { id: "ajustes", labelKey: "nav.settings", Icon: IconSliders },
+  { id: "pokedex", labelKey: "nav.pokedex", Icon: IconGridFill },
+  { id: "ajustes", labelKey: "nav.settings", Icon: IconGearFill },
 ];
 
 export function App() {
@@ -79,6 +80,15 @@ export function App() {
   // O recolhimento e comportamento do iOS 26. No Android a barra do Material e
   // assente e nao se mexe — recolher la pareceria bug, nao refinamento.
   const minimized = useTabBarMinimize(detectPlatform() === "iphone");
+
+  /*
+   * A barra some quando uma folha de tela cheia esta aberta.
+   *
+   * Regra do redesenho, e ela tem motivo tecnico: a barra flutua com vidro
+   * proprio, e vidro mostra o que esta ATRAS. Com uma folha por cima, o "atras"
+   * vira a folha, e a barra fica sendo uma mancha borrada no canto.
+   */
+  const temFolha = useTemFolha();
 
   const species = dataset.status === "ready" ? dataset.data.species : [];
 
@@ -125,6 +135,8 @@ export function App() {
         <nav
           className="tk-tabbar"
           data-min={minimized || undefined}
+          data-oculta={temFolha || undefined}
+          aria-hidden={temFolha || undefined}
           aria-label={t("nav.aria")}
           style={{
             /*
@@ -141,10 +153,8 @@ export function App() {
             "--tk-tab-i": Math.max(0, activeIndex),
           } as CSSProperties}
         >
-          {/* Uma forma so, que VIAJA entre as abas. E o `matchedGeometry` do
-              SwiftUI traduzido: a pilula nunca some, ela muda de lugar. */}
-          <span className="tk-tab-pill" aria-hidden="true" />
-
+          {/* A pilula viajante saiu: agora o proprio item ativo E a bolha,
+              que cresce e transborda a barra. Ver `.tk-tab` no App.css. */}
           {visibleTabs.map(({ id, labelKey, Icon }) => (
             <button
               key={id}
@@ -153,7 +163,7 @@ export function App() {
               aria-current={tab === id ? "page" : undefined}
               onClick={() => go(id)}
             >
-              <Icon size={22} />
+              <Icon size={20} />
               {/* Rotulo sempre visivel: o prototipo proibe icone sem rotulo na navegacao. */}
               <span className="tk-tab-label">{t(labelKey)}</span>
             </button>
