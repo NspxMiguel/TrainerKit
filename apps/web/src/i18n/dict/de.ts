@@ -103,6 +103,7 @@ export const DE: Dict = {
   "species.maxCP": "Maximale WP mit perfekten IV",
   "species.bestMoves": "Beste Attacken",
   "species.sameForAll": "Dieselbe Empfehlung für {contexts} — die Berechnungen ergeben hier dieselbe Liste.",
+  "species.sameBest": "Der beste ist derselbe für {contexts}. Darunter ändert sich die Reihenfolge etwas; diese Liste folgt {principal}.",
   "species.noMoves": "Keine Attackendaten für diese Art.",
   "species.needsElite": "braucht Top-TM",
   "species.bait": "Köder: {move}",

@@ -347,37 +347,74 @@ export const CONTEXT_KEYS: Record<Context, { title: string; detail: string }> = 
  * Quatro botoes que respondem a mesma coisa nao sao quatro opcoes — sao quatro
  * chances de a pessoa achar que perdeu alguma coisa ao nao clicar em todos.
  *
- * A COMPARACAO E POR IDENTIDADE DE GOLPE, nao por nota. Duas listas com os
- * mesmos golpes na mesma ordem sao a mesma recomendacao, mesmo que as notas
- * sejam diferentes — a nota so ordena dentro do proprio contexto e nunca aparece
- * pro usuario. Comparar nota deixaria contextos identicos separados por causa de
- * uma casa decimal que ninguem ve.
+ * A COMPARACAO E PELA RECOMENDACAO — o PRIMEIRO conjunto, e nao a lista inteira.
+ *
+ * ⚠️ Isto e uma correcao, e a versao anterior comparava as cinco linhas.
+ *
+ * "vc nao unificou os melhores ataques de todos os pokemons. lembra q te pedi?
+ * as vezes para tudo, raide pvp sao iguais, e so rocket é diferente."
+ *
+ * A regra existia e rodava nas 2.464 espécies — so que quase nunca unificava:
+ * medido, 90% continuavam com tres ou quatro botoes, e o Venusaur (o que ele
+ * abriu) com quatro. Comparando so o primeiro colocado, 44% caem pra um ou dois
+ * botoes. A diferenca inteira estava na CAUDA: os contextos concordam sobre qual
+ * e o melhor e discordam sobre a ordem do quarto e do quinto.
+ *
+ * Quatro botoes por causa da ordem do quinto lugar e exatamente o defeito que
+ * esta funcao existe pra tirar. O titulo da secao e "melhores ataques", e a
+ * resposta que a pessoa veio buscar e a primeira linha.
+ *
+ * ⚠️ E o que se PERDE ao unificar fica dito, nao escondido: quando os contextos
+ * de um grupo concordam so no primeiro, `mesmaLista` vem `false`, e a tela avisa
+ * que a ordem das alternativas segue o primeiro contexto do grupo. Unificar sem
+ * dizer isso seria trocar quatro botoes redundantes por uma lista que mente para
+ * tres dos quatro contextos.
+ *
+ * Identidade de GOLPE, nunca de nota: a nota so ordena dentro do proprio
+ * contexto e nunca aparece pro usuario. Comparar nota separaria contextos
+ * identicos por causa de uma casa decimal que ninguem ve.
  *
  * `bait` entra na chave porque no Rocket ele MUDA a jogada: mesmo par de golpes
  * com iscas diferentes sao recomendacoes diferentes.
  */
 const CONTEXT_ORDER: readonly Context[] = ["general", "raid", "pvp", "rocket"];
 
-/** Quantos conjuntos comparar. A tela mostra cinco; comparar alem disso separaria
- *  contextos por causa de uma linha que ninguem chega a ver. */
-const COMPARE_TOP = 5;
+function assinatura(m: Moveset | undefined): string {
+  if (!m) return "-";
+  return `${m.fast.id}>${m.charged.id}${m.bait ? `+${m.bait.id}` : ""}`;
+}
 
-function movesetKey(sets: readonly Moveset[]): string {
-  return sets
-    .slice(0, COMPARE_TOP)
-    .map((m) => `${m.fast.id}>${m.charged.id}${m.bait ? `+${m.bait.id}` : ""}`)
-    .join("|");
+/** A chave de agrupamento: so o primeiro colocado. Ver a nota acima. */
+function chaveDaRecomendacao(sets: readonly Moveset[]): string {
+  return assinatura(sets[0]);
+}
+
+/** A lista inteira, pra saber se o grupo concorda ate o fim ou so no topo. */
+function chaveDaLista(sets: readonly Moveset[]): string {
+  return sets.map(assinatura).join("|");
 }
 
 export interface ContextGroup {
   /** Os contextos que compartilham esta recomendacao, na ordem canonica. */
   contexts: Context[];
-  /** A lista, identica para todos eles. */
+  /**
+   * A lista mostrada. Vem do PRIMEIRO contexto do grupo, na ordem canonica —
+   * "Tudo" quando ele esta no grupo, que e o criterio mais neutro dos quatro.
+   */
   movesets: Moveset[];
+  /**
+   * `true` quando todos os contextos do grupo dao a lista INTEIRA igual.
+   *
+   * `false` quando eles concordam sobre o melhor e divergem nas alternativas —
+   * e ai a tela tem que dizer de quem e a ordem que esta sendo mostrada. Sem
+   * isso a unificacao viraria uma afirmacao falsa sobre tres dos quatro
+   * contextos, que e pior que o botao a mais.
+   */
+  mesmaLista: boolean;
 }
 
 /**
- * Roda os quatro contextos e junta os que coincidem.
+ * Roda os quatro contextos e junta os que recomendam o mesmo conjunto.
  *
  * Devolve sempre pelo menos um grupo. Quando os quatro coincidem, e um grupo so
  * — e ai a tela nem precisa desenhar seletor.
@@ -389,19 +426,24 @@ export function groupIdenticalContexts(
 ): ContextGroup[] {
   const grupos: ContextGroup[] = [];
   const porChave = new Map<string, ContextGroup>();
+  /* A lista inteira de cada grupo, pra decidir `mesmaLista` sem guardar quatro
+     rankings vivos depois que a funcao devolve. */
+  const listaDoGrupo = new Map<ContextGroup, string>();
 
   for (const context of CONTEXT_ORDER) {
     const movesets = rankMovesets(fastMoves, chargedMoves, context, input);
-    const chave = movesetKey(movesets);
+    const chave = chaveDaRecomendacao(movesets);
 
     const existente = porChave.get(chave);
     if (existente) {
       existente.contexts.push(context);
+      if (listaDoGrupo.get(existente) !== chaveDaLista(movesets)) existente.mesmaLista = false;
       continue;
     }
 
-    const novo: ContextGroup = { contexts: [context], movesets };
+    const novo: ContextGroup = { contexts: [context], movesets, mesmaLista: true };
     porChave.set(chave, novo);
+    listaDoGrupo.set(novo, chaveDaLista(movesets));
     grupos.push(novo);
   }
 

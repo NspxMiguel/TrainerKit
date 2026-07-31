@@ -3,7 +3,12 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
-import { groupIdenticalContexts, type Context, type MoveWithPvp } from "./moves.js";
+import {
+  groupIdenticalContexts,
+  rankMovesets,
+  type Context,
+  type MoveWithPvp,
+} from "./moves.js";
 
 /**
  * "tem alguns pokemon, tipo o eternatus, que sla, raide, pra tudo e pvp sao
@@ -107,6 +112,98 @@ describe("contextos que dao a mesma resposta viram um só", () => {
     // Se raide e PvP caíram no mesmo grupo, os golpes têm que ser mesmo iguais.
     if (chave("pvp") === chave("raid")) {
       expect(chave("pvp").movesets[0]!.fast.id).toBe(chave("raid").movesets[0]!.fast.id);
+    }
+  });
+});
+
+describe("a unificação tem que ACONTECER de verdade, e não só existir", () => {
+  /*
+   * ⚠️ O teste que faltava, e a falta dele deixou a regra viva e inútil por
+   * semanas.
+   *
+   * "vc nao unificou os melhores ataques de todos os pokemons. lembra q te
+   * pedi?" — e eu tinha pedido. A função existia, rodava nas 2.464 espécies e
+   * passava em todos os testes acima, porque todos eles perguntam se o
+   * agrupamento é COERENTE, e nenhum pergunta se ele agrupa alguma coisa.
+   *
+   * Medido com a regra antiga (comparar as cinco linhas): 90% das espécies
+   * continuavam com três ou quatro botões. Com a regra nova (comparar o primeiro
+   * colocado): 44% caem para um ou dois. A diferença estava toda na cauda — os
+   * contextos concordam sobre o melhor e discordam sobre a ordem do quinto.
+   *
+   * O piso de 30% não é o número medido (44%): é o ponto abaixo do qual a regra
+   * voltou a ser decorativa. Se uma mudança futura de fórmula derrubar isso, o
+   * defeito aparece aqui e não na tela dele.
+   */
+  function todasAsEspecies() {
+    const porMoveId = porId;
+    const pega = (ids: string[]) =>
+      ids.map((i) => porMoveId.get(i)).filter((m): m is MoveWithPvp => m !== undefined);
+
+    let comGolpes = 0;
+    let unificaram = 0;
+    for (const s of data.species) {
+      const fast = pega([...s.fastMoves, ...s.eliteFastMoves]);
+      const charged = pega([...s.chargedMoves, ...s.eliteChargedMoves]);
+      if (fast.length === 0 || charged.length === 0) continue;
+      comGolpes++;
+      const g = groupIdenticalContexts(fast, charged, {
+        attackerTypes: s.types,
+        chart: data.typeChart,
+        order: data.typeOrder,
+        stabMultiplier: 1.2,
+      });
+      if (g.length <= 2) unificaram++;
+    }
+    return { comGolpes, unificaram };
+  }
+
+  it("pelo menos 30% das espécies caem para um ou dois botões", () => {
+    const { comGolpes, unificaram } = todasAsEspecies();
+    expect(comGolpes).toBeGreaterThan(2000);
+    const fracao = unificaram / comGolpes;
+    expect(fracao, `só ${(fracao * 100).toFixed(1)}% unificaram`).toBeGreaterThan(0.3);
+  });
+
+  it("Venusaur — o que ele abriu — deixa de ter quatro botões", () => {
+    // Não é um caso especial: é o Pokémon da captura, e o que provava que a
+    // regra não estava fazendo nada.
+    expect(gruposDe("venusaur").length).toBeLessThan(4);
+  });
+
+  it("`mesmaLista` só é `true` quando as listas são mesmo iguais", () => {
+    /*
+     * A honestidade da unificação mora neste sinalizador: com ele `false` a tela
+     * diz "o melhor é o mesmo, e a ordem abaixo segue Tudo"; com ele `true` ela
+     * diz "a mesma lista". Se ele mentisse, a unificação passaria a esconder uma
+     * diferença real — que é exatamente o que ele disse para não fazer ("alguns
+     * tem pequenas diferenças entao nao da").
+     */
+    const pega = (ids: string[]) =>
+      ids.map((i) => porId.get(i)).filter((m): m is MoveWithPvp => m !== undefined);
+
+    for (const s of data.species.slice(0, 400)) {
+      const fast = pega([...s.fastMoves, ...s.eliteFastMoves]);
+      const charged = pega([...s.chargedMoves, ...s.eliteChargedMoves]);
+      if (fast.length === 0 || charged.length === 0) continue;
+      const entrada = {
+        attackerTypes: s.types,
+        chart: data.typeChart,
+        order: data.typeOrder,
+        stabMultiplier: 1.2,
+      };
+      for (const g of groupIdenticalContexts(fast, charged, entrada)) {
+        if (!g.mesmaLista) continue;
+        // Se o grupo se diz idêntico, cada contexto dele tem que devolver
+        // exatamente a mesma sequência — conferida contra o ranqueador de novo.
+        const esperado = g.movesets.map((m) => `${m.fast.id}>${m.charged.id}${m.bait?.id ?? ""}`);
+        for (const c of g.contexts) {
+          const real = rankMovesets(fast, charged, c, entrada).map(
+            (m) => `${m.fast.id}>${m.charged.id}${m.bait?.id ?? ""}`,
+          );
+          expect(real, `${s.id} / ${c}`).toEqual(esperado);
+        }
+      }
     }
   });
 });

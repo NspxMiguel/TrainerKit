@@ -3099,12 +3099,30 @@
 :root[data-tk="light"] .tk-home-topo::before {
   /* A mesma rampa do bloco escuro, com o sinal trocado: aqui o topo CLAREIA
      em direção ao branco do app. Ver a nota longa em `.tk-home-topo::before`. */
+  /*
+   * ⚠️ NO CLARO O TOPO TEM QUE SER MAIS COR, e não mais branco. Eu tinha
+   * copiado a rampa do escuro literalmente, e o sinal estava trocado.
+   *
+   * "e porra vc dnv tiro o degrade" / "ja falei varias vezes, nao ta se
+   * conectando" — e ele circulou de vermelho exatamente a faixa entre a saudação
+   * e o hero.
+   *
+   * A conta antiga misturava 75% da cor com `--tk-hero-ink`, e no tema claro
+   * `--tk-hero-ink` é o BRANCO do app. Ou seja: claro no alto da tela, cor no
+   * começo do hero, branco de novo no pé. Duas subidas e uma descida — a tela
+   * inteira deixava de ser um degradê e virava uma placa com um degradê embaixo.
+   *
+   * Misturando com `--tk-accent-fg-claro` (a mesma cor da espécie, empurrada até
+   * luminância ≤ 0,146) o topo fica MAIS FUNDO que o começo do hero, e a rampa
+   * fica monótona da primeira linha de pixels da tela até o branco da página. É
+   * uma coisa só descendo, que é o que ele desenha quando fala "degrade".
+   */
   background: linear-gradient(
     180deg,
     color-mix(
         in srgb,
-        var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent)) 75%,
-        var(--tk-hero-ink)
+        var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent)) 78%,
+        var(--tk-accent-fg-claro, var(--tk-accent-topo, transparent)) 22%
       )
       0,
     var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent))
@@ -3128,8 +3146,8 @@
     180deg,
     color-mix(
         in srgb,
-        var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent)) 75%,
-        var(--tk-hero-ink)
+        var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent)) 78%,
+        var(--tk-accent-fg-claro, var(--tk-accent-topo, transparent)) 22%
       )
       0,
     var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent))
@@ -4004,7 +4022,21 @@
   width: calc(100% / var(--tk-tabs, 3) - 40px);
   left: calc(var(--tk-tab-i, 0) * 100% / var(--tk-tabs, 3) + 20px);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--tk-accent, var(--tk-ultra-solid)) 30%, transparent);
+  /*
+   * ⚠️ A COR RESOLVIDA POR TEMA, e não `--tk-accent` cru.
+   *
+   * "ta meio escuro n da pra ve direito" — e nas outras espécies ficava o
+   * contrário. `--tk-accent` é a cor CHEIA do bicho, presa entre claridade 0,38
+   * e 0,62: num Pokémon amarelo, 30% dela sobre a barra clara some; num Pokémon
+   * escuro, vira um borrão. O indicador da aba ativa passava a ter contraste
+   * diferente a cada Pokémon, que é justamente o que a paleta inteira existe
+   * pra impedir.
+   *
+   * `--tk-accent-fg` já é a cor da espécie empurrada até passar 4,7:1 contra o
+   * fundo DO TEMA ATUAL — clara no escuro, escura no claro. Com ela o indicador
+   * fica sempre à mesma distância da barra, seja qual for o bicho.
+   */
+  background: color-mix(in srgb, var(--tk-accent-fg, var(--tk-ultra-solid)) 28%, transparent);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   box-shadow: none;
@@ -4623,4 +4655,177 @@
   :root:not([data-tk="dark"]) .tk-mono:not(.tk-mono--bare)::after {
     background: rgba(255, 255, 255, 0.2);
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   O POP-UP DE AJUSTE — a folha que tem o tamanho do que tem dentro
+   ═══════════════════════════════════════════════════════════════════════════
+
+   "n precisa abrir uma tela inteira so pra aparencia. se n é mt grande n precisa
+   abrir tela inteira, abre so pop up. la nos ajustes"
+
+   Todo assunto de Ajustes abria em `.tk-sheet-full`, tela cheia. Pra Privacidade
+   e Idioma isso está certo — são lista e texto longos. Pra Aparência, que são
+   três opções numa linha, era uma tela de 874px pra mostrar 42px de conteúdo.
+
+   A regra aqui é uma só e resolve os dois extremos sem eu ter que classificar
+   cada painel: `height: auto` com `max-height: 86dvh`. Curto encolhe, longo para
+   no teto e rola por dentro. Um painel que ganhe mais uma opção amanhã continua
+   certo sozinho — que é o que uma lista de exceções nunca consegue.
+*/
+.tk-pop-fundo {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  border: 0;
+  padding: 0;
+  background: rgba(6, 8, 12, var(--tk-pop-veu, 0.45));
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  animation: tk-pop-veu-entra 0.2s var(--tk-ease-out) both;
+}
+
+/* No claro o véu preto a 45% é uma cortina; a folha já se separa pela sombra e
+   pelo branco, então basta um escurecimento leve. */
+[data-tk="light"] .tk-pop-fundo {
+  --tk-pop-veu: 0.28;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-tk="dark"]) .tk-pop-fundo {
+    --tk-pop-veu: 0.28;
+  }
+}
+
+@keyframes tk-pop-veu-entra {
+  from {
+    opacity: 0;
+  }
+}
+
+.tk-pop {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 61;
+  margin: 0 auto;
+  max-width: var(--tk-container);
+  /* ⚠️ `auto` mais teto — é a regra inteira desta peça. Ver a nota acima. */
+  height: auto;
+  max-height: 86dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--tk-elev);
+  border: 1px solid var(--tk-line);
+  border-bottom: 0;
+  border-radius: 26px 26px 0 0;
+  box-shadow: 0 -18px 44px -14px rgba(0, 0, 0, 0.5);
+  animation: tk-rise 0.22s var(--tk-ease-glass) both;
+  padding-bottom: max(var(--tk-s4), env(safe-area-inset-bottom));
+}
+
+/* Em tela larga ela deixa de ser folha de rodapé e vira caixa centrada: numa
+   janela de 1400px uma faixa colada embaixo não lê como diálogo, lê como
+   rodapé. Mesma peça, outra ancoragem. */
+@media (min-width: 700px) {
+  .tk-pop {
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%);
+    width: min(440px, calc(100vw - 48px));
+    border-radius: 26px;
+    border-bottom: 1px solid var(--tk-line);
+    animation: tk-pop-cresce 0.22s var(--tk-ease-glass) both;
+  }
+}
+
+@keyframes tk-pop-cresce {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+}
+
+.tk-pop[data-saindo],
+.tk-pop-fundo[data-saindo] {
+  animation: tk-pop-sai 0.18s var(--tk-ease-out) both;
+}
+
+@keyframes tk-pop-sai {
+  to {
+    opacity: 0;
+  }
+}
+
+.tk-pop-alca {
+  width: 38px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--tk-surf3);
+  margin: 8px auto 0;
+  flex: none;
+}
+
+.tk-pop-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px var(--tk-gutter) 8px;
+  flex: none;
+}
+
+.tk-pop-title {
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+  font: 700 19px var(--tk-font);
+  letter-spacing: -0.3px;
+  color: var(--tk-txt);
+}
+
+.tk-pop-close {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: 0;
+  display: grid;
+  place-items: center;
+  background: var(--tk-surf2);
+  color: var(--tk-txt2);
+  font: 400 14px var(--tk-font);
+}
+
+/*
+ * ⚠️ O ALVO DE TOQUE DE 44px NUM BOTÃO DE 30.
+ *
+ * Mesma técnica do avatar e dos pontinhos: o que se VÊ tem 30px porque um X
+ * grande num cabeçalho de 19px compete com o título; o que se TOCA tem 44.
+ */
+.tk-pop-close::after {
+  content: "";
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+}
+
+.tk-pop-head {
+  position: relative;
+}
+
+.tk-pop-close {
+  position: relative;
+}
+
+.tk-pop-corpo {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 var(--tk-gutter) var(--tk-s4);
+}
+
+/* A barra de abas some enquanto a folha está aberta, como nas folhas cheias: o
+   vidro dela mostraria o véu borrado e mais nada. */
+.tk-pop-corpo > :first-child {
+  margin-top: 0;
 }
