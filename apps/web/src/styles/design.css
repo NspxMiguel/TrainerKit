@@ -2685,3 +2685,76 @@
 .tk-wheel-item {
   scroll-snap-align: center;
 }
+
+/*
+ * O rótulo do segmentado ENCOLHE em vez de truncar.
+ *
+ * ⚠️ Achado varrendo os dez idiomas: "Construire ma collection" (fr),
+ * "Meine Sammlung aufbauen" (de) e "Costruire la mia collezione" (it) saíam com
+ * reticências em Ajustes › Como você usa, e "オールラウンド · レイド · PvP"
+ * saía cortado na ficha da espécie. Em português nenhum deles aparecia.
+ *
+ * Um segmentado com o rótulo cortado é pior que um rótulo pequeno: as duas
+ * opções passam a parecer a mesma coisa ("Construire ma coll…" / "Parcourir la
+ * Poké…"), e a escolha some. É a mesma decisão que eu já tinha tomado no rótulo
+ * de veredito da fila — letra menor ganha de palavra pela metade.
+ *
+ * `clamp` e não um tamanho fixo: em português e inglês o texto continua nos
+ * 13px do handoff, e só encolhe onde a tradução é mais longa.
+ */
+.tk-segment-btn {
+  font-size: clamp(10.5px, 3vw, 13px);
+}
+
+/*
+ * O selo BETA é minúsculo de propósito — mas o dedo não é.
+ *
+ * 36×21px medidos em coreano, onde "베타" é a palavra mais curta das dez; nos
+ * outros idiomas ele passa raspando. Ele ABRE uma explicação ao toque (foi um
+ * pedido dele), então é um alvo de verdade, e a regra dos 44px vale.
+ *
+ * Área de toque maior que a área pintada, como no resto do arquivo: crescer o
+ * selo estragaria o que ele é — uma marca discreta ao lado do título.
+ */
+.tk-beta {
+  position: relative;
+}
+
+.tk-beta::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+}
+
+/*
+ * A linha de metadados da coleção QUEBRA em vez de truncar.
+ *
+ * "4 покемонов · используется" precisa de 176px e tem 127 — medido em russo.
+ * Trocar "Renomear"/"Apagar" por ícones já devolveu ~90px e não bastou; o russo
+ * escreve "em uso" com onze letras.
+ *
+ * ⚠️ O comentário antigo dizia que quebrar "empurrava o botão de renomear pra
+ * fora e desalinhava a linha". Era verdade quando as ações eram texto de largura
+ * variável; com ícones de 44px fixos, uma segunda linha só deixa a linha mais
+ * alta — e a informação de qual conta está em uso é justamente o que essa tela
+ * existe pra dizer.
+ *
+ * O NOME continua sem quebrar: ele é escolhido pela pessoa, tem limite de 24
+ * caracteres, e uma reticência ali é menos ruim que um nome em duas alturas
+ * diferentes de linha pra linha.
+ */
+.tk-row-meta {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  /* Duas linhas bastam para qualquer idioma; a terceira seria sinal de que o
+     texto está errado, não de que falta espaço. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow-wrap: anywhere;
+}
