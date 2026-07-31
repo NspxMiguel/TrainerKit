@@ -2176,6 +2176,15 @@
  * "Bolha de IA: 54px de vidro, canto inferior direito, estrela em gradiente
  * violeta."
  *
+ * ⚠️ Estas regras miravam `.tk-ia-bolha` — uma SEGUNDA bolha, que so rolava a
+ * tela ate o cartao do assistente. Ela e a `.tk-bubble` (a conversa de verdade)
+ * conviviam no mesmo canto da mesma ficha, as duas violeta, as duas sobre IA:
+ * 54px em `bottom: 645` e 52px em `bottom: 734`, medidas no DOM.
+ *
+ * Sobrou a que FAZ mais, e o desenho do handoff veio com ela. O cartao do
+ * assistente continua no fluxo da ficha, entao o atalho pra ele nunca foi
+ * necessario.
+ *
  * ⚠️ `position: fixed` DENTRO de uma folha que tem `transform` na animacao de
  * entrada seria contido por ela — `transform` cria bloco de contencao e o
  * `fixed` passa a se ancorar na folha, nao na janela. Como a folha ocupa a tela
@@ -2184,7 +2193,7 @@
  * pior (a bolha subiria com o conteudo), entao fica `fixed` e a animacao de
  * entrada da folha e que nao pode mexer nela.
  */
-.tk-ia-bolha {
+.tk-bubble {
   position: fixed;
   right: 18px;
   bottom: calc(26px + env(safe-area-inset-bottom));
@@ -2205,14 +2214,14 @@
     inset 0 1px 1px rgba(255, 255, 255, 0.16);
 }
 
-.tk-ia-bolha:active {
+.tk-bubble:active {
   transform: scale(0.95);
 }
 
 /* Alvo bem acima dos 44px, e ela nao cresce: e sobreposicao, e cada pixel a
    mais tapa conteudo da ficha. */
 @media (prefers-reduced-motion: reduce) {
-  .tk-ia-bolha {
+  .tk-bubble {
     transition: none;
   }
 }

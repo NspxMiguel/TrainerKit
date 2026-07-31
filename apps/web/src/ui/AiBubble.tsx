@@ -5,7 +5,6 @@ import { mensagemDeErro } from "../ai/erro.ts";
 import { aiReady, chat } from "../ai/provider.ts";
 import { LIMITE_DIARIO, onQuotaChange, restantes } from "../ai/quota.ts";
 import { useT } from "../i18n/t.ts";
-import { IconSpark } from "./Icons.tsx";
 
 /**
  * A bolinha da IA, tipo a do WhatsApp.
@@ -128,7 +127,26 @@ export function AiBubble({ contexto, sistema, titulo }: Props) {
           aria-label={t("bubble.open")}
           onClick={() => setAberta((v) => !v)}
         >
-          <IconSpark size={22} />
+          {/*
+            A estrela em gradiente violeta do handoff §5.
+
+            O ícone anterior era o `IconSpark` monocromático, herdado de quando
+            esta bolha era só um botão azul. O gradiente é o que a liga
+            visualmente ao resto da IA no app — e é a única coisa violeta que
+            sobrevive sobre o vidro, que assume a cor do que está atrás.
+          */}
+          <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M12 3l1.9 4.9L19 9.8l-4.3 3 .6 5.2-3.3-2.5-3.3 2.5.6-5.2L5 9.8l5.1-1.9L12 3z"
+              fill="url(#tk-estrela)"
+            />
+            <defs>
+              <linearGradient id="tk-estrela" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stopColor="#c4b5ff" />
+                <stop offset="1" stopColor="#6b4bff" />
+              </linearGradient>
+            </defs>
+          </svg>
         </button>,
         document.body,
       )}
