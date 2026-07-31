@@ -30,6 +30,7 @@ export const JA: Dict = {
   "home.greeting.afternoon": "こんにちは",
   "home.greeting.lateNight": "夜ふかし中",
   "home.trainer": "トレーナー",
+  "home.todayPick": "きょうのイチオシ",
   "home.yourCollection": "あなたのコレクション",
   "home.hero.best": "あなたの最高個体",
   "home.hero.topRaid": "今いちばんのレイドアタッカー",

@@ -92,6 +92,22 @@
   --tk-v-guardar: #ffc55c;
   --tk-v-transferir: #9aa6b8;
 
+  /* ── cor por TIPO do Pokemon ─────────────────────────────────────────────
+     Tres paradas, do handoff. Usada no hero, nos tiles e no cabecalho da
+     ficha. O violeta Ultra NAO entra aqui: ele e acao do app, isto e
+     conteudo — misturar os dois foi o que fez a interface antiga parecer
+     tres apps diferentes. Sempre com scrim por cima quando houver texto. */
+  --tk-tipo-fire: #7c2d12, #ea580c, #f97316;
+  --tk-tipo-water: #1e3a8a, #2563eb, #38bdf8;
+  --tk-tipo-grass: #14532d, #16a34a, #84cc16;
+  --tk-tipo-electric: #92400e, #f59e0b, #fbbf24;
+  --tk-tipo-dragon: #2e2a78, #5b3df5, #7c5cff;
+  --tk-tipo-fairy: #9d174d, #ec4899, #f9a8d4;
+  --tk-tipo-psychic: #312e81, #7c3aed, #a78bfa;
+  --tk-tipo-ice: #155e75, #0891b2, #67e8f9;
+  --tk-tipo-fighting: #9a3412, #f97316, #fdba74;
+  --tk-tipo-normal: #374151, #6b7280, #9ca3af;
+
   /* ── movimento do redesenho ──────────────────────────────────────────────
      Saida SEMPRE mais rapida que a entrada: ninguem espera pra sair de algo. */
   --tk-ease-out: cubic-bezier(0.32, 0.72, 0, 1);

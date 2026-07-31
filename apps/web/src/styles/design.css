@@ -249,3 +249,191 @@
 .tk-act:active {
   transform: scale(0.98);
 }
+
+/* ─────────────────────────────────────────────── hero da Inicio ────────── */
+
+/*
+ * FULL-BLEED, 474px, com a saudacao DENTRO dele.
+ *
+ * A versao antiga era um cartao de 160px com a saudacao acima. A diferenca nao
+ * e de tamanho: no desenho novo a primeira coisa que a tela mostra e o Pokemon
+ * que pede decisao hoje, ocupando meia tela, e o nome do treinador flutua sobre
+ * ele. A pergunta "o que eu faco agora?" passa a ser respondida antes de
+ * qualquer rolagem.
+ *
+ * A cor vem do TIPO — `--tk-hero-grad` e injetada pelo React com as tres
+ * paradas do token `--tk-tipo-*`.
+ */
+.tk-hero {
+  position: relative;
+  display: block;
+  /* Escapa da goteira da coluna: o hero sangra ate a borda da tela. */
+  width: 100vw;
+  max-width: var(--tk-container);
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  margin-top: calc(var(--tk-safe-top) * -1);
+  height: 474px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: linear-gradient(180deg, var(--tk-hero-grad, var(--tk-tipo-normal)));
+  overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .tk-hero {
+    width: auto;
+    margin-left: 0;
+    margin-right: 0;
+    border-radius: 28px;
+  }
+}
+
+/*
+ * O monograma gigante ATRAS de tudo, a 10% de branco.
+ *
+ * Nao e enfeite: e o que substitui a arte oficial que o app nao pode embarcar.
+ * A 220px ele deixa de ser "duas letras" e vira textura — quem olha ve uma
+ * forma, nao um rotulo.
+ */
+.tk-hero-mono {
+  position: absolute;
+  left: 50%;
+  top: 80px;
+  transform: translateX(-50%);
+  font: 800 220px/1 var(--tk-font);
+  letter-spacing: -10px;
+  color: rgba(255, 255, 255, 0.1);
+  pointer-events: none;
+  user-select: none;
+}
+
+/*
+ * O scrim, que faz duas coisas ao mesmo tempo: garante contraste do texto
+ * branco sobre um gradiente que pode ser claro (Elétrico, Gelo), e FUNDE a
+ * base do hero com o fundo do app, pra nao existir uma linha de corte.
+ */
+.tk-hero-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 12, 16, 0.4) 0%,
+    rgba(10, 12, 16, 0) 22%,
+    rgba(10, 12, 16, 0) 50%,
+    rgba(10, 12, 16, 0.55) 78%,
+    var(--tk-bg) 100%
+  );
+  pointer-events: none;
+}
+
+.tk-hero-topo {
+  position: absolute;
+  top: calc(var(--tk-safe-top) + 18px);
+  left: 20px;
+  right: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.tk-hero-saudacao {
+  font: 700 34px/1.05 var(--tk-font);
+  letter-spacing: -0.5px;
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  margin: 0;
+  min-width: 0;
+}
+
+.tk-hero-base {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+}
+
+/* "DESTAQUE DE HOJE" — vidro escuro sobre o gradiente. */
+.tk-hero-chip {
+  padding: 5px 14px;
+  border-radius: 999px;
+  font: 700 11px var(--tk-font);
+  letter-spacing: 0.09em;
+  color: #fff;
+  background: rgba(10, 12, 16, 0.35);
+  border: 0.5px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.tk-hero-name {
+  font: 800 46px/1 var(--tk-font);
+  letter-spacing: -1.5px;
+  color: #fff;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  text-align: center;
+}
+
+.tk-hero-frase {
+  max-width: 300px;
+  text-align: center;
+  font: 400 14px/1.4 var(--tk-font);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.tk-hero-acoes {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 2px;
+}
+
+/*
+ * O botao do veredito e BRANCO, e nao violeta.
+ *
+ * Sobre um gradiente colorido, violeta sobre violeta some. O branco e o unico
+ * que funciona em cima dos dez tipos sem excecao — e por isso o desenho o usa
+ * so aqui, no unico botao que vive sobre cor.
+ */
+.tk-hero-cta {
+  height: 48px;
+  padding: 0 26px;
+  border-radius: 999px;
+  background: #fff;
+  border: 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  font: 700 15px var(--tk-font);
+  color: #0a0c10;
+  display: flex;
+  align-items: center;
+}
+
+.tk-hero-cta:active {
+  transform: scale(0.97);
+}
+
+.tk-hero-feito {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  background: rgba(10, 12, 16, 0.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 0.5px solid rgba(255, 255, 255, 0.28);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tk-hero-feito:active {
+  transform: scale(0.95);
+}

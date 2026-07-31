@@ -30,6 +30,7 @@ export const KO: Dict = {
   "home.greeting.afternoon": "안녕하세요",
   "home.greeting.lateNight": "늦은 밤이네요",
   "home.trainer": "트레이너",
+  "home.todayPick": "오늘의 추천",
   "home.yourCollection": "내 컬렉션",
   "home.hero.best": "내 최고 개체",
   "home.hero.topRaid": "지금 최고의 레이드 어태커",

@@ -84,11 +84,42 @@ function greetingKey(): Key {
  * O rotulo diz qual dos tres e, porque um destaque sem rotulo faz a pessoa
  * adivinhar por que aquele bicho esta ali.
  */
+/**
+ * As tres paradas do gradiente do tipo, como o redesenho pede.
+ *
+ * O token e uma LISTA (`#7c2d12, #ea580c, #f97316`), e nao um gradiente pronto:
+ * assim o mesmo tipo serve o hero (180deg, tres paradas espalhadas) e o tile
+ * (135deg, compacto) sem duplicar as cores em dois lugares — que e como as
+ * duas telas comecam a divergir.
+ */
+const TIPO_CSS: Record<string, string> = {
+  fire: "--tk-tipo-fire",
+  water: "--tk-tipo-water",
+  grass: "--tk-tipo-grass",
+  electric: "--tk-tipo-electric",
+  dragon: "--tk-tipo-dragon",
+  fairy: "--tk-tipo-fairy",
+  psychic: "--tk-tipo-psychic",
+  ice: "--tk-tipo-ice",
+  fighting: "--tk-tipo-fighting",
+};
+
+function gradienteDoTipo(tipo: string): string {
+  return `var(${TIPO_CSS[tipo] ?? "--tk-tipo-normal"})`;
+}
+
+/** Monograma de duas letras, o mesmo que os tiles usam. */
+function monograma(nome: string): string {
+  return nome.replace(/[^\p{L}\p{N}]/gu, "").slice(0, 2).toUpperCase();
+}
+
 function Hero({
   species,
   labelKey,
   linha,
   tom,
+  saudacao,
+  treinador,
   onOpen,
   feito,
   onToggleFeito,
@@ -97,77 +128,65 @@ function Hero({
   labelKey: Key;
   linha: string;
   tom?: string | undefined;
+  saudacao: string;
+  treinador: string;
   onOpen: () => void;
   /** Presente so quando o destaque e um veredito pendente de um bicho seu. */
   feito?: boolean | undefined;
   onToggleFeito?: (() => void) | undefined;
 }) {
   const { t } = useT();
-  const cor = typeColor(species.types[0] ?? "normal");
 
   return (
     <div
       className="tk-hero"
-      /* A cor do tipo entra por variavel pra ficar so no CSS quem decide como
-         ela e usada — aqui e um veu atras do sprite, la e o gradiente. */
-      style={{ ["--tk-hero-type" as string]: cor }}
+      style={{ ["--tk-hero-grad" as string]: gradienteDoTipo(species.types[0] ?? "normal") }}
     >
-      {/*
-        Camada invisivel: abrir e a acao do bloco INTEIRO, e nao de um botao
-        dentro dele. Botao dentro de botao nao existe em HTML, e era o que
-        impedia o "ja fiz" de morar aqui — que e exatamente onde ele faltava.
-      */}
-      <button type="button" className="tk-hero-open" onClick={onOpen} aria-label={species.name} />
-
-      <span className="tk-hero-art" aria-hidden="true">
-        <SpeciesTile
-          spriteId={species.spriteId}
-          dex={species.dex}
-          speciesId={species.id}
-          name={species.name}
-          types={species.types}
-          size={84}
-        />
+      {/* O monograma gigante ATRAS de tudo. Substitui a arte oficial que o app
+          nao pode embarcar — a 220px ele vira textura, nao rotulo. */}
+      <span className="tk-hero-mono" aria-hidden="true">
+        {monograma(species.name)}
       </span>
 
-      <span className="tk-hero-text">
-        <span className="tk-hero-label" style={tom ? { color: tom } : undefined}>
-          {t(labelKey)}
-        </span>
-        <span className="tk-hero-name">{species.name}</span>
-        <span className="tk-hero-meta">
-          #{String(species.dex).padStart(3, "0")} ·{" "}
-          {species.types.map((tp) => t(typeKey(tp) as "type.normal")).join(" · ")}
-        </span>
-        <span className="tk-hero-why">{linha}</span>
+      {/* Garante contraste sobre gradiente claro (Elétrico, Gelo) E funde a base
+          do hero com o fundo do app, pra nao haver linha de corte. */}
+      <span className="tk-hero-scrim" aria-hidden="true" />
 
-        {/*
-          "Ja fiz isso", na coisa mais visivel da tela.
+      <div className="tk-hero-topo">
+        <p className="tk-hero-saudacao">
+          {saudacao}, {treinador}.
+        </p>
+      </div>
 
-          O Miguel, duas vezes: "ainda continua essa desgraça de investir sem
-          jeito de tirar isso". Estava certo — o botao existia SO na linha da
-          Colecao, escondido num rotulo colorido, e o destaque da home anunciava
-          INVESTIR sem oferecer nada. Aqui ele fica ao lado do aviso que cobra.
-        */}
-        {onToggleFeito && (
-          <button
-            type="button"
-            className="tk-done tk-done--hero"
-            data-done={feito || undefined}
-            aria-pressed={feito ?? false}
-            onClick={onToggleFeito}
-          >
-            <span className="tk-done-mark" aria-hidden="true">
-              {feito ? "✓" : "○"}
-            </span>
-            {feito ? t("collection.done") : t("collection.markDone")}
+      <div className="tk-hero-base">
+        <span className="tk-hero-chip">{t("home.todayPick")}</span>
+        <div className="tk-hero-name">{species.name}</div>
+        <p className="tk-hero-frase">{linha}</p>
+
+        <div className="tk-hero-acoes">
+          <button type="button" className="tk-hero-cta" onClick={onOpen}>
+            {t(labelKey)}
           </button>
-        )}
-      </span>
 
-      <span className="tk-hero-go" aria-hidden="true">
-        ›
-      </span>
+          {/* "Ja fiz isso" silencia o destaque. So existe quando o destaque e um
+              veredito pendente de um bicho seu — sem isso, nao ha o que marcar. */}
+          {onToggleFeito && (
+            <button
+              type="button"
+              className="tk-hero-feito"
+              aria-pressed={feito}
+              aria-label={t(feito ? "collection.undoDone" : "collection.markDone")}
+              onClick={onToggleFeito}
+              style={feito && tom ? { color: tom } : undefined}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M4 12.5l5 5L20 6.5" />
+              </svg>
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -333,12 +352,10 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
 
   return (
     <>
-      {/* A saudacao e o nome, nos dois tamanhos de sempre. Ficaram numa linha so
-          de 26px pra economizar altura, e o Miguel notou na hora — o nome e a
-          unica coisa da tela que e sobre ELE, e encolher isso pra caber mais
-          informacao foi trocar a coisa certa pela coisa errada. */}
-      <p className="tk-greeting">{t(greetingKey())}</p>
-      <h1 className="tk-h1 tk-h1--home">{setup.name.trim() || t("home.trainer")}</h1>
+      {/* A saudacao e o nome mudaram de lugar: agora vivem DENTRO do hero, por
+          cima do gradiente do tipo. Ver `.tk-hero-topo` no design.css — a
+          primeira coisa da tela passou a ser o Pokemon que pede decisao hoje,
+          e o nome do treinador flutua sobre ele. */}
 
       {showInstall && (
         <InstallBanner
@@ -377,7 +394,9 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
         <>
           {hero && (
             <Hero
-              species={hero.species}
+              saudacao={t(greetingKey())}
+              treinador={setup.name.trim() || t("home.trainer")}
+species={hero.species}
               labelKey={hero.labelKey}
               linha={hero.linha}
               tom={hero.tom}
