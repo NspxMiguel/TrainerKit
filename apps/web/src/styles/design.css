@@ -2440,3 +2440,52 @@
 .tk-meus .tk-owned-remove {
   align-self: start;
 }
+
+/*
+ * ⚠️ O botão de enviar da caixa de perguntas tem 34px — abaixo dos 44 que o
+ * handoff cobra ("alvos ≥44px", restrição nº 4).
+ *
+ * Ele fica DENTRO do campo de busca, encostado na borda: crescer para 44px
+ * empurraria o campo e engordaria a caixa inteira. A saída é a mesma que o
+ * `.tk-owned-remove` já usava — área de toque maior que a área pintada, via
+ * pseudo-elemento. O dedo ganha os 44px; o layout continua com 34.
+ *
+ * Achado varrendo o app em RUSSO, medindo alvo por alvo: em português a caixa
+ * de perguntas nem aparecia na lista, porque só existe com a coleção aberta.
+ */
+.tk-ask-send {
+  position: relative;
+}
+
+.tk-ask-send::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+}
+
+/*
+ * ⚠️ O "+" some enquanto a caixa de perguntas está em uso.
+ *
+ * Os dois vivem no mesmo canto: o FAB é `fixed` em `bottom: 84px`, e o botão de
+ * enviar da pergunta fica na borda direita do campo. Medido no DOM — o FAB em
+ * (297, 672) cobrindo o `.tk-ask-send` em (285, 647). Ou seja: você digita a
+ * pergunta e o botão de enviar está literalmente embaixo do "+".
+ *
+ * Esconder no foco resolve o conflito exatamente quando ele importa, e devolve
+ * o FAB assim que a pergunta sai. `:has()` porque os dois não são irmãos — a
+ * caixa vem embrulhada num `<div>` e o combinador `~` não alcança.
+ *
+ * ⚠️ Isto NÃO resolve o caso geral de conteúdo passando por baixo de um botão
+ * flutuante, que é próprio de qualquer FAB e se resolve rolando. Resolve o caso
+ * em que o app fica impossível de usar: o alvo coberto ser o único jeito de
+ * concluir o que você acabou de escrever.
+ */
+.tk-main:has(.tk-ask:focus-within) .tk-fab {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.14s var(--tk-ease);
+}
