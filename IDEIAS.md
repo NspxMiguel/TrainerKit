@@ -30,24 +30,22 @@ família". Era a metade que faltava.
 **(2) vai entrar num raide** — os counters saem da sua coleção e dizem quantas
 pessoas você precisa.
 
-**(3) mochila cheia** — **não existe nada**. É o maior buraco.
+**(3) mochila cheia** — a **Faxina**. Era "o maior buraco" e deixou de ser.
+
+Ela não lista: ela separa em duas listas, e a separação é o produto inteiro.
+*Sem dúvida* são os duplicados que perdem para um irmão da mesma espécie em
+todos os critérios — vêm pré-marcados, porque a afirmação se confere item por
+item. *Você decide* é o resto, explicado e nunca pré-marcado.
+
+E ela mostra o que **se recusa** a sugerir, com o motivo de cada um. Essa é a
+metade que faz a outra ser levada a sério: um app de faxina em que a pessoa não
+consegue auditar o que ficou de fora é um app que ela usa uma vez.
 
 ---
 
-## As três que eu faria agora
+## As duas que eu faria agora
 
-### 1. Faxina — o buraco (3)
-
-"Esses 23 são transferência segura." Seleção múltipla, total de doce que você
-ganha, e um resumo antes de confirmar.
-
-É onde a coleção deixa de ser lista e vira alívio. Quem tem 2.000 Pokémon não
-abre 2.000 telas — e é a única das três situações que o app ainda não atende.
-
-⚠️ Precisa de confirmação explícita e desfazer. Transferir é irreversível no
-jogo.
-
-### 2. Escanear vários prints de uma vez
+### 1. Escanear vários prints de uma vez
 
 Hoje é um print, um Pokémon, uma tela. Mas quem acabou de fazer uma sessão de
 capturas tem 20 prints na galeria.
@@ -58,7 +56,7 @@ dois não deram".
 
 Junto com a faxina, transforma o app de "consulto um" em "resolvo a sessão".
 
-### 3. Vale a pena esse raide?
+### 2. Vale a pena esse raide?
 
 Antes de gastar o passe: *"você derruba sozinho em 2 min"*, *"você derruba mas
 cai 3 vezes"*, *"nem com a sala cheia"*. O motor de counters já calcula isso —
