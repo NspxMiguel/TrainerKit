@@ -69,7 +69,7 @@ export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
   /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
      caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
      escape volta a piscar, e so aquele. */
-  const { saindo, fechar, sair } = useFolha(onClose);
+  const { saindo, ref: refFolha, fechar, sair } = useFolha(onClose);
 
   const { t } = useT();
   const language = useLanguage();
@@ -408,6 +408,7 @@ export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
 
   return createPortal(
     <div
+      ref={refFolha}
       className="tk-dex"
       data-saindo={saindo || undefined}
       /*

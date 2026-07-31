@@ -134,7 +134,7 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
   /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
      caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
      escape volta a piscar, e so aquele. */
-  const { saindo, fechar } = useFolha(onClose);
+  const { saindo, ref: refFolha, fechar } = useFolha(onClose);
   /* Tirar da colecao pede dois toques — ver o botao la embaixo. */
   const [confirmandoTirar, setConfirmandoTirar] = useState(false);
 
@@ -321,7 +321,8 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
     .filter((s): s is DatasetSpecies => s !== undefined);
 
   return createPortal(
-    <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={species.name} data-saindo={saindo || undefined}>
+    <div ref={refFolha}
+      className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={species.name} data-saindo={saindo || undefined}>
       {/*
         O MESMO HERO DA HOME, aqui na ficha.
 
@@ -418,6 +419,10 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
           </div>
         </div>
       </div>
+
+      {/* A cauda que continua a cor do hero pra dentro da página, pra ele não
+          terminar numa linha reta. Ver `.tk-hero-cauda` no design.css. */}
+      <div className="tk-hero-cauda" aria-hidden="true" />
 
       {/*
         O CARTAO DO VEREDITO — a peça central do handoff, e ela simplesmente

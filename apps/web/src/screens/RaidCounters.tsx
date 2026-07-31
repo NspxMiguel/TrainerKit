@@ -47,7 +47,7 @@ export function RaidCounters({ boss, data, onClose }: Props) {
   /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
      caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
      escape volta a piscar, e so aquele. */
-  const { saindo, fechar } = useFolha(onClose);
+  const { saindo, ref: refFolha, fechar } = useFolha(onClose);
 
   /*
    * O tier que a especie de fato ocupa, ate onde da pra saber.
@@ -158,7 +158,8 @@ export function RaidCounters({ boss, data, onClose }: Props) {
   const speciesOf = (id: string) => data.species.find((s) => s.id === id);
 
   return createPortal(
-    <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={t("raid.title")} data-saindo={saindo || undefined}>
+    <div ref={refFolha}
+      className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={t("raid.title")} data-saindo={saindo || undefined}>
       <header className="tk-sheet-head">
         <button
           type="button"

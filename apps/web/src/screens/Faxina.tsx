@@ -50,7 +50,7 @@ interface Props {
  * faxina que não deixa auditar o que ficou de fora é um app que se usa uma vez.
  */
 export function Faxina({ data, onClose }: Props) {
-  const { saindo, fechar } = useFolha(onClose);
+  const { saindo, ref: refFolha, fechar } = useFolha(onClose);
   const { t, tm, language } = useT();
   const { items } = useCollection();
 
@@ -311,6 +311,7 @@ export function Faxina({ data, onClose }: Props) {
 
   return createPortal(
     <div
+      ref={refFolha}
       className={`tk-sheet-full${temBarra ? " tk-sheet-full--barra" : ""}`}
       role="dialog"
       aria-modal="true"

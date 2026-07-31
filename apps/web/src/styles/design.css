@@ -761,7 +761,18 @@
    * 14px no iPhone comum sem arriscar enfiar a saudacao embaixo da ilha
    * dinamica de quem tem uma.
    */
-  padding: max(var(--tk-safe-top), calc(env(safe-area-inset-top) + var(--tk-s3))) 20px 0;
+  /*
+   * ⚠️ O mesmo `--tk-folha-topo` da folha, e nao `--tk-safe-top`.
+   *
+   * "o botao de voltar ta muito pra baixo, coloca mais em cima."
+   *
+   * O hero da ficha ja sobe ate a borda; era esta barra que segurava a seta
+   * 52px abaixo — o respiro DESENHADO pra saudacao da home, herdado por uma
+   * barra que so tem um botao redondo dentro. O `var(…, …)` mantem o valor
+   * antigo onde o token nao existe (o hero da home, que nao vive em folha).
+   */
+  padding: var(--tk-folha-topo, max(var(--tk-safe-top), calc(env(safe-area-inset-top) + var(--tk-s3))))
+    20px 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1425,9 +1436,17 @@
   height: clamp(280px, 38svh, 420px);
   min-height: 0;
   max-height: none;
-  /* Sobe pra debaixo da barra de status: o gradiente comeca na borda de cima,
-     como na home. */
-  margin-top: calc(var(--tk-safe-top) * -1);
+  /*
+   * Sobe pra debaixo da barra de status: o gradiente comeca na borda de cima,
+   * como na home.
+   *
+   * ⚠️ O valor e o `--tk-folha-topo` da propria folha, com o sinal trocado.
+   * Era `--tk-safe-top` fixo, e no dia em que o recuo da folha mudou (a seta de
+   * voltar subiu) os dois deixaram de bater — a arte subiria 40px a mais e
+   * sairia cortada. Ler o mesmo token nos dois lugares e o que impede a
+   * proxima mudanca de recuo de quebrar isto de novo.
+   */
+  margin-top: calc(var(--tk-folha-topo, var(--tk-safe-top)) * -1);
   margin-bottom: 20px;
   border-radius: 0 0 30px 30px;
 }
@@ -1533,7 +1552,38 @@
    * saudacao.
    */
   height: calc(var(--tk-safe-top) + 200px);
-  background: var(--tk-accent-topo, transparent);
+  /*
+   * ⚠️ A FAIXA CONTINUA A RAMPA DO HERO, em vez de ser uma cor chapada.
+   *
+   * "faz isso subir... pra n ficar com essa clara diferença" — e ele marcou de
+   * vermelho exatamente a linha onde a faixa encontra o hero.
+   *
+   * As duas cores ali são IGUAIS: a faixa é `--tk-accent-topo` e o hero começa
+   * na mesma parada. O que o olho vê não é diferença de cor, é diferença de
+   * DERIVADA — acima da emenda a cor é constante, abaixo ela começa a clarear
+   * na hora. Uma quebra de inclinação lê como linha, mesmo sem degrau de cor.
+   *
+   * Com a faixa subindo de um tom mais fundo até `--tk-accent-topo`, a rampa
+   * nasce no alto da tela e atravessa o hero sem costura. E a direção é segura
+   * nos dois temas por construção: no escuro o topo escurece (texto claro
+   * ganha contraste), no claro ele clareia (texto escuro ganha).
+   */
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--tk-accent-topo, transparent) 75%, var(--tk-hero-ink)) 0,
+    /*
+     * ⚠️ A RAMPA TERMINA ONDE O HERO COMEÇA, e não no fim da faixa.
+     *
+     * Foi o erro da primeira tentativa: eu ramponei ao longo dos 200px inteiros
+     * da faixa, mas o hero começa em `--tk-safe-top + 52px` — no cruzamento a
+     * rampa ainda estava na metade, e a emenda ficou PIOR que a de antes.
+     *
+     * Os 52px são a linha da saudação (42) mais o respiro (10). Depois disso a
+     * cor segura chapada: o resto da faixa vive atrás do hero, que é opaco.
+     */
+      var(--tk-accent-topo, transparent) calc(var(--tk-safe-top) + 52px),
+    var(--tk-accent-topo, transparent) 100%
+  );
   z-index: -1;
   pointer-events: none;
   transition: background 0.5s var(--tk-ease-out);
@@ -2923,7 +2973,20 @@
  * hero"; o que mudou foi qual hero.
  */
 :root[data-tk="light"] .tk-home-topo::before {
-  background: var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent));
+  /* A mesma rampa do bloco escuro, com o sinal trocado: aqui o topo CLAREIA
+     em direção ao branco do app. Ver a nota longa em `.tk-home-topo::before`. */
+  background: linear-gradient(
+    180deg,
+    color-mix(
+        in srgb,
+        var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent)) 75%,
+        var(--tk-hero-ink)
+      )
+      0,
+    var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent))
+      calc(var(--tk-safe-top) + 52px),
+    var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent)) 100%
+  );
 }
 
 :root[data-tk="light"] .tk-saudacao {
@@ -2935,7 +2998,20 @@
 
 @media (prefers-color-scheme: light) {
   :root:not([data-tk="dark"]) .tk-home-topo::before {
-    background: var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent));
+    /* A mesma rampa do bloco escuro, com o sinal trocado: aqui o topo CLAREIA
+     em direção ao branco do app. Ver a nota longa em `.tk-home-topo::before`. */
+  background: linear-gradient(
+    180deg,
+    color-mix(
+        in srgb,
+        var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent)) 75%,
+        var(--tk-hero-ink)
+      )
+      0,
+    var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent))
+      calc(var(--tk-safe-top) + 52px),
+    var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent)) 100%
+  );
   }
 
   :root:not([data-tk="dark"]) .tk-saudacao {
@@ -3185,4 +3261,60 @@
   :root:not([data-tk="dark"]) .tk-hero-numero {
     --tk-hero-numero-forca: 7%;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   A FICHA DA ESPÉCIE: o hero deixa de terminar em linha reta
+   ═══════════════════════════════════════════════════════════════════════════
+
+   "aq dava pra fazer um degradezao q se conecta com o resto."
+
+   O hero da ficha fechava com `border-radius: 0 0 30px 30px` e acabava — cor
+   de um lado, fundo do app do outro, com um corte reto no meio. Numa tela que
+   é inteira sobre um Pokémon, esse corte anuncia "aqui acaba a parte bonita".
+
+   A emenda some com duas coisas somadas:
+
+    · o próprio hero fecha na cor do FUNDO (`--tk-hero-ink`) nos últimos 12%,
+      que já acontecia;
+    · e uma cauda logo abaixo dele continua a cor por mais ~180px, morrendo em
+      transparente. Como ela nasce da mesma cor em que o hero terminou, não há
+      degrau nenhum — a tela inteira vira uma superfície só.
+*/
+.tk-hero--ficha {
+  /* O raio some: com a cauda por baixo, o canto arredondado desenharia duas
+     orelhas de fundo do app em cima da própria continuação. */
+  border-radius: 0;
+  margin-bottom: 0;
+}
+
+.tk-hero-cauda {
+  /*
+   * ⚠️ ELA NÃO OCUPA ESPAÇO. É fundo, não bloco.
+   *
+   * Foi o erro da primeira versão: com 180px de altura em fluxo normal, abriu
+   * um vazio verde de 180px entre o hero e o cartão de veredito — eu tinha
+   * criado um buraco pra tapar uma emenda.
+   *
+   * `margin-bottom` negativo do mesmo tamanho devolve o espaço, e o `z-index`
+   * negativo põe o conteúdo por cima. O resultado é o que se queria: a cor do
+   * hero continua correndo POR BAIXO das primeiras coisas da página.
+   */
+  position: relative;
+  z-index: -1;
+  /* -1px em cima: sem isso o arredondamento de subpixel deixa um fio do fundo
+     aparecendo entre o hero e a cauda em tela com DPR fracionário. */
+  margin-top: -1px;
+  margin-bottom: -179px;
+  height: 180px;
+  /* Sangra a goteira: a cauda é fundo, e fundo não respeita coluna de texto. */
+  margin-left: calc(-1 * var(--tk-gutter));
+  margin-right: calc(-1 * var(--tk-gutter));
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--tk-accent, transparent) 22%, transparent) 0%,
+    color-mix(in srgb, var(--tk-accent, transparent) 8%, transparent) 48%,
+    transparent 100%
+  );
 }
