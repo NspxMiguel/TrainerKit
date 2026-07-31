@@ -420,10 +420,6 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
         </div>
       </div>
 
-      {/* A cauda que continua a cor do hero pra dentro da página, pra ele não
-          terminar numa linha reta. Ver `.tk-hero-cauda` no design.css. */}
-      <div className="tk-hero-cauda" aria-hidden="true" />
-
       {/*
         O CARTAO DO VEREDITO — a peça central do handoff, e ela simplesmente
         nao existia nesta tela.

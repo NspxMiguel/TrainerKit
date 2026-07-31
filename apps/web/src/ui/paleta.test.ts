@@ -612,7 +612,7 @@ describe("paleta por espécie", () => {
      * Medido: 22% ainda passa (4,57 no pior caso), 26% já reprova. 18% é o valor
      * com folga.
      */
-    const TINTA = 0.18;
+    const TINTA = 0.09;
     const TELA = { r: 0xff, g: 0xff, b: 0xff };
     const TINTA_TEXTO: [number, number, number] = [22, 24, 29];
 

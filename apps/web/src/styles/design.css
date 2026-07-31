@@ -551,7 +551,21 @@
    * 1.142, no `paleta.test.ts`). Com esse teto o pé fica em ≤ 0,07 e o texto
    * branco que mora ali guarda 8:1 de folga.
    */
-  --tk-hero-pe: color-mix(in srgb, var(--tk-hero-ink) 62%, var(--tk-accent-topo, transparent));
+  /*
+   * ⚠️ O PÉ É O FUNDO DO APP, SEM TINTA — e ele já foi tingido, por um dia.
+   *
+   * "em cima, onde ta o bixo, é a cor dele certo? ai vai descendo até ficar
+   * fundo totalmente preto. degrade po"
+   *
+   * Eu tinha misturado 38% da cor da espécie aqui pra emendar o hero com uma
+   * "cauda" que continuava a cor página adentro. O resultado foi o oposto do
+   * degradê: a cor descia, sumia, e VOLTAVA embaixo — "esse negocio verde ali
+   * voltando do nada".
+   *
+   * Um degradê é monótono por definição. Se a cor reaparece depois de ter
+   * acabado, não é um degradê, são duas faixas.
+   */
+  --tk-hero-pe: var(--tk-hero-ink);
   --tk-hero-texto: #ffffff;
   /* O que o scrim usa pra recuperar contraste no meio: escuro sobre claro. */
   --tk-hero-veu: 10, 12, 16;
@@ -589,11 +603,7 @@
     /* O mesmo pé, com a parada CLARA: `--tk-accent-topo-claro` tem luminância
        cobrada por cima (≥ 0,66), então a mistura fica ≥ 0,75 e o texto
        quase-preto guarda 12:1. Ver a nota no bloco escuro. */
-    --tk-hero-pe: color-mix(
-    in srgb,
-    var(--tk-hero-ink) 62%,
-    var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent))
-  );
+    --tk-hero-pe: var(--tk-hero-ink);
     --tk-hero-texto: #141920;
     --tk-hero-veu: 250, 251, 253;
   }
@@ -605,11 +615,7 @@
   /* O mesmo pé, com a parada CLARA: `--tk-accent-topo-claro` tem luminância
      cobrada por cima (≥ 0,66), então a mistura fica ≥ 0,75 e o texto
      quase-preto guarda 12:1. Ver a nota no bloco escuro. */
-  --tk-hero-pe: color-mix(
-    in srgb,
-    var(--tk-hero-ink) 62%,
-    var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent))
-  );
+  --tk-hero-pe: var(--tk-hero-ink);
   --tk-hero-texto: #141920;
   --tk-hero-veu: 250, 251, 253;
 }
@@ -2511,8 +2517,22 @@
  * texto invisivel. Recuar, e nao apagar: o Pokemon continua na colecao e
  * continua clicavel — o que acabou foi a pendencia, nao ele.
  */
+/*
+ * ⚠️ 0,86 e nao 0,55 — e o Pokemon deixa de PARECER DEFEITO.
+ *
+ * "os bixo fico apagado do nada."
+ *
+ * Ele nao ligou o apagamento a "feito", e essa e a prova de que o sinal nao
+ * estava comunicando: 45% de transparencia le como imagem que nao carregou,
+ * nao como tarefa concluida. No tema escuro o selo e claro e sobrevive ao veu;
+ * no claro ele se dissolve no fundo, e foi ai que virou defeito visivel.
+ *
+ * Quem diz que acabou e o "✓ FEITO" embaixo, em texto, e o selo em tom neutro
+ * — os dois continuam. O recuo da arte agora e discreto de proposito: ele
+ * acompanha a mensagem em vez de ser a mensagem.
+ */
 .tk-strip-cell[data-feito] .tk-mono {
-  opacity: 0.55;
+  opacity: 0.86;
 }
 
 .tk-strip-cell[data-feito] .tk-strip-verdito {
@@ -2784,6 +2804,7 @@
  * ver "a tinta de fundo não derruba o texto" em `paleta.test.ts`.
  */
 :root {
+  --tk-screen-base: radial-gradient(120vw 80vh at 50% -10%, #141a2a 0%, #0a0c11 55%, #07080b 100%);
   --tk-tinta-fundo: 30%;
   --tk-screen:
     /* A tinta da espécie, mais forte no MEIO da tela — que é justamente onde
@@ -2793,7 +2814,7 @@
       color-mix(in srgb, var(--tk-accent-topo, transparent) var(--tk-tinta-fundo), transparent) 0%,
       transparent 78%
     ),
-    radial-gradient(120vw 80vh at 50% -10%, #141a2a 0%, #0a0c11 55%, #07080b 100%);
+    var(--tk-screen-base);
 }
 
 /*
@@ -2801,40 +2822,45 @@
  * escurecer um fundo branco derruba o texto escuro que vive nele. Aqui entra a
  * cor CHEIA da espécie.
  *
- * ⚠️ 18%, e eram 9%. "nooooosa, fico muito paia isso no modo claro, degrade
- * sumiu, o fundo, tudo."
+ * ⚠️ 9%, DEPOIS de eu ter subido pra 18% e ele reprovar de novo.
  *
- * 9% de uma cor média sobre branco é literalmente invisível — a tela ficava
- * branca e a promessa do app ("as cores são moldadas com a cor do Pokémon")
- * valia só no escuro. O número saiu de medição, como o 30% do escuro: varrendo
- * as 1.142 espécies com os dois tokens de texto claro, 22% ainda passa (4,57) e
- * 18% deixa a casa de folga que o dataset pode consumir na próxima atualização.
+ * A queixa original ("o fundo, tudo") era real, mas eu ataquei o alvo errado.
+ * Subir a tinta do FUNDO pintou a tela inteira da cor da espécie — e aí o hero,
+ * que também é a cor da espécie, deixou de se destacar: "modo claro ainda
+ * horrivel". Uma tela toda de um tom só não tem figura nem fundo.
+ *
+ * O que faltava era o HERO ter cor, e isso foi resolvido nas paradas do
+ * gradiente (ver `HERO_CLARO` em `paleta.ts`). O fundo volta a ser quase
+ * branco, que é o papel dele: no escuro a página é quase preta e o hero carrega
+ * a cor; no claro tem que ser o espelho disso, e não os dois coloridos.
  */
 [data-tk="light"] {
   /* ⚠️ SO dentro do seletor de tema claro. Eu tinha escrito
      `:root:not([data-tk="dark"])` junto — e isso casa tambem com o padrao (sem
      atributo), que segue o SISTEMA: num aparelho no escuro a tinta cairia pra
      9% e o meio da tela voltaria a ser preto. */
-  --tk-tinta-fundo: 18%;
+  --tk-screen-base: radial-gradient(120vw 80vh at 50% -10%, #ffffff 0%, #f6f7fb 55%, #f0f2f7 100%);
+  --tk-tinta-fundo: 9%;
   --tk-screen:
     radial-gradient(
       140vw 70vh at 50% 42%,
       color-mix(in srgb, var(--tk-accent, transparent) var(--tk-tinta-fundo), transparent) 0%,
       transparent 78%
     ),
-    radial-gradient(120vw 80vh at 50% -10%, #ffffff 0%, #f6f7fb 55%, #f0f2f7 100%);
+    var(--tk-screen-base);
 }
 
 @media (prefers-color-scheme: light) {
   :root:not([data-tk="dark"]) {
-    --tk-tinta-fundo: 18%;
+    --tk-screen-base: radial-gradient(120vw 80vh at 50% -10%, #ffffff 0%, #f6f7fb 55%, #f0f2f7 100%);
+    --tk-tinta-fundo: 9%;
     --tk-screen:
       radial-gradient(
         140vw 70vh at 50% 42%,
         color-mix(in srgb, var(--tk-accent, transparent) var(--tk-tinta-fundo), transparent) 0%,
         transparent 78%
       ),
-      radial-gradient(120vw 80vh at 50% -10%, #ffffff 0%, #f6f7fb 55%, #f0f2f7 100%);
+      var(--tk-screen-base);
   }
 }
 
@@ -3311,64 +3337,7 @@
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   A FICHA DA ESPÉCIE: o hero deixa de terminar em linha reta
-   ═══════════════════════════════════════════════════════════════════════════
 
-   "aq dava pra fazer um degradezao q se conecta com o resto."
-
-   O hero da ficha fechava com `border-radius: 0 0 30px 30px` e acabava — cor
-   de um lado, fundo do app do outro, com um corte reto no meio. Numa tela que
-   é inteira sobre um Pokémon, esse corte anuncia "aqui acaba a parte bonita".
-
-   A emenda some com duas coisas somadas:
-
-    · o próprio hero fecha na cor do FUNDO (`--tk-hero-ink`) nos últimos 12%,
-      que já acontecia;
-    · e uma cauda logo abaixo dele continua a cor por mais ~180px, morrendo em
-      transparente. Como ela nasce da mesma cor em que o hero terminou, não há
-      degrau nenhum — a tela inteira vira uma superfície só.
-*/
-.tk-hero--ficha {
-  /* O raio some: com a cauda por baixo, o canto arredondado desenharia duas
-     orelhas de fundo do app em cima da própria continuação. */
-  border-radius: 0;
-  margin-bottom: 0;
-}
-
-.tk-hero-cauda {
-  /*
-   * ⚠️ ELA NÃO OCUPA ESPAÇO. É fundo, não bloco.
-   *
-   * Foi o erro da primeira versão: com 180px de altura em fluxo normal, abriu
-   * um vazio verde de 180px entre o hero e o cartão de veredito — eu tinha
-   * criado um buraco pra tapar uma emenda.
-   *
-   * `margin-bottom` negativo do mesmo tamanho devolve o espaço, e o `z-index`
-   * negativo põe o conteúdo por cima. O resultado é o que se queria: a cor do
-   * hero continua correndo POR BAIXO das primeiras coisas da página.
-   */
-  position: relative;
-  z-index: -1;
-  /* -1px em cima: sem isso o arredondamento de subpixel deixa um fio do fundo
-     aparecendo entre o hero e a cauda em tela com DPR fracionário. */
-  margin-top: -1px;
-  margin-bottom: -179px;
-  height: 180px;
-  /* Sangra a goteira: a cauda é fundo, e fundo não respeita coluna de texto. */
-  margin-left: calc(-1 * var(--tk-gutter));
-  margin-right: calc(-1 * var(--tk-gutter));
-  pointer-events: none;
-  /* Comeca EXATAMENTE na cor em que o hero terminou — a mesma variavel — e
-     morre em transparente. Sem degrau possivel: nao ha dois valores pra
-     acertar, ha um. */
-  background: linear-gradient(
-    180deg,
-    var(--tk-hero-pe, transparent) 0%,
-    color-mix(in srgb, var(--tk-hero-pe, transparent) 45%, transparent) 40%,
-    transparent 100%
-  );
-}
 
 /* ═══════════════════════════════════════════════════════════════════════════
    O RASTRO EM PORTUGUÊS, e o botão de discordar
@@ -4133,4 +4102,39 @@
 
 .tk-card > .tk-row {
   position: relative;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DENTRO DE UMA FOLHA, O FUNDO NÃO TEM TINTA DA ESPÉCIE
+   ═══════════════════════════════════════════════════════════════════════════
+
+   "aq era pra te um degrade, nao esse negocio verde ali voltando do nada."
+
+   A segunda metade da mesma queixa. Tirar a cauda resolveu a faixa colorida
+   logo abaixo do hero, mas sobrava a outra fonte de verde: `--tk-screen` tem
+   uma tinta RADIAL da espécie centrada em 42% da altura da janela — e numa
+   folha isso cai exatamente sob o hero.
+
+   Ou seja: o hero descia até o preto e o FUNDO devolvia a cor três dedos
+   abaixo. Duas peças diferentes produzindo o mesmo defeito.
+
+   Na home a tinta continua — ela nasceu de um pedido dele ("sem cor no meio")
+   e lá o hero ocupa metade da tela, então a cor no miolo é a continuação
+   natural. Numa folha o hero JÁ é a cor, e o que a página tem a fazer é sair
+   do caminho: descer até o fundo e ficar lá.
+*/
+.tk-sheet-full {
+  /*
+   * ⚠️ Aponta pro fundo BASE, e não zera `--tk-tinta-fundo`.
+   *
+   * Foi a minha primeira tentativa e ela não fez nada: `--tk-screen` resolve o
+   * `var(--tk-tinta-fundo)` que está dentro dele NO MOMENTO DA DECLARAÇÃO, lá
+   * no `:root`. Sobrescrever a tinta num descendente chega tarde — o valor já
+   * foi calculado com 30%.
+   *
+   * Medido: a folha reportava `--tk-tinta-fundo: 0%` e pintava
+   * `color(srgb … / 0.3)` mesmo assim. O token dizia uma coisa e a tela pintava
+   * outra, que é exatamente o tipo de coisa que só aparece medindo.
+   */
+  background: var(--tk-screen-base, var(--tk-screen));
 }
