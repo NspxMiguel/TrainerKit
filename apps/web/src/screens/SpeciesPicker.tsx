@@ -17,7 +17,7 @@ export function SpeciesPicker({ data, onPick, onClose }: Props) {
   /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
      caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
      escape volta a piscar, e so aquele. */
-  const { saindo, fechar, sair } = useFolha(onClose);
+  const { saindo, ref: refFolha, fechar, sair } = useFolha(onClose);
 
   const { t } = useT();
   // Trava o scroll do fundo enquanto a folha esta aberta.
@@ -41,7 +41,8 @@ export function SpeciesPicker({ data, onPick, onClose }: Props) {
   // residual que cria contexto de empilhamento, e a folha ficaria PRESA embaixo
   // da barra de abas por mais z-index que levasse.
   return createPortal(
-    <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={t("pokedex.whichPokemon")} data-saindo={saindo || undefined}>
+    <div ref={refFolha}
+      className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={t("pokedex.whichPokemon")} data-saindo={saindo || undefined}>
       <header className="tk-sheet-head">
         <button type="button" className="tk-sheet-close" onClick={fechar} aria-label={t("common.close")}>
           ‹

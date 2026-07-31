@@ -100,7 +100,7 @@ export function InstallGuide({ platform, promptInstall, onClose }: Props) {
   /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
      caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
      escape volta a piscar, e so aquele. */
-  const { saindo, fechar } = useFolha(onClose);
+  const { saindo, ref: refFolha, fechar } = useFolha(onClose);
 
   useEffect(() => {
     const previous = document.body.style.overflow;
@@ -123,7 +123,8 @@ export function InstallGuide({ platform, promptInstall, onClose }: Props) {
 
   return (
     createPortal(
-      <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={t(guide.titleKey)} data-saindo={saindo || undefined}>
+      <div ref={refFolha}
+      className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={t(guide.titleKey)} data-saindo={saindo || undefined}>
         <header className="tk-sheet-head">
           <button
             type="button"

@@ -975,8 +975,24 @@
   z-index: 20;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: max(var(--tk-safe-top), calc(env(safe-area-inset-top) + var(--tk-s3)))
-    var(--tk-gutter) calc(var(--tk-s8) + max(var(--tk-s5), env(safe-area-inset-bottom)));
+  /*
+   * ⚠️ O RECUO DE CIMA E O DA NOTCH, e nao o `--tk-safe-top` da home.
+   *
+   * "o botao de voltar ta muito pra baixo, coloca mais em cima."
+   *
+   * `--tk-safe-top` e 52px porque na HOME a saudacao precisa passar longe da
+   * barra de status. Numa folha o unico morador daquela faixa e a seta de
+   * voltar, que so precisa nao ficar embaixo da notch — e os 52px empurravam
+   * ela pra dentro da tela, com um palmo de vazio em cima.
+   *
+   * `max(12px, notch + 4)` cobre os dois aparelhos: sem notch sobram 12px de
+   * respiro; com notch a seta encosta logo abaixo dela.
+   */
+  /* Num token porque o hero da ficha precisa do MESMO valor com o sinal
+     trocado, pra subir até a borda. Ver `.tk-hero--ficha`. */
+  --tk-folha-topo: max(var(--tk-s3), calc(env(safe-area-inset-top) + 4px));
+  padding: var(--tk-folha-topo) var(--tk-gutter)
+    calc(var(--tk-s8) + max(var(--tk-s5), env(safe-area-inset-bottom)));
   margin: 0 auto;
   max-width: var(--tk-container);
   animation: tk-rise 0.2s var(--tk-ease) both;

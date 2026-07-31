@@ -27,7 +27,7 @@ export function SettingsSheet({ title, onClose, children }: Props) {
   /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
      caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
      escape volta a piscar, e so aquele. */
-  const { saindo, fechar } = useFolha(onClose);
+  const { saindo, ref: refFolha, fechar } = useFolha(onClose);
 
   const { t } = useT();
 
@@ -48,7 +48,8 @@ export function SettingsSheet({ title, onClose, children }: Props) {
   }, [fechar]);
 
   return createPortal(
-    <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={title} data-saindo={saindo || undefined}>
+    <div ref={refFolha}
+      className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={title} data-saindo={saindo || undefined}>
       {/*
         A volta EM CIMA, o titulo alinhado com o resto do app.
         

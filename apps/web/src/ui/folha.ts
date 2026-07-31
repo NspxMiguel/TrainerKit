@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 
+import { useGestoVoltar } from "./gestoVoltar.ts";
+
 /**
  * Sair de uma tela também é uma animação.
  *
@@ -29,6 +31,19 @@ const DURACAO = 180;
 
 export function useFolha(onClose: () => void): {
   saindo: boolean;
+  /**
+   * A raiz da folha. Espalhe em quem tem `tk-sheet-full`.
+   *
+   * ⚠️ Ele existe pro GESTO DE VOLTAR: "coloca tbm voltar puxando pro lado,
+   * igual maioria dos android e ios faz". O gesto mora aqui, no hook por onde
+   * TODAS as folhas passam, e não em cada tela — a alternativa era lembrar de
+   * ligar em nove lugares, que é exatamente o tipo de "lembrar" que já falhou
+   * três vezes neste arquivo.
+   *
+   * Uma folha que esqueça de espalhar o `ref` continua funcionando; só fica sem
+   * o gesto. Não há como quebrar nada esquecendo.
+   */
+  ref: React.RefObject<HTMLDivElement | null>;
   /** Fecha a folha, animado. */
   fechar: () => void;
   /**
@@ -92,7 +107,10 @@ export function useFolha(onClose: () => void): {
 
   const fechar = useCallback(() => sair(onClose), [sair, onClose]);
 
-  return { saindo, fechar, sair };
+  const ref = useRef<HTMLDivElement>(null);
+  useGestoVoltar(ref, fechar);
+
+  return { saindo, ref, fechar, sair };
 }
 
 /**

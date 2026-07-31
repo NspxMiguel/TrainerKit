@@ -51,7 +51,7 @@ export function GymPicks({ data, onClose, onPickSpecies }: Props) {
   /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
      caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
      escape volta a piscar, e so aquele. */
-  const { saindo, fechar, sair } = useFolha(onClose);
+  const { saindo, ref: refFolha, fechar, sair } = useFolha(onClose);
 
   const { t } = useT();
   const { items } = useCollection();
@@ -134,7 +134,8 @@ export function GymPicks({ data, onClose, onPickSpecies }: Props) {
   const nomeTipo = (tp: string) => t(typeKey(tp) as "type.normal");
 
   return createPortal(
-    <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={t("gym.title")} data-saindo={saindo || undefined}>
+    <div ref={refFolha}
+      className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={t("gym.title")} data-saindo={saindo || undefined}>
       <header className="tk-sheet-head">
         <button
           type="button"

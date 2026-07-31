@@ -27,7 +27,7 @@ import { useFolha } from "../ui/folha.ts";
  */
 export function Colecoes({ onClose }: { onClose: () => void }) {
   const { t } = useT();
-  const { saindo, fechar } = useFolha(onClose);
+  const { saindo, ref: refFolha, fechar } = useFolha(onClose);
   const [colecoes, setColecoes] = useState<Colecao[]>([]);
   const [contagem, setContagem] = useState<Record<string, number>>({});
   const [ativa, setAtiva] = useState(colecaoAtiva());
@@ -75,6 +75,7 @@ export function Colecoes({ onClose }: { onClose: () => void }) {
 
   return createPortal(
     <div
+      ref={refFolha}
       className="tk-sheet-full"
       role="dialog"
       aria-modal="true"

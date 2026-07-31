@@ -49,7 +49,7 @@ export function IVCalculator({ species, data, onClose, owned }: Props) {
   /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
      caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
      escape volta a piscar, e so aquele. */
-  const { saindo, fechar } = useFolha(onClose);
+  const { saindo, ref: refFolha, fechar } = useFolha(onClose);
 
   // Vindo da Colecao, ja nasce com o IV salvo. Sem dono, `null` ate o print ser
   // lido — sem print nao ha o que mostrar.
@@ -175,6 +175,7 @@ export function IVCalculator({ species, data, onClose, owned }: Props) {
         detalhe de rodape invertido. Com IV lido a tela volta a ser uma lista
         que rola, porque ai ha o que ler.
       */
+      ref={refFolha}
       className={`tk-sheet-full${ivs ? "" : " tk-sheet-full--empty"}`}
       data-saindo={saindo || undefined}
       role="dialog"
