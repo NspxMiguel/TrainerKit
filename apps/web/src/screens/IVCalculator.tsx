@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useFolha } from "../ui/folha.ts";
 import { createPortal } from "react-dom";
 
@@ -9,11 +9,14 @@ import {
   computeCPAtLevel,
   ivPercentOf,
   ivTotalOf,
+  levelsMatchingHp,
   rankOf,
   solveLevel,
   badgeFor,
   type IVs,
 } from "@trainerkit/core";
+
+import type { LeituraOcr } from "../scan/ocr.ts";
 
 import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
 import { useT } from "../i18n/t.ts";
@@ -61,6 +64,66 @@ export function IVCalculator({ species, data, onClose, owned }: Props) {
   const [hp, setHp] = useState(owned?.hp != null ? String(owned.hp) : "");
   // Ja esta na colecao: nao ha o que salvar de novo.
   const jaSalvo = owned !== undefined;
+
+  /*
+   * O print acabou de ser lido — e o `ivs` do React ainda pode nao ter chegado.
+   *
+   * O `onNumeros` do ScanDropzone dispara logo depois do `onRead`, e nesse
+   * instante o estado do React ainda pode estar na renderizacao anterior. A
+   * conferencia do OCR precisa do IV EXATO daquele print, entao ele vai por
+   * referencia, que e sincrona.
+   */
+  const ivsDoPrint = useRef<IVs | null>(null);
+  const [lidoPeloPrint, setLidoPeloPrint] = useState(false);
+  /** O OCR leu algo, mas a conta provou que nao podia ser. Ver `aceitarNumeros`. */
+  const [numerosRecusados, setNumerosRecusados] = useState(false);
+
+  /**
+   * ⚠️ NUMERO LIDO SO ENTRA SE A MATEMATICA CONFIRMAR.
+   *
+   * Este e o ponto onde o app decide se confia no reconhecimento de texto, e a
+   * resposta e "so quando ha prova". Medindo nos 26 prints reais, o leitor
+   * acertou 11 de 11 PC e 21 de 21 PS em captura nativa de celular — mas em
+   * print de mockup (a tela do celular DENTRO de uma janela de computador) ele
+   * devolveu "10" pra um PC de quatro digitos, e "10" passa em qualquer teste
+   * de formato que se escreva.
+   *
+   * A prova sai de graca: com o IV exato vindo das barras, PC e PS
+   * sobredeterminam o nivel. Se nenhum dos 109 niveis produz aquele par, os
+   * numeros nao existem juntos — e ai um deles foi lido errado. Descartar e a
+   * resposta honesta, e os campos continuam la pra digitar.
+   *
+   * Sem PC, o PS sozinho ainda vale: ele tambem tem que corresponder a algum
+   * nivel, e ja estreita bastante o intervalo.
+   */
+  const aceitarNumeros = (numeros: LeituraOcr) => {
+    const base = ivsDoPrint.current;
+    if (!base) return;
+    const cap = data.version.levelCap;
+
+    if (numeros.pc !== null && numeros.ps !== null) {
+      const possiveis = solveLevel(data.cpm, species.baseStats, base, {
+        cp: numeros.pc,
+        hp: numeros.ps,
+      }, cap);
+      if (possiveis.length > 0) {
+        setCp(String(numeros.pc));
+        setHp(String(numeros.ps));
+        setNumerosRecusados(false);
+        return;
+      }
+      setNumerosRecusados(true);
+      return;
+    }
+
+    if (numeros.ps !== null) {
+      if (levelsMatchingHp(data.cpm, species.baseStats, base, numeros.ps, cap).length > 0) {
+        setHp(String(numeros.ps));
+        return;
+      }
+      setNumerosRecusados(true);
+    }
+  };
 
   useEffect(() => {
     const previous = document.body.style.overflow;
@@ -182,11 +245,18 @@ export function IVCalculator({ species, data, onClose, owned }: Props) {
           onRead={(read) => {
             setIvs(read);
             setManual(false);
+            ivsDoPrint.current = read;
+            setLidoPeloPrint(true);
+            setNumerosRecusados(false);
           }}
           onFail={() => {
             setManual(true);
             setIvs((v) => v ?? { atk: 0, def: 0, hp: 0 });
+            // Sem IV exato nao ha com o que conferir o que o OCR ler.
+            ivsDoPrint.current = null;
+            setLidoPeloPrint(false);
           }}
+          onNumeros={aceitarNumeros}
         />
       </div>
       )}
@@ -261,6 +331,28 @@ export function IVCalculator({ species, data, onClose, owned }: Props) {
         {t("iv.findLevel")}{" "}
         <span style={{ textTransform: "none" }}>{t("common.optional")}</span>
       </div>
+
+      {/*
+        Por que os campos vieram preenchidos — ou por que NAO vieram.
+
+        Sem uma linha explicando, os dois casos sao confusos do mesmo jeito: um
+        numero que aparece sozinho parece bug, e um campo vazio depois de "li o
+        seu print" parece descaso. Aqui o app diz o que fez.
+      */}
+      {lidoPeloPrint && numerosRecusados && (
+        <div className="tk-banner tk-banner--warn" style={{ marginTop: 10 }} role="status">
+          <div className="tk-banner-text">
+            <div className="tk-banner-title">{t("scan.numbersRefused.title")}</div>
+            <p className="tk-banner-body">{t("scan.numbersRefused.body")}</p>
+          </div>
+        </div>
+      )}
+      {lidoPeloPrint && !numerosRecusados && cp !== "" && hp !== "" && (
+        <p className="tk-caption" style={{ marginTop: 8 }}>
+          {t("scan.numbersFromPrint")}
+        </p>
+      )}
+
       <section className="tk-card" style={{ marginTop: 10, display: "flex", gap: 12 }}>
         <label className="tk-field">
           <span className="tk-caption">{t("common.cp")}</span>

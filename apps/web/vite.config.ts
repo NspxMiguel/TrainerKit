@@ -71,6 +71,15 @@ export default defineConfig({
            * entry module". Listando so a raiz, o grafo dela vem junto sozinho.
            */
           kokoro: ["kokoro-js"],
+          /*
+           * O leitor de texto, pelo mesmo motivo dos dois acima.
+           *
+           * O `tesseract.js` em si sao ~63 kB, mas ele arrasta 5,9 MB de wasm e
+           * modelo de `public/ocr/` na primeira vez que alguem anexa um print.
+           * Em pedaco proprio e com import dinamico, quem so consulta a Pokedex
+           * nunca chega perto disso.
+           */
+          tesseract: ["tesseract.js"],
           i18n: [
             "./src/i18n/dict/en.ts",
             "./src/i18n/dict/pt-BR.ts",
@@ -120,7 +129,16 @@ export default defineConfig({
          * a partir dai o navegador o guarda normalmente. Pre-cachear seria
          * cobrar 6 MB de quem deixou a IA desligada — que e o padrao.
          */
-        globIgnores: ["**/webllm*.js", "**/kokoro*.js"],
+        /*
+         * ⚠️ `ocr/**` fora do pre-cache, e nao so o JS.
+         *
+         * Sao 5,9 MB de wasm e modelo. Pre-cachear cobraria isso de TODO mundo
+         * na instalacao — inclusive de quem nunca vai anexar um print — e o
+         * `maximumFileSizeToCacheInBytes` abaixo nem deixaria o wasm de 2,7 MB
+         * passar sem ser levantado. A regra de runtime logo abaixo guarda os
+         * arquivos na primeira leitura, e dai em diante funciona offline.
+         */
+        globIgnores: ["**/webllm*.js", "**/kokoro*.js", "**/tesseract*.js", "ocr/**"],
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         runtimeCaching: [
           {
@@ -132,6 +150,23 @@ export default defineConfig({
             options: {
               cacheName: "tk-sprites",
               expiration: { maxEntries: 1500, maxAgeSeconds: 60 * 60 * 24 * 180 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            /*
+             * O leitor de texto: baixa uma vez, vale pra sempre.
+             *
+             * `CacheFirst` porque estes arquivos sao imutaveis — trocam junto
+             * com a versao do pacote, e ai o caminho muda. Sem esta regra o
+             * segundo print offline falharia mesmo depois de o primeiro ter
+             * baixado os 5,9 MB.
+             */
+            urlPattern: ({ url }) => url.pathname.includes("/ocr/"),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "tk-ocr",
+              expiration: { maxEntries: 8, maxAgeSeconds: 60 * 60 * 24 * 365 },
               cacheableResponse: { statuses: [0, 200] },
             },
           },

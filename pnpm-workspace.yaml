@@ -14,3 +14,7 @@ allowBuilds:
   onnxruntime-node: false
   protobufjs: false
   sharp: false
+  # O postinstall do tesseract.js e `opencollective-postinstall || true` — um
+  # pedido de doacao impresso no terminal. Nao compila nada, nao baixa nada e
+  # nao e necessario pra biblioteca funcionar.
+  tesseract.js: false

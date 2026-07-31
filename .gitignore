@@ -41,6 +41,11 @@ packages/dataset/.cache/
 # GAME_MASTER cru (18 MB). Reconstruivel pelo pipeline de ETL.
 packages/dataset/raw/
 
+# Leitor de texto (tesseract): wasm + modelo, ~5,9 MB. Mesmo caso do dataset —
+# reconstruivel com `pnpm --filter @trainerkit/web ocr:fetch`, e um diff de
+# binario a cada atualizacao do pacote nao serve pra ninguem.
+apps/web/public/ocr/
+
 # Dataset gerado. Fora do git pelo mesmo motivo dos sprites: e dado do jogo,
 # so que transformado. `pnpm --filter @trainerkit/dataset refresh` regenera em
 # segundos, entao versionar so traria o incomodo de um diff de 1 MB a cada
