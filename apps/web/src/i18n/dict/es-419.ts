@@ -583,6 +583,7 @@ export const ES_419: Dict = {
   "dex.prev": "Anterior",
   "dex.next": "Siguiente",
   "dex.line.size": "{height} m de altura, {weight} kilos.",
+  "dex.browse": "Hojear la Pokédex",
   "dex.open": "Modo Pokédex",
   "dex.openDetail": "Apunta, pregunta y escucha la ficha",
   "dex.pick": "¿Qué Pokémon?",

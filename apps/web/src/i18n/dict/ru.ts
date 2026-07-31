@@ -583,6 +583,7 @@ export const RU: Dict = {
   "dex.prev": "Назад",
   "dex.next": "Далее",
   "dex.line.size": "рост {height} м, вес {weight} кг.",
+  "dex.browse": "Листать Покедекс",
   "dex.open": "Режим Покедекса",
   "dex.openDetail": "Наведите, спросите и послушайте запись",
   "dex.pick": "Какой покемон?",

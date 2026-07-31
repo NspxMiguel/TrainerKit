@@ -583,6 +583,7 @@ export const KO: Dict = {
   "dex.prev": "이전",
   "dex.next": "다음",
   "dex.line.size": "키 {height} m, 무게 {weight} kg.",
+  "dex.browse": "도감 넘겨보기",
   "dex.open": "도감 모드",
   "dex.openDetail": "비추고, 묻고, 설명을 듣기",
   "dex.pick": "어떤 포켓몬?",

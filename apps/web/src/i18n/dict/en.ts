@@ -636,6 +636,7 @@ const EN = {
   "dex.prev": "Previous",
   "dex.next": "Next",
   "dex.line.size": "{height} m, {weight} kilos.",
+  "dex.browse": "Browse the Pokédex",
   "dex.open": "Pokédex mode",
   "dex.openDetail": "Point, ask, and hear the entry",
   "dex.pick": "Which Pokémon?",
