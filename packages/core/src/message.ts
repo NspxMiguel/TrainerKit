@@ -70,6 +70,7 @@ export type MessageKey =
    */
   | "faxina.solto.duplicado"
   | "faxina.solto.melhorRuim"
+  | "faxina.preso.meuMotivo"
   | "faxina.preso.semIv"
   | "faxina.preso.sortudo"
   | "faxina.preso.sombroso"

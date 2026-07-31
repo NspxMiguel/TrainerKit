@@ -126,6 +126,7 @@ export function Faxina({ data, onClose }: Props) {
       lucky: o.lucky,
       shadow: o.shadow,
       ivDesconhecido: o.ivDesconhecido === true,
+      meuMotivo: o.meuMotivo != null,
     }));
 
     return planejarFaxina({

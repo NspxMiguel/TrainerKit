@@ -3355,3 +3355,55 @@
     transparent 100%
   );
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   O RASTRO EM PORTUGUÊS, e o botão de discordar
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.tk-trace-linha {
+  display: grid;
+  grid-template-columns: 8px 1fr;
+  align-items: start;
+  column-gap: 10px;
+}
+
+/* A bolinha leva a COR DA AÇÃO que aquela regra puxa. É o que deixa ver, de
+   relance, que três regras puxaram pra lados diferentes — que é justamente o
+   que a barra de confiança está medindo. */
+.tk-trace-bolha {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  margin-top: 6px;
+}
+
+.tk-trace-porque {
+  display: block;
+  font: 500 13.5px/1.45 var(--tk-font);
+  color: var(--tk-txt);
+}
+
+.tk-trace-peso {
+  display: block;
+  margin-top: 2px;
+  font: 400 12px/1.4 var(--tk-font);
+  color: var(--tk-txt3);
+}
+
+.tk-meu-motivo {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: var(--tk-surf);
+  border: 1px solid var(--tk-line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font: 600 13px/1.35 var(--tk-font);
+  color: var(--tk-txt2);
+}
+
+.tk-meu-motivo--perguntando {
+  display: block;
+}
