@@ -358,6 +358,67 @@
  */
 :root {
   --tk-hero-ink: #0a0c10;
+
+  /*
+   * A cor legivel da especie, resolvida por TEMA.
+   *
+   * O `ui/paleta.ts` escreve as duas versoes — clareada pro fundo escuro,
+   * escurecida pro claro — porque so ele sabe fazer a conta de contraste, e so
+   * o CSS sabe qual tema esta valendo. Cada um faz a metade que lhe cabe, e
+   * assim nao ha ouvinte de `prefers-color-scheme` em JS pra dessincronizar.
+   *
+   * O `--tk-warn` de reserva cobre o intervalo antes de a paleta ser escrita e
+   * as 5 especies sem cor na tabela.
+   */
+  --tk-accent-fg: var(--tk-accent-fg-escuro, var(--tk-warn));
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-tk="dark"]) {
+    --tk-accent-fg: var(--tk-accent-fg-claro, var(--tk-warn));
+  }
+}
+
+:root[data-tk="light"] {
+  --tk-accent-fg: var(--tk-accent-fg-claro, var(--tk-warn));
+}
+
+/*
+ * ⚠️ O BANHO DE COR NO APP INTEIRO — o resto do pedido dele.
+ *
+ * "o pokemon destaque, sempre altera a palheta de cores do app ... maior parte
+ * do app laranja."
+ *
+ * O hero sozinho nao cumpre isso: ele e um cartao colorido no topo, e abaixo
+ * dele o app seguia cinza igual pra qualquer especie. Este veu leva a cor ate
+ * o rodape.
+ *
+ * 5% e 3% parecem pouco escrito, e sao MUITO na tela: sobre fundo quase preto,
+ * a cor le como temperatura em vez de como camada. Testei em 12% primeiro e o
+ * texto secundario perdeu contraste — e contraste aqui e requisito, nao gosto.
+ * Por isso o veu tambem fica atras de tudo e nao intercepta toque.
+ */
+.tk-app::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    /* Centrado em 58% e nao no topo: o topo e o hero, que ja e a propria cor.
+       Um veu ali seria cor sobre cor, invisivel — o gasto de pintura tem que
+       cair onde o app ainda estava cinza. */
+    radial-gradient(
+      130% 55% at 50% 58%,
+      color-mix(in srgb, var(--tk-accent, transparent) 7%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      90% 45% at 50% 100%,
+      color-mix(in srgb, var(--tk-accent-2, transparent) 3%, transparent),
+      transparent 75%
+    );
+  pointer-events: none;
+  transition: background 0.5s var(--tk-ease-out);
 }
 
 @media (prefers-color-scheme: light) {

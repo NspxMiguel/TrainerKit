@@ -1,146 +1,174 @@
 @import "./tokens.css";
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html {
-  background: var(--tk-bg);
-  /* Impede o "rubber band" horizontal que estraga a sensacao de app nativo. */
-  overscroll-behavior-x: none;
-}
-
-body {
-  margin: 0;
-  min-height: 100dvh;
-  background: var(--tk-bg);
-  color: var(--tk-txt);
-  font-family: var(--tk-font);
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-/* Nada de zoom acidental ao tocar duas vezes num botao. */
-button,
-input,
-select,
-textarea {
-  font: inherit;
-  color: inherit;
-  touch-action: manipulation;
-}
-
-button {
-  border: 0;
-  background: none;
-  cursor: pointer;
-}
-
 /*
- * Link é azul — MENOS quando ele é um botão.
+ * ⚠️ A ORDEM DAS CAMADAS, declarada — e ela conserta um bug que atingia o app
+ * inteiro em silêncio.
  *
- * ⚠️ O `:not(.tk-btn)` não é preciosismo, é conserto de um bug que apareceu na
- * tela: o botão "Escrever pra mim" ficava EM BRANCO ao passar o mouse.
+ * Quando o `App.css` foi pro `@layer legado` pra o redesenho poder vencê-lo, os
+ * resets deste arquivo continuaram SEM camada. Regra sem camada ganha de regra
+ * em camada, sempre, independente de especificidade — então
+ * `button { background: none }`, com especificidade 1, passou a vencer
+ * `.tk-dex[data-skin="device"] .tk-dexdev-key { background: #2b2f38 }`, com
+ * especificidade 21.
  *
- * O motivo é especificidade. `a:hover` vale (0,1,1); `.tk-btn--primary`, que
- * pinta o texto de branco, vale (0,1,0). No hover o link ganhava e pintava o
- * texto de `--tk-pri-h` — azul sobre o fundo azul do botão. Texto branco virava
- * texto invisível.
+ * O resultado: 36 regras que pintam botão no App.css pararam de pintar. Os
+ * botões do Modo Pokédex apareciam como texto solto com uma sombra embaixo, e
+ * era esse o "refinamento" que faltava — não era desenho, era cascata.
  *
- * Dava pra remendar com `.tk-btn--primary:hover { color: … }`, e seria remendo:
- * qualquer `<a class="tk-btn">` futuro nasceria com o mesmo defeito e alguém
- * teria que descobrir de novo. Excluir os botões aqui resolve na origem — um
- * link que virou botão deixa de ser tratado como link.
+ * Declarar `reset` antes de `legado` põe cada coisa no lugar certo: reset é o
+ * piso, o legado escreve por cima, e o `design.css` (sem camada) continua
+ * ganhando dos dois, que é o arranjo que o redesenho depende.
+ *
+ * ⚠️ Esta linha precisa vir antes de qualquer bloco `@layer`, e depois só de
+ * `@import`. Movê-la muda a precedência de tudo.
  */
-a:not(.tk-btn) {
-  color: var(--tk-pri);
-  text-decoration: none;
-}
+@layer reset, legado;
 
-a:not(.tk-btn):hover {
-  color: var(--tk-pri-h);
-}
+@layer reset {
 
-/* Botão que por acaso é `<a>`: sem sublinhado, e a cor é a da classe do botão. */
-a.tk-btn {
-  text-decoration: none;
-}
-
-/* Foco visivel em anel de 2px na cor primaria — requisito do prototipo. */
-:focus-visible {
-  outline: 2px solid var(--tk-pri);
-  outline-offset: 2px;
-  border-radius: var(--tk-r-chip);
-}
-
-::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    /*
-     * O ATRASO tambem precisa ir a zero.
-     *
-     * Zerar so a duracao nao basta quando a animacao tem `both` e um delay: o
-     * elemento fica preso no primeiro quadro — opacidade 0 — durante todo o
-     * atraso, e so entao aparece de estalo. Quem pediu menos movimento acabava
-     * vendo a tela montar aos pedacos, que e pior que a animacao original.
-     *
-     * Aparece na cascata do setup, onde os itens entram com 0.02s a 0.17s.
-     */
-    animation-delay: 0ms !important;
-    transition-delay: 0ms !important;
+    box-sizing: border-box;
   }
-}
 
-/*
- * Movimento.
- *
- * O erro anterior era animar TUDO do mesmo jeito: todo painel entrava com um
- * fade e um deslize de 8px, sem relacao com o que tinha acontecido. Isso da
- * aquela sensacao de template — o app se mexe, mas o movimento nao significa
- * nada, e por isso incomoda.
- *
- * As regras agora:
- *
- *   1. Trocar de aba nao e navegar pra dentro de nada. Some so o fade, curto.
- *   2. Folha que sobe e uma coisa NOVA cobrindo a tela: ela vem de baixo, que e
- *      de onde o dedo a puxaria.
- *   3. Curva de saida rapida (`cubic-bezier(.2,.8,.2,1)`): comeca veloz e
- *      desacelera no fim. Movimento linear e o que mais parece robotico.
- *   4. Duracoes curtas. Acima de ~200ms o usuario ESPERA a animacao em vez de
- *      so perceber que algo mudou.
- */
+  html {
+    background: var(--tk-bg);
+    /* Impede o "rubber band" horizontal que estraga a sensacao de app nativo. */
+    overscroll-behavior-x: none;
+  }
 
-:root {
-  --tk-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-}
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background: var(--tk-bg);
+    color: var(--tk-txt);
+    font-family: var(--tk-font);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
 
-@keyframes tk-fade {
-  from {
-    opacity: 0;
+  /* Nada de zoom acidental ao tocar duas vezes num botao. */
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+    touch-action: manipulation;
   }
-  to {
-    opacity: 1;
-  }
-}
 
-@keyframes tk-rise {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
+  button {
+    border: 0;
+    background: none;
+    cursor: pointer;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  /*
+   * Link é azul — MENOS quando ele é um botão.
+   *
+   * ⚠️ O `:not(.tk-btn)` não é preciosismo, é conserto de um bug que apareceu na
+   * tela: o botão "Escrever pra mim" ficava EM BRANCO ao passar o mouse.
+   *
+   * O motivo é especificidade. `a:hover` vale (0,1,1); `.tk-btn--primary`, que
+   * pinta o texto de branco, vale (0,1,0). No hover o link ganhava e pintava o
+   * texto de `--tk-pri-h` — azul sobre o fundo azul do botão. Texto branco virava
+   * texto invisível.
+   *
+   * Dava pra remendar com `.tk-btn--primary:hover { color: … }`, e seria remendo:
+   * qualquer `<a class="tk-btn">` futuro nasceria com o mesmo defeito e alguém
+   * teria que descobrir de novo. Excluir os botões aqui resolve na origem — um
+   * link que virou botão deixa de ser tratado como link.
+   */
+  a:not(.tk-btn) {
+    color: var(--tk-pri);
+    text-decoration: none;
   }
+
+  a:not(.tk-btn):hover {
+    color: var(--tk-pri-h);
+  }
+
+  /* Botão que por acaso é `<a>`: sem sublinhado, e a cor é a da classe do botão. */
+  a.tk-btn {
+    text-decoration: none;
+  }
+
+  /* Foco visivel em anel de 2px na cor primaria — requisito do prototipo. */
+  :focus-visible {
+    outline: 2px solid var(--tk-pri);
+    outline-offset: 2px;
+    border-radius: var(--tk-r-chip);
+  }
+
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      /*
+       * O ATRASO tambem precisa ir a zero.
+       *
+       * Zerar so a duracao nao basta quando a animacao tem `both` e um delay: o
+       * elemento fica preso no primeiro quadro — opacidade 0 — durante todo o
+       * atraso, e so entao aparece de estalo. Quem pediu menos movimento acabava
+       * vendo a tela montar aos pedacos, que e pior que a animacao original.
+       *
+       * Aparece na cascata do setup, onde os itens entram com 0.02s a 0.17s.
+       */
+      animation-delay: 0ms !important;
+      transition-delay: 0ms !important;
+    }
+  }
+
+  /*
+   * Movimento.
+   *
+   * O erro anterior era animar TUDO do mesmo jeito: todo painel entrava com um
+   * fade e um deslize de 8px, sem relacao com o que tinha acontecido. Isso da
+   * aquela sensacao de template — o app se mexe, mas o movimento nao significa
+   * nada, e por isso incomoda.
+   *
+   * As regras agora:
+   *
+   *   1. Trocar de aba nao e navegar pra dentro de nada. Some so o fade, curto.
+   *   2. Folha que sobe e uma coisa NOVA cobrindo a tela: ela vem de baixo, que e
+   *      de onde o dedo a puxaria.
+   *   3. Curva de saida rapida (`cubic-bezier(.2,.8,.2,1)`): comeca veloz e
+   *      desacelera no fim. Movimento linear e o que mais parece robotico.
+   *   4. Duracoes curtas. Acima de ~200ms o usuario ESPERA a animacao em vez de
+   *      so perceber que algo mudou.
+   */
+
+  :root {
+    --tk-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  @keyframes tk-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes tk-rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
 }

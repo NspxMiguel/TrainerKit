@@ -209,28 +209,51 @@ function distancia(a: readonly number[], b: readonly number[]): number {
   return Math.sqrt(2 * dr * dr + 4 * dg * dg + 3 * db * db);
 }
 
-interface Balde {
+interface Sub {
   n: number;
   r: number;
   g: number;
   b: number;
 }
 
+interface Familia {
+  /** Pixels da família inteira, somando todas as iluminações. */
+  n: number;
+  /** As iluminações dentro da família, separadas por saturação e claridade. */
+  subs: Map<number, Sub>;
+}
+
 /**
  * As cores da arte, por área ocupada.
  *
- * ⚠️ O peso aqui é a CONTAGEM CRUA de pixels — e isso é uma correção
- * deliberada do que eu tinha feito antes. A versão em tempo de execução pesava
- * por saturação², o que fazia qualquer tom vivo vencer qualquer tom lavado.
- * Nessa regra Mewtwo dá roxo, porque o corpo branco pesa quase zero. Mas o
- * Mewtwo É branco: o roxo é o rabo e a barriga. Contagem crua devolve o que o
- * olho de fato vê primeiro, que é o que ele descreveu.
+ * ⚠️ CONTAGEM EM DOIS NÍVEIS: família de matiz primeiro, iluminação depois. E
+ * essa separação é uma correção — a versão de um nível só errava de um jeito
+ * bem visível.
  *
- * O que continua sendo descartado é só o que não é cor: transparência, borda
- * anti-serrilhada e o contorno quase preto.
+ * Antes, a chave do balde misturava matiz, saturação e claridade num grid 3D.
+ * O efeito colateral: uma superfície GRANDE e bem sombreada se dividia em até
+ * cinco baldes (um por faixa de claridade), enquanto uma superfície pequena e
+ * chapada ficava inteira num só. Aí o pequeno vencia o grande.
+ *
+ * O Venusaur denunciou isso: saía ROSA. O corpo verde-azulado se espalhava em
+ * verde-claro, verde-médio, verde-sombra, teal-claro, teal-sombra — e a flor
+ * rosa, chapada, ganhava de cada fatia individualmente. Blastoise dava marrom
+ * pela mesma razão, e Lucario dava cinza.
+ *
+ * Contando por família de matiz, toda a sombra do verde soma com todo o
+ * realce do verde, e a comparação passa a ser "quanto de verde" contra "quanto
+ * de rosa" — que é a pergunta que o olho responde.
+ *
+ * A cor representativa da família sai da sub-faixa MAIS NUMEROSA dela, e não da
+ * média: a média de realce com sombra dá um tom intermediário que não existe em
+ * lugar nenhum da imagem. A sub-faixa mais numerosa é uma cor que está mesmo lá.
+ *
+ * ⚠️ O peso é CONTAGEM CRUA de pixels, e isso também é deliberado. A versão que
+ * rodava em runtime pesava por saturação², e nessa regra Mewtwo dava roxo,
+ * porque o corpo branco pesa quase zero. Mas o Mewtwo É branco: o roxo é o rabo.
  */
 function extrairPaleta(bmp: Bitmap): string[] {
-  const baldes = new Map<number, Balde>();
+  const familias = new Map<number, Familia>();
 
   for (let p = 0; p < bmp.largura * bmp.altura; p++) {
     const d = p * 4;
@@ -247,28 +270,46 @@ function extrairPaleta(bmp: Bitmap): string[] {
     if (l < 0.08) continue;
 
     /*
-     * Cinzas entram numa escada própria, em vez de num balde de matiz.
+     * Cinzas entram numa escada própria, em vez de numa família de matiz.
      *
      * Sem isto, o branco do Mewtwo se espalharia por 24 matizes conforme o
      * ruído de compressão, e cada fatia perderia pra qualquer cor sólida. A
      * escada junta tudo que é acromático pela luminosidade, que é a única
-     * dimensão que ainda distingue branco de cinza de preto.
+     * dimensão que ainda distingue branco de cinza de preto — e por isso ela é
+     * grossa (5 degraus): mais fina, o sombreado de um corpo branco voltaria a
+     * se fragmentar, que é justamente o defeito que este nível existe pra
+     * evitar.
      */
-    const chave = s < 0.15
-      ? 1000 + Math.floor(l * 8)
-      : Math.floor(h / 15) * 100 + Math.floor(s * 3) * 10 + Math.floor(l * 5);
+    const chaveFamilia = s < 0.15 ? 1000 + Math.floor(l * 5) : Math.floor(h / 15);
+    // Dentro da família, a iluminação. Isto NÃO compete por área: serve só pra
+    // achar qual tom da família representa a superfície.
+    const chaveSub = Math.floor(s * 4) * 10 + Math.floor(l * 6);
 
-    const bal = baldes.get(chave) ?? { n: 0, r: 0, g: 0, b: 0 };
-    bal.n++;
-    bal.r += r;
-    bal.g += g;
-    bal.b += b;
-    baldes.set(chave, bal);
+    const fam = familias.get(chaveFamilia) ?? { n: 0, subs: new Map<number, Sub>() };
+    fam.n++;
+    const sub = fam.subs.get(chaveSub) ?? { n: 0, r: 0, g: 0, b: 0 };
+    sub.n++;
+    sub.r += r;
+    sub.g += g;
+    sub.b += b;
+    fam.subs.set(chaveSub, sub);
+    familias.set(chaveFamilia, fam);
   }
 
-  const ordenados = [...baldes.values()]
+  const ordenados = [...familias.values()]
     .filter((x) => x.n > 0)
-    .map((x) => ({ n: x.n, cor: [x.r / x.n, x.g / x.n, x.b / x.n] as const }))
+    .map((fam) => {
+      // A sub-faixa mais numerosa da família e a cor dela.
+      let melhor: Sub | null = null;
+      for (const sub of fam.subs.values()) {
+        if (!melhor || sub.n > melhor.n) melhor = sub;
+      }
+      const m = melhor as Sub;
+      return {
+        n: fam.n,
+        cor: [m.r / m.n, m.g / m.n, m.b / m.n] as const,
+      };
+    })
     .sort((a, b) => b.n - a.n);
 
   if (ordenados.length === 0) return [];
@@ -302,7 +343,25 @@ function extrairPaleta(bmp: Bitmap): string[] {
       if (escolhidas.some((c) => distancia(c.cor, cand.cor) < 90)) continue;
 
       const [h, s] = paraHsl(cand.cor[0] ?? 0, cand.cor[1] ?? 0, cand.cor[2] ?? 0);
+
+      /*
+       * ⚠️ ÁREA PURA, sem empurrão pra cor mais viva. Eu tentei o empurrão e
+       * DESFIZ, e o registro importa mais que o resultado.
+       *
+       * Sobram dois casos discutíveis: Blastoise sai marrom (o casco ocupa mais
+       * que o corpo azul) e Lucario sai cinza (o pelo preto ocupa mais que o
+       * azul). Pesar saturação em 45% conserta os dois — e quebra o Venusaur,
+       * que volta a sair ROSA, porque a flor é mais saturada que o corpo
+       * verde-azulado ainda que muito menor.
+       *
+       * Não é um bom negócio: "Venusaur é verde" é mais evidente que "Blastoise
+       * é azul e não marrom". E há a diferença de natureza — marrom PARA
+       * Blastoise é uma leitura defensável da arte, enquanto o rosa que ele
+       * reclamou ("mewtwo n é vermelho") não vinha da arte nenhuma, vinha do
+       * tipo. Errar medindo é outra categoria de erro.
+       */
       let nota = cand.n;
+
       if (slot > 0 && s >= 0.15) {
         // Distância de matiz é circular: 350° e 10° são vizinhos, não opostos.
         const perto = escolhidas
