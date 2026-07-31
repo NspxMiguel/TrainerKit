@@ -254,6 +254,45 @@ export async function removePokemon(id: string): Promise<void> {
   emit();
 }
 
+/**
+ * Tira vários da coleção DE UMA VEZ, e devolve o que tirou.
+ *
+ * ⚠️ O retorno é o desfazer. Não é conveniência de API: a faxina remove dezenas
+ * de linhas num toque, e a única coisa que existe entre um toque errado e a
+ * perda é este array — não há servidor, não há lixeira e não há histórico.
+ * Quem chama SEGURA o resultado até a pessoa sair da tela.
+ *
+ * Numa transação só, pelo mesmo motivo de `apagarColecao`: uma remoção pela
+ * metade deixaria a lista de desfazer sem correspondência com o que sumiu, e o
+ * "Desfazer" restauraria duplicatas.
+ */
+export async function removerVarios(ids: readonly string[]): Promise<OwnedPokemon[]> {
+  if (ids.length === 0) return [];
+  const removidos = await db.transaction("rw", db.pokemon, async () => {
+    const linhas = await db.pokemon.bulkGet([...ids]);
+    const achados = linhas.filter((r): r is OwnedPokemon => r !== undefined);
+    await db.pokemon.bulkDelete(achados.map((r) => r.id));
+    return achados;
+  });
+  emit();
+  return removidos;
+}
+
+/**
+ * Devolve o que `removerVarios` tirou.
+ *
+ * Os `id` são os mesmos, então nada mais no app precisa saber que houve uma
+ * volta: o `doneAction`, a coleção de origem e a data de entrada voltam
+ * exatamente como estavam. Um desfazer que recriasse ids novos reordenaria a
+ * lista e apagaria os vereditos já cumpridos — desfazer que muda as coisas de
+ * lugar não é desfazer.
+ */
+export async function restaurar(linhas: readonly OwnedPokemon[]): Promise<void> {
+  if (linhas.length === 0) return;
+  await db.pokemon.bulkPut([...linhas]);
+  emit();
+}
+
 /** Marca (ou desmarca) o veredito como cumprido. `null` volta a cobrar. */
 export async function setDoneAction(id: string, action: string | null): Promise<void> {
   await db.pokemon.update(id, { doneAction: action });
