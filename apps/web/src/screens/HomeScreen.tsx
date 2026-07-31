@@ -15,6 +15,7 @@ import { DidYouKnow } from "../ui/DidYouKnow.tsx";
 import { IconAlert, IconCamera, IconShield, IconSwords } from "../ui/Icons.tsx";
 import { InstallBanner } from "../ui/InstallBanner.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
+import { usarPaleta } from "../ui/paleta.ts";
 import { GymPicks } from "./GymPicks.tsx";
 import { InstallGuide } from "./InstallGuide.tsx";
 import { IVCalculator } from "./IVCalculator.tsx";
@@ -84,35 +85,6 @@ function greetingKey(): Key {
  * O rotulo diz qual dos tres e, porque um destaque sem rotulo faz a pessoa
  * adivinhar por que aquele bicho esta ali.
  */
-/**
- * As tres paradas do gradiente do tipo, como o redesenho pede.
- *
- * O token e uma LISTA (`#7c2d12, #ea580c, #f97316`), e nao um gradiente pronto:
- * assim o mesmo tipo serve o hero (180deg, tres paradas espalhadas) e o tile
- * (135deg, compacto) sem duplicar as cores em dois lugares — que e como as
- * duas telas comecam a divergir.
- */
-const TIPO_CSS: Record<string, string> = {
-  fire: "--tk-tipo-fire",
-  water: "--tk-tipo-water",
-  grass: "--tk-tipo-grass",
-  electric: "--tk-tipo-electric",
-  dragon: "--tk-tipo-dragon",
-  fairy: "--tk-tipo-fairy",
-  psychic: "--tk-tipo-psychic",
-  ice: "--tk-tipo-ice",
-  fighting: "--tk-tipo-fighting",
-};
-
-function gradienteDoTipo(tipo: string): string {
-  return `var(${TIPO_CSS[tipo] ?? "--tk-tipo-normal"})`;
-}
-
-/** Monograma de duas letras, o mesmo que os tiles usam. */
-function monograma(nome: string): string {
-  return nome.replace(/[^\p{L}\p{N}]/gu, "").slice(0, 2).toUpperCase();
-}
-
 function Hero({
   species,
   labelKey,
@@ -137,29 +109,66 @@ function Hero({
 }) {
   const { t } = useT();
 
+  /*
+   * A cor sai da ESPECIE, por tabela — nao do tipo, nem do sprite.
+   *
+   * "quando digo a cor do pokemon, nao pegar do sprite. inclusive, mesmo sem
+   * sprite, o famoso DR pra qm nao ta com os sprites ativos, tem q aparecer a
+   * cor do pokemon."
+   *
+   * As duas versoes anteriores estavam erradas, cada uma do seu jeito: o tipo
+   * pintava o Dragonite de roxo (Dragao) e o Mewtwo de rosa (Psiquico); ler do
+   * sprite acertava a cor mas so quando havia imagem carregada. A tabela acerta
+   * sempre, inclusive no modo monograma. Ver `ui/paleta.ts`.
+   */
+  const paleta = usarPaleta(species.spriteId);
+
   return (
     <div
       className="tk-hero"
-      style={{ ["--tk-hero-grad" as string]: gradienteDoTipo(species.types[0] ?? "normal") }}
+      style={{ ["--tk-hero-grad" as string]: paleta.gradiente }}
     >
-      {/* O monograma gigante ATRAS de tudo. Substitui a arte oficial que o app
-          nao pode embarcar — a 220px ele vira textura, nao rotulo. */}
-      <span className="tk-hero-mono" aria-hidden="true">
-        {monograma(species.name)}
-      </span>
+      {/* O brilho atras da cabeca, na SEGUNDA cor da especie. E o primeiro
+          lugar onde "mais uma cor pra encaixar no app" aparece de fato: no
+          Dragonite e o verde-agua da asa, e nao mais laranja sobre laranja. */}
+      <span className="tk-hero-brilho" aria-hidden="true" />
 
       {/*
-        O SPRITE por cima do monograma, e nao no lugar dele.
-        
-        Eu tinha trocado a arte pelo monograma ao portar o hero — e o Miguel viu
-        na hora: "o pokemon grandao nao ta aparecendo o sprite". O desenho usa
-        monograma porque assume que nao ha arte; o app TEM arte quando a pessoa
-        escolhe uma fonte de imagens, e jogar isso fora foi perda, nao fidelidade.
-        
-        Os dois convivem: o monograma e a textura de fundo, o sprite e o assunto.
-        Quando nao ha arte — fonte desligada, sprite ainda baixando, especie sem
-        arquivo — sobra o monograma, que e exatamente o desenho do handoff.
-        
+        O NUMERO GIGANTE ATRAS DO BICHO — e daqui que vem a profundidade.
+
+        "tenta da um efeito de profundiddade, seria topppp. tipo os q tem nas
+        fotos da apple saca? tipo o relogio da apple, se vc coloca uma cabeca,
+        ele fica meio atras dando efeito de profundidade."
+
+        O mostrador de fotos do Apple Watch recorta o assunto e passa a hora POR
+        TRAS da cabeca. Aqui sai de graca, e essa e a sacada: o sprite e um PNG
+        com transparencia, entao ele JA E a mascara do assunto. Basta desenhar o
+        numero antes dele — o alfa da arte recorta o algarismo sozinho, sem
+        segmentacao, sem canvas, sem uma linha de JS.
+
+        Escolhi o numero da dex, e nao o monograma que ele cogitou ("ou tlvz
+        deixar a letra ali no fundo sla"): as duas letras repetiriam o nome que
+        ja esta logo abaixo, enquanto o numero acrescenta o unico dado que a
+        home nao mostrava. Camisa de time, nao marca d'agua.
+      */}
+      <span className="tk-hero-numero" aria-hidden="true">
+        {species.dex}
+      </span>
+
+      <div className="tk-hero-topo">
+        <p className="tk-hero-saudacao">
+          {saudacao}, {treinador}.
+        </p>
+      </div>
+
+      {/*
+        O assunto, na frente de tudo.
+
+        Sem arte — fonte de imagens desligada, sprite ainda baixando, especie sem
+        arquivo — o `SpeciesTile` ja mostra o monograma no lugar, e a composicao
+        continua de pe: o "DR" vira o assunto e o numero continua atras dele. So
+        o recorte fica reto, porque letra nao tem silhueta.
+
         `bare` tira a moldura do tile: aqui o fundo ja e o gradiente do hero, e
         um tile arredondado por cima dele seria uma caixa dentro de outra.
       */}
@@ -170,23 +179,31 @@ function Hero({
           speciesId={species.id}
           name={species.name}
           types={species.types}
-          size={148}
+          size={220}
           bare
         />
+        {/* A sombra de contato no chao. Sem ela o bicho flutua e a profundidade
+            vira so "coisas empilhadas"; com ela ele POUSA sobre o hero. */}
+        <span className="tk-hero-chao" aria-hidden="true" />
       </span>
 
       {/* Garante contraste sobre gradiente claro (Elétrico, Gelo) E funde a base
           do hero com o fundo do app, pra nao haver linha de corte. */}
       <span className="tk-hero-scrim" aria-hidden="true" />
 
-      <div className="tk-hero-topo">
-        <p className="tk-hero-saudacao">
-          {saudacao}, {treinador}.
-        </p>
-      </div>
-
       <div className="tk-hero-base">
-        <span className="tk-hero-chip">{t("home.todayPick")}</span>
+        {/*
+          O chip "DESTAQUE DE HOJE" saiu.
+          
+          "tira a tile destaque de hj pra poder aumentar o pokemon em destaque
+          tbm. legal deixar ele grande pra chamar atenção."
+          
+          Concordo, e ha um argumento alem do espaco: o chip dizia o OBVIO. Um
+          Pokemon sozinho, gigante, no topo da tela inicial ja e visivelmente o
+          destaque — o rotulo so ocupava 30px pra repetir o que a composicao ja
+          diz. O que ele NAO dizia, e o unico que importa, e por que este bicho
+          esta ali; isso continua na frase logo abaixo do nome.
+        */}
         <div className="tk-hero-name">{species.name}</div>
         <p className="tk-hero-frase">{linha}</p>
 
@@ -378,11 +395,21 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
   const temAviso = showInstall || (install.installed && atRisk) || dataset.status === "error";
 
   return (
-    <>
-      {/* A saudacao e o nome mudaram de lugar: agora vivem DENTRO do hero, por
-          cima do gradiente do tipo. Ver `.tk-hero-topo` no design.css — a
-          primeira coisa da tela passou a ser o Pokemon que pede decisao hoje,
-          e o nome do treinador flutua sobre ele. */}
+    /*
+      A home e uma COLUNA que ocupa a tela toda, e nao uma pilha que cresce.
+
+      "favor sem scroll na tela de inicio" + "legal deixar ele grande pra
+      chamar atencao" sao, juntos, um problema de repartir altura: o hero
+      precisa ser o maior possivel SEM empurrar nada pra fora. Eu vinha
+      resolvendo isso escolhendo um numero (`42svh`) e conferindo num aparelho
+      de 812px — o que so responde pelo aparelho que eu testei.
+
+      Em coluna, o hero fica com `flex: 1` e o resto declara o que precisa.
+      "Nao rola" deixa de ser um numero que eu acertei e passa a ser uma
+      propriedade do layout: sobrou espaco, vai pro Pokemon; faltou, o Pokemon
+      cede primeiro. Vale em qualquer tela, inclusive nas que eu nao tenho.
+    */
+    <div className="tk-home">
 
       {showInstall && (
         <InstallBanner
@@ -592,7 +619,19 @@ species={hero.species}
             nada por nao ver hoje. Entre "leia esta dica" e "seus dados podem
             sumir" nao ha duvida de quem sai.
           */}
-          {!temAviso && <DidYouKnow data={dataset.data} />}
+          {/*
+            O "Você sabia" saiu da home.
+
+            "tira o voce sabia se for necessario pra acaba com scroll" — era
+            necessario, e com folga: o cartao custava ~180px, que e exatamente
+            a diferenca entre um Dragonite de 110px e um de 290px.
+
+            A troca e boa alem da conta de pixels. O fato era interessante e
+            generico; o hero e interessante e SOBRE VOCE. Numa tela que
+            responde "o que eu faco agora?", o segundo ganha do primeiro. O
+            componente continua existindo e pode voltar noutra tela — o que
+            saiu foi o lugar, nao o conteudo.
+          */}
         </>
       )}
 
@@ -652,6 +691,6 @@ species={hero.species}
           onClose={() => setGuideOpen(false)}
         />
       )}
-    </>
+    </div>
   );
 }

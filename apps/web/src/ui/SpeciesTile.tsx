@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { monogram, typeGradient } from "../sprites/provider.ts";
 import { useSpriteUrl } from "../sprites/useSpriteUrl.ts";
+import { gradienteDaEspecie } from "./paleta.ts";
 
 interface Props {
   spriteId: number | null;
@@ -64,7 +65,14 @@ export function SpeciesTile({
         height: size,
         // Raio = 1/3 do lado, como o prototipo especifica.
         borderRadius: bare ? 0 : Math.round(size / 3),
-        background: bare ? "none" : typeGradient(types),
+        /*
+         * A cor do selo vem da ESPECIE, com o tipo de reserva.
+         *
+         * "mesmo sem sprite, o famoso DR pra qm nao ta com os sprites ativos,
+         * tem q aparecer a cor do pokemon" — e o exemplo dele era exato: o selo
+         * do Mewtwo saia rosa porque Psiquico e rosa. Sai lavanda agora.
+         */
+        background: bare ? "none" : gradienteDaEspecie(spriteId, typeGradient(types)),
         fontSize: Math.round(size * 0.27),
         position: "relative",
       }}
