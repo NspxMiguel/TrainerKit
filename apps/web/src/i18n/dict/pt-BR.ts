@@ -11,6 +11,7 @@ export const PT_BR: Dict = {
   "common.close": "Fechar",
   "common.loading": "Carregando…",
   "common.loadingGameData": "Carregando dados do jogo…",
+  "common.save": "Salvar",
   "common.cancel": "Cancelar",
   "common.remove": "Remover {name}",
   "common.optional": "(opcional)",

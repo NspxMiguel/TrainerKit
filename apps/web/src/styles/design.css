@@ -1368,6 +1368,7 @@
  * e fica no canto superior direito, que e onde o olho passa primeiro.
  */
 .tk-avatar {
+  position: relative;
   width: 40px;
   height: 40px;
   flex: none;
@@ -1404,6 +1405,28 @@
 
 .tk-avatar:active {
   transform: scale(0.95);
+}
+
+/*
+ * ⚠️ ALVO DE 44px NUM DISCO DE 40.
+ *
+ * O handoff pede as duas coisas e elas se contradizem no papel: "avatar de
+ * vidro 40px" e "alvos de toque de 44px em qualquer coisa tocável". A auditoria
+ * pegou — 40×40, reprovado nos 10 idiomas.
+ *
+ * A saída é separar o que se VÊ do que se TOCA: o disco continua com 40px, e
+ * uma área invisível de 44 cobre o dedo. Engordar o disco pra 44 resolveria o
+ * toque e quebraria a proporção com a saudação ao lado, que é o que faz ele
+ * parecer avatar e não botão.
+ *
+ * Mesma técnica dos pontinhos de paginação, pelo mesmo motivo.
+ */
+.tk-avatar::after {
+  content: "";
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
 }
 
 /*
@@ -2072,4 +2095,12 @@
    separa a frase do alvo de toque, e na home cada pixel sai do Pokemon. */
 .tk-vazio[data-sem-acao] {
   padding: 18px 16px 8px;
+}
+
+/* O campo de renomear ocupa o lugar do nome, e nao empurra a linha: renomear
+   nao pode mudar a altura da lista enquanto se digita. */
+.tk-row-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
 }

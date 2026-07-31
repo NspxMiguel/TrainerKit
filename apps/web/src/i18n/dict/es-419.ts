@@ -10,6 +10,7 @@ export const ES_419: Dict = {
   "common.close": "Cerrar",
   "common.loading": "Cargando…",
   "common.loadingGameData": "Cargando datos del juego…",
+  "common.save": "Guardar",
   "common.cancel": "Cancelar",
   "common.remove": "Quitar {name}",
   "common.optional": "(opcional)",
