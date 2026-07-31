@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import tabela from "../dados/paleta.json";
-import { enquadrar, paletaDaEspecie } from "./paleta.ts";
+import { enquadrar, gradienteDaEspecie, paletaDaEspecie } from "./paleta.ts";
 
 /**
  * A paleta muda com o Pokémon — então o contraste tem que valer para TODOS.
@@ -173,6 +173,52 @@ describe("paleta por espécie", () => {
           if (q.larg * lado > cqw + 0.5) ruins.push(`#${id} ${fonte} ${cqw}×${cqh}: larga demais`);
           if (q.alt * lado > cqh + 0.5) ruins.push(`#${id} ${fonte} ${cqw}×${cqh}: alta demais`);
         }
+      }
+    }
+    expect(ruins).toEqual([]);
+  });
+
+  it("o monograma branco passa 4,5:1 sobre o selo, em toda espécie", () => {
+    /*
+     * ⚠️ 671 de 1.142 reprovavam — 59% — e eu nunca tinha medido.
+     *
+     * O monograma ("BU", "CH") só aparece com a fonte de imagens desligada ou
+     * enquanto o sprite carrega. Some rápido, e some justamente enquanto quem
+     * testa está olhando: por isso passou por todas as revisões visuais.
+     *
+     * O foco do radial é a parte mais clara do selo, então é o pior caso.
+     */
+    const ruins: string[] = [];
+    for (const id of ids) {
+      const g = gradienteDaEspecie(id, "");
+      const foco = g.match(/#[0-9a-f]{6}/i)?.[0];
+      if (!foco) continue;
+      const r = contraste("#ffffff", foco);
+      if (r < 4.5) ruins.push(`#${id}: branco sobre ${foco} = ${r.toFixed(2)}`);
+    }
+    expect(ruins).toEqual([]);
+  });
+
+  it("o nome do hero passa 3:1 sobre o gradiente, em toda espécie", () => {
+    /*
+     * ⚠️ 152 reprovavam, TODAS amarelas ou verde-claras: Bellsprout em 1,73:1,
+     * Abra em 2,04, Pikachu em 2,73.
+     *
+     * A causa foi limitar as paradas por CLARIDADE em vez de luminância.
+     * Amarelo em `l = 0.56` tem quase o triplo da luminância de azul na mesma
+     * claridade, porque a fórmula da WCAG pesa verde e vermelho muito mais que
+     * azul. Nenhuma espécie azul ou roxa falhava — que é exatamente por que
+     * nunca apareceu: Dragonite, Bulbasaur, Mewtwo e Venusaur passam todos.
+     *
+     * Testar por AMOSTRA não pegaria isto nunca. Só varrendo.
+     */
+    const ruins: string[] = [];
+    for (const id of ids) {
+      const paradas = paletaDaEspecie(id).gradiente.match(/#[0-9a-f]{6}/gi) ?? [];
+      // O nome fica a 54% da altura: entre a segunda parada (48%) e a terceira (72%).
+      for (const parada of paradas.slice(1)) {
+        const r = contraste("#ffffff", parada);
+        if (r < 3) ruins.push(`#${id}: branco sobre ${parada} = ${r.toFixed(2)}`);
       }
     }
     expect(ruins).toEqual([]);

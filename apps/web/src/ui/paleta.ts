@@ -257,6 +257,39 @@ const FUNDO_CLARO = "#f1f3f8";
 const ALVO = 4.7;
 
 /**
+ * O teto de luminância das paradas do gradiente do hero.
+ *
+ * ⚠️ LUMINÂNCIA, e não claridade — e essa distinção é o defeito inteiro.
+ *
+ * O nome do Pokémon é branco e fica sobre o gradiente. Eu limitava as paradas
+ * por claridade HSL (0,45 e 0,56), o que parece uniforme e não é: amarelo em
+ * `l = 0.56` tem quase o triplo da luminância de azul na mesma claridade,
+ * porque o olho (e a fórmula da WCAG) pesa verde e vermelho muito mais que
+ * azul.
+ *
+ * Resultado da varredura: **152 espécies** com o nome reprovando — Bellsprout
+ * em 1,73:1, Abra em 2,04, Pikachu em 2,73. Todas amarelas ou verde-claras.
+ * Nenhuma azul ou roxa falhou, que é por que nunca apareceu nos meus testes:
+ * Dragonite, Bulbasaur, Mewtwo e Venusaur passam todos.
+ *
+ * 0,30 é o que garante 3:1 para o nome, que é texto grande (38px/800). O texto
+ * pequeno do hero não fica aqui — ele vive sobre o véu escuro da base.
+ */
+const TETO_LUZ_HERO = 0.3;
+
+/** Baixa a claridade até a cor caber no teto de luminância, preservando a matiz. */
+function escurecerAte(h: number, s: number, l: number, teto: number): string {
+  let atual = l;
+  let cor = paraHex(h, s, atual);
+  for (let i = 0; i < 60 && luminancia(cor) > teto; i++) {
+    atual -= 0.015;
+    if (atual < 0.06) break;
+    cor = paraHex(h, s, atual);
+  }
+  return cor;
+}
+
+/**
  * Empurra uma cor até ela passar em 4,5:1 contra o fundo dado.
  *
  * ⚠️ Anda numa direção só, escolhida pelo fundo: sobre fundo escuro clareia,
@@ -387,8 +420,8 @@ export function paletaDaEspecie(spriteId: number | null): Paleta {
     topoTinta: contraste(topoCor, "#ffffff") >= contraste(topoCor, "#0a0c10") ? "#ffffff" : "#0a0c10",
     gradiente: [
       `${topoCor} 0%`,
-      `${paraHex(h, sv, 0.45)} 48%`,
-      `${paraHex(h, Math.max(0.4, sv - 0.04), 0.56)} 72%`,
+      `${escurecerAte(h, sv, 0.45, TETO_LUZ_HERO)} 48%`,
+      `${escurecerAte(h, Math.max(0.4, sv - 0.04), 0.56, TETO_LUZ_HERO)} 72%`,
     ].join(", "),
   };
 }
@@ -420,9 +453,22 @@ export function gradienteDaEspecie(
 
   const [h, s, l] = paraHsl(cruas[0] ?? "#888888");
   const sv = Math.min(0.95, s * 1.15);
-  // Claro no foco, escuro na borda: é o que dá volume ao selo. As duas paradas
-  // saem da MESMA matiz pra não virar um degradê de duas cores diferentes.
-  const clara = paraHex(h, sv, Math.min(0.68, Math.max(0.5, l)));
+  /*
+   * ⚠️ O FOCO CEDE LUMINÂNCIA ATÉ O MONOGRAMA CABER.
+   *
+   * O selo leva o monograma ("BU", "CH") em branco, e o foco do radial é a
+   * parte mais clara dele. A varredura achou **671 espécies de 1.142 — 59% —**
+   * com esse texto reprovando: Charmander em 2,08:1, Caterpie em 2,11.
+   *
+   * Eu nunca tinha medido porque o monograma só aparece com a fonte de imagens
+   * desligada ou enquanto o sprite carrega — some rápido, e some justamente
+   * enquanto quem testa está olhando.
+   *
+   * 0,183 de luminância é o que dá 4,5:1 pro branco. O monograma é texto
+   * PEQUENO (13px num selo de 48), então não vale o limite frouxo de 3:1 que o
+   * nome grande do hero usa.
+   */
+  const clara = escurecerAte(h, sv, Math.min(0.68, Math.max(0.5, l)), 0.183);
   const escura = paraHex(h, Math.min(0.95, sv + 0.06), 0.26);
   return `radial-gradient(72% 72% at 32% 24%, ${clara} 0%, ${escura} 100%)`;
 }
