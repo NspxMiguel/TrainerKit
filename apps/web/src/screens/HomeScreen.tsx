@@ -37,11 +37,28 @@ interface Props {
   onGo: (tab: "pokedex", intent?: PokedexIntent) => void;
 }
 
+/*
+ * As cores de veredito, agora nos tokens do handoff.
+ *
+ * ⚠️ Duas estavam erradas, e o erro tinha significado: "Guardar" saia AZUL
+ * (`--tk-info`) e "Transferir" saia VERMELHO (`--tk-dang`). O handoff define
+ * Guardar em ambar e Transferir em cinza — e a escolha dele e melhor que a
+ * minha por um motivo de produto, nao de gosto.
+ *
+ * Vermelho e a cor de perigo do app. Transferir um Pokemon nao e um erro nem um
+ * risco: e uma recomendacao tranquila sobre um bicho que nao vale investimento.
+ * Pintar de vermelho transformava um conselho rotineiro em alarme, e num app
+ * cuja tese e DECIDIR por voce, assustar na decisao mais comum e o pior lugar
+ * possivel pra errar o tom.
+ *
+ * Os tokens ja existiam desde o porte da paleta; eu simplesmente nao tinha
+ * trocado quem os usa.
+ */
 const TONE: Record<Action, string> = {
-  investir: "var(--tk-succ)",
-  evoluir: "var(--tk-pri)",
-  guardar: "var(--tk-info)",
-  transferir: "var(--tk-dang)",
+  investir: "var(--tk-v-investir)",
+  evoluir: "var(--tk-v-evoluir)",
+  guardar: "var(--tk-v-guardar)",
+  transferir: "var(--tk-v-transferir)",
 };
 
 /**
@@ -90,8 +107,6 @@ function Hero({
   labelKey,
   linha,
   tom,
-  saudacao,
-  treinador,
   onOpen,
   feito,
   onToggleFeito,
@@ -100,8 +115,6 @@ function Hero({
   labelKey: Key;
   linha: string;
   tom?: string | undefined;
-  saudacao: string;
-  treinador: string;
   onOpen: () => void;
   /** Presente so quando o destaque e um veredito pendente de um bicho seu. */
   feito?: boolean | undefined;
@@ -154,12 +167,6 @@ function Hero({
       <span className="tk-hero-numero" aria-hidden="true">
         {species.dex}
       </span>
-
-      <div className="tk-hero-topo">
-        <p className="tk-hero-saudacao">
-          {saudacao}, {treinador}.
-        </p>
-      </div>
 
       {/*
         O assunto, na frente de tudo.
@@ -410,6 +417,39 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
       cede primeiro. Vale em qualquer tela, inclusive nas que eu nao tenho.
     */
     <div className="tk-home">
+      {/*
+        A SAUDACAO SAIU DE DENTRO DO HERO.
+
+        "tira da cabeca do pokemon a saudação."
+
+        Ela vivia sobre o gradiente, e enquanto o destaque era um monograma isso
+        funcionava — o mockup desenhou assim porque la nao ha arte nenhuma. Com
+        o sprite ocupando o hero inteiro, qualquer posicao dela cruza ALGUM
+        bicho: eu empurrei a arte pra baixo duas vezes e o Dragonite continuou
+        passando a antena por cima do texto, porque cada especie tem a sua
+        silhueta.
+
+        Numa faixa propria o problema deixa de existir por construcao, e nao por
+        ajuste — nenhum sprite, de nenhuma forma, encosta nela. E o avatar de
+        vidro que o handoff pede ("saudação 34/700 e avatar de vidro 40px")
+        finalmente tem onde morar.
+      */}
+      <header className="tk-home-topo">
+        <p className="tk-saudacao">
+          {t(greetingKey())}, {setup.name.trim() || t("home.trainer")}.
+        </p>
+        {/* O avatar leva pra "Meus" — e o unico lugar da home que fala do
+            treinador, entao e pra onde ele deve apontar. */}
+        <button
+          type="button"
+          className="tk-avatar"
+          onClick={() => onGo("pokedex", { view: "mine" })}
+          aria-label={t("nav.pokedex")}
+        >
+          {(setup.name.trim() || t("home.trainer")).slice(0, 1).toUpperCase()}
+        </button>
+      </header>
+
 
       {showInstall && (
         <InstallBanner
@@ -448,9 +488,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
         <>
           {hero && (
             <Hero
-              saudacao={t(greetingKey())}
-              treinador={setup.name.trim() || t("home.trainer")}
-species={hero.species}
+              species={hero.species}
               labelKey={hero.labelKey}
               linha={hero.linha}
               tom={hero.tom}
@@ -571,17 +609,48 @@ species={hero.species}
                       types={d.species.types}
                       size={48}
                     />
+                    {/*
+                      O ROTULO DO VEREDITO, que faltava.
+
+                      O handoff pede "rótulo do veredito em 9,5/800 embaixo" em
+                      cada anel, e eu tinha portado so o anel colorido. Sem o
+                      rotulo, a tira comunica veredito SO POR COR — que e
+                      exatamente o que a restricao de daltonismo proibe, e que o
+                      resto do app respeita em todo lugar.
+
+                      Era acessibilidade quebrada, nao enfeite faltando: a
+                      informacao estava so no `aria-label`, entao existia pra
+                      leitor de tela e nao pra quem enxerga mal cor.
+                    */}
+                    <span className="tk-strip-verdito">
+                      {t(ACTION_KEYS[d.verdict.action] as Key)}
+                    </span>
                   </button>
                 ))}
-                {meus.porIv.length > NA_FILA && (
-                  <button
-                    type="button"
-                    className="tk-strip-more"
-                    onClick={() => onGo("pokedex", { view: "mine" })}
-                  >
-                    +{meus.porIv.length - NA_FILA}
-                  </button>
-                )}
+                {/*
+                  "VER MAIS" fecha a fila — tambem do handoff ("Último item da
+                  tira é VER MAIS, anel neutro com chevron, e leva para a
+                  Pokédex").
+
+                  Substitui o "+3" que existia antes e so aparecia quando havia
+                  mais de 12 bichos. Com poucos, a tira simplesmente terminava
+                  no vazio e nao dizia que havia uma colecao inteira atras dela.
+                */}
+                <button
+                  type="button"
+                  className="tk-strip-cell tk-strip-cell--mais"
+                  onClick={() => onGo("pokedex", { view: "mine" })}
+                  style={{ ["--tk-i" as string]: Math.min(meus.porIv.length, NA_FILA) }}
+                >
+                  <span className="tk-strip-mais-anel" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"
+                         strokeLinejoin="round">
+                      <path d="M9 5l7 7-7 7" />
+                    </svg>
+                  </span>
+                  <span className="tk-strip-verdito">{t("home.seeAll")}</span>
+                </button>
               </div>
             </>
           )}

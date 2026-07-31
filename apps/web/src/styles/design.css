@@ -35,9 +35,20 @@
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: calc(24px + env(safe-area-inset-bottom));
-  width: min(calc(100% - 52px), calc(var(--tk-container) - 52px));
-  height: 58px;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  /*
+   * ⚠️ 50px, e nao os 58px do handoff — "ta muito grande isso aq do inicio
+   * pokedex e etc".
+   *
+   * O handoff desenhou numa moldura de 874px de altura, onde 58px sao 6,6% da
+   * tela. Num iPhone de 812 sao 7,1%, e com o transbordo de 4px do item ativo
+   * mais a sombra a barra ocupa uns 74px de fato. Numa home que ele quer sem
+   * rolagem, cada pixel aqui sai do Pokemon.
+   *
+   * O que NAO encolheu: o alvo de toque continua com 50px de altura por 100+ de
+   * largura, bem acima dos 44px minimos.
+   */
+  height: 50px;
   border-radius: 999px;
   display: flex;
   align-items: center;
@@ -47,7 +58,7 @@
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border: 0.5px solid var(--tk-glass-border);
   box-shadow:
-    0 14px 36px rgba(0, 0, 0, 0.5),
+    0 12px 30px rgba(0, 0, 0, 0.5),
     inset 0 1px 1px rgba(255, 255, 255, 0.14);
   z-index: 50;
   transition:
@@ -73,14 +84,14 @@
  */
 .tk-tab {
   flex: 1;
-  height: 58px;
+  height: 50px;
   margin: 0;
   border-radius: 999px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 1px;
   background: none;
   border: 0;
   color: var(--tk-text);
@@ -94,14 +105,19 @@
 }
 
 .tk-tab-label {
-  font: 500 10px/1.1 var(--tk-font);
+  font: 500 9.5px/1.1 var(--tk-font);
   letter-spacing: 0;
 }
 
 .tk-tab[aria-current="page"] {
-  flex: 1.25;
-  height: 66px;
-  margin: -4px 0;
+  /*
+   * 1.12 e nao 1.25: com 1.25 a pilula do "Inicio" ficava visivelmente maior
+   * que as outras duas e a barra lia como desequilibrada, nao como selecionada.
+   * O transbordo de 3px continua — e ele que da a impressao de peça pousada.
+   */
+  flex: 1.12;
+  height: 56px;
+  margin: -3px 0;
   color: var(--tk-ultra-fg-strong);
   /*
    * Quatro `inset`, e nao um. Vidro real nao tem UMA quina iluminada: tem a de
@@ -322,9 +338,15 @@
    * antigo deixa exatamente esse tipo de resto pendurado.
    */
   align-items: stretch;
-  /* Saudacao encostada em cima, bloco de decisao encostado embaixo; a arte
-     nao participa, porque saiu do fluxo (ver `.tk-hero-art`). */
-  justify-content: space-between;
+  /*
+   * ⚠️ `flex-end`, e nao `space-between`.
+   *
+   * Com a saudacao fora do hero sobrou UM filho no fluxo — o bloco de decisao.
+   * `space-between` com um item so o encosta no INICIO, entao "Dragonite" e o
+   * botao foram parar no topo do cartao e o bicho ficou embaixo deles. A regra
+   * estava certa pra dois filhos e virou errada quando um saiu.
+   */
+  justify-content: flex-end;
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -409,12 +431,12 @@
        cair onde o app ainda estava cinza. */
     radial-gradient(
       130% 55% at 50% 58%,
-      color-mix(in srgb, var(--tk-accent, transparent) 7%, transparent),
+      color-mix(in srgb, var(--tk-accent, transparent) 13%, transparent),
       transparent 72%
     ),
     radial-gradient(
       90% 45% at 50% 100%,
-      color-mix(in srgb, var(--tk-accent-2, transparent) 3%, transparent),
+      color-mix(in srgb, var(--tk-accent-2, transparent) 8%, transparent),
       transparent 75%
     );
   pointer-events: none;
@@ -892,11 +914,22 @@
   min-height: 0;
 }
 .tk-cta {
-  min-height: 62px;
+  /*
+   * ⚠️ 58px e 54px sao as MEDIDAS DO HANDOFF ("pílula 54px" e "duas
+   * secundárias lado a lado (48px)"). Estavam em 62 e 68.
+   *
+   * Nao e detalhe: os 26px a mais saiam direto do hero, que e o unico bloco
+   * elastico da coluna. O Pokemon estava menor porque dois botoes estavam
+   * maiores que o desenho — e ele pediu o Pokemon grande.
+   *
+   * 58 e nao 54 na acao principal porque ela tem DUAS linhas (titulo e
+   * detalhe), que o mockup nao tinha. O alvo continua muito acima dos 44px.
+   */
+  min-height: 58px;
 }
 
 .tk-act {
-  min-height: 68px;
+  min-height: 54px;
 }
 
 /* ─────────────────────────────────────── o hero na ficha da especie ────── */
@@ -977,4 +1010,225 @@
   border-radius: 999px;
   color: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ────────────────────────────────── a faixa de saudacao da home ────────── */
+
+/*
+ * "saudação 34/700 e avatar de vidro 40px" — o handoff pede os dois, e o avatar
+ * nunca tinha sido implementado.
+ *
+ * Ela e uma FAIXA, e nao mais uma camada sobre o hero: ver a nota no
+ * `HomeScreen`. O ganho colateral e que a cor da especie aparece aqui atras, no
+ * topo da tela, antes mesmo do hero comecar.
+ */
+.tk-home-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 2px;
+  flex: none;
+}
+
+.tk-saudacao {
+  /* Duas linhas em vez de reticencias: "Boa madrugada, Miguel." nao cabe em
+     283px a 26px, e cortar o nome do dono do app e pior que ocupar mais uma
+     linha. Alemao e russo sao ainda mais longos. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  /* 26 e nao 34: o handoff reservava a escala 34 pra saudacao porque ela era o
+     maior tipo da tela. Hoje o nome do Pokemon no hero tem 38 e e o assunto —
+     duas manchetes do mesmo tamanho nao formam hierarquia, formam empate. */
+  font: 700 26px/1.1 var(--tk-font);
+  letter-spacing: -0.6px;
+  color: var(--tk-text);
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/*
+ * O avatar, com a receita de vidro do handoff — e com a COR DA ESPECIE dentro.
+ *
+ * E o primeiro elemento fora do hero a mudar de cor com o Pokemon em destaque,
+ * e fica no canto superior direito, que e onde o olho passa primeiro.
+ */
+.tk-avatar {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      140deg,
+      color-mix(in srgb, var(--tk-accent, #6b7280) 70%, transparent),
+      color-mix(in srgb, var(--tk-accent-2, #6b7280) 55%, transparent)
+    );
+  border: 0.5px solid rgba(255, 255, 255, 0.22);
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.35),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font: 700 16px var(--tk-font);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.45s var(--tk-ease-out);
+}
+
+.tk-avatar:active {
+  transform: scale(0.95);
+}
+
+/*
+ * O hero deixou de encostar no topo, entao ele e um CARTAO — arredondado nos
+ * quatro cantos. Full-bleed na largura continua: e o que o separa dos cartoes
+ * comuns da home.
+ */
+.tk-home > .tk-hero {
+  border-radius: 30px;
+  margin-top: 0;
+}
+
+
+/* ──────────────────────────── a paleta pintando o app inteiro ──────────── */
+
+/*
+ * ⚠️ AQUI a cor da especie deixa de ser enfeite e vira a superficie do app.
+ *
+ * "kd oq falei da palheta de cores ir mudando?"
+ *
+ * Ele nao estava vendo, e estava certo: eu tinha posto a cor num veu de 5% no
+ * fundo e em mais nada. 5% sobre preto e literalmente invisivel — eu conferi a
+ * variavel no console, vi `#faa642` escrito la, e dei por feito. Variavel
+ * definida nao e cor visivel.
+ *
+ * Agora ela entra no que ocupa area: os cartoes, os botoes secundarios, a busca
+ * e o vidro da barra de abas. 14% de uma cor saturada sobre superficie escura
+ * muda a temperatura da tela inteira sem chegar perto de comprometer contraste
+ * — o texto continua medido contra `--tk-surface-2`, que e a base da mistura.
+ *
+ * O que continua FORA, e por quê:
+ *   · o violeta Ultra da acao principal e da aba ativa — e a marca de "aqui se
+ *     toca", e tem que ser a mesma em qualquer Pokemon.
+ *   · as cores de veredito — elas sao o significado, nao o tema.
+ */
+.tk-act,
+.tk-card,
+.tk-btn--secondary,
+.tk-search,
+.tk-seg,
+.tk-row-card,
+.tk-banner {
+  background: color-mix(in srgb, var(--tk-accent, transparent) 14%, var(--tk-surface-2));
+  border-color: color-mix(in srgb, var(--tk-accent, transparent) 26%, var(--tk-border));
+  transition:
+    background 0.5s var(--tk-ease-out),
+    border-color 0.5s var(--tk-ease-out);
+}
+
+/* O vidro da barra tambem pega a cor — e o elemento que fica na tela o tempo
+   todo, entao e o que mais vende a ideia de "o app inteiro mudou". */
+.tk-tabbar {
+  background: color-mix(in srgb, var(--tk-accent, transparent) 12%, var(--tk-glass-bg));
+  transition:
+    background 0.5s var(--tk-ease-out),
+    opacity 0.22s var(--tk-ease-out),
+    transform 0.28s var(--tk-ease-out);
+}
+
+/* Os icones das acoes secundarias na cor legivel da especie, em vez de branco.
+   E o detalhe pequeno que faz a troca de Pokemon ser percebida como TEMA, e nao
+   como "aquele cartao ali mudou". */
+.tk-act svg {
+  color: var(--tk-accent-fg);
+}
+
+/* ─────────────────────────────────── a tira da colecao, do handoff ─────── */
+
+/*
+ * "anéis de 56px com borda 2,5px na cor do veredito, tile de gradiente por
+ * dentro e rótulo do veredito em 9,5/800 embaixo."
+ *
+ * Eu tinha portado o anel e esquecido o rotulo — e isso nao era um enfeite a
+ * menos, era uma restricao quebrada: sem a palavra, a tira comunicava veredito
+ * SO POR COR. O app inteiro respeita "nunca so por cor" por causa de
+ * daltonismo, e justamente aqui a informacao vivia so no `aria-label`, ou seja,
+ * existia pra leitor de tela e nao pra quem enxerga mal cor.
+ */
+.tk-strip-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 0;
+  padding: 0;
+  flex: none;
+  /*
+   * ⚠️ A CELULA e mais larga que o anel, e e o rotulo que manda nisso.
+   *
+   * Com a celula do tamanho do tile (48px), "INVESTIR" a 9,5/800 mede uns 52px
+   * e vazava por cima da celula vizinha — as palavras encostavam umas nas
+   * outras e a fila virava uma faixa de texto continua.
+   *
+   * 62px e a palavra mais larga com folga. Dimensionar pelo TEXTO e nao pela
+   * imagem tambem protege os outros nove idiomas: "TRANSFERIR" em portugues ja
+   * e maior que o tile, e em alemao e russo a diferenca so aumenta.
+   */
+  min-width: 62px;
+}
+
+.tk-strip-cell .tk-mono {
+  box-shadow: 0 0 0 2.5px var(--tk-cell-tone, var(--tk-border-strong));
+}
+
+.tk-strip-verdito {
+  /* 9,5px e o unico tamanho do app abaixo de 11, e o handoff abre a excecao
+     nominalmente ("nada abaixo de 9,5px, e só em rótulo de anel na tira"). */
+  font: 800 9.5px/1 var(--tk-font);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--tk-cell-tone, var(--tk-text-3));
+  white-space: nowrap;
+}
+
+/*
+ * "VER MAIS": anel NEUTRO com chevron.
+ *
+ * Neutro de propósito — ele nao e um veredito, e se pegasse cor de veredito
+ * entraria na mesma leitura dos outros seis e viraria "um Pokemon a mais".
+ */
+.tk-strip-cell--mais .tk-strip-verdito {
+  color: var(--tk-text-3);
+}
+
+.tk-strip-mais-anel {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tk-text-2);
+  background: color-mix(in srgb, var(--tk-accent, transparent) 12%, var(--tk-surface-2));
+  box-shadow: 0 0 0 2.5px var(--tk-border-strong);
+}
+
+/*
+ * O contador da colecao volta pro VIOLETA do handoff ("contador 4 PEDEM
+ * DECISÃO em violeta"), e nao mais no acento da especie.
+ *
+ * ⚠️ Eu tinha ligado ele ao acento achando que era "a paleta alcancando o app".
+ * Errado: este numero conta VEREDITOS PENDENTES, e veredito e a familia de cor
+ * que nunca muda com o tema. Deixa-lo mudar de cor a cada Pokemon em destaque
+ * desfazia a associacao "violeta = coisa que pede decisao".
+ *
+ * A paleta alcanca o app pelas SUPERFICIES, que e area, e nao pelos rotulos,
+ * que sao significado.
+ */
+.tk-overline-hot {
+  color: var(--tk-ultra-fg-strong);
 }

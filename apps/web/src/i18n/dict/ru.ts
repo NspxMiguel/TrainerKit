@@ -382,6 +382,7 @@ export const RU: Dict = {
   "sprites.manifestAria": "Адрес manifest",
   "sprites.noneActive": "Ничего не скачивается.",
   "sprites.manifestHelp": "manifest — это JSON с {nameField} и {templateField}, например {example}. В .zip совпадение идёт по имени файла: {byDex} по номеру Покедекса, {byName} по имени. Папки игнорируются.",
+  "home.seeAll": "Все",
   "home.quickScan": "Сканировать скриншот",
   "home.quickScanDetail": "Точные IV и вердикт",
   "spread.title": "Лучшие IV по лигам",
