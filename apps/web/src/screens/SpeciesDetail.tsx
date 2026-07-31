@@ -31,6 +31,7 @@ import { Segmented } from "../ui/Segmented.tsx";
 import { dexSystem, speciesDossier } from "../ai/dossier.ts";
 import { AiBubble } from "../ui/AiBubble.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
+import { VerdictCard } from "../ui/VerdictCard.tsx";
 import { usarPaleta } from "../ui/paleta.ts";
 import { IVCalculator } from "./IVCalculator.tsx";
 import { RaidCounters } from "./RaidCounters.tsx";
@@ -335,6 +336,44 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies, owned }: 
           </div>
         </div>
       </div>
+
+      {/*
+        O CARTAO DO VEREDITO — a peça central do handoff, e ela simplesmente
+        nao existia nesta tela.
+
+        "ta faltando muita coisa q eu pedi, e muita coisa do app bom de vdd."
+
+        O `VerdictCard` ja estava escrito, com barra de confianca e rastro
+        auditavel, e era usado SO na calculadora de IV. A ficha — a tela mais
+        visitada, e a que o handoff detalha mais — nunca o mostrava. Quem tocava
+        num Pokemon da propria colecao via "Calcular IV do meu" num bicho cujo
+        IV o app ja sabia.
+
+        Duas falhas somadas: a navegacao nao levava o Pokemon salvo (ver a nota
+        no `HomeScreen`), e a tela nao pedia o cartao nem quando tinha. O motor
+        decidia, a barra de confianca era calculada, o rastro existia — e nada
+        disso chegava aos olhos. E a tese do produto inteiro: "decide, e aceita
+        ser conferido".
+      */}
+      {owned && (
+        <VerdictCard
+          owned={owned}
+          name={species.name}
+          baseStats={species.baseStats}
+          ivs={owned.ivs}
+          level={owned.level ?? 20}
+          cpm={data.cpm}
+          levelCap={data.version.levelCap}
+          evolvesInto={species.evolvesInto}
+          candyToEvolve={
+            species.evolvesInto[0]
+              ? (species.candyToEvolve[species.evolvesInto[0]] ?? null)
+              : null
+          }
+          lucky={owned.lucky}
+          shadow={owned.shadow}
+        />
+      )}
 
       <button
         type="button"

@@ -350,7 +350,24 @@
   padding: 0;
   border: 0;
   border-radius: 0;
-  background: linear-gradient(180deg, var(--tk-hero-grad, var(--tk-tipo-normal)));
+  /*
+   * ⚠️ DUAS CAMADAS, e a tinta do rodape e a de cima.
+   *
+   * Antes quem fechava o pe do hero era o `.tk-hero-scrim`, um filho absoluto
+   * com `inset: 0`. Sobrava uma faixa da cor da especie embaixo do bloco de
+   * decisao, e medindo eu achei o motivo pela metade: o retangulo do scrim saia
+   * 27px ACIMA do retangulo do pai, com `offsetTop: 0` e `offsetHeight` igual
+   * ao do hero. Ou seja, o navegador concorda que ele preenche o pai, e desenha
+   * deslocado.
+   *
+   * Nao fui atras do resto da explicacao porque nao precisa: sobreposicao
+   * absoluta e a parte fragil do arranjo, e o fundo do proprio elemento nao tem
+   * como se desalinhar dele mesmo. O scrim continua existindo pro contraste do
+   * meio; o fechamento do pe deixou de depender dele.
+   */
+  background:
+    linear-gradient(180deg, transparent 58%, var(--tk-hero-ink) 97%),
+    linear-gradient(180deg, var(--tk-hero-grad, var(--tk-tipo-normal)));
   overflow: hidden;
 }
 
