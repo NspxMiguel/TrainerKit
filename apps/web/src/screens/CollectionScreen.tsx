@@ -8,10 +8,10 @@ import type { OwnedPokemon } from "../storage/collection.ts";
 import {
   exportJson,
   importJson,
-  removePokemon,
   setDoneAction,
   useCollection,
 } from "../storage/collection.ts";
+import { TOM_VEREDITO as TONE } from "../ui/tomVeredito.ts";
 import { AskBox } from "../ui/AskBox.tsx";
 import { setEmGrade, useEmGrade } from "../ui/vistaColecao.ts";
 import { IconGrid, IconList, IconPlus } from "../ui/Icons.tsx";
@@ -24,13 +24,6 @@ interface Props {
   embutida?: boolean;
   dataset: DatasetState;
 }
-
-const TONE: Record<string, string> = {
-  investir: "var(--tk-succ)",
-  evoluir: "var(--tk-pri)",
-  guardar: "var(--tk-info)",
-  transferir: "var(--tk-dang)",
-};
 
 export function CollectionScreen({ dataset, embutida = false }: Props) {
   const { items, reload } = useCollection();
@@ -159,9 +152,10 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
           <p className="tk-body">{t("collection.empty.body")}</p>
         </div>
       ) : (
+        // Cartao UNICO na vista de lista (handoff §3) — ver `.tk-meus` no
+        // design.css. Na grade continua uma celula por bicho.
         <div
-          className={grade ? "tk-species-grid tk-cascade" : "tk-cascade"}
-          style={grade ? undefined : { display: "grid", gap: 8 }}
+          className={grade ? "tk-species-grid tk-cascade" : "tk-card tk-meus tk-cascade"}
         >
           {rows.map(({ owned, species: s, verdict }, i) => {
             if (!s || !verdict) return null;
@@ -270,14 +264,33 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
                   {owned.cp !== null &&
                     ` · ${t("common.cp")} ${owned.cp.toLocaleString(language)}`}
                   {owned.level !== null && ` · ${t("common.level")} ${owned.level}`}
-                  {/* A etiqueta de troca vive na linha dos NUMEROS, nao ao lado
-                      do veredito. Ela nao concorre com ele: o veredito diz o que
-                      fazer com este bicho, a etiqueta diz que existe uma saida a
-                      mais. Do lado do veredito viraria uma segunda ordem. */}
-                  {troca.vale && (
-                    <span className="tk-tag-trade">{t("trade.tag")}</span>
-                  )}
                 </span>
+
+                {/*
+                  A TROCA VIRA UMA TERCEIRA LINHA, em ambar, com o numero.
+
+                  Era um chip "vale trocar" grudado no fim da linha de numeros.
+                  O handoff pede o contrario, e explica por que: "texto, NÃO
+                  chip — chip quebra em 3 linhas". Ele estava certo na medicao —
+                  "44/45 · PC 2.800 · nível 30" mais um chip nao cabe em 375px,
+                  e o que sobrava quebrava sozinho embaixo.
+
+                  E o texto diz mais que o chip dizia. "vale trocar" e uma
+                  opiniao sem numero; "78% de vir melhor" e a conta que sustenta
+                  a opiniao, e e o tipo de frase que faz este app decidir em vez
+                  de exibir. O numero ja existia dentro do `avaliarTroca` — so
+                  nao chegava na tela.
+
+                  Ambar porque nao e veredito: e uma SAIDA A MAIS. Verde, azul e
+                  cinza sao as cores das quatro decisoes, e usar uma delas aqui
+                  faria a troca competir com o veredito em vez de acompanhar.
+                */}
+                {troca.vale && (
+                  <span className="tk-owned-troca">
+                    <span aria-hidden="true">↻</span>{" "}
+                    {t("trade.line", { chance: Math.round(troca.amigo.melhora * 100) })}
+                  </span>
+                )}
 
                 {/*
                   O veredito como BOTAO, nao como etiqueta.
@@ -324,14 +337,18 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
                     : t(ACTION_KEYS[verdict.action] as Key)}
                 </button>
 
-                <button
-                  type="button"
-                  className="tk-owned-remove"
-                  aria-label={t("common.remove", { name: s.name })}
-                  onClick={() => void removePokemon(owned.id)}
-                >
-                  ✕
-                </button>
+                {/*
+                  O "✕" SAIU daqui, e foi pra ficha do Pokemon com confirmacao.
+
+                  Era um toque so, sem confirmar, permanente — e nao ha servidor
+                  pra desfazer. Num alvo de 32px encostado no chip de veredito,
+                  que e justamente onde o dedo passa pra marcar "ja fiz".
+
+                  A mesma tela pedia dois toques pra apagar uma COLECAO inteira e
+                  um so pra apagar um Pokemon. Agora as duas pedem dois, e a
+                  linha devolveu 44px de largura — que era exatamente o que
+                  faltava pro "Dragonite" parar de truncar em "Dragoni…".
+                */}
               </div>
             );
           })}
