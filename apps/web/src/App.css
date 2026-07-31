@@ -566,7 +566,9 @@
  * unica que esta de fato sob a pilula; acender ao apertar outra seria acender
  * uma peca que o dedo nao encostou.
  */
-.tk-tabbar:has(.tk-tab[aria-current="page"]:active) .tk-tab-pill {
+/* ⚠️ Mirava `.tk-tab-pill`, que nao existe mais — o item ativo VIROU a bolha.
+   O alvo agora e o proprio item, que e a peca que o dedo encosta. */
+.tk-tab[aria-current="page"]:active {
   background: var(--tk-glass-press);
 }
 
@@ -3281,19 +3283,7 @@
  * barra, borda de rolagem, botao de adicionar) e medido a partir de
  * `--tk-container`, mudar so essa variavel move o conjunto inteiro junto.
  */
-@media (min-width: 700px) and (max-width: 899px) {
-  :root {
-    --tk-container: 680px;
-  }
 
-  .tk-species-grid {
-    grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
-  }
-
-  .tk-sheet-full {
-    max-width: 620px;
-  }
-}
 
 /* ------------------------------------------- tela grande: iPad e computador */
 
@@ -3312,134 +3302,11 @@
  * unica — em pe ele e um celular grande, deitado (1194) ele e um computador
  * pequeno. O mesmo limiar cobre notebook e monitor.
  */
-@media (min-width: 900px) {
-  .tk-shell {
-    flex-direction: row;
-    justify-content: center;
-    max-width: 1180px;
-    align-items: stretch;
-    gap: var(--tk-s6);
-    padding: 0 var(--tk-gutter);
-  }
 
-  /* A barra deixa de ser flutuante e vira coluna: ela some do rodape, entao o
-     conteudo nao precisa mais reservar espaco embaixo. */
-  .tk-main,
-  [data-platform="iphone"] .tk-main {
-    flex: 1;
-    min-width: 0;
-    /*
-     * Largura util, nao largura maxima.
-     *
-     * Deixar o conteudo esticar ate os 896px que sobram parece "usar a tela",
-     * mas uma linha de texto de 896px e ilegivel — o olho perde o comeco da
-     * linha seguinte. O que ganha com tela grande e a GRADE de especies, e essa
-     * usa `auto-fill` e se vira sozinha. Os cartoes de texto ficam num limite
-     * confortavel e o conjunto centraliza no que sobra.
-     */
-    max-width: 860px;
-    padding: var(--tk-s8) 0 var(--tk-s8);
-  }
-
-  .tk-tabbar,
-  [data-platform="iphone"] .tk-tabbar {
-    /* Antes do conteudo. No DOM o <main> vem primeiro porque no celular a barra
-       fica embaixo; deitado ela precisa ficar a esquerda, e `order` resolve sem
-       mexer na ordem de leitura nem no foco do teclado. */
-    order: -1;
-    position: sticky;
-    top: var(--tk-s8);
-    left: auto;
-    bottom: auto;
-    transform: none;
-    width: 216px;
-    max-width: 216px;
-    height: max-content;
-    /* Uma coluna, uma linha por aba. */
-    grid-template-columns: 1fr;
-    grid-auto-rows: 52px;
-    gap: 2px;
-    padding: var(--tk-s2);
-    border-radius: var(--tk-r-card);
-    align-self: start;
-    margin-top: max(var(--tk-safe-top), calc(env(safe-area-inset-top) + var(--tk-s3)));
-  }
-
-  /* Deitada, a aba e icone + rotulo lado a lado, alinhados a esquerda — a
-     mesma leitura de uma lista, que e o que uma barra lateral e. */
-  .tk-tab,
-  [data-platform="iphone"] .tk-tab {
-    flex-direction: row;
-    justify-content: flex-start;
-    gap: var(--tk-s3);
-    padding: 0 var(--tk-s4);
-  }
-
-  .tk-tab-label,
-  [data-platform="iphone"] .tk-tabbar .tk-tab-label {
-    font-size: 14px;
-    max-height: none;
-  }
-
-  /* A pilula continua sendo uma peca so que viaja — agora na vertical. */
-  .tk-tab-pill {
-    top: var(--tk-s2);
-    bottom: auto;
-    left: var(--tk-s2);
-    right: var(--tk-s2);
-    width: auto;
-    height: 52px;
-    border-radius: calc(var(--tk-r-card) - var(--tk-s2));
-    transform: translateY(calc(var(--tk-tab-i) * (100% + 2px)));
-  }
-
-  /* Sem barra embaixo nao ha borda de rolagem pra suavizar, e o botao de
-     adicionar volta pro canto do CONTEUDO, nao da janela. */
-  .tk-scroll-edge {
-    display: none;
-  }
-
-  .tk-fab,
-  [data-platform="iphone"] .tk-fab {
-    bottom: var(--tk-s8);
-    right: max(var(--tk-gutter), calc(50vw - 1180px / 2 + var(--tk-gutter)));
-  }
-
-  .tk-strip,
-  [data-platform="iphone"] .tk-strip {
-    bottom: var(--tk-s5);
-    max-width: 420px;
-  }
-
-  /* Com o dobro de largura, tres colunas de especie viram um desperdicio de
-     linha. `auto-fill` acha quantas cabem em vez de eu adivinhar. */
-  .tk-species-grid {
-    grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
-  }
-
-  /* As folhas continuam sendo uma coluna legivel — texto longo em 1180px de
-     largura e ilegivel, e essa e a unica coisa que a tela grande NAO melhora. */
-  .tk-sheet-full {
-    max-width: 620px;
-    border-radius: var(--tk-r-sheet);
-    inset: var(--tk-s6) 0;
-    box-shadow: var(--tk-e3);
-  }
-}
 
 /* A barra lateral so recolhe no celular. Numa coluna fixa, encolher ao rolar
    nao ganharia espaco nenhum e so tiraria o rotulo do lugar. */
-@media (min-width: 900px) {
-  [data-platform="iphone"] .tk-tabbar[data-min] {
-    transform: none;
-  }
 
-  [data-platform="iphone"] .tk-tabbar[data-min] .tk-tab-label {
-    max-height: none;
-    opacity: 1;
-    margin-top: 0;
-  }
-}
 
 /* --------------------------------------------------------- acao destrutiva */
 
