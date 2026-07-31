@@ -647,6 +647,32 @@ export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
       ) : (
         /* ------------------------------------------------------- entradas */
         <>
+          {/*
+            FOLHEAR, sem escanear nada — e a primeira opcao, nao a ultima.
+
+            "tem q ter como ver os pokemon no modo pokedex ... igual pokemon
+            original."
+
+            Dava pra chegar num Pokemon so por busca ou por foto. Faltava a
+            porta mais obvia: ABRIR o aparelho e começar a passar. Este botao
+            entra no primeiro e dali e anterior/proximo, que ja existiam no
+            codigo e nao tinham botao.
+
+            Vem antes da camera de propósito: apontar exige ter o bicho na
+            frente, e folhear e o que se faz sentado — que e quando a Pokedex
+            de verdade e usada.
+          */}
+          {ordenadas[0] && (
+            <button
+              type="button"
+              className="tk-dexdev-key tk-dexdev-key--block"
+              style={{ marginBottom: 10 }}
+              onClick={() => escolher(ordenadas[0]!)}
+            >
+              {t("dex.browse")}
+            </button>
+          )}
+
           {/* AO VIVO primeiro, foto depois: apontar e o que ele pediu, e mandar
               print e o caminho alternativo pra quem ja tem a imagem salva. */}
           {supportsCamera() && (

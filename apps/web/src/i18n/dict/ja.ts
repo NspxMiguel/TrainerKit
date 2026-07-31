@@ -583,6 +583,7 @@ export const JA: Dict = {
   "dex.prev": "前へ",
   "dex.next": "次へ",
   "dex.line.size": "たかさ {height} m、おもさ {weight} kg。",
+  "dex.browse": "図鑑をめくる",
   "dex.open": "図鑑モード",
   "dex.openDetail": "向けて、聞いて、データを読み上げ",
   "dex.pick": "どのポケモン？",
