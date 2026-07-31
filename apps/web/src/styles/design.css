@@ -3993,3 +3993,130 @@
 [data-platform="ipad"] .tk-tabbar[data-min] {
   transform: none;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   AJUSTES: o selo colorido de cada linha, como o handoff desenha (5g)
+   ═══════════════════════════════════════════════════════════════════════════
+
+   "kd ajustes tipo apple? ta la no claude desing po."
+
+   Estava mesmo, e eu não tinha portado. As medidas são literais: selo de 30×30
+   com raio 8, 12px de vão, linha de 52px, rótulo em 16, valor em 15 a meia
+   opacidade, e a seta em 8×14.
+*/
+.tk-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 16px;
+  width: 100%;
+  background: none;
+  border: 0;
+  text-align: left;
+}
+
+.tk-row-selo {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* O selo é o único lugar do app com sombra colorida própria: ele precisa
+     ler como objeto pousado, e não como um quadrado pintado. */
+  box-shadow: 0 1px 3px rgb(0 0 0 / 24%);
+}
+
+.tk-row-label {
+  flex: 1;
+  min-width: 0;
+  font: 500 16px/1.3 var(--tk-font);
+  color: var(--tk-txt);
+}
+
+.tk-row-value {
+  font: 400 15px/1.3 var(--tk-font);
+  color: var(--tk-txt3);
+  /* Encolhe antes do rótulo: "Montar minha coleção" pode truncar; "Como você
+     usa" não pode, porque é ele que diz qual linha é. */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tk-row-seta {
+  flex: none;
+  margin-left: 2px;
+  color: var(--tk-txt4);
+}
+
+/* A linha destrutiva não ganha selo colorido — ela ganha o rótulo em vermelho.
+   Um selo bonito ao lado de "Apagar tudo" convida ao toque. */
+.tk-row[data-tone="danger"] .tk-row-label {
+  color: var(--tk-dang);
+}
+
+.tk-row[data-tone="danger"] .tk-row-selo {
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+
+/*
+ * ⚠️ O RÓTULO NÃO QUEBRA; quem encolhe é o VALOR.
+ *
+ * Medido depois de pôr os selos: "Como você usa" virou três linhas, porque o
+ * rótulo tinha `flex: 1` e o valor ("Montar minha coleção") empurrava. Ler o
+ * assunto em três linhas empilhadas ao lado de um valor de uma é o oposto de
+ * uma lista de ajustes — e é o assunto, não o valor, que diz qual linha é.
+ *
+ * No sistema é assim: o rótulo tem a largura que precisa e o valor corta com
+ * reticências. Quem quer o valor inteiro entra na linha.
+ */
+.tk-row-label {
+  flex: 0 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tk-row-value {
+  /*
+   * ⚠️ Base ZERO, e não `auto`.
+   *
+   * Com base automática os dois encolhiam em proporção e a linha saía com as
+   * DUAS pontas cortadas — "Como vo…" ao lado de "Montar minha…", que é pior
+   * que qualquer uma delas cortada sozinha.
+   *
+   * Com base zero o valor só ocupa o que sobrou depois do rótulo inteiro, e é
+   * ele quem corta. O assunto é o que identifica a linha; o valor a pessoa vê
+   * entrando nela.
+   */
+  flex: 1 1 0;
+  text-align: right;
+}
+
+/*
+ * O fio entre linhas, começando DEPOIS do selo.
+ *
+ * É a marca registrada da lista do sistema, e some quando o fio vai de ponta a
+ * ponta: com o recuo, os selos formam uma coluna contínua e o olho desce por
+ * ela. Sem, viram nove quadrados soltos.
+ *
+ * 58px = 16 de recuo + 30 do selo + 12 de vão.
+ */
+.tk-card > .tk-row + .tk-row::before {
+  content: "";
+  position: absolute;
+  left: 58px;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: var(--tk-sep);
+}
+
+.tk-card > .tk-row {
+  position: relative;
+}
