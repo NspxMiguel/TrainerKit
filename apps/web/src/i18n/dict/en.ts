@@ -119,6 +119,7 @@ const EN = {
   "pokedex.whichPokemon": "Which Pokémon?",
 
   // ------------------------------------------------------------------- especie
+  "species.iHaveThis": "I have this one",
   "species.calcIV": "Check my IVs",
   "species.seeMyIV": "See my IV",
   "species.baseStats": "Base stats",
@@ -414,6 +415,7 @@ const EN = {
   "verdict.raid.attack": "Base attack {base} with {iv} attack IV",
   "verdict.shadow.bonus": "Shadow hits 20% harder — don't purify without thinking",
   "verdict.lucky.cost": "Being lucky, powering up costs half the dust",
+  "verdict.needIv": "I need the IV to decide",
   "verdict.iv.weak": "IV {total} out of 45",
   "verdict.species.weak": "The species delivers neither damage nor bulk",
   "verdict.default": "Nothing here calls for action right now",

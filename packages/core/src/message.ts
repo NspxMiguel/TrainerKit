@@ -21,6 +21,14 @@ export type MessageKey =
   | "verdict.raid.attack"
   | "verdict.shadow.bonus"
   | "verdict.lucky.cost"
+  /**
+   * Sem IV informado, o app NAO decide — ele pede o IV.
+   *
+   * Quem entra pelo "eu tenho esse" nao informou IV nenhum. Decidir em cima dos
+   * zeros que o tipo exige produziria "Transferir" com confianca cheia pra um
+   * bicho que pode ser 100%.
+   */
+  | "verdict.needIv"
   | "verdict.iv.weak"
   | "verdict.species.weak"
   | "verdict.default"

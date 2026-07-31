@@ -2104,3 +2104,23 @@
   min-width: 0;
   min-height: 44px;
 }
+
+
+/*
+ * ⚠️ O ANEL EXTERNO DE "PEDE ACAO" SAIU.
+ *
+ * "tira essa borda verde inutil ai q fico paia, deixa igual o laranja"
+ *
+ * O selo ja tinha um anel na cor do veredito (`box-shadow: 0 0 0 2.5px`) E o
+ * rotulo embaixo dizendo a palavra. O `data-hot` do App.css desenhava um
+ * SEGUNDO anel, mais externo, na mesma cor — dois circulos concentricos da
+ * mesma cor em volta do mesmo bicho.
+ *
+ * Ele nao acrescentava informacao: "pede acao" ja e o que o anel colorido e a
+ * palavra significam, e os que NAO pedem acao (Guardar) tem o anel ambar do
+ * mesmo jeito. O que ele fazia era engordar a celula e sujar o alinhamento da
+ * fila.
+ */
+.tk-strip-cell[data-hot] {
+  box-shadow: none;
+}

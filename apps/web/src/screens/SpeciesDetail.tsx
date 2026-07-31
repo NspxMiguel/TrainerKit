@@ -23,7 +23,7 @@ import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
 import { moveLabel, useLanguage, useShowTranslation } from "../i18n/language.ts";
 import { useT, type Key } from "../i18n/t.ts";
 import { useSetup } from "../onboarding/setup.ts";
-import { useCollection, type OwnedPokemon } from "../storage/collection.ts";
+import { addPokemon, useCollection, type OwnedPokemon } from "../storage/collection.ts";
 import { typeColor, typeKey } from "../sprites/provider.ts";
 import { AssistantCard } from "../ui/AssistantCard.tsx";
 import { IconSwords } from "../ui/Icons.tsx";
@@ -425,6 +425,47 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
           lucky={salvo.lucky}
           shadow={salvo.shadow}
         />
+      )}
+
+      {/*
+        "EU TENHO ESSE" — entrar na colecao sem escanear IV.
+
+        "o unico jeito atual de colocar eles no eu tenho, é escaneando iv. e se
+        a pessoa n qr escanear iv?"
+
+        Ele achou um funil fechado: quem nao quer (ou nao pode) escanear
+        simplesmente nao conseguia registrar um Pokemon. Escanear e o melhor
+        caminho, e nao pode ser o UNICO — a pessoa acabou de pegar o bicho, quer
+        marcar que tem, e resolve o IV depois.
+
+        ⚠️ Sem IV o app NAO inventa veredito. O Pokemon entra marcado como "sem
+        IV" e o veredito dele passa a ser "falta o IV pra eu decidir", que e
+        literalmente o proximo passo. Ver a nota em `HomeScreen`: decidir em
+        cima dos zeros daria "Transferir" com confianca cheia pra um possivel
+        100%.
+      */}
+      {setup.mode === "colecao" && !salvo && (
+        <button
+          type="button"
+          className="tk-btn tk-btn--secondary tk-btn--block"
+          style={{ marginBottom: 10 }}
+          onClick={() => {
+            void addPokemon({
+              speciesId: species.id,
+              nickname: null,
+              ivs: { atk: 0, def: 0, hp: 0 },
+              ivDesconhecido: true,
+              level: null,
+              cp: null,
+              hp: null,
+              lucky: false,
+              shadow: false,
+              doneAction: null,
+            });
+          }}
+        >
+          {t("species.iHaveThis")}
+        </button>
       )}
 
       <button

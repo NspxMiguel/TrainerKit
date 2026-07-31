@@ -42,6 +42,18 @@ export interface OwnedPokemon {
    */
   doneAction: string | null;
   /**
+   * `true` quando a pessoa disse "eu tenho esse" sem informar o IV.
+   *
+   * ⚠️ Isto NÃO é um IV zerado. Os campos de `ivs` ficam em 0 porque o tipo os
+   * exige, e ler esses zeros como se fossem medidos seria o pior erro possível
+   * neste app: o veredito sairia "Transferir" com toda a confiança do mundo
+   * para um Pokémon que pode ser 100%.
+   *
+   * Quem lê a coleção tem que checar esta marca ANTES de decidir. Sem IV o app
+   * não decide — ele pede o IV, que é a resposta honesta.
+   */
+  ivDesconhecido?: boolean;
+  /**
    * A qual coleção este Pokémon pertence.
    *
    * Opcional no tipo por causa das linhas gravadas antes do campo existir — a
