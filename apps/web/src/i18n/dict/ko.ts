@@ -170,6 +170,7 @@ export const KO: Dict = {
   "collection.add": "포켓몬 추가",
   "collection.backup": "백업",
   "collection.done": "완료함",
+  "collection.evolved": "진화시켰어요",
   "collection.markDone": "이미 했어요",
   "collection.undoDone": "아직 안 했어요",
   "collection.export": "내보내기",

@@ -9,7 +9,12 @@ import type { PokedexIntent } from "../App.tsx";
 import { useSetup } from "../onboarding/setup.ts";
 import { typeColor, typeKey } from "../sprites/provider.ts";
 import { useSpriteSettings } from "../sprites/settings.ts";
-import { setDoneAction, useCollection, type OwnedPokemon } from "../storage/collection.ts";
+import {
+  evolvePokemon,
+  setDoneAction,
+  useCollection,
+  type OwnedPokemon,
+} from "../storage/collection.ts";
 import { useInstallState } from "../storage/install.ts";
 import type { PersistState } from "../storage/persist.ts";
 import { DidYouKnow } from "../ui/DidYouKnow.tsx";
@@ -122,6 +127,7 @@ function Hero({
   linha,
   tom,
   onOpen,
+  evolui,
   feito,
   onToggleFeito,
 }: {
@@ -130,6 +136,8 @@ function Hero({
   linha: string;
   tom?: string | undefined;
   onOpen: () => void;
+  /** O botao redondo vai EVOLUIR o bicho, e nao so marcar como feito. */
+  evolui?: boolean | undefined;
   /** Presente so quando o destaque e um veredito pendente de um bicho seu. */
   feito?: boolean | undefined;
   onToggleFeito?: (() => void) | undefined;
@@ -289,21 +297,41 @@ function Hero({
             {t(labelKey)}
           </button>
 
-          {/* "Ja fiz isso" silencia o destaque. So existe quando o destaque e um
-              veredito pendente de um bicho seu — sem isso, nao ha o que marcar. */}
+          {/*
+            O botao redondo confirma o veredito. So existe quando o destaque e
+            um veredito pendente de um bicho seu — sem isso, nao ha o que
+            confirmar.
+
+            ⚠️ EM "EVOLUIR" ELE NAO E UM CHECK, e o rotulo e o desenho tem que
+            dizer isso: ele TRANSFORMA o Pokemon na proxima forma. Um check
+            significaria "anotei", e o que acontece e outra coisa — a especie
+            muda na colecao. Rotulo que descreve mal uma acao irreversivel e
+            pior que rotulo nenhum.
+
+            A seta pra cima e o glifo que o proprio handoff usa pra evolucao.
+          */}
           {onToggleFeito && (
             <button
               type="button"
               className="tk-hero-feito"
-              aria-pressed={feito}
-              aria-label={t(feito ? "collection.undoDone" : "collection.markDone")}
+              aria-pressed={evolui ? undefined : feito}
+              aria-label={t(
+                evolui ? "collection.evolved" : feito ? "collection.undoDone" : "collection.markDone",
+              )}
               onClick={onToggleFeito}
               style={feito && tom ? { color: tom } : undefined}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M4 12.5l5 5L20 6.5" />
-              </svg>
+              {evolui ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M12 19V5M5 12l7-7 7 7" />
+                </svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M4 12.5l5 5L20 6.5" />
+                </svg>
+              )}
             </button>
           )}
         </div>
@@ -605,11 +633,35 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
               linha={hero.linha}
               tom={hero.tom}
               onOpen={() => setDetail({ species: hero.species, owned: hero.owned })}
+              evolui={hero.verdict?.action === "evoluir" && hero.species.evolvesInto.length > 0}
               feito={hero.feito}
               {...(hero.ownedId !== undefined && hero.verdict
                 ? {
-                    onToggleFeito: () =>
-                      void setDoneAction(hero.ownedId!, hero.verdict!.action),
+                    onToggleFeito: () => {
+                      /*
+                        EVOLUIR de verdade evolui — nao marca um check.
+
+                        "ao evoluir um pokemon q pede pra evoluir (bulbasauro)
+                        ao invez de so dar um check, porque nao transformarlo em
+                        sua evolução? continua o trajeto garai"
+
+                        Ele achou um defeito de produto: o app mandava evoluir,
+                        a pessoa evoluia no jogo, marcava como feito — e a
+                        colecao continuava com um Bulbasaur. Dali em diante toda
+                        analise saia da especie ERRADA, e o app ainda achava que
+                        tinha ajudado.
+
+                        Nos outros vereditos o check continua certo: investir e
+                        guardar nao mudam a especie, e transferir tira o bicho
+                        da colecao pelo caminho normal.
+                      */
+                      const evolucao =
+                        hero.verdict!.action === "evoluir"
+                          ? hero.species.evolvesInto[0]
+                          : undefined;
+                      if (evolucao) void evolvePokemon(hero.ownedId!, evolucao);
+                      else void setDoneAction(hero.ownedId!, hero.verdict!.action);
+                    },
                   }
                 : {})}
             />

@@ -206,6 +206,7 @@ const EN = {
   "collection.add": "Add Pokémon",
   "collection.backup": "Backup",
   "collection.done": "Done",
+  "collection.evolved": "I evolved it",
   "collection.markDone": "I already did this",
   "collection.undoDone": "Not done after all",
   "collection.export": "Export",

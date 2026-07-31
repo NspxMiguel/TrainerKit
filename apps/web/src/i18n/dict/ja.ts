@@ -170,6 +170,7 @@ export const JA: Dict = {
   "collection.add": "ポケモンを追加",
   "collection.backup": "バックアップ",
   "collection.done": "済み",
+  "collection.evolved": "進化させた",
   "collection.markDone": "もうやった",
   "collection.undoDone": "やっぱりまだ",
   "collection.export": "書き出し",
