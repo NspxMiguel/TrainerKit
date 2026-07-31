@@ -5,7 +5,12 @@ import { ACTION_KEYS, decide, formatTrace, type VerdictInput } from "@trainerkit
 import { explainVerdict } from "../ai/explain.ts";
 import { useAi } from "../ai/provider.ts";
 import { useT, type Key } from "../i18n/t.ts";
-import { setDoneAction, useCollection, type OwnedPokemon } from "../storage/collection.ts";
+import {
+  evolvePokemon,
+  setDoneAction,
+  useCollection,
+  type OwnedPokemon,
+} from "../storage/collection.ts";
 
 const TONE: Record<string, string> = {
   investir: "var(--tk-succ)",
@@ -87,6 +92,15 @@ export function VerdictCard({ owned, ...props }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [motor.ready, motor.provider, motor.localModel, language, props.name, verdict.action, verdict.confidence]);
   const [traceOpen, setTraceOpen] = useState(false);
+
+  /*
+   * O veredito manda evoluir E ha pra onde evoluir.
+   *
+   * As duas condicoes importam: uma especie de estagio final pode receber
+   * "evoluir" por engano de dados, e evoluir pra lugar nenhum apagaria o
+   * Pokemon da colecao ao gravar um `speciesId` vazio.
+   */
+  const vaiEvoluir = verdict.action === "evoluir" && props.evolvesInto.length > 0;
   const color = TONE[verdict.action] ?? "var(--tk-txt)";
 
   // A prop `owned` e uma foto do momento em que a tela abriu; quem responde ao
@@ -147,18 +161,41 @@ export function VerdictCard({ owned, ...props }: Props) {
         Pokemon sobe de nivel ou evolui, e "ja evolui" nao responde a um
         "transferir" que apareca depois.
       */}
+      {/*
+        ⚠️ EM "EVOLUIR" ESTE BOTAO EVOLUI, e nao marca um check.
+
+        "cliquei em evoluir e o bulbasauro n foi, ja fiz e n foi. bulbasauro
+        ainda aq"
+
+        Eu tinha ligado a evolucao SO no botao redondo do hero da home e
+        reportado como feito. Mas o caminho natural e outro: a pessoa toca em
+        "Evoluir", o que ABRE A FICHA, e confirma aqui dentro — que era
+        justamente o botao que eu nao tinha tocado. Ele continuava chamando
+        `setDoneAction`, entao o Bulbasaur seguia Bulbasaur.
+
+        Conserto de verdade: a decisao de o que fazer sai do componente que
+        conhece o veredito, e vale nos dois lugares que mostram o cartao (a
+        ficha e a calculadora de IV).
+      */}
       {owned && (
         <button
           type="button"
           className="tk-done"
           data-done={feito || undefined}
-          aria-pressed={feito}
-          onClick={() => void setDoneAction(owned.id, feito ? null : verdict.action)}
+          aria-pressed={vaiEvoluir ? undefined : feito}
+          onClick={() => {
+            if (vaiEvoluir) void evolvePokemon(owned.id, props.evolvesInto[0]!);
+            else void setDoneAction(owned.id, feito ? null : verdict.action);
+          }}
         >
           <span className="tk-done-mark" aria-hidden="true">
-            {feito ? "✓" : "○"}
+            {vaiEvoluir ? "↑" : feito ? "✓" : "○"}
           </span>
-          {feito ? t("collection.done") : t("collection.markDone")}
+          {vaiEvoluir
+            ? t("collection.evolved")
+            : feito
+              ? t("collection.done")
+              : t("collection.markDone")}
         </button>
       )}
 
