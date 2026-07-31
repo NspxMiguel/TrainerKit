@@ -91,7 +91,18 @@ function hexDoToken(texto: string, nome: string): RGB | null {
   return m?.[1] ? doHex(m[1]) : null;
 }
 
+/**
+ * Segue UM nivel de `var(--outro)`.
+ *
+ * Os nomes antigos (`--tk-txt3`) viraram apelidos dos canonicos do redesenho
+ * (`--tk-text-3`) pra que a paleta nova chegasse nas ~5.000 linhas de `App.css`
+ * sem renomear nada. Sem resolver o apelido, este teste passaria a dizer que o
+ * token "sumiu" — e um teste que nao acha o token nao mede coisa nenhuma.
+ */
 function rgbaDoToken(texto: string, nome: string): { cor: RGB; alpha: number } | null {
+  const alias = new RegExp(`--${nome}\\s*:\\s*var\\(\\s*--([a-z0-9-]+)\\s*\\)`).exec(texto);
+  if (alias?.[1]) return rgbaDoToken(texto, alias[1]);
+
   const m = new RegExp(`--${nome}\\s*:\\s*rgba\\((\\d+),\\s*(\\d+),\\s*(\\d+),\\s*([\\d.]+)\\)`).exec(
     texto,
   );
@@ -111,20 +122,38 @@ const TEMAS = [
     css: bloco('[data-tk="dark"]', '[data-tk="light"]'),
     // O fundo, o ponto mais claro do degrade `--tk-screen`, e as duas
     // superficies de cartao. Texto pousa nas quatro.
-    superficies: ["#07080b", "#141a2a", "#11141b", "#181b23"],
+    // Fundo do redesenho, o topo do degrade, e as duas superficies de cartao.
+    // As de vidro sao translucidas sobre o fundo, entao o pior caso e o fundo.
+    superficies: ["#0a0c10", "#141a2a", "#12151b", "#181b23"],
   },
   {
     nome: "claro",
     css: bloco('[data-tk="light"]', "@media (prefers-color-scheme: light)"),
-    superficies: ["#eceef3", "#ffffff", "#f1f3f8"],
+    superficies: ["#f2f3f6", "#ffffff", "#f1f3f8"],
   },
 ] as const;
 
 /** Cores semanticas que viram TEXTO em algum lugar do app. */
-const SEMANTICAS = ["tk-succ", "tk-warn", "tk-dang", "tk-pri", "tk-pri-fg", "tk-info"];
+const SEMANTICAS = [
+  "tk-succ",
+  "tk-warn",
+  "tk-dang",
+  "tk-pri",
+  "tk-pri-fg",
+  "tk-info",
+  // ── canonicos do redesenho ──────────────────────────────────────────────
+  // O handoff afirmava que TODOS passavam. Tres nao passavam, e estes casos
+  // sao o que impede a afirmacao de voltar a ser aceita sem conta.
+  "tk-ultra-fg",
+  "tk-ultra-fg-strong",
+  "tk-v-investir",
+  "tk-v-evoluir",
+  "tk-v-guardar",
+  "tk-v-transferir",
+];
 
 /** Os cinzas de texto, que sao rgba e precisam ser achatados antes. */
-const TEXTOS = ["tk-txt2", "tk-txt3", "tk-txt4"];
+const TEXTOS = ["tk-txt2", "tk-txt3", "tk-txt4", "tk-text-2", "tk-text-3"];
 
 describe("contraste dos tokens", () => {
   for (const tema of TEMAS) {
@@ -165,6 +194,29 @@ describe("contraste dos tokens", () => {
     // #767676 sobre branco e o exemplo canonico de "exatamente no limite".
     expect(contraste(doHex("#767676"), [255, 255, 255])).toBeGreaterThanOrEqual(4.5);
     expect(contraste(doHex("#777777"), [255, 255, 255])).toBeLessThan(4.5);
+  });
+
+  it("pega as tres cores que o handoff do design afirmava que passavam", () => {
+    /*
+     * O README do redesenho diz, com todas as letras: "Todos os pares
+     * texto/fundo abaixo passam de 4,5:1". Tres nao passavam — e um deles e o
+     * cinza de "IV 96 · PC 2.874 · nv 31", a linha de metadado de toda lista.
+     *
+     * Estes casos existem pra que a afirmacao nao volte a ser aceita de boa fe
+     * na proxima leva de tokens que chegar de fora.
+     */
+    const preto = doHex("#0a0c10");
+    const claro = doHex("#f2f3f6");
+    const cinza = [235, 238, 245] as const;
+    const tinta = [22, 24, 29] as const;
+
+    expect(contraste(achatar(cinza, 0.45, preto), preto)).toBeLessThan(MINIMO);
+    expect(contraste(achatar(cinza, 0.52, preto), preto)).toBeGreaterThanOrEqual(MINIMO);
+
+    expect(contraste(achatar(tinta, 0.6, claro), claro)).toBeLessThan(MINIMO);
+    expect(contraste(achatar(tinta, 0.61, claro), claro)).toBeGreaterThanOrEqual(MINIMO);
+
+    expect(contraste(achatar(tinta, 0.45, claro), claro)).toBeLessThan(MINIMO);
   });
 
   it("pega a cor que eu tinha deixado passar", () => {

@@ -1,4 +1,43 @@
 /*
+ * ─────────────────────────────────────────────────────────────────────────────
+ * REDESENHO "LIQUID GLASS" — os valores vieram do handoff do Claude Design.
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * Os nomes ANTIGOS (`--tk-txt`, `--tk-surf`, `--tk-pri`…) continuam existindo e
+ * agora apontam para os novos. Isso e deliberado: o `App.css` tem ~5.000 linhas
+ * e mais de 700 usos desses nomes. Renomear tudo de uma vez seria um diff
+ * impossivel de revisar, e o unico jeito de a paleta nova chegar em TODA tela
+ * no mesmo commit e trocar o valor, nao o nome.
+ *
+ * Os nomes NOVOS (`--tk-text`, `--tk-surface`, `--tk-ultra`…) sao os canonicos
+ * daqui pra frente. Componente novo usa eles; componente velho migra quando for
+ * mexido de qualquer jeito.
+ *
+ * ⚠️ TRES VALORES DO HANDOFF FORAM ALTERADOS, e por medicao, nao por gosto.
+ *
+ * O README do design afirma "todos os pares texto/fundo passam de 4,5:1". Medi
+ * os quinze pares antes de escrever uma linha:
+ *
+ *   escuro  --tk-text-3  alpha .45   4.05  ✗  (e 4.02 sobre cartao)
+ *   claro   --tk-text-2  alpha .60   4.47  ✗   (falha por 0,03)
+ *   claro   --tk-text-3  alpha .45   2.87  ✗
+ *
+ * Todo o resto passa folgado. Mas `--tk-text-3` e a cor de "IV 96 · PC 2.874 ·
+ * nv 31" — a linha de metadado de toda lista, texto pequeno, lida no sol. E a
+ * restricao numero 3 do proprio handoff.
+ *
+ * No escuro subiu pra .52 — o minimo que passa tambem SOBRE O CARTAO, que e
+ * translucido e portanto mais claro que o fundo. Ninguem nota a diferenca.
+ *
+ * ⚠️ No CLARO os dois convergem: pra `--tk-text-3` passar ele precisa de .61,
+ * que e exatamente onde `--tk-text-2` precisa ficar. Nao e falha do desenho — e
+ * fisica: tres degraus de cinza nao cabem entre 4,5:1 e o preto sobre #F2F3F6.
+ * Escolhi manter DOIS degraus no claro em vez de perder a leitura no sol. Se
+ * um dia alguem quiser o terceiro degrau de volta, ele so pode existir em texto
+ * grande (>=24px, ou >=18,66px em negrito), onde o minimo cai pra 3:1.
+ */
+
+/*
  * Design tokens do TrainerKit.
  *
  * Extraidos literalmente do prototipo navegavel (TrainerKit.dc.html). Os
@@ -11,7 +50,49 @@
 
 :root,
 [data-tk="dark"] {
-  --tk-bg: #07080b;
+  /* ── canonicos do redesenho (escuro) ─────────────────────────────────── */
+  --tk-text: #f4f6fa;
+  --tk-text-2: rgba(235, 238, 245, 0.62);
+  /*
+   * .52, e nao os .45 do handoff.
+   *
+   * .45 dava 4,05:1 sobre o fundo. Mas o cartao do redesenho e TRANSLUCIDO
+   * (`rgba(255,255,255,.05)` sobre #0a0c10 = #16181c), entao ele e mais claro
+   * que o fundo e derruba mais um pouco. Medido nas tres superficies:
+   *
+   *   .45 → 4,05 / 4,03 / 4,02   ✗
+   *   .49 → 4,61 / 4,55 / 4,49   ✗ passa no fundo e reprova no cartao
+   *   .52 → 5,07 / 4,95 / 4,92   ✓
+   *
+   * O .49 e o exemplo do erro: conferir so contra o fundo aprova uma cor que
+   * falha justamente onde ela mais aparece, que e dentro de cartao.
+   */
+  --tk-text-3: rgba(235, 238, 245, 0.52);
+
+  --tk-surface: rgba(255, 255, 255, 0.05);
+  --tk-surface-2: rgba(255, 255, 255, 0.06);
+  --tk-border: rgba(255, 255, 255, 0.09);
+  --tk-border-strong: rgba(255, 255, 255, 0.11);
+  --tk-sep: rgba(255, 255, 255, 0.07);
+
+  /* O vidro da barra de abas e das folhas. */
+  --tk-glass-bg: rgba(28, 30, 38, 0.4);
+  --tk-glass-border: rgba(255, 255, 255, 0.12);
+
+  /* Violeta "Ultra": reservado pra ACAO DO APP (botao primario, aba ativa,
+     link). Nunca pra conteudo — conteudo usa a cor do tipo do Pokemon. */
+  --tk-ultra: linear-gradient(180deg, #8a6bff, #6e4bff);
+  --tk-ultra-solid: #6e4bff;
+  --tk-ultra-fg: #9f8bff;
+  --tk-ultra-fg-strong: #b9a8ff;
+
+  /* Vereditos: palavra + cor + glifo, sempre. O glifo faz parte do token. */
+  --tk-v-investir: #3ddc97;
+  --tk-v-evoluir: #9f8bff;
+  --tk-v-guardar: #ffc55c;
+  --tk-v-transferir: #9aa6b8;
+
+  --tk-bg: #0a0c10;
   /*
    * O TAMANHO do gradiente e em `vw`/`vh`, e nao em `%`. Nao e detalhe.
    *
@@ -36,10 +117,10 @@
   --tk-line: rgba(255, 255, 255, 0.09);
   --tk-line2: rgba(255, 255, 255, 0.18);
 
-  --tk-txt: #f2f4f8;
-  --tk-txt2: rgba(242, 244, 248, 0.72);
-  --tk-txt3: rgba(242, 244, 248, 0.5);
-  --tk-txt4: rgba(242, 244, 248, 0.58);
+  --tk-txt: var(--tk-text);
+  --tk-txt2: var(--tk-text-2);
+  --tk-txt3: var(--tk-text-3);
+  --tk-txt4: var(--tk-text-2);
 
   --tk-glass: rgba(10, 12, 17, 0.72);
 
@@ -110,17 +191,43 @@
 }
 
 [data-tk="light"] {
-  --tk-bg: #eceef3;
+  /* ── canonicos do redesenho (claro) ──────────────────────────────────── */
+  --tk-text: #16181d;
+  /* .61 nos DOIS: no claro a hierarquia de tres degraus nao cabe acima de
+     4,5:1. Escolha registrada na nota do topo do arquivo. */
+  --tk-text-2: rgba(22, 24, 29, 0.61);
+  --tk-text-3: rgba(22, 24, 29, 0.61);
+
+  --tk-surface: #ffffff;
+  --tk-surface-2: #f1f3f8;
+  --tk-border: rgba(20, 24, 33, 0.07);
+  --tk-border-strong: rgba(20, 24, 33, 0.11);
+  --tk-sep: rgba(20, 24, 33, 0.06);
+
+  --tk-glass-bg: rgba(255, 255, 255, 0.6);
+  --tk-glass-border: rgba(20, 24, 33, 0.08);
+
+  --tk-ultra: linear-gradient(180deg, #6b4bff, #5b3df5);
+  --tk-ultra-solid: #5b3df5;
+  --tk-ultra-fg: #4a2fd0;
+  --tk-ultra-fg-strong: #4a2fd0;
+
+  --tk-v-investir: #067a56;
+  --tk-v-evoluir: #5b3df5;
+  --tk-v-guardar: #8a5a00;
+  --tk-v-transferir: #5b6472;
+
+  --tk-bg: #f2f3f6;
   --tk-screen: radial-gradient(120vw 80vh at 50% -10%, #ffffff 0%, #f6f7fb 55%, #f0f2f7 100%);
 
-  --tk-surf: #ffffff;
-  --tk-surf2: #f1f3f8;
+  --tk-surf: var(--tk-surface);
+  --tk-surf2: var(--tk-surface-2);
   --tk-surf3: rgba(16, 19, 25, 0.11);
   --tk-line: rgba(16, 19, 25, 0.1);
   --tk-line2: rgba(16, 19, 25, 0.2);
 
-  --tk-txt: #101319;
-  --tk-txt2: rgba(16, 19, 25, 0.74);
+  --tk-txt: var(--tk-text);
+  --tk-txt2: var(--tk-text-2);
   /*
    * ⚠️ 0.6 e nao 0.56, e a diferenca e passar ou nao passar.
    *
@@ -141,8 +248,8 @@
    * esta. Os dois temas nao precisam do mesmo numero, precisam do mesmo
    * RESULTADO.
    */
-  --tk-txt3: rgba(16, 19, 25, 0.6);
-  --tk-txt4: rgba(16, 19, 25, 0.6);
+  --tk-txt3: var(--tk-text-3);
+  --tk-txt4: var(--tk-text-2);
 
   --tk-glass: rgba(246, 247, 251, 0.82);
   /* No claro o vidro tambem quase nao tem cor — o que muda e de que lado vem a
@@ -219,17 +326,43 @@
 /* Sem [data-tk] explicito, segue o sistema. */
 @media (prefers-color-scheme: light) {
   :root:not([data-tk="dark"]) {
-    --tk-bg: #eceef3;
+    /* ── canonicos do redesenho (claro) ──────────────────────────────────── */
+    --tk-text: #16181d;
+    /* .61 nos DOIS: no claro a hierarquia de tres degraus nao cabe acima de
+       4,5:1. Escolha registrada na nota do topo do arquivo. */
+    --tk-text-2: rgba(22, 24, 29, 0.61);
+    --tk-text-3: rgba(22, 24, 29, 0.61);
+
+    --tk-surface: #ffffff;
+    --tk-surface-2: #f1f3f8;
+    --tk-border: rgba(20, 24, 33, 0.07);
+    --tk-border-strong: rgba(20, 24, 33, 0.11);
+    --tk-sep: rgba(20, 24, 33, 0.06);
+
+    --tk-glass-bg: rgba(255, 255, 255, 0.6);
+    --tk-glass-border: rgba(20, 24, 33, 0.08);
+
+    --tk-ultra: linear-gradient(180deg, #6b4bff, #5b3df5);
+    --tk-ultra-solid: #5b3df5;
+    --tk-ultra-fg: #4a2fd0;
+    --tk-ultra-fg-strong: #4a2fd0;
+
+    --tk-v-investir: #067a56;
+    --tk-v-evoluir: #5b3df5;
+    --tk-v-guardar: #8a5a00;
+    --tk-v-transferir: #5b6472;
+
+    --tk-bg: #f2f3f6;
     --tk-screen: radial-gradient(120vw 80vh at 50% -10%, #ffffff 0%, #f6f7fb 55%, #f0f2f7 100%);
-    --tk-surf: #ffffff;
-    --tk-surf2: #f1f3f8;
+    --tk-surf: var(--tk-surface);
+    --tk-surf2: var(--tk-surface-2);
     --tk-surf3: rgba(16, 19, 25, 0.11);
     --tk-line: rgba(16, 19, 25, 0.1);
     --tk-line2: rgba(16, 19, 25, 0.2);
-    --tk-txt: #101319;
-    --tk-txt2: rgba(16, 19, 25, 0.74);
-    --tk-txt3: rgba(16, 19, 25, 0.6);
-    --tk-txt4: rgba(16, 19, 25, 0.6);
+    --tk-txt: var(--tk-text);
+    --tk-txt2: var(--tk-text-2);
+    --tk-txt3: var(--tk-text-3);
+    --tk-txt4: var(--tk-text-2);
     --tk-glass: rgba(246, 247, 251, 0.82);
     --tk-glass-ios: rgba(255, 255, 255, 0.3);
     --tk-glass-edge: rgba(255, 255, 255, 0.9);
