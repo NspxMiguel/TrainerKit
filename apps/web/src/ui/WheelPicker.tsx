@@ -36,6 +36,28 @@ const ITEM = 44;
 export function WheelPicker({ options, value, onChange, ariaLabel }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const settle = useRef<number | undefined>(undefined);
+  /*
+   * ⚠️ A RODA SÓ ESCOLHE DEPOIS QUE ALGUÉM ENCOSTA NELA.
+   *
+   * Sem isto, abrir a folha de Ajustes › Idioma TROCAVA O IDIOMA sozinho.
+   *
+   * Reproduzido e medido: a folha entra animada, e enquanto ela se move o
+   * `scrollTop` do trilho lê 44 — exatamente uma linha — em vez de 0. O
+   * `onScroll` com debounce de 120ms interpretava isso como "o usuário parou a
+   * roda na linha 1" e chamava `onChange` com o SEGUNDO idioma da lista. Em
+   * inglês (índice 0), abrir a tela e fechar sem tocar em nada deixava o app em
+   * português.
+   *
+   * Foi o varredor de idiomas que achou: eu setava `en`, rodava a varredura, e
+   * no fim o app estava em `pt-BR`. Passei um tempo achando que era o meu
+   * script — o script estava certo, e o defeito era do app desde sempre. Quem
+   * troca de idioma raramente não perceberia a causa; perceberia só que "o app
+   * volta pro português sozinho".
+   *
+   * "A seleção acompanha o SCROLL" continua valendo — mas scroll de GENTE. Um
+   * reposicionamento que o próprio componente fez não é escolha de ninguém.
+   */
+  const tocou = useRef(false);
 
   const index = Math.max(
     0,
@@ -49,8 +71,22 @@ export function WheelPicker({ options, value, onChange, ariaLabel }: Props) {
     const el = ref.current;
     if (!el) return;
     const target = index * ITEM;
-    if (Math.abs(el.scrollTop - target) < 2) return;
-    el.scrollTo({ top: target, behavior: "auto" });
+    const posicionar = () => {
+      if (!ref.current) return;
+      if (Math.abs(ref.current.scrollTop - target) < 2) return;
+      ref.current.scrollTo({ top: target, behavior: "auto" });
+    };
+    posicionar();
+    /*
+     * E de novo depois que a folha para de animar.
+     *
+     * Enquanto ela entra, o trilho ainda não tem a posição final, e o primeiro
+     * `scrollTo` cai no lugar errado — foi assim que o `scrollTop` acabava em
+     * 44. Repor no fim da animação deixa a roda mostrando o item certo em vez
+     * de um vizinho.
+     */
+    const t = window.setTimeout(posicionar, 260);
+    return () => window.clearTimeout(t);
   }, [index]);
 
   const onScroll = () => {
@@ -60,10 +96,16 @@ export function WheelPicker({ options, value, onChange, ariaLabel }: Props) {
     // o app trocaria de idioma dez vezes durante um unico gesto.
     window.clearTimeout(settle.current);
     settle.current = window.setTimeout(() => {
+      if (!tocou.current) return;
       const nearest = Math.round(el.scrollTop / ITEM);
       const picked = options[Math.min(options.length - 1, Math.max(0, nearest))];
       if (picked && picked.value !== value) onChange(picked.value);
     }, 120);
+  };
+
+  /** Qualquer gesto de verdade sobre a roda libera a escolha por scroll. */
+  const marcarToque = () => {
+    tocou.current = true;
   };
 
   return (
@@ -78,7 +120,11 @@ export function WheelPicker({ options, value, onChange, ariaLabel }: Props) {
         aria-label={ariaLabel}
         tabIndex={0}
         onScroll={onScroll}
+        onPointerDown={marcarToque}
+        onTouchStart={marcarToque}
+        onWheel={marcarToque}
         onKeyDown={(e) => {
+          marcarToque();
           if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
           e.preventDefault();
           const next = index + (e.key === "ArrowDown" ? 1 : -1);
