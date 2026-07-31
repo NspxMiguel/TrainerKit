@@ -436,12 +436,33 @@ function caixaJusta(bmp: Bitmap): [number, number, number, number] {
 
 // ---------------------------------------------------------------- execução
 
-const ARTE = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork";
+const RAIZ = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other";
 
-async function baixar(id: number): Promise<Buffer | null> {
+/**
+ * As duas fontes de imagem que o app oferece.
+ *
+ * ⚠️ A caixa justa precisa ser medida NAS DUAS, e isso nao e zelo: as mesmas
+ * espécies vêm enquadradas de formas diferentes em cada uma. A arte oficial é
+ * ilustração, com margem generosa e variável; os renders 3D do Pokémon HOME são
+ * capturas de modelo, quase sempre mais cheias no quadro.
+ *
+ * "lembresse, testar com pokemons renders 3d e arte oficial. e sem imagens tbm."
+ *
+ * Se o app usasse a caixa da arte oficial pra posicionar um render 3D, o
+ * enquadramento sairia deslocado exatamente como estava antes — só que agora
+ * por minha causa, e não pela do PokeAPI.
+ */
+const FONTES = {
+  /** `pokeapi-artwork` no app. */
+  b: "official-artwork",
+  /** `pokeapi-home` no app: os renders 3D. */
+  h: "home",
+} as const;
+
+async function baixar(id: number, fonte: string): Promise<Buffer | null> {
   for (let tentativa = 0; tentativa < 3; tentativa++) {
     try {
-      const r = await fetch(`${ARTE}/${id}.png`);
+      const r = await fetch(`${RAIZ}/${fonte}/${id}.png`);
       if (r.status === 404) return null;
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       return Buffer.from(await r.arrayBuffer());
@@ -469,7 +490,19 @@ async function main() {
 
   /** Por sprite: `c` = as cores, `b` = a caixa justa. Chaves curtas porque isto
       vai embutido no pacote e são 1.142 entradas. */
-  const paleta: Record<string, { c: string[]; b: [number, number, number, number] }> = {};
+  /**
+   * Por sprite: `c` = as cores, `b` = a caixa na arte oficial, `h` = a caixa nos
+   * renders 3D. Chaves curtas porque isto vai embutido no pacote e são 1.142
+   * entradas.
+   *
+   * `h` sai quando não houver render 3D pra espécie — várias formas regionais e
+   * cosméticas só existem na arte oficial. Nesse caso o app cai na caixa `b`,
+   * que é melhor que não enquadrar.
+   */
+  const paleta: Record<
+    string,
+    { c: string[]; b: [number, number, number, number]; h?: [number, number, number, number] }
+  > = {};
   let feitos = 0;
   let vazios = 0;
 
@@ -478,16 +511,31 @@ async function main() {
   for (let i = 0; i < ids.length; i += LOTE) {
     await Promise.all(
       ids.slice(i, i + LOTE).map(async (id) => {
-        const buf = await baixar(id);
+        const buf = await baixar(id, FONTES.b);
         if (!buf) {
           vazios++;
           return;
         }
         try {
           const bmp = decodificarPng(buf);
+          // A COR sai sempre da arte oficial: ela e a referencia cromatica do
+          // bicho, e o render 3D tem iluminacao de estudio que lava os tons.
           const cores = extrairPaleta(bmp);
-          if (cores.length > 0) paleta[id] = { c: cores, b: caixaJusta(bmp) };
-          else vazios++;
+          if (cores.length === 0) {
+            vazios++;
+            return;
+          }
+          const entrada: (typeof paleta)[string] = { c: cores, b: caixaJusta(bmp) };
+
+          const buf3d = await baixar(id, FONTES.h);
+          if (buf3d) {
+            try {
+              entrada.h = caixaJusta(decodificarPng(buf3d));
+            } catch {
+              // Render 3D ilegivel: o app cai na caixa da arte oficial.
+            }
+          }
+          paleta[id] = entrada;
         } catch (e) {
           console.warn(`  ! ${id}: ${(e as Error).message}`);
           vazios++;
