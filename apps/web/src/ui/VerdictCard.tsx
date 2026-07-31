@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-import { ACTION_KEYS, decide, formatTrace, type VerdictInput } from "@trainerkit/core";
+import { ACTION_KEYS, decide, type VerdictInput } from "@trainerkit/core";
 
 import { explainVerdict } from "../ai/explain.ts";
 import { useAi } from "../ai/provider.ts";
@@ -8,7 +8,9 @@ import { useT, type Key } from "../i18n/t.ts";
 import {
   evolvePokemon,
   setDoneAction,
+  setMeuMotivo,
   useCollection,
+  type MeuMotivo,
   type OwnedPokemon,
 } from "../storage/collection.ts";
 import { TOM_VEREDITO as TONE } from "./tomVeredito.ts";
@@ -33,6 +35,14 @@ import { TOM_VEREDITO as TONE } from "./tomVeredito.ts";
 interface Props extends VerdictInput {
   owned?: OwnedPokemon | undefined;
 }
+
+/** O motivo guardado vira a frase da tela. Mapa explícito: as duas uniões são
+    fechadas, e ligá-las por concatenação de string mataria as duas travas. */
+const MOTIVO_KEY: Record<MeuMotivo, Key> = {
+  gosto: "verdict.mine.gosto",
+  uso: "verdict.mine.uso",
+  desafio: "verdict.mine.desafio",
+};
 
 export function VerdictCard({ owned, ...props }: Props) {
   const verdict = decide(props);
@@ -86,6 +96,7 @@ export function VerdictCard({ owned, ...props }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [motor.ready, motor.provider, motor.localModel, language, props.name, verdict.action, verdict.confidence]);
   const [traceOpen, setTraceOpen] = useState(false);
+  const [discordando, setDiscordando] = useState(false);
 
   /*
    * O veredito manda evoluir E ha pra onde evoluir.
@@ -103,6 +114,18 @@ export function VerdictCard({ owned, ...props }: Props) {
   const feito = atual?.doneAction === verdict.action;
   /** Houve conta? "Descobrir o IV" não é uma conclusão, é um pedido de dado. */
   const temRastro = verdict.signals.length > 0;
+  /** A pessoa discordou e o app aceitou. Ver `OwnedPokemon.meuMotivo`. */
+  const meuMotivo = atual?.meuMotivo ?? null;
+
+  /**
+   * O peso da regra em palavra, e não em número.
+   *
+   * "+0.85" não diz nada pra quem não escreveu o motor. Três faixas dizem tudo
+   * o que a pessoa precisa: se aquela linha mandou muito, mandou um pouco, ou
+   * só opinou.
+   */
+  const forca = (peso: number): Key =>
+    peso >= 0.8 ? "trace.strong" : peso >= 0.5 ? "trace.medium" : "trace.weak";
 
   return (
     <section className="tk-card" style={{ borderColor: color }}>
@@ -223,20 +246,109 @@ export function VerdictCard({ owned, ...props }: Props) {
         </button>
       )}
 
+      {/*
+        ⚠️ O RASTRO EM PORTUGUÊS, e o `decide(bulbasaur) ├─ evolucao.pendente
+        ..... +0.70` saiu da tela.
+
+        "como cheguei nisso meio paia, meio dificil de entender, escreve mais
+        facil..."
+
+        Ele está certo, e o erro era de endereço: aquele desenho é a saída de um
+        LOG — nomes de regra em snake_case, pesos de 0 a 1, arte ASCII. Ele foi
+        feito pra eu depurar o motor, e eu o deixei na tela do usuário achando
+        que "auditável" e "cru" eram a mesma coisa. Não são: auditável é a
+        pessoa CONSEGUIR conferir, e ninguém confere `+0.70`.
+
+        Agora cada regra vira uma frase com três partes — o que ela viu, pra
+        onde ela puxou, e quanto ela pesou — e o fecho diz o resultado com a
+        concordância em porcentagem. A informação é exatamente a mesma; o
+        `formatTrace` continua no core, servindo aos testes e ao log, que é onde
+        ele sempre foi bom.
+      */}
       {traceOpen && (
-        <>
-          <pre className="tk-trace">{formatTrace(props.name.toLowerCase(), verdict)}</pre>
-          <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
-            {verdict.signals.map((s) => (
-              <div key={s.rule} className="tk-caption" style={{ lineHeight: 1.45 }}>
-                <span style={{ fontFamily: "var(--tk-mono)", color: "var(--tk-txt2)" }}>
-                  {s.rule}
-                </span>{" "}
-                — {tm(s.because)}
-              </div>
-            ))}
+        <div style={{ display: "grid", gap: 10, marginTop: 12 }}>
+          {verdict.signals.map((s) => (
+            <div key={s.rule} className="tk-trace-linha">
+              <span className="tk-trace-bolha" style={{ background: TONE[s.towards] }} aria-hidden="true" />
+              <span>
+                <span className="tk-trace-porque">{tm(s.because)}</span>
+                <span className="tk-trace-peso">
+                  {t("trace.pull", { acao: t(ACTION_KEYS[s.towards] as Key) })} ·{" "}
+                  {t(forca(s.weight))}
+                </span>
+              </span>
+            </div>
+          ))}
+          <p className="tk-caption" style={{ lineHeight: 1.5, marginTop: 2 }}>
+            {t("trace.result", {
+              acao: t(ACTION_KEYS[verdict.action] as Key),
+              percent: Math.round(verdict.confidence * 100),
+            })}
+          </p>
+        </div>
+      )}
+
+      {/*
+        ⚠️ DISCORDAR É UMA RESPOSTA VÁLIDA.
+
+        "e tem q ter um botão, discordo... vai q o cara gosta do pokemon q quer
+        colecionar? vai q ele ta num desafio e quer usa o pokemon pra fazer reid
+        e ponto final? pense em tudo isso..."
+
+        O motor decide com o que dá pra calcular. Gostar de um bicho, colecionar
+        uma linha inteira, jogar um desafio de tipo único — nada disso entra
+        numa conta, e nada disso é menos válido que um stat product. Sem esta
+        saída, o app só sabia insistir, e insistir é dizer que a razão dele vale
+        mais que a da pessoa.
+
+        O veredito continua sendo calculado e continua na tela. O que muda é que
+        ele para de COBRAR: sai da fila da home e nunca aparece na faxina.
+      */}
+      {owned && temRastro && (
+        meuMotivo ? (
+          <div className="tk-meu-motivo">
+            <span>
+              {t("verdict.mine.kept")} — {t(MOTIVO_KEY[meuMotivo])}
+            </span>
+            <button
+              type="button"
+              className="tk-btn tk-btn--ghost"
+              style={{ height: 34, fontSize: 12.5 }}
+              onClick={() => void setMeuMotivo(owned.id, null)}
+            >
+              {t("verdict.mine.undo")}
+            </button>
           </div>
-        </>
+        ) : discordando ? (
+          <div className="tk-meu-motivo tk-meu-motivo--perguntando">
+            <span className="tk-caption">{t("verdict.disagree.title")}</span>
+            <div style={{ display: "grid", gap: 6, marginTop: 8 }}>
+              {(["gosto", "uso", "desafio"] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  className="tk-btn tk-btn--secondary tk-btn--block"
+                  style={{ height: 40, fontSize: 13 }}
+                  onClick={() => {
+                    void setMeuMotivo(owned.id, m);
+                    setDiscordando(false);
+                  }}
+                >
+                  {t(MOTIVO_KEY[m])}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="tk-btn tk-btn--ghost tk-btn--block"
+            style={{ height: 38, fontSize: 12.5, marginTop: 4 }}
+            onClick={() => setDiscordando(true)}
+          >
+            {t("verdict.disagree")}
+          </button>
+        )
       )}
     </section>
   );

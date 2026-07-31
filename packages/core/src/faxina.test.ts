@@ -110,6 +110,37 @@ describe("planejarFaxina — o que ela nunca pode sugerir", () => {
     expect(motivo(lendario.id)).toBe("faxina.preso.lendario");
   });
 
+  it("NUNCA sugere quem a pessoa disse que vai ficar", () => {
+    /*
+     * ⚠️ A unica marca do app que vem da PESSOA, e nao de uma conta.
+     *
+     * "e tem q ter um botão, discordo... vai q o cara gosta do pokemon q quer
+     * colecionar? vai q ele ta num desafio e quer usa o pokemon pra fazer reid
+     * e ponto final?"
+     *
+     * O veredito por baixo continua dizendo "transferir" — e e por isso que
+     * este teste existe. Uma lista em lote que so lesse o veredito devolveria o
+     * bicho PRE-MARCADO numa tela com outros vinte, e a pessoa perderia por
+     * distracao exatamente o que ela tinha decidido guardar. E o unico lugar do
+     * app em que ignorar esta marca custa um Pokemon.
+     */
+    const meu = bicho("rattata", LIXO, { meuMotivo: true });
+    const outro = bicho("rattata", LIXO);
+    const r = planejar([meu, outro], [especie("rattata")]);
+
+    expect(r.soltos.map((s) => s.id)).not.toContain(meu.id);
+    expect(r.guardados.find((g) => g.id === meu.id)?.motivo.key).toBe("faxina.preso.meuMotivo");
+  });
+
+  it("o motivo da PESSOA vence os motivos do jogo", () => {
+    // Um sortudo que ela tambem marcou tem dois motivos validos pra ficar de
+    // fora. O que a tela mostra e o dela: a razao de ele estar fora da lista e
+    // a decisao dela, e nao uma propriedade do bicho.
+    const b = bicho("dragonite", LIXO, { lucky: true, meuMotivo: true });
+    const r = planejar([b], [especie("dragonite")]);
+    expect(r.guardados[0]?.motivo.key).toBe("faxina.preso.meuMotivo");
+  });
+
   it("NUNCA sugere espécie que o dataset não conhece", () => {
     // Base customizada, forma regional fora do índice, export antigo. Sem stats
     // base não há veredito nem stat product — e a saída honesta é a que não

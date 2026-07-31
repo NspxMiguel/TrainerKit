@@ -457,8 +457,19 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
      * nao tirava nada da vista, e um botao que nao muda a tela e o mesmo que
      * botao que nao existe.
      */
+    /*
+     * E o que a pessoa DISCORDOU sai junto.
+     *
+     * "e tem q ter um botão, discordo..." — o veredito continua calculado e
+     * continua visível na ficha; o que ele perde é o direito de COBRAR. Deixar
+     * na fila da home um bicho que a pessoa já disse que vai ficar é insistir,
+     * e insistir é dizer que a razão do app vale mais que a dela.
+     */
     const agir = decided
-      .filter((d) => !d.feito && PEDEM_ACAO.includes(d.verdict.action))
+      .filter(
+        (d) =>
+          !d.feito && d.owned.meuMotivo == null && PEDEM_ACAO.includes(d.verdict.action),
+      )
       .sort(
         (a, b) =>
           PEDEM_ACAO.indexOf(a.verdict.action) - PEDEM_ACAO.indexOf(b.verdict.action) ||

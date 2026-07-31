@@ -15,6 +15,26 @@ import type { IVs } from "@trainerkit/core";
  * nao depende do humor do browser.
  */
 
+/**
+ * Por que a pessoa fica com um Pokémon que o app mandaria soltar.
+ *
+ * São três porque foram três os exemplos que ele deu, e eles cobrem categorias
+ * diferentes de razão — não é uma lista de gostos:
+ *
+ *   `gosto`   — afeto e coleção. "vai q o cara gosta do pokemon q quer
+ *               colecionar?"
+ *   `uso`     — uso real que o app não mede (raide com amigos, ginásio, um
+ *               moveset que ele gosta de jogar).
+ *   `desafio` — regra que a pessoa se impôs. "vai q ele ta num desafio e quer
+ *               usa o pokemon pra fazer reid e ponto final?"
+ *
+ * Guardar QUAL motivo, e não um booleano, é o que deixa a tela devolver a frase
+ * dela em vez de um "ignorado" — e é o que permitiria, um dia, a faxina
+ * agrupar por motivo. Um booleano jogaria fora a única parte que o app não
+ * consegue recalcular sozinho.
+ */
+export type MeuMotivo = "gosto" | "uso" | "desafio";
+
 export interface OwnedPokemon {
   id: string;
   speciesId: string;
@@ -53,6 +73,26 @@ export interface OwnedPokemon {
    * não decide — ele pede o IV, que é a resposta honesta.
    */
   ivDesconhecido?: boolean;
+  /**
+   * "Eu discordo — fico com ele", e o motivo que a pessoa deu.
+   *
+   * ⚠️ Isto existe porque o app estava errado sobre o que ele sabe.
+   *
+   * "e tem q ter um botão, discordo... vai q o cara gosta do pokemon q quer
+   * colecionar? vai q ele ta num desafio e quer usa o pokemon pra fazer reid e
+   * ponto final? pense em tudo isso..."
+   *
+   * O motor decide com o que dá pra calcular: IV, stats, liga, custo. Gostar de
+   * um bicho, colecionar uma linha inteira, jogar um desafio de tipo único —
+   * nada disso é calculável, e nada disso é menos válido que um stat product.
+   * Um app que só sabe insistir está dizendo que a razão dele vale mais que a
+   * da pessoa.
+   *
+   * Marcado, o veredito continua sendo CALCULADO e continua visível — o que
+   * muda é que ele para de COBRAR: sai da fila da home e nunca aparece na
+   * faxina. A conta não é escondida, só deixa de mandar.
+   */
+  meuMotivo?: MeuMotivo | null;
   /**
    * A qual coleção este Pokémon pertence.
    *
@@ -290,6 +330,18 @@ export async function removerVarios(ids: readonly string[]): Promise<OwnedPokemo
 export async function restaurar(linhas: readonly OwnedPokemon[]): Promise<void> {
   if (linhas.length === 0) return;
   await db.pokemon.bulkPut([...linhas]);
+  emit();
+}
+
+/**
+ * "Discordo, fico com ele" — ou desfaz.
+ *
+ * `null` devolve o Pokémon à fila normal. Não apaga nada mais: o veredito
+ * continua sendo calculado o tempo todo, e é isso que faz o botão ser
+ * reversível de graça.
+ */
+export async function setMeuMotivo(id: string, motivo: MeuMotivo | null): Promise<void> {
+  await db.pokemon.update(id, { meuMotivo: motivo });
   emit();
 }
 

@@ -59,6 +59,16 @@ export interface BichoFaxina {
   shadow: boolean;
   /** "eu tenho esse", sem IV medido. Ver `OwnedPokemon.ivDesconhecido`. */
   ivDesconhecido: boolean;
+  /**
+   * A pessoa já disse que fica com este, e o app aceitou.
+   *
+   * ⚠️ Sem isto, a faxina desfaria a decisão dela pelas costas: o veredito
+   * continua dizendo "transferir" por baixo, e uma lista em lote que só lê o
+   * veredito devolveria o bicho pré-marcado numa tela onde 20 outros também
+   * estão. É o único lugar do app em que ignorar esta marca custaria um
+   * Pokémon.
+   */
+  meuMotivo?: boolean;
 }
 
 /** A espécie, no mínimo que a faxina precisa saber. */
@@ -357,6 +367,15 @@ function motivoIntocavel(b: BichoFaxina, especie: EspecieFaxina): Message | null
    * lista de transferência "sem dúvida" cheia de Pokémon que podem ser 100% —
    * e pré-marcada. É o pior defeito que este arquivo poderia ter.
    */
+  /*
+   * A decisão DELA vem antes de todas as minhas.
+   *
+   * Ela é a primeira da lista de propósito: se a pessoa já disse que fica com
+   * este bicho, nenhum outro motivo precisa ser calculado nem mostrado. "É
+   * sortudo" seria verdade e seria uma resposta pior — a razão de ele estar
+   * fora da lista é ela, não o jogo.
+   */
+  if (b.meuMotivo) return msg("faxina.preso.meuMotivo");
   if (b.ivDesconhecido) return msg("faxina.preso.semIv");
   // Sortudo custa metade da poeira pra subir e não volta a ser trocado. Mesmo
   // ruim, ele é uma vaga barata de nível 50 que não se recompra.
