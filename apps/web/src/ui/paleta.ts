@@ -72,57 +72,62 @@ const CORES = tabela as unknown as Record<string, Entrada>;
  * fixa, e esticar 3× mostra o pixel. Melhor um bicho pequeno nítido que um
  * grande borrado.
  */
+export interface Quadro {
+  /** Largura da silhueta, em fração da arte. */
+  larg: number;
+  /** Altura da silhueta, em fração da arte. */
+  alt: number;
+  /** Onde a silhueta começa no topo, em fração da arte. */
+  topo: number;
+  /** Centro horizontal da silhueta, em fração da arte. `0.5` = centrada. */
+  centroX: number;
+}
+
+/**
+ * As medidas da silhueta dentro da arte. **A conta de layout fica no CSS.**
+ *
+ * ⚠️ Esta função já devolveu `escala` e `deslocaY` prontos, e isso estava
+ * errado de um jeito que só apareceu varrendo as 1.142.
+ *
+ * O erro: pra calcular a escala eu precisava saber quanta largura sobrava na
+ * caixa, e assumi que sobrava o mesmo que a altura — ou seja, tratei a caixa
+ * como quadrada. Ela não é: no aparelho medido tem 339×237. Resultado: **527
+ * espécies, 46% do total, saíam menores do que cabiam**, porque eu limitava a
+ * largura contra 237px em vez de 339. Iron Hands aparecia com 158px de altura
+ * quando cabiam 224.
+ *
+ * Não dava pra consertar assando `339/237` aqui: essa proporção muda com o
+ * aparelho e com a altura que a coluna deu ao hero, e um número fixo passaria a
+ * ESTOURAR a largura num iPhone mais largo.
+ *
+ * Então a conta mudou de lugar. Aqui saem só os fatos medidos da arte; o CSS
+ * resolve a geometria com unidades de contêiner (`cqw`/`cqh`), que são a
+ * largura e a altura REAIS da caixa naquele aparelho, naquele momento.
+ *
+ * "testo com todos os pokemons ja? procura tudo po" — era isso que faltava
+ * procurar.
+ */
 export function enquadrar(
   spriteId: number | null,
   /**
-   * ⚠️ A FONTE IMPORTA, e ignorá-la reintroduz o defeito que isto conserta.
-   *
-   * "lembresse, testar com pokemons renders 3d e arte oficial."
-   *
-   * As mesmas espécies vêm enquadradas de formas diferentes em cada fonte: a
-   * arte oficial é ilustração com margem variável, e os renders 3D do Pokémon
-   * HOME são capturas de modelo, mais cheias no quadro. Usar a caixa de uma
-   * pra posicionar a outra deslocaria o bicho — só que agora por culpa minha,
-   * e não do enquadramento original.
-   *
-   * Sem imagem nenhuma (monograma) nada disso se aplica: quem chama passa
-   * `null` e recebe a identidade.
+   * A fonte muda o enquadramento: a arte oficial é ilustração com margem
+   * variável, os renders 3D do Pokémon HOME são capturas mais cheias no quadro.
+   * Medido, Bulbasaur ocupa 85% da altura numa e 71% na outra.
    */
   fonte: "artwork" | "3d" = "artwork",
-): { escala: number; deslocaY: number } {
+): Quadro {
   const e = spriteId == null ? undefined : CORES[String(spriteId)];
-  // Cai na caixa da arte oficial quando a espécie não tem render 3D — várias
-  // formas regionais e cosméticas não têm. Enquadrar com a caixa vizinha erra
-  // pouco; não enquadrar erra o que ele apontou no Charizard.
+  // Cai na caixa da arte oficial quando a espécie não tem render 3D — são 2 das
+  // 1.142. Enquadrar com a caixa vizinha erra pouco; não enquadrar erra o que
+  // ele apontou no Charizard.
   const b = fonte === "3d" ? (e?.h ?? e?.b) : e?.b;
-  if (!b) return { escala: 1, deslocaY: 0 };
+  if (!b) return { larg: 1, alt: 1, topo: 0, centroX: 0.5 };
 
-  const alturaJusta = b[3] - b[1];
-  const larguraJusta = b[2] - b[0];
-  if (alturaJusta <= 0 || larguraJusta <= 0) return { escala: 1, deslocaY: 0 };
+  const larg = b[2] - b[0];
+  const alt = b[3] - b[1];
+  if (larg <= 0 || alt <= 0) return { larg: 1, alt: 1, topo: 0, centroX: 0.5 };
 
-  // O quanto ampliar pra silhueta ocupar a caixa como se não houvesse folga.
-  // Limitado pelo eixo mais apertado, senão o bicho vaza pelas laterais.
-  const escala = Math.min(1.45, Math.min(1 / alturaJusta, 1 / larguraJusta));
-
-  /*
-   * ⚠️ ALINHA O TOPO DA SILHUETA, e não o centro dela.
-   *
-   * Centralizar deixava o rosto no meio da caixa — que é exatamente onde o nome
-   * passa. E quanto mais baixo e largo o bicho, mais o rosto subia pro centro:
-   * o Charizard, cuja silhueta ocupa 71% do PNG, ficava com a cara bem na
-   * linha do texto, enquanto o Dragonite (91%) não.
-   *
-   * Alinhando o topo, o rosto fica sempre na mesma altura, seja qual for a
-   * proporção do bicho, e o nome sempre cruza a metade de baixo. Os 5% são a
-   * respiração entre a cabeça e a borda de cima.
-   *
-   * A conta vale em fração da ALTURA DO ELEMENTO porque a arte é quadrada e a
-   * caixa é mais larga que alta: com `object-fit: contain` a imagem renderizada
-   * ocupa exatamente a altura, então fração da imagem e fração do elemento são
-   * a mesma coisa.
-   */
-  return { escala, deslocaY: (0.05 - b[1] * escala) * 100 };
+  return { larg, alt, topo: b[1], centroX: (b[0] + b[2]) / 2 };
 }
 
 export interface Paleta {

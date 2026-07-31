@@ -908,6 +908,19 @@
      que e por onde o texto sobe. */
   place-items: start stretch;
   padding: 0 18px;
+  /*
+   * ⚠️ CONTEINER DE TAMANHO: e o que deixa a conta de enquadramento acontecer
+   * aqui, com a largura e a altura REAIS da caixa.
+   *
+   * A conta vivia no JS e assumia que a caixa era quadrada. Nao e — 339×237 no
+   * aparelho medido — e por causa disso 527 especies (46%) sairam menores do
+   * que cabiam. Assar `339/237` no JS trocaria o defeito: num iPhone mais largo
+   * a proporcao muda e os bichos passariam a estourar a largura.
+   *
+   * Com `cqw`/`cqh` a proporcao e lida do elemento a cada renderizacao, em
+   * qualquer tela, sem medir nada em JS.
+   */
+  container-type: size;
   pointer-events: none;
 }
 
@@ -946,66 +959,61 @@
 }
 
 .tk-hero-art img {
-  width: 100%;
   /*
-   * ⚠️ 82% da caixa, ancorado no TOPO — e nao 100% centralizado.
+   * ⚠️ O LADO DA ARTE, resolvido pelo `min()` — nao por `object-fit` sozinho.
    *
-   * "esse layout vc testou pro charizard, mas e os outros pokemons?"
+   * `contain` puro encaixa o ARQUIVO na caixa, e a arte oficial tem margem
+   * diferente em cada especie: por isso o Charizard saia menor que o Dragonite.
+   * Aqui o alvo e a SILHUETA, e nao o arquivo.
    *
-   * Com 100%, todo sprite quadrado ou alto era limitado pela altura e ocupava a
-   * caixa inteira; `object-position` nao tinha folga pra usar, e o nome caia
-   * sempre no MEIO do bicho — no Bulbasaur, em cima dos olhos. Mudar a
-   * porcentagem de ancoragem nao movia um pixel, porque nao havia o que mover.
+   * As tres candidatas:
+   *   · `100cqw / larg` — a arte grande o bastante pra silhueta encher a largura
+   *   · `100cqh / alt`  — idem pra altura
+   *   · `100cqh * 1.5`  — o teto, que impede uma silhueta minuscula de ser
+   *     ampliada ate mostrar o pixel. So 20 das 1.142 chegam nele.
    *
-   * ⚠️ A cessao de 18% saiu: quem cria a folga agora e o enquadramento medido
-   * (`--tk-art-escala`), que e por espécie. Ceder altura no CSS era uma media
-   * que servia mal a todos — apertava quem ja estava justo e nao bastava pra
-   * quem tinha muita margem no PNG.
+   * `min()` escolhe a que cabe, exatamente como `contain` faria — so que
+   * medindo o bicho em vez do arquivo.
    */
+  --tk-lado: min(
+    calc(100cqw / var(--tk-art-larg, 1)),
+    calc(100cqh / var(--tk-art-alt, 1)),
+    calc(100cqh * 1.5)
+  );
+
   /*
-   * ⚠️ `!important` porque o `SpeciesTile` escreve `height: 100%` INLINE no modo
-   * `bare`, e estilo inline ganha de folha de estilo. Foi por isso que a
-   * primeira tentativa nao moveu nada — a regra estava certa e nunca chegou a
-   * valer. A regra irma logo acima (`.tk-hero-art > .tk-mono`) leva `!important`
-   * pelo mesmo motivo.
+   * ⚠️ `!important` nos quatro lados, e nao so na largura.
+   *
+   * O `SpeciesTile` escreve `inset: 0` INLINE no modo `bare`, e inline ganha de
+   * folha de estilo. Com `left: 0` e `right: 0` valendo junto de uma largura
+   * fixa, o navegador ignora o `right` e ancora a esquerda — o bicho saia
+   * empurrado pra fora da tela pela metade.
+   *
+   * Terceira vez que este mesmo estilo inline morde neste arquivo (antes na
+   * altura e no tamanho do selo). Anular os quatro de uma vez encerra a
+   * categoria em vez de remendar o lado que doeu hoje.
    */
-  height: 100% !important;
+  position: absolute;
+  left: 50% !important;
+  right: auto !important;
+  top: 0 !important;
+  bottom: auto !important;
+  width: var(--tk-lado) !important;
+  height: var(--tk-lado) !important;
+  max-width: none;
   object-fit: contain;
+
   /*
-   * ⚠️ A ESCALA E O DESLOCAMENTO VEM MEDIDOS DA ARTE, por espécie.
+   * Alinha o TOPO da silhueta a 5% da caixa, e o centro dela no meio.
    *
-   * A arte oficial nao enquadra os Pokemon igual: medido, a silhueta do
-   * Dragonite ocupa 91% da altura do PNG e a do Charizard 71%. Com
-   * `object-fit: contain` puro, quem e encaixado na caixa e o ARQUIVO — entao
-   * o Charizard saia 22% menor e mais alto que o Dragonite, e o nome batia em
-   * lugares diferentes em cada um.
-   *
-   * `--tk-art-escala` desfaz a folga da arte e `--tk-art-y` recentra a
-   * silhueta. Com os dois, todos ocupam o mesmo retangulo e uma unica posicao
-   * de nome vale pros 1.142 — que e o "sempre dar certo" que ele pediu.
-   *
-   * `transform-origin: top center` porque a ancoragem util e o topo: e de la
-   * que o rosto desce.
+   * Alinhar o topo, e nao o centro, e o que faz o rosto ficar sempre na mesma
+   * altura: centralizando, quanto mais baixo e largo o bicho, mais o rosto
+   * subia pro meio da caixa — que e exatamente onde o nome passa.
    */
-  transform: translateY(var(--tk-art-y, 0)) scale(var(--tk-art-escala, 1));
-  transform-origin: top center;
-  /*
-   * ⚠️ ANCORADO EM CIMA, e nao centralizado.
-   *
-   * `contain` centraliza no quadro, entao um bicho baixo e largo (Bulbasaur,
-   * Snorlax) desce ate o meio — bem onde ficam o nome e a frase. O Dragonite,
-   * que e alto, preenche o quadro e nunca mostrou isso.
-   *
-   * A 14% o rosto fica na parte de cima em qualquer proporcao, e o texto passa
-   * a cruzar o CORPO. Texto cruzando corpo e composicao; cruzando rosto e
-   * acidente — e a diferenca entre os dois nao esta no texto, esta em qual
-   * Pokemon calhou de estar em destaque.
-   *
-   * Medido: a 28% o nome ainda passava nos olhos do Bulbasaur, porque `contain`
-   * ajusta um bicho largo pela LARGURA e sobra altura de folga, que ele gasta
-   * descendo. Quanto mais achatado o Pokemon, mais fundo ele afunda.
-   */
-  object-position: 50% 14%;
+  transform: translate(
+    calc(-1 * var(--tk-art-cx, 0.5) * var(--tk-lado)),
+    calc(5cqh - var(--tk-art-topo, 0) * var(--tk-lado))
+  );
 }
 
 /*
