@@ -1141,6 +1141,33 @@
  */
 .tk-home > .tk-hero {
   flex: 1 1 auto;
+  /*
+   * ⚠️ PISO DE 46% DA TELA, e nao `min-height: 0`.
+   *
+   * Com zero, qualquer bloco alto que aparecesse embaixo comia a altura do
+   * hero — foi o que aconteceu quando o estado vazio entrou na home: o
+   * Eternatus virou uma sombra atras do nome, num hero de 265px.
+   *
+   * O `0` existia pra o hero poder encolher e a home nunca rolar. Mas ele pediu
+   * as duas coisas — "legal deixar ele grande" e "sem scroll na tela de inicio"
+   * — entao o piso tem que ser o maior que ainda CABE.
+   *
+   * ⚠️ Medido, e o piso VOLTOU A SER ZERO.
+   *
+   * Tentei 46svh e depois 38svh, e os dois faziam a home rolar (116px e 51px).
+   * Qualquer piso fixo aqui e um palpite sobre quanto os OUTROS blocos vao
+   * ocupar — e eles mudam: a fila de seloes, o estado vazio e os avisos tem
+   * alturas diferentes.
+   *
+   * Com zero, o hero fica com a sobra exata e a home nunca rola, por
+   * construcao. Ele fica grande porque o resto foi enxugado (acoes no tamanho
+   * do handoff, saudacao numa linha, vazio compacto) — e nao porque eu reservei
+   * um numero pra ele.
+   *
+   * O que fez o Eternatus sumir na tela dele nao foi a falta de piso: foi o
+   * estado vazio entrar com um BOTAO que repetia a acao principal, somando
+   * ~90px que agora nao existem mais.
+   */
   min-height: 0;
 }
 .tk-cta {
@@ -2039,4 +2066,10 @@
   .tk-ia-bolha {
     transition: none;
   }
+}
+
+/* Vazio sem acao e mais compacto: sem botao ele nao precisa do respiro que
+   separa a frase do alvo de toque, e na home cada pixel sai do Pokemon. */
+.tk-vazio[data-sem-acao] {
+  padding: 18px 16px 8px;
 }

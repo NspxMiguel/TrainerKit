@@ -32,7 +32,7 @@ export function Vazio({
   acao?: { label: string; onClick: () => void } | undefined;
 }) {
   return (
-    <div className="tk-vazio">
+    <div className="tk-vazio" data-sem-acao={acao ? undefined : true}>
       <span className="tk-vazio-tile" aria-hidden="true">
         ?
       </span>
