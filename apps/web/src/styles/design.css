@@ -150,7 +150,26 @@
    * Aqui fica so o que e do ITEM: a cor e o peso. O material e da lente.
    */
   flex: var(--tk-tab-ativo);
-  color: var(--tk-accent-fg);
+  /*
+   * ⚠️ A ABA ATIVA NÃO PODE SER MAIS FRACA QUE AS INATIVAS — e era.
+   *
+   * "botao ainda bugado", com a captura da barra: o ícone e o rótulo de
+   * "Ajustes" saem oliva claro sobre a pílula amarela, enquanto "Início" e
+   * "Pokédex" saem quase pretos sobre a barra. Medido: **12,4:1 nas inativas
+   * contra 5,15:1 na ativa**. Selecionar uma aba a fazia DESBOTAR.
+   *
+   * A causa é a mesma dos dois erros anteriores desta pílula, um nível acima: eu
+   * pintava o item ativo com `--tk-accent-fg`, que é a cor da espécie garantida
+   * contra o FUNDO DA PÁGINA — e o item ativo não está sobre a página, está
+   * sobre a própria pílula, que é mais clara. A garantia era contra a superfície
+   * errada.
+   *
+   * `--tk-aba-ativa` puxa essa cor na direção de `--tk-text` até ela ficar tão
+   * forte quanto as inativas. A matiz da espécie sobrevive (no claro vira um
+   * oliva escuro, não um cinza), e a cor de verdade continua na PÍLULA, que é
+   * onde não custa leitura.
+   */
+  color: var(--tk-aba-ativa, var(--tk-accent-fg));
 }
 
 .tk-tab[aria-current="page"] .tk-tab-label {
@@ -4309,6 +4328,9 @@
   --tk-barra-sombra: 0 12px 30px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.14);
   --tk-barra-tinta: 12%;
   --tk-indicador-forca: 26%;
+  /* No escuro a pílula ACENDE, então a cor da espécie já é a mais forte da
+     barra e quase não precisa ceder. */
+  --tk-aba-ativa: color-mix(in srgb, var(--tk-accent-fg, var(--tk-ultra-solid)) 74%, var(--tk-text));
 
   /* Cartões e botões secundários: base, quanto de espécie entra, e o relevo. */
   --tk-cartao-base: var(--tk-surface-2);
@@ -4367,6 +4389,10 @@
    */
   --tk-barra-tinta: 26%;
   --tk-indicador-forca: 42%;
+  /* No claro a conta é outra: `--tk-accent-fg-claro` tem luminância ≤ 0,146, e
+     sobre a pílula clara isso dá 4,4:1 — abaixo do mínimo e MUITO abaixo dos
+     18:1 das abas inativas. 34% é onde a ativa volta a ser a mais forte. */
+  --tk-aba-ativa: color-mix(in srgb, var(--tk-accent-fg, var(--tk-ultra-solid)) 34%, var(--tk-text));
   --tk-lente-fundo: #ffffff;
   --tk-lente-borda: rgba(16, 19, 25, 0.08);
   --tk-lente-luz-topo: rgba(255, 255, 255, 0.9);
@@ -4451,6 +4477,7 @@
 
     --tk-barra-tinta: 26%;
     --tk-indicador-forca: 42%;
+    --tk-aba-ativa: color-mix(in srgb, var(--tk-accent-fg, var(--tk-ultra-solid)) 34%, var(--tk-text));
     --tk-lente-fundo: #ffffff;
     --tk-lente-borda: rgba(16, 19, 25, 0.08);
     --tk-lente-luz-topo: rgba(255, 255, 255, 0.9);
