@@ -23,6 +23,7 @@ import { IconAlert, IconCamera, IconShield, IconSwords } from "../ui/Icons.tsx";
 import { InstallBanner } from "../ui/InstallBanner.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 import { enquadrar, usarPaleta } from "../ui/paleta.ts";
+import { TOM_VEREDITO as TONE } from "../ui/tomVeredito.ts";
 import { Colecoes } from "./Colecoes.tsx";
 import { GymPicks } from "./GymPicks.tsx";
 import { InstallGuide } from "./InstallGuide.tsx";
@@ -45,29 +46,6 @@ interface Props {
   onGo: (tab: "pokedex", intent?: PokedexIntent) => void;
 }
 
-/*
- * As cores de veredito, agora nos tokens do handoff.
- *
- * ⚠️ Duas estavam erradas, e o erro tinha significado: "Guardar" saia AZUL
- * (`--tk-info`) e "Transferir" saia VERMELHO (`--tk-dang`). O handoff define
- * Guardar em ambar e Transferir em cinza — e a escolha dele e melhor que a
- * minha por um motivo de produto, nao de gosto.
- *
- * Vermelho e a cor de perigo do app. Transferir um Pokemon nao e um erro nem um
- * risco: e uma recomendacao tranquila sobre um bicho que nao vale investimento.
- * Pintar de vermelho transformava um conselho rotineiro em alarme, e num app
- * cuja tese e DECIDIR por voce, assustar na decisao mais comum e o pior lugar
- * possivel pra errar o tom.
- *
- * Os tokens ja existiam desde o porte da paleta; eu simplesmente nao tinha
- * trocado quem os usa.
- */
-const TONE: Record<Action, string> = {
-  investir: "var(--tk-v-investir)",
-  evoluir: "var(--tk-v-evoluir)",
-  guardar: "var(--tk-v-guardar)",
-  transferir: "var(--tk-v-transferir)",
-};
 
 /**
  * O que a home mostra da colecao.

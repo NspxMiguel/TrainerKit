@@ -11,13 +11,7 @@ import {
   useCollection,
   type OwnedPokemon,
 } from "../storage/collection.ts";
-
-const TONE: Record<string, string> = {
-  investir: "var(--tk-succ)",
-  evoluir: "var(--tk-pri)",
-  guardar: "var(--tk-info)",
-  transferir: "var(--tk-dang)",
-};
+import { TOM_VEREDITO as TONE } from "./tomVeredito.ts";
 
 /**
  * O veredito, com o rastro atras.

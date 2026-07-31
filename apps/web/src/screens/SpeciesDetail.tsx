@@ -23,7 +23,12 @@ import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
 import { moveLabel, useLanguage, useShowTranslation } from "../i18n/language.ts";
 import { useT, type Key } from "../i18n/t.ts";
 import { useSetup } from "../onboarding/setup.ts";
-import { addPokemon, useCollection, type OwnedPokemon } from "../storage/collection.ts";
+import {
+  addPokemon,
+  removePokemon,
+  useCollection,
+  type OwnedPokemon,
+} from "../storage/collection.ts";
 import { typeColor, typeKey } from "../sprites/provider.ts";
 import { AssistantCard } from "../ui/AssistantCard.tsx";
 import { IconSwords } from "../ui/Icons.tsx";
@@ -130,6 +135,8 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
      caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
      escape volta a piscar, e so aquele. */
   const { saindo, fechar } = useFolha(onClose);
+  /* Tirar da colecao pede dois toques — ver o botao la embaixo. */
+  const [confirmandoTirar, setConfirmandoTirar] = useState(false);
 
   const [calcOpen, setCalcOpen] = useState(false);
   const [raidOpen, setRaidOpen] = useState(false);
@@ -477,6 +484,37 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
             nao pede pra calcular de novo. */}
         {salvo ? t("species.seeMyIV") : t("species.calcIV")}
       </button>
+
+      {/*
+        TIRAR DA COLECAO — e agora e AQUI, com confirmacao.
+
+        Antes era um "✕" na linha da lista: um toque, sem confirmar, permanente,
+        e sem servidor nenhum pra desfazer. A mesma tela que pede dois toques
+        pra apagar uma COLECAO apagava um Pokemon no primeiro — e num alvo de
+        32px encostado no chip de veredito, que e onde o dedo passa.
+
+        Mudar de lugar resolve tres coisas de uma vez: a acao destrutiva ganha o
+        segundo toque, a linha da lista devolve 44px (o "Dragonite" truncava em
+        "Dragoni…" por 1 pixel), e ela passa a viver na tela DAQUELE Pokemon —
+        que e onde a pessoa ja esta olhando pra ele, e nao numa fila onde a
+        linha de cima e igual a de baixo.
+      */}
+      {salvo && (
+        <button
+          type="button"
+          className="tk-btn tk-btn--ghost tk-btn--block"
+          style={{ marginTop: 10, color: confirmandoTirar ? "var(--tk-dang)" : undefined }}
+          onClick={() => {
+            if (!confirmandoTirar) {
+              setConfirmandoTirar(true);
+              return;
+            }
+            void removePokemon(salvo.id).then(() => fechar());
+          }}
+        >
+          {confirmandoTirar ? t("collection.removeSure") : t("collection.remove")}
+        </button>
+      )}
 
 
       {/*

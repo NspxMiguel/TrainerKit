@@ -2288,3 +2288,146 @@
  * folhear sem antes achar um Pokemon por busca ou por foto. Isso virou o botao
  * "Folhear a Pokédex" no estado ocioso, e so isso.
  */
+
+/* ─────────────────────────────────────────────── "Meus" em cartão único ── */
+
+/*
+ * ⚠️ UM cartão para a lista inteira, e não um cartão por Pokémon.
+ *
+ * É o §3 do handoff ("Meus: lista em cartão único, raio 28"), e a razão é de
+ * leitura, não de estilo: com um cartão por linha cada Pokémon ganhava borda
+ * própria, e a tela virava uma pilha de caixas iguais onde o olho conta caixas
+ * em vez de ler nomes. Num cartão só, com um fio entre as linhas, a coleção lê
+ * como UMA lista — que é o que ela é.
+ *
+ * Na GRADE nada disso vale: lá a moldura de cada célula é o que separa um bicho
+ * do outro. Por isso a classe só entra na vista de lista.
+ */
+.tk-meus {
+  padding: 0;
+  overflow: hidden;
+}
+
+/*
+ * ⚠️ As linhas perdem cartão, borda e raio — o cartão agora é o pai.
+ *
+ * Sem isto sobrariam caixas dentro de caixa: o `.tk-owned` do App.css continua
+ * declarando `background`, `border` e `border-radius`, e camada nenhuma
+ * resolveria isso porque não há disputa — o design.css simplesmente nunca
+ * declarou essas três. Mesma armadilha de cascata que já mordeu três vezes
+ * neste arquivo, e a lição é sempre a mesma: declarar o que se quer anular.
+ */
+.tk-meus .tk-owned {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  /* 14px em vez dos 12 do token: o cartão único ficou mais alto e comporta o ar
+     que o handoff desenha entre as linhas. */
+  padding: 14px 16px;
+  column-gap: 12px;
+}
+
+/* O fio entre linhas — e só ENTRE, nunca no topo nem no pé do cartão. */
+.tk-meus .tk-owned + .tk-owned {
+  border-top: 1px solid var(--tk-sep);
+}
+
+/*
+ * O selo em 46px, e o `!important` não é preguiça.
+ *
+ * O `SpeciesTile` escreve a medida INLINE (`size={48}` vira `width`/`height` no
+ * atributo `style`), e inline ganha de folha de estilo. É o mesmo estilo inline
+ * que já mordeu três vezes no hero — aqui a categoria já é conhecida, então
+ * anular direto é mais honesto que descobrir de novo.
+ */
+.tk-meus .tk-owned > .tk-mono {
+  width: 46px !important;
+  height: 46px !important;
+  border-radius: 14px;
+  grid-row: 1 / 4;
+}
+
+.tk-meus .tk-owned-name {
+  font: 600 16px/1.3 var(--tk-font);
+}
+
+.tk-meus .tk-owned-meta {
+  font: 400 12.5px/1.4 var(--tk-font);
+  /* Só até a coluna do veredito: a linha de números não passa por baixo dele. */
+  grid-column: 2 / 4;
+}
+
+/*
+ * A terceira linha: a troca, em âmbar.
+ *
+ * "Quando houver ganho em trocar, uma terceira linha em âmbar: `↻ Troca: 78% de
+ * vir melhor` (texto, NÃO chip — chip quebra em 3 linhas)."
+ *
+ * Âmbar porque não é veredito. Verde, azul e cinza são as cores das quatro
+ * decisões; usar uma delas aqui faria a troca competir com o veredito em vez de
+ * acompanhá-lo. A troca é uma saída A MAIS, não uma quinta ordem.
+ */
+.tk-meus .tk-owned-troca {
+  grid-column: 2 / 5;
+  grid-row: 3;
+  margin-top: 2px;
+  font: 600 12.5px/1.35 var(--tk-font);
+  color: var(--tk-warn);
+}
+
+/*
+ * O chip de veredito à direita, com a forma do handoff.
+ *
+ * Fica na primeira linha, alinhado ao topo junto com o nome — e não no meio
+ * vertical do cartão, que é onde ele cairia sozinho quando a terceira linha
+ * aparece. Um chip que muda de altura conforme o Pokémon ter ou não ganho de
+ * troca faria a coluna da direita dançar de linha em linha.
+ */
+.tk-meus .tk-owned-act {
+  align-self: start;
+  padding: 6px 9px;
+  border-radius: 14px;
+  font: 800 11.5px/1.25 var(--tk-font);
+  /* Sem espacamento entre letras: os 0,02em custavam ~4px na palavra mais
+     longa, e 4px aqui e a diferenca entre "Crabominable" caber e truncar. */
+  letter-spacing: 0;
+  text-transform: uppercase;
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  /*
+   * ⚠️ O CHIP QUEBRA EM DUAS LINHAS EM VEZ DE COMER O NOME.
+   *
+   * "Эволюционировать" em versalete mede 169px numa linha de 297 — sobravam 14
+   * para o nome do Pokemon, e 1.422 dos 2.466 nomes truncavam. Em russo a lista
+   * inteira virava reticências.
+   *
+   * Mesma família do defeito que eu já tinha achado na fila da home
+   * ("ПРОКАЧА…"): rótulo de veredito é a versão acessível da cor, então cortá-lo
+   * tira a única informação que quem enxerga mal cor tem. Cortar o NOME é igual
+   * de ruim — nome é identidade.
+   *
+   * Com teto e quebra, ninguém corta: o chip fica mais alto, que é a dimensão
+   * onde há espaço sobrando. `border-radius` deixa de ser pílula porque pílula
+   * de duas linhas fica com a cara errada.
+   */
+  max-width: 108px;
+  white-space: normal;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* O "○"/"✓" precisa de ar: com `letter-spacing: 0` ele encostava na palavra e
+   saía "○TRANSFERIR", que lê como uma palavra só. */
+.tk-meus .tk-owned-act .tk-done-mark {
+  margin-right: 4px;
+}
+
+.tk-meus .tk-owned-act[data-done] {
+  background: var(--tk-surface-2);
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 600;
+}
+
+.tk-meus .tk-owned-remove {
+  align-self: start;
+}
