@@ -10,6 +10,7 @@ export const JA: Dict = {
   "common.close": "閉じる",
   "common.loading": "読み込み中…",
   "common.loadingGameData": "ゲームデータを読み込み中…",
+  "common.save": "保存",
   "common.cancel": "キャンセル",
   "common.remove": "{name} を削除",
   "common.optional": "（任意）",

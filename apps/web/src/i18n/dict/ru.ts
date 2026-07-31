@@ -10,6 +10,7 @@ export const RU: Dict = {
   "common.close": "Закрыть",
   "common.loading": "Загрузка…",
   "common.loadingGameData": "Загрузка данных игры…",
+  "common.save": "Сохранить",
   "common.cancel": "Отмена",
   "common.remove": "Убрать {name}",
   "common.optional": "(необязательно)",

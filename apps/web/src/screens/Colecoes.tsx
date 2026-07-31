@@ -33,6 +33,18 @@ export function Colecoes({ onClose }: { onClose: () => void }) {
   const [criando, setCriando] = useState(false);
   const [nome, setNome] = useState("");
   const [confirmando, setConfirmando] = useState<string | null>(null);
+  /*
+   * ⚠️ Renomear com campo PROPRIO, e nao `prompt()`.
+   *
+   * O `prompt` do navegador bloqueia a pagina inteira, ignora o tema, ignora o
+   * idioma do app (os botoes vem no idioma do SISTEMA) e, num PWA instalado no
+   * iOS, aparece com a cara do Safari no meio de uma tela que nao e o Safari.
+   *
+   * Achei rodando um varredor que clica em todos os botoes: ele parou aqui.
+   * Um dialogo que trava um robo trava uma pessoa do mesmo jeito.
+   */
+  const [renomeando, setRenomeando] = useState<string | null>(null);
+  const [nomeEdit, setNomeEdit] = useState("");
 
   const recarregar = async () => {
     /*
@@ -113,16 +125,46 @@ export function Colecoes({ onClose }: { onClose: () => void }) {
               */}
             </button>
 
-            <button
-              type="button"
-              className="tk-row-acao"
-              onClick={() => {
-                const novo = prompt(t("colecoes.rename"), c.nome);
-                if (novo !== null) void renomearColecao(c.id, novo).then(recarregar);
-              }}
-            >
-              {t("colecoes.rename")}
-            </button>
+            {renomeando === c.id ? (
+              <>
+                <input
+                  className="tk-input tk-row-input"
+                  value={nomeEdit}
+                  onChange={(e) => setNomeEdit(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      void renomearColecao(c.id, nomeEdit).then(recarregar);
+                      setRenomeando(null);
+                    }
+                    if (e.key === "Escape") setRenomeando(null);
+                  }}
+                  autoFocus
+                  maxLength={24}
+                  aria-label={t("colecoes.rename")}
+                />
+                <button
+                  type="button"
+                  className="tk-row-acao"
+                  onClick={() => {
+                    void renomearColecao(c.id, nomeEdit).then(recarregar);
+                    setRenomeando(null);
+                  }}
+                >
+                  {t("common.save")}
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                className="tk-row-acao"
+                onClick={() => {
+                  setNomeEdit(c.nome);
+                  setRenomeando(c.id);
+                }}
+              >
+                {t("colecoes.rename")}
+              </button>
+            )}
 
             {/*
               Apagar só aparece quando há mais de uma, e nunca sem confirmar.
@@ -131,7 +173,7 @@ export function Colecoes({ onClose }: { onClose: () => void }) {
               destrutiva desta tela, e sem servidor não existe desfazer. O
               segundo toque é o que separa "quis apagar" de "encostou no botão".
             */}
-            {colecoes.length > 1 && (
+            {colecoes.length > 1 && renomeando !== c.id && (
               <button
                 type="button"
                 className="tk-row-acao tk-row-acao--perigo"

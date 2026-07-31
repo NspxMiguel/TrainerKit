@@ -10,6 +10,7 @@ export const KO: Dict = {
   "common.close": "닫기",
   "common.loading": "불러오는 중…",
   "common.loadingGameData": "게임 데이터를 불러오는 중…",
+  "common.save": "저장",
   "common.cancel": "취소",
   "common.remove": "{name} 삭제",
   "common.optional": "(선택)",

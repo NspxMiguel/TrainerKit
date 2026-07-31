@@ -22,6 +22,7 @@ const EN = {
   "common.close": "Close",
   "common.loading": "Loading…",
   "common.loadingGameData": "Loading game data…",
+  "common.save": "Save",
   "common.cancel": "Cancel",
   "common.remove": "Remove {name}",
   "common.optional": "(optional)",
