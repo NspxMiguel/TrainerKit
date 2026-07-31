@@ -74,8 +74,23 @@
    *
    * Cobrado especie por especie no `paleta.test.ts`, nos dois temas.
    */
-  --tk-text-2: rgba(235, 238, 245, 0.65);
-  --tk-text-3: rgba(235, 238, 245, 0.65);
+  /*
+   * ⚠️ 0,72 NO ESCURO, e 0,65 no claro — os dois não são mais o mesmo número.
+   *
+   * Eram 0,65 dos dois lados, e a nota acima explica de onde veio: "no claro a
+   * hierarquia de três degraus não cabe acima de 4,5:1". Verdade no claro; no
+   * escuro a conta é outra, porque o cartão leva 14% da cor da espécie e isso
+   * empurra o fundo pra CIMA — na direção do texto claro, não contra ele.
+   *
+   * Medido na varredura ao vivo, no pior caso do degradê da página: as legendas
+   * de 12px de "Imagens" e os segmentos inativos do "Assistente" ficavam entre
+   * 3,91 e 4,21:1. 0,72 leva os dois acima de 4,5.
+   *
+   * E não custa hierarquia nenhuma: `--tk-text-2` e `--tk-text-3` já tinham o
+   * MESMO valor. Os três degraus que a nota antiga defendia eram dois.
+   */
+  --tk-text-2: rgba(235, 238, 245, 0.72);
+  --tk-text-3: rgba(235, 238, 245, 0.72);
 
   --tk-surface: rgba(255, 255, 255, 0.05);
   --tk-surface-2: rgba(255, 255, 255, 0.06);

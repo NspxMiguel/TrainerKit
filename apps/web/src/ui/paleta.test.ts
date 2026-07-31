@@ -80,7 +80,10 @@ function sobrepor(tinta: [number, number, number], alfa: number, fundo: string):
  */
 const LEGENDA = {
   claro: { tinta: [22, 24, 29] as [number, number, number], alfa: 0.65 },
-  escuro: { tinta: [235, 238, 245] as [number, number, number], alfa: 0.65 },
+  /* 0,72 no escuro: ver a nota em `--tk-text-3` no `tokens.css`. O cartão tingido
+     empurra o fundo NA DIREÇÃO do texto claro, então lá o mesmo 0,65 do claro
+     rendia menos — medido entre 3,91 e 4,21 nas legendas de 12px. */
+  escuro: { tinta: [235, 238, 245] as [number, number, number], alfa: 0.72 },
 };
 
 /**

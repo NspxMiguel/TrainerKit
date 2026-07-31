@@ -3653,7 +3653,9 @@
 
 .tk-lista-radio-item[data-on] {
   font-weight: 700;
-  color: var(--tk-ultra-fg);
+  /* `-strong` porque esta linha pousa num cartão tingido pela espécie: a
+     variante normal dava 3,66:1 no escuro. */
+  color: var(--tk-ultra-fg-strong);
 }
 
 .tk-lista-radio-glifo {
@@ -4193,7 +4195,10 @@
 /* A linha destrutiva não ganha selo colorido — ela ganha o rótulo em vermelho.
    Um selo bonito ao lado de "Apagar tudo" convida ao toque. */
 .tk-row[data-tone="danger"] .tk-row-label {
-  color: var(--tk-dang);
+  /* `-fg` pelo mesmo motivo dos links: `--tk-dang` é a cor de preenchimento do
+     botão destrutivo, e como TEXTO sobre o cartão tingido dá 4,31:1 no escuro —
+     abaixo do mínimo, justamente na linha que apaga tudo. */
+  color: var(--tk-dang-fg);
 }
 
 .tk-row[data-tone="danger"] .tk-row-selo {

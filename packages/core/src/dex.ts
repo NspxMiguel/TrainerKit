@@ -22,6 +22,32 @@ import type { BaseStats } from "./types.js";
  *
  * Este modulo devolve as PARTES em dados, nunca frases prontas: quem monta a
  * frase e a camada de idioma, porque o app fala dez.
+ *
+ * ── O que a pesquisa achou, e a UNICA coisa que falta ────────────────────────
+ *
+ * "PESQUISA COMO A POKEDEX FUNCIONA NOS JOGOS, FILMES E SERIES PRA TU VER."
+ * Pesquisado (julho/2026). O resultado, e o que ele muda aqui:
+ *
+ *  · Nos JOGOS a ficha e categoria + altura + peso + grito + o texto. Altura e
+ *    peso ja entram (`DexMode` monta com `heightDm`/`weightHg`); o texto e a
+ *    obra escrita que este arquivo decidiu nao copiar.
+ *  · Na SERIE o aparelho abre SEMPRE pela categoria: "Bulbasaur, o Pokemon
+ *    Semente." E a assinatura da locucao — a frase que qualquer pessoa reconhece
+ *    de ouvido. Depois vem o resto, na ordem que a `locucao` do `DexMode` ja usa.
+ *  · O ROTOM Dex conversa e tem personalidade propria. Isso o app ja faz, e pela
+ *    bolinha da IA.
+ *
+ * ⚠️ FALTA A CATEGORIA, e ela e uma DECISAO DELE, nao minha.
+ *
+ * O genus ("Pokemon Semente", "Pokemon Chama") nao esta no GAME_MASTER — viria
+ * da PokeAPI, que ja e fonte declarada do app pras imagens. Sao uma ou duas
+ * palavras por especie, mais perto de um nome que de um paragrafo, e e o que
+ * falta pra locucao soar como a da serie em vez de um relatorio.
+ *
+ * Mas continua sendo texto de propriedade da TPC, e este arquivo tem um
+ * compromisso escrito de nao embarcar texto deles. Quebrar esse compromisso pra
+ * ganhar duas palavras e escolha de quem assume o risco — e o risco e dele, nao
+ * meu. Ate ele decidir, a locucao segue sem categoria.
  */
 
 export interface DexEntryInput {
