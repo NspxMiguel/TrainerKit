@@ -3110,3 +3110,29 @@
   background-image: linear-gradient(var(--tk-succ-soft), var(--tk-succ-soft));
   border-top-color: var(--tk-succ-line);
 }
+
+/*
+ * O botão principal NA COR DO POKÉMON.
+ *
+ * "e tbm roxo? nao tem nada haver com a cor do pokemon. as cores do app sao
+ * moldadas com a cor do pokemon lembra?"
+ *
+ * A regra antiga — violeta é AÇÃO DO APP, cor do tipo é CONTEÚDO — continua
+ * valendo nas telas do app (Ajustes, backup, instalar). Ela para de valer numa
+ * tela que é SOBRE UM POKÉMON: ali o botão principal é a ação daquele bicho, e
+ * um violeta genérico no meio de uma ficha inteira tingida lê como peça de
+ * outro app. O hero da home já fazia certo; a ficha não.
+ *
+ * ⚠️ A tinta vem de `--tk-accent-ink`, escolhida por LUMINÂNCIA em `paleta.ts`
+ * e cobrada espécie por espécie no `paleta.test.ts`. Branco fixo aqui daria
+ * 1,98:1 no laranja do Dragonite — é literalmente o defeito que fez aquele
+ * arquivo de teste existir.
+ */
+.tk-btn--especie {
+  background: var(--tk-accent, var(--tk-ultra-solid));
+  color: var(--tk-accent-ink, #fff);
+  border: 0;
+  box-shadow:
+    0 8px 24px color-mix(in srgb, var(--tk-accent, #6e4bff) 40%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 22%);
+}

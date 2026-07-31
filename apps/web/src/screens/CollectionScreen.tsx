@@ -61,6 +61,9 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
       if (!s) return { owned, species: null, verdict: null };
 
       const verdict = decide({
+        // Sem isto a lista dizia "Transferir" pra quem entrou por "eu tenho
+        // esse" — lendo como medidos os zeros que o tipo exige.
+        ivDesconhecido: owned.ivDesconhecido === true,
         name: s.name,
         baseStats: s.baseStats,
         ivs: owned.ivs,

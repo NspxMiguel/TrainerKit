@@ -29,9 +29,10 @@ function species(id: string): Species {
   return s;
 }
 
-function base(id: string, ivs: { atk: number; def: number; hp: number }, extra = {}) {
+/** A entrada montada, sem decidir — pra quem precisa acrescentar campos. */
+function comum(id: string, ivs: { atk: number; def: number; hp: number }) {
   const s = species(id);
-  return decide({
+  return {
     name: s.name,
     baseStats: s.baseStats,
     ivs,
@@ -40,8 +41,11 @@ function base(id: string, ivs: { atk: number; def: number; hp: number }, extra =
     levelCap: data.version.levelCap,
     evolvesInto: s.evolvesInto,
     candyToEvolve: s.evolvesInto[0] ? (s.candyToEvolve[s.evolvesInto[0]] ?? null) : null,
-    ...extra,
-  });
+  };
+}
+
+function base(id: string, ivs: { atk: number; def: number; hp: number }, extra = {}) {
+  return decide({ ...comum(id, ivs), ...extra });
 }
 
 describe("motor de veredito", () => {
@@ -88,6 +92,56 @@ describe("motor de veredito", () => {
       expect(v.signals.length).toBeGreaterThan(0);
       expect(v.confidence).toBeGreaterThan(0);
       expect(v.confidence).toBeLessThanOrEqual(1);
+    }
+  });
+
+  it("SEM IV, nao decide — pede o IV, e nao inventa confianca", () => {
+    /*
+     * ⚠️ O caso mais caro do motor, e ele ja tinha custado uma contradicao na
+     * cara do usuario.
+     *
+     * O guarda existia SO na tela inicial, que montava um veredito a mao com
+     * `action: "investir"`. Resultado: a home escrevia "Falta o IV pra eu
+     * decidir" com um botao INVESTIR do lado, e a ficha da especie — que nao
+     * tinha guarda nenhum — respondia "Transferir · IV 0 de 45 · confianca
+     * 65%" pro MESMO Bulbasaur.
+     *
+     * "aq diz investir e no outro diz transferir..."
+     *
+     * Os zeros existem porque o tipo exige tres numeros. Le-los como medidos e
+     * o pior erro possivel neste app: sai "Transferir" com confianca cheia pra
+     * um bicho que pode ser 100%.
+     */
+    const zerado = { atk: 0, def: 0, hp: 0 };
+    for (const id of ["bulbasaur", "machamp", "mewtwo", "magikarp"]) {
+      const v = decide({ ...comum(id, zerado), ivDesconhecido: true });
+      expect(v.action).toBe("descobrir");
+      expect(v.reason.key).toBe("verdict.needIv");
+      // Sem regra nenhuma nao ha rastro NEM barra: confianca e concordancia
+      // entre regras, e aqui nenhuma rodou.
+      expect(v.signals).toEqual([]);
+      expect(v.confidence).toBe(0);
+    }
+  });
+
+  it("o mesmo Pokemon sem IV da a MESMA resposta em qualquer chamada", () => {
+    // A contradicao entre telas so foi possivel porque cada uma resolvia o caso
+    // do seu jeito. Com o guarda no motor, "chamar de outro lugar" deixou de
+    // ser uma variavel.
+    const a = decide({ ...comum("bulbasaur", { atk: 0, def: 0, hp: 0 }), ivDesconhecido: true });
+    const b = decide({ ...comum("bulbasaur", { atk: 15, def: 15, hp: 15 }), ivDesconhecido: true });
+    expect(a.action).toBe(b.action);
+    expect(a.reason.key).toBe(b.reason.key);
+  });
+
+  it("com IV informado, `descobrir` NUNCA aparece", () => {
+    // O outro lado da trava: a quinta acao e so pro caso sem dado. Se ela
+    // vazar pro caminho normal, o app para de decidir.
+    for (const id of ["machamp", "blissey", "magikarp", "mewtwo", "smeargle"]) {
+      for (const iv of [0, 7, 15]) {
+        const v = base(id, { atk: iv, def: iv, hp: iv });
+        expect(v.action).not.toBe("descobrir");
+      }
     }
   });
 

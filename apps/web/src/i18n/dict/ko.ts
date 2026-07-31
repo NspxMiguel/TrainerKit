@@ -26,6 +26,7 @@ export const KO: Dict = {
   "action.evolve": "진화",
   "action.keep": "보관",
   "action.transfer": "전송",
+  "action.discover": "개체값 확인",
   "home.greeting.night": "좋은 저녁",
   "home.greeting.morning": "좋은 아침",
   "home.greeting.afternoon": "안녕하세요",

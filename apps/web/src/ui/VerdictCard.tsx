@@ -101,6 +101,8 @@ export function VerdictCard({ owned, ...props }: Props) {
   // toque e o banco. Sem reler daqui, o botao nao mudava de estado.
   const atual = items?.find((x) => x.id === owned?.id) ?? owned;
   const feito = atual?.doneAction === verdict.action;
+  /** Houve conta? "Descobrir o IV" não é uma conclusão, é um pedido de dado. */
+  const temRastro = verdict.signals.length > 0;
 
   return (
     <section className="tk-card" style={{ borderColor: color }}>
@@ -130,19 +132,33 @@ export function VerdictCard({ owned, ...props }: Props) {
         </p>
       )}
 
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 14 }}>
-        {/* A barra CRESCE ao aparecer. Nao e enfeite: ela esta dizendo que
-            aquele numero acabou de sair de uma conta. Ver `.tk-meter` no CSS. */}
-        <div className="tk-meter">
-          <div
-            className="tk-meter-fill"
-            style={{ width: `${Math.round(verdict.confidence * 100)}%`, background: color }}
-          />
+      {/*
+        ⚠️ SEM REGRA NENHUMA, NÃO HÁ BARRA.
+
+        Confiança é o grau de concordância ENTRE regras. Quando `decide()`
+        devolve "descobrir o IV", nenhuma regra chegou a rodar — e desenhar uma
+        barra vazia com "confiança 0%" ao lado seria mostrar o resultado de uma
+        conta que não aconteceu.
+
+        A condição é `signals.length`, e não `action === "descobrir"`, de
+        propósito: qualquer resposta futura sem sinais herda o comportamento
+        certo sem ninguém lembrar de vir aqui.
+      */}
+      {temRastro && (
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 14 }}>
+          {/* A barra CRESCE ao aparecer. Nao e enfeite: ela esta dizendo que
+              aquele numero acabou de sair de uma conta. Ver `.tk-meter` no CSS. */}
+          <div className="tk-meter">
+            <div
+              className="tk-meter-fill"
+              style={{ width: `${Math.round(verdict.confidence * 100)}%`, background: color }}
+            />
+          </div>
+          <span className="tk-caption">
+            {t("verdict.confidence", { percent: Math.round(verdict.confidence * 100) })}
+          </span>
         </div>
-        <span className="tk-caption">
-          {t("verdict.confidence", { percent: Math.round(verdict.confidence * 100) })}
-        </span>
-      </div>
+      )}
 
       {/*
         "Ja fiz isso" no cartao do veredito.
@@ -171,7 +187,9 @@ export function VerdictCard({ owned, ...props }: Props) {
         conhece o veredito, e vale nos dois lugares que mostram o cartao (a
         ficha e a calculadora de IV).
       */}
-      {owned && (
+      {/* "Já fiz isso" só existe onde há algo a fazer. Marcar como cumprido um
+          "me dá o IV" seria dizer que o IV chegou. */}
+      {owned && temRastro && (
         <button
           type="button"
           className="tk-done"
@@ -193,15 +211,17 @@ export function VerdictCard({ owned, ...props }: Props) {
         </button>
       )}
 
-      <button
-        type="button"
-        className="tk-btn tk-btn--secondary tk-btn--block"
-        style={{ height: 40, fontSize: 13, marginTop: 10 }}
-        onClick={() => setTraceOpen((v) => !v)}
-        aria-expanded={traceOpen}
-      >
-        {traceOpen ? t("verdict.hide") : t("verdict.howIGotHere")}
-      </button>
+      {temRastro && (
+        <button
+          type="button"
+          className="tk-btn tk-btn--secondary tk-btn--block"
+          style={{ height: 40, fontSize: 13, marginTop: 10 }}
+          onClick={() => setTraceOpen((v) => !v)}
+          aria-expanded={traceOpen}
+        >
+          {traceOpen ? t("verdict.hide") : t("verdict.howIGotHere")}
+        </button>
+      )}
 
       {traceOpen && (
         <>
