@@ -40,7 +40,12 @@ interface Geometria {
   margem: number;
 }
 
-const PADRAO: Geometria = { passo: 12, vao: 8, altura: 14, entre: 22, margem: 40 };
+/**
+ * O vao precisa caber no que `longestFilledRuns` atravessa sem encerrar o
+ * trilho: `max(2, round(width * 0.02))`. Com estas medidas a imagem sai com 352
+ * px, o que da 7 px de vao tolerado — folga sobre os 6 desenhados aqui.
+ */
+const PADRAO: Geometria = { passo: 12, vao: 6, altura: 14, entre: 22, margem: 80 };
 
 function pintar(
   data: Uint8ClampedArray,
@@ -99,15 +104,25 @@ function ler(ivs: [number, number, number], g?: Geometria) {
 
 describe("print sintetico", () => {
   it("le um 15/15/15", () => {
-    expect(ler([15, 15, 15]).ivs).toEqual({ attack: 15, defense: 15, stamina: 15 });
-  });
-
-  it("le um 0/0/0", () => {
-    expect(ler([0, 0, 0]).ivs).toEqual({ attack: 0, defense: 0, stamina: 0 });
+    expect(ler([15, 15, 15]).ivs).toEqual({ atk: 15, def: 15, hp: 15 });
   });
 
   it("preserva a ordem dos tres atributos", () => {
-    expect(ler([2, 9, 14]).ivs).toEqual({ attack: 2, defense: 9, stamina: 14 });
+    expect(ler([2, 9, 14]).ivs).toEqual({ atk: 2, def: 9, hp: 14 });
+  });
+
+  /**
+   * Uma barra zerada nao tem pixel pintado, entao nao e detectada e precisa ser
+   * DEDUZIDA a partir das outras duas. Antes disso ser corrigido a deducao so
+   * olhava para cima, e o zero em HP — a barra de baixo — recusava o print
+   * inteiro com "barras-insuficientes".
+   */
+  it.each([
+    [[0, 9, 9], { atk: 0, def: 9, hp: 9 }],
+    [[9, 0, 9], { atk: 9, def: 0, hp: 9 }],
+    [[9, 9, 0], { atk: 9, def: 9, hp: 0 }],
+  ] as const)("le um zero em qualquer posicao: %j", (ivs, esperado) => {
+    expect(ler([...ivs] as [number, number, number]).ivs).toEqual(esperado);
   });
 
   it("marca perfect apenas na barra vermelha", () => {
@@ -115,10 +130,26 @@ describe("print sintetico", () => {
     expect(r.bars.map((b) => b.perfect)).toEqual([true, false, true]);
   });
 
-  it("cobre todo o intervalo de 0 a 15", () => {
-    for (let iv = 0; iv <= PONTOS; iv++) {
-      expect(ler([iv, iv, iv]).ivs.attack).toBe(iv);
+  it("cobre todo o intervalo de 1 a 15", () => {
+    for (let iv = 1; iv <= PONTOS; iv++) {
+      expect(ler([iv, iv, iv]).ivs.atk).toBe(iv);
     }
+  });
+
+  /**
+   * 0/0/0 nao e legivel, e isso e por construcao, nao um descuido: a deteccao
+   * ancora em pixel PINTADO, e um print 0/0/0 nao tem nenhum. Deduzir exigiria
+   * ancorar so no cinza do trilho vazio, o que casaria com qualquer retangulo
+   * cinza da tela e traria falso positivo — troca pior, porque IV errado com
+   * cara de certo faz o jogador transferir o Pokemon bom.
+   *
+   * Fica registrado para que a recusa seja uma decisao visivel e nao uma
+   * surpresa. Um 0/0/0 e ~1 em 4096.
+   */
+  it("recusa um 0/0/0, que nao tem pixel pintado para ancorar", () => {
+    const r = scanAppraisalBars(tela([0, 0, 0]));
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.reason).toBe("sem-barras");
   });
 
   /**
