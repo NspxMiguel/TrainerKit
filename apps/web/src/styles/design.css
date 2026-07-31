@@ -4026,21 +4026,41 @@
 }
 
 /*
- * O indicador do Material fica ATRÁS DO ÍCONE, e não atrás do item inteiro.
+ * ⚠️ A PÍLULA ENVOLVE O ITEM INTEIRO — ícone E rótulo.
  *
- * É a diferença de gramática entre os dois sistemas: no iOS a aba inteira vira
- * uma peça de vidro; no Material o rótulo continua solto e só o ícone ganha uma
- * pílula. Reaproveitar a lente sem reduzi-la daria um retângulo colorido de
- * ponta a ponta, que não é nem uma coisa nem outra.
+ * "ta cara, mas a pilula nao preenche tudo."
+ *
+ * Aqui dizia o contrário, e com um argumento que eu ainda acho bom: no Material
+ * o indicador fica só atrás do ÍCONE, e o rótulo vive solto embaixo dele. É
+ * assim no Android de verdade, e era isso que estava implementado — `top: 8px`,
+ * 30px de altura, com o rótulo caindo fora por baixo.
+ *
+ * O argumento é bom pro Android e errado pra ESTE app, por dois motivos:
+ *
+ *  · o rótulo aqui tem 9,5px, contra os 12 do Material. Uma pílula que cobre só
+ *    o ícone deixa metade do alvo de toque sem marca nenhuma, e o que sobra
+ *    lido é "um quadradinho colorido com uma palavra solta embaixo";
+ *  · o app já tem uma gramática pra "aba ativa", e é a cápsula do iPhone, que
+ *    envolve tudo. Duas gramáticas diferentes pra mesma coisa era o que fazia a
+ *    barra parecer de outro app quando ele abria no computador.
+ *
+ * Então a pílula passa a ocupar o item, com 6px de folga em volta. `top` e
+ * `bottom` com `height: auto` em vez de altura fixa: assim ela acompanha
+ * qualquer mudança na altura da barra sem precisar ser remedida — que é
+ * exatamente o erro que já custou três rodadas neste elemento.
  */
 [data-platform="android"] .tk-tab-bolha,
 [data-platform="desktop"] .tk-tab-bolha,
 [data-platform="ipad"] .tk-tab-bolha {
-  top: 8px;
-  height: 30px;
-  width: calc(100% / var(--tk-tabs, 3) - 40px);
-  left: calc(var(--tk-tab-i, 0) * 100% / var(--tk-tabs, 3) + 20px);
-  border-radius: 999px;
+  top: 6px;
+  bottom: calc(6px + env(safe-area-inset-bottom));
+  height: auto;
+  /* 12px de folga lateral, e não 8: a barra é full-bleed, então a pílula da
+     PRIMEIRA e da ÚLTIMA aba encosta na borda da tela. 12 é o que dá pra ver que
+     ela é uma peça pousada e não um bloco que vazou. */
+  width: calc(100% / var(--tk-tabs, 3) - 24px);
+  left: calc(var(--tk-tab-i, 0) * 100% / var(--tk-tabs, 3) + 12px);
+  border-radius: 18px;
   /*
    * ⚠️ OPACO E MISTURADO NA SUPERFÍCIE, e não uma cor escura translúcida.
    *
