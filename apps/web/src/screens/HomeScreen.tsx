@@ -148,6 +148,33 @@ function Hero({
         {monograma(species.name)}
       </span>
 
+      {/*
+        O SPRITE por cima do monograma, e nao no lugar dele.
+        
+        Eu tinha trocado a arte pelo monograma ao portar o hero — e o Miguel viu
+        na hora: "o pokemon grandao nao ta aparecendo o sprite". O desenho usa
+        monograma porque assume que nao ha arte; o app TEM arte quando a pessoa
+        escolhe uma fonte de imagens, e jogar isso fora foi perda, nao fidelidade.
+        
+        Os dois convivem: o monograma e a textura de fundo, o sprite e o assunto.
+        Quando nao ha arte — fonte desligada, sprite ainda baixando, especie sem
+        arquivo — sobra o monograma, que e exatamente o desenho do handoff.
+        
+        `bare` tira a moldura do tile: aqui o fundo ja e o gradiente do hero, e
+        um tile arredondado por cima dele seria uma caixa dentro de outra.
+      */}
+      <span className="tk-hero-art" aria-hidden="true">
+        <SpeciesTile
+          spriteId={species.spriteId}
+          dex={species.dex}
+          speciesId={species.id}
+          name={species.name}
+          types={species.types}
+          size={148}
+          bare
+        />
+      </span>
+
       {/* Garante contraste sobre gradiente claro (Elétrico, Gelo) E funde a base
           do hero com o fundo do app, pra nao haver linha de corte. */}
       <span className="tk-hero-scrim" aria-hidden="true" />

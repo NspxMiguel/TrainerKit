@@ -437,3 +437,101 @@
 .tk-hero-feito:active {
   transform: scale(0.95);
 }
+
+/* ─────────────────────────────────────────── a lente que viaja ─────────── */
+
+/*
+ * A bolha de vidro e UMA peça que desliza entre as abas.
+ *
+ * ⚠️ Sem uma linha de JS, e sem medir nada. A conta e exata porque os `flex`
+ * sao conhecidos: o ativo vale 1.25 e os outros 1, entao numa barra de N abas o
+ * denominador e `N - 1 + 1.25`. A posicao do ativo e o indice dele sobre esse
+ * total, e a largura e 1.25 sobre o mesmo total.
+ *
+ * Isso importa porque medir seria pior aqui: enquanto o `flex` anima, a largura
+ * do item muda a cada quadro — uma bolha posicionada por medicao no clique
+ * ficaria no tamanho ANTIGO, e uma medida a cada quadro custaria 420ms de rAF
+ * pra chegar no mesmo lugar que uma `calc()` acerta de primeira.
+ *
+ * `--tk-tab-i` e `--tk-tabs` ja vinham do React desde antes do redesenho — sao
+ * dados (qual aba, quantas), nunca layout. O layout continua sendo daqui.
+ */
+.tk-tab-bolha {
+  position: absolute;
+  top: -4px;
+  height: 66px;
+  left: calc(var(--tk-tab-i, 0) * 100% / (var(--tk-tabs, 3) - 1 + 1.25));
+  width: calc(1.25 * 100% / (var(--tk-tabs, 3) - 1 + 1.25));
+  border-radius: 999px;
+  pointer-events: none;
+  background: rgba(16, 18, 26, 0.3);
+  backdrop-filter: blur(8px) saturate(160%);
+  -webkit-backdrop-filter: blur(8px) saturate(160%);
+  box-shadow:
+    inset 0 2.5px 4px -1.5px rgba(255, 255, 255, 0.45),
+    inset 0 -2.5px 4px -1.5px rgba(255, 255, 255, 0.28),
+    inset 3px 0 4px -2px rgba(255, 255, 255, 0.16),
+    inset -3px 0 4px -2px rgba(255, 255, 255, 0.16),
+    0 6px 16px rgba(0, 0, 0, 0.35);
+  transition:
+    left 0.42s var(--tk-ease-out),
+    width 0.42s var(--tk-ease-out);
+}
+
+/*
+ * O item ativo perde o vidro proprio — quem carrega o vidro agora e a lente.
+ * Se os dois pintassem, o destino acenderia antes de a lente chegar nele, que e
+ * exatamente o defeito que esta correcao existe pra tirar.
+ */
+.tk-tab[aria-current="page"] {
+  background: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+
+/* O rotulo e o icone continuam acima da lente. */
+.tk-tab {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tk-tab-bolha {
+    transition-duration: 0.01ms;
+  }
+}
+
+/*
+ * O sprite do hero, por cima do monograma.
+ *
+ * ⚠️ A ALTURA E CALCULADA, nao escolhida no olho. O hero tem 474px e o bloco de
+ * baixo (chip + nome + frase + botoes) ocupa 202px terminando a 10px da base —
+ * ou seja, ele comeca em y=262. Na primeira tentativa o sprite tinha 226px a
+ * partir de y=92 e terminava em 318: cobria o "DESTAQUE DE HOJE" e os pes
+ * batiam no nome.
+ *
+ * 200px a partir de y=52 tirava a colisao com o chip e criava outra: a cabeca
+ * do Pokemon cortava "Boa noite, Miguel." ao meio. Medido de novo, agora com os
+ * DOIS vizinhos na conta:
+ *
+ *   saudacao termina em .... y=106
+ *   chip comeca em ......... y=262
+ *   sobra .................. 156px
+ *
+ * 148px a partir de y=110 cabe com folga nos dois lados. O sprite ficou menor
+ * do que eu queria — e a alternativa era espremer a saudacao, que e a unica
+ * coisa da tela que fala com a PESSOA. O Pokemon cede.
+ *
+ * O scrim passa por cima da base dele de propósito: e o que funde o sprite no
+ * gradiente em vez de deixar um recorte flutuando.
+ */
+.tk-hero-art {
+  position: absolute;
+  left: 50%;
+  top: 110px;
+  transform: translateX(-50%);
+  display: block;
+  pointer-events: none;
+  filter: drop-shadow(0 18px 32px rgba(0, 0, 0, 0.45));
+}
