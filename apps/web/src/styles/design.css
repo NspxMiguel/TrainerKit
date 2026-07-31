@@ -54,6 +54,15 @@
    * largura, bem acima dos 44px minimos.
    */
   height: 50px;
+  /*
+   * ⚠️ A LARGURA DO ITEM ATIVO MORA AQUI, e nao em dois lugares.
+   *
+   * A lente e o item ativo precisam ter a MESMA proporcao, senao a lente para
+   * num lugar e o item esta noutro. Eu mudei o `flex` de 1.25 pra 1.08 pra
+   * encolher a barra e esqueci da conta da lente, que continuou calculando com
+   * 1.25 — ela passou a parar desalinhada do proprio item que destaca.
+   */
+  --tk-tab-ativo: 1.08;
   border-radius: 999px;
   display: flex;
   align-items: center;
@@ -72,7 +81,7 @@
    * vertical, que e o transbordo que o desenho quer: le como peça pousada, e
    * nao como peça fora do lugar.
    */
-  padding: 0 5px;
+  padding: 0;
   background: var(--tk-glass-bg);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
@@ -131,47 +140,17 @@
 
 .tk-tab[aria-current="page"] {
   /*
-   * 1.12 e nao 1.25: com 1.25 a pilula do "Inicio" ficava visivelmente maior
-   * que as outras duas e a barra lia como desequilibrada, nao como selecionada.
-   * O transbordo de 3px continua — e ele que da a impressao de peça pousada.
+   * ⚠️ SEM VIDRO PROPRIO. Quem desenha o vidro e a `.tk-tab-bolha`, que viaja.
+   *
+   * As duas tinham a receita completa — fundo, `backdrop-filter` e as quatro
+   * refracoes — e ficavam empilhadas no mesmo lugar. Alem de dobrar o custo do
+   * `backdrop-filter`, era isso que fazia a selecao parecer ter contorno duplo:
+   * duas pilulas de tamanhos diferentes uma sobre a outra.
+   *
+   * Aqui fica so o que e do ITEM: a cor e o peso. O material e da lente.
    */
-  /*
-   * ⚠️ A BOLHA FICA DENTRO DA BARRA — 40px numa barra de 50.
-   *
-   * "a bolha ta maior q os botoes, isso n é bom."
-   *
-   * O handoff manda ela transbordar 4px pra cima e pra baixo, e eu vinha
-   * defendendo esse transbordo como "o detalhe que faz parecer Apple". Ele
-   * reclamou duas vezes, e olhando de novo ele esta certo: no mockup a barra
-   * tem 58px e o transbordo e 7% da altura; na nossa, que encolheu pra 50, os
-   * mesmos 4px viram 8% e a bolha passa a ler como peça que nao coube.
-   *
-   * Dentro da barra ela vira o que de fato e — um indicador de selecao — e para
-   * de competir com a barra pela borda. O vidro, a refracao e o deslize
-   * continuam iguais.
-   */
-  flex: 1.08;
-  height: 40px;
-  margin: 0;
-  /* A aba ativa acompanha a especie junto com o resto — "a palheta principal do
-     app". `--tk-accent-fg` ja e a versao com contraste garantido no tema. */
+  flex: var(--tk-tab-ativo);
   color: var(--tk-accent-fg);
-  /*
-   * Quatro `inset`, e nao um. Vidro real nao tem UMA quina iluminada: tem a de
-   * cima pegando a luz mais forte, a de baixo devolvendo menos, e as laterais
-   * de raspao.
-   */
-  background: rgba(16, 18, 26, 0.3);
-  backdrop-filter: blur(8px) saturate(160%);
-  -webkit-backdrop-filter: blur(8px) saturate(160%);
-  box-shadow:
-    inset 0 2.5px 4px -1.5px rgba(255, 255, 255, 0.45),
-    inset 0 -2.5px 4px -1.5px rgba(255, 255, 255, 0.28),
-    inset 3px 0 4px -2px rgba(255, 255, 255, 0.16),
-    inset -3px 0 4px -2px rgba(255, 255, 255, 0.16),
-    /* Sombra curta: dentro da barra, uma longa so suja o vidro em volta — e o
-       que ela fazia (descolar do fundo) o `inset` ja faz sozinho. */
-    0 3px 8px rgba(0, 0, 0, 0.3);
 }
 
 .tk-tab[aria-current="page"] .tk-tab-label {
@@ -787,11 +766,33 @@
  * dados (qual aba, quantas), nunca layout. O layout continua sendo daqui.
  */
 .tk-tab-bolha {
+  /*
+   * ⚠️ DENTRO DA BARRA: 40px de altura numa barra de 50, com 5px de folga em
+   * cima e embaixo e 4px nas laterais.
+   *
+   * "bolHA AINDA PRA FORA CARA."
+   *
+   * Ele reclamou tres vezes e eu "consertei" tres vezes — o elemento ERRADO.
+   * Existem duas peças de vidro aqui: esta lente, que viaja entre as abas, e o
+   * fundo do proprio item ativo. Eu vinha medindo e encolhendo o item ativo,
+   * que ja estava dentro da barra, enquanto o que aparecia pra fora era a
+   * lente, com `top: -4px` e 66px de altura numa barra que encolheu pra 50.
+   *
+   * Medir o elemento certo teria custado um comando. Medi o que eu ACHAVA que
+   * era a bolha, achei tudo certo, e reportei consertado — tres vezes.
+   *
+   * Os 4px laterais evitam o outro sintoma: encostada na ponta, o raio dela
+   * (20px) nao coincide com o da barra (25px) e ela morde a borda arredondada.
+   */
   position: absolute;
-  top: -4px;
-  height: 66px;
-  left: calc(var(--tk-tab-i, 0) * 100% / (var(--tk-tabs, 3) - 1 + 1.25));
-  width: calc(1.25 * 100% / (var(--tk-tabs, 3) - 1 + 1.25));
+  top: 5px;
+  height: 40px;
+  left: calc(
+    var(--tk-tab-i, 0) * 100% / (var(--tk-tabs, 3) - 1 + var(--tk-tab-ativo)) + 4px
+  );
+  width: calc(
+    var(--tk-tab-ativo) * 100% / (var(--tk-tabs, 3) - 1 + var(--tk-tab-ativo)) - 8px
+  );
   border-radius: 999px;
   pointer-events: none;
   background: rgba(16, 18, 26, 0.3);

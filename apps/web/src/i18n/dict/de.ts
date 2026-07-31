@@ -170,6 +170,7 @@ export const DE: Dict = {
   "collection.add": "Pokémon hinzufügen",
   "collection.backup": "Backup",
   "collection.done": "Erledigt",
+  "collection.evolved": "Habe es entwickelt",
   "collection.markDone": "Habe ich schon gemacht",
   "collection.undoDone": "Doch noch nicht",
   "collection.export": "Exportieren",

@@ -170,6 +170,7 @@ export const RU: Dict = {
   "collection.add": "Добавить покемона",
   "collection.backup": "Резервная копия",
   "collection.done": "Сделано",
+  "collection.evolved": "Я его эволюционировал",
   "collection.markDone": "Уже сделал",
   "collection.undoDone": "Ещё не сделал",
   "collection.export": "Экспорт",

@@ -83,6 +83,41 @@ export async function setDoneAction(id: string, action: string | null): Promise<
   emit();
 }
 
+/**
+ * Evolui o Pokémon de verdade: ele VIRA a próxima espécie.
+ *
+ * "ao evoluir um pokemon q pede pra evoluir (bulbasauro) ao invez de so dar um
+ * check, porque nao transformarlo em sua evolução? continua o trajeto garai"
+ *
+ * Ele está certo, e o defeito era de produto, não de tela: o app dizia
+ * "Evoluir", a pessoa evoluía no jogo, tocava em "já fiz isso" — e o app
+ * continuava com um Bulbasaur na coleção. A partir dali toda análise ficava
+ * errada, porque era feita sobre a espécie ANTERIOR: PC máximo do Bulbasaur,
+ * ranking do Bulbasaur, counters do Bulbasaur. Um "check" registrava que a
+ * pessoa cumpriu e jogava fora justamente o que ela cumpriu.
+ *
+ * ⚠️ Os IVs e o nível são PRESERVADOS, e isso não é escolha de interface: é
+ * como o jogo funciona. Evoluir não altera IV nem nível — só a espécie, e com
+ * ela os stats base. Por isso o veredito da forma nova sai correto sozinho, sem
+ * a pessoa precisar reescanear nada.
+ *
+ * `doneAction` volta a `null` porque o veredito recomeça: o Ivysaur pode
+ * perfeitamente voltar a pedir "evoluir", e um "já fiz" herdado esconderia isso.
+ *
+ * PC e PS entram como `null` — eles mudam na evolução e o app não tem como
+ * saber os novos. Deixar os antigos seria pior que não ter: número errado com
+ * cara de certo.
+ */
+export async function evolvePokemon(id: string, paraEspecie: string): Promise<void> {
+  await db.pokemon.update(id, {
+    speciesId: paraEspecie,
+    doneAction: null,
+    cp: null,
+    hp: null,
+  });
+  emit();
+}
+
 export async function listPokemon(): Promise<OwnedPokemon[]> {
   const all = await db.pokemon.toArray();
   return (
