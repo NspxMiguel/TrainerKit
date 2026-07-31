@@ -46,6 +46,10 @@ interface Entrada {
   b: Caixa;
   /** Caixa justa nos RENDERS 3D. Ausente quando a espécie só tem arte oficial. */
   h?: Caixa;
+  /** Linha da barriga na arte oficial, 0,62 a 0,95. Ver `Quadro.barriga`. */
+  v: number;
+  /** Idem, no render 3D. */
+  w?: number;
 }
 
 const CORES = tabela as unknown as Record<string, Entrada>;
@@ -81,6 +85,17 @@ export interface Quadro {
   topo: number;
   /** Centro horizontal da silhueta, em fração da arte. `0.5` = centrada. */
   centroX: number;
+  /**
+   * A LINHA DA BARRIGA: que fração da silhueta, do topo pra baixo, é "a cara".
+   *
+   * "a cara e a parte da barriga pra cima." Medida por espécie no gerador (ver
+   * `dataset/src/paleta.ts`), porque uma fração única não serve às 1.142: num
+   * Machamp a perna começa em 60% da altura, num Venusaur agachado o corpo vai
+   * até 82%, e num Snorlax é corpo até o chão.
+   *
+   * Fica entre 0,62 e 0,95.
+   */
+  barriga: number;
 }
 
 /**
@@ -121,13 +136,16 @@ export function enquadrar(
   // 1.142. Enquadrar com a caixa vizinha erra pouco; não enquadrar erra o que
   // ele apontou no Charizard.
   const b = fonte === "3d" ? (e?.h ?? e?.b) : e?.b;
-  if (!b) return { larg: 1, alt: 1, topo: 0, centroX: 0.5 };
+  // A barriga acompanha a MESMA fonte da caixa: as duas artes enquadram
+  // diferente, então a mesma barriga cai em frações diferentes do quadro.
+  const barriga = (fonte === "3d" ? (e?.w ?? e?.v) : e?.v) ?? 0.75;
+  if (!b) return { larg: 1, alt: 1, topo: 0, centroX: 0.5, barriga };
 
   const larg = b[2] - b[0];
   const alt = b[3] - b[1];
-  if (larg <= 0 || alt <= 0) return { larg: 1, alt: 1, topo: 0, centroX: 0.5 };
+  if (larg <= 0 || alt <= 0) return { larg: 1, alt: 1, topo: 0, centroX: 0.5, barriga };
 
-  return { larg, alt, topo: b[1], centroX: (b[0] + b[2]) / 2 };
+  return { larg, alt, topo: b[1], centroX: (b[0] + b[2]) / 2, barriga };
 }
 
 export interface Paleta {

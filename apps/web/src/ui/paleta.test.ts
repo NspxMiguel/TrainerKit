@@ -154,12 +154,16 @@ describe("paleta por espécie", () => {
   /** A altura do bloco de decisão — o `--tk-hero-bloco` do design.css. */
   const BLOCO = 146;
 
-  function ladoDaArte(q: { larg: number; alt: number }, cqw: number, cqh: number): number {
+  function ladoDaArte(
+    q: { larg: number; alt: number; barriga: number },
+    cqw: number,
+    cqh: number,
+  ): number {
     return Math.min(
-      cqw / q.larg, //                     100cqw / larg
-      (1.2667 * cqh) / q.alt, //           126.67cqh / alt        — a cara livre
-      (0.95 * cqh + BLOCO) / q.alt, //     (95cqh + bloco) / alt  — os pés inteiros
-      710, //                              710px — 1,5x a resolução do arquivo
+      cqw / q.larg, //                        100cqw / larg
+      (0.95 * cqh) / (q.barriga * q.alt), //   95cqh / (barriga × alt) — a cara livre
+      (0.95 * cqh + BLOCO) / q.alt, //         (95cqh + bloco) / alt   — os pés inteiros
+      710, //                                  710px — 1,5x a resolução do arquivo
     );
   }
 
@@ -209,13 +213,13 @@ describe("paleta por espécie", () => {
      * inteiro do Hoopa, e cada um exigiria um ajuste diferente.
      *
      * A regra, em geometria: o topo da silhueta fica em 5% da faixa, a faixa
-     * termina onde o nome começa, e os 75% de cima da silhueta têm que caber
-     * antes disso.
+     * termina onde o nome começa, e a parte da silhueta que vai da BARRIGA PRA
+     * CIMA tem que caber antes disso.
      *
-     * ⚠️ 75%, e não os 62% que eu tinha posto primeiro. Num bípede a barriga
-     * fica por volta de 55% e 62% sobrava — mas o Venusaur é quadrúpede, tem a
-     * flor nas costas e o rosto descendo até 68% da silhueta. Medido na tela:
-     * com 62% o nome encostava no queixo dele.
+     * ⚠️ A barriga é medida POR ESPÉCIE, no gerador. Eu tentei duas frações
+     * únicas antes — 62% encostava no queixo do Venusaur, 75% ainda cruzava a
+     * boca dele na ficha, onde o bicho fica maior. Uma fração não serve a 1.142
+     * formas: Machamp dá 0,95, Venusaur 0,82, Gyarados 0,65.
      */
     const ruins: string[] = [];
     for (const [cqw, cqh] of PROPORCOES) {
@@ -224,7 +228,7 @@ describe("paleta por espécie", () => {
           const q = enquadrar(id, fonte);
           const lado = ladoDaArte(q, cqw, cqh);
           const topo = 0.05 * cqh;
-          const linhaDaBarriga = topo + 0.75 * q.alt * lado;
+          const linhaDaBarriga = topo + q.barriga * q.alt * lado;
           if (linhaDaBarriga > cqh + 0.5) {
             ruins.push(
               `#${id} ${fonte} ${cqw}×${cqh}: barriga em ${linhaDaBarriga.toFixed(0)}px de ${cqh}`,
@@ -242,9 +246,9 @@ describe("paleta por espécie", () => {
      *
      * O que passa de 100% da faixa desce pro bloco de decisão — que tem altura
      * FIXA (146px: nome, frase, botão e recuos) enquanto a faixa cresce com a
-     * tela. Deixar a silhueta chegar aos 127% que a regra da cara permitiria
-     * daria 128px de transbordo num hero de 620 — perto do limite — e sem esta
-     * regra o `overflow: hidden` do hero cortaria os pés no meio.
+     * tela. Sem esta regra, uma silhueta cuja barriga fica alta (Gyarados, 0,65)
+     * poderia descer 146% da faixa, e o `overflow: hidden` do hero cortaria os
+     * pés no meio numa tela alta.
      *
      * ⚠️ O bloco é o piso, e não a faixa: em tela alta a faixa cresce e o bloco
      * não. Testar só o aparelho pequeno esconderia exatamente o caso ruim.
@@ -306,6 +310,66 @@ describe("paleta por espécie", () => {
       for (const parada of paradas.slice(1)) {
         const r = contraste("#ffffff", parada);
         if (r < 3) ruins.push(`#${id}: branco sobre ${parada} = ${r.toFixed(2)}`);
+      }
+    }
+    expect(ruins).toEqual([]);
+  });
+
+
+  it("a tinta de fundo não derruba o texto, em nenhuma espécie", () => {
+    /*
+     * ⚠️ O fundo do app passou a ter a COR DA ESPÉCIE ("sem cor no meio"), e um
+     * fundo que muda por Pokémon é exatamente o tipo de coisa que quebra o
+     * contraste sem ninguém ver — foi assim que nasceram as 823 reprovações de
+     * luminância desta mesma tabela.
+     *
+     * A conta aqui repete a do `design.css`: `--tk-accent-topo` misturado a 30%
+     * sobre o fundo escuro, e o texto composto por cima. O 30 saiu DESTE teste:
+     * comecei em 42% e ele reprovou 104 espécies, todas em `--tk-text-3` entre
+     * 4,34 e 4,42 — perto o bastante do mínimo para eu nunca ver no olho. Se os dois arquivos
+     * discordarem, isto mede ficção — por isso o número aparece literal nos dois,
+     * com o comentário de lá apontando pra cá.
+     *
+     * O que torna isto seguro é a ESCOLHA da variável: `topo` é a parada mais
+     * escura do gradiente, e o teste logo acima já cobra que a luminância dela
+     * fique abaixo de 0,18 em todas as espécies.
+     */
+    const TINTA = 0.3;
+    const FUNDO = { r: 0x0a, g: 0x0c, b: 0x11 };
+
+    const canais = (hexa: string) => {
+      const n = parseInt(hexa.slice(1), 16);
+      return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+    };
+    const paraHex = (c: { r: number; g: number; b: number }) =>
+      `#${[c.r, c.g, c.b].map((v) => Math.round(v).toString(16).padStart(2, "0")).join("")}`;
+    /** Compõe `frente` com alfa `a` sobre `atras`. */
+    const sobre = (
+      frente: { r: number; g: number; b: number },
+      atras: { r: number; g: number; b: number },
+      a: number,
+    ) => ({
+      r: frente.r * a + atras.r * (1 - a),
+      g: frente.g * a + atras.g * (1 - a),
+      b: frente.b * a + atras.b * (1 - a),
+    });
+
+    // As três cores de texto do tema escuro, com o alfa real dos tokens.
+    const TEXTOS: Array<[string, { r: number; g: number; b: number }, number, number]> = [
+      ["--tk-text", { r: 0xf4, g: 0xf6, b: 0xfa }, 1, 4.5],
+      ["--tk-text-2", { r: 235, g: 238, b: 245 }, 0.62, 4.5],
+      ["--tk-text-3", { r: 235, g: 238, b: 245 }, 0.52, 4.5],
+    ];
+
+    const ruins: string[] = [];
+    for (const id of ids) {
+      const topo = canais(paletaDaEspecie(id).topo);
+      const fundo = sobre(topo, FUNDO, TINTA);
+      const fundoHex = paraHex(fundo);
+      for (const [nome, cor, alfa, minimo] of TEXTOS) {
+        const composto = paraHex(sobre(cor, fundo, alfa));
+        const r = contraste(composto, fundoHex);
+        if (r < minimo) ruins.push(`#${id} ${nome}: ${r.toFixed(2)} sobre ${fundoHex}`);
       }
     }
     expect(ruins).toEqual([]);
