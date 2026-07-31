@@ -8,7 +8,8 @@
     "build": "tsx src/etl.ts",
     "refresh": "pnpm run download && pnpm run build",
     "test": "echo 'sem testes: o ETL e validado pelos testes do core contra o dataset gerado'",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "paleta": "tsx src/paleta.ts"
   },
   "devDependencies": {
     "@types/node": "^26.1.2",

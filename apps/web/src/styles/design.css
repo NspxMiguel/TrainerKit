@@ -273,8 +273,58 @@
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
   margin-top: calc(var(--tk-safe-top) * -1);
-  height: 474px;
-  flex-shrink: 0;
+  /*
+   * ⚠️ ALTURA FLUIDA, e nao os 474px fixos do handoff.
+   *
+   * "favor sem scroll na tela de inicio." Com 474px fixos a home somava ~1.010px
+   * num aparelho de 812 — rolava sempre. O mockup vive numa moldura de 874px e
+   * la cabia; no iPhone que a pessoa tem, nao.
+   *
+   * `42svh` cede o que precisa em tela curta e para de crescer em tela alta.
+   * `svh` e nao `vh` de propósito: no iOS o `vh` conta a barra de endereco
+   * RETRAIDA, entao a conta erra pra mais justamente onde o espaco e menor.
+   */
+  /*
+   * Piso e teto, nao altura. Quem decide a altura e o `flex: 1` da coluna da
+   * home (ver `.tk-home`); estes dois so impedem os extremos — um hero
+   * espremido a 200px numa tela baixa, ou um hero de meia pagina num tablet.
+   */
+  min-height: 320px;
+  max-height: 620px;
+  /*
+   * ⚠️ COLUNA FLEX, e nao mais posicionamento absoluto.
+   *
+   * "lembresse q tem sprites maiores ne. n é só o dragonitte q vai ficar ai"
+   *
+   * Ele matou a abordagem inteira com uma frase. Eu vinha calibrando `top` e
+   * `size` pro Dragonite — e errei tres vezes seguidas justamente porque cada
+   * numero servia a UM sprite. Snorlax e largo e baixo, Gyarados e comprido,
+   * Joltik cabe numa unha: qualquer medida fixa quebra em algum deles.
+   *
+   * Em coluna, quem manda no tamanho e a CAIXA, nao a arte. A saudacao e o
+   * bloco de baixo tomam o que precisam, a arte fica com `flex: 1` e o resto,
+   * e `object-fit: contain` resolve a proporcao — largo, comprido ou minusculo,
+   * cabe sempre, sem sobrepor nada.
+   */
+  display: flex;
+  flex-direction: column;
+  /*
+   * ⚠️ `align-items` DECLARADO, e nao herdado por omissao.
+   *
+   * O hero saia com `align-items: center` vindo do `@layer legado`, e a
+   * saudacao, a arte e o bloco de baixo encolhiam pro tamanho do conteudo em
+   * vez de ocupar a largura — a arte ficou com 107px de 375 disponiveis.
+   *
+   * A licao vale pro arquivo inteiro: camada so decide entre declaracoes que
+   * COMPETEM. Como o design.css nunca declarava `align-items`, nao havia
+   * disputa — a regra antiga era a unica candidata e venceu sem concorrencia.
+   * Trocar `display: block` por `display: flex` sem revisar o resto do bloco
+   * antigo deixa exatamente esse tipo de resto pendurado.
+   */
+  align-items: stretch;
+  /* Saudacao encostada em cima, bloco de decisao encostado embaixo; a arte
+     nao participa, porque saiu do fluxo (ver `.tk-hero-art`). */
+  justify-content: space-between;
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -292,22 +342,67 @@
 }
 
 /*
- * O monograma gigante ATRAS de tudo, a 10% de branco.
+ * ⚠️ O HERO E ESCURO NOS DOIS TEMAS, e o texto dele e branco nos dois.
  *
- * Nao e enfeite: e o que substitui a arte oficial que o app nao pode embarcar.
- * A 220px ele deixa de ser "duas letras" e vira textura — quem olha ve uma
- * forma, nao um rotulo.
+ * O veu da base e o scrim fechavam em `--tk-bg`, pra fundir o hero com o app e
+ * nao deixar linha de corte. No tema escuro isso e perfeito. No claro,
+ * `--tk-bg` e BRANCO — e o resultado era "É top 1 na Master League" em branco
+ * sobre branco, com o botao branco sumindo junto. Achei testando o tema claro,
+ * nao lendo o codigo: as duas regras estavam certas cada uma por si.
+ *
+ * `--tk-hero-ink` desfaz o acoplamento. Ele e escuro sempre, porque o hero e
+ * uma superficie colorida com texto branco por cima — como capa de album em
+ * app de musica, que tambem nao clareia junto com o tema. No tema escuro ele
+ * coincide com o fundo e a fusao continua invisivel; no claro, o hero vira um
+ * painel com cantos arredondados, que e o que ele ja e visualmente.
  */
-.tk-hero-mono {
+:root {
+  --tk-hero-ink: #0a0c10;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-tk="dark"]) .tk-hero {
+    border-radius: 0 0 30px 30px;
+  }
+}
+
+:root[data-tk="light"] .tk-hero {
+  border-radius: 0 0 30px 30px;
+}
+
+/*
+ * O NUMERO DA DEX, gigante, ATRAS do bicho — a peça de profundidade.
+ *
+ * "tipo o relogio da apple, se vc coloca uma cabeca, ele fica meio atras dando
+ * efeito de profundidade."
+ *
+ * O mostrador de fotos do Watch segmenta o assunto e passa a hora por tras da
+ * cabeca. Aqui nao ha o que segmentar: o sprite e PNG com alfa, entao ELE ja e
+ * a mascara. Desenhar o numero antes dele na ordem de pintura basta — o recorte
+ * acontece sozinho, de graca, em qualquer sprite.
+ *
+ * ⚠️ `z-index: 0` contra o `1` da arte, e isso NAO e redundante: `.tk-hero-art`
+ * e item de flex sem posicionamento, e elemento posicionado pinta por cima de
+ * item de flex comum mesmo vindo antes no documento. Sem os dois indices o
+ * numero passaria na FRENTE do bicho e o efeito seria o oposto do pedido.
+ */
+.tk-hero-numero {
   position: absolute;
   left: 50%;
-  top: 80px;
-  transform: translateX(-50%);
-  font: 800 220px/1 var(--tk-font);
-  letter-spacing: -10px;
-  color: rgba(255, 255, 255, 0.1);
+  top: 46%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  font: 900 min(272px, 34svh)/1 var(--tk-font);
+  letter-spacing: -0.06em;
+  /*
+   * Claro o bastante pra existir, fraco o bastante pra nao competir. Abaixo de
+   * ~7% ele some no gradiente; acima de ~16% vira um numero que a pessoa tenta
+   * ler, e o assunto da tela e o bicho.
+   */
+  color: rgba(255, 255, 255, 0.12);
   pointer-events: none;
   user-select: none;
+  white-space: nowrap;
 }
 
 /*
@@ -324,25 +419,32 @@
     rgba(10, 12, 16, 0) 22%,
     rgba(10, 12, 16, 0) 50%,
     rgba(10, 12, 16, 0.55) 78%,
-    var(--tk-bg) 100%
+    var(--tk-hero-ink) 100%
   );
   pointer-events: none;
 }
 
 .tk-hero-topo {
-  position: absolute;
-  top: calc(var(--tk-safe-top) + 18px);
-  left: 20px;
-  right: 20px;
+  flex: none;
+  padding: calc(var(--tk-safe-top) + 14px) 20px 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+  z-index: 2;
 }
 
+/*
+ * ⚠️ 22px, e nao os 34px do handoff.
+ *
+ * La a saudacao ficava ACIMA do hero, sozinha, e era legitimamente o maior
+ * tipo da tela. Aqui ela vive DENTRO dele, a 40px do nome do Pokemon — e duas
+ * manchetes empilhadas nao formam hierarquia, formam empate. Sendo que o
+ * assunto da tela nao e o cumprimento; e o bicho.
+ */
 .tk-hero-saudacao {
-  font: 700 34px/1.05 var(--tk-font);
-  letter-spacing: -0.5px;
+  font: 700 22px/1.15 var(--tk-font);
+  letter-spacing: -0.3px;
   color: #fff;
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
   margin: 0;
@@ -350,15 +452,31 @@
 }
 
 .tk-hero-base {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 10px;
+  flex: none;
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 0 16px;
+  gap: 8px;
+  padding: 10px 16px 12px;
+  z-index: 2;
+  /*
+   * ⚠️ VEU PROPRIO, e nao so o scrim do hero.
+   *
+   * O scrib geral cobre o hero inteiro e deixa o miolo transparente de
+   * propósito — e ali que a arte tem que aparecer. Mas o texto do bloco de
+   * baixo pousa justamente sobre a barriga do sprite, e com o gradiente agora
+   * DERIVADO do sprite as duas coisas tem a mesma cor: laranja sobre laranja.
+   *
+   * Este veu e local, comeca transparente e fecha em `--tk-bg`. E o que
+   * garante que "Dragonite" continue legivel com o bicho atras dele.
+   */
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--tk-hero-ink) 62%, transparent) 42%,
+    var(--tk-hero-ink) 100%
+  );
 }
 
 /* "DESTAQUE DE HOJE" — vidro escuro sobre o gradiente. */
@@ -375,8 +493,10 @@
 }
 
 .tk-hero-name {
-  font: 800 46px/1 var(--tk-font);
-  letter-spacing: -1.5px;
+  /* 38 e nao 46: cada pixel que o nome devolve vira altura de sprite, e o nome
+     ja e a maior tipografia da tela com folga. */
+  font: 800 38px/1.05 var(--tk-font);
+  letter-spacing: -1.2px;
   color: #fff;
   text-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
   text-align: center;
@@ -503,35 +623,204 @@
 }
 
 /*
- * O sprite do hero, por cima do monograma.
+ * A ARTE FICA COM O QUE SOBRAR, e e isso que a faz funcionar pra todo sprite.
  *
- * ⚠️ A ALTURA E CALCULADA, nao escolhida no olho. O hero tem 474px e o bloco de
- * baixo (chip + nome + frase + botoes) ocupa 202px terminando a 10px da base —
- * ou seja, ele comeca em y=262. Na primeira tentativa o sprite tinha 226px a
- * partir de y=92 e terminava em 318: cobria o "DESTAQUE DE HOJE" e os pes
- * batiam no nome.
+ * `flex: 1` + `min-height: 0` entrega a ela toda a altura livre entre a
+ * saudacao e o bloco de baixo. `object-fit: contain` faz o resto: sprite largo
+ * encosta nas laterais, sprite comprido encosta em cima e embaixo, e nenhum
+ * dos dois estoura nem se sobrepoe ao texto.
  *
- * 200px a partir de y=52 tirava a colisao com o chip e criava outra: a cabeca
- * do Pokemon cortava "Boa noite, Miguel." ao meio. Medido de novo, agora com os
- * DOIS vizinhos na conta:
- *
- *   saudacao termina em .... y=106
- *   chip comeca em ......... y=262
- *   sobra .................. 156px
- *
- * 148px a partir de y=110 cabe com folga nos dois lados. O sprite ficou menor
- * do que eu queria — e a alternativa era espremer a saudacao, que e a unica
- * coisa da tela que fala com a PESSOA. O Pokemon cede.
- *
- * O scrim passa por cima da base dele de propósito: e o que funde o sprite no
- * gradiente em vez de deixar um recorte flutuando.
+ * Nao ha `size` que importe aqui — o valor passado no React vira so o piso do
+ * elemento, e o CSS o expande. E de propósito: numero fixo foi exatamente o
+ * que quebrou nas tres tentativas anteriores.
  */
 .tk-hero-art {
+  /*
+   * ⚠️ FORA DO FLUXO, e essa e a virada que finalmente deixou o bicho grande.
+   *
+   * Como item de flex, a arte so ficava com a SOBRA entre a saudacao e o bloco
+   * de decisao — 117px de um hero de 408. Encolher tipografia pra devolver
+   * espaco rendia uns 40px e estragava a leitura; nao era o caminho.
+   *
+   * "legal deixar ele grande pra chamar atencao" pede o contrario: a arte
+   * ocupa o hero quase inteiro e o TEXTO passa por cima dela. E tambem o que a
+   * profundidade pedia — assunto grande atras, informacao na frente.
+   *
+   * Os recuos sao PORCENTAGEM do hero, nao pixels: o quadro acompanha a altura
+   * que a coluna deu, em qualquer aparelho. E `object-fit: contain` continua
+   * garantindo que Onix comprido e Joltik minusculo caibam no mesmo quadro.
+   */
+  position: absolute;
+  left: 0;
+  right: 0;
+  /*
+   * 12% em cima e nao 5%: a 5% a cabeca do Dragonite subia ate a linha da
+   * saudacao e "Boa noite, Miguel." passava por cima do ROSTO dele. Texto
+   * cruzando corpo e composicao; cruzando rosto e acidente.
+   *
+   * Embaixo sobra pouco de propósito — os pes afundando no veu escuro da base
+   * dao o mesmo que uma sombra de chao daria, e de graca.
+   */
+  top: 12%;
+  bottom: 18%;
+  /* Ver a nota de `.tk-hero-numero`: e este indice que decide quem fica na
+     frente de quem. O numero e o brilho ficam no 0. */
+  z-index: 1;
+  display: grid;
+  /*
+   * ⚠️ `stretch`, e nao `place-items: center`.
+   *
+   * Centralizar dimensiona o item pelo CONTEUDO, entao o selo colapsava pro
+   * tamanho intrinseco e o sprite saia com 77px de altura dentro de um quadro
+   * de 300. Quem centraliza aqui e o `object-fit: contain` da imagem, que
+   * centraliza SEM encolher a caixa.
+   */
+  place-items: stretch;
+  padding: 0 18px;
+  pointer-events: none;
+}
+
+/*
+ * ⚠️ As regras da arte miram `.tk-mono` — o selo — e nao `> *`.
+ *
+ * `.tk-hero-art > *` pegava tambem a sombra de chao, que e irma da arte dentro
+ * da mesma caixa: ela recebia `width/height: 100% !important` (virando um
+ * borrao do tamanho do hero) e ainda ganhava `drop-shadow`, que e sombra de
+ * sombra. Seletor por classe descreve o que a regra quer dizer; `> *` descreve
+ * so onde o elemento calhou de estar.
+ */
+.tk-hero-art > .tk-mono {
+  width: 100% !important;
+  height: 100% !important;
+  /*
+   * DUAS sombras. A larga e escura da a distancia ate o fundo; a curta e o
+   * contorno, e ela ficou indispensavel quando o gradiente passou a ser
+   * DERIVADO da especie: sem ela e laranja sobre laranja.
+   */
+  filter:
+    drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5))
+    drop-shadow(0 18px 26px rgba(0, 0, 0, 0.55));
+}
+
+.tk-hero-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/*
+ * O BRILHO atras da cabeca, na SEGUNDA cor da especie.
+ *
+ * "ai a asa tem tal cor, mais uma cor pra encaixar no app" — e este e o lugar
+ * onde a segunda cor encaixa primeiro. Com o gradiente e o brilho tirados os
+ * dois da cor principal, o hero do Dragonite era laranja sobre laranja e o
+ * bicho sumia dentro do proprio fundo. Com o verde-agua da asa por tras, ele
+ * se destaca do fundo sem precisar de contorno.
+ *
+ * Fica abaixo do numero e da arte: e luz de fundo, nao camada.
+ */
+.tk-hero-brilho {
   position: absolute;
   left: 50%;
-  top: 110px;
-  transform: translateX(-50%);
-  display: block;
+  top: 46%;
+  width: 92%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--tk-accent-2, #fff) 55%, transparent),
+    color-mix(in srgb, var(--tk-accent-2, #fff) 12%, transparent) 62%,
+    transparent 100%
+  );
   pointer-events: none;
-  filter: drop-shadow(0 18px 32px rgba(0, 0, 0, 0.45));
+}
+
+/*
+ * A SOMBRA DE CONTATO — o que separa "profundidade" de "coisas empilhadas".
+ *
+ * A sombra projetada do sprite (o `drop-shadow` da arte) diz que ha uma luz;
+ * so esta aqui diz que ha um CHAO. Sem ela o bicho pairava, e um assunto que
+ * paira le como adesivo colado por cima — exatamente o efeito que ele nao
+ * pediu.
+ *
+ * E uma elipse porque o ponto de apoio varia com o sprite: Dragonite pousa nos
+ * pes, Gyarados na cauda enrolada, Magnemite no ar. Uma elipse larga e difusa
+ * acerta o suficiente nos tres; uma sombra desenhada pra silhueta acertaria um
+ * so — o mesmo erro de medida fixa que ja quebrou o hero tres vezes.
+ */
+.tk-hero-chao {
+  position: absolute;
+  left: 50%;
+  bottom: 2%;
+  width: 56%;
+  height: 9%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    rgba(0, 0, 0, 0.5),
+    rgba(0, 0, 0, 0.18) 58%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* A contagem de pendencias da colecao acompanha o acento. E o unico numero da
+   home que muda de cor — e ele ja era colorido, so era sempre o mesmo ambar. */
+.tk-overline-hot {
+  color: var(--tk-accent-fg, var(--tk-warn));
+}
+
+/* ── a home nao rola ── */
+
+/*
+ * ⚠️ "NAO ROLA" VIROU ESTRUTURA, e nao mais um numero conferido num aparelho.
+ *
+ * "favor sem scroll na tela de inicio" + "legal deixar ele grande pra chamar
+ * atencao" pedem coisas que se disputam: quanto maior o hero, mais perto de
+ * estourar. Antes eu resolvia escolhendo `42svh` e medindo num iPhone de
+ * 812px — o que responde por aquele aparelho e por nenhum outro.
+ *
+ * Agora a home e uma coluna da altura da tela e o HERO e quem tem `flex: 1`.
+ * Sobrou espaco, ele cresce; faltou, ele encolhe primeiro, porque e o unico
+ * bloco cujo conteudo e elastico por natureza (a arte tem `object-fit:
+ * contain`, entao acompanha). Todo o resto declara altura minima e nao cede.
+ *
+ * O que NAO encolhe, em nenhuma hipotese: o alvo de toque de 44px e o tamanho
+ * de fonte. Espremer esses dois pra caber seria trocar "nao rola" por "nao da
+ * pra usar".
+ */
+.tk-home {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  /*
+   * `min-height` e nao `height`: quando um aviso aparece (instalacao,
+   * armazenamento em risco, erro de dataset) a home PODE passar da tela e
+   * rolar. Isso e certo — aviso que nao cabe e aviso que nao existe. O piso
+   * garante o caso normal sem proibir o excepcional.
+   */
+  min-height: 100%;
+}
+
+/*
+ * O hero fica com a sobra. E o unico `flex: 1` da coluna, de propósito: dois
+ * blocos elasticos dividiriam a sobra entre si e nenhum dos dois seria "o
+ * grande".
+ *
+ * `min-height: 0` porque item de flex nao encolhe abaixo do proprio conteudo
+ * sem isso — e sem ele a coluna estouraria a tela exatamente nos aparelhos
+ * baixos, que sao os que mais precisam do ajuste.
+ */
+.tk-home > .tk-hero {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.tk-cta {
+  min-height: 62px;
+}
+
+.tk-act {
+  min-height: 68px;
 }
