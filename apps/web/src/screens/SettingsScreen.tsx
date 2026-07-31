@@ -14,7 +14,6 @@ import { IconeAjuste, type SeloAjustes } from "../ui/IconesAjustes.tsx";
 import { Segmented } from "../ui/Segmented.tsx";
 import { SettingsSheet } from "../ui/SettingsSheet.tsx";
 import { FeedbackScreen } from "./FeedbackScreen.tsx";
-import { HelpProject } from "./HelpProject.tsx";
 import { PrivacyScreen } from "./PrivacyScreen.tsx";
 import { updateSetup, useSetup } from "../onboarding/setup.ts";
 import { salvarTema, temaSalvo, type Tema } from "../ui/tema.ts";
@@ -66,7 +65,15 @@ type Painel =
   | "about"
   | "privacy"
   | "feedback"
-  | "help";
+  /*
+   * ⚠️ "help" SAIU: "tire o ajude o projeto".
+   *
+   * A tela explicava por que usar a sua própria chave já é a ajuda que o projeto
+   * precisa, e dava os links pra criar as chaves da Groq e da ElevenLabs. As
+   * duas coisas continuam existindo onde importam — o campo da chave da Groq
+   * mora em "Assistente com IA" e o da ElevenLabs em "Voz da Pokédex", cada um
+   * com o seu link. O que se perdeu foi uma terceira porta pra chegar neles.
+   */;
 
 const THEME_KEYS: Record<Theme, Key> = {
   sistema: "settings.theme.system",
@@ -279,8 +286,6 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
           selo="privacidade" label={t("privacy.title")} onOpen={() => setPainel("privacy")} />
         <Linha
           selo="feedback" label={t("feedback.title")} onOpen={() => setPainel("feedback")} />
-        <Linha
-          selo="apoiar" label={t("help.title")} onOpen={() => setPainel("help")} />
       </section>
 
       {/*
@@ -417,7 +422,7 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
       )}
 
       {painel === "voice" && (
-        <SettingsSheet title={t("voice.title")} onClose={fechar}>
+        <SettingsSheet title={t("voice.title")} onClose={fechar} cheia>
           <VoiceSettings />
         </SettingsSheet>
       )}
@@ -429,7 +434,7 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
       )}
 
       {painel === "ai" && (
-        <SettingsSheet title={t("ai.title")} onClose={fechar}>
+        <SettingsSheet title={t("ai.title")} onClose={fechar} cheia>
           <AiSettings />
         </SettingsSheet>
       )}
@@ -554,14 +559,6 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
       {painel === "privacy" && (
         <SettingsSheet title={t("privacy.title")} onClose={fechar} cheia>
           <PrivacyScreen />
-        </SettingsSheet>
-      )}
-
-      {painel === "help" && (
-        <SettingsSheet title={t("help.title")} onClose={fechar} cheia>
-          {/* O botao leva direto pra tela da chave: instrucao que termina em
-              "va procurar nos Ajustes" e instrucao que ninguem segue. */}
-          <HelpProject onOpenAi={() => setPainel("ai")} />
         </SettingsSheet>
       )}
 

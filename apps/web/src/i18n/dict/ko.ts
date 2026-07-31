@@ -297,6 +297,7 @@ export const KO: Dict = {
   "feedback.sorry": "그래서 잘못된 것을 발견하시면 미리 사과드립니다. 맞지 않는 숫자, 어색한 번역, 깨진 화면, 엉뚱한 언어로 말하는 음성 등. 대개 제 실수이고 아직 못 본 것입니다.",
   "feedback.ask": "알려주시면 정말 감사하겠습니다. 스크린샷과 무슨 일이 있었는지 한 문장이면 충분합니다. 이 앱의 버그 대부분이 그렇게 발견됐습니다.",
   "feedback.send": "메일 쓰기",
+  "feedback.copied": "이메일을 복사했습니다",
   "feedback.subject": "TrainerKit — 피드백",
   "feedback.privacy": "버튼은 사용 중인 메일 앱을 엽니다. 여기서는 아무것도 전송되지 않고, 보내기를 누르기 전까지 저에게 아무것도 오지 않습니다.",
   "feedback.ctx.app": "앱",

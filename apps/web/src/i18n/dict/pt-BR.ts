@@ -314,6 +314,7 @@ export const PT_BR: Dict = {
   "feedback.sorry": "Então peço desculpa de antemão por qualquer coisa errada que você encontrar — número que não bate, tradução esquisita, tela quebrada, voz falando o idioma errado. Provavelmente é erro meu e eu ainda não vi.",
   "feedback.ask": "Se puder me contar, eu fico feliz de verdade. Um print e uma frase do que aconteceu já resolvem. É assim que a maior parte dos bugs deste app foi encontrada.",
   "feedback.send": "Escrever pra mim",
+  "feedback.copied": "E-mail copiado",
   "feedback.subject": "TrainerKit — feedback",
   "feedback.privacy": "O botão abre o seu próprio app de e-mail. Nada é enviado por aqui, e eu não recebo nada até você apertar enviar.",
   "feedback.ctx.app": "App",

@@ -337,6 +337,7 @@ const EN = {
   "feedback.sorry": "So I apologise in advance for anything you find wrong — a number that doesn't add up, an odd translation, a broken screen, a voice speaking the wrong language. It's probably my mistake and I haven't seen it yet.",
   "feedback.ask": "If you can tell me, I'd genuinely appreciate it. A screenshot and one sentence about what happened is enough. That's how most bugs in this app were found.",
   "feedback.send": "Write to me",
+  "feedback.copied": "Email copied",
   "feedback.subject": "TrainerKit — feedback",
   "feedback.privacy": "The button opens your own email app. Nothing is sent from here, and I receive nothing until you hit send.",
   "feedback.ctx.app": "App",
