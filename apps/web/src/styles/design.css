@@ -3886,3 +3886,110 @@
     padding-bottom: 78px;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   O LIQUID GLASS É DA APPLE — no resto, uma barra ASSENTE
+   ═══════════════════════════════════════════════════════════════════════════
+
+   "liquid glass somente em dispositivos apple."
+
+   Ele está certo, e não é só gosto: a cápsula flutuante de vidro é uma
+   convenção do iOS 26. Ela funciona lá porque o sistema inteiro usa o mesmo
+   material — a barra do app conversa com a do sistema. Num Android, a mesma
+   peça não conversa com nada: vira um app de iPhone rodando fora de casa, e o
+   custo é real (uma barra que flutua sobre o conteúdo esconde a última linha e
+   não tem nenhuma barra de sistema por perto pra explicar por quê).
+
+   O `data-platform` já existia no `<html>` desde o começo, com a nota certa: "o
+   que muda entre plataformas é sobretudo MATERIAL". Só que o material do iPhone
+   era o PADRÃO, e as outras plataformas herdavam. Aqui isso inverte.
+
+   Android e desktop ganham a barra que o Material desenha: encostada no rodapé,
+   largura cheia, superfície opaca, um fio em cima e nada de desfoque.
+
+   ⚠️ O iPad em RETRATO entra junto. Deitado ele vira barra lateral (≥900px), e
+   em pé ele é um tablet, não um telefone grande — a cápsula de vidro flutuando
+   no meio de 768px de largura não tem o que a justifique.
+*/
+[data-platform="android"] .tk-tabbar,
+[data-platform="desktop"] .tk-tabbar,
+[data-platform="ipad"] .tk-tabbar {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transform: none;
+  width: 100%;
+  max-width: none;
+  height: calc(64px + env(safe-area-inset-bottom));
+  padding: 0 0 env(safe-area-inset-bottom);
+  border-radius: 0;
+  /* Opaca de verdade: `--tk-elev` é o único token de superfície que não é véu.
+     A tinta da espécie continua, porque ela é do app e não da plataforma. */
+  background: color-mix(in srgb, var(--tk-accent, transparent) 10%, var(--tk-elev));
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 0;
+  border-top: 1px solid var(--tk-line);
+  box-shadow: none;
+}
+
+/* Sem transbordo: numa barra assente o item ativo que cresce pra fora corta na
+   borda de cima, em vez de virar relevo. */
+[data-platform="android"] .tk-tab,
+[data-platform="desktop"] .tk-tab,
+[data-platform="ipad"] .tk-tab {
+  height: 100%;
+  margin: 0;
+  border-radius: 0;
+}
+
+[data-platform="android"] .tk-tab[aria-current="page"],
+[data-platform="desktop"] .tk-tab[aria-current="page"],
+[data-platform="ipad"] .tk-tab[aria-current="page"] {
+  flex: 1;
+  height: 100%;
+  margin: 0;
+  background: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+
+/*
+ * O indicador do Material fica ATRÁS DO ÍCONE, e não atrás do item inteiro.
+ *
+ * É a diferença de gramática entre os dois sistemas: no iOS a aba inteira vira
+ * uma peça de vidro; no Material o rótulo continua solto e só o ícone ganha uma
+ * pílula. Reaproveitar a lente sem reduzi-la daria um retângulo colorido de
+ * ponta a ponta, que não é nem uma coisa nem outra.
+ */
+[data-platform="android"] .tk-tab-bolha,
+[data-platform="desktop"] .tk-tab-bolha,
+[data-platform="ipad"] .tk-tab-bolha {
+  top: 8px;
+  height: 30px;
+  width: calc(100% / var(--tk-tabs, 3) - 40px);
+  left: calc(var(--tk-tab-i, 0) * 100% / var(--tk-tabs, 3) + 20px);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tk-accent, var(--tk-ultra-solid)) 30%, transparent);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+
+/* A barra assente ocupa espaço de verdade, então o conteúdo reserva menos: os
+   84px do arranjo flutuante (barra + os 18px de folga + a sombra) viram os 64
+   reais. */
+[data-platform="android"] .tk-main,
+[data-platform="desktop"] .tk-main,
+[data-platform="ipad"] .tk-main {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+}
+
+/* Ela não recolhe ao rolar: `tabBarMinimizeBehavior` é comportamento do iOS 26,
+   e uma barra encostada que some ao rolar é só uma barra que some. */
+[data-platform="android"] .tk-tabbar[data-min],
+[data-platform="desktop"] .tk-tabbar[data-min],
+[data-platform="ipad"] .tk-tabbar[data-min] {
+  transform: none;
+}
