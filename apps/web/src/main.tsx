@@ -3,6 +3,15 @@ import { createRoot } from "react-dom/client";
 
 import { App } from "./App.tsx";
 import { detectPlatform } from "./storage/install.ts";
+/*
+ * ⚠️ Importado pelo EFEITO, e nao pelo que exporta.
+ *
+ * `ui/tema.ts` le a preferencia salva e aplica o `data-tk` no import — antes de
+ * o React montar. Sem isto, o tema escolhido so era aplicado quando alguem
+ * abria a tela de Ajustes, porque era la que o `applyTheme` morava. Quem
+ * escolhia "Claro" e reabria o app via o tema do SISTEMA ate tocar em Ajustes.
+ */
+import "./ui/tema.ts";
 import { registerServiceWorker } from "./storage/updates.ts";
 import "./styles/base.css";
 import "./App.css";

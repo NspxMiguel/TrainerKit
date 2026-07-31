@@ -3,6 +3,8 @@ import { resolve } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+import { TYPE_NAMES, typeColor, typeInk } from "../sprites/provider.ts";
+
 /**
  * As cores do app, medidas em vez de julgadas.
  *
@@ -217,6 +219,42 @@ describe("contraste dos tokens", () => {
     expect(contraste(achatar(tinta, 0.61, claro), claro)).toBeGreaterThanOrEqual(MINIMO);
 
     expect(contraste(achatar(tinta, 0.45, claro), claro)).toBeLessThan(MINIMO);
+  });
+
+
+  it("a etiqueta de tipo é legível nas 19 cores", () => {
+    /*
+     * ⚠️ Este teste nasceu de um COMENTÁRIO FALSO.
+     *
+     * A tabela de cores de tipo dizia, em prosa, que fora "escolhida para
+     * manter o contraste do texto branco por cima". Nunca tinha sido medido.
+     * Medindo: DEZOITO das 19 reprovam — "Planta" saía com 2,21:1 na ficha da
+     * espécie, "Elétrico" com 1,63.
+     *
+     * Um comentário que afirma uma garantia que o código não dá é pior que
+     * comentário nenhum: ele impede a pergunta. Achado por um varredor que mede
+     * contraste tela por tela, no tema claro.
+     *
+     * A cor do tipo é DADO (ela identifica o tipo e não pode mudar), então quem
+     * cede é a tinta — escolhida por luminância, como `ui/paleta.ts` já fazia
+     * pro botão primário.
+     */
+    const ruins: string[] = [];
+    for (const tipo of [...TYPE_NAMES, "inexistente"]) {
+      const fundo = doHex(typeColor(tipo));
+      const tinta = doHex(typeInk(tipo));
+      const r = contraste(tinta, fundo);
+      if (r < MINIMO) ruins.push(`${tipo}: ${r.toFixed(2)} (${typeInk(tipo)} sobre ${typeColor(tipo)})`);
+    }
+    expect(ruins).toEqual([]);
+  });
+
+  it("o branco fixo que existia antes REPROVA — é o que este arquivo trava", () => {
+    // Sem este caso, alguém "simplifica" o `typeInk` de volta pra `#fff` e o
+    // teste acima continua verde, porque ele mediria a simplificação e não a
+    // regra. Aqui fica registrado o número que motivou a mudança.
+    expect(contraste(doHex("#ffffff"), doHex(typeColor("grass")))).toBeLessThan(MINIMO);
+    expect(contraste(doHex("#ffffff"), doHex(typeColor("electric")))).toBeLessThan(2);
   });
 
   it("pega a cor que eu tinha deixado passar", () => {
