@@ -22,6 +22,7 @@ import { IconAlert, IconCamera, IconShield, IconSwords } from "../ui/Icons.tsx";
 import { InstallBanner } from "../ui/InstallBanner.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 import { enquadrar, usarPaleta } from "../ui/paleta.ts";
+import { Colecoes } from "./Colecoes.tsx";
 import { GymPicks } from "./GymPicks.tsx";
 import { InstallGuide } from "./InstallGuide.tsx";
 import { IVCalculator } from "./IVCalculator.tsx";
@@ -358,6 +359,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
    * colecao. Guardar os dois juntos e o que permite a mesma tela responder as
    * duas perguntas — "esse Pokemon presta?" e "o que eu faco com o MEU?".
    */
+  const [contasAberto, setContasAberto] = useState(false);
   const [detail, setDetail] = useState<
     { species: DatasetSpecies; owned?: OwnedPokemon | undefined } | null
   >(null);
@@ -564,7 +566,14 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
           {t(greetingKey())}, {setup.name.trim() || t("home.trainer")}.
         </p>
         {/*
-          O avatar SO no modo colecao.
+          O avatar abre a TROCA DE CONTA, e nao mais a lista "Meus".
+
+          "esse M, no caso, a conta da pessoa ... onde vc pode criar varias
+          contas, varias coleçÕes."
+
+          Antes ele levava pra colecao — um destino plausivel, mas nao o que o
+          simbolo promete. Disco com a inicial e, em todo app, "a sua conta"; e
+          agora ha conta de verdade atras dele.
 
           "esse M, no caso, a conta da pessoa, so aparece no modo coleção, onde
           vc pode criar varias contas, varias coleçÕes. pra pessoas q tem varias
@@ -582,8 +591,8 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
           <button
             type="button"
             className="tk-avatar"
-            onClick={() => onGo("pokedex", { view: "mine" })}
-            aria-label={t("nav.pokedex")}
+            onClick={() => setContasAberto(true)}
+            aria-label={t("colecoes.title")}
           >
             {(setup.name.trim() || t("home.trainer")).slice(0, 1).toUpperCase()}
           </button>
@@ -916,6 +925,8 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
           }}
         />
       )}
+
+      {contasAberto && <Colecoes onClose={() => setContasAberto(false)} />}
 
       {detail && data && (
         <SpeciesDetail
