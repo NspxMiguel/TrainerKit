@@ -5,12 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && pnpm audit:bundle",
+    "build": "pnpm ocr:fetch && tsc -b && vite build && pnpm audit:bundle",
     "preview": "vite preview --port 4273 --strictPort",
     "typecheck": "tsc --noEmit",
     "icons": "node --experimental-strip-types scripts/make-icons.ts",
     "test": "vitest run",
-    "audit:bundle": "tsx scripts/audit-bundle.ts"
+    "audit:bundle": "tsx scripts/audit-bundle.ts",
+    "ocr:fetch": "tsx scripts/fetch-ocr.ts"
   },
   "dependencies": {
     "@mlc-ai/web-llm": "^0.2.84",
@@ -19,7 +20,8 @@
     "fflate": "^0.8.3",
     "kokoro-js": "^1.2.1",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
     "@types/node": "^26.1.2",
