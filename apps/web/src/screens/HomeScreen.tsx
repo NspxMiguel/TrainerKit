@@ -795,15 +795,46 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
                     type="button"
                     className="tk-strip-cell"
                     data-hot={(!d.feito && PEDEM_ACAO.includes(d.verdict.action)) || undefined}
+                    /*
+                      ⚠️ CUMPRIDO TEM QUE PARECER CUMPRIDO.
+
+                      "eu ja coloquei feito. pq ainda aparece investir? o botao
+                      certinho ali do lado tbm n faz nada."
+
+                      O botao FAZIA: a acao era gravada, o contador caia e o
+                      destaque passava pro proximo. So que a celula da fila
+                      continuava com o anel verde e a palavra INVESTIR embaixo,
+                      e o proximo destaque tambem dizia "Investir" — entao a
+                      unica confirmacao visivel era um numero mudando de 3 pra 2
+                      no meio de uma linha em versalete.
+
+                      Um botao cujo efeito nao aparece e indistinguivel de um
+                      botao quebrado, e ele leu como quebrado. Estava certo em
+                      ler assim.
+
+                      O `feito` ja era calculado logo acima e servia so pra
+                      filtrar a lista de pendencias; a fila recebia o mesmo
+                      objeto e ignorava o campo. Terceira vez nesta sessao que o
+                      nucleo calcula e a tela nao mostra.
+                    */
+                    data-feito={d.feito || undefined}
                     style={{
-                      ["--tk-cell-tone" as string]: TONE[d.verdict.action],
+                      // Cumprido perde o tom do veredito: cor de veredito num
+                      // bicho que ja foi resolvido continua cobrando algo.
+                      ["--tk-cell-tone" as string]: d.feito
+                        ? "var(--tk-border-strong)"
+                        : TONE[d.verdict.action],
                       // Indice da cascata: a fila entra da esquerda pra direita,
                       // o que ja diz que ela rola.
                       ["--tk-i" as string]: i,
                     }}
                     onClick={() => setDetail({ species: d.species, owned: d.owned })}
-                    aria-label={`${d.species.name} · ${t(ACTION_KEYS[d.verdict.action] as Key)}`}
-                    title={`${d.species.name} · ${t(ACTION_KEYS[d.verdict.action] as Key)}`}
+                    aria-label={`${d.species.name} · ${
+                      d.feito ? t("collection.done") : t(ACTION_KEYS[d.verdict.action] as Key)
+                    }`}
+                    title={`${d.species.name} · ${
+                      d.feito ? t("collection.done") : t(ACTION_KEYS[d.verdict.action] as Key)
+                    }`}
                   >
                     <SpeciesTile
                       spriteId={d.species.spriteId}
@@ -827,7 +858,15 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
                       leitor de tela e nao pra quem enxerga mal cor.
                     */}
                     <span className="tk-strip-verdito">
-                      {t(ACTION_KEYS[d.verdict.action] as Key)}
+                      {/*
+                        O visto vem ANTES da palavra, e nao no lugar dela.
+
+                        Sozinho, o "✓" seria informacao so por forma — a mesma
+                        falha que o rotulo do veredito existe pra corrigir. Com
+                        a palavra junto, quem enxerga mal cor le "FEITO" e quem
+                        bate o olho ve o visto.
+                      */}
+                      {d.feito ? `✓ ${t("collection.done")}` : t(ACTION_KEYS[d.verdict.action] as Key)}
                     </span>
                   </button>
                 ))}

@@ -2153,6 +2153,30 @@
 }
 
 /*
+ * ⚠️ O QUE JA FOI FEITO PRECISA PARECER FEITO.
+ *
+ * "eu ja coloquei feito. pq ainda aparece investir? o botao certinho ali do lado
+ * tbm n faz nada."
+ *
+ * O botao gravava, o contador caia e o destaque passava pro proximo — mas a
+ * celula da fila ficava identica, anel verde e "INVESTIR" embaixo, pra sempre.
+ * Como o proximo destaque tambem dizia "Investir", a tela inteira parecia nao
+ * ter mudado. Efeito invisivel le como botao quebrado, e foi assim que ele leu.
+ *
+ * O tom neutro vem do React (`--tk-cell-tone`); aqui fica o que e so aparencia:
+ * o selo recua e o rotulo sai da cor de veredito, que a 0.11 de alfa seria
+ * texto invisivel. Recuar, e nao apagar: o Pokemon continua na colecao e
+ * continua clicavel — o que acabou foi a pendencia, nao ele.
+ */
+.tk-strip-cell[data-feito] .tk-mono {
+  opacity: 0.55;
+}
+
+.tk-strip-cell[data-feito] .tk-strip-verdito {
+  color: var(--tk-text-3);
+}
+
+/*
  * ⚠️ NAO adicionar anterior/proximo aqui.
  *
  * Eu adicionei, e era DUPLICATA: o aparelho ja tem os dois botoes embaixo, ao
