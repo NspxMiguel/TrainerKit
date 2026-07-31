@@ -60,6 +60,25 @@ export type MessageKey =
   | "assistant.headline.weak"
   | "assistant.headline.plain"
   | "assistant.headline.speciesOnly"
+  /*
+   * ---- faxina
+   *
+   * Duas famílias, e a divisão não é organizacional: `solto.*` justifica uma
+   * sugestão de transferir e `preso.*` justifica a RECUSA de sugerir. A segunda
+   * é a que sustenta a confiança na primeira — é ela que responde "cadê o meu
+   * sortudo?" antes que a pergunta vire desconfiança na lista inteira.
+   */
+  | "faxina.solto.duplicado"
+  | "faxina.solto.melhorRuim"
+  | "faxina.preso.semIv"
+  | "faxina.preso.sortudo"
+  | "faxina.preso.sombroso"
+  | "faxina.preso.lendario"
+  | "faxina.preso.desconhecida"
+  | "faxina.preso.great"
+  | "faxina.preso.ultra"
+  | "faxina.preso.master"
+  | "faxina.preso.raide"
   // ---- troca
   | "trade.yes"
   | "trade.no.alreadyGood"

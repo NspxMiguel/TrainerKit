@@ -17,3 +17,4 @@ export * from "./dex.js";
 export * from "./gym.js";
 export * from "./team.js";
 export * from "./trade.js";
+export * from "./faxina.js";

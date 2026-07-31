@@ -1,6 +1,13 @@
 import { useMemo, useState } from "react";
 
-import { ACTION_KEYS, avaliarTroca, decide, ivTotalOf } from "@trainerkit/core";
+import {
+  ACTION_KEYS,
+  avaliarTroca,
+  decide,
+  ivTotalOf,
+  planejarFaxina,
+  type EspecieFaxina,
+} from "@trainerkit/core";
 
 import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
 import { useT, type Key } from "../i18n/t.ts";
@@ -16,6 +23,7 @@ import { AskBox } from "../ui/AskBox.tsx";
 import { setEmGrade, useEmGrade } from "../ui/vistaColecao.ts";
 import { IconGrid, IconList, IconPlus } from "../ui/Icons.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
+import { Faxina } from "./Faxina.tsx";
 import { SpeciesDetail } from "./SpeciesDetail.tsx";
 import { SpeciesPicker } from "./SpeciesPicker.tsx";
 
@@ -35,6 +43,7 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
     null,
   );
   const [message, setMessage] = useState<string | null>(null);
+  const [faxinando, setFaxinando] = useState(false);
 
   const grade = useEmGrade();
 
@@ -68,6 +77,50 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
 
       return { owned, species: s, verdict };
     });
+  }, [items, ready, species, dataset]);
+
+  /*
+   * Quantos podem sair, contado ANTES de a pessoa abrir a faxina.
+   *
+   * "Faxina" sozinho é um nome de tela; "Faxina · 23 podem sair" é uma resposta.
+   * A tese do app é decidir em vez de exibir, e um atalho que obriga a entrar
+   * pra descobrir se há algo lá é exatamente o trabalho que ele deveria poupar.
+   *
+   * O custo é baixo porque `rankOf` guarda a tabela de stat product por espécie
+   * e liga: os vereditos logo acima já pagaram esse cálculo, e aqui ele volta do
+   * cache.
+   */
+  const podemSair = useMemo(() => {
+    if (!ready || items === null || items.length === 0) return 0;
+
+    const mapa = new Map<string, EspecieFaxina>();
+    for (const o of items) {
+      if (mapa.has(o.speciesId)) continue;
+      const s = species.find((x) => x.id === o.speciesId);
+      if (!s) continue;
+      mapa.set(s.id, {
+        id: s.id,
+        baseStats: s.baseStats,
+        evolvesInto: s.evolvesInto,
+        candyToEvolve: s.evolvesInto[0] ? (s.candyToEvolve[s.evolvesInto[0]] ?? null) : null,
+        legendary: s.legendary ?? false,
+      });
+    }
+
+    return planejarFaxina({
+      bichos: items.map((o) => ({
+        id: o.id,
+        speciesId: o.speciesId,
+        ivs: o.ivs,
+        level: o.level,
+        lucky: o.lucky,
+        shadow: o.shadow,
+        ivDesconhecido: o.ivDesconhecido === true,
+      })),
+      especies: mapa,
+      cpm: dataset.status === "ready" ? dataset.data.cpm : [],
+      levelCap: dataset.status === "ready" ? dataset.data.version.levelCap : 55,
+    }).soltos.length;
   }, [items, ready, species, dataset]);
 
   const download = async () => {
@@ -140,6 +193,33 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
           </button>
         )}
       </div>
+
+      {/*
+        A porta da faxina, e ela só aparece quando há o que fazer.
+
+        Um atalho permanente dizendo "0 podem sair" seria mobília: ocupa a
+        primeira dobra da lista todo dia pra dizer que não há nada a fazer. Ele
+        entra quando o app tem uma resposta, e some quando não tem — que é o
+        mesmo critério dos outros avisos da home.
+      */}
+      {podemSair > 0 && (
+        <div className="tk-banner tk-banner--act" style={{ marginBottom: 14 }}>
+          <button
+            type="button"
+            className="tk-banner-open"
+            aria-label={t("faxina.title")}
+            onClick={() => setFaxinando(true)}
+          />
+          <div className="tk-banner-text">
+            <div className="tk-banner-title">{t("faxina.title")}</div>
+            <p className="tk-banner-body">
+              {podemSair === 1
+                ? t("faxina.openDetail.one")
+                : t("faxina.openDetail.many", { n: podemSair.toLocaleString(language) })}
+            </p>
+          </div>
+        </div>
+      )}
 
       {rows === null ? (
         <p className="tk-body">{t("common.loading")}</p>
@@ -426,6 +506,10 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
           }}
           onClose={() => setPicking(false)}
         />
+      )}
+
+      {faxinando && ready && (
+        <Faxina data={dataset.data} onClose={() => setFaxinando(false)} />
       )}
 
       {open && ready && (
