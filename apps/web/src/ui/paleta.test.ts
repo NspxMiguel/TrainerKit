@@ -550,6 +550,106 @@ describe("paleta por espécie", () => {
     expect(escuras).toEqual([]);
   });
 
+  it("o degradê claro DEGRADÊ — a última parada é bem mais escura que a primeira", () => {
+    /*
+     * ⚠️ O teste que faltava, e a falta dele custou a tela inteira.
+     *
+     * "nooooosa, fico muito paia isso no modo claro, degrade sumiu, o fundo,
+     * tudo."
+     *
+     * A primeira versão do hero claro tinha só PISO de luminância (0,42) e meia
+     * saturação. Os três testes acima passavam — contraste do nome, contraste
+     * da saudação, topo claro de verdade — porque os três medem cada parada
+     * SOZINHA. Nenhum deles perguntava se as três eram diferentes entre si.
+     *
+     * E não eram: em espécie clara as três subiam pro mesmo quase-branco. Um
+     * gradiente cujas paradas coincidem é um retângulo, e foi exatamente isso
+     * que apareceu na tela dele.
+     *
+     * A regra: pelo menos 0,22 de luminância entre a primeira e a última. É o
+     * suficiente pra rampa ser visível a olho nu sem que a base fique escura
+     * demais pro texto quase-preto que mora nela.
+     */
+    const chatas: string[] = [];
+    for (const id of ids) {
+      const paradas = paletaDaEspecie(id).gradienteClaro.match(/#[0-9a-f]{6}/gi) ?? [];
+      const topo = luminancia(paradas[0] ?? "#ffffff");
+      const base = luminancia(paradas[paradas.length - 1] ?? "#ffffff");
+      if (topo - base < 0.22) {
+        chatas.push(`#${id}: ${paradas.join(" → ")} varia só ${(topo - base).toFixed(3)}`);
+      }
+    }
+    expect(chatas).toEqual([]);
+  });
+
+  it("o degradê claro não escurece a ponto de virar o tema escuro", () => {
+    // O outro lado da mesma régua. Sem ele, "dar mais cor" vira licença pra
+    // descer até um hero preto num app branco — que é o defeito oposto, e o
+    // que a versão pálida estava tentando (errado) evitar.
+    const escuras: string[] = [];
+    for (const id of ids) {
+      const paradas = paletaDaEspecie(id).gradienteClaro.match(/#[0-9a-f]{6}/gi) ?? [];
+      const base = luminancia(paradas[paradas.length - 1] ?? "#ffffff");
+      if (base < 0.24) escuras.push(`#${id}: base ${paradas[paradas.length - 1]} em ${base.toFixed(3)}`);
+    }
+    expect(escuras).toEqual([]);
+  });
+
+  it("a tinta de fundo do tema CLARO também não derruba o texto", () => {
+    /*
+     * ⚠️ O espelho do teste acima, e ele faltava.
+     *
+     * A tinta do fundo claro estava em 9% — invisível — e o app inteiro parecia
+     * branco: "nooooosa, fico muito paia isso no modo claro, degrade sumiu, o
+     * fundo, tudo". Subir pra 18% devolve a cor da espécie à tela, e é aqui que
+     * a subida deixa de ser palpite.
+     *
+     * A conta repete a do `design.css`: `--tk-accent` (a cor CHEIA, e não a
+     * `topo`, que é escura e serve ao tema escuro) misturada sobre a parada mais
+     * clara do `--tk-screen`, com o texto composto por cima. Se os dois arquivos
+     * discordarem, isto mede ficção — por isso o número aparece literal nos dois.
+     *
+     * Medido: 22% ainda passa (4,57 no pior caso), 26% já reprova. 18% é o valor
+     * com folga.
+     */
+    const TINTA = 0.18;
+    const TELA = { r: 0xff, g: 0xff, b: 0xff };
+    const TINTA_TEXTO: [number, number, number] = [22, 24, 29];
+
+    const canais = (hexa: string) => {
+      const n = parseInt(hexa.slice(1), 16);
+      return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+    };
+    const paraHexa = (c: { r: number; g: number; b: number }) =>
+      `#${[c.r, c.g, c.b].map((v) => Math.round(v).toString(16).padStart(2, "0")).join("")}`;
+    const sobre = (
+      frente: { r: number; g: number; b: number },
+      atras: { r: number; g: number; b: number },
+      a: number,
+    ) => ({
+      r: frente.r * a + atras.r * (1 - a),
+      g: frente.g * a + atras.g * (1 - a),
+      b: frente.b * a + atras.b * (1 - a),
+    });
+
+    const ruins: string[] = [];
+    for (const id of ids) {
+      const fundo = sobre(canais(paletaDaEspecie(id).base), TELA, TINTA);
+      // `--tk-text` cheio e `--tk-text-2/3` em .65, que sao os que pousam
+      // direto no fundo (titulo, sobrelinha, legenda fora de cartao).
+      for (const alfa of [1, 0.65]) {
+        const texto = sobre(
+          { r: TINTA_TEXTO[0], g: TINTA_TEXTO[1], b: TINTA_TEXTO[2] },
+          fundo,
+          alfa,
+        );
+        const r = contraste(paraHexa(texto), paraHexa(fundo));
+        if (r < 4.5) ruins.push(`#${id} alfa ${alfa}: ${r.toFixed(2)}`);
+      }
+    }
+    expect(ruins).toEqual([]);
+  });
+
   it("espécie sem paleta cai no plano B em vez de quebrar", () => {
     const p = paletaDaEspecie(999999);
     expect(p.cruas).toEqual([]);
