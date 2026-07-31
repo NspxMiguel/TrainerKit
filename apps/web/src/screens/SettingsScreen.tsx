@@ -17,6 +17,7 @@ import { FeedbackScreen } from "./FeedbackScreen.tsx";
 import { HelpProject } from "./HelpProject.tsx";
 import { PrivacyScreen } from "./PrivacyScreen.tsx";
 import { updateSetup, useSetup } from "../onboarding/setup.ts";
+import { salvarTema, temaSalvo, type Tema } from "../ui/tema.ts";
 import { useAi } from "../ai/provider.ts";
 import { chosenVoiceName, voiceOn } from "../ui/dexVoice.ts";
 import { SOURCE_KEYS, useSpriteSettings } from "../sprites/settings.ts";
@@ -44,7 +45,12 @@ interface Props {
   sources?: DatasetSource[] | undefined;
 }
 
-type Theme = "sistema" | "claro" | "escuro";
+/*
+ * O tipo do tema vem de `ui/tema.ts`, que e quem le e aplica. Duplicar a uniao
+ * aqui era como o `applyTheme` acabou existindo em dois lugares e valendo em
+ * um so.
+ */
+type Theme = Tema;
 
 /** Qual assunto esta aberto. `null` e o indice. */
 type Painel =
@@ -62,19 +68,11 @@ type Painel =
   | "feedback"
   | "help";
 
-const THEME_KEY = "tk:tema";
-
 const THEME_KEYS: Record<Theme, Key> = {
   sistema: "settings.theme.system",
   claro: "settings.theme.light",
   escuro: "settings.theme.dark",
 };
-
-function applyTheme(theme: Theme): void {
-  const el = document.documentElement;
-  if (theme === "sistema") el.removeAttribute("data-tk");
-  else el.setAttribute("data-tk", theme === "claro" ? "light" : "dark");
-}
 
 /**
  * Tamanho legivel.
@@ -138,13 +136,17 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
   const { t } = useT();
   const setup = useSetup();
   const [guideOpen, setGuideOpen] = useState(false);
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(THEME_KEY) as Theme | null) ?? "sistema",
-  );
+  /*
+   * ⚠️ A leitura e a aplicacao do tema mudaram pra `ui/tema.ts`, e nao por
+   * organizacao: elas moravam AQUI, num `useEffect` desta tela, e esta tela so
+   * monta quando alguem abre a aba. O tema salvo era ignorado no arranque.
+   *
+   * Aqui sobra o que e mesmo desta tela: o estado do controle.
+   */
+  const [theme, setTheme] = useState<Theme>(temaSalvo);
 
   useEffect(() => {
-    applyTheme(theme);
-    localStorage.setItem(THEME_KEY, theme);
+    salvarTema(theme);
   }, [theme]);
 
   const fechar = () => setPainel(null);

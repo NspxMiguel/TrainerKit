@@ -1376,7 +1376,13 @@
   font: 700 11px var(--tk-font);
   padding: 5px 11px;
   border-radius: 999px;
-  color: #fff;
+  /*
+   * ⚠️ A COR VEM DO REACT (`typeInk`), e nao daqui.
+   *
+   * Estava `color: #fff` fixo, e branco reprova 4,5:1 em 18 das 19 cores de
+   * tipo — "Planta" saia com 2,21. A tinta agora e escolhida por luminancia,
+   * por tipo, e o `contraste.test.ts` cobra as 19.
+   */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 

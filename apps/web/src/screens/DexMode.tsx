@@ -13,7 +13,7 @@ import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
 import { useLanguage } from "../i18n/language.ts";
 import { useT, type Key } from "../i18n/t.ts";
 import { useSetup } from "../onboarding/setup.ts";
-import { typeColor, typeKey } from "../sprites/provider.ts";
+import { typeColor, typeInk, typeKey } from "../sprites/provider.ts";
 import { useCollection } from "../storage/collection.ts";
 import { markSeen, seenIds, useSeenCount, wasSeen } from "../storage/seen.ts";
 import { IconCamera, IconSearch } from "../ui/Icons.tsx";
@@ -542,7 +542,11 @@ export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
           <span className="tk-dexdev-nome">{ficha.name}</span>
           <span className="tk-dexdev-tipos">
             {ficha.types.map((tp) => (
-              <span key={tp} className="tk-dexdev-tipo" style={{ background: typeColor(tp) }}>
+              <span
+                key={tp}
+                className="tk-dexdev-tipo"
+                style={{ background: typeColor(tp), color: typeInk(tp) }}
+              >
                 {t(typeKey(tp) as "type.normal")}
               </span>
             ))}

@@ -29,7 +29,7 @@ import {
   useCollection,
   type OwnedPokemon,
 } from "../storage/collection.ts";
-import { typeColor, typeKey } from "../sprites/provider.ts";
+import { typeColor, typeInk, typeKey } from "../sprites/provider.ts";
 import { AssistantCard } from "../ui/AssistantCard.tsx";
 import { IconSwords } from "../ui/Icons.tsx";
 import { Segmented } from "../ui/Segmented.tsx";
@@ -390,7 +390,13 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
           <div className="tk-hero-dex">#{String(species.dex).padStart(3, "0")}</div>
           <div className="tk-hero-tipos">
             {species.types.map((tp) => (
-              <span key={tp} className="tk-hero-tipo" style={{ background: typeColor(tp) }}>
+              <span
+                key={tp}
+                className="tk-hero-tipo"
+                /* A tinta acompanha a cor: branco reprovava 4,5:1 em 18 dos 19
+                   tipos. Ver `typeInk`. */
+                style={{ background: typeColor(tp), color: typeInk(tp) }}
+              >
                 {t(typeKey(tp) as "type.normal")}
               </span>
             ))}
