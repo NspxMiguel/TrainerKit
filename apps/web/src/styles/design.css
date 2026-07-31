@@ -1290,14 +1290,25 @@
  * Fica abaixo do numero e da arte: e luz de fundo, nao camada.
  */
 .tk-hero-brilho {
-  position: absolute;
-  left: 50%;
-  top: 46%;
-  width: 92%;
-  aspect-ratio: 1;
-  transform: translate(-50%, -50%);
-  z-index: 0;
   /*
+   * ⚠️ `inset: 0` E ELIPSE, e nao um quadrado de 92% centrado em 46%.
+   *
+   * "da pra ver diferença ainda" — sobre a mesma emenda embaixo da saudacao,
+   * depois de a rampa da faixa ja ter sido acertada. Escondi este elemento no
+   * navegador e a emenda SUMIU: era ele.
+   *
+   * A conta: o quadrado media 345px num hero de 288 e ficava centrado em 46% da
+   * altura, entao a borda dele nascia 40px ACIMA do hero. O `overflow: hidden`
+   * do hero cortava esses 40px — e no ponto do corte o radial ainda pintava
+   * ~5,6% da segunda cor. Ou seja, a primeira linha de pixels do hero recebia
+   * um veu verde que a faixa acima nao recebia. Duas cores iguais separadas por
+   * um veu de 5% leem como linha.
+   *
+   * Com a caixa colada no hero e um radial ELIPTICO de 40% de raio vertical
+   * centrado em 48%, o brilho comeca em 8% da altura — sempre, em qualquer
+   * tamanho de hero, porque as duas medidas sao proporcionais. Nao ha corte
+   * possivel, entao nao ha aresta.
+   *
    * Duas camadas: um ESCURECIMENTO no miolo e o brilho da segunda cor em volta.
    *
    * So o brilho nao bastava. Ele usa `--tk-accent-2`, que em muitas especies e
@@ -1306,10 +1317,13 @@
    * matiz, porque a diferenca que ele cria e de CLARIDADE, e nao de cor — e
    * claridade e a unica dimensao que o contorno do bicho sempre atravessa.
    */
+  position: absolute;
+  inset: 0;
+  z-index: 0;
   background:
-    radial-gradient(closest-side, rgba(0, 0, 0, 0.34), transparent 68%),
+    radial-gradient(64% 40% at 50% 48%, rgba(0, 0, 0, 0.34), transparent 68%),
     radial-gradient(
-      closest-side,
+      64% 40% at 50% 48%,
       color-mix(in srgb, var(--tk-accent-2, #fff) 55%, transparent),
       color-mix(in srgb, var(--tk-accent-2, #fff) 12%, transparent) 62%,
       transparent 100%
