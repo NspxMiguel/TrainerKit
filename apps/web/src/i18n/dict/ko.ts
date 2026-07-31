@@ -382,6 +382,7 @@ export const KO: Dict = {
   "sprites.manifestAria": "manifest 주소",
   "sprites.noneActive": "아무것도 내려받지 않습니다.",
   "sprites.manifestHelp": "manifest는 {nameField}와 {templateField}를 가진 JSON입니다 — 예: {example}. .zip에서는 파일 이름으로 맞춥니다: {byDex}는 도감 번호, {byName}은 이름. 폴더는 무시됩니다.",
+  "home.seeAll": "모두 보기",
   "home.quickScan": "스크린샷 스캔",
   "home.quickScanDetail": "정확한 개체값과 판정",
   "spread.title": "리그별 최적 개체값",

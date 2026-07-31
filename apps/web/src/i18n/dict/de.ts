@@ -378,6 +378,7 @@ export const DE: Dict = {
   "sprites.manifestPlaceholder": "https://beispiel.de/sprites.json",
   "sprites.noneActive": "Es wird nichts geladen.",
   "sprites.manifestHelp": "Das Manifest ist ein JSON mit {nameField} und {templateField} — zum Beispiel {example}. In der .zip zählt der Dateiname: {byDex} nach Pokédex-Nummer, {byName} nach Name. Ordner werden ignoriert.",
+  "home.seeAll": "Mehr",
   "home.quickScan": "Screenshot scannen",
   "home.quickScanDetail": "Exakte IV und ein Urteil",
   "spread.title": "Beste IV pro Liga",

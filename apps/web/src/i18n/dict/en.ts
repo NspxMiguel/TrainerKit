@@ -435,6 +435,7 @@ const EN = {
   "sprites.manifestPlaceholder": "https://example.com/sprites.json",
   "sprites.noneActive": "Nothing is downloaded.",
   "sprites.manifestHelp": "The manifest is a JSON with {nameField} and {templateField} — for example {example}. In a .zip, the file name is what matches: {byDex} by Pokédex number, {byName} by name. Folders are ignored.",
+  "home.seeAll": "See all",
   "home.quickScan": "Scan a screenshot",
   "home.quickScanDetail": "Exact IVs and a verdict",
   "spread.title": "Best IVs by league",
