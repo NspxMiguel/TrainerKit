@@ -885,3 +885,83 @@
 .tk-act {
   min-height: 68px;
 }
+
+/* ─────────────────────────────────────── o hero na ficha da especie ────── */
+
+/*
+ * A ficha usa O MESMO hero da home, com um modificador.
+ *
+ * "o app parece tres apps diferentes dependendo da tela." As duas telas mais
+ * vistas mostram a mesma coisa — um Pokemon e o que fazer com ele — e mostravam
+ * de dois jeitos: a home com arte gigante e cor da especie, a ficha com um tile
+ * de 116px ao lado de um titulo.
+ *
+ * Compartilhar as classes e o que impede a divergencia de voltar. O que muda
+ * aqui e so o que PRECISA mudar: altura propria (a ficha rola, a home nao) e um
+ * bloco de base com nome, numero e tipos em vez de veredito e botoes.
+ */
+.tk-hero--ficha {
+  /* Altura propria: aqui nao ha coluna de tela cheia repartindo sobra, porque
+     a ficha rola. Proporcional a tela mesmo assim — o handoff pede 38svh. */
+  height: clamp(280px, 38svh, 420px);
+  min-height: 0;
+  max-height: none;
+  /* Sobe pra debaixo da barra de status: o gradiente comeca na borda de cima,
+     como na home. */
+  margin-top: calc(var(--tk-safe-top) * -1);
+  margin-bottom: 20px;
+  border-radius: 0 0 30px 30px;
+}
+
+/* A seta de voltar, em vidro escuro sobre o gradiente — o mesmo material do
+   botao "ja fiz isso" da home, pra a folha nao ter um botao de outra familia. */
+.tk-hero--ficha .tk-sheet-close {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: rgba(10, 12, 16, 0.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 0.5px solid rgba(255, 255, 255, 0.28);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  line-height: 1;
+}
+
+.tk-hero--ficha .tk-hero-topo {
+  /* A seta fica a esquerda; sem isto o `space-between` do hero a jogaria pro
+     canto errado quando ela e filha unica. */
+  justify-content: flex-start;
+}
+
+.tk-hero-dex {
+  font: 600 13px var(--tk-mono);
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.tk-hero-tipos {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+/*
+ * As etiquetas de tipo continuam na cor do TIPO, e nao na da especie.
+ *
+ * Aqui a cor e DADO: "Dragao" verde num bicho e azul noutro destruiria a unica
+ * pista visual de tipo que a ficha tem. E a mesma regra que protege as cores de
+ * veredito — o acento pinta o que e decorativo, nunca o que significa.
+ */
+.tk-hero-tipo {
+  font: 700 11px var(--tk-font);
+  padding: 5px 11px;
+  border-radius: 999px;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}

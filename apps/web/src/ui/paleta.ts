@@ -226,6 +226,52 @@ export function gradienteDaEspecie(
   return `radial-gradient(72% 72% at 32% 24%, ${clara} 0%, ${escura} 100%)`;
 }
 
+const VARIAVEIS = [
+  "--tk-c1",
+  "--tk-c2",
+  "--tk-c3",
+  "--tk-accent",
+  "--tk-accent-2",
+  "--tk-accent-fg-escuro",
+  "--tk-accent-fg-claro",
+  "--tk-accent-grad",
+] as const;
+
+/**
+ * ⚠️ UMA PILHA, e não cada tela escrevendo por cima da outra.
+ *
+ * O `<html>` é um recurso compartilhado: a home pinta o app com o Pokémon em
+ * destaque, e a ficha da espécie, aberta por cima, pinta com o Pokémon aberto.
+ * Com dois `useEffect` independentes isso quebra na SAÍDA, não na entrada — a
+ * ficha fecha, sua limpeza apaga as variáveis, e o efeito da home não roda de
+ * novo porque as dependências dela não mudaram. O app voltaria pra home sem
+ * cor nenhuma, e o defeito só apareceria depois de abrir e fechar uma folha.
+ *
+ * A pilha desfaz isso: quem monta empilha, quem desmonta desempilha, e o topo é
+ * sempre reaplicado. Fechar a ficha devolve a cor da home sozinho.
+ */
+const pilha: Paleta[] = [];
+
+function aplicarTopo() {
+  const raiz = document.documentElement;
+  const topo = pilha[pilha.length - 1];
+  if (!topo) {
+    for (const k of VARIAVEIS) raiz.style.removeProperty(k);
+    return;
+  }
+  const valores: Record<(typeof VARIAVEIS)[number], string> = {
+    "--tk-c1": topo.cruas[0] ?? topo.base,
+    "--tk-c2": topo.cruas[1] ?? topo.cruas[0] ?? topo.base,
+    "--tk-c3": topo.cruas[2] ?? topo.cruas[1] ?? topo.cruas[0] ?? topo.base,
+    "--tk-accent": topo.base,
+    "--tk-accent-2": topo.segunda,
+    "--tk-accent-fg-escuro": topo.legivelEscuro,
+    "--tk-accent-fg-claro": topo.legivelClaro,
+    "--tk-accent-grad": topo.gradiente,
+  };
+  for (const k of VARIAVEIS) raiz.style.setProperty(k, valores[k]);
+}
+
 /**
  * Escreve a paleta no `<html>`.
  *
@@ -237,20 +283,12 @@ export function usarPaleta(spriteId: number | null): Paleta {
   const paleta = useMemo(() => paletaDaEspecie(spriteId), [spriteId]);
 
   useEffect(() => {
-    const raiz = document.documentElement;
-    const vars: Record<string, string> = {
-      "--tk-c1": paleta.cruas[0] ?? paleta.base,
-      "--tk-c2": paleta.cruas[1] ?? paleta.cruas[0] ?? paleta.base,
-      "--tk-c3": paleta.cruas[2] ?? paleta.cruas[1] ?? paleta.cruas[0] ?? paleta.base,
-      "--tk-accent": paleta.base,
-      "--tk-accent-2": paleta.segunda,
-      "--tk-accent-fg-escuro": paleta.legivelEscuro,
-      "--tk-accent-fg-claro": paleta.legivelClaro,
-      "--tk-accent-grad": paleta.gradiente,
-    };
-    for (const [k, v] of Object.entries(vars)) raiz.style.setProperty(k, v);
+    pilha.push(paleta);
+    aplicarTopo();
     return () => {
-      for (const k of Object.keys(vars)) raiz.style.removeProperty(k);
+      const i = pilha.lastIndexOf(paleta);
+      if (i >= 0) pilha.splice(i, 1);
+      aplicarTopo();
     };
   }, [paleta]);
 

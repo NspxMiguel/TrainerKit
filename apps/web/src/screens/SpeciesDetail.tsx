@@ -31,6 +31,7 @@ import { Segmented } from "../ui/Segmented.tsx";
 import { dexSystem, speciesDossier } from "../ai/dossier.ts";
 import { AiBubble } from "../ui/AiBubble.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
+import { usarPaleta } from "../ui/paleta.ts";
 import { IVCalculator } from "./IVCalculator.tsx";
 import { RaidCounters } from "./RaidCounters.tsx";
 
@@ -262,6 +263,10 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies, owned }: 
    */
   const podeSerChefe = species.evolvesInto.length === 0;
 
+  // A ficha manda na paleta enquanto esta aberta, e a home retoma ao fechar.
+  // A pilha em `ui/paleta.ts` cuida da troca nos dois sentidos.
+  const paleta = usarPaleta(species.spriteId);
+
   const evolutions = species.evolvesInto
     .map((id) => data.species.find((s) => s.id === id))
     .filter((s): s is DatasetSpecies => s !== undefined);
@@ -269,56 +274,61 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies, owned }: 
   return createPortal(
     <div className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={species.name} data-saindo={saindo || undefined}>
       {/*
-        Sem titulo no cabecalho.
+        O MESMO HERO DA HOME, aqui na ficha.
 
-        Ele dizia "Pokédex" — e mentia quando a tela era aberta pela Coleção,
-        que e de onde ela mais se abre. Pior: o nome da especie ja aparece
-        logo abaixo, em corpo 22, do lado do sprite. Eram duas linhas grandes
-        seguidas, uma delas errada, empurrando o conteudo pra baixo.
+        "o app parece tres apps diferentes dependendo da tela" — era a queixa
+        dele no briefing, e esta tela era o exemplo mais caro, porque e a mais
+        visitada: a home ganhou um Pokemon gigante com a cor da especie, e a
+        ficha continuava um tile de 116px ao lado de um titulo.
 
-        Fica so a seta, como nas telas de detalhe do proprio iOS: o que nomeia
-        a tela e o conteudo dela.
+        As classes sao literalmente as do hero da home, com um modificador. Nao
+        e economia de CSS: e o que impede as duas de divergirem de novo na
+        proxima mudanca. Se o hero mudar, muda nos dois.
+
+        Sem titulo no cabecalho, como antes: ele dizia "Pokédex" e mentia quando
+        a tela era aberta pela Colecao. Fica so a seta, e quem nomeia a tela e o
+        nome gigante do bicho.
       */}
-      <header className="tk-sheet-head">
-        <button
-          type="button"
-          className="tk-sheet-close"
-          onClick={fechar}
-          aria-label={t("common.back")}
-        >
-          ‹
-        </button>
-      </header>
+      <div
+        className="tk-hero tk-hero--ficha"
+        style={{ ["--tk-hero-grad" as string]: paleta.gradiente }}
+      >
+        <span className="tk-hero-brilho" aria-hidden="true" />
+        <span className="tk-hero-numero" aria-hidden="true">
+          {species.dex}
+        </span>
 
-      <div style={{ display: "flex", gap: 16, alignItems: "flex-start", marginBottom: 22 }}>
-        <SpeciesTile
-          spriteId={species.spriteId}
-          dex={species.dex}
-          speciesId={species.id}
-          name={species.name}
-          types={species.types}
-          size={116}
-        />
-        {/* O nome vive aqui, ao lado do sprite — nao so no cabecalho.
-            Antes ficava um bloco vazio neste ponto porque a dex e os tipos
-            comecavam alinhados ao topo, e o olho procurava o nome no vazio. */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h1 className="tk-h1 tk-h1--ao-lado">{species.name}</h1>
-          <div className="tk-species-dex" style={{ margin: "4px 0 10px" }}>
-            #{String(species.dex).padStart(3, "0")}
-          </div>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        <span className="tk-hero-art" aria-hidden="true">
+          <SpeciesTile
+            spriteId={species.spriteId}
+            dex={species.dex}
+            speciesId={species.id}
+            name={species.name}
+            types={species.types}
+            size={220}
+            bare
+          />
+        </span>
+
+        <span className="tk-hero-scrim" aria-hidden="true" />
+
+        <div className="tk-hero-topo">
+          <button
+            type="button"
+            className="tk-sheet-close"
+            onClick={fechar}
+            aria-label={t("common.back")}
+          >
+            ‹
+          </button>
+        </div>
+
+        <div className="tk-hero-base">
+          <div className="tk-hero-name">{species.name}</div>
+          <div className="tk-hero-dex">#{String(species.dex).padStart(3, "0")}</div>
+          <div className="tk-hero-tipos">
             {species.types.map((tp) => (
-              <span
-                key={tp}
-                style={{
-                  font: "700 11px var(--tk-font)",
-                  padding: "5px 10px",
-                  borderRadius: "var(--tk-r-chip)",
-                  background: typeColor(tp),
-                  color: "#fff",
-                }}
-              >
+              <span key={tp} className="tk-hero-tipo" style={{ background: typeColor(tp) }}>
                 {t(typeKey(tp) as "type.normal")}
               </span>
             ))}
