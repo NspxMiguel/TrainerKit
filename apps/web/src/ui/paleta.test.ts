@@ -143,14 +143,37 @@ describe("paleta por espécie", () => {
     expect(diferentes.length).toBeGreaterThan(ids.length * 0.5);
   });
 
-  it("nenhuma silhueta estoura a caixa, em nenhuma proporção de tela", () => {
+  /**
+   * O lado da arte, exatamente como o `--tk-lado` do `design.css` calcula.
+   *
+   * Ter a conta em UM lugar aqui é o que permite os três testes abaixo cobrarem
+   * coisas diferentes da mesma fórmula. Se o CSS mudar e isto não, os testes
+   * passam a medir ficção — por isso os números aparecem literais nos dois
+   * arquivos, com o comentário de lá apontando pra cá.
+   */
+  /** A altura do bloco de decisão — o `--tk-hero-bloco` do design.css. */
+  const BLOCO = 146;
+
+  function ladoDaArte(q: { larg: number; alt: number }, cqw: number, cqh: number): number {
+    return Math.min(
+      cqw / q.larg, //                     100cqw / larg
+      (1.2667 * cqh) / q.alt, //           126.67cqh / alt        — a cara livre
+      (0.95 * cqh + BLOCO) / q.alt, //     (95cqh + bloco) / alt  — os pés inteiros
+      710, //                              710px — 1,5x a resolução do arquivo
+    );
+  }
+
+  /** As caixas reais da faixa de cima do hero, do iPhone estreito ao desktop. */
+  const PROPORCOES: Array<[number, number]> = [
+    [339, 243], // iPhone de 375
+    [394, 300], // iPhone Pro Max
+    [584, 380], // contêiner do desktop
+    [339, 180], // hero espremido por um aviso na home
+  ];
+
+  it("nenhuma silhueta estoura a caixa pela lateral, em nenhuma proporção", () => {
     /*
      * "procura tudo po."
-     *
-     * O CSS escolhe o lado da arte com `min(cqw/larg, cqh/alt, cqh*1.5)`. Este
-     * teste refaz essa conta para as 1.142 × 2 fontes e para várias proporções
-     * de caixa — do iPhone estreito ao contêiner de 620px do desktop — e cobra
-     * que a silhueta caiba nas duas dimensões.
      *
      * ⚠️ O que isto protege é o TETO. Ele existe pra não ampliar uma silhueta
      * pequena até mostrar o pixel; se alguém subir esse número achando que
@@ -158,20 +181,84 @@ describe("paleta por espécie", () => {
      * isso vira teste vermelho em vez de um Pokémon cortado que só aparece
      * quando alguém abre justamente aquele.
      */
-    const proporcoes: Array<[number, number]> = [
-      [339, 243], // iPhone de 375
-      [394, 300], // iPhone Pro Max
-      [584, 380], // contêiner do desktop
-      [339, 180], // hero espremido por um aviso na home
-    ];
     const ruins: string[] = [];
-    for (const [cqw, cqh] of proporcoes) {
+    for (const [cqw, cqh] of PROPORCOES) {
       for (const id of ids) {
         for (const fonte of ["artwork", "3d"] as const) {
           const q = enquadrar(id, fonte);
-          const lado = Math.min(cqw / q.larg, cqh / q.alt, cqh * 1.5);
+          const lado = ladoDaArte(q, cqw, cqh);
           if (q.larg * lado > cqw + 0.5) ruins.push(`#${id} ${fonte} ${cqw}×${cqh}: larga demais`);
-          if (q.alt * lado > cqh + 0.5) ruins.push(`#${id} ${fonte} ${cqw}×${cqh}: alta demais`);
+        }
+      }
+    }
+    expect(ruins).toEqual([]);
+  });
+
+  it("a cara fica livre do texto em TODA espécie, nas duas fontes", () => {
+    /*
+     * ⚠️ ESTE É O TESTE QUE ELE PEDIU COM TODAS AS LETRAS.
+     *
+     * "eu nao gsto disso, da cara do pokemon estar tapada. ent testa um por um,
+     * e deixa sempre a cara livre, sem nada. a cara e a parte da barriga pra
+     * cima."
+     *
+     * "Testa um por um" não é força de expressão neste app — foi assim que
+     * apareceram as 527 espécies desenhadas pequenas demais e as 823 com
+     * contraste reprovado, nenhuma delas visível nos oito Pokémon que eu tinha
+     * aberto. O nome cruzava a boca do Venusaur, o peito do Machamp e o rosto
+     * inteiro do Hoopa, e cada um exigiria um ajuste diferente.
+     *
+     * A regra, em geometria: o topo da silhueta fica em 5% da faixa, a faixa
+     * termina onde o nome começa, e os 75% de cima da silhueta têm que caber
+     * antes disso.
+     *
+     * ⚠️ 75%, e não os 62% que eu tinha posto primeiro. Num bípede a barriga
+     * fica por volta de 55% e 62% sobrava — mas o Venusaur é quadrúpede, tem a
+     * flor nas costas e o rosto descendo até 68% da silhueta. Medido na tela:
+     * com 62% o nome encostava no queixo dele.
+     */
+    const ruins: string[] = [];
+    for (const [cqw, cqh] of PROPORCOES) {
+      for (const id of ids) {
+        for (const fonte of ["artwork", "3d"] as const) {
+          const q = enquadrar(id, fonte);
+          const lado = ladoDaArte(q, cqw, cqh);
+          const topo = 0.05 * cqh;
+          const linhaDaBarriga = topo + 0.75 * q.alt * lado;
+          if (linhaDaBarriga > cqh + 0.5) {
+            ruins.push(
+              `#${id} ${fonte} ${cqw}×${cqh}: barriga em ${linhaDaBarriga.toFixed(0)}px de ${cqh}`,
+            );
+          }
+        }
+      }
+    }
+    expect(ruins).toEqual([]);
+  });
+
+  it("os pés não são cortados pelo fim do hero, em nenhuma altura de tela", () => {
+    /*
+     * O outro lado da mesma moeda, e a razão do teto de 120%.
+     *
+     * O que passa de 100% da faixa desce pro bloco de decisão — que tem altura
+     * FIXA (146px: nome, frase, botão e recuos) enquanto a faixa cresce com a
+     * tela. Deixar a silhueta chegar aos 127% que a regra da cara permitiria
+     * daria 128px de transbordo num hero de 620 — perto do limite — e sem esta
+     * regra o `overflow: hidden` do hero cortaria os pés no meio.
+     *
+     * ⚠️ O bloco é o piso, e não a faixa: em tela alta a faixa cresce e o bloco
+     * não. Testar só o aparelho pequeno esconderia exatamente o caso ruim.
+     */
+    const ruins: string[] = [];
+    for (const [cqw, cqh] of PROPORCOES) {
+      for (const id of ids) {
+        for (const fonte of ["artwork", "3d"] as const) {
+          const q = enquadrar(id, fonte);
+          const lado = ladoDaArte(q, cqw, cqh);
+          const pes = 0.05 * cqh + q.alt * lado;
+          if (pes > cqh + BLOCO + 0.5) {
+            ruins.push(`#${id} ${fonte} ${cqw}×${cqh}: pés em ${pes.toFixed(0)}px de ${cqh + BLOCO}`);
+          }
         }
       }
     }
