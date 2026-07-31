@@ -30,6 +30,7 @@ export const IT: Dict = {
   "home.greeting.afternoon": "Buon pomeriggio",
   "home.greeting.lateNight": "Ancora sveglio",
   "home.trainer": "Allenatore",
+  "home.todayPick": "IN EVIDENZA OGGI",
   "home.yourCollection": "La tua collezione",
   "home.hero.best": "Il tuo migliore",
   "home.hero.topRaid": "Miglior attaccante da raid ora",

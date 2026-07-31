@@ -46,6 +46,7 @@ const EN = {
   "home.greeting.afternoon": "Good afternoon",
   "home.greeting.lateNight": "Up late",
   "home.trainer": "Trainer",
+  "home.todayPick": "TODAY’S PICK",
   "home.yourCollection": "Your collection",
   "home.hero.best": "Your best one",
   "home.hero.topRaid": "Best raid attacker right now",
