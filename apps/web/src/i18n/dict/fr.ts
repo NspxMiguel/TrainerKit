@@ -297,6 +297,7 @@ export const FR: Dict = {
   "feedback.sorry": "Je m’excuse donc d’avance pour tout ce que vous trouverez de travers : un chiffre qui ne colle pas, une traduction bizarre, un écran cassé, une voix qui parle la mauvaise langue. C’est probablement mon erreur et je ne l’ai pas encore vue.",
   "feedback.ask": "Si vous pouvez me le dire, ça me fait vraiment plaisir. Une capture et une phrase sur ce qui s’est passé suffisent. C’est comme ça que la plupart des bugs ont été trouvés.",
   "feedback.send": "M’écrire",
+  "feedback.copied": "E-mail copié",
   "feedback.subject": "TrainerKit — retour",
   "feedback.privacy": "Le bouton ouvre votre propre application e-mail. Rien n’est envoyé d’ici, et je ne reçois rien tant que vous n’appuyez pas sur envoyer.",
   "feedback.ctx.app": "App",

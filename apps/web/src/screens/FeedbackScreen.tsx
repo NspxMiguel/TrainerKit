@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import { useT } from "../i18n/t.ts";
 
 /**
@@ -23,6 +25,7 @@ const EMAIL = "spxmiguel@icloud.com";
 
 export function FeedbackScreen() {
   const { t } = useT();
+  const [copiado, setCopiado] = useState(false);
 
   /*
    * O corpo já vem com o que eu sempre precisaria perguntar depois.
@@ -67,11 +70,42 @@ export function FeedbackScreen() {
         {t("feedback.send")}
       </a>
 
-      {/* O endereço também em texto: no computador nem sempre há app de e-mail
-          configurado, e aí o botão não faz nada. Poder copiar salva o relato. */}
-      <p className="tk-caption" style={{ marginTop: 10, textAlign: "center" }}>
-        {EMAIL}
-      </p>
+      {/*
+        ⚠️ O ENDEREÇO VIROU BOTÃO DE COPIAR — antes era só texto.
+
+        "tem uns botoes nas configuracoes q ianda n ta funciondo." Varri as treze
+        telas de Ajustes atrás disso: todas abrem, e todo botão tem gatilho. O
+        único beco sem saída é este — `mailto:` não faz NADA em computador sem
+        app de e-mail configurado, e é exatamente onde ele está testando.
+
+        O comentário antigo aqui já reconhecia o problema ("aí o botão não faz
+        nada. Poder copiar salva o relato") e parava em mostrar o texto: a pessoa
+        tinha que selecionar com o dedo um parágrafo de 11px. Reconhecer um
+        defeito no comentário não é consertá-lo.
+
+        Agora o endereço é um botão que copia e confirma. O `mailto:` continua
+        sendo o caminho principal onde ele funciona (celular), e isto é a saída
+        que sempre existe.
+      */}
+      <button
+        type="button"
+        className="tk-btn tk-btn--ghost tk-btn--block"
+        style={{ marginTop: 10, height: 38, fontSize: 13 }}
+        onClick={() => {
+          void navigator.clipboard
+            ?.writeText(EMAIL)
+            .then(() => {
+              setCopiado(true);
+              setTimeout(() => setCopiado(false), 2000);
+            })
+            /* Sem área de transferência (http sem TLS, navegador antigo) o texto
+               continua na tela pra selecionar na mão. Falhar calado aqui é
+               melhor que um alerta sobre uma conveniência. */
+            .catch(() => {});
+        }}
+      >
+        {copiado ? t("feedback.copied") : EMAIL}
+      </button>
 
       <p className="tk-caption" style={{ marginTop: 14, lineHeight: 1.6 }}>
         {t("feedback.privacy")}

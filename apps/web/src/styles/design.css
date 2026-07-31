@@ -4023,20 +4023,53 @@
   left: calc(var(--tk-tab-i, 0) * 100% / var(--tk-tabs, 3) + 20px);
   border-radius: 999px;
   /*
-   * ⚠️ A COR RESOLVIDA POR TEMA, e não `--tk-accent` cru.
+   * ⚠️ OPACO E MISTURADO NA SUPERFÍCIE, e não uma cor escura translúcida.
    *
-   * "ta meio escuro n da pra ve direito" — e nas outras espécies ficava o
-   * contrário. `--tk-accent` é a cor CHEIA do bicho, presa entre claridade 0,38
-   * e 0,62: num Pokémon amarelo, 30% dela sobre a barra clara some; num Pokémon
-   * escuro, vira um borrão. O indicador da aba ativa passava a ter contraste
-   * diferente a cada Pokémon, que é justamente o que a paleta inteira existe
-   * pra impedir.
+   * "botao de inicio dnv ferrado" — terceira versão desta pílula, e as duas
+   * anteriores erraram pelo mesmo motivo, com sinais opostos:
    *
-   * `--tk-accent-fg` já é a cor da espécie empurrada até passar 4,7:1 contra o
-   * fundo DO TEMA ATUAL — clara no escuro, escura no claro. Com ela o indicador
-   * fica sempre à mesma distância da barra, seja qual for o bicho.
+   *  1. `--tk-accent` cru a 30%: a cor CHEIA do bicho. Num Pokémon amarelo some
+   *     na barra clara, num escuro vira um borrão. O contraste do indicador
+   *     passava a depender de qual Pokémon estava em destaque.
+   *  2. `--tk-accent-fg` a 28%: a cor legível do tema, que no CLARO é escura de
+   *     propósito (luminância ≤ 0,146, pra servir de texto). Uma cor escura a
+   *     28% sobre uma barra creme dá cáqui lavado — cor de sujeira, não de
+   *     seleção.
+   *
+   * O erro em (2) foi de categoria: `--tk-accent-fg` é tinta de TEXTO, e eu usei
+   * como PREENCHIMENTO. Preenchimento claro se faz misturando a cor na
+   * superfície, não sobrepondo a tinta.
+   *
+   * Aqui a pílula é opaca e nasce de `--tk-elev` — a superfície da barra —
+   * puxada 42% na direção da cor da espécie. No claro dá um tom claro e nítido
+   * da matiz do bicho sobre a barra quase branca; no escuro, a 26%, dá o mesmo
+   * degrau na direção contrária. É a receita do `secondaryContainer` do
+   * Material, que é o sistema que esta barra imita.
    */
-  background: color-mix(in srgb, var(--tk-accent-fg, var(--tk-ultra-solid)) 28%, transparent);
+  /*
+   * ⚠️ A SEGUNDA MISTURA existe por causa das espécies AMARELAS.
+   *
+   * Misturar a cor na superfície resolve a matiz, mas não garante o degrau de
+   * claridade: amarelo tem luminância altíssima, então 42% de amarelo no branco
+   * continua quase branco — medido no Hoopa, 1,04 de razão contra a barra. Num
+   * Pokémon azul ou roxo o mesmo 42% escurece bastante. O indicador voltaria a
+   * ter contraste diferente a cada bicho, que é o defeito que já apareceu duas
+   * vezes aqui.
+   *
+   * `--tk-accent-fg` conserta isso sem exceção por matiz: ele é a cor da espécie
+   * empurrada pro lado LEGÍVEL do tema (escura no claro, clara no escuro). 12%
+   * dela garante que a pílula ande na direção contrária à barra seja qual for o
+   * tema — e a direção certa é escolhida pelo token, não por mim.
+   */
+  background: color-mix(
+    in srgb,
+    var(--tk-accent-fg, var(--tk-ultra-solid)) var(--tk-indicador-fundo, 12%),
+    color-mix(
+      in srgb,
+      var(--tk-accent, var(--tk-ultra-solid)) var(--tk-indicador-forca, 26%),
+      var(--tk-elev)
+    )
+  );
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   box-shadow: none;
@@ -4275,6 +4308,7 @@
   /* A sombra da barra de abas contra a tela. */
   --tk-barra-sombra: 0 12px 30px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.14);
   --tk-barra-tinta: 12%;
+  --tk-indicador-forca: 26%;
 
   /* Cartões e botões secundários: base, quanto de espécie entra, e o relevo. */
   --tk-cartao-base: var(--tk-surface-2);
@@ -4332,6 +4366,7 @@
    * ativo ficava em 2,4:1 em cima dela.
    */
   --tk-barra-tinta: 26%;
+  --tk-indicador-forca: 42%;
   --tk-lente-fundo: #ffffff;
   --tk-lente-borda: rgba(16, 19, 25, 0.08);
   --tk-lente-luz-topo: rgba(255, 255, 255, 0.9);
@@ -4415,6 +4450,7 @@
     --tk-chao-longe: rgba(16, 19, 25, 0.07);
 
     --tk-barra-tinta: 26%;
+    --tk-indicador-forca: 42%;
     --tk-lente-fundo: #ffffff;
     --tk-lente-borda: rgba(16, 19, 25, 0.08);
     --tk-lente-luz-topo: rgba(255, 255, 255, 0.9);
