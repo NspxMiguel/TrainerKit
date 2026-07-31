@@ -1877,80 +1877,13 @@
  * A altura total e fixa em 3 x 44px — a mesma altura de um campo de formulario,
  * contra os ~500px que dez idiomas ocupavam empilhados.
  */
-.tk-wheel {
-  position: relative;
-  height: 132px; /* 3 x --tk-wheel-item */
-  margin-top: var(--tk-s3);
-  border-radius: var(--tk-r-input);
-  background: var(--tk-surf);
-  border: 1px solid var(--tk-line);
-  overflow: hidden;
-}
 
 /* A faixa do meio: sinalizacao de onde a escolha acontece, nunca um alvo. */
-.tk-wheel-window {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 44px;
-  height: 44px;
-  background: var(--tk-pri-soft);
-  border-top: 1px solid var(--tk-pri-line);
-  border-bottom: 1px solid var(--tk-pri-line);
-  pointer-events: none;
-  z-index: 1;
-}
-
-.tk-wheel-scroll {
-  height: 100%;
-  overflow-y: auto;
-  scroll-snap-type: y mandatory;
-  scrollbar-width: none;
-  overscroll-behavior: contain;
-}
-
-.tk-wheel-scroll::-webkit-scrollbar {
-  display: none;
-}
 
 /* Meia janela em cima e embaixo, pra primeira e ultima opcao alcancarem o centro. */
-.tk-wheel-pad {
-  height: 44px;
-}
-
-.tk-wheel-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  height: 44px;
-  padding: 0 var(--tk-s4);
-  scroll-snap-align: start;
-  font: 500 15px var(--tk-font);
-  color: var(--tk-txt3);
-  text-align: left;
-  position: relative;
-  z-index: 2;
-  transition:
-    color 0.14s var(--tk-ease),
-    opacity 0.14s var(--tk-ease);
-}
-
-.tk-wheel-item[data-on] {
-  font-weight: 700;
-  color: var(--tk-pri-fg);
-}
 
 /* Quem esta a mais de uma posicao do centro some — e o que da a impressao de
    roda em vez de lista, sem nenhuma transformacao 3D. */
-.tk-wheel-item[data-far] {
-  opacity: 0.35;
-}
-
-.tk-wheel-glyph {
-  font-size: 18px;
-  line-height: 1;
-}
 
 /* --------------------------------------------------------- acao rapida da home */
 
