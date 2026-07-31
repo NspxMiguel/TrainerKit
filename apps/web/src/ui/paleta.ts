@@ -314,18 +314,61 @@ const ALVO = 4.7;
 const TETO_LUZ_HERO = 0.3;
 
 /**
- * O PISO de luminância das paradas do gradiente CLARO.
+ * As três paradas do hero CLARO, com PISO e TETO de luminância em cada uma.
  *
- * A conta é a inversa da do teto escuro. O nome do Pokémon no tema claro é
- * quase-preto (`#141920`, luminância 0,0104), e para texto grande o mínimo é
- * 3:1 — ou seja, `(L + 0,05) / 0,0604 >= 3`, logo `L >= 0,131`.
+ * ⚠️ A versão anterior tinha só piso (0,42) e meia saturação, e o resultado foi
+ * o que ele viu: **"nooooosa, fico muito paia isso no modo claro, degrade
+ * sumiu, o fundo, tudo"**. Estava tudo lá — só que tão pálido que as três
+ * paradas caíam praticamente na mesma cor, e um gradiente sem variação é um
+ * retângulo.
  *
- * 0,42 fica muito acima disso de propósito: o pedido foi "branco no modo
- * claro", e um piso apertado devolveria um tom médio, que é justamente o que
- * ele não quer ver. Com 0,42 as paradas ficam pálidas e o `paleta.test.ts`
- * varre as 1.142 pra provar que a folga existe em todas.
+ * O erro de projeto foi meu, e está escrito na nota que eu mesmo deixei:
+ * "pálido é o que faz ele ler como 'a tela é branca, com a cor do bicho'".
+ * Isso vale pra faixa do topo, que é onde a saudação mora. Não vale pro hero
+ * inteiro, que ocupa metade da tela e é o retrato do Pokémon — ali a cor é o
+ * assunto.
+ *
+ * Por que PISO **E** TETO, e não só um dos dois:
+ *
+ *  · O piso protege a leitura. O nome é quase-preto (`#141920`, luminância
+ *    0,0104): 3:1 pede L ≥ 0,131, e o texto pequeno do rodapé pede 0,29. Os
+ *    pisos abaixo ficam acima dos dois.
+ *  · O teto garante que a cor APAREÇA. Sem ele, amarelo e verde-claro sobem
+ *    sozinhos: `l = 0,68` num amarelo dá luminância 0,75, quase branco. Era
+ *    exatamente esse o buraco — as espécies claras perdiam o degradê inteiro, e
+ *    são muitas.
+ *
+ * As claridades (0,93 / 0,80 / 0,68) espelham as do tema escuro; o que inverte
+ * é a direção da rampa de luminância.
  */
-const PISO_LUZ_HERO_CLARO = 0.42;
+const HERO_CLARO = [
+  { l: 0.93, sat: 0.5, piso: 0.66, teto: 0.9 },
+  { l: 0.74, sat: 1.25, piso: 0.36, teto: 0.52 },
+  /*
+   * ⚠️ O piso desta é 0,28, e não 0,22 como eu tinha posto — o teste
+   * "não escurece a ponto de virar o tema escuro" reprovou na hora.
+   *
+   * 0,22 dá 3:1 pro nome (texto grande) e passaria nos testes de contraste,
+   * mas a FRASE embaixo do nome é texto pequeno e pede 4,5:1, ou seja
+   * luminância ≥ 0,29 sem contar com ajuda do véu. Como o véu do tema claro
+   * também enfraqueceu nesta mesma leva, contar com ele seria trocar uma
+   * garantia por uma coincidência.
+   */
+  { l: 0.58, sat: 1.6, piso: 0.28, teto: 0.4 },
+] as const;
+
+/*
+ * ⚠️ A SATURAÇÃO SOBE ACIMA DE 1 nas paradas de baixo, e isso não é engano.
+ *
+ * Cor sobre fundo claro precisa de mais croma pra ler como cor. O mesmo verde
+ * do Bulbasaur (`#46a280`) salta sobre preto e some sobre branco — é o fundo
+ * que muda o quanto do croma o olho aproveita, não a cor.
+ *
+ * O `Math.min(0.95, …)` continua valendo lá embaixo, então uma espécie
+ * dessaturada (Mewtwo, os cinzas) NÃO vira colorida: 1,35 × quase-nada continua
+ * quase-nada. O multiplicador devolve croma a quem tem, sem inventar pra quem
+ * não tem — que é a mesma regra do `sv` lá em cima.
+ */
 
 /** Sobe a claridade até a cor alcançar o piso de luminância, preservando a matiz. */
 function clarearAte(h: number, s: number, l: number, piso: number): string {
@@ -334,6 +377,27 @@ function clarearAte(h: number, s: number, l: number, piso: number): string {
   for (let i = 0; i < 60 && luminancia(cor) < piso; i++) {
     atual += 0.015;
     if (atual > 0.97) break;
+    cor = paraHex(h, s, atual);
+  }
+  return cor;
+}
+
+/**
+ * Encaixa a cor numa FAIXA de luminância, preservando a matiz.
+ *
+ * Sobe se estiver abaixo do piso, desce se estiver acima do teto, e não mexe
+ * quando já cabe — que é o caso da maioria das espécies. Andar nos dois
+ * sentidos é o que permite pedir "clara, mas não branca": com um limite só,
+ * metade das matizes escapa pelo outro lado.
+ */
+function entre(h: number, s: number, l: number, piso: number, teto: number): string {
+  let atual = l;
+  let cor = paraHex(h, s, atual);
+  for (let i = 0; i < 80; i++) {
+    const luz = luminancia(cor);
+    if (luz >= piso && luz <= teto) break;
+    atual += luz < piso ? 0.012 : -0.012;
+    if (atual > 0.99 || atual < 0.02) break;
     cor = paraHex(h, s, atual);
   }
   return cor;
@@ -428,14 +492,16 @@ export function paletaDaEspecie(spriteId: number | null): Paleta {
    */
   const topoCor = paraHex(h, Math.min(0.95, sv + 0.06), 0.22);
   /*
-   * O topo do tema CLARO: quase branco, com um sopro da espécie.
+   * As três paradas do hero CLARO, na faixa de luminância de cada uma.
    *
-   * A saudação fica em cima dele, em quase-preto, e precisa de 4,5:1 — o que
-   * pede luminância ≥ 0,222. 0,94 de claridade com um terço da saturação dá
-   * folga larga em todas as 1.142, inclusive nas espécies mais escuras, e
-   * mantém a tela parecendo branca, que foi o pedido.
+   * A primeira também é `topoClaro`: a faixa da saudação é pintada com ela pra
+   * encontrar o hero SEM EMENDA, e se as duas saíssem de contas diferentes
+   * voltaria a aparecer o fio horizontal que ele já circulou duas vezes.
    */
-  const topoClaroCor = clarearAte(h, sv * 0.34, 0.94, 0.62);
+  const paradasClaras = HERO_CLARO.map((p) =>
+    entre(h, Math.min(0.95, sv * p.sat), p.l, p.piso, p.teto),
+  );
+  const topoClaroCor = paradasClaras[0]!;
   let base = paraHex(h, sv, Math.min(0.62, Math.max(0.38, l)));
   const tinta = contraste(base, "#0a0c10") >= contraste(base, "#ffffff") ? "#0a0c10" : "#ffffff";
   {
@@ -498,22 +564,15 @@ export function paletaDaEspecie(spriteId: number | null): Paleta {
       `${escurecerAte(h, Math.max(0.4, sv - 0.04), 0.56, TETO_LUZ_HERO)} 72%`,
     ].join(", "),
     /*
-     * O MESMO desenho, espelhado pro tema claro.
+     * O MESMO desenho, espelhado pro tema claro — e agora COM COR.
      *
-     * ⚠️ A saturação cai pela metade, e isso não é gosto: a mesma matiz com a
-     * mesma saturação, só que clara, vira um pastel forte — e o hero ocupa
-     * metade da tela inicial. Pálido é o que faz ele ler como "a tela é branca,
-     * com a cor do bicho" em vez de "um cartaz colorido".
-     *
-     * A ordem das paradas se mantém: mais claro em cima, cor crescendo pra
-     * baixo. É a forma do handoff, e continua sendo a que faz a luz nascer
-     * atrás da cabeça do Pokémon.
+     * A ordem das paradas se mantém (mais claro em cima, cor crescendo pra
+     * baixo): é a forma do handoff, e é a que faz a luz nascer atrás da cabeça
+     * do Pokémon. O que mudou foi a AMPLITUDE — ver `HERO_CLARO`.
      */
-    gradienteClaro: [
-      `${topoClaroCor} 0%`,
-      `${clarearAte(h, sv * 0.5, 0.9, PISO_LUZ_HERO_CLARO)} 48%`,
-      `${clarearAte(h, Math.min(0.9, sv * 0.62), 0.82, PISO_LUZ_HERO_CLARO)} 72%`,
-    ].join(", "),
+    gradienteClaro: paradasClaras
+      .map((cor, i) => `${cor} ${[0, 48, 72][i]}%`)
+      .join(", "),
     topoClaro: topoClaroCor,
     topoClaroTinta:
       contraste(topoClaroCor, "#141920") >= contraste(topoClaroCor, "#ffffff")

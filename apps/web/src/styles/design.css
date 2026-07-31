@@ -659,7 +659,7 @@
    */
   /* 12% da tinta do tema: no claro ele vira um algarismo escuro e discreto,
      em vez de branco sobre branco, que e o mesmo que nao existir. */
-  color: color-mix(in srgb, var(--tk-hero-texto) 12%, transparent);
+  color: color-mix(in srgb, var(--tk-hero-texto) var(--tk-hero-numero-forca, 12%), transparent);
   pointer-events: none;
   user-select: none;
   white-space: nowrap;
@@ -695,10 +695,34 @@
     180deg,
     rgba(var(--tk-hero-veu), 0) 0%,
     rgba(var(--tk-hero-veu), 0) 50%,
-    rgba(var(--tk-hero-veu), 0.55) 78%,
+    rgba(var(--tk-hero-veu), var(--tk-hero-veu-forca, 0.55)) 78%,
     var(--tk-hero-ink) 100%
   );
   pointer-events: none;
+}
+
+/*
+ * ⚠️ O VÉU CLAREIA MENOS NO TEMA CLARO.
+ *
+ * A rampa de 0,55 foi calibrada pro escuro, onde ela ESCURECE — e escurecer o
+ * pé de um hero escuro não tira cor nenhuma, porque a cor já mora no meio.
+ *
+ * No claro o sinal inverte: o mesmo 0,55 branqueia justamente a faixa 50–78%,
+ * que é onde as paradas coloridas do gradiente vivem. Ou seja, eu dava croma
+ * com uma mão e apagava com a outra — parte do "degrade sumiu" era isto, e não
+ * o gradiente.
+ *
+ * 0,34 ainda fecha o pé (o último 22% vai pra `--tk-hero-ink` de qualquer
+ * jeito) e deixa a cor chegar até onde o nome começa.
+ */
+:root[data-tk="light"] .tk-hero-scrim {
+  --tk-hero-veu-forca: 0.34;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-tk="dark"]) .tk-hero-scrim {
+    --tk-hero-veu-forca: 0.34;
+  }
 }
 
 .tk-hero-topo {
@@ -2677,15 +2701,23 @@
 /*
  * No CLARO a mesma tinta faria o contrário: `--tk-accent-topo` é escura, e
  * escurecer um fundo branco derruba o texto escuro que vive nele. Aqui entra a
- * cor CHEIA da espécie, e em dose bem menor — o suficiente para a tela ter a
- * cor do bicho sem sair do branco.
+ * cor CHEIA da espécie.
+ *
+ * ⚠️ 18%, e eram 9%. "nooooosa, fico muito paia isso no modo claro, degrade
+ * sumiu, o fundo, tudo."
+ *
+ * 9% de uma cor média sobre branco é literalmente invisível — a tela ficava
+ * branca e a promessa do app ("as cores são moldadas com a cor do Pokémon")
+ * valia só no escuro. O número saiu de medição, como o 30% do escuro: varrendo
+ * as 1.142 espécies com os dois tokens de texto claro, 22% ainda passa (4,57) e
+ * 18% deixa a casa de folga que o dataset pode consumir na próxima atualização.
  */
 [data-tk="light"] {
   /* ⚠️ SO dentro do seletor de tema claro. Eu tinha escrito
      `:root:not([data-tk="dark"])` junto — e isso casa tambem com o padrao (sem
      atributo), que segue o SISTEMA: num aparelho no escuro a tinta cairia pra
      9% e o meio da tela voltaria a ser preto. */
-  --tk-tinta-fundo: 9%;
+  --tk-tinta-fundo: 18%;
   --tk-screen:
     radial-gradient(
       140vw 70vh at 50% 42%,
@@ -2697,7 +2729,7 @@
 
 @media (prefers-color-scheme: light) {
   :root:not([data-tk="dark"]) {
-    --tk-tinta-fundo: 9%;
+    --tk-tinta-fundo: 18%;
     --tk-screen:
       radial-gradient(
         140vw 70vh at 50% 42%,
@@ -3135,4 +3167,22 @@
   box-shadow:
     0 8px 24px color-mix(in srgb, var(--tk-accent, #6e4bff) 40%, transparent),
     inset 0 1px 0 rgb(255 255 255 / 22%);
+}
+
+/*
+ * A marca-d'água do número, mais fraca no tema CLARO.
+ *
+ * 12% de tinta escura sobre um fundo pálido não lê como marca-d'água: lê como
+ * sujeira. No escuro os mesmos 12% de branco somem no gradiente e o algarismo
+ * fica etéreo, que é o efeito que se quer nos dois — só que o número que
+ * produz esse efeito não é o mesmo dos dois lados.
+ */
+:root[data-tk="light"] .tk-hero-numero {
+  --tk-hero-numero-forca: 7%;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-tk="dark"]) .tk-hero-numero {
+    --tk-hero-numero-forca: 7%;
+  }
 }
