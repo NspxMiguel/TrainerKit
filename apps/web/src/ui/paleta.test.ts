@@ -109,33 +109,72 @@ describe("paleta por espécie", () => {
     expect(g).toMatch(/^#[0-9a-f]{6} 0%, #[0-9a-f]{6} 48%, #[0-9a-f]{6} 72%$/);
   });
 
-  it("enquadra toda espécie com o topo da silhueta no mesmo lugar", () => {
+  it("mede a silhueta de toda espécie, nas duas fontes de imagem", () => {
     /*
-     * "tem q testar pokemon por pokemon, pra sempre dar certo."
+     * "testo com todos os pokemons ja? procura tudo po."
      *
-     * É este teste. A arte oficial não enquadra os Pokémon igual — medido, a
-     * silhueta do Dragonite ocupa 91% da altura do PNG e a do Charizard 71% —
-     * e por isso o nome caía no rosto de uns e no pé de outros.
-     *
-     * Com o enquadramento medido, o topo da silhueta cai no MESMO ponto em
-     * todas. É o que faz um único layout servir para as 1.142 em vez de para a
-     * que eu conferi na tela.
+     * É este teste, e ele achou o que oito espécies na tela não achariam. As
+     * medidas têm que ser plausíveis para as 1.142 × 2 fontes: uma caixa
+     * degenerada (largura ou altura zero, topo fora do quadro) faria o CSS
+     * dividir por quase-zero e o bicho explodir na tela.
      */
-    const tab = tabela as unknown as Record<string, { b: [number, number, number, number] }>;
-    const topos = ids.map((id) => {
-      const e = enquadrar(id);
-      const b = tab[String(id)]!.b;
-      return b[1] * e.escala + e.deslocaY / 100;
-    });
-    const menor = Math.min(...topos);
-    const maior = Math.max(...topos);
-    // Meio ponto percentual de variação, que é arredondamento da caixa medida.
-    expect(maior - menor).toBeLessThan(0.005);
+    const ruins: string[] = [];
+    for (const id of ids) {
+      for (const fonte of ["artwork", "3d"] as const) {
+        const q = enquadrar(id, fonte);
+        if (q.larg <= 0.02 || q.larg > 1) ruins.push(`#${id} ${fonte}: larg ${q.larg}`);
+        if (q.alt <= 0.02 || q.alt > 1) ruins.push(`#${id} ${fonte}: alt ${q.alt}`);
+        if (q.topo < 0 || q.topo > 0.9) ruins.push(`#${id} ${fonte}: topo ${q.topo}`);
+        if (q.centroX < 0.05 || q.centroX > 0.95) ruins.push(`#${id} ${fonte}: cx ${q.centroX}`);
+      }
+    }
+    expect(ruins).toEqual([]);
   });
 
-  it("nunca amplia a ponto de borrar: escala com teto de 1,45", () => {
-    const demais = ids.filter((id) => enquadrar(id).escala > 1.45);
-    expect(demais).toEqual([]);
+  it("as duas fontes enquadram diferente — por isso as duas são medidas", () => {
+    // Se fossem iguais, a segunda caixa seria peso morto no pacote. Não são:
+    // Bulbasaur ocupa 85% da altura na arte oficial e 71% no render 3D.
+    const diferentes = ids.filter((id) => {
+      const a = enquadrar(id, "artwork");
+      const b = enquadrar(id, "3d");
+      return Math.abs(a.alt - b.alt) > 0.03 || Math.abs(a.topo - b.topo) > 0.03;
+    });
+    expect(diferentes.length).toBeGreaterThan(ids.length * 0.5);
+  });
+
+  it("nenhuma silhueta estoura a caixa, em nenhuma proporção de tela", () => {
+    /*
+     * "procura tudo po."
+     *
+     * O CSS escolhe o lado da arte com `min(cqw/larg, cqh/alt, cqh*1.5)`. Este
+     * teste refaz essa conta para as 1.142 × 2 fontes e para várias proporções
+     * de caixa — do iPhone estreito ao contêiner de 620px do desktop — e cobra
+     * que a silhueta caiba nas duas dimensões.
+     *
+     * ⚠️ O que isto protege é o TETO. Ele existe pra não ampliar uma silhueta
+     * pequena até mostrar o pixel; se alguém subir esse número achando que
+     * "deixa o bicho maior", espécies largas passam a vazar pela lateral. Aqui
+     * isso vira teste vermelho em vez de um Pokémon cortado que só aparece
+     * quando alguém abre justamente aquele.
+     */
+    const proporcoes: Array<[number, number]> = [
+      [339, 243], // iPhone de 375
+      [394, 300], // iPhone Pro Max
+      [584, 380], // contêiner do desktop
+      [339, 180], // hero espremido por um aviso na home
+    ];
+    const ruins: string[] = [];
+    for (const [cqw, cqh] of proporcoes) {
+      for (const id of ids) {
+        for (const fonte of ["artwork", "3d"] as const) {
+          const q = enquadrar(id, fonte);
+          const lado = Math.min(cqw / q.larg, cqh / q.alt, cqh * 1.5);
+          if (q.larg * lado > cqw + 0.5) ruins.push(`#${id} ${fonte} ${cqw}×${cqh}: larga demais`);
+          if (q.alt * lado > cqh + 0.5) ruins.push(`#${id} ${fonte} ${cqw}×${cqh}: alta demais`);
+        }
+      }
+    }
+    expect(ruins).toEqual([]);
   });
 
   it("espécie sem paleta cai no plano B em vez de quebrar", () => {

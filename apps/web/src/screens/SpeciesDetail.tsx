@@ -310,8 +310,10 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies, owned }: 
           aria-hidden="true"
           style={
             {
-              "--tk-art-escala": quadro.escala,
-              "--tk-art-y": `${quadro.deslocaY}%`,
+              "--tk-art-larg": quadro.larg,
+              "--tk-art-alt": quadro.alt,
+              "--tk-art-topo": quadro.topo,
+              "--tk-art-cx": quadro.centroX,
             } as CSSProperties
           }
         >
