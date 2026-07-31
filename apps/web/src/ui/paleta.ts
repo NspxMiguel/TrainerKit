@@ -65,6 +65,21 @@ export interface Paleta {
    */
   tinta: string;
   /**
+   * A cor do TOPO DA TELA: a primeira parada do gradiente, isolada.
+   *
+   * "faz a cor subir ate o topo da tela." A faixa acima do hero — onde vive a
+   * saudação — passa a ser pintada com ela, e é por isso que a cor precisa sair
+   * daqui em vez de o CSS tentar ler a primeira parada da lista: não há como
+   * fatiar uma variável de gradiente em CSS.
+   *
+   * Ela é escura de propósito (claridade 0,22), e isso não é estética: é o que
+   * garante que a saudação passe em contraste nas 1.142 espécies, inclusive nas
+   * amarelas e brancas. O `paleta.test.ts` cobra isso espécie por espécie.
+   */
+  topo: string;
+  /** A tinta que se lê sobre `topo`. Escolhida por luminância, como `tinta`. */
+  topoTinta: string;
+  /**
    * As três paradas do fundo do hero, COM POSIÇÃO — `#x 0%, #y 48%, #z 72%`.
    *
    * A posição vem junto porque o handoff a especifica, e porque o CSS não
@@ -159,6 +174,8 @@ const vazia: Paleta = {
   cruas: [],
   base: "#8e96a6",
   tinta: "#0a0c10",
+  topo: "#171a20",
+  topoTinta: "#ffffff",
   legivelEscuro: "#aab2c0",
   legivelClaro: "#4b5364",
   segunda: "#6b7280",
@@ -204,6 +221,7 @@ export function paletaDaEspecie(spriteId: number | null): Paleta {
    * identifica o bicho; o contrário — trocar a tinta — daria texto cinza sobre
    * cor, que é pior nos dois quesitos.
    */
+  const topoCor = paraHex(h, Math.min(0.95, sv + 0.06), 0.22);
   let base = paraHex(h, sv, Math.min(0.62, Math.max(0.38, l)));
   const tinta = contraste(base, "#0a0c10") >= contraste(base, "#ffffff") ? "#0a0c10" : "#ffffff";
   {
@@ -258,8 +276,10 @@ export function paletaDaEspecie(spriteId: number | null): Paleta {
      * inseri-la: a variável entra na `linear-gradient()` como lista pronta, e
      * não há como intercalar porcentagens entre itens de uma lista.
      */
+    topo: topoCor,
+    topoTinta: contraste(topoCor, "#ffffff") >= contraste(topoCor, "#0a0c10") ? "#ffffff" : "#0a0c10",
     gradiente: [
-      `${paraHex(h, Math.min(0.95, sv + 0.06), 0.22)} 0%`,
+      `${topoCor} 0%`,
       `${paraHex(h, sv, 0.45)} 48%`,
       `${paraHex(h, Math.max(0.4, sv - 0.04), 0.56)} 72%`,
     ].join(", "),
@@ -306,6 +326,8 @@ const VARIAVEIS = [
   "--tk-c3",
   "--tk-accent",
   "--tk-accent-ink",
+  "--tk-accent-topo",
+  "--tk-accent-topo-ink",
   "--tk-accent-2",
   "--tk-accent-fg-escuro",
   "--tk-accent-fg-claro",
@@ -340,6 +362,8 @@ function aplicarTopo() {
     "--tk-c3": topo.cruas[2] ?? topo.cruas[1] ?? topo.cruas[0] ?? topo.base,
     "--tk-accent": topo.base,
     "--tk-accent-ink": topo.tinta,
+    "--tk-accent-topo": topo.topo,
+    "--tk-accent-topo-ink": topo.topoTinta,
     "--tk-accent-2": topo.segunda,
     "--tk-accent-fg-escuro": topo.legivelEscuro,
     "--tk-accent-fg-claro": topo.legivelClaro,
