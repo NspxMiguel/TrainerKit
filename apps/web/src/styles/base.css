@@ -104,8 +104,20 @@
    * teria que descobrir de novo. Excluir os botões aqui resolve na origem — um
    * link que virou botão deixa de ser tratado como link.
    */
+  /*
+   * ⚠️ `--tk-pri-fg`, e não `--tk-pri`.
+   *
+   * `--tk-pri` é a cor de PREENCHIMENTO (fundo de botão, borda de foco); a
+   * variante `-fg` é a mesma cor empurrada pro lado legível de cada tema. Como
+   * texto, `--tk-pri` cru dá 3,09:1 sobre o cartão tingido pela espécie no tema
+   * escuro — medido nos links da tela "Dados do jogo", e reprovado.
+   *
+   * É a mesma confusão de categoria que já mordeu na pílula da aba e nos rótulos
+   * da barra de IV: cor de fundo usada como cor de texto. Aqui ela some de uma
+   * vez pra todo link do app, que é onde ela deveria ter sido resolvida.
+   */
   a:not(.tk-btn) {
-    color: var(--tk-pri);
+    color: var(--tk-pri-fg);
     text-decoration: none;
   }
 
