@@ -340,7 +340,22 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
       */}
       <div
         className="tk-hero tk-hero--ficha"
-        style={{ ["--tk-hero-grad" as string]: paleta.gradiente }}
+        style={
+        {
+          /*
+            As DUAS versoes do degrade viajam juntas; quem escolhe e o CSS.
+            
+            "faz o degrade ser branco no modo claro ne...."
+            
+            So o `ui/paleta.ts` sabe fazer a conta de contraste de cada parada,
+            e so o CSS sabe qual tema esta valendo. Escrever as duas e deixar a
+            cascata decidir evita um ouvinte de `prefers-color-scheme` em JS —
+            que e onde os dois lados dessincronizam.
+          */
+          "--tk-hero-grad": paleta.gradiente,
+          "--tk-hero-grad-claro": paleta.gradienteClaro,
+        } as CSSProperties
+      }
       >
         <span className="tk-hero-brilho" aria-hidden="true" />
         <span className="tk-hero-numero" aria-hidden="true">

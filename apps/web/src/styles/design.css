@@ -475,6 +475,29 @@
   overflow: hidden;
 }
 
+/*
+ * O degrade CLARO, quando o tema e claro. Ver a nota das variaveis do hero.
+ *
+ * ⚠️ Duas regras iguais, uma pro atributo e outra pra media query, e nao uma so
+ * com `:not()`. O `:root:not([data-tk="dark"])` dentro da media cobre o padrao
+ * (sem atributo, seguindo o sistema); o `[data-tk="light"]` cobre a escolha
+ * explicita, que precisa valer mesmo num aparelho no escuro. Tentar unir as
+ * duas ja me custou uma vez, no `--tk-tinta-fundo`.
+ */
+:root[data-tk="light"] .tk-hero {
+  background:
+    linear-gradient(180deg, transparent 88%, var(--tk-hero-ink) 100%),
+    linear-gradient(180deg, var(--tk-hero-grad-claro, var(--tk-hero-grad, var(--tk-tipo-normal))));
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-tk="dark"]) .tk-hero {
+    background:
+      linear-gradient(180deg, transparent 88%, var(--tk-hero-ink) 100%),
+      linear-gradient(180deg, var(--tk-hero-grad-claro, var(--tk-hero-grad, var(--tk-tipo-normal))));
+  }
+}
+
 @media (min-width: 640px) {
   .tk-hero {
     width: auto;
@@ -485,22 +508,35 @@
 }
 
 /*
- * ⚠️ O HERO E ESCURO NOS DOIS TEMAS, e o texto dele e branco nos dois.
+ * ⚠️ O HERO ACOMPANHA O TEMA — e isto e uma correcao de rumo.
  *
- * O veu da base e o scrim fechavam em `--tk-bg`, pra fundir o hero com o app e
- * nao deixar linha de corte. No tema escuro isso e perfeito. No claro,
- * `--tk-bg` e BRANCO — e o resultado era "É top 1 na Master League" em branco
- * sobre branco, com o botao branco sumindo junto. Achei testando o tema claro,
- * nao lendo o codigo: as duas regras estavam certas cada uma por si.
+ * Aqui dizia "O HERO E ESCURO NOS DOIS TEMAS", com o argumento de que ele e uma
+ * superficie colorida com texto branco por cima, "como capa de album em app de
+ * musica, que tambem nao clareia junto com o tema".
  *
- * `--tk-hero-ink` desfaz o acoplamento. Ele e escuro sempre, porque o hero e
- * uma superficie colorida com texto branco por cima — como capa de album em
- * app de musica, que tambem nao clareia junto com o tema. No tema escuro ele
- * coincide com o fundo e a fusao continua invisivel; no claro, o hero vira um
- * painel com cantos arredondados, que e o que ele ja e visualmente.
+ * "faz o degrade ser branco no modo claro ne...."
+ *
+ * O argumento nao e errado em geral — e errado AQUI, e a razao e de proporcao.
+ * Capa de album ocupa um quadrado no meio de uma lista; este hero ocupa METADE
+ * da tela inicial. Um painel quase preto tomando metade de uma tela branca nao
+ * le como capa, le como buraco. Foi o que a captura dele mostrou.
+ *
+ * Entao agora sao tres variaveis por tema, e nao uma cor fixa:
+ *
+ *   --tk-hero-ink    onde o veu e o scrim FECHAM (o fundo do proprio hero)
+ *   --tk-hero-texto  a tinta de tudo que e escrito por cima
+ *   --tk-hero-veu    a cor que escurece/clareia o meio pro texto passar
+ *
+ * A ESPECIE continua mandando na cor; o TEMA passou a mandar na claridade. As
+ * duas versoes do degrade vem prontas do `ui/paleta.ts` (ver
+ * `--tk-accent-grad` e `--tk-accent-grad-claro`), porque so ele sabe fazer a
+ * conta de contraste de cada parada.
  */
 :root {
   --tk-hero-ink: #0a0c10;
+  --tk-hero-texto: #ffffff;
+  /* O que o scrim usa pra recuperar contraste no meio: escuro sobre claro. */
+  --tk-hero-veu: 10, 12, 16;
 
   /*
    * A cor legivel da especie, resolvida por TEMA.
@@ -516,14 +552,32 @@
   --tk-accent-fg: var(--tk-accent-fg-escuro, var(--tk-warn));
 }
 
+/*
+ * As tres variaveis do hero no tema CLARO.
+ *
+ * ⚠️ `--tk-hero-ink` vira o BRANCO DO APP, e nao branco puro: e nele que o veu
+ * da base e o scrim fecham, e o objetivo deles e fundir o hero com a tela sem
+ * deixar linha de corte. Fechar em `#fff` num app cujo fundo e `#f2f3f6`
+ * desenharia exatamente a linha que eles existem pra evitar.
+ *
+ * `--tk-hero-veu` inverte junto: no escuro o meio precisa ESCURECER pro texto
+ * branco passar; no claro precisa CLAREAR pro texto quase-preto passar. E a
+ * mesma rampa, com o sinal trocado.
+ */
 @media (prefers-color-scheme: light) {
   :root:not([data-tk="dark"]) {
     --tk-accent-fg: var(--tk-accent-fg-claro, var(--tk-warn));
+    --tk-hero-ink: #f2f3f6;
+    --tk-hero-texto: #141920;
+    --tk-hero-veu: 250, 251, 253;
   }
 }
 
 :root[data-tk="light"] {
   --tk-accent-fg: var(--tk-accent-fg-claro, var(--tk-warn));
+  --tk-hero-ink: #f2f3f6;
+  --tk-hero-texto: #141920;
+  --tk-hero-veu: 250, 251, 253;
 }
 
 /*
@@ -603,7 +657,9 @@
    * ~7% ele some no gradiente; acima de ~16% vira um numero que a pessoa tenta
    * ler, e o assunto da tela e o bicho.
    */
-  color: rgba(255, 255, 255, 0.12);
+  /* 12% da tinta do tema: no claro ele vira um algarismo escuro e discreto,
+     em vez de branco sobre branco, que e o mesmo que nao existir. */
+  color: color-mix(in srgb, var(--tk-hero-texto) 12%, transparent);
   pointer-events: none;
   user-select: none;
   white-space: nowrap;
@@ -633,11 +689,13 @@
    * emenda. A metade de baixo do scrim continua intacta: la ela ainda protege
    * o nome e a frase, que continuam sobre o gradiente.
    */
+  /* A cor vem de `--tk-hero-veu`: escurece no tema escuro, CLAREIA no claro.
+     E a mesma rampa com o sinal trocado — ver a nota das variaveis do hero. */
   background: linear-gradient(
     180deg,
-    rgba(10, 12, 16, 0) 0%,
-    rgba(10, 12, 16, 0) 50%,
-    rgba(10, 12, 16, 0.55) 78%,
+    rgba(var(--tk-hero-veu), 0) 0%,
+    rgba(var(--tk-hero-veu), 0) 50%,
+    rgba(var(--tk-hero-veu), 0.55) 78%,
     var(--tk-hero-ink) 100%
   );
   pointer-events: none;
@@ -700,7 +758,7 @@
 .tk-hero-saudacao {
   font: 700 22px/1.15 var(--tk-font);
   letter-spacing: -0.3px;
-  color: #fff;
+  color: var(--tk-hero-texto);
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
   margin: 0;
   min-width: 0;
@@ -732,6 +790,7 @@
     color-mix(in srgb, var(--tk-hero-ink) 62%, transparent) 42%,
     var(--tk-hero-ink) 100%
   );
+  color: var(--tk-hero-texto);
 }
 
 /* "DESTAQUE DE HOJE" — vidro escuro sobre o gradiente. */
@@ -740,9 +799,9 @@
   border-radius: 999px;
   font: 700 11px var(--tk-font);
   letter-spacing: 0.09em;
-  color: #fff;
-  background: rgba(10, 12, 16, 0.35);
-  border: 0.5px solid rgba(255, 255, 255, 0.25);
+  color: var(--tk-hero-texto);
+  background: rgba(var(--tk-hero-veu), 0.35);
+  border: 0.5px solid color-mix(in srgb, var(--tk-hero-texto) 25%, transparent);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
@@ -752,8 +811,19 @@
      ja e a maior tipografia da tela com folga. */
   font: 800 38px/1.05 var(--tk-font);
   letter-spacing: -1.2px;
-  color: #fff;
-  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  /* Branco no escuro, quase-preto no claro. Ver `--tk-hero-texto`. */
+  color: var(--tk-hero-texto);
+  /*
+   * ⚠️ A sombra usa a cor do VEU, e nao preto fixo.
+   *
+   * Ela existe pra descolar o nome do bicho que passa atras dele. Com preto
+   * fixo e nome escuro no tema claro, ela vira um halo cinza em volta de cada
+   * letra — sombra escura atras de texto escuro nao descola nada, so suja.
+   *
+   * Com `--tk-hero-veu`, no claro ela vira um halo BRANCO, que e o que de fato
+   * separa letra escura de um sprite colorido.
+   */
+  text-shadow: 0 4px 24px rgba(var(--tk-hero-veu), 0.55);
   text-align: center;
 }
 
@@ -761,7 +831,8 @@
   max-width: 300px;
   text-align: center;
   font: 400 14px/1.4 var(--tk-font);
-  color: rgba(255, 255, 255, 0.85);
+  /* 85% da tinta do tema: mesma hierarquia nos dois, sem branco fixo. */
+  color: color-mix(in srgb, var(--tk-hero-texto) 85%, transparent);
   /*
    * ⚠️ `margin: 0` — a frase e um `<p>`, e `<p>` vem com 14px em cima e embaixo.
    *
@@ -794,11 +865,20 @@
   height: 48px;
   padding: 0 26px;
   border-radius: 999px;
-  background: #fff;
+  /*
+   * ⚠️ A pilula INVERTE com o tema, e o motivo e o mesmo de sempre: ela precisa
+   * ser o oposto do que esta atras dela.
+   *
+   * Sobre o hero escuro, branco e o unico tom que funciona nos dez tipos. Sobre
+   * o hero claro, uma pilula branca num degrade quase branco perde a borda e
+   * deixa de parecer botao — o elemento mais importante da tela vira um retangulo
+   * de texto. Trocar as duas cores mantem a mesma relacao.
+   */
+  background: var(--tk-hero-texto);
   border: 0;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   font: 700 15px var(--tk-font);
-  color: #0a0c10;
+  color: var(--tk-hero-ink);
   display: flex;
   align-items: center;
 }
@@ -811,11 +891,12 @@
   width: 48px;
   height: 48px;
   border-radius: 999px;
-  background: rgba(10, 12, 16, 0.35);
+  /* O vidro acompanha o tema: escuro sobre hero escuro, claro sobre claro. */
+  background: rgba(var(--tk-hero-veu), 0.35);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 0.5px solid rgba(255, 255, 255, 0.28);
-  color: #fff;
+  border: 0.5px solid color-mix(in srgb, var(--tk-hero-texto) 28%, transparent);
+  color: var(--tk-hero-texto);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1333,11 +1414,11 @@
   width: 44px;
   height: 44px;
   border-radius: 999px;
-  background: rgba(10, 12, 16, 0.35);
+  background: rgba(var(--tk-hero-veu), 0.35);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 0.5px solid rgba(255, 255, 255, 0.28);
-  color: #fff;
+  border: 0.5px solid color-mix(in srgb, var(--tk-hero-texto) 28%, transparent);
+  color: var(--tk-hero-texto);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1354,7 +1435,7 @@
 .tk-hero-dex {
   font: 600 13px var(--tk-mono);
   letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.72);
+  color: color-mix(in srgb, var(--tk-hero-texto) 72%, transparent);
 }
 
 .tk-hero-tipos {
@@ -2763,4 +2844,41 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow-wrap: anywhere;
+}
+
+/* ────────────────────────────────── a faixa do topo, no tema claro ─────── */
+
+/*
+ * ⚠️ A faixa da saudação também clareia — senão sobra a tarja escura.
+ *
+ * Ela é pintada com `--tk-accent-topo`, a primeira parada do gradiente ESCURO,
+ * justamente para encontrar o hero sem emenda. Com o hero claro, essa mesma cor
+ * vira uma tarja preta atravessando o topo de uma tela branca — foi o que a
+ * captura dele mostrou, e é o mesmo defeito que ele já tinha circulado duas
+ * vezes, só que com o sinal trocado.
+ *
+ * `--tk-accent-topo-claro` é a primeira parada do gradiente CLARO, escrita pelo
+ * mesmo `ui/paleta.ts`. A regra continua sendo "a faixa É a cor do topo do
+ * hero"; o que mudou foi qual hero.
+ */
+:root[data-tk="light"] .tk-home-topo::before {
+  background: var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent));
+}
+
+:root[data-tk="light"] .tk-saudacao {
+  color: var(--tk-accent-topo-claro-ink, var(--tk-text));
+  /* A sombra existia pra descolar texto branco de uma cor escura. Sobre um topo
+     pálido ela só suja a letra. */
+  text-shadow: none;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-tk="dark"]) .tk-home-topo::before {
+    background: var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent));
+  }
+
+  :root:not([data-tk="dark"]) .tk-saudacao {
+    color: var(--tk-accent-topo-claro-ink, var(--tk-text));
+    text-shadow: none;
+  }
 }

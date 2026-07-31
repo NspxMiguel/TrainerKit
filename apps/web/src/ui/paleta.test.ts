@@ -375,6 +375,57 @@ describe("paleta por espécie", () => {
     expect(ruins).toEqual([]);
   });
 
+
+  it("o nome do hero passa 3:1 sobre o gradiente CLARO, em toda espécie", () => {
+    /*
+     * ⚠️ O espelho exato do teste acima, e ele existe pela mesma razão.
+     *
+     * "faz o degrade ser branco no modo claro ne...." — o hero deixou de ser
+     * escuro nos dois temas, e agora há um segundo gradiente por espécie. Um
+     * gradiente novo sem varredura é como as 152 espécies com o nome ilegível
+     * apareceram da primeira vez.
+     *
+     * No tema claro o nome é quase-preto (`#141920`) e é texto grande
+     * (38px/800), então o mínimo é 3:1.
+     */
+    const ruins: string[] = [];
+    for (const id of ids) {
+      const paradas = paletaDaEspecie(id).gradienteClaro.match(/#[0-9a-f]{6}/gi) ?? [];
+      for (const parada of paradas) {
+        const r = contraste("#141920", parada);
+        if (r < 3) ruins.push(`#${id}: tinta escura sobre ${parada} = ${r.toFixed(2)}`);
+      }
+    }
+    expect(ruins).toEqual([]);
+  });
+
+  it("a saudação passa 4,5:1 sobre o topo CLARO, em toda espécie", () => {
+    // A faixa acima do hero é pintada com a primeira parada do gradiente claro,
+    // e a saudação vive nela. Mesma cobrança da versão escura — ver o teste da
+    // `topoTinta`, que nasceu de "coloca auto contraste pra quando ao mudar o
+    // pokemon, nao dar bosta. testa com todas as cores".
+    const ruins: string[] = [];
+    for (const id of ids) {
+      const p = paletaDaEspecie(id);
+      const r = contraste(p.topoClaroTinta, p.topoClaro);
+      if (r < 4.5) ruins.push(`#${id}: ${p.topoClaroTinta} sobre ${p.topoClaro} = ${r.toFixed(2)}`);
+    }
+    expect(ruins).toEqual([]);
+  });
+
+  it("o topo claro é CLARO mesmo — senão o pedido não foi cumprido", () => {
+    /*
+     * O pedido era "branco no modo claro". Um teste que só cobra contraste
+     * aceitaria um topo cinza-médio com texto preto — passaria em 4,5:1 e
+     * continuaria não sendo branco.
+     *
+     * Luminância ≥ 0,62 é o que garante que a faixa leia como parte de uma tela
+     * branca, e não como um painel colorido.
+     */
+    const escuras = ids.filter((id) => luminancia(paletaDaEspecie(id).topoClaro) < 0.62);
+    expect(escuras).toEqual([]);
+  });
+
   it("espécie sem paleta cai no plano B em vez de quebrar", () => {
     const p = paletaDaEspecie(999999);
     expect(p.cruas).toEqual([]);
