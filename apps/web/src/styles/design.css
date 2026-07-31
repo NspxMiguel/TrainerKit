@@ -465,7 +465,7 @@
      * rampa do handoff; aqui so falta garantir que a ultima faixa nao mostre a
      * cor da especie por baixo do bloco de decisao.
      */
-    linear-gradient(180deg, transparent 88%, var(--tk-hero-ink) 100%),
+    linear-gradient(180deg, transparent 74%, var(--tk-hero-pe, var(--tk-hero-ink)) 100%),
     /* As paradas 0/48/72% vem DENTRO de `--tk-hero-grad`, escritas pelo
        `ui/paleta.ts` — sao as do handoff ("Hero de tela cheia:
        linear-gradient(180deg, p1 0%, p2 48%, p3 72%)"). Com elas o brilho fica
@@ -486,14 +486,14 @@
  */
 :root[data-tk="light"] .tk-hero {
   background:
-    linear-gradient(180deg, transparent 88%, var(--tk-hero-ink) 100%),
+    linear-gradient(180deg, transparent 74%, var(--tk-hero-pe, var(--tk-hero-ink)) 100%),
     linear-gradient(180deg, var(--tk-hero-grad-claro, var(--tk-hero-grad, var(--tk-tipo-normal))));
 }
 
 @media (prefers-color-scheme: light) {
   :root:not([data-tk="dark"]) .tk-hero {
     background:
-      linear-gradient(180deg, transparent 88%, var(--tk-hero-ink) 100%),
+      linear-gradient(180deg, transparent 74%, var(--tk-hero-pe, var(--tk-hero-ink)) 100%),
       linear-gradient(180deg, var(--tk-hero-grad-claro, var(--tk-hero-grad, var(--tk-tipo-normal))));
   }
 }
@@ -534,6 +534,24 @@
  */
 :root {
   --tk-hero-ink: #0a0c10;
+  /*
+   * ⚠️ O PÉ DO HERO, e ele NÃO é `--tk-hero-ink`.
+   *
+   * "degrade nao funcionando ne" — e não estava mesmo. O hero fechava em
+   * `#0a0c10` PURO por duas camadas somadas (o próprio fundo nos últimos 12% e
+   * o scrim no 100%), e a cauda que eu tinha posto embaixo começava numa cor
+   * completamente outra: 22% do acento sobre a página. Preto, depois um verde
+   * aguado, depois preto de novo. Três materiais em vinte pixels.
+   *
+   * Agora os três pontos leem A MESMA variável, então a emenda deixa de ser
+   * uma coisa que precisa ser acertada: ela é a mesma cor por construção.
+   *
+   * A dose é 62% de fundo pra 38% de `--tk-accent-topo` — e `topo`, e não
+   * `--tk-accent`, porque só ele tem luminância cobrada (≤ 0,18 em todas as
+   * 1.142, no `paleta.test.ts`). Com esse teto o pé fica em ≤ 0,07 e o texto
+   * branco que mora ali guarda 8:1 de folga.
+   */
+  --tk-hero-pe: color-mix(in srgb, var(--tk-hero-ink) 62%, var(--tk-accent-topo, transparent));
   --tk-hero-texto: #ffffff;
   /* O que o scrim usa pra recuperar contraste no meio: escuro sobre claro. */
   --tk-hero-veu: 10, 12, 16;
@@ -568,6 +586,14 @@
   :root:not([data-tk="dark"]) {
     --tk-accent-fg: var(--tk-accent-fg-claro, var(--tk-warn));
     --tk-hero-ink: #f2f3f6;
+    /* O mesmo pé, com a parada CLARA: `--tk-accent-topo-claro` tem luminância
+       cobrada por cima (≥ 0,66), então a mistura fica ≥ 0,75 e o texto
+       quase-preto guarda 12:1. Ver a nota no bloco escuro. */
+    --tk-hero-pe: color-mix(
+    in srgb,
+    var(--tk-hero-ink) 62%,
+    var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent))
+  );
     --tk-hero-texto: #141920;
     --tk-hero-veu: 250, 251, 253;
   }
@@ -576,6 +602,14 @@
 :root[data-tk="light"] {
   --tk-accent-fg: var(--tk-accent-fg-claro, var(--tk-warn));
   --tk-hero-ink: #f2f3f6;
+  /* O mesmo pé, com a parada CLARA: `--tk-accent-topo-claro` tem luminância
+     cobrada por cima (≥ 0,66), então a mistura fica ≥ 0,75 e o texto
+     quase-preto guarda 12:1. Ver a nota no bloco escuro. */
+  --tk-hero-pe: color-mix(
+    in srgb,
+    var(--tk-hero-ink) 62%,
+    var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent))
+  );
   --tk-hero-texto: #141920;
   --tk-hero-veu: 250, 251, 253;
 }
@@ -696,7 +730,7 @@
     rgba(var(--tk-hero-veu), 0) 0%,
     rgba(var(--tk-hero-veu), 0) 50%,
     rgba(var(--tk-hero-veu), var(--tk-hero-veu-forca, 0.55)) 78%,
-    var(--tk-hero-ink) 100%
+    var(--tk-hero-pe, var(--tk-hero-ink)) 100%
   );
   pointer-events: none;
 }
@@ -3311,10 +3345,13 @@
   margin-left: calc(-1 * var(--tk-gutter));
   margin-right: calc(-1 * var(--tk-gutter));
   pointer-events: none;
+  /* Comeca EXATAMENTE na cor em que o hero terminou — a mesma variavel — e
+     morre em transparente. Sem degrau possivel: nao ha dois valores pra
+     acertar, ha um. */
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--tk-accent, transparent) 22%, transparent) 0%,
-    color-mix(in srgb, var(--tk-accent, transparent) 8%, transparent) 48%,
+    var(--tk-hero-pe, transparent) 0%,
+    color-mix(in srgb, var(--tk-hero-pe, transparent) 45%, transparent) 40%,
     transparent 100%
   );
 }
