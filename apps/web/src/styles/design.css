@@ -465,13 +465,12 @@
      * rampa do handoff; aqui so falta garantir que a ultima faixa nao mostre a
      * cor da especie por baixo do bloco de decisao.
      */
-    linear-gradient(180deg, transparent 74%, var(--tk-hero-pe, var(--tk-hero-ink)) 100%),
     /* As paradas 0/48/72% vem DENTRO de `--tk-hero-grad`, escritas pelo
        `ui/paleta.ts` — sao as do handoff ("Hero de tela cheia:
        linear-gradient(180deg, p1 0%, p2 48%, p3 72%)"). Com elas o brilho fica
        no terco final em vez de espalhado, que e o volume que ele reconheceu
        como melhor. */
-    linear-gradient(180deg, var(--tk-hero-grad, var(--tk-tipo-normal)));
+    linear-gradient(180deg, var(--tk-hero-grad, var(--tk-tipo-normal)), transparent 100%);
   overflow: hidden;
 }
 
@@ -485,16 +484,20 @@
  * duas ja me custou uma vez, no `--tk-tinta-fundo`.
  */
 :root[data-tk="light"] .tk-hero {
-  background:
-    linear-gradient(180deg, transparent 74%, var(--tk-hero-pe, var(--tk-hero-ink)) 100%),
-    linear-gradient(180deg, var(--tk-hero-grad-claro, var(--tk-hero-grad, var(--tk-tipo-normal))));
+  background: linear-gradient(
+    180deg,
+    var(--tk-hero-grad-claro, var(--tk-hero-grad, var(--tk-tipo-normal))),
+    transparent 100%
+  );
 }
 
 @media (prefers-color-scheme: light) {
   :root:not([data-tk="dark"]) .tk-hero {
-    background:
-      linear-gradient(180deg, transparent 74%, var(--tk-hero-pe, var(--tk-hero-ink)) 100%),
-      linear-gradient(180deg, var(--tk-hero-grad-claro, var(--tk-hero-grad, var(--tk-tipo-normal))));
+    background: linear-gradient(
+      180deg,
+      var(--tk-hero-grad-claro, var(--tk-hero-grad, var(--tk-tipo-normal))),
+      transparent 100%
+    );
   }
 }
 
@@ -535,37 +538,33 @@
 :root {
   --tk-hero-ink: #0a0c10;
   /*
-   * ⚠️ O PÉ DO HERO, e ele NÃO é `--tk-hero-ink`.
+   * ⚠️ O PÉ DO HERO NÃO É UMA COR — É AUSÊNCIA DE COR.
    *
-   * "degrade nao funcionando ne" — e não estava mesmo. O hero fechava em
-   * `#0a0c10` PURO por duas camadas somadas (o próprio fundo nos últimos 12% e
-   * o scrim no 100%), e a cauda que eu tinha posto embaixo começava numa cor
-   * completamente outra: 22% do acento sobre a página. Preto, depois um verde
-   * aguado, depois preto de novo. Três materiais em vinte pixels.
+   * "a tela inicial ta legal, mas tem q ser continuo a imagem. so colocar a cor
+   * do personagem fica mal feito e da para ver na cara."
    *
-   * Agora os três pontos leem A MESMA variável, então a emenda deixa de ser
-   * uma coisa que precisa ser acertada: ela é a mesma cor por construção.
+   * Aqui viveu `--tk-hero-pe` por três versões, e as três tentavam a mesma coisa:
+   * ADIVINHAR a cor com que a página aparece embaixo do hero, pra pintar o pé
+   * dele igual. Primeiro `--tk-hero-ink` puro; depois uma mistura de 38% da
+   * espécie (que virou a "cauda" reprovada, "esse negocio verde ali voltando do
+   * nada"); depois a mistura exata da tinta da página.
    *
-   * A dose é 62% de fundo pra 38% de `--tk-accent-topo` — e `topo`, e não
-   * `--tk-accent`, porque só ele tem luminância cobrada (≤ 0,18 em todas as
-   * 1.142, no `paleta.test.ts`). Com esse teto o pé fica em ≤ 0,07 e o texto
-   * branco que mora ali guarda 8:1 de folga.
+   * Nenhuma acerta, e não por falta de conta: a página embaixo do hero é o
+   * `--tk-screen` MAIS dois véus radiais (`.tk-app::before`), e o valor deles
+   * naquele ponto depende da altura da tela, de onde o hero acaba e do raio dos
+   * radiais. Copiar esse número num token é copiar uma coincidência — ela
+   * desalinha na primeira mudança de qualquer um dos três, e desalinha em
+   * silêncio.
+   *
+   * Então o hero deixou de terminar numa cor e passou a terminar em
+   * `transparent`. O fundo que aparece nos últimos pixels dele é literalmente o
+   * fundo da página, porque É o fundo da página — o hero é uma camada por cima.
+   * Não há emenda a acertar, e não há como desacertar depois.
+   *
+   * As três camadas do hero fecham assim: o degradê da espécie (`.tk-hero`), o
+   * véu de contraste (`.tk-hero-scrim`) e o véu do bloco de decisão
+   * (`.tk-hero-base`).
    */
-  /*
-   * ⚠️ O PÉ É O FUNDO DO APP, SEM TINTA — e ele já foi tingido, por um dia.
-   *
-   * "em cima, onde ta o bixo, é a cor dele certo? ai vai descendo até ficar
-   * fundo totalmente preto. degrade po"
-   *
-   * Eu tinha misturado 38% da cor da espécie aqui pra emendar o hero com uma
-   * "cauda" que continuava a cor página adentro. O resultado foi o oposto do
-   * degradê: a cor descia, sumia, e VOLTAVA embaixo — "esse negocio verde ali
-   * voltando do nada".
-   *
-   * Um degradê é monótono por definição. Se a cor reaparece depois de ter
-   * acabado, não é um degradê, são duas faixas.
-   */
-  --tk-hero-pe: var(--tk-hero-ink);
   --tk-hero-texto: #ffffff;
   /* O que o scrim usa pra recuperar contraste no meio: escuro sobre claro. */
   --tk-hero-veu: 10, 12, 16;
@@ -600,10 +599,6 @@
   :root:not([data-tk="dark"]) {
     --tk-accent-fg: var(--tk-accent-fg-claro, var(--tk-warn));
     --tk-hero-ink: #f2f3f6;
-    /* O mesmo pé, com a parada CLARA: `--tk-accent-topo-claro` tem luminância
-       cobrada por cima (≥ 0,66), então a mistura fica ≥ 0,75 e o texto
-       quase-preto guarda 12:1. Ver a nota no bloco escuro. */
-    --tk-hero-pe: var(--tk-hero-ink);
     --tk-hero-texto: #141920;
     --tk-hero-veu: 250, 251, 253;
   }
@@ -612,10 +607,6 @@
 :root[data-tk="light"] {
   --tk-accent-fg: var(--tk-accent-fg-claro, var(--tk-warn));
   --tk-hero-ink: #f2f3f6;
-  /* O mesmo pé, com a parada CLARA: `--tk-accent-topo-claro` tem luminância
-     cobrada por cima (≥ 0,66), então a mistura fica ≥ 0,75 e o texto
-     quase-preto guarda 12:1. Ver a nota no bloco escuro. */
-  --tk-hero-pe: var(--tk-hero-ink);
   --tk-hero-texto: #141920;
   --tk-hero-veu: 250, 251, 253;
 }
@@ -735,8 +726,8 @@
     180deg,
     rgba(var(--tk-hero-veu), 0) 0%,
     rgba(var(--tk-hero-veu), 0) 50%,
-    rgba(var(--tk-hero-veu), var(--tk-hero-veu-forca, 0.55)) 78%,
-    var(--tk-hero-pe, var(--tk-hero-ink)) 100%
+    rgba(var(--tk-hero-veu), var(--tk-hero-veu-forca, 0.55)) 82%,
+    rgba(var(--tk-hero-veu), 0) 100%
   );
   pointer-events: none;
 }
@@ -858,12 +849,20 @@
    *
    * Este veu e local, comeca transparente e fecha em `--tk-bg`. E o que
    * garante que "Dragonite" continue legivel com o bicho atras dele.
+   *
+   * ⚠️ E ELE TAMBEM ABRE DE NOVO NO FIM, pelo mesmo motivo do hero inteiro.
+   *
+   * Fechava em `--tk-hero-ink` chapado no 100%, o que punha um retangulo opaco
+   * exatamente na ultima linha de pixels do hero — a linha que tem que ser a
+   * pagina. O veu chega no maximo em 88%, que e onde acaba o botao, e sai. Ver a
+   * nota longa sobre o pe do hero, la em cima.
    */
   background: linear-gradient(
     180deg,
     transparent 0%,
     color-mix(in srgb, var(--tk-hero-ink) 62%, transparent) 42%,
-    var(--tk-hero-ink) 100%
+    color-mix(in srgb, var(--tk-hero-ink) 72%, transparent) 88%,
+    transparent 100%
   );
   color: var(--tk-hero-texto);
 }
@@ -1699,12 +1698,28 @@
   height: 40px;
   flex: none;
   border-radius: 999px;
+  /*
+   * ⚠️ DISCO OPACO, e a inicial usa a tinta CALCULADA pra ele.
+   *
+   * Era um degradê translúcido (70% da cor principal, 55% da segunda) com a
+   * letra em branco fixo. Isso funcionava enquanto o avatar pousava sobre o
+   * quase-preto do app. Quando a faixa da saudação passou a ser pintada de
+   * verdade — ela nunca tinha sido, ver `body` em `base.css` — o avatar passou a
+   * pousar sobre a COR DA ESPÉCIE, e o disco translúcido virou "a cor da espécie
+   * sobre a cor da espécie". Medido no Hoopa: branco em **2,43:1**.
+   *
+   * Opaco, a conta deixa de depender do que está atrás: `--tk-accent-ink` é
+   * escolhido por luminância contra `--tk-accent`, espécie a espécie, e o
+   * `paleta.test.ts` cobra 4,5:1 nas 1.142. A segunda cor continua presente como
+   * um brilho de canto, fraco o bastante pra não mover a conta.
+   */
   background:
-    linear-gradient(
-      140deg,
-      color-mix(in srgb, var(--tk-accent, #6b7280) 70%, transparent),
-      color-mix(in srgb, var(--tk-accent-2, #6b7280) 55%, transparent)
-    );
+    radial-gradient(
+      120% 120% at 22% 12%,
+      color-mix(in srgb, var(--tk-accent-2, #6b7280) 34%, transparent),
+      transparent 72%
+    ),
+    var(--tk-accent, #6b7280);
   /*
    * ⚠️ BORDA DE 2px, e nao o fio de 0,5px de antes.
    *
@@ -1720,8 +1735,9 @@
   box-shadow:
     0 4px 14px rgba(0, 0, 0, 0.4),
     inset 0 1px 1px rgba(255, 255, 255, 0.25);
-  color: #fff;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  /* Ver a nota do fundo: a tinta é a do disco, não um branco fixo. */
+  color: var(--tk-accent-ink, #fff);
+  text-shadow: none;
   font: 700 16px var(--tk-font);
   display: flex;
   align-items: center;
@@ -1809,7 +1825,20 @@
 /* O vidro da barra tambem pega a cor — e o elemento que fica na tela o tempo
    todo, entao e o que mais vende a ideia de "o app inteiro mudou". */
 .tk-tabbar {
-  background: color-mix(in srgb, var(--tk-accent, transparent) 12%, var(--tk-glass-bg));
+  /*
+   * ⚠️ A DOSE DE COR DA BARRA MUDA POR TEMA, e não é capricho.
+   *
+   * `--tk-glass-bg` no claro é `rgba(255,255,255,.6)` — vidro branco sobre uma
+   * página branca. Com 12% de cor por cima a barra fica quase branca, e aí a
+   * lente do item ativo (que TAMBÉM é branca no claro) não tem de que se
+   * destacar: a seleção sumia.
+   *
+   * A relação certa é a mesma dos cartões, e é a inversão de sempre: no escuro
+   * a peça selecionada é mais CLARA que o suporte; no claro ela é mais BRANCA, e
+   * quem tem que ceder é o suporte. Por isso a barra escurece/tinge mais no
+   * claro, e não menos.
+   */
+  background: color-mix(in srgb, var(--tk-accent, transparent) var(--tk-barra-tinta, 12%), var(--tk-glass-bg));
   transition:
     background 0.5s var(--tk-ease-out),
     opacity 0.22s var(--tk-ease-out),
@@ -2805,7 +2834,25 @@
  */
 :root {
   --tk-screen-base: radial-gradient(120vw 80vh at 50% -10%, #141a2a 0%, #0a0c11 55%, #07080b 100%);
-  --tk-tinta-fundo: 30%;
+  /*
+   * ⚠️ 10%, e ANTES ERA 30% — o número caiu porque a camada passou a existir.
+   *
+   * Os 30% foram escolhidos por varredura de contraste, e a varredura estava
+   * certa: 31% é o último valor em que as 1.142 espécies passam. O que ninguém
+   * conferiu é se aquilo aparecia na tela — e não aparecia. O `--tk-screen` era
+   * pintado por `.tk-app::before`, e essa declaração vinha sendo substituída
+   * inteira por outra regra do mesmo seletor neste arquivo (ver `.tk-app::before`
+   * lá embaixo). Um número calibrado contra uma camada invisível.
+   *
+   * Com a camada pintando de verdade, 30% deixa o app inteiro de um tom só — e
+   * aí a tela perde figura e fundo, que é exatamente a queixa dele sobre o tema
+   * claro ("modo claro ainda horrivel"), agora do outro lado.
+   *
+   * 10% devolve TEMPERATURA sem virar cor: o hero continua sendo quem carrega a
+   * cor, e a página vai escurecendo até o preto — "ai vai descendo até ficar
+   * fundo totalmente preto. degrade po".
+   */
+  --tk-tinta-fundo: 10%;
   --tk-screen:
     /* A tinta da espécie, mais forte no MEIO da tela — que é justamente onde
        ele apontou o vazio, e onde o gradiente do hero já não alcança. */
@@ -2840,7 +2887,10 @@
      atributo), que segue o SISTEMA: num aparelho no escuro a tinta cairia pra
      9% e o meio da tela voltaria a ser preto. */
   --tk-screen-base: radial-gradient(120vw 80vh at 50% -10%, #ffffff 0%, #f6f7fb 55%, #f0f2f7 100%);
-  --tk-tinta-fundo: 9%;
+  /* 5%: mesmo raciocínio do bloco escuro, e aqui com um motivo a mais — o topo
+     da tela agora É a cor da espécie de verdade (ver `HERO_CLARO`), então a
+     página não precisa mais tentar dizer isso sozinha. */
+  --tk-tinta-fundo: 5%;
   --tk-screen:
     radial-gradient(
       140vw 70vh at 50% 42%,
@@ -2853,7 +2903,7 @@
 @media (prefers-color-scheme: light) {
   :root:not([data-tk="dark"]) {
     --tk-screen-base: radial-gradient(120vw 80vh at 50% -10%, #ffffff 0%, #f6f7fb 55%, #f0f2f7 100%);
-    --tk-tinta-fundo: 9%;
+    --tk-tinta-fundo: 5%;
     --tk-screen:
       radial-gradient(
         140vw 70vh at 50% 42%,
@@ -2864,14 +2914,14 @@
   }
 }
 
-/* O botão de perguntar, quando a IA entra na linha em vez de flutuar. */
-.tk-perguntar {
-  margin-top: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
+/*
+ * O `.tk-perguntar` saiu junto com o botão "Perguntar à Pokédex".
+ *
+ * "o perguntar para pokedex, tira isso. deixa uma bolinha voando pela tela
+ * inteira do pokemon." O gatilho da IA voltou a ser a bolha flutuante — ver a
+ * nota em `ui/AiBubble.tsx` sobre por que a variante de linha existiu e por que
+ * não devia ter existido.
+ */
 
 /*
  * As ações da linha de coleção viram ÍCONE — e o alvo de toque não encolhe.
@@ -4137,4 +4187,440 @@
    * outra, que é exatamente o tipo de coisa que só aparece medindo.
    */
   background: var(--tk-screen-base, var(--tk-screen));
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   O TEMA CLARO NÃO É O ESCURO COM OUTRAS CORES
+   ═══════════════════════════════════════════════════════════════════════════
+
+   "é q o problema, q vc ta pegando o modo preto e só mudando as cores. vc tem q
+   reformular tudo quando muda pro modo branco, algumas imagens sao feitas pro
+   preto e so encaixa no preto."
+
+   Ele está descrevendo uma classe inteira de defeito, e tinha razão. Trocar
+   `--tk-bg` de preto pra branco resolve o FUNDO e deixa em pé tudo que foi
+   desenhado CONTANDO com o fundo preto:
+
+     · sombra preta a 50% — sobre preto ela é invisível e só dá volume; sobre
+       branco ela é uma nódoa cinza em volta de cada peça;
+     · filete branco a 8% no topo (`inset 0 1px 0`) — sobre uma superfície
+       escura é o brilho que dá espessura; sobre branco é literalmente nada, e a
+       peça fica chapada;
+     · vidro escuro a 30% (a lente da barra de abas) — sobre preto é uma lente;
+       sobre branco é um borrão cinza no meio da barra;
+     · superfície `#f1f3f8` — no escuro os cartões são MAIS CLAROS que a página
+       e por isso aparecem; no claro esse mesmo token é praticamente a cor da
+       página, então o cartão some;
+     · véu preto atrás do sprite — no escuro ele afunda o fundo e a silhueta
+       salta; no claro ele suja a área toda em volta do bicho.
+
+   O conserto não é trocar cada valor onde ele está escrito — é dar NOME ao
+   papel de cada um e deixar o tema decidir o valor. Assim a regra diz "aqui vai
+   a sombra que descola do fundo" e cada tema responde com a sombra que faz isso
+   NO fundo dele. Uma peça nova herda os dois temas de graça, e nunca mais um
+   valor de tema escuro vaza pro claro por esquecimento.
+
+   Estes tokens são as respostas do tema escuro; logo abaixo vêm as do claro.
+*/
+:root {
+  /* As três sombras do sprite do hero: contorno, distância e luz. */
+  --tk-arte-sombra:
+    drop-shadow(0 0 3px rgba(0, 0, 0, 0.6)) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5))
+    drop-shadow(0 18px 26px rgba(0, 0, 0, 0.55));
+  /* O núcleo do brilho atrás da cabeça: escurece o miolo pro contorno saltar. */
+  --tk-brilho-nucleo: rgba(0, 0, 0, 0.34);
+  /* A elipse de contato — o que diz que há chão e o bicho não paira. */
+  --tk-chao-perto: rgba(0, 0, 0, 0.5);
+  --tk-chao-longe: rgba(0, 0, 0, 0.18);
+
+  /* A lente que viaja entre as abas. */
+  --tk-lente-fundo: rgba(16, 18, 26, 0.3);
+  --tk-lente-borda: transparent;
+  --tk-lente-luz-topo: rgba(255, 255, 255, 0.45);
+  --tk-lente-luz-pe: rgba(255, 255, 255, 0.28);
+  --tk-lente-luz-lado: rgba(255, 255, 255, 0.16);
+  --tk-lente-sombra: 0 3px 8px rgba(0, 0, 0, 0.3);
+  /* A sombra da barra de abas contra a tela. */
+  --tk-barra-sombra: 0 12px 30px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.14);
+  --tk-barra-tinta: 12%;
+
+  /* Cartões e botões secundários: base, quanto de espécie entra, e o relevo. */
+  --tk-cartao-base: var(--tk-surface-2);
+  --tk-cartao-tinta: 14%;
+  --tk-cartao-borda-tinta: 26%;
+  --tk-cartao-relevo: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  /* A ação principal. */
+  --tk-cta-cor: var(--tk-accent, #5b3df5);
+  --tk-cta-topo: color-mix(in srgb, var(--tk-accent, #6b4bff) 82%, #fff 6%);
+  --tk-cta-ink: var(--tk-accent-ink, #fff);
+  --tk-cta-sombra:
+    0 8px 24px color-mix(in srgb, var(--tk-accent, #6e4bff) 42%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+
+  /* O banho de cor no app inteiro (`.tk-app::before`). */
+  --tk-veu-app: 7%;
+  --tk-veu-app-2: 5%;
+}
+
+/*
+ * ⚠️ AS RESPOSTAS DO TEMA CLARO — escritas duas vezes, e isso é convenção deste
+ * arquivo, não descuido: `[data-tk="light"]` cobre a escolha explícita (que tem
+ * que valer num aparelho no escuro) e o `:not([data-tk="dark"])` dentro da media
+ * cobre o padrão, que segue o sistema. Unir as duas já custou caro aqui antes.
+ */
+:root[data-tk="light"] {
+  /*
+   * ⚠️ O CONTORNO PRETO A 60% SAIU, e era ele o "bulbasaur pretao".
+   *
+   * A primeira sombra é `drop-shadow(0 0 3px)` — deslocamento zero, ou seja um
+   * contorno colado na silhueta. Sobre o hero escuro ela é o que impede o
+   * Bulbasaur verde de sumir dentro do próprio fundo verde. Sobre o hero claro
+   * ela vira uma borda preta desenhada em volta do bicho, e o bicho passa a
+   * parecer sujo — recortado com tesoura e colado ali.
+   *
+   * No claro a separação já vem de graça: o fundo é pálido e o sprite é de tom
+   * médio, então a diferença de claridade que o contorno fabricava já existe. O
+   * que resta pra sombra fazer é dizer que há distância, e isso ela faz com uma
+   * sombra difusa embaixo — como sombra de verdade.
+   */
+  --tk-arte-sombra:
+    drop-shadow(0 1px 1px rgba(16, 19, 25, 0.18)) drop-shadow(0 6px 10px rgba(16, 19, 25, 0.16))
+    drop-shadow(0 20px 26px rgba(16, 19, 25, 0.14));
+  /* No escuro o miolo AFUNDA pro contorno saltar; no claro ele ACENDE, pelo
+     mesmo motivo e com o sinal trocado. Preto aqui só sujaria a área em volta. */
+  --tk-brilho-nucleo: rgba(255, 255, 255, 0.5);
+  --tk-chao-perto: rgba(16, 19, 25, 0.2);
+  --tk-chao-longe: rgba(16, 19, 25, 0.07);
+
+  /*
+   * A lente vira BRANCA. "até botoes la em baixo estao bugados" — era isto: a
+   * lente é `rgba(16,18,26,0.3)`, vidro escuro, e sobre a barra clara ela
+   * aparecia como uma mancha cinza-oliva atrás do item ativo. Medido, o rótulo
+   * ativo ficava em 2,4:1 em cima dela.
+   */
+  --tk-barra-tinta: 26%;
+  --tk-lente-fundo: #ffffff;
+  --tk-lente-borda: rgba(16, 19, 25, 0.08);
+  --tk-lente-luz-topo: rgba(255, 255, 255, 0.9);
+  --tk-lente-luz-pe: rgba(16, 19, 25, 0.04);
+  --tk-lente-luz-lado: rgba(255, 255, 255, 0.5);
+  --tk-lente-sombra: 0 2px 8px rgba(16, 19, 25, 0.18);
+  --tk-barra-sombra:
+    0 8px 24px -6px rgba(16, 19, 25, 0.16), 0 1px 2px rgba(16, 19, 25, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+
+  /*
+   * ⚠️ CARTÃO BRANCO, e a página é que fica cinza — a inversão que faltava.
+   *
+   * No escuro o cartão é `rgba(255,255,255,.06)`: mais CLARO que a página, e é
+   * essa diferença que faz o retângulo existir. No claro o mesmo token vira
+   * `#f1f3f8`, e a página é `#f2f3f6` — um por cento de diferença. Os cartões
+   * estavam lá, com borda e tudo, e simplesmente não apareciam.
+   *
+   * Elevação no claro é BRANCO MAIS SOMBRA, não uma superfície mais clara: não
+   * há mais claro que branco pra onde ir. É a mesma regra do iOS e do Material,
+   * e é a que o app não estava seguindo.
+   *
+   * A tinta da espécie cai de 14% pra 6% junto: 14% de uma cor saturada sobre
+   * branco é um cartão colorido, não um cartão com temperatura — e com o topo da
+   * tela agora carregando a cor de verdade (ver `HERO_CLARO`), o cartão não
+   * precisa mais fazer esse trabalho.
+   */
+  --tk-cartao-base: #ffffff;
+  --tk-cartao-tinta: 6%;
+  --tk-cartao-borda-tinta: 14%;
+  --tk-cartao-relevo: 0 1px 2px rgba(16, 19, 25, 0.05), 0 10px 22px -14px rgba(16, 19, 25, 0.22);
+
+  /*
+   * ⚠️ A AÇÃO PRINCIPAL ESCURECE, em vez de clarear.
+   *
+   * `--tk-accent` é a cor cheia da espécie, presa entre claridade 0,38 e 0,62.
+   * Sobre a página preta isso é um botão que brilha; sobre a página branca, num
+   * Pokémon amarelo, é um marca-texto — e pior, um botão claro sobre fundo claro
+   * perde a própria forma.
+   *
+   * `--tk-accent-fg-claro` é a mesma cor empurrada até passar 4,7:1 contra o
+   * fundo claro, ou seja luminância ≤ 0,146. Isso dá duas coisas de uma vez: o
+   * botão se destaca da página, e o branco em cima dele guarda 5,3:1 em QUALQUER
+   * uma das 1.142 espécies — sem precisar de nova conta de contraste.
+   */
+  /*
+   * ⚠️ NO CLARO O DEGRADÊ DO BOTÃO ESCURECE PRA BAIXO, e não clareia pra cima.
+   *
+   * A primeira versão copiava o desenho do tema escuro (topo = a cor com 14% de
+   * branco por cima, pra dar o brilho de peça iluminada). Medido, isso derruba a
+   * garantia: `--tk-accent-fg-claro` tem luminância ≤ 0,146 por construção, mas
+   * misturar 14% de branco leva o TOPO do botão a ~0,21 — e o texto branco cai
+   * pra ~4,0:1 justamente na faixa onde o título mora.
+   *
+   * O brilho no topo é um device de fundo escuro: ele funciona porque a peça é
+   * mais clara que a página. Sobre página branca a peça é mais ESCURA que a
+   * página, e o volume vem do outro lado — sombrear o pé. Assim o botão inteiro
+   * fica dentro do teto de luminância, e o branco guarda ≥ 5,3:1 nas 1.142.
+   */
+  --tk-cta-topo: var(--tk-accent-fg-claro, #4b5364);
+  --tk-cta-cor: color-mix(in srgb, var(--tk-accent-fg-claro, #4b5364) 88%, #000 12%);
+  --tk-cta-ink: #ffffff;
+  --tk-cta-sombra:
+    0 10px 24px -8px color-mix(in srgb, var(--tk-accent-fg-claro, #4b5364) 45%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+
+  /* O véu do app cai pela metade: o topo da tela já é a cor da espécie de
+     verdade agora, e somar um banho por cima devolveria a tela de um tom só que
+     ele reprovou ("modo claro ainda horrivel"). */
+  --tk-veu-app: 6%;
+  --tk-veu-app-2: 4%;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-tk="dark"]) {
+    --tk-arte-sombra:
+      drop-shadow(0 1px 1px rgba(16, 19, 25, 0.18)) drop-shadow(0 6px 10px rgba(16, 19, 25, 0.16))
+      drop-shadow(0 20px 26px rgba(16, 19, 25, 0.14));
+    --tk-brilho-nucleo: rgba(255, 255, 255, 0.5);
+    --tk-chao-perto: rgba(16, 19, 25, 0.2);
+    --tk-chao-longe: rgba(16, 19, 25, 0.07);
+
+    --tk-barra-tinta: 26%;
+    --tk-lente-fundo: #ffffff;
+    --tk-lente-borda: rgba(16, 19, 25, 0.08);
+    --tk-lente-luz-topo: rgba(255, 255, 255, 0.9);
+    --tk-lente-luz-pe: rgba(16, 19, 25, 0.04);
+    --tk-lente-luz-lado: rgba(255, 255, 255, 0.5);
+    --tk-lente-sombra: 0 2px 8px rgba(16, 19, 25, 0.18);
+    --tk-barra-sombra:
+      0 8px 24px -6px rgba(16, 19, 25, 0.16), 0 1px 2px rgba(16, 19, 25, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.7);
+
+    --tk-cartao-base: #ffffff;
+    --tk-cartao-tinta: 6%;
+    --tk-cartao-borda-tinta: 14%;
+    --tk-cartao-relevo: 0 1px 2px rgba(16, 19, 25, 0.05), 0 10px 22px -14px rgba(16, 19, 25, 0.22);
+
+    --tk-cta-topo: var(--tk-accent-fg-claro, #4b5364);
+    --tk-cta-cor: color-mix(in srgb, var(--tk-accent-fg-claro, #4b5364) 88%, #000 12%);
+    --tk-cta-ink: #ffffff;
+    --tk-cta-sombra:
+      0 10px 24px -8px color-mix(in srgb, var(--tk-accent-fg-claro, #4b5364) 45%, transparent),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22);
+
+    --tk-veu-app: 6%;
+    --tk-veu-app-2: 4%;
+  }
+}
+
+/* ── e agora as regras leem o token, em vez de repetir o valor do escuro ── */
+
+.tk-hero-art > .tk-mono {
+  filter: var(--tk-arte-sombra);
+}
+
+.tk-hero-brilho {
+  background:
+    radial-gradient(64% 40% at 50% 48%, var(--tk-brilho-nucleo), transparent 68%),
+    radial-gradient(
+      64% 40% at 50% 48%,
+      color-mix(in srgb, var(--tk-accent-2, #fff) var(--tk-brilho-forca, 55%), transparent),
+      color-mix(in srgb, var(--tk-accent-2, #fff) 12%, transparent) 62%,
+      transparent 100%
+    );
+}
+
+/*
+ * ⚠️ O BRILHO DA SEGUNDA COR CAI PELA METADE NO CLARO.
+ *
+ * Ele existe pra separar o bicho do fundo quando os dois são da mesma família de
+ * cor (o hero do Dragonite era laranja sobre laranja). Sobre um hero escuro,
+ * 55% da segunda cor é uma luz. Sobre um hero pálido, é uma mancha de uma
+ * SEGUNDA cor no meio de uma tela que já tem a primeira — e aí a tela tem duas
+ * cores brigando onde devia ter uma.
+ */
+:root[data-tk="light"] .tk-hero-brilho {
+  --tk-brilho-forca: 26%;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-tk="dark"]) .tk-hero-brilho {
+    --tk-brilho-forca: 26%;
+  }
+}
+
+.tk-hero-chao {
+  background: radial-gradient(
+    closest-side,
+    var(--tk-chao-perto),
+    var(--tk-chao-longe) 58%,
+    transparent 100%
+  );
+}
+
+.tk-tabbar {
+  box-shadow: var(--tk-barra-sombra);
+}
+
+.tk-tab-bolha {
+  background: var(--tk-lente-fundo);
+  border: 0.5px solid var(--tk-lente-borda);
+  box-shadow:
+    inset 0 2.5px 4px -1.5px var(--tk-lente-luz-topo),
+    inset 0 -2.5px 4px -1.5px var(--tk-lente-luz-pe),
+    inset 3px 0 4px -2px var(--tk-lente-luz-lado),
+    inset -3px 0 4px -2px var(--tk-lente-luz-lado),
+    var(--tk-lente-sombra);
+}
+
+.tk-cta {
+  background: linear-gradient(180deg, var(--tk-cta-topo), var(--tk-cta-cor));
+  box-shadow: var(--tk-cta-sombra);
+  color: var(--tk-cta-ink);
+}
+
+.tk-cta-ico {
+  background: color-mix(in srgb, var(--tk-cta-ink) 18%, transparent);
+  color: var(--tk-cta-ink);
+}
+
+.tk-cta-t,
+.tk-cta-d {
+  color: var(--tk-cta-ink);
+}
+
+/* 0,88 e não 0,82: sobre a ação principal CLARA (fundo escuro da espécie, tinta
+   branca) o subtítulo em 82% caía pra ~3,9:1, e ele é texto pequeno. */
+.tk-cta-d {
+  opacity: 0.88;
+}
+
+.tk-act,
+.tk-card,
+.tk-btn--secondary,
+.tk-search,
+.tk-seg,
+.tk-row-card,
+.tk-banner {
+  background: color-mix(
+    in srgb,
+    var(--tk-accent, transparent) var(--tk-cartao-tinta, 14%),
+    var(--tk-cartao-base, var(--tk-surface-2))
+  );
+  border-color: color-mix(
+    in srgb,
+    var(--tk-accent, transparent) var(--tk-cartao-borda-tinta, 26%),
+    var(--tk-border)
+  );
+}
+
+/* O relevo vai só na família CARTÃO. Campo de busca e segmentado são superfícies
+   AFUNDADAS por natureza — dar sombra de elevação a eles diria a coisa errada. */
+.tk-act,
+.tk-card,
+.tk-row-card,
+.tk-banner {
+  box-shadow: var(--tk-cartao-relevo);
+}
+
+/*
+ * ⚠️ O VEU E O FUNDO NA MESMA DECLARACAO — antes um matava o outro.
+ *
+ * Havia dois `.tk-app::before` com `background`: o do `App.css`, que pinta
+ * `var(--tk-screen)` (o degrade da tela, com a tinta da especie), e o daqui, que
+ * pinta o veu de cor. Mesma especificidade, e o `design.css` importa depois —
+ * entao a regra daqui substituia a outra INTEIRA, e `--tk-screen` nunca chegava
+ * a ser pintado.
+ *
+ * O sintoma era o app parecer chapado: o fundo que aparecia era o `--tk-bg`
+ * liso do `html`, sem o radial e sem a tinta. E o token estava la, definido,
+ * medido e coberto por teste — a tela e que nao o usava. Terceira vez que este
+ * arquivo morde assim, e sempre da mesma forma: `background` e propriedade
+ * atalho, e atalho nao se soma, se substitui.
+ *
+ * Agora as tres camadas estao na mesma pilha, na ordem certa: veu da cor
+ * principal, veu da segunda cor, e o degrade da tela por baixo de tudo.
+ */
+.tk-app::before {
+  background:
+    radial-gradient(
+      130% 55% at 50% 58%,
+      color-mix(in srgb, var(--tk-accent, transparent) var(--tk-veu-app, 13%), transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      90% 45% at 50% 100%,
+      color-mix(in srgb, var(--tk-accent-2, transparent) var(--tk-veu-app-2, 8%), transparent),
+      transparent 75%
+    ),
+    var(--tk-screen);
+}
+
+/*
+ * ⚠️ TODO BOTÃO CHEIO DA ESPÉCIE LÊ OS MESMOS TOKENS.
+ *
+ * `.tk-cta` (Escanear um print), `.tk-btn--especie` (Ver o IV do meu) e
+ * `.tk-vazio-btn` pintavam `var(--tk-accent)` cada um por conta própria — a cor
+ * cheia da espécie, presa entre claridade 0,38 e 0,62.
+ *
+ * Sobre a página preta isso é um botão que brilha. Sobre a página branca é um
+ * botão CLARO sobre fundo claro: medido no Venusaur, o "Ver o IV do meu" ficava
+ * `rgb(62,134,139)` com texto `rgb(10,12,16)` — passa em contraste de TEXTO, e
+ * mesmo assim some como objeto, porque a forma dele não se separa da página.
+ *
+ * Este é exatamente o defeito que ele descreveu: uma peça desenhada olhando o
+ * fundo preto, reaproveitada no branco só trocando a cor. A correção não é
+ * escolher outro tom aqui — é os três lerem a mesma decisão de tema, que já
+ * existe em `--tk-cta-cor` / `--tk-cta-ink` / `--tk-cta-sombra`.
+ */
+.tk-btn--especie,
+.tk-vazio-btn {
+  background: var(--tk-cta-cor);
+  color: var(--tk-cta-ink);
+}
+
+.tk-btn--especie {
+  box-shadow: var(--tk-cta-sombra);
+}
+
+/*
+ * O RELEVO do avatar no tema claro.
+ *
+ * A tinta da inicial já foi resolvida na regra base (ver `.tk-avatar`: disco
+ * opaco + `--tk-accent-ink`), e vale nos dois temas. O que ainda era do escuro
+ * eram as sombras: `0 4px 14px rgba(0,0,0,.4)` sobre uma faixa clara é uma
+ * nódoa, e a borda a 32% de branco some. Aqui elas invertem.
+ */
+:root[data-tk="light"] .tk-avatar {
+  border-color: rgba(255, 255, 255, 0.72);
+  box-shadow:
+    0 3px 10px rgba(16, 19, 25, 0.16),
+    inset 0 1px 1px rgba(255, 255, 255, 0.5);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-tk="dark"]) .tk-avatar {
+    border-color: rgba(255, 255, 255, 0.72);
+    box-shadow:
+      0 3px 10px rgba(16, 19, 25, 0.16),
+      inset 0 1px 1px rgba(255, 255, 255, 0.5);
+  }
+}
+
+/*
+ * O selo do tipo no tema claro perdia cor demais.
+ *
+ * O véu branco a 34% foi a resposta certa pra "esses back dos pokemon no modo
+ * claro fico estranho" — mas com o cartão agora BRANCO por baixo (ver
+ * `--tk-cartao-base`), 34% deixa a grade inteira cinza: o verde do Bulbasaur e o
+ * cinza do Machamp ficam quase o mesmo tom, e aí a cor para de informar o tipo.
+ *
+ * 20% clareia o suficiente pro selo não pesar sobre o branco, e devolve a
+ * diferença entre um Planta e um Lutador.
+ */
+[data-tk="light"] .tk-mono:not(.tk-mono--bare)::after {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-tk="dark"]) .tk-mono:not(.tk-mono--bare)::after {
+    background: rgba(255, 255, 255, 0.2);
+  }
 }

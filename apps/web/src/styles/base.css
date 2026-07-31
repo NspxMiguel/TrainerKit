@@ -38,10 +38,34 @@
     overscroll-behavior-x: none;
   }
 
+  /*
+   * ⚠️ O `body` NAO PINTA FUNDO, e isso conserta duas camadas que estavam mortas.
+   *
+   * Ele tinha `background: var(--tk-bg)` igual ao `html`, o que parece
+   * inofensivo e nao e. O `html` e a raiz: o fundo dele e propagado pra tela e
+   * pintado ABAIXO de tudo, inclusive de `z-index: -1`. O `body` nao — ele e um
+   * bloco em fluxo comum, e na ordem de pintura o fundo dele vem DEPOIS dos
+   * descendentes de z-index negativo.
+   *
+   * Ou seja: duas camadas fixas do app viviam atras de um retangulo opaco e
+   * nunca apareceram na tela.
+   *
+   *   · `.tk-app::before` — o degrade `--tk-screen`, com a tinta da especie
+   *   · `.tk-home-topo::before` — a faixa da saudacao, que existe justamente pra
+   *     encontrar o topo do hero SEM EMENDA
+   *
+   * A segunda explica uma caçada inteira: a emenda embaixo da saudacao foi
+   * "consertada" varias vezes mexendo na cor, na rampa e na altura dessa faixa —
+   * e cada conserto era num elemento que ninguem podia ver. O que aparecia ali
+   * era o `--tk-bg` chapado do `body`, que nao acompanha especie nenhuma.
+   *
+   * Com o `body` transparente, o `html` continua garantindo que nao ha buraco
+   * branco em lugar nenhum, e as camadas do app voltam a existir.
+   */
   body {
     margin: 0;
     min-height: 100dvh;
-    background: var(--tk-bg);
+    background: transparent;
     color: var(--tk-txt);
     font-family: var(--tk-font);
     -webkit-font-smoothing: antialiased;

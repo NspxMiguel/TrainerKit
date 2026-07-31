@@ -210,7 +210,13 @@ export interface Paleta {
    * Então a espécie continua mandando na cor, e o TEMA manda na claridade.
    */
   gradienteClaro: string;
-  /** A cor do topo da tela no tema claro. Pálida, pra saudação escura passar. */
+  /**
+   * A cor do topo da tela no tema claro — e ela é COLORIDA, não pálida.
+   *
+   * É a primeira parada do `gradienteClaro`, que agora é a mais forte das três:
+   * a faixa da saudação e o topo do hero são a mesma cor, e a partir dali tudo
+   * clareia até o branco da página. Ver `HERO_CLARO`.
+   */
   topoClaro: string;
   /** A tinta que se lê sobre `topoClaro`. */
   topoClaroTinta: string;
@@ -316,49 +322,60 @@ const TETO_LUZ_HERO = 0.3;
 /**
  * As três paradas do hero CLARO, com PISO e TETO de luminância em cada uma.
  *
- * ⚠️ A versão anterior tinha só piso (0,42) e meia saturação, e o resultado foi
- * o que ele viu: **"nooooosa, fico muito paia isso no modo claro, degrade
- * sumiu, o fundo, tudo"**. Estava tudo lá — só que tão pálido que as três
- * paradas caíam praticamente na mesma cor, e um gradiente sem variação é um
- * retângulo.
+ * ⚠️ A RAMPA VIROU DE CABEÇA PRA BAIXO, e essa é a correção inteira.
  *
- * O erro de projeto foi meu, e está escrito na nota que eu mesmo deixei:
- * "pálido é o que faz ele ler como 'a tela é branca, com a cor do bicho'".
- * Isso vale pra faixa do topo, que é onde a saudação mora. Não vale pro hero
- * inteiro, que ocupa metade da tela e é o retrato do Pokémon — ali a cor é o
- * assunto.
+ * "vc ta pegando o modo preto e só mudando as cores. vc tem q reformular tudo
+ * quando muda pro modo branco ... o degrade aq na tela inicial tbm fica estranho
+ * no branco, tem q achar alguma solução."
+ *
+ * A versão anterior ia de quase-branco (0,93) pra cor cheia (0,58): CLARO em
+ * cima, ESCURO embaixo — a mesma direção do tema escuro, com as cores trocadas.
+ * Só que embaixo o hero fecha em `--tk-hero-ink`, que no claro é o branco do
+ * app. Ou seja, a tela fazia branco → cor → branco.
+ *
+ * Isso não é um degradê, é uma FAIXA. Um degradê é monótono por definição: se a
+ * cor cresce e depois volta pro que era, o olho lê duas emendas e uma tarja no
+ * meio — e foi exatamente isso que apareceu em toda captura dele do tema claro.
+ * No tema escuro o mesmo desenho funciona porque escuro→claro→escuro lê como LUZ
+ * atrás da cabeça; sobre branco, claro→cor→claro lê como MANCHA.
+ *
+ * Agora a rampa desce uma vez só: a cor da espécie nasce no topo da tela — onde
+ * a saudação mora, e que é a mesma cor da faixa acima do hero — e vai clareando
+ * até encostar no branco da página. Não há volta, então não há emenda: a última
+ * parada e o fundo do app são praticamente a mesma luminância.
+ *
+ * É o espelho honesto do tema escuro, e não a cópia dele: lá a cor está no topo
+ * e afunda no preto; aqui a cor está no topo e dissolve no branco.
  *
  * Por que PISO **E** TETO, e não só um dos dois:
  *
- *  · O piso protege a leitura. O nome é quase-preto (`#141920`, luminância
- *    0,0104): 3:1 pede L ≥ 0,131, e o texto pequeno do rodapé pede 0,29. Os
- *    pisos abaixo ficam acima dos dois.
+ *  · O piso protege a leitura. A saudação e o nome são quase-pretos (`#141920`,
+ *    luminância 0,0104): 4,5:1 pede L ≥ 0,22, e o piso de 0,30 da primeira
+ *    parada dá 5,8:1 com folga pra espécie mais escura que existir.
  *  · O teto garante que a cor APAREÇA. Sem ele, amarelo e verde-claro sobem
- *    sozinhos: `l = 0,68` num amarelo dá luminância 0,75, quase branco. Era
+ *    sozinhos: `l = 0,62` num amarelo dá luminância 0,75, quase branco. Era
  *    exatamente esse o buraco — as espécies claras perdiam o degradê inteiro, e
  *    são muitas.
- *
- * As claridades (0,93 / 0,80 / 0,68) espelham as do tema escuro; o que inverte
- * é a direção da rampa de luminância.
  */
 const HERO_CLARO = [
-  { l: 0.93, sat: 0.5, piso: 0.66, teto: 0.9 },
-  { l: 0.74, sat: 1.25, piso: 0.36, teto: 0.52 },
   /*
-   * ⚠️ O piso desta é 0,28, e não 0,22 como eu tinha posto — o teste
-   * "não escurece a ponto de virar o tema escuro" reprovou na hora.
-   *
-   * 0,22 dá 3:1 pro nome (texto grande) e passaria nos testes de contraste,
-   * mas a FRASE embaixo do nome é texto pequeno e pede 4,5:1, ou seja
-   * luminância ≥ 0,29 sem contar com ajuda do véu. Como o véu do tema claro
-   * também enfraqueceu nesta mesma leva, contar com ele seria trocar uma
-   * garantia por uma coincidência.
+   * 0% — A COR. É aqui que a saudação vive, e é a cor que a faixa acima do hero
+   * repete pra as duas se encontrarem sem fio.
    */
-  { l: 0.58, sat: 1.6, piso: 0.28, teto: 0.4 },
+  { l: 0.62, sat: 1.5, piso: 0.3, teto: 0.46 },
+  /* 48% — a passagem. */
+  { l: 0.8, sat: 1.15, piso: 0.55, teto: 0.68 },
+  /*
+   * 72% — QUASE A PÁGINA. O fundo claro do app é `#f2f3f6`, luminância 0,87: com
+   * a última parada entre 0,80 e 0,88, os 28% que faltam pro pé do hero são uma
+   * rampa entre duas cores quase idênticas. É por construção que não dá pra ver
+   * onde o hero acaba — e não por eu ter acertado um número olhando a tela.
+   */
+  { l: 0.92, sat: 0.55, piso: 0.8, teto: 0.88 },
 ] as const;
 
 /*
- * ⚠️ A SATURAÇÃO SOBE ACIMA DE 1 nas paradas de baixo, e isso não é engano.
+ * ⚠️ A SATURAÇÃO SOBE ACIMA DE 1 nas paradas de CIMA, e isso não é engano.
  *
  * Cor sobre fundo claro precisa de mais croma pra ler como cor. O mesmo verde
  * do Bulbasaur (`#46a280`) salta sobre preto e some sobre branco — é o fundo
@@ -564,11 +581,12 @@ export function paletaDaEspecie(spriteId: number | null): Paleta {
       `${escurecerAte(h, Math.max(0.4, sv - 0.04), 0.56, TETO_LUZ_HERO)} 72%`,
     ].join(", "),
     /*
-     * O MESMO desenho, espelhado pro tema claro — e agora COM COR.
+     * O ESPELHO do tema escuro, e não a cópia dele.
      *
-     * A ordem das paradas se mantém (mais claro em cima, cor crescendo pra
-     * baixo): é a forma do handoff, e é a que faz a luz nascer atrás da cabeça
-     * do Pokémon. O que mudou foi a AMPLITUDE — ver `HERO_CLARO`.
+     * No escuro a cor nasce no topo e AFUNDA no preto. No claro ela nasce no
+     * topo e DISSOLVE no branco. As duas rampas são monótonas, cada uma na
+     * direção do próprio fundo — que é o que faz o hero acabar sem emenda nos
+     * dois temas. Ver a nota longa em `HERO_CLARO`.
      */
     gradienteClaro: paradasClaras
       .map((cor, i) => `${cor} ${[0, 48, 72][i]}%`)
