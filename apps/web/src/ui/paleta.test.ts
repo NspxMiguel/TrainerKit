@@ -45,6 +45,79 @@ function contraste(a: string, b: string): number {
   return la > lb ? (la + 0.05) / (lb + 0.05) : (lb + 0.05) / (la + 0.05);
 }
 
+/**
+ * `color-mix(in srgb, {cor} {pct}%, {sobre})`, na conta que o navegador faz.
+ *
+ * Mistura em sRGB é média ponderada canal a canal — sem gama, sem espaço de cor
+ * perceptual. É o que o CSS especifica com `in srgb`, e é o que precisa ser
+ * reproduzido aqui para o teste medir a cor que a tela PINTA.
+ */
+function misturar(cor: string, pct: number, sobre: string): string {
+  const a = parseInt(cor.slice(1), 16);
+  const b = parseInt(sobre.slice(1), 16);
+  const canal = (deslocamento: number) => {
+    const x = ((a >> deslocamento) & 255) * pct + ((b >> deslocamento) & 255) * (1 - pct);
+    return Math.round(x);
+  };
+  const [r, g, bl] = [canal(16), canal(8), canal(0)];
+  return `#${[r, g, bl].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
+}
+
+/** Tinta com alfa composta sobre um fundo opaco (`source-over`). */
+function sobrepor(tinta: [number, number, number], alfa: number, fundo: string): string {
+  const f = parseInt(fundo.slice(1), 16);
+  const canal = (v: number, deslocamento: number) =>
+    Math.round(v * alfa + ((f >> deslocamento) & 255) * (1 - alfa));
+  const [r, g, b] = [canal(tinta[0], 16), canal(tinta[1], 8), canal(tinta[2], 0)];
+  return `#${[r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
+}
+
+/**
+ * A legenda cinza de cada tema, como o `tokens.css` a declara.
+ *
+ * ⚠️ Manter em sincronia com `--tk-text-2` / `--tk-text-3`. Se alguém baixar a
+ * opacidade lá, é este teste que precisa reprovar.
+ */
+const LEGENDA = {
+  claro: { tinta: [22, 24, 29] as [number, number, number], alfa: 0.65 },
+  escuro: { tinta: [235, 238, 245] as [number, number, number], alfa: 0.65 },
+};
+
+/** `.tk-card`: `color-mix(in srgb, var(--tk-accent) 14%, var(--tk-surface-2))`. */
+const TINTA_DO_CARTAO = 0.14;
+
+/**
+ * O cartão do tema ESCURO, resolvido até virar cor opaca.
+ *
+ * Duas voltas que o tema claro não tem, e as duas mudam o número:
+ *
+ *  1. `--tk-surface-2` é `rgba(255,255,255,.06)` — translúcido. O `color-mix`
+ *     com uma cor translúcida mistura em PREMULTIPLICADO e devolve algo que
+ *     ainda tem alfa (0,14 + 0,86 × 0,06 = 0,1916).
+ *  2. Esse resultado ainda pousa sobre `--tk-screen`, que é gradiente. O pior
+ *     caso pra texto claro é a parada mais CLARA, `#141a2a`.
+ *
+ * Tratar o cartão escuro como `#12151b` chapado — que é o que o
+ * `contraste.test.ts` faz — pula as duas e mede um fundo que não existe.
+ */
+const TELA_ESCURA_MAIS_CLARA = "#141a2a";
+
+function cartaoEscuro(acento: string): string {
+  const a = parseInt(acento.slice(1), 16);
+  const tela = parseInt(TELA_ESCURA_MAIS_CLARA.slice(1), 16);
+  const alfaSuperficie = 0.06;
+  const alfa = TINTA_DO_CARTAO + (1 - TINTA_DO_CARTAO) * alfaSuperficie;
+  const canal = (deslocamento: number) => {
+    const acc = (a >> deslocamento) & 255;
+    const premultiplicado =
+      TINTA_DO_CARTAO * acc + (1 - TINTA_DO_CARTAO) * alfaSuperficie * 255;
+    const cor = premultiplicado / alfa;
+    return Math.round(cor * alfa + ((tela >> deslocamento) & 255) * (1 - alfa));
+  };
+  const [r, g, b] = [canal(16), canal(8), canal(0)];
+  return `#${[r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
+}
+
 const ids = Object.keys(tabela as Record<string, unknown>).map(Number);
 
 describe("paleta por espécie", () => {
@@ -79,6 +152,57 @@ describe("paleta por espécie", () => {
       const p = paletaDaEspecie(id);
       const r = contraste(p.legivelClaro, FUNDO_CLARO);
       if (r < 4.5) ruins.push(`#${id}: ${p.legivelClaro} = ${r.toFixed(2)}`);
+    }
+    expect(ruins).toEqual([]);
+  });
+
+  it("a legenda cinza passa 4,5:1 sobre o cartão TINGIDO, em toda espécie", () => {
+    /*
+     * ⚠️ O cartão do tema claro NÃO é `#f1f3f8`. Ele leva 14% da cor da espécie.
+     *
+     * Este é o furo que estava aberto, e ele é da mesma família de todos os
+     * outros deste arquivo: a legenda foi calibrada contra a superfície LIMPA
+     * (`--tk-surface-2`), e o `tokens.css` até registra a escolha — ".61 nos
+     * dois: no claro a hierarquia de três degraus não cabe acima de 4,5:1".
+     * A conta estava certa para o fundo errado.
+     *
+     * Medido no app, em russo e no tema claro: a legenda de cada linha da faxina
+     * dava **4,47** sobre o cartão do Pidgey — e 4,26 sobre uma linha marcada,
+     * que leva mais 10% de azul por cima. Não é um caso de espécie exótica: é
+     * toda legenda de todo cartão do app no tema claro.
+     *
+     * O caminho até aqui também vale registro: a primeira varredura disse "zero
+     * problemas" porque o `color-mix` computa para `color(srgb …)` e o regex
+     * dela só entendia `rgb(`. Zero problemas medidos era zero medições.
+     */
+    const ruins: string[] = [];
+    for (const id of ids) {
+      const p = paletaDaEspecie(id);
+
+      const claro = misturar(p.base, TINTA_DO_CARTAO, FUNDO_CLARO);
+      const emClaro = contraste(
+        sobrepor(LEGENDA.claro.tinta, LEGENDA.claro.alfa, claro),
+        claro,
+      );
+      if (emClaro < 4.5) ruins.push(`#${id} claro: legenda sobre ${claro} = ${emClaro.toFixed(2)}`);
+
+      /*
+       * ⚠️ O TEMA ESCURO TAMBÉM, e ele estava PIOR que o claro.
+       *
+       * Medido a .52, que era o valor do token: **3,58:1** no pior caso — abaixo
+       * até dos .45 que o handoff já tinha rejeitado por dar 4,05 sobre o fundo.
+       * A diferença é que a conta antiga usava o cartão CHAPADO; o cartão de
+       * verdade leva 14% da cor da espécie, e para texto claro isso empurra o
+       * fundo justamente na direção errada.
+       */
+      const escuro = cartaoEscuro(p.base);
+      const emEscuro = contraste(
+        sobrepor(LEGENDA.escuro.tinta, LEGENDA.escuro.alfa, escuro),
+        escuro,
+      );
+      if (emEscuro < 4.5) {
+        ruins.push(`#${id} escuro: legenda sobre ${escuro} = ${emEscuro.toFixed(2)}`);
+      }
     }
     expect(ruins).toEqual([]);
   });

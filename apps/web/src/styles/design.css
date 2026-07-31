@@ -2514,7 +2514,36 @@
      longa, e 4px aqui e a diferenca entre "Crabominable" caber e truncar. */
   letter-spacing: 0;
   text-transform: uppercase;
-  background: color-mix(in srgb, currentColor 14%, transparent);
+  /*
+   * ⚠️ O CHIP POUSA NUMA BASE NEUTRA E OPACA, e não no cartão.
+   *
+   * Era `color-mix(in srgb, currentColor 14%, transparent)` — 14% da própria
+   * cor sobre o que estivesse embaixo. E embaixo está o cartão, que leva 14% da
+   * cor da ESPÉCIE. Duas tintas somadas empurravam o fundo justamente na
+   * direção do texto.
+   *
+   * Medido nas 1.142 espécies, com o chip do jeito antigo:
+   *
+   *   claro  investir 3,12   evoluir 3,51   guardar 3,44   transferir 3,51
+   *   escuro investir 4,28   evoluir 2,97   guardar 4,65   transferir 3,22
+   *
+   * Não é caso de espécie exótica: no tema claro reprovavam as **1.142**, nas
+   * quatro cores. É o chip que carrega o veredito — a única coisa que este app
+   * existe pra dizer — em 11,5px.
+   *
+   * Duas descobertas na conta, e a segunda é a que decidiu o desenho:
+   *
+   *  1. Tirar a tinta do chip não bastava: mesmo em 0%, `investir` no claro
+   *     ainda reprovava em 1.022 espécies. O problema maior é o cartão tingido.
+   *  2. Ancorar o chip num fundo OPACO E NEUTRO (`--tk-elev`) resolve inteiro,
+   *     sem mexer nas quatro cores do veredito: a 10% o pior caso vira 4,65.
+   *
+   * Preservar as cores importava: elas são a linguagem do app (verde investir,
+   * violeta evoluir, âmbar guardar, cinza transferir) e escurecê-las até caber
+   * no cartão tingido teria custado a identidade delas pra resolver um problema
+   * que era do FUNDO.
+   */
+  background: color-mix(in srgb, currentColor 10%, var(--tk-elev));
   /*
    * ⚠️ O CHIP QUEBRA EM DUAS LINHAS EM VEZ DE COMER O NOME.
    *
@@ -2881,4 +2910,203 @@
     color: var(--tk-accent-topo-claro-ink, var(--tk-text));
     text-shadow: none;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FAXINA — a lista de quem pode sair
+   ═══════════════════════════════════════════════════════════════════════════
+
+   A tela é de mochila cheia, então ela é feita de LINHA: dezenas de itens que
+   a pessoa varre com o olho marcando e desmarcando. Isso muda o desenho em
+   relação ao resto do app — aqui nada é cartão individual, nada tem sombra
+   própria e nada compete pela atenção. Um item = uma linha num cartão único,
+   como a lista "Meus".
+*/
+
+.tk-fax-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.tk-fax-group + .tk-fax-group {
+  border-top: 1px solid var(--tk-sep);
+}
+
+/*
+ * O nome da espécie aparece UMA vez, no topo do grupo.
+ *
+ * Repeti-lo em cada linha custaria a informação que a linha tem pra dar (IV,
+ * PC, motivo) e ainda esconderia a pilha: quem tem 9 Pidgey sobrando precisa
+ * VER que são 9 do mesmo, e é o cabeçalho do grupo que diz isso.
+ */
+.tk-fax-group-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 16px 6px;
+  font: 700 13px/1.3 var(--tk-font);
+  color: var(--tk-txt2);
+}
+
+.tk-fax-candy {
+  font: 600 12px/1.3 var(--tk-font);
+  color: var(--tk-txt3);
+  white-space: nowrap;
+}
+
+.tk-fax-row {
+  display: grid;
+  grid-template-columns: 28px 40px 1fr;
+  align-items: center;
+  column-gap: 12px;
+  /* 10px de altura útil + 40 do selo = 60px de linha, acima dos 44 de alvo
+     mínimo. A linha INTEIRA é o alvo, porque ela é um `<label>`. */
+  padding: 10px 16px;
+  cursor: pointer;
+}
+
+.tk-fax-row + .tk-fax-row {
+  border-top: 1px solid var(--tk-sep);
+}
+
+/*
+ * O marcado ganha FUNDO, e não só o quadradinho azul.
+ *
+ * Numa lista de trinta, conferir a seleção pelo estado de trinta caixas de
+ * 20px é trabalho de lupa. O fundo deixa a resposta ("quais vão sair?")
+ * legível de relance, que é o que a pessoa precisa antes de tocar no botão.
+ */
+.tk-fax-row[data-on] {
+  background: var(--tk-pri-soft);
+}
+
+.tk-fax-row--kept {
+  grid-template-columns: 36px 1fr;
+  cursor: default;
+  opacity: 0.82;
+}
+
+.tk-fax-check {
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  justify-self: center;
+  accent-color: var(--tk-pri);
+  /* O alvo é a linha inteira (o `<label>`), então a caixa não precisa de 44px
+     próprios — e forçá-los aqui empurraria o selo da espécie pra fora. */
+  flex: none;
+}
+
+.tk-fax-text {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.tk-fax-name {
+  font: 600 14.5px/1.3 var(--tk-font);
+  color: var(--tk-txt);
+}
+
+.tk-fax-why {
+  font: 400 12.5px/1.4 var(--tk-font);
+  /*
+   * O cinza de legenda de sempre — mas ele foi RECALIBRADO por causa desta
+   * tela: sobre uma linha marcada (que leva 14% da cor da espécie mais 10% de
+   * azul) o `--tk-txt3` antigo dava 4,44:1 no escuro e 4,26 no claro. Ver a
+   * nota longa em `tokens.css`; a correção é global, não local, porque o defeito
+   * era de todo cartão do app e não desta lista.
+   */
+  color: var(--tk-txt3);
+}
+
+/*
+ * A barra de ação, fixa no rodapé.
+ *
+ * Fixa porque a lista é longa por definição: um botão no fim obrigaria a rolar
+ * trinta linhas de volta pra confirmar. Ela ocupa o lugar onde a barra de abas
+ * estaria — a barra some quando há folha aberta (ver `useFolha`), então não há
+ * duas coisas flutuando no mesmo canto.
+ */
+.tk-fax-bar {
+  /*
+   * ⚠️ `sticky`, e NUNCA `fixed`. Dentro destas folhas, `fixed` não existe.
+   *
+   * Foi assim que eu escrevi da primeira vez, e o sintoma é bizarro o bastante
+   * pra valer o registro: a barra aparecia no TOPO da tela, sobre o título,
+   * enquanto a lista rolava por baixo. Medido: `top: -30` com `scrollTop: 729`.
+   *
+   * A causa é `.tk-sheet-full`, que anima com `animation: … both`. O
+   * `fill-mode: both` mantém o `transform` da animação aplicado depois que ela
+   * termina — e QUALQUER transform, inclusive a identidade
+   * `matrix(1,0,0,1,0,0)`, faz o elemento virar bloco contentor dos
+   * descendentes `fixed`. A barra passou a se posicionar contra a folha, que é
+   * um contêiner que rola, e portanto rolou junto.
+   *
+   * `sticky` é o que resolve, e resolve melhor: ela é filha direta do contêiner
+   * que rola, ocupa lugar de verdade no fim do fluxo (a última linha da lista
+   * não fica escondida) e gruda no rodapé do visor enquanto há conteúdo acima.
+   */
+  position: sticky;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  /* Sangra a goteira da folha pra encostar nas duas bordas: uma barra com 20px
+     de fundo de tela de cada lado lê como cartão flutuante, não como rodapé. */
+  margin: 0 calc(-1 * var(--tk-gutter));
+  padding: 12px var(--tk-gutter) calc(12px + var(--tk-safe-bottom));
+  /*
+   * ⚠️ VIDRO, e não `--tk-surf2`.
+   *
+   * Foi o meu primeiro erro aqui, e ele é fácil de repetir: os tokens `surf*`
+   * são VÉUS — `rgba(255,255,255,.085)` —, feitos pra clarear um cartão que já
+   * está pousado no fundo do app. Numa barra fixa por cima de uma lista que
+   * rola, um véu de 8,5% não esconde nada: o texto "8 marcados" saía cruzado
+   * com o nome da espécie que passava por baixo.
+   *
+   * A receita do vidro é a mesma da barra de abas, e pelo mesmo motivo: é o
+   * único material do app desenhado pra ficar SOBRE conteúdo em movimento.
+   */
+  background: var(--tk-glass-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-top: 1px solid var(--tk-glass-border);
+  box-shadow: 0 -8px 24px rgb(0 0 0 / 22%);
+}
+
+/*
+ * ⚠️ A FOLHA PERDE O RECUO DE BAIXO ENQUANTO HÁ BARRA.
+ *
+ * Segunda armadilha do `sticky`, medida depois de resolver a primeira: o
+ * elemento gruda no rodapé do BLOCO CONTENTOR, que é a caixa de conteúdo da
+ * folha — e a folha tem `padding-bottom` de `--tk-s8` mais a área segura. A
+ * barra parava 44px acima do fim da tela, com uma faixa de fundo por baixo, o
+ * que a fazia parecer um cartão solto em vez de rodapé.
+ *
+ * Some com o recuo só quando a barra existe: ela própria carrega a área segura
+ * no seu `padding`, e sem barra o recuo continua sendo necessário pra última
+ * linha da lista não encostar na borda.
+ */
+.tk-sheet-full--barra {
+  padding-bottom: 0;
+}
+
+.tk-fax-bar-text {
+  flex: 1;
+  min-width: 0;
+  font: 700 14px/1.3 var(--tk-font);
+  color: var(--tk-txt);
+}
+
+/* O desfazer é informação, não alarme: verde de "deu certo", e o botão que
+   conserta é o único da barra. */
+.tk-fax-bar--undo {
+  /* O verde entra como CAMADA por cima do vidro (imagem sobre cor), e não no
+     lugar dele: `--tk-succ-soft` também é um véu, e sozinho deixaria a lista
+     aparecer através do aviso. */
+  background-image: linear-gradient(var(--tk-succ-soft), var(--tk-succ-soft));
+  border-top-color: var(--tk-succ-line);
 }

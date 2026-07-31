@@ -29,8 +29,9 @@
  * No escuro subiu pra .52 — o minimo que passa tambem SOBRE O CARTAO, que e
  * translucido e portanto mais claro que o fundo. Ninguem nota a diferenca.
  *
- * ⚠️ No CLARO os dois convergem: pra `--tk-text-3` passar ele precisa de .61,
- * que e exatamente onde `--tk-text-2` precisa ficar. Nao e falha do desenho — e
+ * ⚠️ No CLARO os dois convergem, hoje em .65 (era .61 — ver a nota do bloco
+ * `[data-tk="light"]`: o .61 media contra a superficie LIMPA, e o cartao do app
+ * leva 14% da cor da especie). Nao e falha do desenho — e
  * fisica: tres degraus de cinza nao cabem entre 4,5:1 e o preto sobre #F2F3F6.
  * Escolhi manter DOIS degraus no claro em vez de perder a leitura no sol. Se
  * um dia alguem quiser o terceiro degrau de volta, ele so pode existir em texto
@@ -52,22 +53,29 @@
 [data-tk="dark"] {
   /* ── canonicos do redesenho (escuro) ─────────────────────────────────── */
   --tk-text: #f4f6fa;
-  --tk-text-2: rgba(235, 238, 245, 0.62);
   /*
-   * .52, e nao os .45 do handoff.
+   * .65 nos DOIS, e a historia deste numero e a mesma nos dois temas.
    *
-   * .45 dava 4,05:1 sobre o fundo. Mas o cartao do redesenho e TRANSLUCIDO
-   * (`rgba(255,255,255,.05)` sobre #0a0c10 = #16181c), entao ele e mais claro
-   * que o fundo e derruba mais um pouco. Medido nas tres superficies:
+   * O caminho ate aqui, em tres passos, cada um corrigindo o fundo do anterior:
    *
-   *   .45 → 4,05 / 4,03 / 4,02   ✗
-   *   .49 → 4,61 / 4,55 / 4,49   ✗ passa no fundo e reprova no cartao
-   *   .52 → 5,07 / 4,95 / 4,92   ✓
+   *   .45 do handoff → 4,05 sobre o FUNDO. Reprovava.
+   *   .52            → 5,07 / 4,95 / 4,92 sobre fundo e CARTOES chapados. ✓
+   *   .65            → 4,66 sobre o cartao TINGIDO, que e o que a tela pinta.
    *
-   * O .49 e o exemplo do erro: conferir so contra o fundo aprova uma cor que
-   * falha justamente onde ela mais aparece, que e dentro de cartao.
+   * ⚠️ O passo que faltava: `.tk-card` leva 14% da cor da especie desde que o
+   * app ganhou cor por Pokemon. A .52, a legenda sobre o cartao tingido caia a
+   * **3,58:1** no pior caso (especie #723) — pior que os .45 que o handoff ja
+   * tinha rejeitado, e num fundo que nao existia quando a conta foi feita.
+   *
+   * O `--tk-text-2` (que era .62) reprovava tambem: 4,39. Os dois convergem em
+   * .65 porque, sobre um cartao tingido, nao ha espaco pra dois degraus de
+   * cinza acima de 4,5:1 — a mesma fisica que ja tinha juntado os dois no tema
+   * claro. Perde-se um degrau de hierarquia; ganha-se o texto legivel no sol.
+   *
+   * Cobrado especie por especie no `paleta.test.ts`, nos dois temas.
    */
-  --tk-text-3: rgba(235, 238, 245, 0.52);
+  --tk-text-2: rgba(235, 238, 245, 0.65);
+  --tk-text-3: rgba(235, 238, 245, 0.65);
 
   --tk-surface: rgba(255, 255, 255, 0.05);
   --tk-surface-2: rgba(255, 255, 255, 0.06);
@@ -81,7 +89,23 @@
 
   /* Violeta "Ultra": reservado pra ACAO DO APP (botao primario, aba ativa,
      link). Nunca pra conteudo — conteudo usa a cor do tipo do Pokemon. */
-  --tk-ultra: linear-gradient(180deg, #8a6bff, #6e4bff);
+  /*
+   * ⚠️ A PARADA DE CIMA ERA #8a6bff, e o texto branco reprovava nela.
+   *
+   * O botao primario e o unico do app com texto branco chapado, e o gradiente
+   * clareia pra CIMA — a parte de cima da pilula e a mais clara, e e la que a
+   * primeira linha do rotulo cai. Branco sobre #8a6bff da **3,71:1** num texto
+   * de 17px/600, que e pequeno pelo criterio do WCAG. A parada de baixo passava
+   * (5,16) e foi ela que sustentou a impressao de que o botao estava bem.
+   *
+   * #7657ff da 4,62 e mantem a matiz. O tema claro nunca teve o problema: la o
+   * topo e #6b4bff, luminancia menor.
+   *
+   * O `contraste.test.ts` media so token CHAPADO, e o proprio comentario dele
+   * dizia que gradiente ficava de fora. Agora ele abre as paradas: para o texto
+   * de um botao, todas ficam atras do rotulo, e a pior delas e a resposta.
+   */
+  --tk-ultra: linear-gradient(180deg, #7657ff, #6e4bff);
   --tk-ultra-solid: #6e4bff;
   --tk-ultra-fg: #9f8bff;
   --tk-ultra-fg-strong: #b9a8ff;
@@ -218,10 +242,22 @@
 [data-tk="light"] {
   /* ── canonicos do redesenho (claro) ──────────────────────────────────── */
   --tk-text: #16181d;
-  /* .61 nos DOIS: no claro a hierarquia de tres degraus nao cabe acima de
-     4,5:1. Escolha registrada na nota do topo do arquivo. */
-  --tk-text-2: rgba(22, 24, 29, 0.61);
-  --tk-text-3: rgba(22, 24, 29, 0.61);
+  /*
+   * .65 nos DOIS. A hierarquia de tres degraus continua nao cabendo no claro —
+   * mas o .61 de antes tambem nao cabia, e isso so apareceu quando eu medi a
+   * tela em vez do token.
+   *
+   * ⚠️ O .61 foi calibrado contra `--tk-surface-2` LIMPO. O cartao do app nao e
+   * limpo: ele leva 14% da cor da especie (`.tk-card` no design.css). Sobre o
+   * cartao do Pidgey a legenda dava 4,47, e 4,26 numa linha selecionada, que
+   * leva mais 10% de azul. Nao era caso raro: 949 das 1.142 especies
+   * reprovavam, ou seja, toda legenda de todo cartao no tema claro.
+   *
+   * O `paleta.test.ts` agora cobra isso especie por especie, com a mistura
+   * refeita como o navegador faz. Baixar daqui reprova o teste.
+   */
+  --tk-text-2: rgba(22, 24, 29, 0.65);
+  --tk-text-3: rgba(22, 24, 29, 0.65);
 
   --tk-surface: #ffffff;
   --tk-surface-2: #f1f3f8;
@@ -268,6 +304,11 @@
    * Reprovava nos TRES. A 0.6 passa nos tres (4.61 / 4.87 / 4.68), que e o
    * menor passo de 0.02 que resolve — subir mais apagaria a hierarquia entre
    * `--tk-txt2` e este, que e a razao de os dois existirem.
+   *
+   * ⚠️ ESTA LISTA DE TRES FUNDOS ESTAVA INCOMPLETA, e foi o que deixou o furo
+   * passar: falta nela o cartao TINGIDO, que e o que a tela pinta desde que o
+   * app ganhou cor por especie. Ver `--tk-text-2` no bloco claro; o numero
+   * final e .65, e agora ha teste varrendo as 1.142 especies.
    *
    * No tema escuro o mesmo token da 4.82 a 4.93: passa, e por isso fica como
    * esta. Os dois temas nao precisam do mesmo numero, precisam do mesmo
@@ -353,10 +394,10 @@
   :root:not([data-tk="dark"]) {
     /* ── canonicos do redesenho (claro) ──────────────────────────────────── */
     --tk-text: #16181d;
-    /* .61 nos DOIS: no claro a hierarquia de tres degraus nao cabe acima de
-       4,5:1. Escolha registrada na nota do topo do arquivo. */
-    --tk-text-2: rgba(22, 24, 29, 0.61);
-    --tk-text-3: rgba(22, 24, 29, 0.61);
+    /* .65: ver a nota no bloco `[data-tk="light"]`. Medido contra o cartao
+       TINGIDO, que e o que a tela pinta. */
+    --tk-text-2: rgba(22, 24, 29, 0.65);
+    --tk-text-3: rgba(22, 24, 29, 0.65);
 
     --tk-surface: #ffffff;
     --tk-surface-2: #f1f3f8;
