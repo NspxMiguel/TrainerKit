@@ -103,6 +103,7 @@ export const PT_BR: Dict = {
   "pokedex.showMore": "Mostrar mais ({count} restantes)",
   "pokedex.whichPokemon": "Qual Pokémon?",
 
+  "species.iHaveThis": "Eu tenho esse",
   "species.calcIV": "Calcular IV do meu",
   "species.seeMyIV": "Ver o IV do meu",
   "species.baseStats": "Stats base",
@@ -386,6 +387,7 @@ export const PT_BR: Dict = {
   "verdict.raid.attack": "Ataque base {base} com IV {iv}",
   "verdict.shadow.bonus": "Sombroso bate 20% mais forte — não purifique sem pensar",
   "verdict.lucky.cost": "Sendo lucky, subir custa metade da poeira",
+  "verdict.needIv": "Falta o IV pra eu decidir",
   "verdict.iv.weak": "IV {total} de 45",
   "verdict.species.weak": "A espécie não rende nem atacando nem aguentando",
   "verdict.default": "Não há nada que peça ação agora",

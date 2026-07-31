@@ -378,6 +378,41 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
       const s = data.species.find((x) => x.id === owned.speciesId);
       if (!s) return [];
 
+      /*
+       * ⚠️ SEM IV, O APP NAO DECIDE — ele pede o IV.
+       *
+       * "coloca um botão de eu tenho esse pokemon... e se a pessoa n qr
+       * escanear iv?"
+       *
+       * Quem entra por "eu tenho esse" fica com `ivs` em 0 porque o tipo exige
+       * numeros. Rodar `decide()` em cima desses zeros seria o pior erro que
+       * este app pode cometer: sairia "Transferir", com barra de confianca
+       * cheia, pra um bicho que pode ser 100%. Numero inventado com cara de
+       * medido e pior que numero nenhum.
+       *
+       * Entao o veredito vira "descobrir o IV", que e literalmente o que falta
+       * fazer — e a tese do app continua de pe, porque ele continua dizendo o
+       * proximo passo em vez de despejar dado.
+       */
+      if (owned.ivDesconhecido) {
+        return [
+          {
+            id: owned.id,
+            owned,
+            species: s,
+            verdict: {
+              action: "investir",
+              confidence: 0,
+              reason: { key: "verdict.needIv" },
+              signals: [],
+            } satisfies Verdict,
+            iv: -1,
+            semIv: true,
+            feito: false,
+          },
+        ];
+      }
+
       const verdict = decide({
         name: s.name,
         baseStats: s.baseStats,
@@ -396,6 +431,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
       return [
         {
           id: owned.id,
+          semIv: false,
           /*
            * ⚠️ O POKEMON SALVO INTEIRO, e nao so o `id`.
            *
