@@ -23,7 +23,7 @@ import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
 import { moveLabel, useLanguage, useShowTranslation } from "../i18n/language.ts";
 import { useT, type Key } from "../i18n/t.ts";
 import { useSetup } from "../onboarding/setup.ts";
-import type { OwnedPokemon } from "../storage/collection.ts";
+import { useCollection, type OwnedPokemon } from "../storage/collection.ts";
 import { typeColor, typeKey } from "../sprites/provider.ts";
 import { AssistantCard } from "../ui/AssistantCard.tsx";
 import { IconSwords } from "../ui/Icons.tsx";
@@ -90,7 +90,26 @@ function StatBar({ label, value }: { label: string; value: number }) {
   );
 }
 
-export function SpeciesDetail({ species, data, onClose, onPickSpecies, owned }: Props) {
+export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpecies, owned }: Props) {
+  /*
+   * ⚠️ A ESPECIE SEGUE O POKEMON SALVO, e nao a foto de quando a tela abriu.
+   *
+   * "cliquei em evoluir e o bulbasauro n foi, ja fiz e n foi."
+   *
+   * A prop `species` e um retrato do instante em que a ficha foi aberta. Depois
+   * que evoluir passou a MUDAR a especie do bicho salvo, esse retrato virou
+   * mentira: a tela continuava dizendo "Bulbasaur" com o botao de evoluir
+   * armado, e o proximo toque evoluia de novo — pulando o Ivysaur e indo direto
+   * pro Venusaur, que foi exatamente o que apareceu no teste.
+   *
+   * Lendo do registro salvo, a ficha acompanha: evoluiu, ela vira a forma nova,
+   * o veredito recalcula e o botao passa a oferecer o proximo passo real. E o
+   * "continua o trajeto" que ele pediu, sem pular degrau.
+   */
+  const { items } = useCollection();
+  const salvo = items?.find((x) => x.id === owned?.id) ?? owned;
+  const species =
+    (salvo ? data.species.find((s) => s.id === salvo.speciesId) : undefined) ?? especieAberta;
   /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
      caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
      escape volta a piscar, e so aquele. */
