@@ -33,6 +33,17 @@ import { TYPE_NAMES, typeColor, typeInk } from "../sprites/provider.ts";
  * conta real varia com a posicao, e nenhuma checagem estatica resolve. Por
  * isso as superficies listadas aqui incluem o ponto mais CLARO do degrade no
  * tema escuro e o mais ESCURO no claro: e o pior caso de cada um.
+ *
+ * ⚠️ Esse "nenhuma checagem estatica resolve" era largo demais, e a largura
+ * custou caro: o BOTAO PRIMARIO tem gradiente, ficou de fora por causa dessa
+ * frase, e o branco dele reprovava em 3,71:1 no tema escuro. A distincao certa
+ * nao e "tem gradiente", e "o texto cobre o gradiente inteiro?" — numa pilula
+ * de 54px cobre, entao a pior parada e a resposta e da pra medir. Ha um teste
+ * pra isso mais abaixo.
+ *
+ * O que continua fora: superficies muito maiores que o texto (`--tk-screen`) e
+ * as que dependem do que passa por tras (vidro). Essas so o app medindo a si
+ * mesmo pega — e foi assim que esta ultima leva apareceu.
  */
 
 /*
@@ -81,11 +92,30 @@ function achatar(cor: RGB, alpha: number, fundo: RGB): RGB {
   ] as const;
 }
 
+/**
+ * Onde um seletor ABRE de verdade — `seletor {`, e não a primeira menção a ele.
+ *
+ * ⚠️ Isto era `CSS.indexOf(inicio)`, e a fragilidade não é teórica: bastou uma
+ * NOTA no topo do arquivo citar `[data-tk="light"]` entre crases pra que o
+ * "bloco claro" passasse a começar no comentário — vários tokens antes do
+ * bloco escuro. O teste então media as cores do tema ESCURO chamando-as de
+ * claras, e reprovou 17 vezes com números absurdos (`--tk-succ` a 1,73:1).
+ *
+ * Um teste que encontra o texto errado não mede nada, e o pior é que ele
+ * reprova, o que dá a impressão de estar funcionando.
+ */
+function abertura(seletor: string): number {
+  const i = CSS.search(new RegExp(`${seletor.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{`));
+  return i;
+}
+
 function bloco(inicio: string, fim: string): string {
-  const i = CSS.indexOf(inicio);
-  const f = CSS.indexOf(fim, i);
+  const i = abertura(inicio);
   expect(i, `bloco "${inicio}" sumiu do tokens.css`).toBeGreaterThan(-1);
-  return CSS.slice(i, f === -1 ? undefined : f);
+  const f = CSS.slice(i).search(
+    new RegExp(`${fim.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{`),
+  );
+  return CSS.slice(i, f === -1 ? undefined : i + f);
 }
 
 function hexDoToken(texto: string, nome: string): RGB | null {
@@ -255,6 +285,80 @@ describe("contraste dos tokens", () => {
     // regra. Aqui fica registrado o número que motivou a mudança.
     expect(contraste(doHex("#ffffff"), doHex(typeColor("grass")))).toBeLessThan(MINIMO);
     expect(contraste(doHex("#ffffff"), doHex(typeColor("electric")))).toBeLessThan(2);
+  });
+
+  it("o branco do botao primario passa em TODAS as paradas do gradiente", () => {
+    /*
+     * ⚠️ O que o comentario do topo dizia que este arquivo NAO garantia.
+     *
+     * "Onde o texto cai sobre gradiente ... nenhuma checagem estatica resolve."
+     * Isso vale pro degrade da TELA, que se estende por trezentos pixels e cuja
+     * cor sob uma palavra depende de onde a palavra esta. Nao vale pro botao: o
+     * gradiente dele mede 54px de altura, o rotulo fica no meio, e TODA parada
+     * esta atras do texto. A pior delas e a resposta, e ela e estatica.
+     *
+     * A distincao importava: `--tk-ultra` do tema escuro comecava em #8a6bff e
+     * o branco dava **3,71:1** ali. O botao primario e a acao principal de quase
+     * toda tela do app, e passou por todas as revisoes — inclusive por uma que
+     * mediu tokens chapados e declarou o tema escuro limpo.
+     */
+    const ruins: string[] = [];
+    for (const tema of TEMAS) {
+      const m = /--tk-ultra\s*:\s*linear-gradient\(([^)]+)\)/.exec(tema.css);
+      expect(m, `--tk-ultra sumiu do tema ${tema.nome}`).not.toBeNull();
+      for (const parada of m![1]!.match(/#[0-9a-fA-F]{6}/g) ?? []) {
+        const r = contraste(doHex("#ffffff"), doHex(parada));
+        if (r < MINIMO) ruins.push(`${tema.nome}: branco sobre ${parada} = ${r.toFixed(2)}`);
+      }
+    }
+    expect(ruins).toEqual([]);
+  });
+
+  it("o chip de veredito passa sobre o proprio fundo, nas quatro cores", () => {
+    /*
+     * ⚠️ O chip nao pousa numa superficie da lista acima: ele pinta a PROPRIA.
+     *
+     * `.tk-owned-act` faz `color-mix(in srgb, currentColor 10%, var(--tk-elev))`
+     * — um veu da propria cor sobre uma base neutra opaca. Medir a cor contra
+     * `#f1f3f8` (como os outros casos deste arquivo fazem) responde uma pergunta
+     * que a tela nao faz.
+     *
+     * Antes ele misturava com `transparent`, e o que aparecia embaixo era o
+     * cartao TINGIDO com 14% da cor da especie. Duas tintas somadas: no tema
+     * claro as quatro cores reprovavam nas 1.142 especies, `investir` chegando a
+     * 3,12:1. Ancorar em `--tk-elev` desacopla o chip da especie de vez.
+     */
+    const VEU = 0.1;
+    const ruins: string[] = [];
+    for (const tema of TEMAS) {
+      const base = hexDoToken(tema.css, "tk-elev");
+      expect(base, `--tk-elev sumiu do tema ${tema.nome}`).not.toBeNull();
+      for (const nome of ["tk-v-investir", "tk-v-evoluir", "tk-v-guardar", "tk-v-transferir"]) {
+        const cor = hexDoToken(tema.css, nome);
+        expect(cor, `--${nome} sumiu do tema ${tema.nome}`).not.toBeNull();
+        const fundo = achatar(cor!, VEU, base!);
+        const r = contraste(cor!, fundo);
+        if (r < MINIMO) ruins.push(`${tema.nome} --${nome}: ${r.toFixed(2)} sobre o proprio chip`);
+      }
+    }
+    expect(ruins).toEqual([]);
+  });
+
+  it("o veu de 14% sobre o cartao tingido REPROVA — e o que motivou a mudanca", () => {
+    // O cartao do Bulbasaur no tema claro, e o verde de "investir" em cima.
+    // Sem este caso, alguem devolve o `transparent` e o teste acima continua
+    // verde, porque ele mediria a base neutra e nao a que a tela usaria.
+    const cartaoTingido = achatar(doHex("#4e8a72"), 0.14, doHex("#f1f3f8"));
+    const chipAntigo = achatar(doHex("#067a56"), 0.14, cartaoTingido);
+    expect(contraste(doHex("#067a56"), chipAntigo)).toBeLessThan(MINIMO);
+  });
+
+  it("a parada clara que existia antes REPROVA", () => {
+    // Mesma trava do `typeInk`: sem o caso negativo, alguem devolve o #8a6bff
+    // "porque ficava mais bonito" e o teste acima continua verde medindo a
+    // regressao em vez da regra.
+    expect(contraste(doHex("#ffffff"), doHex("#8a6bff"))).toBeLessThan(MINIMO);
+    expect(contraste(doHex("#ffffff"), doHex("#7657ff"))).toBeGreaterThanOrEqual(MINIMO);
   });
 
   it("pega a cor que eu tinha deixado passar", () => {

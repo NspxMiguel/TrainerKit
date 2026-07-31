@@ -896,7 +896,20 @@
   border: 1px solid var(--tk-line2);
   box-shadow: inset 0 -8px 14px -8px rgba(0, 0, 0, 0.45);
   font: 800 17px var(--tk-mono);
-  color: rgba(255, 255, 255, 0.93);
+  /*
+   * ⚠️ BRANCO INTEIRO. Os 93% de antes anulavam a garantia do `paleta.ts`.
+   *
+   * `gradienteDaEspecie` cede luminância da parada clara até o BRANCO passar em
+   * 4,5:1 — e o teste que trava isso mede `#ffffff`, porque foi o que eu supus
+   * que a tela pintava. A tela pintava 93%: sobre o selo do Pidgey
+   * (`rgb(145,110,58)`, luminância 0,174) o branco puro dá 4,68 e o de 93% dá
+   * **4,26**. O piso existia, o teste passava, e a tela reprovava mesmo assim.
+   *
+   * Achado medindo a tela de verdade, não o código — e vale como categoria: o
+   * teste garantia uma cor que a folha de estilo não usava. Os 7% de véu não
+   * mudavam nada que se veja; o contraste, sim.
+   */
+  color: #ffffff;
   flex: none;
   overflow: hidden;
 }
