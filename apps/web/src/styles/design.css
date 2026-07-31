@@ -1612,3 +1612,98 @@
 .tk-hero-art[data-sem-imagem] > .tk-mono {
   filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.5));
 }
+
+/* ───────────────────────────────────── a troca de conta (coleções) ─────── */
+
+/*
+ * O selo de cada conta usa a cor da espécie em destaque, como o avatar da home
+ * — é o que liga visualmente o disco do canto à tela que ele abre.
+ */
+.tk-colecao-selo {
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 700 16px var(--tk-font);
+  color: #fff;
+  background: linear-gradient(
+    140deg,
+    color-mix(in srgb, var(--tk-accent, #6b7280) 70%, transparent),
+    color-mix(in srgb, var(--tk-accent-2, #6b7280) 55%, transparent)
+  );
+  border: 2px solid rgba(255, 255, 255, 0.28);
+}
+
+.tk-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 12px;
+}
+
+.tk-row-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  border: 0;
+  padding: 4px 0;
+  color: var(--tk-text);
+  /* O nome e a contagem podem ser longos em qualquer idioma; quem cede espaco
+     e o texto, nunca os botoes de acao. */
+  overflow: hidden;
+  /* 44px de alvo mesmo com a linha compacta: é a regra do handoff pra
+     qualquer coisa tocável, e trocar de conta é toque de dedão. */
+  min-height: 44px;
+}
+
+.tk-row-title {
+  display: block;
+  font: 600 16px var(--tk-font);
+  /* O check ficava POR CIMA do nome ("Principal✓") porque o bloco de texto
+     ocupava a largura toda e o icone vinha depois sem espaco proprio. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* A conta em uso fica com o rotulo em destaque, e nao com um icone extra —
+   icone so numa linha da larguras diferentes as duas. */
+.tk-row-main[aria-current] .tk-row-meta {
+  color: var(--tk-accent-fg);
+  font-weight: 600;
+}
+
+.tk-row-meta {
+  display: block;
+  font: 400 12.5px var(--tk-font);
+  color: var(--tk-text-3);
+  margin-top: 1px;
+  /* Sem quebrar: "3 Pokémon · em uso" em duas linhas empurrava o botao de
+     renomear pra fora e desalinhava a linha inteira. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tk-row-acao {
+  flex: none;
+  min-height: 44px;
+  padding: 0 8px;
+  white-space: nowrap;
+  background: none;
+  border: 0;
+  font: 600 12.5px var(--tk-font);
+  color: var(--tk-accent-fg);
+}
+
+/* Vermelho só aqui: apagar uma conta leva os Pokémon dela junto, e sem
+   servidor não existe desfazer. */
+.tk-row-acao--perigo {
+  color: var(--tk-dang);
+}
