@@ -8,7 +8,7 @@ import { useT, type Key } from "../i18n/t.ts";
 import type { PokedexIntent } from "../App.tsx";
 import { useSetup } from "../onboarding/setup.ts";
 import { typeColor, typeKey } from "../sprites/provider.ts";
-import { setDoneAction, useCollection } from "../storage/collection.ts";
+import { setDoneAction, useCollection, type OwnedPokemon } from "../storage/collection.ts";
 import { useInstallState } from "../storage/install.ts";
 import type { PersistState } from "../storage/persist.ts";
 import { DidYouKnow } from "../ui/DidYouKnow.tsx";
@@ -253,7 +253,17 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
   const [picked, setPicked] = useState<DatasetSpecies | null>(null);
   const [teamOpen, setTeamOpen] = useState(false);
   const [gymOpen, setGymOpen] = useState(false);
-  const [detail, setDetail] = useState<DatasetSpecies | null>(null);
+  /*
+   * O detalhe carrega a ESPECIE e, quando houver, O SEU Pokemon.
+   *
+   * Era so a especie, e por isso a ficha nunca via o veredito de quem estava na
+   * colecao. Guardar os dois juntos e o que permite a mesma tela responder as
+   * duas perguntas — "esse Pokemon presta?" e "o que eu faco com o MEU?".
+   */
+  const [detail, setDetail] = useState<
+    { species: DatasetSpecies; owned?: OwnedPokemon | undefined } | null
+  >(null);
+  const abrirEspecie = (species: DatasetSpecies) => setDetail({ species });
 
   const ready = dataset.status === "ready";
   const data = ready ? dataset.data : null;
@@ -285,6 +295,19 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
       return [
         {
           id: owned.id,
+          /*
+           * ⚠️ O POKEMON SALVO INTEIRO, e nao so o `id`.
+           *
+           * Sem ele, tocar num bicho da SUA colecao abria a ficha generica da
+           * ESPECIE: "Calcular IV do meu" num Dragonite que ja esta salvo com
+           * IV conhecido, e nenhum veredito a vista. O app calculava a decisao
+           * (esta bem aqui, no `verdict`) e a tela seguinte nao recebia.
+           *
+           * E o mesmo padrao que ja mordeu em `lastTtsError`, `needsElite` e
+           * `bossCatchCP`: o nucleo computa e a interface nao mostra, porque o
+           * dado nao viaja junto com a navegacao.
+           */
+          owned,
           species: s,
           verdict,
           iv: ivTotalOf(owned.ivs),
@@ -339,6 +362,8 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
     verdict?: Verdict;
     /** Id na colecao, presente so quando o destaque cobra uma acao. */
     ownedId?: string;
+    /** O Pokemon salvo, pra ficha poder mostrar o veredito DELE. */
+    owned?: OwnedPokemon;
     feito?: boolean;
   } | null => {
     if (!data) return null;
@@ -352,6 +377,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
         tom: TONE[pendente.verdict.action],
         verdict: pendente.verdict,
         ownedId: pendente.id,
+        owned: pendente.owned,
         feito: false,
       };
     }
@@ -361,6 +387,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
         species: meus.melhor.species,
         labelKey: "home.hero.best",
         linha: `${meus.melhor.iv}/45 · ${tm(meus.melhor.verdict.reason)}`,
+        owned: meus.melhor.owned,
       };
     }
 
@@ -492,7 +519,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
               labelKey={hero.labelKey}
               linha={hero.linha}
               tom={hero.tom}
-              onOpen={() => setDetail(hero.species)}
+              onOpen={() => setDetail({ species: hero.species, owned: hero.owned })}
               feito={hero.feito}
               {...(hero.ownedId !== undefined && hero.verdict
                 ? {
@@ -597,7 +624,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
                       // o que ja diz que ela rola.
                       ["--tk-i" as string]: i,
                     }}
-                    onClick={() => setDetail(d.species)}
+                    onClick={() => setDetail({ species: d.species, owned: d.owned })}
                     aria-label={`${d.species.name} · ${t(ACTION_KEYS[d.verdict.action] as Key)}`}
                     title={`${d.species.name} · ${t(ACTION_KEYS[d.verdict.action] as Key)}`}
                   >
@@ -728,7 +755,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
           onClose={() => setTeamOpen(false)}
           onPickSpecies={(s) => {
             setTeamOpen(false);
-            setDetail(s);
+            abrirEspecie(s);
           }}
         />
       )}
@@ -739,17 +766,18 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
           onClose={() => setGymOpen(false)}
           onPickSpecies={(s) => {
             setGymOpen(false);
-            setDetail(s);
+            abrirEspecie(s);
           }}
         />
       )}
 
       {detail && data && (
         <SpeciesDetail
-          species={detail}
+          species={detail.species}
           data={data}
+          owned={detail.owned}
           onClose={() => setDetail(null)}
-          onPickSpecies={setDetail}
+          onPickSpecies={abrirEspecie}
         />
       )}
 
