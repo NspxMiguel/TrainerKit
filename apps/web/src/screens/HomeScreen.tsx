@@ -18,6 +18,7 @@ import {
 import { useInstallState } from "../storage/install.ts";
 import type { PersistState } from "../storage/persist.ts";
 import { DidYouKnow } from "../ui/DidYouKnow.tsx";
+import { Esqueleto, Offline, Vazio } from "../ui/Estados.tsx";
 import { IconAlert, IconCamera, IconShield, IconSwords } from "../ui/Icons.tsx";
 import { InstallBanner } from "../ui/InstallBanner.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
@@ -621,16 +622,10 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
         </div>
       )}
 
-      {dataset.status === "loading" && <p className="tk-body">{t("common.loadingGameData")}</p>}
+      {dataset.status === "loading" && <Esqueleto linhas={3} />}
 
       {dataset.status === "error" && (
-        <div className="tk-banner tk-banner--warn" role="alert">
-          <IconAlert size={20} />
-          <div className="tk-banner-text">
-            <div className="tk-banner-title">{t("home.datasetError.title")}</div>
-            <p className="tk-banner-body">{t("home.datasetError.body", { message: dataset.message })}</p>
-          </div>
-        </div>
+        <Offline detalhe={dataset.message} />
       )}
 
       {dataset.status === "ready" && (
@@ -837,10 +832,20 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
             </>
           )}
 
-          {/* Sem nada salvo o convite substitui a fila: um espaço vazio com
-              moldura nao convida ninguem. */}
+          {/*
+            Sem nada salvo o convite substitui a fila: um espaço vazio com
+            moldura nao convida ninguem.
+
+            E agora e um vazio DESENHADO, com saida. Era uma frase solta em
+            cinza; o handoff pede tile, titulo, frase e um botao — e o botao e a
+            parte que importa, porque vazio sem saida informa e abandona.
+          */}
           {colecao && !meus && (
-            <p className="tk-caption tk-home-nudge">{t("home.empty.body")}</p>
+            <Vazio
+              titulo={t("home.empty.title")}
+              frase={t("home.empty.body")}
+              acao={{ label: t("home.quickScan"), onClick: () => setScanning(true) }}
+            />
           )}
 
           {/*

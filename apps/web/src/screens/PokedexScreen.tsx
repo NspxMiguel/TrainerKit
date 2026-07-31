@@ -2,11 +2,14 @@ import { useState } from "react";
 
 import type { PokedexIntent } from "../App.tsx";
 import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
+import { useLanguage } from "../i18n/language.ts";
 import { useT } from "../i18n/t.ts";
-import { IconCamera, IconGrid, IconList } from "../ui/Icons.tsx";
+import { useCollection } from "../storage/collection.ts";
+import { IconGrid, IconList } from "../ui/Icons.tsx";
 import { setEmGrade, useEmGrade } from "../ui/vistaColecao.ts";
 import { SpeciesBrowser, type SortId } from "../ui/SpeciesBrowser.tsx";
 import { useSetup } from "../onboarding/setup.ts";
+import { Esqueleto, Offline } from "../ui/Estados.tsx";
 import { Segmented } from "../ui/Segmented.tsx";
 import { CollectionScreen } from "./CollectionScreen.tsx";
 import { DexMode } from "./DexMode.tsx";
@@ -59,11 +62,29 @@ export function PokedexScreen({ dataset, intent }: Props) {
   const meus = podeColecao && aba === "meus";
   const emGrade = useEmGrade();
 
+  /*
+   * As contagens do seletor. Ver a nota no `options` do `Segmented`.
+   *
+   * "Todos" conta so as especies CANONICAS: `cosmeticOf` marca variacoes
+   * cosmeticas (fantasia, padrao de Unown), que tem stats identicos e ja ficam
+   * fora da busca. Conta-las aqui daria um numero que nao bate com a lista que
+   * a pessoa ve rolando logo abaixo.
+   */
+  const { items } = useCollection();
+  const language = useLanguage();
+  const totalEspecies =
+    dataset.status === "ready"
+      ? dataset.data.species.filter((s) => !s.cosmeticOf).length
+      : 0;
+  const totalMeus = items?.length ?? 0;
+
   if (dataset.status === "loading") {
     return (
       <>
         <h1 className="tk-h1">{t("pokedex.title")}</h1>
-        <p className="tk-body">{t("common.loadingGameData")}</p>
+        {/* Esqueleto com a geometria da lista real, e nao uma frase: sem isso
+            a tela saltava quando os dados chegavam. Ver `ui/Estados.tsx`. */}
+        <Esqueleto linhas={6} />
       </>
     );
   }
@@ -72,7 +93,9 @@ export function PokedexScreen({ dataset, intent }: Props) {
     return (
       <>
         <h1 className="tk-h1">{t("pokedex.title")}</h1>
-        <p className="tk-body">{t("pokedex.loadError", { message: dataset.message })}</p>
+        {/* Cartao ambar que diz que os vereditos CONTINUAM VALENDO: sem rede o
+            app funciona, porque o dataset esta no aparelho. Ver `ui/Estados.tsx`. */}
+        <Offline detalhe={dataset.message} />
       </>
     );
   }
@@ -98,9 +121,24 @@ export function PokedexScreen({ dataset, intent }: Props) {
               value={aba}
               onChange={setAba}
               size="compact"
+              /*
+                ⚠️ COM A CONTAGEM, como o handoff pede ("Todos · 1.182 / Meus ·
+                247").
+
+                Nao e enfeite: o numero responde antes do toque. "Meus" sem
+                contagem obriga a pessoa a entrar pra descobrir se ha algo la —
+                e num app cuja tese e decidir por voce, fazer entrar pra
+                descobrir e o oposto do trabalho.
+              */
               options={[
-                { value: "todos" as const, label: t("pokedex.all") },
-                { value: "meus" as const, label: t("pokedex.mine") },
+                {
+                  value: "todos" as const,
+                  label: `${t("pokedex.all")} · ${totalEspecies.toLocaleString(language)}`,
+                },
+                {
+                  value: "meus" as const,
+                  label: `${t("pokedex.mine")} · ${totalMeus.toLocaleString(language)}`,
+                },
               ]}
             />
           </div>
@@ -130,17 +168,40 @@ export function PokedexScreen({ dataset, intent }: Props) {
         outra coisa que a mesma aba faz, no lugar onde a pessoa ja esta olhando
         Pokemon.
       */}
-      <button
-        type="button"
-        className="tk-dexopen"
-        onClick={() => setDexOpen(true)}
-      >
-        <span className="tk-dexopen-lens" aria-hidden="true" />
+      {/*
+        O cartao do Modo Pokedex, na receita do handoff: "tile vermelho 48px
+        (raio 16, gradiente #F87171→#DC2626) com a lente desenhada em SVG,
+        título 16/700, subtítulo 12,5px, chevron".
+
+        ⚠️ O VERMELHO E DO APARELHO, e nao do app. E o unico lugar da interface
+        que nao segue a cor da especie em destaque — de propósito: este cartao
+        anuncia um OBJETO, e um objeto que muda de cor com o Pokemon da vez
+        deixa de parecer um objeto.
+      */}
+      <button type="button" className="tk-dexopen" onClick={() => setDexOpen(true)}>
+        <span className="tk-dexopen-tile" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+            <circle cx="13" cy="13" r="10.5" fill="#EAF2FF" stroke="rgba(0,0,0,.28)" />
+            <circle cx="13" cy="13" r="7.5" fill="url(#tk-lente)" />
+            <circle cx="10" cy="10" r="2.6" fill="#fff" fillOpacity=".85" />
+            <defs>
+              <radialGradient id="tk-lente" cx="0.35" cy="0.3" r="0.85">
+                <stop offset="0" stopColor="#9CD4FF" />
+                <stop offset="1" stopColor="#1D4ED8" />
+              </radialGradient>
+            </defs>
+          </svg>
+        </span>
         <span style={{ flex: 1, minWidth: 0 }}>
           <span className="tk-dexopen-t">{t("dex.open")}</span>
           <span className="tk-dexopen-d">{t("dex.openDetail")}</span>
         </span>
-        <IconCamera size={20} />
+        <span className="tk-dexopen-chevron" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 5l7 7-7 7" />
+          </svg>
+        </span>
       </button>
 
       {/*

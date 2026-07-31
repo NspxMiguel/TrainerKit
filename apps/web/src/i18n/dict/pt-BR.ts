@@ -37,6 +37,7 @@ export const PT_BR: Dict = {
   "home.yourCollection": "Sua coleção",
   "home.hero.best": "O seu melhor",
   "home.hero.topRaid": "Melhor atacante de raide agora",
+  "home.empty.title": "Sua coleção está vazia",
   "home.empty.body": "Ainda não há nenhum Pokémon salvo. Leva menos de 10 segundos.",
   "home.needsDecision.one": "1 pede uma decisão",
   "home.needsDecision.many": "{count} pedem uma decisão",
@@ -186,6 +187,9 @@ export const PT_BR: Dict = {
   "collection.backup": "Backup",
   "collection.done": "Feito",
   "collection.evolved": "Já evoluí ele",
+  "estados.offlineTitle": "Sem conexão agora",
+  "estados.offlineBody": "Os dados são do último sync, e os vereditos continuam valendo — a conta roda no seu aparelho.",
+  "estados.retry": "Tentar de novo",
   "colecoes.title": "Suas contas",
   "colecoes.body": "Cada conta tem os próprios Pokémon e os próprios vereditos. Tudo fica no aparelho.",
   "colecoes.count": "{n} Pokémon",
@@ -202,6 +206,7 @@ export const PT_BR: Dict = {
   "collection.import": "Importar",
   "collection.imported": "{count} Pokémon importados.",
 
+  "assistant.ask": "Perguntar à Pokédex",
   "assistant.title": "O que eu acho",
 
   "settings.title": "Ajustes",

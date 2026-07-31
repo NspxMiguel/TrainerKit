@@ -26,7 +26,7 @@ export function AssistantCard(props: AssistantInput) {
         {t("assistant.title")}
       </div>
 
-      <section className="tk-card" style={{ marginTop: 10 }}>
+      <section className="tk-card tk-assistente" style={{ marginTop: 10 }}>
         <p
           style={{
             font: "700 16px/1.4 var(--tk-font)",

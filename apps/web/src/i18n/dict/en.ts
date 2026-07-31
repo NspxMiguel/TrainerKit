@@ -50,6 +50,7 @@ const EN = {
   "home.yourCollection": "Your collection",
   "home.hero.best": "Your best one",
   "home.hero.topRaid": "Best raid attacker right now",
+  "home.empty.title": "Your collection is empty",
   "home.empty.body": "Nothing saved yet. Takes less than 10 seconds.",
   "home.needsDecision.one": "1 needs a decision",
   "home.needsDecision.many": "{count} need a decision",
@@ -207,6 +208,9 @@ const EN = {
   "collection.backup": "Backup",
   "collection.done": "Done",
   "collection.evolved": "I evolved it",
+  "estados.offlineTitle": "You're offline",
+  "estados.offlineBody": "Data is from the last sync, and the verdicts still hold — the math runs on your device.",
+  "estados.retry": "Try again",
   "colecoes.title": "Your accounts",
   "colecoes.body": "Each account keeps its own Pokémon and its own verdicts. Everything stays on this device.",
   "colecoes.count": "{n} Pokémon",
@@ -224,6 +228,7 @@ const EN = {
   "collection.imported": "{count} Pokémon imported.",
 
   // ------------------------------------------------------------------ assistente
+  "assistant.ask": "Ask the Pokédex",
   "assistant.title": "What I think",
 
   // -------------------------------------------------------------------- ajustes

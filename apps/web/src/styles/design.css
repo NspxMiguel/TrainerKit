@@ -1714,3 +1714,329 @@
 .tk-row-acao--perigo {
   color: var(--tk-dang);
 }
+
+/* ─────────────────────────────── o cartao do Modo Pokedex (handoff §3) ─── */
+
+/*
+ * "tile vermelho 48px (raio 16, gradiente #F87171→#DC2626) com a lente
+ * desenhada em SVG, título 16/700, subtítulo 12,5px, chevron."
+ *
+ * ⚠️ O VERMELHO NAO SEGUE A PALETA DA ESPECIE, e e o unico elemento do app
+ * assim. Este cartao anuncia um OBJETO — um aparelho vermelho — e objeto que
+ * muda de cor conforme o Pokemon da vez deixa de parecer objeto. A superficie
+ * do cartao, essa sim, acompanha o resto do app.
+ */
+.tk-dexopen {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 68px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--tk-accent, transparent) 14%, var(--tk-surface-2));
+  border: 1px solid color-mix(in srgb, var(--tk-accent, transparent) 26%, var(--tk-border));
+  color: var(--tk-text);
+  text-align: left;
+}
+
+.tk-dexopen:active {
+  transform: scale(0.985);
+}
+
+.tk-dexopen-tile {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(150deg, #f87171, #dc2626);
+  box-shadow:
+    0 4px 12px rgba(220, 38, 38, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.tk-dexopen-t {
+  display: block;
+  font: 700 16px var(--tk-font);
+}
+
+.tk-dexopen-d {
+  display: block;
+  font: 400 12.5px var(--tk-font);
+  color: var(--tk-text-3);
+  margin-top: 1px;
+}
+
+.tk-dexopen-chevron {
+  flex: none;
+  color: var(--tk-text-3);
+  display: flex;
+}
+
+/* ───────────────────────────── estados desenhados (handoff §10) ────────── */
+
+.tk-vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 34px 16px;
+}
+
+.tk-vazio-tile {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 700 24px var(--tk-font);
+  /* NEUTRO, e nao na cor da especie: aqui nao ha especie nenhuma — e isso e
+     justamente o que o estado esta dizendo. */
+  color: var(--tk-text-3);
+  background: var(--tk-surface-2);
+  border: 1px solid var(--tk-border);
+}
+
+.tk-vazio-t {
+  font: 700 16px var(--tk-font);
+  margin: 14px 0 0;
+}
+
+.tk-vazio-d {
+  font: 400 13.5px/1.45 var(--tk-font);
+  color: var(--tk-text-3);
+  max-width: 260px;
+  margin: 6px 0 0;
+}
+
+.tk-vazio-btn {
+  min-height: 42px;
+  margin-top: 16px;
+  padding: 0 20px;
+  border-radius: 999px;
+  border: 0;
+  background: var(--tk-accent, var(--tk-ultra-solid));
+  color: var(--tk-accent-ink, #fff);
+  font: 600 14px var(--tk-font);
+}
+
+/* ── esqueleto ── */
+
+.tk-esq-linha {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+}
+
+.tk-esq-linha + .tk-esq-linha {
+  border-top: 1px solid var(--tk-sep);
+}
+
+/*
+ * Um pulso so, na animacao, e nao um brilho que corre.
+ *
+ * O handoff pede "pulso 1,6s". Brilho corrido (shimmer) chama mais atencao que
+ * o conteudo que vai chegar — e num app que carrega em menos de um segundo,
+ * isso e ansiedade de graca.
+ */
+.tk-esq {
+  display: block;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  animation: tk-pulso 1.6s ease-in-out infinite;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-tk="dark"]) .tk-esq {
+    background: rgba(20, 24, 33, 0.08);
+  }
+}
+
+.tk-esq-tile {
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border-radius: 15px;
+}
+
+.tk-esq-titulo {
+  width: 58%;
+  height: 15px;
+}
+
+.tk-esq-meta {
+  width: 38%;
+  height: 11px;
+  margin-top: 7px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tk-esq-chip {
+  width: 74px;
+  height: 22px;
+  flex: none;
+  border-radius: 999px;
+}
+
+@keyframes tk-pulso {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tk-esq {
+    animation: none;
+  }
+}
+
+/* ── erro / offline ── */
+
+.tk-offline {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 20px;
+  background: var(--tk-warn-soft);
+  border: 1px solid var(--tk-warn-line);
+}
+
+.tk-offline-ico {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--tk-warn-soft);
+  color: var(--tk-warn);
+  border: 1px solid var(--tk-warn-line);
+}
+
+.tk-offline-t {
+  font: 700 15px var(--tk-font);
+  color: var(--tk-text);
+}
+
+.tk-offline-d {
+  font: 400 13px/1.45 var(--tk-font);
+  color: var(--tk-text-2);
+  margin: 3px 0 0;
+}
+
+.tk-offline-detalhe {
+  font: 400 11.5px var(--tk-mono);
+  color: var(--tk-text-3);
+  margin: 6px 0 0;
+  word-break: break-word;
+}
+
+.tk-offline-btn {
+  flex: none;
+  min-height: 44px;
+  padding: 0 12px;
+  background: none;
+  border: 0;
+  font: 600 13px var(--tk-font);
+  color: var(--tk-warn);
+}
+
+/* ── dots de paginacao do hero ── */
+
+.tk-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+/*
+ * O ativo e uma barra de 22×7, os outros sao pontos de 7 — a receita do
+ * handoff. A diferenca de FORMA, e nao so de opacidade, e o que deixa a posicao
+ * legivel de relance e sem depender de cor.
+ */
+.tk-dot {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.35);
+  transition:
+    width 0.28s var(--tk-ease-out),
+    background 0.28s var(--tk-ease-out);
+}
+
+.tk-dot[aria-selected="true"] {
+  width: 22px;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+/* Alvo de toque de 44px sem engordar o ponto: a area invisivel cobre o dedo. */
+.tk-dot::before {
+  content: "";
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+}
+
+/* ─────────────────────────────────────── a bolha da IA (handoff §5) ────── */
+
+/*
+ * "Bolha de IA: 54px de vidro, canto inferior direito, estrela em gradiente
+ * violeta."
+ *
+ * ⚠️ `position: fixed` DENTRO de uma folha que tem `transform` na animacao de
+ * entrada seria contido por ela — `transform` cria bloco de contencao e o
+ * `fixed` passa a se ancorar na folha, nao na janela. Como a folha ocupa a tela
+ * inteira o efeito coincide, mas so enquanto ela nao se move: durante os 220ms
+ * de entrada a bolha viajaria junto. `absolute` com a folha rolando resolveria
+ * pior (a bolha subiria com o conteudo), entao fica `fixed` e a animacao de
+ * entrada da folha e que nao pode mexer nela.
+ */
+.tk-ia-bolha {
+  position: fixed;
+  right: 18px;
+  bottom: calc(26px + env(safe-area-inset-bottom));
+  width: 54px;
+  height: 54px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 40;
+
+  background: var(--tk-glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 0.5px solid var(--tk-glass-border);
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.45),
+    inset 0 1px 1px rgba(255, 255, 255, 0.16);
+}
+
+.tk-ia-bolha:active {
+  transform: scale(0.95);
+}
+
+/* Alvo bem acima dos 44px, e ela nao cresce: e sobreposicao, e cada pixel a
+   mais tapa conteudo da ficha. */
+@media (prefers-reduced-motion: reduce) {
+  .tk-ia-bolha {
+    transition: none;
+  }
+}
