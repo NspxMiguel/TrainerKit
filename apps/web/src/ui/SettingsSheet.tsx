@@ -8,6 +8,22 @@ interface Props {
   title: string;
   onClose: () => void;
   children: ReactNode;
+  /**
+   * Folha CURTA, colada no rodapé — o seletor do sistema.
+   *
+   * "idioma abre tela inteira la nas configuraçÕes. agr q tem um botao so pro
+   * idioma."
+   *
+   * Ele está certo sobre a proporção: uma tela inteira, com título de 34px e
+   * uma volta no topo, pra mostrar UMA roda de escolha. Nos dois sistemas essa
+   * interação é uma folha baixa que sobe, cobre um terço da tela e sai — e o
+   * conteúdo de trás continua visível, que é o que diz "isto é um ajuste, não
+   * um lugar".
+   *
+   * Continua sendo a mesma folha: mesmo `useFolha`, mesmo Escape, mesmo gesto
+   * de voltar. O que muda é a forma.
+   */
+  compacta?: boolean;
 }
 
 /**
@@ -23,7 +39,7 @@ interface Props {
  * as duas coisas de uma vez: a tela inicial cabe sem rolagem e cada assunto
  * ganha a tela inteira quando e a vez dele.
  */
-export function SettingsSheet({ title, onClose, children }: Props) {
+export function SettingsSheet({ title, onClose, children, compacta = false }: Props) {
   /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
      caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
      escape volta a piscar, e so aquele. */
@@ -46,6 +62,36 @@ export function SettingsSheet({ title, onClose, children }: Props) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [fechar]);
+
+  if (compacta) {
+    return createPortal(
+      <div className="tk-baixo-scrim" onClick={fechar} data-saindo={saindo || undefined}>
+        {/* `stopPropagation` porque o toque FORA fecha, e o toque dentro não
+            pode fechar junto — é o mesmo contrato de qualquer folha do sistema. */}
+        <div
+          ref={refFolha}
+          className="tk-baixo"
+          role="dialog"
+          aria-modal="true"
+          aria-label={title}
+          data-saindo={saindo || undefined}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* A alça. Ela não faz nada além de dizer "isto sai puxando pra
+              baixo" — e é o único jeito de anunciar um gesto sem um texto. */}
+          <span className="tk-baixo-alca" aria-hidden="true" />
+          <div className="tk-baixo-head">
+            <span className="tk-baixo-titulo">{title}</span>
+            <button type="button" className="tk-baixo-ok" onClick={fechar}>
+              {t("common.done")}
+            </button>
+          </div>
+          {children}
+        </div>
+      </div>,
+      document.body,
+    );
+  }
 
   return createPortal(
     <div ref={refFolha}

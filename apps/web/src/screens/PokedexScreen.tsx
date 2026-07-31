@@ -143,14 +143,29 @@ export function PokedexScreen({ dataset, intent }: Props) {
             />
           </div>
           {meus && (
+            /*
+             * ⚠️ COM A PALAVRA, e não só o ícone.
+             *
+             * "esse botao nao faz nada, tira ou da uma função pra ele bro."
+             *
+             * Ele faz — medi: alterna lista e grade, e o estado persiste. O que
+             * não funcionava era ELE CONTAR o que faz. Um ícone mudo de 44px no
+             * canto, cuja consequência acontece abaixo da dobra numa coleção
+             * curta: toca, nada muda na altura dos olhos, e a conclusão certa a
+             * tirar é a que ele tirou.
+             *
+             * Com o rótulo, o botão promete antes de agir — e a promessa é
+             * conferível sem rolar. Tirar seria jogar fora uma vista que ele
+             * mesmo pediu ("#43 coleção com cara de Pokédex de verdade").
+             */
             <button
               type="button"
-              className="tk-filter-btn"
+              className="tk-filter-btn tk-filter-btn--rotulo"
               aria-label={t(emGrade ? "collection.asList" : "collection.asGrid")}
-              title={t(emGrade ? "collection.asList" : "collection.asGrid")}
               onClick={() => setEmGrade(!emGrade)}
             >
-              {emGrade ? <IconList size={18} /> : <IconGrid size={18} />}
+              {emGrade ? <IconList size={17} /> : <IconGrid size={17} />}
+              <span>{t(emGrade ? "collection.asListShort" : "collection.asGridShort")}</span>
             </button>
           )}
         </div>

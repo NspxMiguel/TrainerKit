@@ -239,6 +239,8 @@ export const PT_BR: Dict = {
   "faxina.preso.raide": "O seu melhor atacante de raide.",
   "collection.asGrid": "Ver em grade",
   "collection.asList": "Ver em lista",
+  "collection.asGridShort": "Grade",
+  "collection.asListShort": "Lista",
   "collection.empty.title": "Nenhum Pokémon salvo",
   "collection.empty.body": "Escaneie o print da avaliação e salve. O veredito aparece aqui.",
   "collection.add": "Adicionar Pokémon",

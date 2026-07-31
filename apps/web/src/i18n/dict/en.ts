@@ -260,6 +260,8 @@ const EN = {
   "faxina.preso.raide": "Your best raid attacker.",
   "collection.asGrid": "Grid view",
   "collection.asList": "List view",
+  "collection.asGridShort": "Grid",
+  "collection.asListShort": "List",
   "collection.empty.title": "No Pokémon saved",
   "collection.empty.body": "Scan the appraisal screenshot and save it. The verdict shows up here.",
   "collection.add": "Add Pokémon",
