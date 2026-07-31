@@ -369,8 +369,53 @@
    * e `object-fit: contain` resolve a proporcao — largo, comprido ou minusculo,
    * cabe sempre, sem sobrepor nada.
    */
-  display: flex;
-  flex-direction: column;
+  /*
+   * ⚠️ GRADE DE DUAS FAIXAS, e nao mais coluna flex com a arte por cima.
+   *
+   * "eu nao gsto disso, da cara do pokemon estar tapada ... deixa sempre a cara
+   * livre, sem nada. a cara e a parte da barriga pra cima."
+   *
+   * A arte era absoluta sobre o hero INTEIRO, do 6% ao 88%, e o bloco de
+   * decisao passava por cima dela. Onde o nome caia dependia da silhueta: no
+   * Venusaur ele cruzava a boca, no Machamp o peito, no Hoopa o rosto todo.
+   * Nao havia numero de `top` que servisse pras 1.142 — foi a mesma armadilha
+   * que ele ja tinha matado antes ("n é só o dragonitte q vai ficar ai").
+   *
+   * Em grade, a faixa de cima E o espaco acima do texto, medido pelo navegador.
+   * A arte vira contêiner de tamanho DESSA faixa, e a regra de enquadramento
+   * (ver `.tk-hero-art img`) passa a poder dizer "no maximo X% da silhueta pode
+   * descer pra faixa de baixo" — que e a frase dele traduzida em geometria, e
+   * vale pra qualquer bicho sem eu calibrar nada.
+   */
+  display: grid;
+  grid-template-rows: 1fr auto;
+  /*
+   * ⚠️ `gap: 0` DECLARADO, e nao deixado por omissao.
+   *
+   * O hero herdava `gap: 16px` de uma regra antiga de cartao. Como flex com UM
+   * filho no fluxo, esse gap nunca aparecia — nao ha entre o que separar. Virar
+   * grade de duas faixas fez ele existir: 16px de faixa branca entre a arte e o
+   * bloco de decisao, tirados justamente do espaco do Pokemon.
+   *
+   * Mesma familia do `align-items` logo abaixo, e da regra de cascata que ja
+   * mordeu tres vezes neste arquivo: trocar `display` sem revisar o que o bloco
+   * antigo deixou pendurado. Aqui o resto so ficou visivel na medicao — a olho
+   * era "o bicho ficou pequeno", sem dizer por que.
+   */
+  gap: 0;
+  /*
+   * A altura do bloco de decisao, em pixels.
+   *
+   * Nome (40) + frase (20) + botao (48) + tres recuos e vaos (38). E o unico
+   * numero fixo desta composicao, e ele existe porque `.tk-hero-art img`
+   * precisa saber quanto espaco ha ABAIXO da faixa dele pra silhueta descer
+   * sem ter os pes cortados.
+   *
+   * ⚠️ Subestimar aqui e SEGURO; superestimar nao. Se a frase quebrar em duas
+   * linhas o bloco fica maior e a faixa menor — e a conta passa a permitir
+   * menos transbordo do que cabe, que e o lado certo pra errar.
+   */
+  --tk-hero-bloco: 146px;
   /*
    * ⚠️ `align-items` DECLARADO, e nao herdado por omissao.
    *
@@ -386,14 +431,12 @@
    */
   align-items: stretch;
   /*
-   * ⚠️ `flex-end`, e nao `space-between`.
+   * O `justify-content: flex-end` saiu junto com o flex.
    *
-   * Com a saudacao fora do hero sobrou UM filho no fluxo — o bloco de decisao.
-   * `space-between` com um item so o encosta no INICIO, entao "Dragonite" e o
-   * botao foram parar no topo do cartao e o bicho ficou embaixo deles. A regra
-   * estava certa pra dois filhos e virou errada quando um saiu.
+   * Ele existia porque, com um filho so no fluxo, `space-between` encostava o
+   * bloco de decisao no TOPO. Na grade o problema nao existe: a faixa `auto` do
+   * bloco fica embaixo por definicao, e nao por ajuste.
    */
-  justify-content: flex-end;
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -696,6 +739,18 @@
   text-align: center;
   font: 400 14px/1.4 var(--tk-font);
   color: rgba(255, 255, 255, 0.85);
+  /*
+   * ⚠️ `margin: 0` — a frase e um `<p>`, e `<p>` vem com 14px em cima e embaixo.
+   *
+   * O bloco de decisao ja e um flex com `gap: 8px`; as margens do paragrafo
+   * somavam 28px POR CIMA disso. Num hero de 288px, 28px e um quinto do que
+   * sobra pro Pokemon — e o bloco media 178px onde a soma das partes dava 146.
+   *
+   * Nao aparecia enquanto a arte passava por baixo do texto: o espaco extra era
+   * preenchido pelo proprio bicho. Com a arte terminando onde o texto comeca,
+   * cada pixel de margem esquecida virou pixel de Pokemon a menos.
+   */
+  margin: 0;
 }
 
 .tk-hero-acoes {
@@ -849,50 +904,23 @@
  */
 .tk-hero-art {
   /*
-   * ⚠️ FORA DO FLUXO, e essa e a virada que finalmente deixou o bicho grande.
+   * ⚠️ ITEM DA GRADE, e nao mais caixa absoluta sobre o hero inteiro.
    *
-   * Como item de flex, a arte so ficava com a SOBRA entre a saudacao e o bloco
-   * de decisao — 117px de um hero de 408. Encolher tipografia pra devolver
-   * espaco rendia uns 40px e estragava a leitura; nao era o caminho.
+   * Era `top: 6%; bottom: 12%` — ou seja, a arte cobria TAMBEM o espaco do
+   * bloco de decisao, e o texto passava por cima dela. Onde o nome caia
+   * dependia da silhueta de cada especie: no Venusaur cruzava a boca, no
+   * Machamp o peito, no Hoopa o rosto inteiro.
    *
-   * "legal deixar ele grande pra chamar atencao" pede o contrario: a arte
-   * ocupa o hero quase inteiro e o TEXTO passa por cima dela. E tambem o que a
-   * profundidade pedia — assunto grande atras, informacao na frente.
+   * "deixa sempre a cara livre, sem nada. a cara e a parte da barriga pra cima."
    *
-   * Os recuos sao PORCENTAGEM do hero, nao pixels: o quadro acompanha a altura
-   * que a coluna deu, em qualquer aparelho. E `object-fit: contain` continua
-   * garantindo que Onix comprido e Joltik minusculo caibam no mesmo quadro.
+   * Agora a caixa E a faixa de cima da grade: ela termina exatamente onde o
+   * nome comeca, medido pelo navegador em vez de estimado por mim. A silhueta
+   * continua descendo pra faixa de baixo — e dai que vem a profundidade, e e o
+   * que mantem o bicho grande — mas so ate onde a regra de enquadramento
+   * permite. Ver `.tk-hero-art img`.
    */
-  position: absolute;
-  left: 0;
-  right: 0;
-  /*
-   * 12% em cima e nao 5%: a 5% a cabeca do Dragonite subia ate a linha da
-   * saudacao e "Boa noite, Miguel." passava por cima do ROSTO dele. Texto
-   * cruzando corpo e composicao; cruzando rosto e acidente.
-   *
-   * Embaixo sobra pouco de propósito — os pes afundando no veu escuro da base
-   * dao o mesmo que uma sombra de chao daria, e de graca.
-   */
-  /*
-   * ⚠️ 6% e 12%: a caixa da arte precisa ser MAIS ALTA QUE LARGA.
-   *
-   * Isto e geometria, nao gosto. `object-fit: contain` escolhe o eixo que
-   * limita: se a caixa e mais larga que alta, um sprite quadrado e limitado
-   * pela ALTURA e ocupa 100% dela — e ai `object-position` vertical nao tem
-   * folga nenhuma pra usar, por mais que eu mude a porcentagem. Foi o que
-   * aconteceu: eu ajustei de 28% pra 14% e o Bulbasaur nao se moveu um pixel.
-   *
-   * ⚠️ E a caixa NAO PODE ser mais alta que larga aqui: ela tem 375px de largura
-   * e o hero teria que passar de 375px de altura pra isso, o que nao cabe numa
-   * home sem rolagem com todo o resto do conteudo. Medi: sobram 289.
-   *
-   * Entao a folga vertical vem do outro lado — limitando a ALTURA do sprite
-   * (ver `.tk-hero-art img`) em vez de esticar a caixa. Estes recuos so definem
-   * onde a caixa comeca e termina.
-   */
-  top: 6%;
-  bottom: 12%;
+  grid-row: 1;
+  position: relative;
   /* Ver a nota de `.tk-hero-numero`: e este indice que decide quem fica na
      frente de quem. O numero e o brilho ficam no 0. */
   z-index: 1;
@@ -970,16 +998,73 @@
    * As tres candidatas:
    *   · `100cqw / larg` — a arte grande o bastante pra silhueta encher a largura
    *   · `100cqh / alt`  — idem pra altura
-   *   · `100cqh * 1.5`  — o teto, que impede uma silhueta minuscula de ser
-   *     ampliada ate mostrar o pixel. So 20 das 1.142 chegam nele.
+   *   · `710px`         — o teto contra ampliar demais uma silhueta minuscula.
+   *
+   * ⚠️ O teto era `100cqh * 1.5`, e virar grade o transformou no limitante de
+   * TUDO. Ele existe pra nao ampliar uma silhueta pequena ate mostrar o pixel,
+   * e amarrar isso a altura da FAIXA sempre foi um proxy: quando a faixa era o
+   * hero quase inteiro (236px) o proxy passava despercebido; com a faixa em
+   * 94px ele passou a mandar em todas as especies, e o Venusaur saiu com 141px
+   * de lado onde cabiam 239.
+   *
+   * O que ele quer limitar e a AMPLIACAO DO ARQUIVO, e arquivo tem resolucao
+   * fixa: 475px na arte oficial, 512px no render 3D. 710px e 1,5x de 475 — a
+   * mesma intencao, agora dita na unidade certa, e imune ao tamanho da tela.
    *
    * `min()` escolhe a que cabe, exatamente como `contain` faria — so que
    * medindo o bicho em vez do arquivo.
    */
+  /*
+   * ⚠️ A REGRA DA CARA LIVRE MORA AQUI.
+   *
+   * "deixa sempre a cara livre, sem nada. a cara e a parte da barriga pra cima."
+   *
+   * Traduzido: os 75% DE CIMA da silhueta nao podem cruzar o bloco de decisao.
+   * Como a caixa da arte agora termina exatamente onde o nome comeca (ver
+   * `.tk-hero`), isso vira uma desigualdade de uma linha:
+   *
+   *     topo + 0,62 x altura <= 100cqh
+   *
+   * O topo da silhueta esta fixo em 5cqh (o `transform` la embaixo), entao
+   * sobra `95cqh` pros 75%, e o lado maximo e `95 / 0,75 = 126,67cqh / alt`.
+   *
+   * ⚠️ A conta ja vem resolvida, e nao como `95cqh / (0.62 * alt)`. Dividir por
+   * uma EXPRESSAO dentro de `calc()` e Values 4 e nem todo navegador que este
+   * app atende aceita; dividir por uma variavel simples, todos aceitam. Um
+   * `calc()` invalido nao avisa — a propriedade inteira e descartada em
+   * silencio e o sprite volta ao tamanho intrinseco.
+   *
+   * ⚠️ 75%, e QUADRUPEDE e o motivo — eu tinha comecado em 62%.
+   *
+   * Num bipede a barriga fica por volta de 55% da altura, e 62% sobrava. Mas o
+   * Venusaur nao e bipede: a flor fica nas costas e o rosto desce ate 68% da
+   * silhueta. Medi na tela: com 62% o nome encostava no queixo dele. Nao era
+   * uma especie mal enquadrada — era a fracao errada.
+   *
+   * 75% cobre os dois formatos. Custa ~17% do tamanho do bicho, e essa e a
+   * troca que ele pediu: "deixa sempre a cara livre, sem nada."
+   *
+   * O terceiro teto e outro assunto: ele impede que os PES saiam do hero. O que
+   * passa de 100% da faixa desce pro bloco de decisao, e o bloco tem altura em
+   * PIXELS (nome, frase, botao e recuos) enquanto a faixa cresce com a tela.
+   *
+   * ⚠️ Por isso ele e `95cqh + --tk-hero-bloco`, e nao uma porcentagem.
+   *
+   * Eu tinha posto um `120cqh / alt` — outra porcentagem — e o efeito foi o que
+   * uma porcentagem sempre faz aqui: serviu a UM tamanho de tela. Num aparelho
+   * pequeno a faixa fica com ~145px, e 120% dela encolheu o Venusaur pra dois
+   * tercos do que cabia; a cara ficou livre e o bicho ficou pequeno, que nao e
+   * o que ele pediu. Em tela alta a mesma regra deixaria de proteger.
+   *
+   * Com a soma, o limite e exatamente "os pes encostam no fim do hero": em tela
+   * baixa quem manda e a regra da cara, em tela alta quem manda e esta. Nenhuma
+   * das duas precisa saber qual e o caso.
+   */
   --tk-lado: min(
     calc(100cqw / var(--tk-art-larg, 1)),
-    calc(100cqh / var(--tk-art-alt, 1)),
-    calc(100cqh * 1.5)
+    calc(126.67cqh / var(--tk-art-alt, 1)),
+    calc((95cqh + var(--tk-hero-bloco)) / var(--tk-art-alt, 1)),
+    710px
   );
 
   /*
@@ -1684,8 +1769,22 @@
  * volta a ocupar o hero.
  */
 .tk-hero-art[data-sem-imagem] .tk-mono {
-  font-size: min(190px, 26svh) !important;
-  letter-spacing: -8px;
+  /*
+   * ⚠️ Medido na FAIXA, e nao na tela.
+   *
+   * Era `min(190px, 26svh)` — duas medidas de TELA. Enquanto a arte cobria o
+   * hero inteiro isso passava; com a faixa terminando onde o nome comeca, um
+   * "VE" de 190px numa faixa de 138 saiu pela metade e o nome caiu em cima
+   * dele. No modo monograma o "VE" E o assunto, entao tapa-lo e o mesmo defeito
+   * que ele reclamou no sprite — "e sem imagens tbm", como ele ja tinha dito.
+   *
+   * 85cqh deixa a altura de caixa alta em ~61% da faixa, centrada: sobra folga
+   * em cima e embaixo em qualquer tela, sem eu escolher um numero por aparelho.
+   */
+  font-size: min(85cqh, 190px) !important;
+  /* Relativo tambem: -8px era proporcional aos 190px e apertava demais quando a
+     letra encolhia. */
+  letter-spacing: -0.045em;
   /* Opaco de verdade: a 10% de branco, como o handoff pede pro monograma DE
      FUNDO, ele sumiria — aqui ele nao e fundo, e o assunto. */
   color: rgba(255, 255, 255, 0.86);
