@@ -83,8 +83,25 @@ const LEGENDA = {
   escuro: { tinta: [235, 238, 245] as [number, number, number], alfa: 0.65 },
 };
 
-/** `.tk-card`: `color-mix(in srgb, var(--tk-accent) 14%, var(--tk-surface-2))`. */
+/**
+ * `.tk-card`: `color-mix(in srgb, var(--tk-accent) TINTA, --tk-cartao-base)`.
+ *
+ * ⚠️ OS DOIS TEMAS DEIXARAM DE TER O MESMO NÚMERO, e é isso que o teste tem que
+ * saber. Um `14%` único era parte do defeito que ele apontou: "vc ta pegando o
+ * modo preto e só mudando as cores."
+ *
+ *  · No escuro a base é `rgba(255,255,255,.06)` — quase nada — e os 14% da cor
+ *    da espécie são o que dá temperatura ao cartão sem clarear a página.
+ *  · No claro a base virou `#ffffff` (era `#f1f3f8`, praticamente a cor da
+ *    página, e por isso o cartão sumia). Sobre branco, 14% de uma cor saturada
+ *    não é temperatura, é um cartão colorido — 6% é o equivalente visual.
+ *
+ * Ver a nota longa em `--tk-cartao-base` no `design.css`.
+ */
 const TINTA_DO_CARTAO = 0.14;
+const TINTA_DO_CARTAO_CLARO = 0.06;
+/** `--tk-cartao-base` no tema claro. Elevação no claro é branco mais sombra. */
+const CARTAO_CLARO_BASE = "#ffffff";
 
 /**
  * O cartão do tema ESCURO, resolvido até virar cor opaca.
@@ -179,7 +196,7 @@ describe("paleta por espécie", () => {
     for (const id of ids) {
       const p = paletaDaEspecie(id);
 
-      const claro = misturar(p.base, TINTA_DO_CARTAO, FUNDO_CLARO);
+      const claro = misturar(p.base, TINTA_DO_CARTAO_CLARO, CARTAO_CLARO_BASE);
       const emClaro = contraste(
         sobrepor(LEGENDA.claro.tinta, LEGENDA.claro.alfa, claro),
         claro,
@@ -537,20 +554,34 @@ describe("paleta por espécie", () => {
     expect(ruins).toEqual([]);
   });
 
-  it("o topo claro é CLARO mesmo — senão o pedido não foi cumprido", () => {
+  it("o hero claro ACABA na página — a última parada encosta no branco do app", () => {
     /*
-     * O pedido era "branco no modo claro". Um teste que só cobra contraste
-     * aceitaria um topo cinza-médio com texto preto — passaria em 4,5:1 e
-     * continuaria não sendo branco.
+     * ⚠️ Este teste cobrava o CONTRÁRIO até hoje, e o contrário era o defeito.
      *
-     * Luminância ≥ 0,62 é o que garante que a faixa leia como parte de uma tela
-     * branca, e não como um painel colorido.
+     * Ele exigia luminância ≥ 0,62 na PRIMEIRA parada ("o topo claro é CLARO
+     * mesmo"), o que fixava no lugar o desenho branco → cor → branco: pálido em
+     * cima, cor no meio, e o pé do hero fechando em `--tk-hero-ink`, que no tema
+     * claro é o branco do app. Uma rampa que sobe e volta não é degradê, é
+     * tarja — e era a tarja que ele circulou em toda captura do tema claro.
+     *
+     * A régua certa é a do FIM da rampa, não a do começo: o hero claro tem que
+     * chegar ao branco da página (`#f2f3f6`, luminância 0,87) antes de acabar.
+     * Com a última parada em 0,78+, os 28% que restam até o pé são a rampa entre
+     * duas cores quase idênticas, e não há onde ver a emenda.
+     *
+     * Assim a cor pode ser forte em cima — que é o que ele pediu — sem que isso
+     * custe a continuidade lá embaixo.
      */
-    const escuras = ids.filter((id) => luminancia(paletaDaEspecie(id).topoClaro) < 0.62);
-    expect(escuras).toEqual([]);
+    const naoFecham: string[] = [];
+    for (const id of ids) {
+      const paradas = paletaDaEspecie(id).gradienteClaro.match(/#[0-9a-f]{6}/gi) ?? [];
+      const base = luminancia(paradas[paradas.length - 1] ?? "#000000");
+      if (base < 0.78) naoFecham.push(`#${id}: acaba em ${paradas.at(-1)} (${base.toFixed(3)})`);
+    }
+    expect(naoFecham).toEqual([]);
   });
 
-  it("o degradê claro DEGRADÊ — a última parada é bem mais escura que a primeira", () => {
+  it("o degradê claro DEGRADÊ — a primeira parada é bem mais escura que a última", () => {
     /*
      * ⚠️ O teste que faltava, e a falta dele custou a tela inteira.
      *
@@ -558,39 +589,38 @@ describe("paleta por espécie", () => {
      * tudo."
      *
      * A primeira versão do hero claro tinha só PISO de luminância (0,42) e meia
-     * saturação. Os três testes acima passavam — contraste do nome, contraste
-     * da saudação, topo claro de verdade — porque os três medem cada parada
-     * SOZINHA. Nenhum deles perguntava se as três eram diferentes entre si.
+     * saturação. Os testes acima passavam — contraste do nome, contraste da
+     * saudação — porque medem cada parada SOZINHA. Nenhum deles perguntava se as
+     * três eram diferentes entre si.
      *
      * E não eram: em espécie clara as três subiam pro mesmo quase-branco. Um
      * gradiente cujas paradas coincidem é um retângulo, e foi exatamente isso
      * que apareceu na tela dele.
      *
-     * A regra: pelo menos 0,22 de luminância entre a primeira e a última. É o
-     * suficiente pra rampa ser visível a olho nu sem que a base fique escura
-     * demais pro texto quase-preto que mora nela.
+     * A regra continua sendo 0,22 de amplitude; o que inverteu foi o SINAL,
+     * junto com a rampa. Ver `HERO_CLARO`.
      */
     const chatas: string[] = [];
     for (const id of ids) {
       const paradas = paletaDaEspecie(id).gradienteClaro.match(/#[0-9a-f]{6}/gi) ?? [];
       const topo = luminancia(paradas[0] ?? "#ffffff");
       const base = luminancia(paradas[paradas.length - 1] ?? "#ffffff");
-      if (topo - base < 0.22) {
-        chatas.push(`#${id}: ${paradas.join(" → ")} varia só ${(topo - base).toFixed(3)}`);
+      if (base - topo < 0.22) {
+        chatas.push(`#${id}: ${paradas.join(" → ")} varia só ${(base - topo).toFixed(3)}`);
       }
     }
     expect(chatas).toEqual([]);
   });
 
   it("o degradê claro não escurece a ponto de virar o tema escuro", () => {
-    // O outro lado da mesma régua. Sem ele, "dar mais cor" vira licença pra
-    // descer até um hero preto num app branco — que é o defeito oposto, e o
-    // que a versão pálida estava tentando (errado) evitar.
+    // O outro lado da mesma régua, agora medido na parada de CIMA, que é a que
+    // carrega a cor. Sem ele, "dar mais cor" vira licença pra pôr um topo quase
+    // preto num app branco — que é o defeito oposto e igualmente feio.
     const escuras: string[] = [];
     for (const id of ids) {
       const paradas = paletaDaEspecie(id).gradienteClaro.match(/#[0-9a-f]{6}/gi) ?? [];
-      const base = luminancia(paradas[paradas.length - 1] ?? "#ffffff");
-      if (base < 0.24) escuras.push(`#${id}: base ${paradas[paradas.length - 1]} em ${base.toFixed(3)}`);
+      const topo = luminancia(paradas[0] ?? "#ffffff");
+      if (topo < 0.24) escuras.push(`#${id}: topo ${paradas[0]} em ${topo.toFixed(3)}`);
     }
     expect(escuras).toEqual([]);
   });

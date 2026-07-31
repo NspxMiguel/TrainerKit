@@ -38,29 +38,33 @@ interface Props {
   sistema: string;
   /** Nome do que está em foco, pro cabeçalho da conversa. */
   titulo: string;
-  /**
-   * Como o GATILHO aparece. A conversa em si é a mesma nos dois casos.
-   *
-   * ⚠️ `"linha"` existe por causa de um pedido direto: "essa estrela ali de
-   * baixo tira".
-   *
-   * Um botão flutuante sobre uma tela que ROLA e que já tem cartões até o fim
-   * acaba pousando em cima de conteúdo — foi o que ele viu na ficha da espécie,
-   * com a estrela parada sobre a tabela de stats. Na ficha o assistente já vive
-   * no fluxo, então o gatilho pode viver ao lado dele em vez de pairar.
-   *
-   * A bolha continua sendo o desenho certo onde ela NÃO cobre nada e onde não há
-   * um lugar natural no conteúdo — por isso a variante não sumiu, mudou de lugar.
-   */
-  variante?: "bolha" | "linha";
 }
+
+/*
+ * ⚠️ A VARIANTE `"linha"` SAIU, e vale registrar por quê — ela pode ser pedida
+ * de volta por engano.
+ *
+ * Ela nasceu de "essa estrela ali de baixo tira", quando a bolha pousava sobre a
+ * tabela de stats da ficha. Eu li aquilo como "não quero bolha" e transformei o
+ * gatilho num botão no fluxo, "Perguntar à Pokédex".
+ *
+ * Era a leitura errada, e ele corrigiu duas vezes: "o perguntar a pokedex
+ * poderia ser q nem no whatsapp, uma bolinha ali em baixo, igual ideia
+ * primaria", e depois "o perguntar para pokedex, tira isso. deixa uma bolinha
+ * voando pela tela inteira do pokemon".
+ *
+ * O que incomodava era a bolha COBRIR conteúdo, não a bolha existir. Isso é
+ * problema de espaço reservado, e é assim que todo app com botão flutuante
+ * resolve: a lista termina com um respiro do tamanho do botão. Ver o
+ * `padding-bottom` de `.tk-sheet-full`.
+ */
 
 interface Fala {
   de: "eu" | "dex";
   texto: string;
 }
 
-export function AiBubble({ contexto, sistema, titulo, variante = "bolha" }: Props) {
+export function AiBubble({ contexto, sistema, titulo }: Props) {
   const { t } = useT();
   const [aberta, setAberta] = useState(false);
   const [pergunta, setPergunta] = useState("");
@@ -134,28 +138,7 @@ export function AiBubble({ contexto, sistema, titulo, variante = "bolha" }: Prop
         Dentro da arvore da tela ela rolaria junto com o conteudo e sumiria — que
         e o oposto de "flutuante".
       */}
-      {variante === "linha" ? (
-        <button
-          type="button"
-          className="tk-btn tk-btn--secondary tk-btn--block tk-perguntar"
-          onClick={() => setAberta(true)}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M12 3l1.9 4.9L19 9.8l-4.3 3 .6 5.2-3.3-2.5-3.3 2.5.6-5.2L5 9.8l5.1-1.9L12 3z"
-              fill="url(#tk-estrela)"
-            />
-            <defs>
-              <linearGradient id="tk-estrela" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stopColor="#c4b5ff" />
-                <stop offset="1" stopColor="#6b4bff" />
-              </linearGradient>
-            </defs>
-          </svg>
-          {t("bubble.open")}
-        </button>
-      ) : (
-        createPortal(
+      {createPortal(
         <button
           type="button"
           className="tk-bubble"
@@ -171,7 +154,7 @@ export function AiBubble({ contexto, sistema, titulo, variante = "bolha" }: Prop
             visualmente ao resto da IA no app — e é a única coisa violeta que
             sobrevive sobre o vidro, que assume a cor do que está atrás.
           */}
-          <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true">
             <path
               d="M12 3l1.9 4.9L19 9.8l-4.3 3 .6 5.2-3.3-2.5-3.3 2.5.6-5.2L5 9.8l5.1-1.9L12 3z"
               fill="url(#tk-estrela)"
@@ -185,7 +168,6 @@ export function AiBubble({ contexto, sistema, titulo, variante = "bolha" }: Prop
           </svg>
         </button>,
         document.body,
-        )
       )}
 
       {aberta &&

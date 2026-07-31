@@ -320,9 +320,16 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
     .map((id) => data.species.find((s) => s.id === id))
     .filter((s): s is DatasetSpecies => s !== undefined);
 
+  /*
+    `--com-bolha`: a ficha reserva o lugar da bolinha da IA no fim.
+
+    Sem isso a bolha pousa em cima da última coisa da tela — foi a queixa que
+    fez a bolha virar botão de linha uma vez ("essa estrela ali de baixo tira").
+    É o mesmo respiro que toda lista com botão flutuante tem.
+  */
   return createPortal(
     <div ref={refFolha}
-      className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={species.name} data-saindo={saindo || undefined}>
+      className="tk-sheet-full tk-sheet-full--com-bolha" role="dialog" aria-modal="true" aria-label={species.name} data-saindo={saindo || undefined}>
       {/*
         O MESMO HERO DA HOME, aqui na ficha.
 
@@ -592,17 +599,23 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
           // `owned` aqui e UM Pokemon (o da tela), nao a colecao — vira lista de um.
           contexto={speciesDossier(species, data, salvo ? [salvo] : [], language)}
           /*
-            ⚠️ NA LINHA, e nao flutuando.
+            ⚠️ FLUTUANDO, e nao na linha — e isto e um retorno.
 
-            "essa estrela ali de baixo tira." A bolha ficava parada sobre a
-            tabela de stats enquanto a ficha rolava por baixo dela — um botao
-            que nao pertence a nada do que esta atras.
+            "o perguntar para pokedex, tira isso. deixa uma bolinha voando pela
+            tela inteira do pokemon. ao clicar na bolinha chama a ia."
 
-            Aqui ela vira um botao no fluxo, logo depois do cartao do
-            assistente, que e o lugar onde a pergunta faz sentido. A conversa
-            que abre e exatamente a mesma.
+            Ele pediu duas vezes. A bolha ja tinha sido bolha, virou botao de
+            linha quando ele disse "essa estrela ali de baixo tira", e o que
+            incomodava naquela versao nao era ela flutuar: era ela POUSAR EM CIMA
+            do conteudo — parada sobre a tabela de stats enquanto a ficha rolava
+            por baixo.
+
+            Isso agora esta resolvido de outro jeito, que e o do WhatsApp: a
+            ficha reserva o espaco dela no fim (`padding-bottom` em
+            `.tk-sheet-full`), entao ela flutua sobre o FUNDO, e nunca sobre algo
+            que se queira ler. Tirar a bolha resolvia o sintoma cobrando o
+            recurso; reservar o lugar dela resolve o problema.
           */
-          variante="linha"
         />
       )}
 

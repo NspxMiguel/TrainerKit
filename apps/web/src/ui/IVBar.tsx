@@ -33,11 +33,29 @@ interface Props {
 export function IVBar({ label, value, onChange }: Props) {
   const perfect = isBarPerfect(value);
   const color = perfect ? BAR_COLOR_PERFECT : BAR_COLOR_FILLED;
+  /*
+   * ⚠️ O RÓTULO NÃO USA A COR DO JOGO — a BARRA usa. São coisas diferentes.
+   *
+   * "Ataque" e "Defesa" saíam em `BAR_COLOR_FILLED` (`#EE9219`, o laranja medido
+   * em print de verdade) e "PS" em `BAR_COLOR_PERFECT`. Sobre o app escuro isso
+   * lê bem. Medido no tema claro: **2,24:1** e 2,59:1 — reprovado, e reprovado
+   * como texto de 13px, que é a categoria mais exigente.
+   *
+   * O erro é de categoria, não de tom: a barra é um GRÁFICO, e a cor dela é o
+   * dado (é assim que o jogo desenha, e é por isso que ela foi medida em vez de
+   * escolhida). O rótulo é TEXTO, e texto responde à régua de 4,5:1 do app.
+   *
+   * `--tk-warn` e `--tk-dang-fg` são os equivalentes do app pros dois estados —
+   * âmbar e vermelho, resolvidos por tema (`#ffc24b`/`#8a5a00` e
+   * `#ff9b9b`/`#a82323`). O sinal de "esse é 15" continua existindo em três
+   * lugares: a cor da barra, a cor do rótulo e o número `15 / 15` ao lado.
+   */
+  const corRotulo = perfect ? "var(--tk-dang-fg)" : "var(--tk-warn)";
 
   return (
     <div>
       <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 6 }}>
-        <span style={{ flex: 1, font: "700 13px var(--tk-font)", color }}>{label}</span>
+        <span style={{ flex: 1, font: "700 13px var(--tk-font)", color: corRotulo }}>{label}</span>
         <span style={{ font: "700 15px var(--tk-mono)" }}>{value}</span>
         <span className="tk-caption">/ {MAX_BAR}</span>
       </div>
