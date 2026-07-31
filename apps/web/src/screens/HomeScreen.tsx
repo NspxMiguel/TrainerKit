@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 
 import { ACTION_KEYS, decide, ivTotalOf, type Action, type Verdict } from "@trainerkit/core";
 
@@ -15,7 +15,7 @@ import { DidYouKnow } from "../ui/DidYouKnow.tsx";
 import { IconAlert, IconCamera, IconShield, IconSwords } from "../ui/Icons.tsx";
 import { InstallBanner } from "../ui/InstallBanner.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
-import { usarPaleta } from "../ui/paleta.ts";
+import { enquadrar, usarPaleta } from "../ui/paleta.ts";
 import { GymPicks } from "./GymPicks.tsx";
 import { InstallGuide } from "./InstallGuide.tsx";
 import { IVCalculator } from "./IVCalculator.tsx";
@@ -200,7 +200,24 @@ function Hero({
         `bare` tira a moldura do tile: aqui o fundo ja e o gradiente do hero, e
         um tile arredondado por cima dele seria uma caixa dentro de outra.
       */}
-      <span className="tk-hero-art" aria-hidden="true">
+      {/*
+        O enquadramento vem MEDIDO da arte, e nao chutado.
+
+        "tem q testar pokemon por pokemon, pra sempre dar certo." A caixa justa
+        de cada sprite foi medida no gerador; aqui ela vira escala e
+        deslocamento, e o efeito e que todo Pokemon ocupa o MESMO retangulo —
+        que e o que faz um unico layout servir pros 1.142. Ver `enquadrar()`.
+      */}
+      <span
+        className="tk-hero-art"
+        aria-hidden="true"
+        style={
+          {
+            "--tk-art-escala": enquadrar(species.spriteId).escala,
+            "--tk-art-y": `${enquadrar(species.spriteId).deslocaY}%`,
+          } as CSSProperties
+        }
+      >
         <SpeciesTile
           spriteId={species.spriteId}
           dex={species.dex}
@@ -699,6 +716,14 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
                   mais de 12 bichos. Com poucos, a tira simplesmente terminava
                   no vazio e nao dizia que havia uma colecao inteira atras dela.
                 */}
+                {/*
+                  "VER MAIS" so quando HA mais.
+
+                  "tira o botao ver mais se nao tem mais pokemon ne." Com tres
+                  Pokemon na colecao ele aparecia mesmo assim, prometendo uma
+                  lista que era a mesma que ja estava na tela.
+                */}
+                {meus.porIv.length > NA_FILA && (
                 <button
                   type="button"
                   className="tk-strip-cell tk-strip-cell--mais"
@@ -714,6 +739,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
                   </span>
                   <span className="tk-strip-verdito">{t("home.seeAll")}</span>
                 </button>
+                )}
               </div>
             </>
           )}
