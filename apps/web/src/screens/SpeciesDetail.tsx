@@ -356,6 +356,8 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
               "--tk-art-alt": quadro.alt,
               "--tk-art-topo": quadro.topo,
               "--tk-art-cx": quadro.centroX,
+              // `barriga x alt` ja multiplicado — ver a nota em `HomeScreen`.
+              "--tk-art-cara": quadro.barriga * quadro.alt,
             } as CSSProperties
           }
         >
@@ -540,6 +542,27 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
           baseStats={species.baseStats}
           cpm={data.cpm}
           levelCap={data.version.levelCap}
+        />
+      )}
+
+      {!calcOpen && !raidOpen && (
+        <AiBubble
+          titulo={species.name}
+          sistema={dexSystem(language)}
+          // `owned` aqui e UM Pokemon (o da tela), nao a colecao — vira lista de um.
+          contexto={speciesDossier(species, data, salvo ? [salvo] : [], language)}
+          /*
+            ⚠️ NA LINHA, e nao flutuando.
+
+            "essa estrela ali de baixo tira." A bolha ficava parada sobre a
+            tabela de stats enquanto a ficha rolava por baixo dela — um botao
+            que nao pertence a nada do que esta atras.
+
+            Aqui ela vira um botao no fluxo, logo depois do cartao do
+            assistente, que e o lugar onde a pergunta faz sentido. A conversa
+            que abre e exatamente a mesma.
+          */
+          variante="linha"
         />
       )}
 
@@ -864,14 +887,6 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
         os counters abertos, a pergunta seria sobre outra coisa que nao a tela
         na frente.
       */}
-      {!calcOpen && !raidOpen && (
-        <AiBubble
-          titulo={species.name}
-          sistema={dexSystem(language)}
-          // `owned` aqui e UM Pokemon (o da tela), nao a colecao — vira lista de um.
-          contexto={speciesDossier(species, data, salvo ? [salvo] : [], language)}
-        />
-      )}
     </div>,
     document.body,
   );

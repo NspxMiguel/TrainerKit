@@ -644,7 +644,28 @@
 }
 
 .tk-hero-topo {
-  flex: none;
+  /*
+   * ⚠️ SOBREPOSTO, e nao uma faixa da grade.
+   *
+   * "pokemon muito pequeno" — e a culpa era minha, desta semana.
+   *
+   * Quando o hero virou `grid-template-rows: 1fr auto`, a home tinha DOIS
+   * filhos no fluxo e a conta fechava. A ficha da especie tem TRES: esta barra
+   * com a seta de voltar entra antes. Com a arte fixada em `grid-row: 1`, o
+   * posicionamento automatico empurrou a barra pra linha 2 e o bloco do nome
+   * pra uma linha 3 implicita — a seta foi parar EMBAIXO do Pokemon, e a faixa
+   * da arte caiu de ~185px pra 89. O Venusaur saiu com 159px de lado onde
+   * cabiam 326.
+   *
+   * A barra nunca foi conteudo empilhado: e um controle sobre o gradiente. Fora
+   * da grade ela para de disputar altura, e a arte recebe a faixa inteira de
+   * volta — em qualquer tela que reuse o hero, inclusive as que ainda nao
+   * existem.
+   */
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   /*
    * ⚠️ `max(...)`, e nao `--tk-safe-top + 14px`.
    *
@@ -663,7 +684,9 @@
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  z-index: 2;
+  /* Acima da arte (1) e do bloco do nome (2): e um controle, e controle nao
+     fica atras de conteudo. */
+  z-index: 3;
 }
 
 /*
@@ -1019,14 +1042,17 @@
    *
    * "deixa sempre a cara livre, sem nada. a cara e a parte da barriga pra cima."
    *
-   * Traduzido: os 75% DE CIMA da silhueta nao podem cruzar o bloco de decisao.
+   * Traduzido: a parte da silhueta que vai da BARRIGA PRA CIMA nao pode cruzar o
+   * bloco de decisao.
    * Como a caixa da arte agora termina exatamente onde o nome comeca (ver
    * `.tk-hero`), isso vira uma desigualdade de uma linha:
    *
    *     topo + 0,62 x altura <= 100cqh
    *
-   * O topo da silhueta esta fixo em 5cqh (o `transform` la embaixo), entao
-   * sobra `95cqh` pros 75%, e o lado maximo e `95 / 0,75 = 126,67cqh / alt`.
+   * O topo da silhueta esta fixo em 5cqh (o `transform` la embaixo), entao sobra
+   * `95cqh` pra essa parte, e o lado maximo e `95cqh / (barriga x alt)`.
+   *
+   * `--tk-art-cara` E esse produto, calculado no React — ver a nota la.
    *
    * ⚠️ A conta ja vem resolvida, e nao como `95cqh / (0.62 * alt)`. Dividir por
    * uma EXPRESSAO dentro de `calc()` e Values 4 e nem todo navegador que este
@@ -1062,7 +1088,7 @@
    */
   --tk-lado: min(
     calc(100cqw / var(--tk-art-larg, 1)),
-    calc(126.67cqh / var(--tk-art-alt, 1)),
+    calc(95cqh / var(--tk-art-cara, 0.75)),
     calc((95cqh + var(--tk-hero-bloco)) / var(--tk-art-alt, 1)),
     710px
   );
@@ -2488,4 +2514,89 @@
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.14s var(--tk-ease);
+}
+
+/* ─────────────────────────────────────── a cor da espécie no MEIO da tela ── */
+
+/*
+ * ⚠️ O fundo do app era um radial NEUTRO e fixo, e a paleta nunca chegava nele.
+ *
+ * "sem cor no meio."
+ *
+ * A cor da espécie pintava o hero (o topo) e tingia as superfícies dos cartões
+ * a 19% — mas entre o fim do gradiente do hero e o primeiro cartão sobrava uma
+ * faixa de preto puro, e era ela que ele estava vendo. O app dizia "este
+ * Pokémon é verde-água" no topo e esquecia disso no resto da tela.
+ *
+ * ⚠️ A tinta usa `--tk-accent-topo`, e essa escolha é a que torna isto seguro.
+ *
+ * Ela é a parada MAIS ESCURA do gradiente da espécie, e o `paleta.test.ts` já
+ * cobra que a luminância dela fique abaixo de 0,18 em TODAS as 1.142 — foi o
+ * teste que nasceu de "coloca auto contraste pra quando ao mudar o pokemon, nao
+ * dar bosta. testa com todas as cores". Usar `--tk-accent` cru aqui seria pintar
+ * o fundo com a cor cheia do Pikachu e apagar o texto do app inteiro.
+ *
+ * ⚠️ 30%, e o número não foi escolhido: foi RESOLVIDO. Comecei em 42% e o teste
+ * reprovou 104 espécies — todas em `--tk-text-3`, entre 4,34 e 4,42, logo abaixo
+ * do mínimo. Varrendo de 40% para baixo, 31% é o último valor em que as 1.142
+ * passam; 30% deixa uma casa de folga para a próxima atualização do dataset
+ * trazer uma cor um pouco mais clara sem quebrar a tela.
+ *
+ * O valor de mistura está num token porque o teste precisa repetir a conta:
+ * ver "a tinta de fundo não derruba o texto" em `paleta.test.ts`.
+ */
+:root {
+  --tk-tinta-fundo: 30%;
+  --tk-screen:
+    /* A tinta da espécie, mais forte no MEIO da tela — que é justamente onde
+       ele apontou o vazio, e onde o gradiente do hero já não alcança. */
+    radial-gradient(
+      140vw 70vh at 50% 42%,
+      color-mix(in srgb, var(--tk-accent-topo, transparent) var(--tk-tinta-fundo), transparent) 0%,
+      transparent 78%
+    ),
+    radial-gradient(120vw 80vh at 50% -10%, #141a2a 0%, #0a0c11 55%, #07080b 100%);
+}
+
+/*
+ * No CLARO a mesma tinta faria o contrário: `--tk-accent-topo` é escura, e
+ * escurecer um fundo branco derruba o texto escuro que vive nele. Aqui entra a
+ * cor CHEIA da espécie, e em dose bem menor — o suficiente para a tela ter a
+ * cor do bicho sem sair do branco.
+ */
+[data-tk="light"] {
+  /* ⚠️ SO dentro do seletor de tema claro. Eu tinha escrito
+     `:root:not([data-tk="dark"])` junto — e isso casa tambem com o padrao (sem
+     atributo), que segue o SISTEMA: num aparelho no escuro a tinta cairia pra
+     9% e o meio da tela voltaria a ser preto. */
+  --tk-tinta-fundo: 9%;
+  --tk-screen:
+    radial-gradient(
+      140vw 70vh at 50% 42%,
+      color-mix(in srgb, var(--tk-accent, transparent) var(--tk-tinta-fundo), transparent) 0%,
+      transparent 78%
+    ),
+    radial-gradient(120vw 80vh at 50% -10%, #ffffff 0%, #f6f7fb 55%, #f0f2f7 100%);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-tk="dark"]) {
+    --tk-tinta-fundo: 9%;
+    --tk-screen:
+      radial-gradient(
+        140vw 70vh at 50% 42%,
+        color-mix(in srgb, var(--tk-accent, transparent) var(--tk-tinta-fundo), transparent) 0%,
+        transparent 78%
+      ),
+      radial-gradient(120vw 80vh at 50% -10%, #ffffff 0%, #f6f7fb 55%, #f0f2f7 100%);
+  }
+}
+
+/* O botão de perguntar, quando a IA entra na linha em vez de flutuar. */
+.tk-perguntar {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }

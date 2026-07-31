@@ -235,6 +235,17 @@ function Hero({
             "--tk-art-alt": quadro.alt,
             "--tk-art-topo": quadro.topo,
             "--tk-art-cx": quadro.centroX,
+            /*
+              ⚠️ A conta ja vem FEITA: `barriga x alt`, e nao os dois separados.
+              
+              O CSS precisa de `95cqh / (barriga x alt)`, e dividir por uma
+              EXPRESSAO dentro de `calc()` e Values 4 — nem todo navegador que
+              este app atende aceita, e um `calc()` invalido nao avisa: a
+              propriedade inteira e descartada em silencio e o sprite volta ao
+              tamanho intrinseco. Multiplicar aqui deixa o CSS com uma divisao
+              por variavel simples, que todos aceitam.
+            */
+            "--tk-art-cara": quadro.barriga * quadro.alt,
           } as CSSProperties
         }
       >

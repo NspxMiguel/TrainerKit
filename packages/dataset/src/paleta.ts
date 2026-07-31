@@ -434,6 +434,79 @@ function caixaJusta(bmp: Bitmap): [number, number, number, number] {
   ];
 }
 
+/**
+ * A LINHA DA BARRIGA: onde acaba "a cara" e começam as pernas.
+ *
+ * ⚠️ Isto existe por causa de uma frase dele, e de duas tentativas minhas de
+ * responder a ela com um número só.
+ *
+ * "deixa sempre a cara livre, sem nada. a cara e a parte da barriga pra cima."
+ *
+ * O nome do Pokémon passa por cima da silhueta no hero, e o que não pode ser
+ * coberto é da barriga pra cima. Eu tentei 62% da altura — servia a bípedes e
+ * encostava no queixo do Venusaur. Tentei 75% — servia ao Venusaur na home e
+ * ainda cruzava a boca dele na ficha, porque lá o bicho fica maior. O erro não
+ * era o valor: era supor que UMA fração serve para 1.142 formas diferentes.
+ *
+ * A barriga é medível, e a definição que funciona nas duas formas extremas é a
+ * mesma: **subindo a partir dos pés, é onde a silhueta deixa de ser perna e
+ * volta a ser corpo** — ou seja, onde a largura da linha reencontra a largura
+ * do tronco.
+ *
+ *   · Machamp (bípede): pernas finas até ~60%, tronco largo acima. Dá ~0,60.
+ *   · Venusaur (quadrúpede agachado): pés minúsculos, corpo larguíssimo logo
+ *     acima. Dá ~0,88 — que é exatamente onde a boca dele termina.
+ *
+ * O limiar é 70% da linha mais larga. Mais alto passa a cortar dentro do corpo
+ * de bichos que afinam pra cima (Gyarados); mais baixo perde a perna de quem
+ * tem coxa grossa.
+ *
+ * Devolve a fração da ALTURA DA CAIXA JUSTA, de 0 (topo) a 1 (base), presa
+ * entre 0,62 e 0,95.
+ *
+ * ⚠️ O PISO é 0,62 porque essa era a fração universal que eu usava antes desta
+ * medição, e ela já servia a todo bípede. Assim a medida por espécie só pode
+ * PROTEGER MAIS que o comportamento anterior, nunca menos — se a heurística
+ * errar para baixo em alguma silhueta que eu não olhei, o pior caso é o que já
+ * estava em produção.
+ *
+ * O teto é 0,95 porque proteger 100% é o mesmo que não deixar o bicho descer, e
+ * aí acaba a profundidade que ele pediu ("tipo o relogio da apple"). 181 das
+ * 1.142 chegam nele — são as formas que são corpo até o chão (Snorlax, Ditto,
+ * Machamp de coxa grossa), e para essas a resposta certa é mesmo "quase tudo".
+ */
+function linhaDaBarriga(bmp: Bitmap, caixa: [number, number, number, number]): number {
+  const y0 = Math.floor(caixa[1] * bmp.altura);
+  const y1 = Math.ceil(caixa[3] * bmp.altura);
+  const alt = y1 - y0;
+  if (alt <= 2) return 0.75;
+
+  const larguras: number[] = [];
+  for (let y = y0; y < y1; y++) {
+    let esq = -1;
+    let dir = -1;
+    for (let x = 0; x < bmp.largura; x++) {
+      if ((bmp.px[(y * bmp.largura + x) * 4 + 3] ?? 0) < 24) continue;
+      if (esq < 0) esq = x;
+      dir = x;
+    }
+    larguras.push(dir < 0 ? 0 : dir - esq + 1);
+  }
+
+  const maior = Math.max(...larguras);
+  if (maior <= 0) return 0.75;
+  const limiar = maior * 0.7;
+
+  // Subindo dos pés: a primeira linha que volta a ter largura de tronco.
+  for (let i = larguras.length - 1; i >= 0; i--) {
+    if ((larguras[i] ?? 0) >= limiar) {
+      const fracao = (i + 1) / larguras.length;
+      return Math.round(Math.min(0.95, Math.max(0.62, fracao)) * 100) / 100;
+    }
+  }
+  return 0.75;
+}
+
 // ---------------------------------------------------------------- execução
 
 const RAIZ = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other";
@@ -501,7 +574,15 @@ async function main() {
    */
   const paleta: Record<
     string,
-    { c: string[]; b: [number, number, number, number]; h?: [number, number, number, number] }
+    {
+      c: string[];
+      b: [number, number, number, number];
+      h?: [number, number, number, number];
+      /** Linha da barriga na arte oficial — ver `linhaDaBarriga`. */
+      v: number;
+      /** Idem, no render 3D. */
+      w?: number;
+    }
   > = {};
   let feitos = 0;
   let vazios = 0;
@@ -525,12 +606,23 @@ async function main() {
             vazios++;
             return;
           }
-          const entrada: (typeof paleta)[string] = { c: cores, b: caixaJusta(bmp) };
+          const caixa = caixaJusta(bmp);
+          const entrada: (typeof paleta)[string] = {
+            c: cores,
+            b: caixa,
+            // A linha da barriga, por espécie e por FONTE: a arte oficial e o
+            // render 3D enquadram o mesmo bicho com proporções diferentes, então
+            // a mesma barriga cai em frações diferentes da caixa.
+            v: linhaDaBarriga(bmp, caixa),
+          };
 
           const buf3d = await baixar(id, FONTES.h);
           if (buf3d) {
             try {
-              entrada.h = caixaJusta(decodificarPng(buf3d));
+              const bmp3d = decodificarPng(buf3d);
+              const caixa3d = caixaJusta(bmp3d);
+              entrada.h = caixa3d;
+              entrada.w = linhaDaBarriga(bmp3d, caixa3d);
             } catch {
               // Render 3D ilegivel: o app cai na caixa da arte oficial.
             }
