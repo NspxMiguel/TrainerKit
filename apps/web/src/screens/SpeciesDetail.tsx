@@ -438,6 +438,45 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
       </button>
 
 
+      {/*
+        A BOLHA DA IA — "54px de vidro, canto inferior direito, estrela em
+        gradiente violeta" (handoff §5), e a tarefa que ele abriu ha tempo
+        ("bolinha flutuante da IA, tipo o WhatsApp").
+
+        Ela nao substitui o cartao: leva ate ele. O assistente explica um
+        veredito que ja existe, entao ele mora ABAIXO da analise, e a bolha e o
+        atalho pra quem rolou ate a metade e quer perguntar agora.
+
+        ⚠️ Violeta, e nao a cor da especie. A IA e funcao DO APP, como o botao
+        primario era antes — e ela precisa ser reconhecivel como a mesma coisa
+        em qualquer ficha.
+      */}
+      {setup.assistant && (
+        <button
+          type="button"
+          className="tk-ia-bolha"
+          aria-label={t("assistant.ask")}
+          onClick={() => {
+            document
+              .querySelector(".tk-assistente")
+              ?.scrollIntoView({ behavior: "smooth", block: "center" });
+          }}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M12 3l1.9 4.9L19 9.8l-4.3 3 .6 5.2-3.3-2.5-3.3 2.5.6-5.2L5 9.8l5.1-1.9L12 3z"
+              fill="url(#tk-estrela)"
+            />
+            <defs>
+              <linearGradient id="tk-estrela" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stopColor="#c4b5ff" />
+                <stop offset="1" stopColor="#6b4bff" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </button>
+      )}
+
       {setup.assistant && (
         <AssistantCard
           name={species.name}

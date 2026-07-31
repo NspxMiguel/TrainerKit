@@ -459,10 +459,20 @@ const pilha: Paleta[] = [];
 function aplicarTopo() {
   const raiz = document.documentElement;
   const topo = pilha[pilha.length - 1];
-  if (!topo) {
-    for (const k of VARIAVEIS) raiz.style.removeProperty(k);
-    return;
-  }
+  /*
+   * ⚠️ PILHA VAZIA MANTEM A ULTIMA COR, e nao apaga.
+   *
+   * "o pokemon destaque, sempre altera a palheta de cores do app."
+   *
+   * O hero vive na home, e a `App` remonta a tela a cada troca de aba
+   * (`key={tab}`). Entao ao ir pra Pokedex ou Ajustes a pilha esvaziava, as
+   * variaveis eram removidas e o app voltava pro amarelo de reserva — a aba
+   * ativa aparecia LARANJA no meio de um app azul-esverdeado do Ivysaur.
+   *
+   * A cor e do APP, e nao daquela tela. Sem destaque nenhum ela continua sendo
+   * a ultima valida, que e o que a pessoa acabou de ver.
+   */
+  if (!topo) return;
   const valores: Record<(typeof VARIAVEIS)[number], string> = {
     "--tk-c1": topo.cruas[0] ?? topo.base,
     "--tk-c2": topo.cruas[1] ?? topo.cruas[0] ?? topo.base,
