@@ -8,6 +8,7 @@ import { useT, type Key } from "../i18n/t.ts";
 import type { PokedexIntent } from "../App.tsx";
 import { useSetup } from "../onboarding/setup.ts";
 import { typeColor, typeKey } from "../sprites/provider.ts";
+import { useSpriteSettings } from "../sprites/settings.ts";
 import { setDoneAction, useCollection, type OwnedPokemon } from "../storage/collection.ts";
 import { useInstallState } from "../storage/install.ts";
 import type { PersistState } from "../storage/persist.ts";
@@ -149,6 +150,20 @@ function Hero({
    */
   const paleta = usarPaleta(species.spriteId);
 
+  /*
+   * O enquadramento depende da FONTE de imagem escolhida nos Ajustes.
+   *
+   * A arte oficial e os renders 3D enquadram os mesmos bichos de jeitos
+   * diferentes, entao cada uma tem a sua caixa medida. Com a fonte desligada
+   * (monograma) nada disso vale, e `enquadrar` devolve a identidade.
+   */
+  const fonteSprite = useSpriteSettings().source;
+  const semImagem = fonteSprite === "off";
+  const quadro = enquadrar(
+    species.spriteId,
+    fonteSprite === "pokeapi-home" ? "3d" : "artwork",
+  );
+
   return (
     <div
       className="tk-hero"
@@ -177,6 +192,19 @@ function Hero({
         ja esta logo abaixo, enquanto o numero acrescenta o unico dado que a
         home nao mostrava. Camisa de time, nao marca d'agua.
       */}
+      {/*
+        Sem imagem, o numero da dex sai de cena.
+
+        "e sem imagens tbm." Nesse modo quem faz o papel de assunto e o
+        monograma, e ele fica grande no meio do hero — e o numero gigante atras
+        passaria a competir com ele em vez de ficar atras dele, porque letra nao
+        tem silhueta pra recortar o algarismo. Duas formas claras do mesmo
+        tamanho no mesmo lugar nao somam, brigam.
+
+        Com arte, o recorte acontece e os dois convivem: e daí que vem a
+        profundidade.
+      */}
+      {semImagem ? null : (
       <span className="tk-hero-numero" aria-hidden="true">
         {/*
           Tres digitos sempre: "001", nao "1".
@@ -188,6 +216,7 @@ function Hero({
         */}
         {String(species.dex).padStart(3, "0")}
       </span>
+      )}
 
       {/*
         O assunto, na frente de tudo.
@@ -211,10 +240,11 @@ function Hero({
       <span
         className="tk-hero-art"
         aria-hidden="true"
+        data-sem-imagem={semImagem || undefined}
         style={
           {
-            "--tk-art-escala": enquadrar(species.spriteId).escala,
-            "--tk-art-y": `${enquadrar(species.spriteId).deslocaY}%`,
+            "--tk-art-escala": quadro.escala,
+            "--tk-art-y": `${quadro.deslocaY}%`,
           } as CSSProperties
         }
       >

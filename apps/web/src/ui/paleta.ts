@@ -37,11 +37,15 @@ import tabela from "../dados/paleta.json";
  * é trocar o que pode mudar sem custar leitura.
  */
 
+type Caixa = [number, number, number, number];
+
 interface Entrada {
-  /** As cores, em ordem de área ocupada. */
+  /** As cores, em ordem de área ocupada. Sempre da arte oficial. */
   c: string[];
-  /** A caixa justa da silhueta na arte: `[esq, topo, dir, base]`, de 0 a 1. */
-  b: [number, number, number, number];
+  /** Caixa justa da silhueta na ARTE OFICIAL: `[esq, topo, dir, base]`, 0 a 1. */
+  b: Caixa;
+  /** Caixa justa nos RENDERS 3D. Ausente quando a espécie só tem arte oficial. */
+  h?: Caixa;
 }
 
 const CORES = tabela as unknown as Record<string, Entrada>;
@@ -68,9 +72,29 @@ const CORES = tabela as unknown as Record<string, Entrada>;
  * fixa, e esticar 3× mostra o pixel. Melhor um bicho pequeno nítido que um
  * grande borrado.
  */
-export function enquadrar(spriteId: number | null): { escala: number; deslocaY: number } {
+export function enquadrar(
+  spriteId: number | null,
+  /**
+   * ⚠️ A FONTE IMPORTA, e ignorá-la reintroduz o defeito que isto conserta.
+   *
+   * "lembresse, testar com pokemons renders 3d e arte oficial."
+   *
+   * As mesmas espécies vêm enquadradas de formas diferentes em cada fonte: a
+   * arte oficial é ilustração com margem variável, e os renders 3D do Pokémon
+   * HOME são capturas de modelo, mais cheias no quadro. Usar a caixa de uma
+   * pra posicionar a outra deslocaria o bicho — só que agora por culpa minha,
+   * e não do enquadramento original.
+   *
+   * Sem imagem nenhuma (monograma) nada disso se aplica: quem chama passa
+   * `null` e recebe a identidade.
+   */
+  fonte: "artwork" | "3d" = "artwork",
+): { escala: number; deslocaY: number } {
   const e = spriteId == null ? undefined : CORES[String(spriteId)];
-  const b = e?.b;
+  // Cai na caixa da arte oficial quando a espécie não tem render 3D — várias
+  // formas regionais e cosméticas não têm. Enquadrar com a caixa vizinha erra
+  // pouco; não enquadrar erra o que ele apontou no Charizard.
+  const b = fonte === "3d" ? (e?.h ?? e?.b) : e?.b;
   if (!b) return { escala: 1, deslocaY: 0 };
 
   const alturaJusta = b[3] - b[1];

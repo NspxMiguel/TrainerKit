@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useFolha } from "../ui/folha.ts";
 import { createPortal } from "react-dom";
 
@@ -32,7 +32,8 @@ import { dexSystem, speciesDossier } from "../ai/dossier.ts";
 import { AiBubble } from "../ui/AiBubble.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 import { VerdictCard } from "../ui/VerdictCard.tsx";
-import { usarPaleta } from "../ui/paleta.ts";
+import { useSpriteSettings } from "../sprites/settings.ts";
+import { enquadrar, usarPaleta } from "../ui/paleta.ts";
 import { IVCalculator } from "./IVCalculator.tsx";
 import { RaidCounters } from "./RaidCounters.tsx";
 
@@ -267,6 +268,11 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies, owned }: 
   // A ficha manda na paleta enquanto esta aberta, e a home retoma ao fechar.
   // A pilha em `ui/paleta.ts` cuida da troca nos dois sentidos.
   const paleta = usarPaleta(species.spriteId);
+  // Mesmo enquadramento medido do hero da home — ver `enquadrar()`.
+  const quadro = enquadrar(
+    species.spriteId,
+    useSpriteSettings().source === "pokeapi-home" ? "3d" : "artwork",
+  );
 
   const evolutions = species.evolvesInto
     .map((id) => data.species.find((s) => s.id === id))
@@ -299,7 +305,16 @@ export function SpeciesDetail({ species, data, onClose, onPickSpecies, owned }: 
           {species.dex}
         </span>
 
-        <span className="tk-hero-art" aria-hidden="true">
+        <span
+          className="tk-hero-art"
+          aria-hidden="true"
+          style={
+            {
+              "--tk-art-escala": quadro.escala,
+              "--tk-art-y": `${quadro.deslocaY}%`,
+            } as CSSProperties
+          }
+        >
           <SpeciesTile
             spriteId={species.spriteId}
             dex={species.dex}

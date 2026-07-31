@@ -595,10 +595,25 @@
 .tk-hero-scrim {
   position: absolute;
   inset: 0;
+  /*
+   * ⚠️ SEM o escurecimento no topo, que o handoff pede e aqui virou defeito.
+   *
+   * A receita original comeca em `rgba(10,12,16,.4)` no 0% — 40% de preto na
+   * borda de cima. Isso existia pra garantir contraste da SAUDACAO, que no
+   * mockup fica dentro do hero. A saudacao saiu de la ("tira da cabeca do
+   * pokemon a saudação") e o escurecimento ficou, sem nada pra proteger.
+   *
+   * O estrago: a faixa colorida acima do hero e a cor pura, e o topo do hero e
+   * a mesma cor com 40% de preto em cima. Duas cores diferentes encostadas =
+   * uma linha horizontal atravessando a tela, que foi o que ele circulou.
+   *
+   * Comecando transparente, a faixa e o hero sao literalmente a mesma cor na
+   * emenda. A metade de baixo do scrim continua intacta: la ela ainda protege
+   * o nome e a frase, que continuam sobre o gradiente.
+   */
   background: linear-gradient(
     180deg,
-    rgba(10, 12, 16, 0.4) 0%,
-    rgba(10, 12, 16, 0) 22%,
+    rgba(10, 12, 16, 0) 0%,
     rgba(10, 12, 16, 0) 50%,
     rgba(10, 12, 16, 0.55) 78%,
     var(--tk-hero-ink) 100%
@@ -1561,4 +1576,30 @@
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/*
+ * O MONOGRAMA quando nao ha imagem nenhuma.
+ *
+ * "e sem imagens tbm." Nesse modo ele deixa de ser o que aparece enquanto a
+ * arte carrega e passa a SER a arte — o handoff desenhou o hero assim, com o
+ * monograma a 220px, porque partiu do princípio de que o app nunca teria
+ * sprite.
+ *
+ * O `SpeciesTile` calcula o corpo da letra a partir do `size` que recebe (27%
+ * dele), e no hero isso dava 59px — tamanho de rotulo, nao de assunto. Aqui ele
+ * volta a ocupar o hero.
+ */
+.tk-hero-art[data-sem-imagem] .tk-mono {
+  font-size: min(190px, 26svh) !important;
+  letter-spacing: -8px;
+  /* Opaco de verdade: a 10% de branco, como o handoff pede pro monograma DE
+     FUNDO, ele sumiria — aqui ele nao e fundo, e o assunto. */
+  color: rgba(255, 255, 255, 0.86);
+}
+
+/* Sem arte nao ha silhueta, entao o contorno nao tem o que contornar: fica so a
+   sombra projetada, que da o mesmo descolamento do fundo. */
+.tk-hero-art[data-sem-imagem] > .tk-mono {
+  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.5));
 }
