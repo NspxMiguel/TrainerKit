@@ -130,11 +130,24 @@
    * que as outras duas e a barra lia como desequilibrada, nao como selecionada.
    * O transbordo de 3px continua — e ele que da a impressao de peça pousada.
    */
-  /* 1.08 e 54px: "grande de mais". O contraste com os inativos continua
-     legivel — o que sumiu foi a impressao de que a barra esta torta. */
+  /*
+   * ⚠️ A BOLHA FICA DENTRO DA BARRA — 40px numa barra de 50.
+   *
+   * "a bolha ta maior q os botoes, isso n é bom."
+   *
+   * O handoff manda ela transbordar 4px pra cima e pra baixo, e eu vinha
+   * defendendo esse transbordo como "o detalhe que faz parecer Apple". Ele
+   * reclamou duas vezes, e olhando de novo ele esta certo: no mockup a barra
+   * tem 58px e o transbordo e 7% da altura; na nossa, que encolheu pra 50, os
+   * mesmos 4px viram 8% e a bolha passa a ler como peça que nao coube.
+   *
+   * Dentro da barra ela vira o que de fato e — um indicador de selecao — e para
+   * de competir com a barra pela borda. O vidro, a refracao e o deslize
+   * continuam iguais.
+   */
   flex: 1.08;
-  height: 54px;
-  margin: -2px 0;
+  height: 40px;
+  margin: 0;
   /* A aba ativa acompanha a especie junto com o resto — "a palheta principal do
      app". `--tk-accent-fg` ja e a versao com contraste garantido no tema. */
   color: var(--tk-accent-fg);
@@ -836,8 +849,25 @@
    * Embaixo sobra pouco de propósito — os pes afundando no veu escuro da base
    * dao o mesmo que uma sombra de chao daria, e de graca.
    */
-  top: 12%;
-  bottom: 18%;
+  /*
+   * ⚠️ 6% e 12%: a caixa da arte precisa ser MAIS ALTA QUE LARGA.
+   *
+   * Isto e geometria, nao gosto. `object-fit: contain` escolhe o eixo que
+   * limita: se a caixa e mais larga que alta, um sprite quadrado e limitado
+   * pela ALTURA e ocupa 100% dela — e ai `object-position` vertical nao tem
+   * folga nenhuma pra usar, por mais que eu mude a porcentagem. Foi o que
+   * aconteceu: eu ajustei de 28% pra 14% e o Bulbasaur nao se moveu um pixel.
+   *
+   * ⚠️ E a caixa NAO PODE ser mais alta que larga aqui: ela tem 375px de largura
+   * e o hero teria que passar de 375px de altura pra isso, o que nao cabe numa
+   * home sem rolagem com todo o resto do conteudo. Medi: sobram 289.
+   *
+   * Entao a folga vertical vem do outro lado — limitando a ALTURA do sprite
+   * (ver `.tk-hero-art img`) em vez de esticar a caixa. Estes recuos so definem
+   * onde a caixa comeca e termina.
+   */
+  top: 6%;
+  bottom: 12%;
   /* Ver a nota de `.tk-hero-numero`: e este indice que decide quem fica na
      frente de quem. O numero e o brilho ficam no 0. */
   z-index: 1;
@@ -850,7 +880,9 @@
    * de 300. Quem centraliza aqui e o `object-fit: contain` da imagem, que
    * centraliza SEM encolher a caixa.
    */
-  place-items: stretch;
+  /* `start`: a arte encosta no topo da caixa, e a folga de 18% fica embaixo,
+     que e por onde o texto sobe. */
+  place-items: start stretch;
   padding: 0 18px;
   pointer-events: none;
 }
@@ -868,19 +900,69 @@
   width: 100% !important;
   height: 100% !important;
   /*
-   * DUAS sombras. A larga e escura da a distancia ate o fundo; a curta e o
-   * contorno, e ela ficou indispensavel quando o gradiente passou a ser
-   * DERIVADO da especie: sem ela e laranja sobre laranja.
+   * ⚠️ TRES sombras, e a primeira e um CONTORNO — sombra de deslocamento zero.
+   *
+   * "esse layout vc testou pro charizard, mas e os outros pokemons? nem todos
+   * podem se encaixar ali corretamente."
+   *
+   * Ele previu o defeito antes de eu ver. Como o fundo do hero e derivado da
+   * PROPRIA especie, todo Pokemon aparece sobre a sua propria cor: o Bulbasaur
+   * saia verde sobre verde e simplesmente sumia. O Dragonite escondia isso
+   * porque a asa e verde-agua e destoa do corpo laranja — eu testei justamente
+   * a especie que nao tinha o problema.
+   *
+   * `drop-shadow` com deslocamento 0 acompanha a silhueta inteira e separa o
+   * bicho do fundo seja qual for a cor dos dois. As outras duas continuam
+   * fazendo o que faziam: distancia e luz.
    */
   filter:
+    drop-shadow(0 0 3px rgba(0, 0, 0, 0.6))
     drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5))
     drop-shadow(0 18px 26px rgba(0, 0, 0, 0.55));
 }
 
 .tk-hero-art img {
   width: 100%;
-  height: 100%;
+  /*
+   * ⚠️ 82% da caixa, ancorado no TOPO — e nao 100% centralizado.
+   *
+   * "esse layout vc testou pro charizard, mas e os outros pokemons?"
+   *
+   * Com 100%, todo sprite quadrado ou alto era limitado pela altura e ocupava a
+   * caixa inteira; `object-position` nao tinha folga pra usar, e o nome caia
+   * sempre no MEIO do bicho — no Bulbasaur, em cima dos olhos. Mudar a
+   * porcentagem de ancoragem nao movia um pixel, porque nao havia o que mover.
+   *
+   * Cedendo 18% de altura, o sprite sobe e o nome passa a cruzar o terco de
+   * baixo: corpo, e nao rosto. Custa tamanho, e vale — um Pokemon 18% menor e
+   * inteiro le melhor que um Pokemon grande com o nome atravessado na cara.
+   */
+  /*
+   * ⚠️ `!important` porque o `SpeciesTile` escreve `height: 100%` INLINE no modo
+   * `bare`, e estilo inline ganha de folha de estilo. Foi por isso que a
+   * primeira tentativa nao moveu nada — a regra estava certa e nunca chegou a
+   * valer. A regra irma logo acima (`.tk-hero-art > .tk-mono`) leva `!important`
+   * pelo mesmo motivo.
+   */
+  height: 82% !important;
   object-fit: contain;
+  /*
+   * ⚠️ ANCORADO EM CIMA, e nao centralizado.
+   *
+   * `contain` centraliza no quadro, entao um bicho baixo e largo (Bulbasaur,
+   * Snorlax) desce ate o meio — bem onde ficam o nome e a frase. O Dragonite,
+   * que e alto, preenche o quadro e nunca mostrou isso.
+   *
+   * A 14% o rosto fica na parte de cima em qualquer proporcao, e o texto passa
+   * a cruzar o CORPO. Texto cruzando corpo e composicao; cruzando rosto e
+   * acidente — e a diferenca entre os dois nao esta no texto, esta em qual
+   * Pokemon calhou de estar em destaque.
+   *
+   * Medido: a 28% o nome ainda passava nos olhos do Bulbasaur, porque `contain`
+   * ajusta um bicho largo pela LARGURA e sobra altura de folga, que ele gasta
+   * descendo. Quanto mais achatado o Pokemon, mais fundo ele afunda.
+   */
+  object-position: 50% 14%;
 }
 
 /*
@@ -902,12 +984,23 @@
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
   z-index: 0;
-  background: radial-gradient(
-    closest-side,
-    color-mix(in srgb, var(--tk-accent-2, #fff) 55%, transparent),
-    color-mix(in srgb, var(--tk-accent-2, #fff) 12%, transparent) 62%,
-    transparent 100%
-  );
+  /*
+   * Duas camadas: um ESCURECIMENTO no miolo e o brilho da segunda cor em volta.
+   *
+   * So o brilho nao bastava. Ele usa `--tk-accent-2`, que em muitas especies e
+   * um vizinho da cor principal (Bulbasaur: verde e verde), entao acendia o
+   * fundo sem separar nada. O escurecimento no centro funciona pra qualquer
+   * matiz, porque a diferenca que ele cria e de CLARIDADE, e nao de cor — e
+   * claridade e a unica dimensao que o contorno do bicho sempre atravessa.
+   */
+  background:
+    radial-gradient(closest-side, rgba(0, 0, 0, 0.34), transparent 68%),
+    radial-gradient(
+      closest-side,
+      color-mix(in srgb, var(--tk-accent-2, #fff) 55%, transparent),
+      color-mix(in srgb, var(--tk-accent-2, #fff) 12%, transparent) 62%,
+      transparent 100%
+    );
   pointer-events: none;
 }
 
@@ -969,7 +1062,13 @@
 .tk-home {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  /*
+   * 10px e nao 12: sao 5 vaos na coluna, entao dois pixels em cada devolvem 10
+   * ao hero. Parece pouco escrito e nao e — junto com a saudacao numa linha e a
+   * fileira secundaria em 50px, e o que tira o hero da faixa em que TODO sprite
+   * quadrado encosta no nome.
+   */
+  gap: 10px;
   /*
    * `min-height` e nao `height`: quando um aviso aparece (instalacao,
    * armazenamento em risco, erro de dataset) a home PODE passar da tela e
@@ -1008,7 +1107,7 @@
 }
 
 .tk-act {
-  min-height: 54px;
+  min-height: 50px;
 }
 
 /* ─────────────────────────────────────── o hero na ficha da especie ────── */
@@ -1101,7 +1200,39 @@
  * `HomeScreen`. O ganho colateral e que a cor da especie aparece aqui atras, no
  * topo da tela, antes mesmo do hero comecar.
  */
+/*
+ * ⚠️ A COR SOBE ATE O TOPO — inclusive por tras da barra de status.
+ *
+ * "faz a cor subir ate o topo da tela."
+ *
+ * A faixa e `fixed` e sangra pra cima com `top: 0`, cobrindo a area segura: sem
+ * isso a cor comecaria abaixo do entalhe e a tela ganharia uma tarja preta em
+ * cima justamente no aparelho onde ela mais aparece.
+ *
+ * Ela usa `--tk-accent-topo`, que e a PRIMEIRA PARADA do gradiente do hero. Nao
+ * e uma cor nova nem parecida: e a mesma, entao a faixa e o hero se encontram
+ * sem emenda mesmo o hero tendo cantos arredondados embaixo.
+ */
+.tk-home-topo::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--tk-safe-top) + 118px);
+  background: linear-gradient(
+    180deg,
+    var(--tk-accent-topo, transparent) 0%,
+    var(--tk-accent-topo, transparent) 62%,
+    transparent 100%
+  );
+  z-index: -1;
+  pointer-events: none;
+  transition: background 0.5s var(--tk-ease-out);
+}
+
 .tk-home-topo {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1111,18 +1242,34 @@
 }
 
 .tk-saudacao {
-  /* Duas linhas em vez de reticencias: "Boa madrugada, Miguel." nao cabe em
-     283px a 26px, e cortar o nome do dono do app e pior que ocupar mais uma
-     linha. Alemao e russo sao ainda mais longos. */
+  /*
+   * ⚠️ UMA LINHA, com o corpo se ajustando a largura da tela.
+   *
+   * Duas linhas custavam ~30px, e cada pixel aqui sai do Pokemon — o hero e o
+   * unico bloco elastico da coluna. `clamp` com `vw` resolve sem cortar nome
+   * nenhum: em tela estreita a letra encolhe ate caber, em tela larga ela para
+   * de crescer. Continua duas linhas se nem assim couber (alemao, russo).
+   */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   /* 26 e nao 34: o handoff reservava a escala 34 pra saudacao porque ela era o
      maior tipo da tela. Hoje o nome do Pokemon no hero tem 38 e e o assunto —
      duas manchetes do mesmo tamanho nao formam hierarquia, formam empate. */
-  font: 700 26px/1.1 var(--tk-font);
-  letter-spacing: -0.6px;
-  color: var(--tk-text);
+  font: 700 clamp(19px, 5.7vw, 26px)/1.15 var(--tk-font);
+  letter-spacing: -0.5px;
+  /*
+   * ⚠️ A tinta acompanha a cor do topo, e nao o tema.
+   *
+   * "coloca bordas e auto contraste pra quando ao mudar o pokemon, nao dar
+   * bosta. tanto com foto tanto com boa madrugada."
+   *
+   * Com a faixa colorida atras, `--tk-text` deixou de ser seguro: ele e definido
+   * contra o FUNDO DO APP, e o fundo ali agora e o Pokemon. `--tk-accent-topo-ink`
+   * e escolhido por luminancia contra essa cor exata, espécie a espécie.
+   */
+  color: var(--tk-accent-topo-ink, var(--tk-text));
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.28);
   margin: 0;
   min-width: 0;
   overflow: hidden;
@@ -1145,11 +1292,23 @@
       color-mix(in srgb, var(--tk-accent, #6b7280) 70%, transparent),
       color-mix(in srgb, var(--tk-accent-2, #6b7280) 55%, transparent)
     );
-  border: 0.5px solid rgba(255, 255, 255, 0.22);
+  /*
+   * ⚠️ BORDA DE 2px, e nao o fio de 0,5px de antes.
+   *
+   * "coloca bordas ... pra quando ao mudar o pokemon, nao dar bosta."
+   *
+   * O avatar e pintado com a cor da especie e agora pousa sobre a faixa TAMBEM
+   * pintada com a cor da especie. Sao dois tons da mesma matiz encostados: com
+   * um fio de meio pixel o disco simplesmente sumia no fundo em varias
+   * espécies. A borda clara e o que garante que ele continue sendo um objeto
+   * recortado, seja qual for o bicho.
+   */
+  border: 2px solid rgba(255, 255, 255, 0.32);
   box-shadow:
-    0 4px 14px rgba(0, 0, 0, 0.35),
-    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    0 4px 14px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.25);
   color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
   font: 700 16px var(--tk-font);
   display: flex;
   align-items: center;
@@ -1166,8 +1325,12 @@
  * quatro cantos. Full-bleed na largura continua: e o que o separa dos cartoes
  * comuns da home.
  */
+/*
+ * Sem cantos em cima: o hero encontra a faixa colorida, e as duas tem a mesma
+ * cor na emenda. Arredondar ali desenharia uma linha onde nao ha divisao.
+ */
 .tk-home > .tk-hero {
-  border-radius: 30px;
+  border-radius: 0 0 30px 30px;
   margin-top: 0;
 }
 

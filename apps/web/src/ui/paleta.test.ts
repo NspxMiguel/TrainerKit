@@ -82,6 +82,26 @@ describe("paleta por espécie", () => {
     expect(ruins).toEqual([]);
   });
 
+  it("a saudação passa 4,5:1 sobre a cor do topo, em toda espécie", () => {
+    // "coloca ... auto contraste pra quando ao mudar o pokemon, nao dar bosta
+    // ... testa com todas as cores." É literalmente este teste: a faixa do topo
+    // é pintada com a cor da espécie, e o nome do treinador fica em cima dela.
+    const ruins: string[] = [];
+    for (const id of ids) {
+      const p = paletaDaEspecie(id);
+      const r = contraste(p.topoTinta, p.topo);
+      if (r < 4.5) ruins.push(`#${id}: ${p.topoTinta} sobre ${p.topo} = ${r.toFixed(2)}`);
+    }
+    expect(ruins).toEqual([]);
+  });
+
+  it("a cor do topo é escura o bastante para o texto branco em toda espécie", () => {
+    // A cor do topo é a parada mais escura do gradiente justamente para isto —
+    // se alguma espécie escapasse, a saudação viraria texto claro sobre claro.
+    const claras = ids.filter((id) => luminancia(paletaDaEspecie(id).topo) > 0.18);
+    expect(claras).toEqual([]);
+  });
+
   it("o gradiente do hero traz as três paradas com posição, como o handoff pede", () => {
     // `#x 0%, #y 48%, #z 72%` — a posição vem daqui porque o CSS não consegue
     // intercalar porcentagens entre itens de uma lista vinda de variável.

@@ -178,7 +178,15 @@ function Hero({
         home nao mostrava. Camisa de time, nao marca d'agua.
       */}
       <span className="tk-hero-numero" aria-hidden="true">
-        {species.dex}
+        {/*
+          Tres digitos sempre: "001", nao "1".
+          
+          Um algarismo sozinho a 272px nao le como numero — le como uma barra
+          clara no meio do cartao, e o Bulbasaur mostrou isso na tela. Com o
+          zero a esquerda a forma vira reconhecivelmente um NUMERO, que e o que
+          justifica ele estar ali, e ainda e como a dex se escreve no jogo.
+        */}
+        {String(species.dex).padStart(3, "0")}
       </span>
 
       {/*
@@ -478,16 +486,31 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
         <p className="tk-saudacao">
           {t(greetingKey())}, {setup.name.trim() || t("home.trainer")}.
         </p>
-        {/* O avatar leva pra "Meus" — e o unico lugar da home que fala do
-            treinador, entao e pra onde ele deve apontar. */}
-        <button
-          type="button"
-          className="tk-avatar"
-          onClick={() => onGo("pokedex", { view: "mine" })}
-          aria-label={t("nav.pokedex")}
-        >
-          {(setup.name.trim() || t("home.trainer")).slice(0, 1).toUpperCase()}
-        </button>
+        {/*
+          O avatar SO no modo colecao.
+
+          "esse M, no caso, a conta da pessoa, so aparece no modo coleção, onde
+          vc pode criar varias contas, varias coleçÕes. pra pessoas q tem varias
+          contas."
+
+          Faz sentido e conserta uma promessa falsa: no modo so consulta nao ha
+          colecao, nao ha conta e nao ha nada atras daquele disco — ele seria um
+          botao de perfil num app sem perfil. O destino dele (a lista "Meus")
+          tambem nao existe ali.
+
+          A troca de contas em si ainda nao existe; por enquanto ele leva pra
+          colecao, que e o unico lugar que fala do treinador hoje.
+        */}
+        {colecao && (
+          <button
+            type="button"
+            className="tk-avatar"
+            onClick={() => onGo("pokedex", { view: "mine" })}
+            aria-label={t("nav.pokedex")}
+          >
+            {(setup.name.trim() || t("home.trainer")).slice(0, 1).toUpperCase()}
+          </button>
+        )}
       </header>
 
 
