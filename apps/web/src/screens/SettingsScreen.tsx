@@ -10,7 +10,6 @@ import {
   useShowTranslation,
 } from "../i18n/language.ts";
 import { useT, type Key } from "../i18n/t.ts";
-import { WheelPicker } from "../ui/WheelPicker.tsx";
 import { Segmented } from "../ui/Segmented.tsx";
 import { SettingsSheet } from "../ui/SettingsSheet.tsx";
 import { FeedbackScreen } from "./FeedbackScreen.tsx";
@@ -300,19 +299,52 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
         </SettingsSheet>
       )}
 
-      {/* Folha BAIXA: uma roda de escolha não justifica uma tela inteira. Ver a
-          nota em `SettingsSheet`. */}
       {painel === "lang" && (
-        <SettingsSheet title={t("settings.language")} onClose={fechar} compacta>
-          {/* Roda em vez de grade: dez idiomas viravam vinte botoes ocupando
-              meia tela. O idioma ja vem detectado do aparelho — isto aqui e a
-              excecao, nao o caminho principal. */}
-          <WheelPicker
-            ariaLabel={t("settings.language")}
-            value={language}
-            onChange={setLanguage}
-            options={LANGUAGES.map((l) => ({ value: l.code, label: l.label, glyph: l.flag }))}
-          />
+        <SettingsSheet title={t("settings.language")} onClose={fechar}>
+          {/*
+            ⚠️ LISTA INTEIRA, e a tela rola. NÃO uma roda.
+
+            "quando digo idioma a tela inteira, digo ao invez de ser um scroll
+            estatico, escrolar a tela toda. nao um tao pequuen."
+
+            A roda mostrava TRÊS idiomas por vez numa janelinha de 132px, com
+            rolagem própria dentro de uma tela que também rola. Duas rolagens
+            aninhadas é o pior arranjo possível: o dedo cai na de dentro quando
+            queria a de fora, e vice-versa — e nenhuma das duas mostra as dez
+            opções que existem.
+
+            Dez linhas é uma lista curta. Ela cabe na tela, rola com a página, e
+            mostra tudo o que há sem ninguém precisar descobrir que aquele
+            retângulo é arrastável. É o que o próprio sistema faz em Idioma e
+            Região — lista, não seletor.
+
+            ⚠️ Eu tinha ido pro lado OPOSTO antes: transformei a tela cheia numa
+            folha baixa, porque li "abre tela inteira" como reclamação do
+            tamanho. Era do CONTEÚDO.
+          */}
+          <div className="tk-card tk-lista-radio">
+            {LANGUAGES.map((l) => (
+              <button
+                key={l.code}
+                type="button"
+                className="tk-lista-radio-item"
+                data-on={l.code === language || undefined}
+                aria-pressed={l.code === language}
+                onClick={() => setLanguage(l.code)}
+              >
+                <span className="tk-lista-radio-glifo" aria-hidden="true">
+                  {l.flag}
+                </span>
+                <span className="tk-lista-radio-nome">{l.label}</span>
+                {/* O ✓ à direita, e não um radinho à esquerda: o alinhamento do
+                    sistema, e o que deixa a coluna dos nomes começar toda no
+                    mesmo lugar. */}
+                <span className="tk-lista-radio-check" aria-hidden="true">
+                  {l.code === language ? "✓" : ""}
+                </span>
+              </button>
+            ))}
+          </div>
           {language !== "en" && (
             <button
               type="button"

@@ -3544,3 +3544,63 @@
     opacity: 0;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LISTA DE ESCOLHA ÚNICA — dez linhas que rolam com a página
+   ═══════════════════════════════════════════════════════════════════════════
+
+   "quando digo idioma a tela inteira, digo ao invez de ser um scroll estatico,
+   escrolar a tela toda. nao um tao pequuen."
+
+   Substitui a roda de seleção no Idioma. A roda mostrava três opções por vez
+   numa janela de 132px com rolagem PRÓPRIA, dentro de uma tela que também
+   rola — duas rolagens aninhadas, e o dedo acerta a errada metade das vezes.
+*/
+.tk-lista-radio {
+  padding: 0;
+  overflow: hidden;
+}
+
+.tk-lista-radio-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  /* 56px: acima dos 44 de alvo mínimo, e a altura de linha que o sistema usa
+     em lista de escolha. */
+  min-height: 56px;
+  padding: 0 16px;
+  background: none;
+  border: 0;
+  text-align: left;
+  font: 500 16px/1.3 var(--tk-font);
+  color: var(--tk-txt);
+}
+
+.tk-lista-radio-item + .tk-lista-radio-item {
+  border-top: 1px solid var(--tk-sep);
+}
+
+.tk-lista-radio-item[data-on] {
+  font-weight: 700;
+  color: var(--tk-ultra-fg);
+}
+
+.tk-lista-radio-glifo {
+  font-size: 20px;
+  line-height: 1;
+  flex: none;
+}
+
+.tk-lista-radio-nome {
+  flex: 1;
+  min-width: 0;
+}
+
+.tk-lista-radio-check {
+  flex: none;
+  width: 18px;
+  text-align: right;
+  font-size: 16px;
+  color: var(--tk-ultra-fg);
+}
