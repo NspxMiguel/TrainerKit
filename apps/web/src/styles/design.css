@@ -27,9 +27,14 @@
  * completa. E a diferenca entre "barra de navegacao web" (encostada na borda)
  * e "barra do sistema" (pousada sobre o conteudo).
  *
- * ⚠️ SEM `overflow: hidden`. O item ativo TRANSBORDA 4px pra cima e pra baixo,
- * e e o transbordo que da a impressao de peça de vidro pousada. Cortar mata o
- * efeito inteiro.
+ * ⚠️ AGORA COM `overflow: hidden`, e a nota antiga dizia o contrario.
+ *
+ * Ela dizia: "sem overflow hidden, o item ativo transborda 4px e e o transbordo
+ * que da a impressao de peça pousada". Isso valia enquanto a bolha transbordava
+ * de propósito. Ela nao transborda mais ("a bolha ta maior q os botoes"), e a
+ * regra virou dano: medido, a bolha esta DENTRO da barra com 5px de folga de
+ * cada lado — mas a sombra externa dela se espalha 16px e atravessa a borda
+ * arredondada. Era a sombra que continuava lendo como "pilula vazada".
  */
 .tk-tabbar {
   position: fixed;
@@ -164,7 +169,9 @@
     inset 0 -2.5px 4px -1.5px rgba(255, 255, 255, 0.28),
     inset 3px 0 4px -2px rgba(255, 255, 255, 0.16),
     inset -3px 0 4px -2px rgba(255, 255, 255, 0.16),
-    0 6px 16px rgba(0, 0, 0, 0.35);
+    /* Sombra curta: dentro da barra, uma longa so suja o vidro em volta — e o
+       que ela fazia (descolar do fundo) o `inset` ja faz sozinho. */
+    0 3px 8px rgba(0, 0, 0, 0.3);
 }
 
 .tk-tab[aria-current="page"] .tk-tab-label {
@@ -780,7 +787,9 @@
     inset 0 -2.5px 4px -1.5px rgba(255, 255, 255, 0.28),
     inset 3px 0 4px -2px rgba(255, 255, 255, 0.16),
     inset -3px 0 4px -2px rgba(255, 255, 255, 0.16),
-    0 6px 16px rgba(0, 0, 0, 0.35);
+    /* Sombra curta: dentro da barra, uma longa so suja o vidro em volta — e o
+       que ela fazia (descolar do fundo) o `inset` ja faz sozinho. */
+    0 3px 8px rgba(0, 0, 0, 0.3);
   transition:
     left 0.42s var(--tk-ease-out),
     width 0.42s var(--tk-ease-out);
@@ -933,9 +942,10 @@
    * sempre no MEIO do bicho — no Bulbasaur, em cima dos olhos. Mudar a
    * porcentagem de ancoragem nao movia um pixel, porque nao havia o que mover.
    *
-   * Cedendo 18% de altura, o sprite sobe e o nome passa a cruzar o terco de
-   * baixo: corpo, e nao rosto. Custa tamanho, e vale — um Pokemon 18% menor e
-   * inteiro le melhor que um Pokemon grande com o nome atravessado na cara.
+   * ⚠️ A cessao de 18% saiu: quem cria a folga agora e o enquadramento medido
+   * (`--tk-art-escala`), que e por espécie. Ceder altura no CSS era uma media
+   * que servia mal a todos — apertava quem ja estava justo e nao bastava pra
+   * quem tinha muita margem no PNG.
    */
   /*
    * ⚠️ `!important` porque o `SpeciesTile` escreve `height: 100%` INLINE no modo
@@ -944,8 +954,26 @@
    * valer. A regra irma logo acima (`.tk-hero-art > .tk-mono`) leva `!important`
    * pelo mesmo motivo.
    */
-  height: 82% !important;
+  height: 100% !important;
   object-fit: contain;
+  /*
+   * ⚠️ A ESCALA E O DESLOCAMENTO VEM MEDIDOS DA ARTE, por espécie.
+   *
+   * A arte oficial nao enquadra os Pokemon igual: medido, a silhueta do
+   * Dragonite ocupa 91% da altura do PNG e a do Charizard 71%. Com
+   * `object-fit: contain` puro, quem e encaixado na caixa e o ARQUIVO — entao
+   * o Charizard saia 22% menor e mais alto que o Dragonite, e o nome batia em
+   * lugares diferentes em cada um.
+   *
+   * `--tk-art-escala` desfaz a folga da arte e `--tk-art-y` recentra a
+   * silhueta. Com os dois, todos ocupam o mesmo retangulo e uma unica posicao
+   * de nome vale pros 1.142 — que e o "sempre dar certo" que ele pediu.
+   *
+   * `transform-origin: top center` porque a ancoragem util e o topo: e de la
+   * que o rosto desce.
+   */
+  transform: translateY(var(--tk-art-y, 0)) scale(var(--tk-art-escala, 1));
+  transform-origin: top center;
   /*
    * ⚠️ ANCORADO EM CIMA, e nao centralizado.
    *
@@ -1219,13 +1247,20 @@
   top: 0;
   left: 0;
   right: 0;
-  height: calc(var(--tk-safe-top) + 118px);
-  background: linear-gradient(
-    180deg,
-    var(--tk-accent-topo, transparent) 0%,
-    var(--tk-accent-topo, transparent) 62%,
-    transparent 100%
-  );
+  /*
+   * ⚠️ COR CHAPADA, e nao um degrade que morre no ar.
+   *
+   * Antes ela desbotava pra transparente no fim, e sobrava uma FAIXA MAIS
+   * ESCURA entre o fim do desbote e o inicio do hero — o fundo do app
+   * aparecendo por dois dedos. Foi o que ele circulou de vermelho, duas vezes.
+   *
+   * Chapada e alta o bastante pra passar POR TRAS do hero, a emenda deixa de
+   * existir: o hero e opaco, cobre o excesso, e a cor dele no topo e
+   * exatamente esta. Sobra visivel so o pedaço acima do hero, que e a faixa da
+   * saudacao.
+   */
+  height: calc(var(--tk-safe-top) + 200px);
+  background: var(--tk-accent-topo, transparent);
   z-index: -1;
   pointer-events: none;
   transition: background 0.5s var(--tk-ease-out);
@@ -1488,7 +1523,16 @@
  */
 .tk-strip-row {
   display: grid;
+  /*
+   * ⚠️ CINCO COLUNAS FIXAS, e nao `auto-fit`.
+   *
+   * Tentei `auto-fit` pra fila nao ficar com buracos quando ha menos de cinco
+   * Pokemon, e foi pior: com tres, as tres colunas se esticaram pra ocupar a
+   * largura toda e os seloes viraram cartoes gordos e espalhados. Coluna vazia
+   * e invisivel; coluna esticada nao.
+   */
   grid-template-columns: repeat(5, minmax(0, 1fr));
+  justify-items: center;
   gap: 8px;
   overflow: visible;
 }

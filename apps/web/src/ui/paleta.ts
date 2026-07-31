@@ -37,7 +37,69 @@ import tabela from "../dados/paleta.json";
  * é trocar o que pode mudar sem custar leitura.
  */
 
-const CORES = tabela as Record<string, string[]>;
+interface Entrada {
+  /** As cores, em ordem de área ocupada. */
+  c: string[];
+  /** A caixa justa da silhueta na arte: `[esq, topo, dir, base]`, de 0 a 1. */
+  b: [number, number, number, number];
+}
+
+const CORES = tabela as unknown as Record<string, Entrada>;
+
+/**
+ * O enquadramento do sprite, calculado a partir da caixa justa.
+ *
+ * ⚠️ Isto existe porque a arte oficial NÃO enquadra os Pokémon de forma
+ * consistente, e foi o Miguel que apontou: "olha ai, por exemplo o charizard,
+ * n combino. tem q testar pokemon por pokemon, pra sempre dar certo."
+ *
+ * Medido nas 1.142 artes: a silhueta do Dragonite ocupa 91% da altura do PNG,
+ * a do Charizard 71%. Renderizados na MESMA caixa com `object-fit: contain`, um
+ * aparece 22% menor que o outro e mais alto — porque o que está sendo encaixado
+ * é o arquivo, e não o bicho.
+ *
+ * Com a caixa justa dá pra desfazer isso: `escala` desfaz a folga da arte e
+ * `deslocaY` recentra a silhueta. O resultado é que TODOS ocupam o mesmo
+ * retângulo na tela, e aí uma única posição de nome serve para todos — em vez
+ * de eu acertar num e quebrar noutro.
+ *
+ * ⚠️ A escala é limitada a 1,45. Sem teto, uma arte com silhueta minúscula
+ * (Joltik, algumas formas) seria ampliada até virar borrão: o PNG tem resolução
+ * fixa, e esticar 3× mostra o pixel. Melhor um bicho pequeno nítido que um
+ * grande borrado.
+ */
+export function enquadrar(spriteId: number | null): { escala: number; deslocaY: number } {
+  const e = spriteId == null ? undefined : CORES[String(spriteId)];
+  const b = e?.b;
+  if (!b) return { escala: 1, deslocaY: 0 };
+
+  const alturaJusta = b[3] - b[1];
+  const larguraJusta = b[2] - b[0];
+  if (alturaJusta <= 0 || larguraJusta <= 0) return { escala: 1, deslocaY: 0 };
+
+  // O quanto ampliar pra silhueta ocupar a caixa como se não houvesse folga.
+  // Limitado pelo eixo mais apertado, senão o bicho vaza pelas laterais.
+  const escala = Math.min(1.45, Math.min(1 / alturaJusta, 1 / larguraJusta));
+
+  /*
+   * ⚠️ ALINHA O TOPO DA SILHUETA, e não o centro dela.
+   *
+   * Centralizar deixava o rosto no meio da caixa — que é exatamente onde o nome
+   * passa. E quanto mais baixo e largo o bicho, mais o rosto subia pro centro:
+   * o Charizard, cuja silhueta ocupa 71% do PNG, ficava com a cara bem na
+   * linha do texto, enquanto o Dragonite (91%) não.
+   *
+   * Alinhando o topo, o rosto fica sempre na mesma altura, seja qual for a
+   * proporção do bicho, e o nome sempre cruza a metade de baixo. Os 5% são a
+   * respiração entre a cabeça e a borda de cima.
+   *
+   * A conta vale em fração da ALTURA DO ELEMENTO porque a arte é quadrada e a
+   * caixa é mais larga que alta: com `object-fit: contain` a imagem renderizada
+   * ocupa exatamente a altura, então fração da imagem e fração do elemento são
+   * a mesma coisa.
+   */
+  return { escala, deslocaY: (0.05 - b[1] * escala) * 100 };
+}
 
 export interface Paleta {
   /** As cores como elas são na arte, em ordem de área ocupada. */
@@ -183,7 +245,7 @@ const vazia: Paleta = {
 };
 
 export function paletaDaEspecie(spriteId: number | null): Paleta {
-  const cruas = spriteId == null ? undefined : CORES[String(spriteId)];
+  const cruas = spriteId == null ? undefined : CORES[String(spriteId)]?.c;
   if (!cruas || cruas.length === 0) return vazia;
 
   const [h, s, l] = paraHsl(cruas[0] ?? "#888888");
@@ -308,7 +370,7 @@ export function gradienteDaEspecie(
   spriteId: number | null,
   reserva: string,
 ): string {
-  const cruas = spriteId == null ? undefined : CORES[String(spriteId)];
+  const cruas = spriteId == null ? undefined : CORES[String(spriteId)]?.c;
   if (!cruas || cruas.length === 0) return reserva;
 
   const [h, s, l] = paraHsl(cruas[0] ?? "#888888");

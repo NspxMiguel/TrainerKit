@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import tabela from "../dados/paleta.json";
-import { paletaDaEspecie } from "./paleta.ts";
+import { enquadrar, paletaDaEspecie } from "./paleta.ts";
 
 /**
  * A paleta muda com o Pokémon — então o contraste tem que valer para TODOS.
@@ -44,7 +44,7 @@ function contraste(a: string, b: string): number {
   return la > lb ? (la + 0.05) / (lb + 0.05) : (lb + 0.05) / (la + 0.05);
 }
 
-const ids = Object.keys(tabela as Record<string, string[]>).map(Number);
+const ids = Object.keys(tabela as Record<string, unknown>).map(Number);
 
 describe("paleta por espécie", () => {
   it("tem paleta para praticamente toda espécie com arte", () => {
@@ -107,6 +107,35 @@ describe("paleta por espécie", () => {
     // intercalar porcentagens entre itens de uma lista vinda de variável.
     const g = paletaDaEspecie(149).gradiente;
     expect(g).toMatch(/^#[0-9a-f]{6} 0%, #[0-9a-f]{6} 48%, #[0-9a-f]{6} 72%$/);
+  });
+
+  it("enquadra toda espécie com o topo da silhueta no mesmo lugar", () => {
+    /*
+     * "tem q testar pokemon por pokemon, pra sempre dar certo."
+     *
+     * É este teste. A arte oficial não enquadra os Pokémon igual — medido, a
+     * silhueta do Dragonite ocupa 91% da altura do PNG e a do Charizard 71% —
+     * e por isso o nome caía no rosto de uns e no pé de outros.
+     *
+     * Com o enquadramento medido, o topo da silhueta cai no MESMO ponto em
+     * todas. É o que faz um único layout servir para as 1.142 em vez de para a
+     * que eu conferi na tela.
+     */
+    const tab = tabela as unknown as Record<string, { b: [number, number, number, number] }>;
+    const topos = ids.map((id) => {
+      const e = enquadrar(id);
+      const b = tab[String(id)]!.b;
+      return b[1] * e.escala + e.deslocaY / 100;
+    });
+    const menor = Math.min(...topos);
+    const maior = Math.max(...topos);
+    // Meio ponto percentual de variação, que é arredondamento da caixa medida.
+    expect(maior - menor).toBeLessThan(0.005);
+  });
+
+  it("nunca amplia a ponto de borrar: escala com teto de 1,45", () => {
+    const demais = ids.filter((id) => enquadrar(id).escala > 1.45);
+    expect(demais).toEqual([]);
   });
 
   it("espécie sem paleta cai no plano B em vez de quebrar", () => {

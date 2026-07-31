@@ -387,6 +387,53 @@ function extrairPaleta(bmp: Bitmap): string[] {
   return saida;
 }
 
+/**
+ * A CAIXA JUSTA do bicho dentro da arte — onde o alfa deixa de ser zero.
+ *
+ * ⚠️ Isto existe porque a arte oficial NÃO enquadra os Pokémon de forma
+ * consistente. Cada PNG tem 512×512, mas o quanto o bicho ocupa dentro desse
+ * quadrado varia muito: uns encostam nas bordas, outros flutuam no meio com
+ * margem enorme. Charizard e Bulbasaur, lado a lado no mesmo quadro, aparecem
+ * em tamanhos e alturas completamente diferentes.
+ *
+ * "olha ai, por exemplo o charizard, n combino. tem q testar pokemon por
+ * pokemon, pra sempre dar certo."
+ *
+ * Testar um por um na mão são 1.142 telas. Medir um por um são 1.142 caixas —
+ * e com a caixa, o app consegue enquadrar todos no MESMO lugar, o que faz o
+ * layout valer para todos de uma vez em vez de para o que eu conferi.
+ *
+ * Devolve as bordas normalizadas (0 a 1): `[esquerda, topo, direita, base]`.
+ */
+function caixaJusta(bmp: Bitmap): [number, number, number, number] {
+  let x0 = bmp.largura;
+  let y0 = bmp.altura;
+  let x1 = -1;
+  let y1 = -1;
+
+  for (let y = 0; y < bmp.altura; y++) {
+    for (let x = 0; x < bmp.largura; x++) {
+      // 24 e não 0: as artes têm um halo de alfa quase-zero em volta da
+      // silhueta, e contá-lo devolveria quase sempre a imagem inteira — ou
+      // seja, uma caixa "justa" que não aperta nada.
+      if ((bmp.px[(y * bmp.largura + x) * 4 + 3] ?? 0) < 24) continue;
+      if (x < x0) x0 = x;
+      if (x > x1) x1 = x;
+      if (y < y0) y0 = y;
+      if (y > y1) y1 = y;
+    }
+  }
+
+  if (x1 < 0) return [0, 0, 1, 1];
+  const r = (v: number) => Math.round(v * 1000) / 1000;
+  return [
+    r(x0 / bmp.largura),
+    r(y0 / bmp.altura),
+    r((x1 + 1) / bmp.largura),
+    r((y1 + 1) / bmp.altura),
+  ];
+}
+
 // ---------------------------------------------------------------- execução
 
 const ARTE = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork";
@@ -420,7 +467,9 @@ async function main() {
 
   console.log(`${ids.length} sprites a analisar.`);
 
-  const paleta: Record<string, string[]> = {};
+  /** Por sprite: `c` = as cores, `b` = a caixa justa. Chaves curtas porque isto
+      vai embutido no pacote e são 1.142 entradas. */
+  const paleta: Record<string, { c: string[]; b: [number, number, number, number] }> = {};
   let feitos = 0;
   let vazios = 0;
 
@@ -435,8 +484,9 @@ async function main() {
           return;
         }
         try {
-          const cores = extrairPaleta(decodificarPng(buf));
-          if (cores.length > 0) paleta[id] = cores;
+          const bmp = decodificarPng(buf);
+          const cores = extrairPaleta(bmp);
+          if (cores.length > 0) paleta[id] = { c: cores, b: caixaJusta(bmp) };
           else vazios++;
         } catch (e) {
           console.warn(`  ! ${id}: ${(e as Error).message}`);
