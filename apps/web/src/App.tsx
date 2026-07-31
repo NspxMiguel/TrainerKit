@@ -153,8 +153,18 @@ export function App() {
             "--tk-tab-i": Math.max(0, activeIndex),
           } as CSSProperties}
         >
-          {/* A pilula viajante saiu: agora o proprio item ativo E a bolha,
-              que cresce e transborda a barra. Ver `.tk-tab` no App.css. */}
+          {/*
+            A lente de vidro, que VIAJA.
+            
+            "ele vai de inicio, se vc clicou em pokedex se arrastando pro lado"
+            — e o documento de animacao do desenho concorda: "a lente de vidro
+            viaja entre os itens em 420ms".
+            
+            Minha primeira versao seguiu o mockup ESTATICO, onde cada item
+            acende no lugar: a bolha aparecia no destino em vez de ir ate ele.
+            Parecia certo em screenshot e errado em uso.
+          */}
+          <span className="tk-tab-bolha" aria-hidden="true" />
           {visibleTabs.map(({ id, labelKey, Icon }) => (
             <button
               key={id}
