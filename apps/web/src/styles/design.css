@@ -487,7 +487,20 @@
 
 .tk-hero-topo {
   flex: none;
-  padding: calc(var(--tk-safe-top) + 14px) 20px 0;
+  /*
+   * ⚠️ `max(...)`, e nao `--tk-safe-top + 14px`.
+   *
+   * "o boa noite sobe um pouco." Estava 14px baixo demais porque eu SOMEI ao
+   * respiro em vez de escolher entre respiros — e o `App.css` ja avisa disso
+   * com todas as letras: `--tk-safe-top` (52px) JA e o espaco desenhado pro
+   * topo, entao somar mais qualquer coisa conta duas vezes.
+   *
+   * O `max` e o idioma que o resto do app usa: fica com o respiro de desenho
+   * onde nao ha entalhe, e com o entalhe de verdade + folga onde ha. Sobe os
+   * 14px no iPhone comum sem arriscar enfiar a saudacao embaixo da ilha
+   * dinamica de quem tem uma.
+   */
+  padding: max(var(--tk-safe-top), calc(env(safe-area-inset-top) + var(--tk-s3))) 20px 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
