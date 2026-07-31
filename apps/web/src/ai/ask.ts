@@ -32,6 +32,15 @@ import { chat } from "./provider.ts";
 export interface CollectionFact {
   name: string;
   ivTotal: number;
+  /**
+   * "eu tenho esse", sem IV medido.
+   *
+   * ⚠️ `ivTotal` é 0 nesses casos porque os `ivs` são zeros de preenchimento.
+   * Quem monta o texto tem que checar ISTO antes de escrever o número — foi
+   * assim que a Pokédex respondeu "O IV do Bulbasaur do jogador é 0" pra um
+   * bicho que ninguém mediu.
+   */
+  semIv: boolean;
   level: number | null;
   cp: number | null;
   action: string;
@@ -72,6 +81,7 @@ export function collectionFacts(
     if (!sp) return [];
 
     const verdict = decide({
+      ivDesconhecido: owned.ivDesconhecido === true,
       name: sp.name,
       baseStats: sp.baseStats,
       ivs: owned.ivs,
@@ -93,6 +103,7 @@ export function collectionFacts(
       {
         name: sp.name,
         ivTotal: ivTotalOf(owned.ivs),
+        semIv: owned.ivDesconhecido === true,
         level: owned.level,
         cp: owned.cp,
         action: verdict.action,
@@ -129,8 +140,12 @@ Regras rígidas:
 - Se o cabeçalho disser que você está vendo só parte da coleção, responda pelo
   que viu e avise numa frase curta que olhou só os extremos. Nunca diga "o
   melhor que você tem" ou "o pior que você tem" como se tivesse visto todos.
-- Não chame um IV de bom ou ruim pelo número solto: 45/45 é perfeito, 0/45 é o
-  pior possível, e a média de um Pokémon selvagem é perto de 22.
+- Não chame um IV de bom ou ruim pelo número solto: 100% é perfeito, 0% é o
+  pior possível, e a média de um Pokémon selvagem é perto de 49%.
+- Quando perguntarem "qual o IV", responda em PORCENTAGEM, que é o que a tela
+  mostra em letra grande. A fração de 45 vem depois, entre parênteses.
+- "IV NÃO informado" quer dizer que o jogador nunca mediu aquele Pokémon.
+  NUNCA diga que o IV dele é 0 — diga que falta escanear.
 - Não gere, descreva nem ofereça imagens.
 - Responda SEMPRE no idioma pedido no cabeçalho, nunca no idioma que você achou
   que a pergunta estava.
@@ -152,7 +167,12 @@ function asContext(facts: readonly CollectionFact[], total: number): string {
     .map((f) => {
       const partes = [
         f.name,
-        `IV ${f.ivTotal}/45`,
+        // Porcentagem e fração juntas: a tela mostra as duas, e o modelo
+        // precisa poder responder na língua de quem perguntou. Ver a nota em
+        // `dossier.ts`.
+        f.semIv
+          ? "IV NÃO informado"
+          : `IV ${Math.round((f.ivTotal / 45) * 100)}% (${f.ivTotal}/45)`,
         f.cp === null ? null : `PC ${f.cp}`,
         f.level === null ? null : `nv ${f.level}`,
         `veredito: ${f.action}`,

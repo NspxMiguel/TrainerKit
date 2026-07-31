@@ -26,6 +26,7 @@ export const IT: Dict = {
   "action.evolve": "Evolvi",
   "action.keep": "Tieni",
   "action.transfer": "Trasferisci",
+  "action.discover": "Scoprire l’IV",
   "home.greeting.night": "Buonasera",
   "home.greeting.morning": "Buongiorno",
   "home.greeting.afternoon": "Buon pomeriggio",

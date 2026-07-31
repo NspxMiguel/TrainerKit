@@ -30,6 +30,16 @@ export const TOM_VEREDITO: Record<Action, string> = {
   evoluir: "var(--tk-v-evoluir)",
   guardar: "var(--tk-v-guardar)",
   transferir: "var(--tk-v-transferir)",
+  /*
+   * "Descobrir o IV" em AZUL, e aqui a cor de informação é a certa — ao
+   * contrário de "guardar", que ficou azul por engano e virou um aviso que não
+   * avisava nada.
+   *
+   * Esta não é uma das quatro decisões: é o app dizendo que falta um dado.
+   * Azul é exatamente "leia isto, tem algo pra você fazer aqui", e o que falta
+   * fazer é escanear o print.
+   */
+  descobrir: "var(--tk-info)",
 };
 
 /** O tom de quem já cumpriu: neutro. Cor de veredito cobra; cumprido não cobra. */

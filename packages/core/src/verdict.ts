@@ -17,7 +17,30 @@ import type { BaseStats, IVs } from "./types.js";
  * que deveria acontecer quando o caso e ambiguo.
  */
 
-export type Action = "investir" | "evoluir" | "guardar" | "transferir";
+/**
+ * As respostas possíveis. São CINCO, e a quinta existe por um defeito real.
+ *
+ * ⚠️ `descobrir` é "eu não sei, me dá o IV" — e ela precisa ser uma AÇÃO, não
+ * uma marca por fora, porque quem esquece dela tem que errar pro lado seguro.
+ *
+ * Antes eram quatro, e o guarda de "sem IV" vivia na tela inicial: ela detectava
+ * `ivDesconhecido` e MONTAVA um veredito à mão, com `action: "investir"` e a
+ * frase "falta o IV pra eu decidir". Duas consequências, as duas na cara do
+ * Miguel na mesma sessão:
+ *
+ *   · a home mostrava "Falta o IV pra eu decidir" com um botão escrito
+ *     INVESTIR do lado — a tela se contradizendo em dois centímetros;
+ *   · e as OUTRAS telas não tinham guarda nenhum. A ficha da espécie rodava
+ *     `decide()` em cima dos zeros e devolvia **"Transferir · IV 0 de 45 ·
+ *     confiança 65%"** para o mesmo Bulbasaur. "aq diz investir e no outro diz
+ *     transferir..."
+ *
+ * O guarda mora aqui agora. Quem chamar `decide()` sem passar `ivDesconhecido`
+ * continua funcionando; quem passar recebe a resposta honesta, e quem esquecer
+ * de tratar `descobrir` na interface mostra "Descobrir o IV", que é o texto
+ * certo. Esquecer virou seguro.
+ */
+export type Action = "investir" | "evoluir" | "guardar" | "transferir" | "descobrir";
 
 export interface Signal {
   /** Nome da regra, como aparece no rastro: `papel.raide`. */
@@ -55,8 +78,24 @@ export interface VerdictInput {
   candyToEvolve?: number | null;
   lucky?: boolean;
   shadow?: boolean;
+  /**
+   * "eu tenho esse", sem IV medido.
+   *
+   * ⚠️ Os `ivs` vêm zerados porque o tipo exige três números — não porque
+   * alguém mediu zero. Sem esta marca, `decide()` lê os zeros como medidos e
+   * devolve "Transferir" com confiança cheia para um bicho que pode ser 100%.
+   */
+  ivDesconhecido?: boolean;
 }
 
+/**
+ * ⚠️ `descobrir` fica FORA da agregação.
+ *
+ * Ela não disputa peso com as outras: ou o IV existe e as quatro decidem, ou
+ * ele não existe e não há o que decidir. Deixá-la na lista faria uma regra
+ * futura "puxar para descobrir" e o veredito viraria uma pergunta no meio de
+ * quatro respostas.
+ */
 const ACTIONS: readonly Action[] = ["investir", "evoluir", "guardar", "transferir"];
 
 /**
@@ -68,6 +107,7 @@ export const ACTION_KEYS: Record<Action, string> = {
   evoluir: "action.evolve",
   guardar: "action.keep",
   transferir: "action.transfer",
+  descobrir: "action.discover",
 };
 
 /** A melhor posicao entre as tres ligas, que e o que decide se vale pra PvP. */
@@ -88,6 +128,23 @@ function bestLeagueRank(
 }
 
 export function decide(input: VerdictInput): Verdict {
+  /*
+   * ⚠️ SEM IV, O APP NÃO DECIDE — ele pede o IV. E isso vem ANTES de tudo.
+   *
+   * Não há sinal, não há rastro e não há confiança: confiança é o grau de
+   * concordância entre regras, e aqui nenhuma regra chegou a rodar. Devolver
+   * `confidence: 0` com a lista de sinais vazia é o único jeito de a barra da
+   * interface não desenhar certeza sobre um palpite.
+   */
+  if (input.ivDesconhecido) {
+    return {
+      action: "descobrir",
+      confidence: 0,
+      reason: msg("verdict.needIv"),
+      signals: [],
+    };
+  }
+
   const signals: Signal[] = [];
   const total = input.ivs.atk + input.ivs.def + input.ivs.hp;
 

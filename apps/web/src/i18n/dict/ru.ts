@@ -26,6 +26,7 @@ export const RU: Dict = {
   "action.evolve": "Эволюционировать",
   "action.keep": "Оставить",
   "action.transfer": "Передать",
+  "action.discover": "Узнать IV",
   "home.greeting.night": "Добрый вечер",
   "home.greeting.morning": "Доброе утро",
   "home.greeting.afternoon": "Добрый день",

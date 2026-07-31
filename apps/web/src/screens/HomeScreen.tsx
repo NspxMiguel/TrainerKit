@@ -54,8 +54,12 @@ interface Props {
  * ACAO: evoluir e transferir mudam o Pokemon, investir gasta recurso. "Guardar"
  * e o veredito de quem nao precisa fazer nada, e portanto nao merece espaco na
  * primeira tela.
+ *
+ * `descobrir` vem PRIMEIRO, e a ordem aqui e a ordem da fila. Enquanto o IV nao
+ * for medido, nenhum dos outros vereditos daquele Pokemon vale — e escanear um
+ * print custa menos que qualquer uma das outras tres acoes.
  */
-const PEDEM_ACAO: readonly Action[] = ["evoluir", "investir", "transferir"];
+const PEDEM_ACAO: readonly Action[] = ["descobrir", "evoluir", "investir", "transferir"];
 
 /**
  * Quantos Pokemon aparecem na fila. O quinto lugar e sempre o "VER MAIS".
@@ -383,41 +387,21 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
       if (!s) return [];
 
       /*
-       * ⚠️ SEM IV, O APP NAO DECIDE — ele pede o IV.
+       * ⚠️ O GUARDA DE "SEM IV" SAIU DAQUI e virou regra do `decide()`.
        *
-       * "coloca um botão de eu tenho esse pokemon... e se a pessoa n qr
-       * escanear iv?"
+       * Ele existia só nesta tela, e montava um veredito à mão com
+       * `action: "investir"`. Duas consequências:
        *
-       * Quem entra por "eu tenho esse" fica com `ivs` em 0 porque o tipo exige
-       * numeros. Rodar `decide()` em cima desses zeros seria o pior erro que
-       * este app pode cometer: sairia "Transferir", com barra de confianca
-       * cheia, pra um bicho que pode ser 100%. Numero inventado com cara de
-       * medido e pior que numero nenhum.
+       *   · aqui, a home escrevia "Falta o IV pra eu decidir" com um botão
+       *     INVESTIR do lado — se contradizendo em dois centímetros;
+       *   · e a ficha da espécie, que não tinha guarda nenhum, respondia
+       *     "Transferir · IV 0 de 45 · confiança 65%" pro mesmo Bulbasaur.
        *
-       * Entao o veredito vira "descobrir o IV", que e literalmente o que falta
-       * fazer — e a tese do app continua de pe, porque ele continua dizendo o
-       * proximo passo em vez de despejar dado.
+       * Agora `decide()` devolve a ação `descobrir` quando o IV não foi medido,
+       * e as duas telas dizem a mesma coisa porque leem a mesma resposta.
        */
-      if (owned.ivDesconhecido) {
-        return [
-          {
-            id: owned.id,
-            owned,
-            species: s,
-            verdict: {
-              action: "investir",
-              confidence: 0,
-              reason: { key: "verdict.needIv" },
-              signals: [],
-            } satisfies Verdict,
-            iv: -1,
-            semIv: true,
-            feito: false,
-          },
-        ];
-      }
-
       const verdict = decide({
+        ivDesconhecido: owned.ivDesconhecido === true,
         name: s.name,
         baseStats: s.baseStats,
         ivs: owned.ivs,
@@ -435,7 +419,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
       return [
         {
           id: owned.id,
-          semIv: false,
+          semIv: verdict.action === "descobrir",
           /*
            * ⚠️ O POKEMON SALVO INTEIRO, e nao so o `id`.
            *
@@ -451,7 +435,10 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
           owned,
           species: s,
           verdict,
-          iv: ivTotalOf(owned.ivs),
+          // `-1` marca "não tem IV" pra ordenação: sem isto, o Pokémon sem IV
+          // medido entraria na fila como se fosse 0/45, ou seja, como o pior de
+          // todos — que é justamente a leitura que este app não faz.
+          iv: verdict.action === "descobrir" ? -1 : ivTotalOf(owned.ivs),
           // Cumprido so quando a acao marcada e a MESMA que o veredito indica
           // hoje: subiu de nivel e virou "evoluir"? Volta a cobrar, porque e
           // outra coisa a fazer.

@@ -40,6 +40,7 @@ const EN = {
   "action.evolve": "Evolve",
   "action.keep": "Keep",
   "action.transfer": "Transfer",
+  "action.discover": "Find the IV",
 
   // ----------------------------------------------------------------------- home
   "home.greeting.night": "Good evening",

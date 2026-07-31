@@ -553,8 +553,40 @@ export function speciesDossier(
       `O jogador tem ${meus.length}: ` +
         meus
           .map((o) => {
+            /*
+             * ⚠️ IV NÃO INFORMADO NÃO É IV ZERO.
+             *
+             * "nao é 0. nao ta cadastrado porraaaaaa" — e ele perguntou isso
+             * depois de a Pokédex responder "O IV do Bulbasaur do jogador é 0."
+             * sobre um bicho que ele só marcou como "eu tenho esse".
+             *
+             * Os `ivs` vêm zerados porque o tipo exige três números. O veredito
+             * já sabia disso; o dossiê somava os zeros e entregava o resultado
+             * ao modelo como fato medido — e o modelo repetiu, com a confiança
+             * de quem recebeu um número.
+             */
+            if (o.ivDesconhecido) {
+              const partes = ["IV NÃO informado (o jogador só marcou que tem)"];
+              if (o.cp !== null) partes.push(`PC ${o.cp}`);
+              if (o.level !== null) partes.push(`nível ${o.level}`);
+              if (o.shadow) partes.push("sombroso");
+              if (o.lucky) partes.push("lucky");
+              return partes.join(" ");
+            }
+
             const iv = o.ivs.atk + o.ivs.def + o.ivs.hp;
-            const partes = [`IV ${iv}/45`];
+            /*
+             * ⚠️ OS DOIS NÚMEROS, e a porcentagem primeiro.
+             *
+             * "pq o iv é 39?? ta doido man, é 87" — a tela mostrava 39/45 e
+             * 87%, o dossiê mandava só o 39, e a Pokédex respondeu "39". Não
+             * estava errada; estava falando outra língua. Quem joga fala em
+             * porcentagem, e é isso que a própria tela do app mostra em letra
+             * grande.
+             */
+            const partes = [
+              `IV ${Math.round((iv / 45) * 100)}% (${iv} de 45; atk ${o.ivs.atk}, def ${o.ivs.def}, PS ${o.ivs.hp})`,
+            ];
             if (o.cp !== null) partes.push(`PC ${o.cp}`);
             if (o.level !== null) partes.push(`nível ${o.level}`);
             if (o.shadow) partes.push("sombroso");

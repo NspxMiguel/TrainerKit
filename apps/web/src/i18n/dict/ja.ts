@@ -26,6 +26,7 @@ export const JA: Dict = {
   "action.evolve": "進化させる",
   "action.keep": "キープ",
   "action.transfer": "交換する",
+  "action.discover": "個体値を調べる",
   "home.greeting.night": "こんばんは",
   "home.greeting.morning": "おはよう",
   "home.greeting.afternoon": "こんにちは",

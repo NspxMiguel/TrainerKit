@@ -440,6 +440,13 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
       {salvo && (
         <VerdictCard
           owned={salvo}
+          /*
+           * ⚠️ Isto FALTAVA, e foi o que fez esta tela dizer "Transferir · IV 0
+           * de 45 · confiança 65%" pra um Bulbasaur que a pessoa só marcou como
+           * "eu tenho esse" — enquanto a home, na mesma hora, dizia "Falta o IV
+           * pra eu decidir". Ver a nota longa em `verdict.ts`.
+           */
+          ivDesconhecido={salvo.ivDesconhecido === true}
           name={species.name}
           baseStats={species.baseStats}
           ivs={salvo.ivs}
@@ -498,9 +505,20 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
         </button>
       )}
 
+      {/*
+        ⚠️ `--especie`, e com AR em cima.
+
+        "o ver o iv do meu ta mt colado no negocio de cima. e tbm roxo?"
+
+        Duas coisas na mesma frase, e as duas eram verdade: ele encostava no
+        cartão de veredito (o cartão tem borda na cor do veredito, então "colado"
+        virava uma faixa de duas cores grudadas) e era violeta numa tela inteira
+        pintada com a cor do Pokémon.
+      */}
       <button
         type="button"
-        className="tk-btn tk-btn--primary tk-btn--block"
+        className="tk-btn tk-btn--especie tk-btn--block"
+        style={{ marginTop: 14 }}
         onClick={() => setCalcOpen(true)}
       >
         {/* Vindo da Colecao o IV ja e conhecido: o botao abre o que ja existe,
