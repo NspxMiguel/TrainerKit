@@ -1,0 +1,251 @@
+/*
+ * O redesenho "liquid glass" — a interface do Claude Design, portada.
+ *
+ * ⚠️ ESTE ARQUIVO NAO TEM CAMADA, e e por isso que ele manda.
+ *
+ * O `App.css` inteiro esta em `@layer legado`. Regra do CSS: estilo sem camada
+ * ganha de estilo em camada, sempre, independente de especificidade. Entao aqui
+ * eu escrevo o desenho novo e ele vence o antigo sem eu precisar caçar e apagar
+ * a regra velha correspondente.
+ *
+ * Isso muda a ordem de trabalho, e foi o Miguel que apontou: em vez de remendar
+ * a interface atual peça por peça, a interface DELE vira a base e a nossa vira
+ * o que ainda nao foi portado.
+ *
+ * ── De onde vem cada numero ──────────────────────────────────────────────────
+ *
+ * Do mockup, literalmente. O `TrainerKit Mockup.dc.html` nao tem UMA regra de
+ * classe: sao 322 estilos inline dentro de um template proprietario. Nao ha
+ * folha de estilo pra colar — mas cada receita esta la, exata, e e ela que eu
+ * transcrevo. Onde eu mudei um valor, esta escrito por que.
+ */
+
+/* ─────────────────────────────────────────────── barra de abas ─────────── */
+
+/*
+ * Ela FLUTUA: 26px de cada lado, 24px do rodape, 58px de altura, pilula
+ * completa. E a diferenca entre "barra de navegacao web" (encostada na borda)
+ * e "barra do sistema" (pousada sobre o conteudo).
+ *
+ * ⚠️ SEM `overflow: hidden`. O item ativo TRANSBORDA 4px pra cima e pra baixo,
+ * e e o transbordo que da a impressao de peça de vidro pousada. Cortar mata o
+ * efeito inteiro.
+ */
+.tk-tabbar {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  width: min(calc(100% - 52px), calc(var(--tk-container) - 52px));
+  height: 58px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  background: var(--tk-glass-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 0.5px solid var(--tk-glass-border);
+  box-shadow:
+    0 14px 36px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.14);
+  z-index: 50;
+  transition:
+    opacity 0.22s var(--tk-ease-out),
+    transform 0.28s var(--tk-ease-out);
+}
+
+/* Some quando ha folha de tela cheia: o vidro mostra o que esta ATRAS, e atras
+   passa a ser a folha — viraria uma mancha borrada no canto, sem funcao. */
+.tk-tabbar[data-oculta] {
+  opacity: 0;
+  transform: translateX(-50%) translateY(12px);
+  pointer-events: none;
+}
+
+/*
+ * O item ativo E a bolha. Nao existe elemento viajante.
+ *
+ * Eu ia implementar uma pilula absoluta medida em JS. O desenho resolve melhor:
+ * cada item anima `flex`, `height` e `margin`, e o ativo cresce, estica pra 66px
+ * e ganha vidro proprio. Zero medicao, zero chance de a pilula dessincronizar
+ * do item — eles sao a mesma coisa.
+ */
+.tk-tab {
+  flex: 1;
+  height: 58px;
+  margin: 0;
+  border-radius: 999px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: none;
+  border: 0;
+  color: var(--tk-text);
+  transition:
+    flex 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    height 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    margin 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.28s ease-out,
+    box-shadow 0.28s ease-out,
+    color 0.28s ease-out;
+}
+
+.tk-tab-label {
+  font: 500 10px/1.1 var(--tk-font);
+  letter-spacing: 0;
+}
+
+.tk-tab[aria-current="page"] {
+  flex: 1.25;
+  height: 66px;
+  margin: -4px 0;
+  color: var(--tk-ultra-fg-strong);
+  /*
+   * Quatro `inset`, e nao um. Vidro real nao tem UMA quina iluminada: tem a de
+   * cima pegando a luz mais forte, a de baixo devolvendo menos, e as laterais
+   * de raspao.
+   */
+  background: rgba(16, 18, 26, 0.3);
+  backdrop-filter: blur(8px) saturate(160%);
+  -webkit-backdrop-filter: blur(8px) saturate(160%);
+  box-shadow:
+    inset 0 2.5px 4px -1.5px rgba(255, 255, 255, 0.45),
+    inset 0 -2.5px 4px -1.5px rgba(255, 255, 255, 0.28),
+    inset 3px 0 4px -2px rgba(255, 255, 255, 0.16),
+    inset -3px 0 4px -2px rgba(255, 255, 255, 0.16),
+    0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+.tk-tab[aria-current="page"] .tk-tab-label {
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tk-tab,
+  .tk-tabbar {
+    transition-duration: 0.01ms;
+  }
+}
+
+/* ─────────────────────────────────────────────── botoes e cartoes ──────── */
+
+/*
+ * Primario: pilula de 54px com o gradiente Ultra.
+ *
+ * Receita literal do mockup. As duas sombras fazem o trabalho junto: a de fora
+ * (`0 8px 24px` no violeta) descola o botao do fundo, e o `inset` de 1px no
+ * topo e o fio de luz que da espessura. Sem o inset ele vira um retangulo
+ * colorido; com ele, vira um objeto.
+ *
+ * ⚠️ O violeta e reservado pra ACAO DO APP. Conteudo usa a cor do TIPO do
+ * Pokemon — misturar os dois foi o que fez a interface antiga parecer tres apps.
+ */
+.tk-btn--primary {
+  height: 54px;
+  border-radius: 999px;
+  background: var(--tk-ultra);
+  border: 0;
+  box-shadow:
+    0 8px 24px rgba(110, 75, 255, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  color: #fff;
+  font: 600 17px var(--tk-font);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+}
+
+.tk-btn--primary:active {
+  transform: scale(0.985);
+}
+
+/*
+ * Secundario e cartao: vidro fino sobre o fundo.
+ *
+ * `rgba(255,255,255,.06)` nao e "cinza escuro": e branco quase transparente. A
+ * diferenca aparece quando ha cor por tras — o cartao pega um pouco do
+ * gradiente do tipo, em vez de tapar. E o que faz o conjunto parecer material,
+ * e nao caixas empilhadas.
+ */
+.tk-card,
+.tk-btn--secondary {
+  border-radius: 28px;
+  background: var(--tk-surface-2);
+  border: 1px solid var(--tk-border);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.tk-btn--secondary {
+  height: 54px;
+  border-radius: 999px;
+  color: var(--tk-text);
+  font: 600 17px var(--tk-font);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+}
+
+.tk-btn--secondary:active {
+  transform: scale(0.985);
+}
+
+/*
+ * As classes que a home ja usa: `.tk-cta` (acao principal) e `.tk-act`
+ * (secundarias lado a lado).
+ *
+ * ⚠️ Elas ficaram TRANSPARENTES ao inverter a camada, e o motivo vale registrar:
+ * as regras antigas delas pintavam com `--tk-surf`, que era um cinza OPACO
+ * (#11141b). No redesenho `--tk-surf` virou `rgba(255,255,255,.05)` — branco
+ * quase transparente. A regra continuou valendo e continuou pintando; o que
+ * mudou foi o que ela pinta.
+ *
+ * Ou seja: nao foi a camada que apagou os botoes. Foi a paleta nova chegando
+ * numa regra escrita pra paleta velha — e e exatamente por isso que portar
+ * componente por componente, com a receita do mockup, e o caminho certo.
+ */
+.tk-cta {
+  background: var(--tk-ultra);
+  border: 0;
+  border-radius: 999px;
+  box-shadow:
+    0 8px 24px rgba(110, 75, 255, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+.tk-cta:active {
+  transform: scale(0.985);
+}
+
+/* O tile do icone dentro da acao principal: vidro claro sobre o violeta. */
+.tk-cta-ico {
+  background: rgba(255, 255, 255, 0.18);
+  border: 0;
+  color: #fff;
+}
+
+.tk-cta-t,
+.tk-cta-d {
+  color: #fff;
+}
+
+.tk-cta-d {
+  opacity: 0.82;
+}
+
+.tk-act {
+  background: var(--tk-surface-2);
+  border: 1px solid var(--tk-border);
+  border-radius: 26px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  color: var(--tk-text);
+}
+
+.tk-act:active {
+  transform: scale(0.98);
+}

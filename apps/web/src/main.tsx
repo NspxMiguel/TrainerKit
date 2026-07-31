@@ -6,6 +6,8 @@ import { detectPlatform } from "./storage/install.ts";
 import { registerServiceWorker } from "./storage/updates.ts";
 import "./styles/base.css";
 import "./App.css";
+// Sem camada, e importado por ULTIMO: e o que faz o redesenho vencer o legado.
+import "./styles/design.css";
 
 /**
  * O sistema fica no `<html>`, nao numa prop de componente.
