@@ -10,6 +10,7 @@ import {
   useShowTranslation,
 } from "../i18n/language.ts";
 import { useT, type Key } from "../i18n/t.ts";
+import { IconeAjuste, type SeloAjustes } from "../ui/IconesAjustes.tsx";
 import { Segmented } from "../ui/Segmented.tsx";
 import { SettingsSheet } from "../ui/SettingsSheet.tsx";
 import { FeedbackScreen } from "./FeedbackScreen.tsx";
@@ -87,13 +88,24 @@ function formatBytes(n: number): string {
   return `${gb >= 10 ? Math.round(gb) : gb.toFixed(1)} GB`;
 }
 
-/** Uma linha do indice: assunto a esquerda, valor atual a direita. */
+/**
+ * Uma linha do índice: selo, assunto, valor atual, chevron.
+ *
+ * ⚠️ O SELO veio do handoff (opção 5g) e faltava. "kd ajustes tipo apple? ta la
+ * no claude desing po."
+ *
+ * A estrutura já estava certa — grupos, valor à direita, seta —, mas sem os
+ * selos a tela é uma lista de rótulos cinza. Eles são o que deixa achar uma
+ * linha sem ler: pela posição e pela cor. Ver `IconesAjustes.tsx`.
+ */
 function Linha({
+  selo,
   label,
   value,
   onOpen,
   tone,
 }: {
+  selo: SeloAjustes;
   label: string;
   value?: string | undefined;
   onOpen: () => void;
@@ -101,10 +113,28 @@ function Linha({
 }) {
   return (
     <button type="button" className="tk-row" onClick={onOpen} data-tone={tone}>
+      <IconeAjuste selo={selo} />
       <span className="tk-row-label">{label}</span>
-      <span className="tk-row-value">
-        {value !== undefined && value !== "" ? `${value} ` : ""}›
-      </span>
+      <span className="tk-row-value">{value !== undefined && value !== "" ? value : ""}</span>
+      {/* A seta como SVG, e não o caractere "›": o glifo muda de desenho e de
+          peso conforme a fonte que o sistema resolve, e numa coluna de nove
+          linhas essa variação aparece. O handoff desenha 8×14. */}
+      <svg
+        className="tk-row-seta"
+        width="8"
+        height="14"
+        viewBox="0 0 8 14"
+        aria-hidden="true"
+      >
+        <path
+          d="M1 1l6 6-6 6"
+          stroke="currentColor"
+          strokeWidth="2"
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
     </button>
   );
 }
@@ -172,17 +202,21 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
       {/* Como o app se parece e como ele fala com você. */}
       <section className="tk-card">
         <Linha
+          selo="aparencia"
           label={t("settings.appearance")}
           value={t(THEME_KEYS[theme])}
           onOpen={() => setPainel("look")}
         />
         <Linha
+          selo="uso"
           label={t("settings.usage")}
           value={setup.mode === "consulta" ? t("onb.mode.browse") : t("onb.mode.collection")}
           onOpen={() => setPainel("usage")}
         />
-        <Linha label={t("settings.language")} value={idioma} onOpen={() => setPainel("lang")} />
         <Linha
+          selo="idioma" label={t("settings.language")} value={idioma} onOpen={() => setPainel("lang")} />
+        <Linha
+          selo="imagens"
           label={t("sprites.title")}
           value={fonteDeImagem}
           onOpen={() => setPainel("images")}
@@ -190,6 +224,7 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
         {/* A voz fica junto do resto da aparencia: e como o app se apresenta,
             nao um detalhe da Pokedex. */}
         <Linha
+          selo="voz"
           label={t("voice.title")}
           value={voiceOn() ? (chosenVoiceName(language) ?? t("settings.yes")) : t("ai.off")}
           onOpen={() => setPainel("voice")}
@@ -199,11 +234,13 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
       {/* De onde vem o que o app mostra, e quem paga a IA. */}
       <section className="tk-card" style={{ marginTop: 14 }}>
         <Linha
+          selo="dados"
           label={t("settings.gameData")}
           value={datasetLabel ?? undefined}
           onOpen={() => setPainel("data")}
         />
         <Linha
+          selo="ia"
           label={t("ai.title")}
           /* Os quatro casos, nomeados. Antes o `shared` caia no `else` e o
              indice anunciava "Groq" pra quem estava na chave compartilhada. */
@@ -223,21 +260,27 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
       {/* Manutencao: onde os dados moram e como o app se atualiza. */}
       <section className="tk-card" style={{ marginTop: 14 }}>
         <Linha
+          selo="armazenamento"
           label={t("settings.storage")}
           value={protegido}
           onOpen={() => setPainel("storage")}
         />
         <Linha
+          selo="atualizacoes"
           label={t("settings.updates")}
           value={t("settings.version", { version: "0.1.0" })}
           onOpen={() => setPainel("updates")}
         />
-        <Linha label={t("settings.about")} onOpen={() => setPainel("about")} />
+        <Linha
+          selo="sobre" label={t("settings.about")} onOpen={() => setPainel("about")} />
         {/* Privacidade e Feedback ficam junto do Sobre: sao as tres coisas que
             falam do projeto em si, nao do que ele calcula. */}
-        <Linha label={t("privacy.title")} onOpen={() => setPainel("privacy")} />
-        <Linha label={t("feedback.title")} onOpen={() => setPainel("feedback")} />
-        <Linha label={t("help.title")} onOpen={() => setPainel("help")} />
+        <Linha
+          selo="privacidade" label={t("privacy.title")} onOpen={() => setPainel("privacy")} />
+        <Linha
+          selo="feedback" label={t("feedback.title")} onOpen={() => setPainel("feedback")} />
+        <Linha
+          selo="apoiar" label={t("help.title")} onOpen={() => setPainel("help")} />
       </section>
 
       {/*
@@ -248,7 +291,8 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
         fica achavel de propósito e impossivel de confundir com o resto.
       */}
       <section className="tk-card" style={{ marginTop: 14 }}>
-        <Linha label={t("wipe.open")} onOpen={() => setWipeOpen(true)} tone="danger" />
+        <Linha
+          selo="armazenamento" label={t("wipe.open")} onOpen={() => setWipeOpen(true)} tone="danger" />
       </section>
 
       {painel === "look" && (
