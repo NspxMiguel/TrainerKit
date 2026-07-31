@@ -236,9 +236,25 @@ function contraste(a: string, b: string): number {
   return la > lb ? (la + 0.05) / (lb + 0.05) : (lb + 0.05) / (la + 0.05);
 }
 
-/** Os dois fundos do app. A conta de contraste é sempre contra um deles. */
+/**
+ * Os dois fundos do app. A conta de contraste é sempre contra um deles.
+ *
+ * ⚠️ O claro é `#f1f3f8`, e NÃO branco puro. A diferença parece irrelevante e
+ * não é: o app quase nunca pinta `#fff` — as superfícies claras são
+ * `--tk-surface-2` (`#f1f3f8`), e a barra de abas fica ainda um pouco mais
+ * escura por causa da mistura com o acento.
+ *
+ * Mirar em branco deixava a conta otimista: `#3b8084` passava 4,5 contra `#fff`
+ * e chegava a **4,11 contra a superfície real** — reprovado. Medi na tela, não
+ * no papel.
+ *
+ * A margem de 4,7 (e não 4,5 cravado) cobre o resto da variação: o veu de cor
+ * da espécie e o vidro da barra escurecem a superfície mais um pouco, e cada
+ * espécie escurece um tanto diferente.
+ */
 const FUNDO_ESCURO = "#0a0c10";
-const FUNDO_CLARO = "#ffffff";
+const FUNDO_CLARO = "#f1f3f8";
+const ALVO = 4.7;
 
 /**
  * Empurra uma cor até ela passar em 4,5:1 contra o fundo dado.
@@ -253,7 +269,7 @@ function ateLegivel(h: number, s: number, l: number, fundo: string): string {
   const claro = fundo === FUNDO_ESCURO;
   let atual = l;
   let cor = paraHex(h, s, atual);
-  for (let i = 0; i < 60 && contraste(cor, fundo) < 4.5; i++) {
+  for (let i = 0; i < 60 && contraste(cor, fundo) < ALVO; i++) {
     atual += claro ? 0.02 : -0.02;
     if (atual > 0.96 || atual < 0.04) break;
     cor = paraHex(h, s, atual);

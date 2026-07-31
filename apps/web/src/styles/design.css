@@ -1556,7 +1556,14 @@
    * e invisivel; coluna esticada nao.
    */
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  justify-items: center;
+  /*
+   * ⚠️ `stretch`, e nao `center`.
+   *
+   * Com `center` a celula encolhia pro tamanho do SELO (43px medidos) e o
+   * rotulo era cortado — "INVESTIR" nao cabe em 43px. Quem tem que mandar na
+   * largura e a coluna; quem centraliza e o conteudo dentro dela.
+   */
+  justify-items: stretch;
   gap: 8px;
   overflow: visible;
 }

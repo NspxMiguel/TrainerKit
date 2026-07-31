@@ -23,7 +23,8 @@ import { enquadrar, paletaDaEspecie } from "./paleta.ts";
  */
 
 const FUNDO_ESCURO = "#0a0c10";
-const FUNDO_CLARO = "#ffffff";
+// A superficie clara REAL do app, e nao branco puro — ver a nota em `paleta.ts`.
+const FUNDO_CLARO = "#f1f3f8";
 
 function luminancia(hexa: string): number {
   const n = parseInt(hexa.slice(1), 16);
