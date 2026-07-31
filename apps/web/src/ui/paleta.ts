@@ -196,6 +196,24 @@ export interface Paleta {
    * pronta, e não há como intercalar porcentagens entre itens de uma lista.
    */
   gradiente: string;
+  /**
+   * As mesmas três paradas, mas CLARAS — o hero do tema claro.
+   *
+   * ⚠️ "faz o degrade ser branco no modo claro ne...."
+   *
+   * O hero era escuro nos dois temas, por uma decisão minha que estava escrita
+   * no CSS com todas as letras ("como capa de álbum em app de música, que
+   * também não clareia junto com o tema"). O argumento não é errado em geral —
+   * é errado AQUI: o hero deste app ocupa metade da tela inicial, e um painel
+   * quase preto no meio de uma tela branca não lê como capa, lê como um buraco.
+   *
+   * Então a espécie continua mandando na cor, e o TEMA manda na claridade.
+   */
+  gradienteClaro: string;
+  /** A cor do topo da tela no tema claro. Pálida, pra saudação escura passar. */
+  topoClaro: string;
+  /** A tinta que se lê sobre `topoClaro`. */
+  topoClaroTinta: string;
 }
 
 // ---------------------------------------------------------------- conversão
@@ -295,6 +313,32 @@ const ALVO = 4.7;
  */
 const TETO_LUZ_HERO = 0.3;
 
+/**
+ * O PISO de luminância das paradas do gradiente CLARO.
+ *
+ * A conta é a inversa da do teto escuro. O nome do Pokémon no tema claro é
+ * quase-preto (`#141920`, luminância 0,0104), e para texto grande o mínimo é
+ * 3:1 — ou seja, `(L + 0,05) / 0,0604 >= 3`, logo `L >= 0,131`.
+ *
+ * 0,42 fica muito acima disso de propósito: o pedido foi "branco no modo
+ * claro", e um piso apertado devolveria um tom médio, que é justamente o que
+ * ele não quer ver. Com 0,42 as paradas ficam pálidas e o `paleta.test.ts`
+ * varre as 1.142 pra provar que a folga existe em todas.
+ */
+const PISO_LUZ_HERO_CLARO = 0.42;
+
+/** Sobe a claridade até a cor alcançar o piso de luminância, preservando a matiz. */
+function clarearAte(h: number, s: number, l: number, piso: number): string {
+  let atual = l;
+  let cor = paraHex(h, s, atual);
+  for (let i = 0; i < 60 && luminancia(cor) < piso; i++) {
+    atual += 0.015;
+    if (atual > 0.97) break;
+    cor = paraHex(h, s, atual);
+  }
+  return cor;
+}
+
 /** Baixa a claridade até a cor caber no teto de luminância, preservando a matiz. */
 function escurecerAte(h: number, s: number, l: number, teto: number): string {
   let atual = l;
@@ -338,6 +382,9 @@ const vazia: Paleta = {
   legivelClaro: "#4b5364",
   segunda: "#6b7280",
   gradiente: "#171a20 0%, #3a404b 48%, #5c6472 72%",
+  gradienteClaro: "#f4f5f8 0%, #e2e5ea 48%, #d4d8e0 72%",
+  topoClaro: "#f4f5f8",
+  topoClaroTinta: "#141920",
 };
 
 export function paletaDaEspecie(spriteId: number | null): Paleta {
@@ -380,6 +427,15 @@ export function paletaDaEspecie(spriteId: number | null): Paleta {
    * cor, que é pior nos dois quesitos.
    */
   const topoCor = paraHex(h, Math.min(0.95, sv + 0.06), 0.22);
+  /*
+   * O topo do tema CLARO: quase branco, com um sopro da espécie.
+   *
+   * A saudação fica em cima dele, em quase-preto, e precisa de 4,5:1 — o que
+   * pede luminância ≥ 0,222. 0,94 de claridade com um terço da saturação dá
+   * folga larga em todas as 1.142, inclusive nas espécies mais escuras, e
+   * mantém a tela parecendo branca, que foi o pedido.
+   */
+  const topoClaroCor = clarearAte(h, sv * 0.34, 0.94, 0.62);
   let base = paraHex(h, sv, Math.min(0.62, Math.max(0.38, l)));
   const tinta = contraste(base, "#0a0c10") >= contraste(base, "#ffffff") ? "#0a0c10" : "#ffffff";
   {
@@ -441,6 +497,28 @@ export function paletaDaEspecie(spriteId: number | null): Paleta {
       `${escurecerAte(h, sv, 0.45, TETO_LUZ_HERO)} 48%`,
       `${escurecerAte(h, Math.max(0.4, sv - 0.04), 0.56, TETO_LUZ_HERO)} 72%`,
     ].join(", "),
+    /*
+     * O MESMO desenho, espelhado pro tema claro.
+     *
+     * ⚠️ A saturação cai pela metade, e isso não é gosto: a mesma matiz com a
+     * mesma saturação, só que clara, vira um pastel forte — e o hero ocupa
+     * metade da tela inicial. Pálido é o que faz ele ler como "a tela é branca,
+     * com a cor do bicho" em vez de "um cartaz colorido".
+     *
+     * A ordem das paradas se mantém: mais claro em cima, cor crescendo pra
+     * baixo. É a forma do handoff, e continua sendo a que faz a luz nascer
+     * atrás da cabeça do Pokémon.
+     */
+    gradienteClaro: [
+      `${topoClaroCor} 0%`,
+      `${clarearAte(h, sv * 0.5, 0.9, PISO_LUZ_HERO_CLARO)} 48%`,
+      `${clarearAte(h, Math.min(0.9, sv * 0.62), 0.82, PISO_LUZ_HERO_CLARO)} 72%`,
+    ].join(", "),
+    topoClaro: topoClaroCor,
+    topoClaroTinta:
+      contraste(topoClaroCor, "#141920") >= contraste(topoClaroCor, "#ffffff")
+        ? "#141920"
+        : "#ffffff",
   };
 }
 
@@ -503,6 +581,15 @@ const VARIAVEIS = [
   "--tk-accent-fg-escuro",
   "--tk-accent-fg-claro",
   "--tk-accent-grad",
+  /*
+   * As versões CLARAS. Escritas SEMPRE, junto das escuras, e é o CSS que decide
+   * qual vale — pelo mesmo motivo de `--tk-accent-fg-escuro`/`-claro`: só o JS
+   * sabe fazer a conta de contraste, só o CSS sabe qual tema está valendo, e
+   * assim não há ouvinte de `prefers-color-scheme` em JS pra dessincronizar.
+   */
+  "--tk-accent-grad-claro",
+  "--tk-accent-topo-claro",
+  "--tk-accent-topo-claro-ink",
 ] as const;
 
 /**
@@ -549,6 +636,9 @@ function aplicarTopo() {
     "--tk-accent-fg-escuro": topo.legivelEscuro,
     "--tk-accent-fg-claro": topo.legivelClaro,
     "--tk-accent-grad": topo.gradiente,
+    "--tk-accent-grad-claro": topo.gradienteClaro,
+    "--tk-accent-topo-claro": topo.topoClaro,
+    "--tk-accent-topo-claro-ink": topo.topoClaroTinta,
   };
   for (const k of VARIAVEIS) raiz.style.setProperty(k, valores[k]);
 }
