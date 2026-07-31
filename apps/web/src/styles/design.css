@@ -2600,3 +2600,88 @@
   justify-content: center;
   gap: 8px;
 }
+
+/*
+ * As ações da linha de coleção viram ÍCONE — e o alvo de toque não encolhe.
+ *
+ * Escritas por extenso, "Renomear" e "Apagar" comiam a largura da linha: em
+ * português "4 Pokémon · em uso" já truncava, e em alemão ("Umbenennen") e
+ * russo ("Переименовать") o próprio nome da coleção ia junto. Achado varrendo
+ * os dez idiomas e medindo truncamento, não olhando.
+ */
+.tk-row-acao--icone {
+  /* 44 de largura, e nao 40: o `min-height: 44px` da regra base ja garante a
+     altura, e igualar a largura fecha o alvo quadrado sem pseudo-elemento. */
+  width: 44px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+
+/*
+ * O passo de "quantos ginásios" tinha alvo de 22px — metade do mínimo.
+ *
+ * Mesma solução do resto do arquivo: a área de toque cresce sem a área pintada
+ * crescer. Um `−` de 44px num controle de contagem ficaria desproporcional ao
+ * número que ele altera.
+ */
+.tk-step-btn {
+  position: relative;
+}
+
+.tk-step-btn::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+}
+
+/*
+ * A fila de sugestões da caixa de perguntas para ANTES do botão flutuante.
+ *
+ * A fila sangra até a borda direita da tela e o "+" mora exatamente ali: um
+ * chip ficava metade embaixo dele. Ela rola de lado, então o chip continuava
+ * alcançável — mas "alcançável arrastando" não é o mesmo que visível, e o "+"
+ * come justamente o toque de quem tentar.
+ *
+ * ⚠️ `margin-right`, e não `padding-right`. O recuo interno só empurra o FIM da
+ * lista; quem determina onde os chips PODEM aparecer é a largura da caixa. Foi a
+ * primeira tentativa, e o varredor continuou acusando — corretamente.
+ *
+ * A fila perde o sangramento à direita nesta tela. Vale a troca: o sangramento
+ * existe pra dizer "continua"; a rolagem e os chips cortados na borda dizem o
+ * mesmo, e agora nenhum deles fica embaixo de um botão.
+ */
+.tk-main:has(.tk-fab) .tk-chips {
+  margin-right: 60px;
+  padding-right: var(--tk-gutter);
+}
+
+/*
+ * ⚠️ `center`, e não `start`. Uma palavra, e ela era a causa de dois defeitos.
+ *
+ * A roda alinha por `scroll-snap`, e o `App.css` alinhava pelo TOPO do item. Só
+ * que o marcador da escolha é a faixa do MEIO (`.tk-wheel-window`, `top: 44px`).
+ * Com `start`, o item que o navegador encaixa vai parar no terço de cima — e
+ * quem aparece sob o marcador é o SEGUINTE.
+ *
+ * As consequências, as duas medidas na tela:
+ *
+ *  1. Visual: com o app em inglês, a roda mostrava "Português" sob o marcador.
+ *
+ *  2. Silenciosa e pior: o JS calcula a escolha com `Math.round(scrollTop /
+ *     44)` e centraliza com `index * 44` — duas contas escritas para
+ *     alinhamento CENTRAL. Com `start`, a posição de encaixe do item `i` é
+ *     `44 + i*44`, então a conta devolvia `i + 1`. Era isso que trocava o
+ *     idioma do app sozinho ao abrir Ajustes › Idioma.
+ *
+ * Com `center`, a posição de encaixe do item `i` passa a ser `i*44` — que é
+ * exatamente o que o componente sempre assumiu. O guarda de "só conta scroll de
+ * gente" continua lá, mas agora ele guarda uma conta que está certa.
+ */
+.tk-wheel-item {
+  scroll-snap-align: center;
+}

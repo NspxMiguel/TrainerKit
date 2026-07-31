@@ -12,6 +12,7 @@ import {
   trocarColecao,
   type Colecao,
 } from "../storage/collection.ts";
+import { IconPencil } from "../ui/Icons.tsx";
 import { useFolha } from "../ui/folha.ts";
 
 /**
@@ -154,15 +155,29 @@ export function Colecoes({ onClose }: { onClose: () => void }) {
                 </button>
               </>
             ) : (
+              /*
+                ⚠️ ICONE, e nao a palavra "Renomear".
+                
+                Duas acoes escritas por extenso comiam a largura da linha: em
+                portugues "4 Pokémon · em uso" ja truncava, e em alemao
+                ("Umbenennen") e russo ("Переименовать") o nome da colecao ia
+                junto. Achado varrendo os dez idiomas, medindo truncamento.
+                
+                O lapis diz a mesma coisa em qualquer idioma e devolve ~90px
+                pra linha. O nome da acao continua existindo — no `aria-label` e
+                no `title`, que e onde ele serve pra quem precisa dele.
+              */
               <button
                 type="button"
-                className="tk-row-acao"
+                className="tk-row-acao tk-row-acao--icone"
+                aria-label={t("colecoes.rename")}
+                title={t("colecoes.rename")}
                 onClick={() => {
                   setNomeEdit(c.nome);
                   setRenomeando(c.id);
                 }}
               >
-                {t("colecoes.rename")}
+                <IconPencil size={17} />
               </button>
             )}
 
@@ -174,9 +189,21 @@ export function Colecoes({ onClose }: { onClose: () => void }) {
               segundo toque é o que separa "quis apagar" de "encostou no botão".
             */}
             {colecoes.length > 1 && renomeando !== c.id && (
+              /*
+                A lixeira vira PALAVRA no segundo toque.
+                
+                Icone basta pra oferecer a acao; nao basta pra confirmar uma
+                acao destrutiva. No estado de confirmacao o botao se expande e
+                diz o que vai acontecer — e ai a largura extra e bem gasta,
+                porque a linha inteira parou pra perguntar.
+              */
               <button
                 type="button"
-                className="tk-row-acao tk-row-acao--perigo"
+                className={`tk-row-acao tk-row-acao--perigo${
+                  confirmando === c.id ? "" : " tk-row-acao--icone"
+                }`}
+                aria-label={t("colecoes.delete")}
+                title={t("colecoes.delete")}
                 onClick={() => {
                   if (confirmando === c.id) {
                     void apagarColecao(c.id).then(recarregar);
@@ -186,7 +213,14 @@ export function Colecoes({ onClose }: { onClose: () => void }) {
                   }
                 }}
               >
-                {confirmando === c.id ? t("colecoes.deleteSure") : t("colecoes.delete")}
+                {confirmando === c.id ? (
+                  t("colecoes.deleteSure")
+                ) : (
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />
+                  </svg>
+                )}
               </button>
             )}
           </div>
