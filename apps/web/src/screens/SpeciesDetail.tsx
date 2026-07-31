@@ -107,7 +107,23 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
    * "continua o trajeto" que ele pediu, sem pular degrau.
    */
   const { items } = useCollection();
-  const salvo = items?.find((x) => x.id === owned?.id) ?? owned;
+  /*
+   * ⚠️ Acha o Pokemon salvo MESMO quando a tela nao recebeu `owned`.
+   *
+   * "ele duplico e tem 2 venusaur agr"
+   *
+   * Abrindo a especie pela Pokedex, `owned` vem indefinido — e ai o app agia
+   * como se voce nao tivesse aquele bicho: a calculadora oferecia "Salvar na
+   * coleção" e criava uma SEGUNDA linha da mesma especie. Duplicar era o
+   * comportamento programado, nao um acidente.
+   *
+   * Procurando por id primeiro (quando veio) e por especie depois, a mesma tela
+   * responde as duas perguntas com o mesmo Pokemon, venha de onde vier.
+   */
+  const salvo =
+    items?.find((x) => x.id === owned?.id) ??
+    owned ??
+    items?.find((x) => x.speciesId === especieAberta.id);
   const species =
     (salvo ? data.species.find((s) => s.id === salvo.speciesId) : undefined) ?? especieAberta;
   /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
@@ -391,13 +407,13 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
         disso chegava aos olhos. E a tese do produto inteiro: "decide, e aceita
         ser conferido".
       */}
-      {owned && (
+      {salvo && (
         <VerdictCard
-          owned={owned}
+          owned={salvo}
           name={species.name}
           baseStats={species.baseStats}
-          ivs={owned.ivs}
-          level={owned.level ?? 20}
+          ivs={salvo.ivs}
+          level={salvo.level ?? 20}
           cpm={data.cpm}
           levelCap={data.version.levelCap}
           evolvesInto={species.evolvesInto}
@@ -406,8 +422,8 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
               ? (species.candyToEvolve[species.evolvesInto[0]] ?? null)
               : null
           }
-          lucky={owned.lucky}
-          shadow={owned.shadow}
+          lucky={salvo.lucky}
+          shadow={salvo.shadow}
         />
       )}
 
@@ -418,7 +434,7 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
       >
         {/* Vindo da Colecao o IV ja e conhecido: o botao abre o que ja existe,
             nao pede pra calcular de novo. */}
-        {owned ? t("species.seeMyIV") : t("species.calcIV")}
+        {salvo ? t("species.seeMyIV") : t("species.calcIV")}
       </button>
 
 
@@ -447,7 +463,7 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
         O caso bloqueado (sombroso, sortudo) tambem aparece, com o motivo — nao
         saber POR QUE a etiqueta nao veio e o que faz parecer que o app esqueceu.
       */}
-      {owned && <BlocoTroca owned={owned} baseStats={species.baseStats} />}
+      {salvo && <BlocoTroca owned={salvo} baseStats={species.baseStats} />}
 
       <div className="tk-overline" style={{ display: "block", marginTop: 26 }}>
         {t("species.baseStats")}
@@ -735,7 +751,7 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
       )}
 
       {calcOpen && (
-        <IVCalculator species={species} data={data} onClose={() => setCalcOpen(false)} owned={owned} />
+        <IVCalculator species={species} data={data} onClose={() => setCalcOpen(false)} owned={salvo} />
       )}
       {raidOpen && (
         <RaidCounters boss={species} data={data} onClose={() => setRaidOpen(false)} />
@@ -757,7 +773,7 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
           titulo={species.name}
           sistema={dexSystem(language)}
           // `owned` aqui e UM Pokemon (o da tela), nao a colecao — vira lista de um.
-          contexto={speciesDossier(species, data, owned ? [owned] : [], language)}
+          contexto={speciesDossier(species, data, salvo ? [salvo] : [], language)}
         />
       )}
     </div>,
