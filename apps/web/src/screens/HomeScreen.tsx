@@ -836,16 +836,19 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
             Sem nada salvo o convite substitui a fila: um espaço vazio com
             moldura nao convida ninguem.
 
-            E agora e um vazio DESENHADO, com saida. Era uma frase solta em
-            cinza; o handoff pede tile, titulo, frase e um botao — e o botao e a
-            parte que importa, porque vazio sem saida informa e abandona.
+            ⚠️ SEM BOTAO, e o handoff pede botao.
+
+            A regra dele ("vazio tem titulo, frase e acao de 42px") supoe um
+            vazio SOZINHO na tela. Na home nao e o caso: a acao principal —
+            "Escanear um print", a mesma coisa — fica 40px acima, em pilula
+            cheia. Repetir dava dois botoes identicos empilhados, que foi o que
+            apareceu na tela dele.
+
+            Duas vezes a mesma acao nao e duas chances, e duvida: a pessoa para
+            pra descobrir se fazem coisas diferentes.
           */}
           {colecao && !meus && (
-            <Vazio
-              titulo={t("home.empty.title")}
-              frase={t("home.empty.body")}
-              acao={{ label: t("home.quickScan"), onClick: () => setScanning(true) }}
-            />
+            <Vazio titulo={t("home.empty.title")} frase={t("home.empty.body")} />
           )}
 
           {/*
