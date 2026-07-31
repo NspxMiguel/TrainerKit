@@ -52,7 +52,22 @@
   border-radius: 999px;
   display: flex;
   align-items: center;
-  padding: 0;
+  /*
+   * ⚠️ 5px de folga lateral, e e isso que conserta o desalinhamento.
+   *
+   * "a bolha do liquid glass, dos botoes ta desalinhada e grande de mais."
+   *
+   * A pilula do item ativo encostava na ponta da barra. As duas tem
+   * `border-radius: 999px`, mas alturas diferentes (54 contra 50), entao o raio
+   * efetivo de cada uma e diferente — 27px contra 25px — e as curvas nao
+   * coincidem. Resultado: a bolha aparecia mordendo a borda da barra na
+   * esquerda, que e exatamente o que se ve na foto.
+   *
+   * Com folga, a bolha vive DENTRO da barra na horizontal e so transborda na
+   * vertical, que e o transbordo que o desenho quer: le como peça pousada, e
+   * nao como peça fora do lugar.
+   */
+  padding: 0 5px;
   background: var(--tk-glass-bg);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
@@ -115,10 +130,14 @@
    * que as outras duas e a barra lia como desequilibrada, nao como selecionada.
    * O transbordo de 3px continua — e ele que da a impressao de peça pousada.
    */
-  flex: 1.12;
-  height: 56px;
-  margin: -3px 0;
-  color: var(--tk-ultra-fg-strong);
+  /* 1.08 e 54px: "grande de mais". O contraste com os inativos continua
+     legivel — o que sumiu foi a impressao de que a barra esta torta. */
+  flex: 1.08;
+  height: 54px;
+  margin: -2px 0;
+  /* A aba ativa acompanha a especie junto com o resto — "a palheta principal do
+     app". `--tk-accent-fg` ja e a versao com contraste garantido no tema. */
+  color: var(--tk-accent-fg);
   /*
    * Quatro `inset`, e nao um. Vidro real nao tem UMA quina iluminada: tem a de
    * cima pegando a luz mais forte, a de baixo devolvendo menos, e as laterais
@@ -224,14 +243,41 @@
  * numa regra escrita pra paleta velha — e e exatamente por isso que portar
  * componente por componente, com a receita do mockup, e o caminho certo.
  */
+/*
+ * ⚠️ A ACAO PRINCIPAL PASSOU A USAR A COR DA ESPECIE.
+ *
+ * "o botao escanear um print nao mudo de cor pq? pq a palheta principal do app
+ * ainda é roxo? era pra ser laranja, a cor predominante do dragonite."
+ *
+ * Eu tinha deixado o violeta Ultra de fora da paleta de propósito, e escrevi o
+ * argumento em tres arquivos: ele seria a marca estavel de "aqui se toca", e
+ * deixa-lo mudar faria a pessoa perder a pista de onde tocar.
+ *
+ * Ele ouviu e decidiu o contrario, e a decisao e dele. Vale registrar que o
+ * argumento tambem tem contra: o botao primario ja e o unico elemento cheio,
+ * grande e em pilula da tela — a forma sozinha ja diz "toque", sem depender da
+ * cor. O violeta continua vivo na aba ativa e nos vereditos de "Evoluir".
+ *
+ * O que NAO muda continua sendo veredito: verde/violeta/ambar/cinza sao
+ * significado, e ele nao pediu pra mexer neles.
+ */
 .tk-cta {
-  background: var(--tk-ultra);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--tk-accent, #6b4bff) 82%, #fff 6%),
+    var(--tk-accent, #5b3df5)
+  );
   border: 0;
   border-radius: 999px;
   box-shadow:
-    0 8px 24px rgba(110, 75, 255, 0.4),
+    0 8px 24px color-mix(in srgb, var(--tk-accent, #6e4bff) 42%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  color: #fff;
+  /* Ver `tinta` em `ui/paleta.ts`: branco fixo dava 1,9:1 sobre o laranja do
+     Dragonite. A tinta e escolhida por luminancia, espécie a espécie. */
+  color: var(--tk-accent-ink, #fff);
+  transition:
+    background 0.5s var(--tk-ease-out),
+    box-shadow 0.5s var(--tk-ease-out);
 }
 
 .tk-cta:active {
@@ -240,14 +286,16 @@
 
 /* O tile do icone dentro da acao principal: vidro claro sobre o violeta. */
 .tk-cta-ico {
-  background: rgba(255, 255, 255, 0.18);
+  /* O tile do icone acompanha a tinta: sobre laranja claro ele precisa escurecer
+     junto, senao vira um quadrado branco lavado dentro do botao. */
+  background: color-mix(in srgb, var(--tk-accent-ink, #fff) 18%, transparent);
   border: 0;
-  color: #fff;
+  color: var(--tk-accent-ink, #fff);
 }
 
 .tk-cta-t,
 .tk-cta-d {
-  color: #fff;
+  color: var(--tk-accent-ink, #fff);
 }
 
 .tk-cta-d {
@@ -366,7 +414,21 @@
    * meio; o fechamento do pe deixou de depender dele.
    */
   background:
-    linear-gradient(180deg, transparent 58%, var(--tk-hero-ink) 97%),
+    /*
+     * A tinta do pe fecha SO os ultimos 12%.
+     *
+     * Comecava em 58% e apagava justamente a parada mais clara do degrade, que
+     * fica em 72% — eu tinha restaurado o brilho do handoff e coberto ele com a
+     * propria correcao. Quem escurece o meio e o `.tk-hero-scrim`, que ja faz a
+     * rampa do handoff; aqui so falta garantir que a ultima faixa nao mostre a
+     * cor da especie por baixo do bloco de decisao.
+     */
+    linear-gradient(180deg, transparent 88%, var(--tk-hero-ink) 100%),
+    /* As paradas 0/48/72% vem DENTRO de `--tk-hero-grad`, escritas pelo
+       `ui/paleta.ts` — sao as do handoff ("Hero de tela cheia:
+       linear-gradient(180deg, p1 0%, p2 48%, p3 72%)"). Com elas o brilho fica
+       no terco final em vez de espalhado, que e o volume que ele reconheceu
+       como melhor. */
     linear-gradient(180deg, var(--tk-hero-grad, var(--tk-tipo-normal)));
   overflow: hidden;
 }
@@ -1248,4 +1310,48 @@
  */
 .tk-overline-hot {
   color: var(--tk-ultra-fg-strong);
+}
+
+/*
+ * A fila da colecao NAO ROLA — cinco colunas iguais, e a quinta e o destino.
+ *
+ * "ao invez de uma faixa com scroll pro lado, coloca tipo, no lugar do 5 um ver
+ * mais."
+ *
+ * Em grade de 5 colunas iguais, os cinco itens dividem a largura e cabem em
+ * qualquer aparelho sem medida fixa. `minmax(0, 1fr)` e o detalhe que faz
+ * funcionar: `1fr` sozinho tem piso de conteudo minimo, e o rotulo "TRANSFERIR"
+ * empurraria a coluna e estouraria a linha em telas estreitas.
+ */
+.tk-strip-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  overflow: visible;
+}
+
+/* Sem largura minima aqui: quem manda na coluna agora e a grade. O rotulo
+   encolhe junto em vez de brigar com ela. */
+.tk-strip-cell {
+  min-width: 0;
+}
+
+.tk-strip-cell .tk-mono,
+.tk-strip-mais-anel {
+  /* O selo acompanha a coluna em vez dos 48px fixos — em tela estreita ele
+     encolhe, em tela larga cresce ate o tamanho do handoff. */
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1;
+  max-width: 56px;
+}
+
+.tk-strip-verdito {
+  /* Cabe na coluna: em portugues "TRANSFERIR" e a palavra mais larga, e em
+     alemao e russo fica pior. Encolher a letra e melhor que cortar a palavra —
+     ela e a versao acessivel da cor do anel. */
+  font-size: clamp(8px, 2.4vw, 9.5px);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

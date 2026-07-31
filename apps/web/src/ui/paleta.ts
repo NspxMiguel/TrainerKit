@@ -50,7 +50,27 @@ export interface Paleta {
   legivelClaro: string;
   /** A segunda cor, usável — é ela que faz o brilho e os detalhes. */
   segunda: string;
-  /** As três paradas do fundo do hero, do topo (clara) à base (escura). */
+  /**
+   * A tinta que se lê EM CIMA de `base`: quase-preto ou branco, o que contrastar.
+   *
+   * ⚠️ Isto passou a ser obrigatório quando o botão primário virou a cor da
+   * espécie. O botão sempre teve texto branco, porque o violeta Ultra é escuro
+   * (`#5b3df5`, luminância 0,10) e branco sobre ele dá 7,6:1. Mas a cor da
+   * espécie pode ser clara: o laranja do Dragonite é `#faa642`, luminância
+   * 0,49, e branco em cima dá **1,9:1** — o botão mais importante do app viraria
+   * ilegível no sol, que é exatamente onde ele é usado.
+   *
+   * Escolher a tinta pela luminância resolve para as 1.142 espécies de uma vez,
+   * em vez de dar certo no Dragonite e quebrar no Pikachu.
+   */
+  tinta: string;
+  /**
+   * As três paradas do fundo do hero, COM POSIÇÃO — `#x 0%, #y 48%, #z 72%`.
+   *
+   * A posição vem junto porque o handoff a especifica, e porque o CSS não
+   * conseguiria inseri-la: a variável entra numa `linear-gradient()` como lista
+   * pronta, e não há como intercalar porcentagens entre itens de uma lista.
+   */
   gradiente: string;
 }
 
@@ -138,10 +158,11 @@ function ateLegivel(h: number, s: number, l: number, fundo: string): string {
 const vazia: Paleta = {
   cruas: [],
   base: "#8e96a6",
+  tinta: "#0a0c10",
   legivelEscuro: "#aab2c0",
   legivelClaro: "#4b5364",
   segunda: "#6b7280",
-  gradiente: "#5c6472, #3a404b, #171a20",
+  gradiente: "#171a20 0%, #3a404b 48%, #5c6472 72%",
 };
 
 export function paletaDaEspecie(spriteId: number | null): Paleta {
@@ -165,10 +186,40 @@ export function paletaDaEspecie(spriteId: number | null): Paleta {
    */
   const sv = Math.min(0.95, s * 1.15);
   const s2v = Math.min(0.95, s2 * 1.15);
+  /*
+   * ⚠️ A COR CHEIA CEDE ATÉ A TINTA PASSAR — e não o contrário.
+   *
+   * Escolher entre preto e branco pelo maior contraste resolve quase tudo, mas
+   * o teste varreu as 1.142 espécies e achou **11** em que nem um nem outro
+   * chega a 4,5:1: tons médios como `#9a713a` (Sandshrew) ficam em 4,47, que é
+   * reprovado por três centésimos.
+   *
+   * Sozinho eu teria dado por resolvido no Dragonite. Meia dúzia de espécies
+   * com o botão principal reprovando em contraste é justamente o tipo de coisa
+   * que só aparece quando alguém abre AQUELE Pokémon — ou seja, nunca em teste
+   * manual, e sempre em uso real.
+   *
+   * A saída é empurrar a claridade da cor cheia na direção contrária à tinta até
+   * passar. Isso muda o tom em alguns por cento e preserva a matiz, que é o que
+   * identifica o bicho; o contrário — trocar a tinta — daria texto cinza sobre
+   * cor, que é pior nos dois quesitos.
+   */
+  let base = paraHex(h, sv, Math.min(0.62, Math.max(0.38, l)));
+  const tinta = contraste(base, "#0a0c10") >= contraste(base, "#ffffff") ? "#0a0c10" : "#ffffff";
+  {
+    const claro = tinta === "#0a0c10"; // tinta escura pede fundo mais claro
+    let lb = Math.min(0.62, Math.max(0.38, l));
+    for (let i = 0; i < 40 && contraste(tinta, base) < 4.5; i++) {
+      lb += claro ? 0.015 : -0.015;
+      if (lb > 0.9 || lb < 0.1) break;
+      base = paraHex(h, sv, lb);
+    }
+  }
 
   return {
     cruas,
-    base: paraHex(h, sv, Math.min(0.62, Math.max(0.38, l))),
+    base,
+    tinta,
     legivelEscuro: ateLegivel(h, sv, Math.min(0.72, Math.max(0.45, l)), FUNDO_ESCURO),
     legivelClaro: ateLegivel(h, sv, Math.min(0.55, Math.max(0.22, l)), FUNDO_CLARO),
     segunda: paraHex(h2, s2v, 0.55),
@@ -184,10 +235,33 @@ export function paletaDaEspecie(spriteId: number | null): Paleta {
      * — que é de onde o texto precisa de contraste, e de quebra é como a luz se
      * comporta de verdade.
      */
+    /*
+     * ⚠️ ESCURO EM CIMA, CLARO EMBAIXO — a forma do handoff, restaurada.
+     *
+     * "nao gostei desse novo degrade, o do claude desing ta melhor ainda."
+     *
+     * Eu tinha INVERTIDO o desenho dele por um motivo que parecia bom: o nome
+     * do Pokémon é branco e fica na base, então clarear pra baixo põe texto
+     * branco onde o fundo é mais claro.
+     *
+     * O erro foi tratar o gradiente como se ele trabalhasse sozinho. No handoff
+     * ele nunca trabalha: vem sempre com o scrim por cima, que escurece de 78%
+     * pra baixo justamente pra devolver o contraste. Invertendo, eu resolvi um
+     * problema que o scrim já resolvia e paguei com a única coisa que o desenho
+     * dele tinha e o meu não — a luz crescendo, que é o que faz o cartão parecer
+     * iluminado em vez de esmaecido.
+     *
+     * As claridades espelham as paradas de tipo do handoff (Fogo:
+     * #7C2D12 → #EA580C → #F97316, ou l 0,28 → 0,48 → 0,52).
+     *
+     * A POSIÇÃO vem junto (`0% / 48% / 72%`) porque o CSS não conseguiria
+     * inseri-la: a variável entra na `linear-gradient()` como lista pronta, e
+     * não há como intercalar porcentagens entre itens de uma lista.
+     */
     gradiente: [
-      paraHex(h, Math.max(0.35, sv - 0.05), 0.58),
-      paraHex(h, sv, 0.34),
-      paraHex(h, Math.min(0.95, sv + 0.08), 0.12),
+      `${paraHex(h, Math.min(0.95, sv + 0.06), 0.22)} 0%`,
+      `${paraHex(h, sv, 0.45)} 48%`,
+      `${paraHex(h, Math.max(0.4, sv - 0.04), 0.56)} 72%`,
     ].join(", "),
   };
 }
@@ -231,6 +305,7 @@ const VARIAVEIS = [
   "--tk-c2",
   "--tk-c3",
   "--tk-accent",
+  "--tk-accent-ink",
   "--tk-accent-2",
   "--tk-accent-fg-escuro",
   "--tk-accent-fg-claro",
@@ -264,6 +339,7 @@ function aplicarTopo() {
     "--tk-c2": topo.cruas[1] ?? topo.cruas[0] ?? topo.base,
     "--tk-c3": topo.cruas[2] ?? topo.cruas[1] ?? topo.cruas[0] ?? topo.base,
     "--tk-accent": topo.base,
+    "--tk-accent-ink": topo.tinta,
     "--tk-accent-2": topo.segunda,
     "--tk-accent-fg-escuro": topo.legivelEscuro,
     "--tk-accent-fg-claro": topo.legivelClaro,

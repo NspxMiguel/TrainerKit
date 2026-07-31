@@ -71,8 +71,21 @@ const TONE: Record<Action, string> = {
  */
 const PEDEM_ACAO: readonly Action[] = ["evoluir", "investir", "transferir"];
 
-/** Quantos sprites cabem na fila antes de ela virar rolagem lateral. */
-const NA_FILA = 12;
+/**
+ * Quantos Pokemon aparecem na fila. O quinto lugar e sempre o "VER MAIS".
+ *
+ * "ao invez de uma faixa com scroll pro lado, coloca tipo, no lugar do 5 um ver
+ * mais."
+ *
+ * Eram 12 com rolagem lateral, e ele esta certo em cortar: rolagem horizontal
+ * numa tela que nao rola na vertical e um gesto que ninguem descobre. O que
+ * estava fora da tela existia so pra quem tentasse arrastar — ou seja, quase
+ * ninguem — e o "+3" no fim so aparecia acima de 12.
+ *
+ * Com quatro e um destino fixo, tudo que a fila mostra esta visivel, e o
+ * caminho pra colecao inteira e um alvo permanente em vez de uma descoberta.
+ */
+const NA_FILA = 4;
 
 function greetingKey(): Key {
   const h = new Date().getHours();
@@ -667,7 +680,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
                   type="button"
                   className="tk-strip-cell tk-strip-cell--mais"
                   onClick={() => onGo("pokedex", { view: "mine" })}
-                  style={{ ["--tk-i" as string]: Math.min(meus.porIv.length, NA_FILA) }}
+                  style={{ ["--tk-i" as string]: NA_FILA }}
                 >
                   <span className="tk-strip-mais-anel" aria-hidden="true">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
