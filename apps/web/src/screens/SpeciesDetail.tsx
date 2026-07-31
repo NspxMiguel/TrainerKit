@@ -710,14 +710,34 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
         </div>
       )}
 
+      {/*
+        ⚠️ TRÊS FRASES, e a do meio é a que impede a unificação de mentir.
+
+        Os contextos passaram a ser agrupados pela RECOMENDAÇÃO — o primeiro
+        colocado — e não pelas cinco linhas. Isso é o que ele pediu ("da pra
+        unificar os q sao ="), e é o que tira o Venusaur de quatro botões.
+
+        Só que dois contextos podem concordar sobre o melhor e discordar sobre a
+        ordem das alternativas. Quando isso acontece, `mesmaLista` vem `false` do
+        core, e a frase muda: continua sendo verdade que o melhor é o mesmo, e
+        fica dito de quem é a ordem que está na tela. Dizer "mesma lista" ali
+        seria trocar botões redundantes por uma afirmação falsa.
+      */}
       <p className="tk-caption" style={{ margin: "0 2px 10px", lineHeight: 1.45 }}>
-        {grupoAtivo.contexts.length > 1
-          ? t("species.sameForAll", {
-              contexts: grupoAtivo.contexts
-                .map((c) => t(CONTEXT_KEYS[c].title as Key))
-                .join(", "),
-            })
-          : t(CONTEXT_KEYS[grupoAtivo.contexts[0]!].detail as Key)}
+        {grupoAtivo.contexts.length === 1
+          ? t(CONTEXT_KEYS[grupoAtivo.contexts[0]!].detail as Key)
+          : grupoAtivo.mesmaLista
+            ? t("species.sameForAll", {
+                contexts: grupoAtivo.contexts
+                  .map((c) => t(CONTEXT_KEYS[c].title as Key))
+                  .join(", "),
+              })
+            : t("species.sameBest", {
+                contexts: grupoAtivo.contexts
+                  .map((c) => t(CONTEXT_KEYS[c].title as Key))
+                  .join(", "),
+                principal: t(CONTEXT_KEYS[grupoAtivo.contexts[0]!].title as Key),
+              })}
       </p>
 
       {/* Chip, nao botao de bloco: o sombroso e um filtro do que esta abaixo,

@@ -344,7 +344,7 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
       )}
 
       {painel === "lang" && (
-        <SettingsSheet title={t("settings.language")} onClose={fechar}>
+        <SettingsSheet title={t("settings.language")} onClose={fechar} cheia>
           {/*
             ⚠️ LISTA INTEIRA, e a tela rola. NÃO uma roda.
 
@@ -411,7 +411,7 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
       )}
 
       {painel === "images" && (
-        <SettingsSheet title={t("sprites.title")} onClose={fechar}>
+        <SettingsSheet title={t("sprites.title")} onClose={fechar} cheia>
           <SpriteSettings species={species} />
         </SettingsSheet>
       )}
@@ -552,13 +552,13 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
       )}
 
       {painel === "privacy" && (
-        <SettingsSheet title={t("privacy.title")} onClose={fechar}>
+        <SettingsSheet title={t("privacy.title")} onClose={fechar} cheia>
           <PrivacyScreen />
         </SettingsSheet>
       )}
 
       {painel === "help" && (
-        <SettingsSheet title={t("help.title")} onClose={fechar}>
+        <SettingsSheet title={t("help.title")} onClose={fechar} cheia>
           {/* O botao leva direto pra tela da chave: instrucao que termina em
               "va procurar nos Ajustes" e instrucao que ninguem segue. */}
           <HelpProject onOpenAi={() => setPainel("ai")} />
@@ -572,7 +572,7 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
       )}
 
       {painel === "about" && (
-        <SettingsSheet title={t("settings.about")} onClose={fechar}>
+        <SettingsSheet title={t("settings.about")} onClose={fechar} cheia>
           <section className="tk-card">
             <p className="tk-caption" style={{ lineHeight: 1.6 }}>
               {t("settings.disclaimer")}

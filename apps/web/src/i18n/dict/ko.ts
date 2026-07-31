@@ -103,6 +103,7 @@ export const KO: Dict = {
   "species.maxCP": "완벽한 개체값일 때 최대 CP",
   "species.bestMoves": "최적의 기술",
   "species.sameForAll": "{contexts}는 추천이 같습니다. 계산 결과가 여기서는 같은 목록이 됩니다.",
+  "species.sameBest": "가장 좋은 조합은 {contexts}에서 같습니다. 그 아래는 순서가 조금 달라지며, 이 목록은 {principal}을 따릅니다.",
   "species.noMoves": "이 종의 기술 데이터가 없습니다.",
   "species.needsElite": "스페셜 테크니컬머신 필요",
   "species.bait": "미끼: {move}",

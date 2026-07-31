@@ -103,6 +103,7 @@ export const IT: Dict = {
   "species.maxCP": "PL massimi con IV perfetti",
   "species.bestMoves": "Mosse migliori",
   "species.sameForAll": "Stessa raccomandazione per {contexts}: i calcoli danno la stessa lista qui.",
+  "species.sameBest": "Il migliore è lo stesso per {contexts}. Sotto di esso l’ordine cambia un po’; questa lista segue {principal}.",
   "species.noMoves": "Nessun dato sulle mosse per questa specie.",
   "species.needsElite": "richiede MT Elite",
   "species.bait": "esca: {move}",

@@ -103,6 +103,7 @@ export const JA: Dict = {
   "species.maxCP": "個体値満タン時の最大CP",
   "species.bestMoves": "最適なわざ",
   "species.sameForAll": "{contexts} は同じ推奨です。計算の結果がここでは同じリストになります。",
+  "species.sameBest": "最良の組み合わせは {contexts} で同じです。その下は順序が少し変わり、この一覧は {principal} に従います。",
   "species.noMoves": "この種のわざデータがありません。",
   "species.needsElite": "すごいわざマシンが必要",
   "species.bait": "おとり：{move}",

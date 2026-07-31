@@ -111,6 +111,7 @@ export const PT_BR: Dict = {
   "species.maxCP": "PC máximo com IV perfeito",
   "species.bestMoves": "Melhores ataques",
   "species.sameForAll": "Mesma recomendação para {contexts} — os cálculos dão a mesma lista aqui.",
+  "species.sameBest": "O melhor é o mesmo em {contexts}. Abaixo dele a ordem muda um pouco; a lista aqui segue {principal}.",
   "species.noMoves": "Sem dados de ataque para esta espécie.",
   "species.needsElite": "exige TM Elite",
   "species.bait": "isca: {move}",

@@ -103,6 +103,7 @@ export const RU: Dict = {
   "species.maxCP": "Максимальный CP при идеальных IV",
   "species.bestMoves": "Лучшие атаки",
   "species.sameForAll": "Одинаковая рекомендация для {contexts} — расчёты дают здесь один и тот же список.",
+  "species.sameBest": "Лучший набор одинаков для {contexts}. Ниже порядок немного отличается — этот список следует {principal}.",
   "species.noMoves": "Нет данных об атаках для этого вида.",
   "species.needsElite": "нужен элитный TM",
   "species.bait": "приманка: {move}",

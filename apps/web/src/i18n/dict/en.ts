@@ -127,6 +127,7 @@ const EN = {
   "species.maxCP": "Max CP with perfect IVs",
   "species.bestMoves": "Best moves",
   "species.sameForAll": "Same recommendation for {contexts} — the calculations land on the same list here.",
+  "species.sameBest": "The best one is the same for {contexts}. Below it the order shifts a little; this list follows {principal}.",
   "species.noMoves": "No move data for this species.",
   "species.needsElite": "needs an Elite TM",
   "species.bait": "bait: {move}",
