@@ -408,26 +408,36 @@ function inferMissingBar(
 
   // Intervalo dobrado: a que falta e a do MEIO.
   const doubled = gap > height * 3.5;
-  const y = doubled
-    ? Math.round((first.rect.y + second.rect.y) / 2)
-    : // Caso contrario ela esta numa ponta. Tento acima primeiro; a de baixo
-      // costuma estar coberta pelo texto de captura.
-      first.rect.y - gap;
 
-  if (y < 0 || y + height >= bmp.height) return null;
+  // Nas pontas sao DUAS posicoes possiveis, e as duas precisam ser tentadas.
+  // Tentar so a de cima torna impossivel deduzir a de baixo, e a de baixo e o
+  // HP: um Pokemon com HP 0 nao tem pixel pintado naquela barra, ela nao e
+  // detectada, e o print inteiro era recusado com "barras-insuficientes".
+  const candidatas: { y: number; index: number }[] = doubled
+    ? [{ y: Math.round((first.rect.y + second.rect.y) / 2), index: 1 }]
+    : [
+        { y: first.rect.y - gap, index: 0 },
+        { y: second.rect.y + gap, index: 2 },
+      ];
 
-  const centerY = y + Math.floor(height / 2);
-  if (!looksLikeTrack(bmp, centerY, left, width)) return null;
+  for (const { y, index } of candidatas) {
+    if (y < 0 || y + height >= bmp.height) continue;
 
-  const measured = measureAt(bmp, centerY, left, width);
-  return {
-    bar: {
-      value: measured.value,
-      perfect: measured.perfect,
-      rect: { x: left, y, width, height },
-    },
-    index: doubled ? 1 : 0,
-  };
+    const centerY = y + Math.floor(height / 2);
+    if (!looksLikeTrack(bmp, centerY, left, width)) continue;
+
+    const measured = measureAt(bmp, centerY, left, width);
+    return {
+      bar: {
+        value: measured.value,
+        perfect: measured.perfect,
+        rect: { x: left, y, width, height },
+      },
+      index,
+    };
+  }
+
+  return null;
 }
 
 /**
