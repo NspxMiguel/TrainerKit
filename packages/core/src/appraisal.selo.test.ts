@@ -60,6 +60,14 @@ import { BADGE_TIERS, badgeFor } from "./appraisal.js";
  *
  * O total vem do leitor de barras (`pnpm --filter @trainerkit/web ler-prints`);
  * as estrelas foram contadas na roseta do mesmo print.
+ *
+ * ⚠️ ESTA TABELA É O GABARITO, NÃO A PROVA. Ela guarda o que o scanner
+ * devolveu no dia da medição e não roda o scanner — se ele regredir amanhã,
+ * este arquivo continua verde sobre números que já não correspondem a nada.
+ *
+ * Quem fecha o circuito é `apps/web/src/scan/barras.png.test.ts`: mesmos
+ * prints, mesmos totais, mas rodando `scanAppraisalBars` de verdade. Os dois
+ * andam juntos — mexeu num, confira o outro.
  */
 const MEDIDOS: ReadonlyArray<{ print: string; total: number; estrelas: number }> = [
   { print: "IMG_2544", total: 23, estrelas: 1 },
