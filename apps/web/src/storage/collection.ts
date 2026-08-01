@@ -334,7 +334,11 @@ export async function restaurar(linhas: readonly OwnedPokemon[]): Promise<void> 
 }
 
 /**
- * "Discordo, fico com ele" — ou desfaz.
+ * "Discordo" — ou desfaz.
+ *
+ * O nome do campo (`meuMotivo`) e este comentário já falaram em "fico com ele";
+ * o texto da tela não fala mais, porque discordar de "Guardar" ou de "Evoluir"
+ * não é ficar com nada. O efeito é sempre o mesmo: o app para de cobrar.
  *
  * `null` devolve o Pokémon à fila normal. Não apaga nada mais: o veredito
  * continua sendo calculado o tempo todo, e é isso que faz o botão ser

@@ -1,6 +1,7 @@
 import { useMemo, useState, type CSSProperties } from "react";
 
 import {
+  ACOES_QUE_COBRAM,
   ACTION_KEYS,
   decide,
   fazGigantamax,
@@ -65,8 +66,17 @@ interface Props {
  * `descobrir` vem PRIMEIRO, e a ordem aqui e a ordem da fila. Enquanto o IV nao
  * for medido, nenhum dos outros vereditos daquele Pokemon vale — e escanear um
  * print custa menos que qualquer uma das outras tres acoes.
+ *
+ * ⚠️ A LISTA E A MESMA DO CORE, so reordenada. Ela era um literal aqui e o
+ * cartao de veredito nao consultava lista nenhuma — foi assim que o botao
+ * "Discordo" acabou aparecendo num "Guardar", oferecendo silenciar uma cobranca
+ * que esta lista ja dizia que nao existe. Duas telas com a mesma regra escrita
+ * em dois lugares divergem; ja divergiram antes, neste mesmo app.
  */
-const PEDEM_ACAO: readonly Action[] = ["descobrir", "evoluir", "investir", "transferir"];
+const PEDEM_ACAO: readonly Action[] = [
+  "descobrir",
+  ...ACOES_QUE_COBRAM.filter((a) => a !== "descobrir"),
+];
 
 /**
  * Quantos Pokemon aparecem na fila. O quinto lugar e sempre o "VER MAIS".

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-import { ACTION_KEYS, decide, type VerdictInput } from "@trainerkit/core";
+import { ACOES_QUE_COBRAM, ACTION_KEYS, decide, type VerdictInput } from "@trainerkit/core";
 
 import { explainVerdict } from "../ai/explain.ts";
 import { useAi } from "../ai/provider.ts";
@@ -303,8 +303,33 @@ export function VerdictCard({ owned, ...props }: Props) {
 
         O veredito continua sendo calculado e continua na tela. O que muda é que
         ele para de COBRAR: sai da fila da home e nunca aparece na faxina.
+
+        ⚠️ O TEXTO É NEUTRO QUANTO AO VEREDITO, e isso não é preferência de
+        estilo — a versão anterior estava errada.
+
+        O botão dizia "Discordo — fico com ele" e a pergunta seguinte, "Por que
+        você fica com ele?". As duas frases foram escritas supondo que o veredito
+        é TRANSFERIR. Num "Guardar" o botão oferecia, como discordância,
+        exatamente o que o app tinha acabado de recomendar: concordar e discordar
+        davam no mesmo. Ele apontou isso na tela — "discordo fico com ele?
+        deveria ser so discordo".
+
+        E não é só o Guardar: discordar de "Evoluir" também não é "fico com ele",
+        é "não vou evoluir". O que este botão faz, em TODOS os casos, é uma coisa
+        só — o app para de cobrar. É disso que o texto tem que falar.
+
+        ⚠️ E NUM "GUARDAR" ELE NEM APARECE, porque ali não havia o que silenciar.
+
+        Investigando o texto eu descobri que o problema era maior: `guardar` não
+        entra na fila da home (`ACOES_QUE_COBRAM`) nem na faxina. Discordar dele
+        gravava um motivo, mudava a tela — e não tinha efeito nenhum sobre nada.
+        Botão que existe e não faz é pior que botão ausente: ele ensina que os
+        outros também podem não fazer.
+
+        A lista mora no core justamente para a home e este cartão não divergirem
+        de novo.
       */}
-      {owned && temRastro && (
+      {owned && temRastro && ACOES_QUE_COBRAM.includes(verdict.action) && (
         meuMotivo ? (
           <div className="tk-meu-motivo">
             <span>

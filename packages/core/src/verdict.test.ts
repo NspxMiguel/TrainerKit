@@ -3,7 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
-import { decide, formatTrace } from "./verdict.js";
+import { ACOES_QUE_COBRAM, decide, formatTrace, type Action } from "./verdict.js";
 import type { BaseStats } from "./types.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -151,5 +151,36 @@ describe("motor de veredito", () => {
     expect(trace).toMatch(/^decide\(machamp\)/);
     expect(trace).toMatch(/veredito/);
     for (const s of v.signals) expect(trace).toContain(s.rule);
+  });
+});
+
+/*
+ * ⚠️ O QUE COBRA, E O QUE NAO COBRA.
+ *
+ * "discordo fico com ele? deveria ser so discordo" — o texto era o sintoma. O
+ * defeito era que o cartao oferecia a saida de "Discordo" num veredito que nao
+ * cobrava nada: `guardar` nao entra na fila da home nem na faxina, entao
+ * discordar dele silenciava uma cobranca inexistente.
+ *
+ * A lista virou uma so, no core. Estes testes existem pra que ela nao volte a
+ * ser dois literais em duas telas.
+ */
+describe("quais vereditos cobram alguma coisa", () => {
+  it("guardar NAO cobra — e por isso nao oferece saida", () => {
+    expect(ACOES_QUE_COBRAM).not.toContain("guardar");
+  });
+
+  it("as outras quatro cobram", () => {
+    for (const a of ["descobrir", "evoluir", "investir", "transferir"] as const) {
+      expect(ACOES_QUE_COBRAM, a).toContain(a);
+    }
+  });
+
+  it("cobre todas as acoes possiveis, sem esquecer nenhuma", () => {
+    const todas: Action[] = ["investir", "evoluir", "guardar", "transferir", "descobrir"];
+    const naoCobram = todas.filter((a) => !ACOES_QUE_COBRAM.includes(a));
+    // Se alguem criar uma acao nova, ela cai aqui e tem que ser classificada de
+    // proposito — em vez de silenciosamente virar "nao cobra".
+    expect(naoCobram).toEqual(["guardar"]);
   });
 });
