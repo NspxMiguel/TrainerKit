@@ -12,7 +12,8 @@
     "test": "vitest run",
     "audit:bundle": "tsx scripts/audit-bundle.ts",
     "ocr:fetch": "tsx scripts/fetch-ocr.ts",
-    "ler-prints": "tsx scripts/ler-prints.ts"
+    "ler-prints": "tsx scripts/ler-prints.ts",
+    "test:prints": "TK_PRINTS_PNG=${TK_PRINTS_PNG:-$HOME/Downloads} vitest run src/scan/barras.png.test.ts"
   },
   "dependencies": {
     "@mlc-ai/web-llm": "^0.2.84",
