@@ -412,10 +412,33 @@ export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
       className="tk-dex"
       data-saindo={saindo || undefined}
       /*
-       * A casca do aparelho. Trocar por "plain" devolve o visual autoral do app
-       * — e o que uma build publicavel usaria, pelo mesmo motivo dos sprites.
+       * ⚠️ "plain", e nao "device" — a casca de aparelho SAIU.
+       *
+       * "troca ent o nome da propria nintendo pra n ter confusao judicial. n
+       * quero ter problema nao man."
+       *
+       * O `data-skin="device"` desenhava a carcaca, a lente redonda com as tres
+       * luzinhas e a grade de alto-falante. Aquilo nao e dado de jogo nem
+       * calculo: e o DESENHO INDUSTRIAL do aparelho, que e obra da Nintendo/TPC
+       * — e o §6 do ToS proibe expressamente espelhar "the layout and design of
+       * any page or App".
+       *
+       * Era a unica coisa do app que dependia de ele nunca publicar. Os sprites
+       * ja nao dependem: a fonte de imagens nasce DESLIGADA (ver
+       * `sprites/settings.ts`), entao o artefato publicado nao leva arte nenhuma
+       * e quem quiser liga no proprio aparelho. Com a casca fora, some a ultima
+       * peca que precisava de uma build separada — e a decisao "publicar ou nao"
+       * volta a ser dele, a qualquer momento, sem refatoracao.
+       *
+       * O que NAO se perde: continua sendo um aparelho de Pokedex em
+       * funcionalidade — visor, contadores de vistos e capturados, navegacao por
+       * numero, leitura em voz alta, camera. O que muda e a casca.
+       *
+       * As 53 regras de `[data-skin="device"]` no `App.css` ficam onde estao,
+       * inertes: e uma palavra pra voltar, se um dia ele decidir que a build e
+       * pessoal de novo.
        */
-      data-skin="device"
+      data-skin="plain"
       role="dialog"
       aria-modal="true"
       aria-label={t("dex.title")}
@@ -683,7 +706,16 @@ export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
           {supportsCamera() && (
             <button
               type="button"
-              className="tk-dexdev-key tk-dexdev-key--block"
+              /*
+               * ⚠️ `--principal`: apontar a câmera é A ação desta tela.
+               *
+               * Com a casca do aparelho fora, as três ações viraram três pílulas
+               * cinzas idênticas e a tela perdeu o centro — nada dizia por onde
+               * começar. "Apontar a câmera" é o que ele descreveu desde o começo
+               * ("VC APONTA PRO POKEMON, MANDA PRINT E ETC"); folhear e anexar
+               * são os caminhos alternativos.
+               */
+              className="tk-dexdev-key tk-dexdev-key--block tk-dexdev-key--principal"
               disabled={lendo || camera.state === "starting"}
               onClick={() => {
                 if (camera.state === "on") void lerAoVivo();

@@ -5065,3 +5065,55 @@ button.tk-chip,
 }
 
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   O MODO POKÉDEX SEM A CASCA — a identidade passa a ser a do app
+   ═══════════════════════════════════════════════════════════════════════════
+
+   Tirar o `data-skin="device"` resolve a questão jurídica e cria uma de desenho:
+   sem a carcaça, o visor virou um retângulo branco e as três ações viraram três
+   pílulas cinzas iguais. A tela funcionava e não dizia nada.
+
+   O que devolve caráter não é imitar o aparelho de novo — é usar o que o app já
+   tem e o aparelho nunca teve: a COR DA ESPÉCIE. Ela pinta o hero, os cartões, a
+   barra e os botões em todas as outras telas; aqui ela estava de fora.
+*/
+.tk-dex[data-skin="plain"] .tk-dexdev-screen {
+  /* O visor pega a cor do bicho na tela, e o acento do app quando não há
+     nenhum — em vez do violeta fixo, que não é de ninguém. */
+  background:
+    radial-gradient(
+      circle at 50% 45%,
+      color-mix(in srgb, var(--tk-dex-type, var(--tk-accent, var(--tk-pri))) 30%, transparent),
+      transparent 72%
+    ),
+    var(--tk-cartao-base, var(--tk-surf));
+  box-shadow: var(--tk-cartao-relevo);
+}
+
+/* As ações passam a ser cartão, como todo bloco tocável do app. */
+.tk-dex[data-skin="plain"] .tk-dexdev-key {
+  background: color-mix(
+    in srgb,
+    var(--tk-accent, transparent) var(--tk-cartao-tinta, 14%),
+    var(--tk-cartao-base, var(--tk-surface-2))
+  );
+  border-color: color-mix(
+    in srgb,
+    var(--tk-accent, transparent) var(--tk-cartao-borda-tinta, 26%),
+    var(--tk-border)
+  );
+}
+
+/* E uma delas é A ação: mesma tinta do "Escanear um print" da home, pelo mesmo
+   motivo — é o botão que a tela existe pra oferecer. */
+.tk-dex[data-skin="plain"] .tk-dexdev-key--principal {
+  background: linear-gradient(180deg, var(--tk-cta-topo), var(--tk-cta-cor));
+  border: 0;
+  box-shadow: var(--tk-cta-sombra);
+  color: var(--tk-cta-ink);
+}
+
+.tk-dex[data-skin="plain"] .tk-dexdev-key--principal:disabled {
+  opacity: 0.5;
+}
