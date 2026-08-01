@@ -1830,7 +1830,16 @@
     transform 0.08s var(--tk-ease);
 }
 
-.tk-owned-act:active {
+/*
+ * ⚠️ O AFUNDAR É SÓ DO BOTÃO — `button.`, e não `.tk-owned-act` sozinho.
+ *
+ * Num "Guardar" este chip vira um `<span>`: ele mostra o veredito e não é
+ * tocável, porque "Guardar" não é uma ação que se cumpre. Sem o seletor
+ * apertado, ele continuava encolhendo ao ser pressionado — uma animação de
+ * toque num elemento que ignora o toque, que é a mesma mentira de affordance
+ * que o "○" ausente acabou de tirar.
+ */
+button.tk-owned-act:active {
   transform: scale(0.93);
 }
 

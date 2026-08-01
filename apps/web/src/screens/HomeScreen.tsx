@@ -705,7 +705,27 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
               onOpen={() => setDetail({ species: hero.species, owned: hero.owned })}
               evolui={hero.verdict?.action === "evoluir" && hero.species.evolvesInto.length > 0}
               feito={hero.feito}
-              {...(hero.ownedId !== undefined && hero.verdict
+              {...(/*
+                 * A checagem de "cobra?" aqui é REDUNDANTE, e de propósito.
+                 *
+                 * Eu vim atrás de um bug e não achei: fui conferir se o botão
+                 * redondo aparecia num "Guardar" — como aconteceu no cartão da
+                 * ficha — e ele não aparece. O destaque só carrega `verdict`
+                 * quando vem de `meus.agir[0]`, e `agir` já filtra por
+                 * `PEDEM_ACAO`. No outro ramo ("o seu melhor") nem `ownedId`
+                 * nem `verdict` são passados. Testado na tela, com o Hoopa
+                 * marcado como feito pra forçar o segundo ramo.
+                 *
+                 * Fica escrito porque hoje o invariante mora a dois saltos
+                 * daqui, num filtro de outra `useMemo`. Quem mexer no `agir`
+                 * amanhã não tem como saber que este botão depende dele — e o
+                 * sintoma seria silencioso: um botão que grava um `doneAction`
+                 * que o `cumpriu()` ignora, ou seja, um toque que não muda
+                 * nada.
+                 */
+              hero.ownedId !== undefined &&
+              hero.verdict &&
+              ACOES_QUE_COBRAM.includes(hero.verdict.action)
                 ? {
                     onToggleFeito: () => {
                       /*
@@ -721,9 +741,10 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
                         analise saia da especie ERRADA, e o app ainda achava que
                         tinha ajudado.
 
-                        Nos outros vereditos o check continua certo: investir e
-                        guardar nao mudam a especie, e transferir tira o bicho
-                        da colecao pelo caminho normal.
+                        Nos outros vereditos o check continua certo: investir
+                        nao muda a especie, e transferir tira o bicho da colecao
+                        pelo caminho normal. ("guardar" nem chega aqui — a
+                        condicao acima ja o barra, porque ele nao cobra nada.)
                       */
                       const evolucao =
                         hero.verdict!.action === "evoluir"
