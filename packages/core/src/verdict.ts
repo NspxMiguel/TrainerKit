@@ -128,6 +128,28 @@ export const ACOES_QUE_COBRAM: readonly Action[] = [
 ];
 
 /**
+ * O veredito de hoje ja foi cumprido?
+ *
+ * Duas condicoes, e as duas ja moraram espalhadas por quatro arquivos:
+ *
+ *  1. A acao marcada tem que ser a MESMA que o veredito indica agora. Subiu de
+ *     nivel e o conselho virou "evoluir"? Volta a cobrar — e outra coisa.
+ *  2. A acao tem que COBRAR alguma coisa. "Guardar" nao se cumpre.
+ *
+ * ⚠️ A segunda condicao tambem CURA dado velho, e essa e a razao de ela viver
+ * aqui e nao na tela. Enquanto o app deixava marcar "Guardar" como feito, ele
+ * gravou `doneAction: "guardar"` em Pokemon reais. Tirar so o botao deixaria
+ * essas linhas exibindo "✓ FEITO" pra sempre, sem nenhum lugar pra desmarcar —
+ * trocar um botao que nao faz nada por um estado do qual nao se sai.
+ *
+ * Ignorando a marca aqui, a linha volta a mostrar "Guardar" sozinha, sem
+ * migracao e sem tocar no banco.
+ */
+export function cumpriu(action: Action, doneAction: string | null | undefined): boolean {
+  return doneAction === action && ACOES_QUE_COBRAM.includes(action);
+}
+
+/**
  * Chave de traducao de cada acao. Nao e o rotulo — o rotulo depende do idioma e
  * mora no dicionario da interface.
  */
