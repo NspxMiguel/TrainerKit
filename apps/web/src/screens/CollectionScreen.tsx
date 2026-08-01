@@ -4,7 +4,9 @@ import {
   ACTION_KEYS,
   avaliarTroca,
   decide,
+  fazGigantamax,
   ivTotalOf,
+  MAX_POWERUP_LEVEL,
   planejarFaxina,
   type EspecieFaxina,
 } from "@trainerkit/core";
@@ -76,6 +78,7 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
           : null,
         lucky: owned.lucky,
         shadow: owned.shadow,
+        gigantamax: fazGigantamax(s.id, dataset.data.dynamax),
       });
 
       return { owned, species: s, verdict };
@@ -122,7 +125,10 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
       })),
       especies: mapa,
       cpm: dataset.status === "ready" ? dataset.data.cpm : [],
-      levelCap: dataset.status === "ready" ? dataset.data.version.levelCap : 55,
+      // Sem dataset o `cpm` vem vazio e nada e calculado; o teto so precisa ser
+      // um numero valido. O do core, e nao um literal, pra este nao virar o
+      // ultimo lugar do app dizendo 55 depois de o teto mudar.
+      levelCap: dataset.status === "ready" ? dataset.data.version.levelCap : MAX_POWERUP_LEVEL,
     }).soltos.length;
   }, [items, ready, species, dataset]);
 

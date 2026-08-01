@@ -37,17 +37,23 @@ import type { BaseStats } from "./types.js";
  *  · O ROTOM Dex conversa e tem personalidade propria. Isso o app ja faz, e pela
  *    bolinha da IA.
  *
- * ⚠️ FALTA A CATEGORIA, e ela e uma DECISAO DELE, nao minha.
+ * ⚠️ A CATEGORIA ENTROU. A decisao era dele, e ele decidiu ("integra as coisas
+ * ai ent"), na mesma linha da build pessoal com sprites oficiais.
  *
- * O genus ("Pokemon Semente", "Pokemon Chama") nao esta no GAME_MASTER — viria
- * da PokeAPI, que ja e fonte declarada do app pras imagens. Sao uma ou duas
- * palavras por especie, mais perto de um nome que de um paragrafo, e e o que
- * falta pra locucao soar como a da serie em vez de um relatorio.
+ * Ela nao passa por este modulo: a categoria e TEXTO, e este arquivo continua
+ * devolvendo so o que o app CALCULOU. Ela e montada onde as frases sao montadas
+ * (`DexMode`), a partir de `categoryNames` do dataset.
  *
- * Mas continua sendo texto de propriedade da TPC, e este arquivo tem um
- * compromisso escrito de nao embarcar texto deles. Quebrar esse compromisso pra
- * ganhar duas palavras e escolha de quem assume o risco — e o risco e dele, nao
- * meu. Ate ele decidir, a locucao segue sem categoria.
+ * Duas coisas valem ficar escritas, porque as duas eram armadilha:
+ *
+ *  · A fonte NAO e a PokeAPI. O `pokemon_species_names.csv` de la parecia o
+ *    caminho obvio — ja e fonte declarada do app — e nao tem portugues nem
+ *    russo. A categoria sairia em ingles no meio de uma frase em portugues,
+ *    justamente pro dono do app. Os textos do proprio jogo tem
+ *    `pokemon_category_0001` nos dez idiomas.
+ *  · O compromisso deste arquivo continua de pe pra build publicavel, e ele e
+ *    um INTERRUPTOR de verdade: `INCLUIR_CATEGORIA` no ETL tira o texto do
+ *    ARQUIVO, nao da tela. Sem o campo, a locucao volta sozinha ao que era.
  */
 
 export interface DexEntryInput {

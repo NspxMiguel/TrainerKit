@@ -8,8 +8,12 @@ import { MAX_LEVEL, MIN_LEVEL } from "./types.js";
  * `PLAYER_LEVEL_SETTINGS.cpMultiplier` do GAME_MASTER entrega. Meios niveis nao
  * estao na tabela e sao derivados por interpolacao — ver `cpmForLevel`.
  *
- * Vem do dataset, nunca digitada a mao: sao ~55 floats de 7 casas em que um
+ * Vem do dataset, nunca digitada a mao: sao ~50 floats de 7 casas em que um
  * digito errado produz um app que mente com confianca.
+ *
+ * ⚠️ A tabela vai ALEM do teto de power-up de proposito — ate o nivel do Melhor
+ * Amigo. Ver `MAX_POWERUP_LEVEL` e `MAX_LEVEL` em `types.ts`: sao numeros
+ * diferentes e confundi-los ja custou 6% de erro no PC maximo.
  */
 export type CpmTable = readonly number[];
 

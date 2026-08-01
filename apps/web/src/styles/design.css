@@ -4211,6 +4211,22 @@
   position: relative;
 }
 
+/*
+ * ⚠️ O recuo de 58px pressupõe um SELO que nem toda lista tem.
+ *
+ * Ele foi medido para a lista de contas, onde cada linha começa com um círculo
+ * de 30px — e ali o fio recuado é o que faz os selos virarem uma coluna. Numa
+ * lista sem selo (a ficha da Batalha Max é a primeira) o mesmo recuo deixa o
+ * fio começando no meio do nada, sem nada acima dele para justificar a folga.
+ *
+ * Não dá pra corrigir no rule geral sem quebrar a lista de contas: o recuo está
+ * certo lá. Então a exceção é explícita, e quem escrever a próxima lista sem
+ * selo tem um nome pra pedir.
+ */
+.tk-card > .tk-row--semselo + .tk-row--semselo::before {
+  left: 12px;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    DENTRO DE UMA FOLHA, O FUNDO NÃO TEM TINTA DA ESPÉCIE
    ═══════════════════════════════════════════════════════════════════════════

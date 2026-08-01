@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import { computeCPAtLevel } from "./cp.js";
 import { rankDefenders } from "./gym.js";
 import { isObtainable } from "./rankings.js";
+import { MAX_LEVEL, MAX_POWERUP_LEVEL } from "./types.js";
 import {
   DOUBLE_RESISTED,
   NEUTRAL,
@@ -50,7 +51,7 @@ interface Dataset {
   typeOrder: string[];
   typeChart: Record<string, number[]>;
   species: Especie[];
-  version: { levelCap: number };
+  version: { levelCap: number; observableLevelCap: number };
 }
 
 const data = JSON.parse(readFileSync(DATASET, "utf8")) as Dataset;
@@ -244,8 +245,11 @@ describe("aguento de ginasio", () => {
 
 describe("integridade do dataset", () => {
   it("o teto de nivel do dataset e o mesmo que as telas anunciam", () => {
-    expect(data.version.levelCap).toBe(55);
-    expect(cpm.length).toBe(55);
+    // O teto de power-up e o do core; a tabela vai um nivel alem por causa do
+    // Melhor Amigo. Ver a nota em `types.ts` — sao dois numeros, nao um.
+    expect(data.version.levelCap).toBe(MAX_POWERUP_LEVEL);
+    expect(cpm.length).toBe(MAX_LEVEL);
+    expect(data.version.observableLevelCap).toBe(MAX_LEVEL);
   });
 
   it("nenhuma especie real fica sem nome, tipo ou stat", () => {

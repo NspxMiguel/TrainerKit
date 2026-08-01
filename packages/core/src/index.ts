@@ -14,6 +14,7 @@ export * from "./message.js";
 export * from "./counters.js";
 export * from "./rankings.js";
 export * from "./dex.js";
+export * from "./dynamax.js";
 export * from "./gym.js";
 export * from "./team.js";
 export * from "./trade.js";

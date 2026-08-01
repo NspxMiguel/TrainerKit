@@ -52,6 +52,30 @@ export const BADGE_TIERS: readonly AppraisalBadge[] = [
   { tier: 4, litStars: 3, pink: true, label: "Perfeito" },
 ];
 
+/**
+ * Total de IV → selo.
+ *
+ * ⚠️ ESTES QUATRO NUMEROS NAO ESTAO NO GAME_MASTER, e agora estao MEDIDOS.
+ *
+ * O jogo publica so o rotulo de busca ("3*,4*"); onde cada tier corta e
+ * client-side. Ate hoje eles eram o que a comunidade repete. Foram conferidos
+ * contra 13 Pokemon reais do dono, com as quatro bordas batendo exatamente —
+ * ver `appraisal.selo.test.ts`, que tem a tabela e o metodo.
+ *
+ * ⚠️ E POR ISSO QUE O APP LE A BARRA, E NUNCA A ESTRELA.
+ *
+ * A medicao achou de graca uma coisa que vale registrar: num dos prints a
+ * roseta mostrava DUAS estrelas para um Pokemon de 42 (que sao tres), e o
+ * apelido escrito pelo dono confirmava os 93%. As estrelas acendem uma a uma, e
+ * um print tirado no meio da animacao pega menos do que o bicho tem.
+ *
+ * O erro so acontece nessa direcao — menos, nunca mais. Um leitor que tentasse
+ * deduzir IV pela estrela subestimaria em silencio; as barras nao tem esse
+ * problema porque `scanAppraisalBars` mede geometria acabada e RECUSA o que nao
+ * bate. Se um dia alguem quiser ler a roseta pra conferir a barra, tem que
+ * tratar divergencia pra menos como "print cedo demais", nao como erro de
+ * leitura.
+ */
 export function badgeFor(total: number): AppraisalBadge {
   if (total >= 45) return BADGE_TIERS[4]!;
   if (total >= 37) return BADGE_TIERS[3]!;

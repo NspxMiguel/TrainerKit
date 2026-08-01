@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import { allLevels, computeCP, computeCPAtLevel, cpmForLevel, effectiveStamina } from "./cp.js";
-import type { BaseStats } from "./types.js";
+import { MAX_LEVEL, MAX_POWERUP_LEVEL, type BaseStats } from "./types.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DATASET = join(HERE, "..", "..", "..", "apps", "web", "public", "dataset", "gamedata.json");
@@ -27,9 +27,46 @@ function speciesById(id: string): { baseStats: BaseStats } {
 const PERFECT = { atk: 15, def: 15, hp: 15 };
 
 describe("tabela de CPM", () => {
-  it("cobre exatamente 55 niveis", () => {
-    expect(cpm).toHaveLength(55);
-    expect(data.version.levelCap).toBe(55);
+  it("cobre do nivel 1 ao teto observavel, e o teto de power-up e 50", () => {
+    expect(data.version.levelCap).toBe(MAX_POWERUP_LEVEL);
+    expect(MAX_POWERUP_LEVEL).toBe(50);
+
+    // A tabela vai um nivel ALEM do que se compra, por causa do Melhor Amigo.
+    expect(cpm).toHaveLength(MAX_LEVEL);
+    expect(MAX_LEVEL).toBe(51);
+  });
+
+  /*
+   * ⚠️ O TESTE QUE TERIA PEGADO O ERRO DE CINCO NIVEIS.
+   *
+   * O ETL fixava o teto em 55 porque o `cpMultiplier` do GAME_MASTER sobe ate
+   * 0.8653. Nenhum teste comparava o PC maximo com o mundo, entao o app anunciou
+   * por meses um Mewtwo de 5009 — 6% acima do que o jogo permite.
+   *
+   * Estes dois numeros sao publicos, estaveis e conferiveis por qualquer pessoa
+   * que jogue: sao o PC de um Mewtwo 15/15/15 no nivel 40 e no nivel 50. Ancorar
+   * neles amarra a formula, a tabela de CPM E o teto de uma vez so.
+   */
+  it("o PC maximo de um Mewtwo perfeito bate com o que o jogo publica", () => {
+    const mewtwo = data.species.find((s) => s.id === "mewtwo");
+    expect(mewtwo, "mewtwo sumiu do dataset").toBeDefined();
+
+    expect(computeCPAtLevel(cpm, mewtwo!.baseStats, PERFECT, 40)).toBe(4178);
+    expect(computeCPAtLevel(cpm, mewtwo!.baseStats, PERFECT, MAX_POWERUP_LEVEL)).toBe(4724);
+  });
+
+  /*
+   * A pista de que 51..55 era invencao, virada em teste.
+   *
+   * Do nivel 41 pra frente o CPM do GAME_MASTER sobe exatamente 0.005 por
+   * nivel — uma reta. A curva real e nao-linear e termina no 40. Se um dia o
+   * teto subir de verdade, isto aqui continua passando (a reta continua); o que
+   * ele protege e a leitura contraria: enquanto o dataset parar em 50, o valor
+   * do teto tem que ser o 0.8403 conhecido, e nao o 0.8653 do fim do padding.
+   */
+  it("o CPM do teto e o 0.8403 conhecido, nao o fim do padding", () => {
+    expect(cpmForLevel(cpm, MAX_POWERUP_LEVEL)).toBeCloseTo(0.8403, 7);
+    expect(cpmForLevel(cpm, MAX_LEVEL)).toBeCloseTo(0.8453, 7);
   });
 
   it("bate com os valores ancora conhecidos do jogo", () => {
@@ -40,7 +77,10 @@ describe("tabela de CPM", () => {
     expect(cpmForLevel(cpm, 30)).toBeCloseTo(0.7317, 6);
     expect(cpmForLevel(cpm, 40)).toBeCloseTo(0.7903, 6);
     expect(cpmForLevel(cpm, 50)).toBeCloseTo(0.8403, 6);
-    expect(cpmForLevel(cpm, 55)).toBeCloseTo(0.8653, 6);
+    // 51 e o Melhor Amigo. Aqui havia uma ancora no nivel 55 com 0.8653 — o
+    // valor existe mesmo no GAME_MASTER, e era exatamente essa existencia que
+    // fazia o teto errado parecer conferido.
+    expect(cpmForLevel(cpm, 51)).toBeCloseTo(0.8453, 6);
   });
 
   it("cresce monotonicamente", () => {

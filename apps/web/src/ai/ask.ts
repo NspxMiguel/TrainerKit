@@ -3,6 +3,7 @@ import {
   MASTER_LEAGUE,
   ULTRA_LEAGUE,
   decide,
+  fazGigantamax,
   ivTotalOf,
   rankOf,
   type CpmTable,
@@ -94,6 +95,7 @@ export function collectionFacts(
         : null,
       lucky: owned.lucky,
       shadow: owned.shadow,
+      gigantamax: fazGigantamax(sp.id, data.dynamax),
     });
 
     const rank = (league: typeof GREAT_LEAGUE) =>

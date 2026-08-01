@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { useT } from "../i18n/t.ts";
 import { useSetup } from "../onboarding/setup.ts";
-import { exportJson, useCollection } from "../storage/collection.ts";
+import { contarPorColecao, exportJson } from "../storage/collection.ts";
 import { wipeEverything } from "../storage/wipe.ts";
 import { IconAlert } from "./Icons.tsx";
 
@@ -28,7 +28,6 @@ import { IconAlert } from "./Icons.tsx";
 export function WipeDialog({ onClose }: { onClose: () => void }) {
   const { t } = useT();
   const setup = useSetup();
-  const { items } = useCollection();
   /*
    * Quem nao guarda colecao nao perde colecao.
    *
@@ -36,8 +35,22 @@ export function WipeDialog({ onClose }: { onClose: () => void }) {
    * nunca salvou um Pokemon. Alem de errado, enfraquece o aviso: uma lista com
    * um item falso ensina a nao ler a lista. Mesma coisa com o botao de backup —
    * baixar um arquivo com zero Pokemon dentro nao e rede de seguranca nenhuma.
+   *
+   * ⚠️ CONTA TODAS AS CONTAS, e nao so a aberta.
+   *
+   * Aqui estava `useCollection()`, que filtra pela coleção ativa. Quem tivesse
+   * a segunda conta aberta e vazia via este diálogo esconder o botão de backup
+   * e omitir "a sua coleção inteira" da lista — e mesmo assim o apagar levava
+   * as duas contas. O aviso mentia exatamente no caso em que ele é a única
+   * proteção que existe.
    */
-  const temColecao = setup.mode === "colecao" && (items?.length ?? 0) > 0;
+  const [guardados, setGuardados] = useState<number | null>(null);
+  useEffect(() => {
+    void contarPorColecao().then((c) =>
+      setGuardados(Object.values(c).reduce((a, n) => a + n, 0)),
+    );
+  }, []);
+  const temColecao = setup.mode === "colecao" && (guardados ?? 0) > 0;
   const [confirmando, setConfirmando] = useState(false);
   const [apagando, setApagando] = useState(false);
   const [exportou, setExportou] = useState(false);

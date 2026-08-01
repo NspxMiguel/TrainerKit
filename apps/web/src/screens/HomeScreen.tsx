@@ -1,6 +1,13 @@
 import { useMemo, useState, type CSSProperties } from "react";
 
-import { ACTION_KEYS, decide, ivTotalOf, type Action, type Verdict } from "@trainerkit/core";
+import {
+  ACTION_KEYS,
+  decide,
+  fazGigantamax,
+  ivTotalOf,
+  type Action,
+  type Verdict,
+} from "@trainerkit/core";
 
 import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
 import { moveLabel, useLanguage } from "../i18n/language.ts";
@@ -414,6 +421,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
           : null,
         lucky: owned.lucky,
         shadow: owned.shadow,
+        gigantamax: fazGigantamax(s.id, data.dynamax),
       });
 
       return [

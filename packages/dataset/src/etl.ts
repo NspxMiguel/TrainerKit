@@ -26,8 +26,60 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const RAW_DIR = join(HERE, "..", "raw");
 const OUT_DIR = join(HERE, "..", "..", "..", "apps", "web", "public", "dataset");
 
-/** O cap atual do jogo. Acima disso o GAME_MASTER so repete o ultimo CPM. */
-const LEVEL_CAP = 55;
+/**
+ * ⚠️ O TETO DE NIVEL NAO E MAIS CHUTADO. Ele vem do GAME_MASTER.
+ *
+ * Aqui havia `const LEVEL_CAP = 55`, com o comentario "o cap atual do jogo".
+ * Estava errado, e o erro tinha 5 niveis de tamanho: o `cpMultiplier` do
+ * `PLAYER_LEVEL_SETTINGS` REALMENTE sobe ate 0.8653 no indice 54, mas aquilo e
+ * a tabela do CLIENTE, nao a permissao pra chegar la.
+ *
+ * Quem manda e `POKEMON_UPGRADE_SETTINGS`:
+ *
+ *   maxNormalUpgradeLevel: 50        — ate onde da pra PAGAR power-up
+ *   defaultCpBoostAdditionalLevel: 1 — o que o Melhor Amigo soma POR CIMA disso
+ *
+ * A pista de que 51..55 era invencao estava na propria tabela: do nivel 41 pra
+ * frente o CPM sobe exatamente 0.005 por nivel, uma reta — e ela continua reta
+ * ate 55 e ai vira plato, repetindo 0.8653 ate o indice 80 (que hoje acompanha
+ * o teto de TREINADOR, que subiu pra 80 em outubro/2025). Extensao linear com
+ * plato no fim e padding, nao mecanica.
+ *
+ * Consequencia do erro: `computeCPAtLevel(..., 55)` inflava o "PC maximo" em
+ * ~6% (CPM 0.8653 contra 0.8403, e o CPM entra ao QUADRADO no PC). Um Mewtwo
+ * perfeito aparecia com ~4425 em vez de ~4178. O app anunciava um teto que o
+ * jogo nao deixa alcancar, e o custo de chegar la saia junto.
+ *
+ * Os dois numeros sao coisas diferentes e o dataset publica os dois:
+ *
+ *   `levelCap`  — o teto que se PAGA. E o teto do "PC maximo" e dos custos.
+ *   `capBuddy`  — o teto que se OBSERVA. E ate onde o solver de nivel procura,
+ *                 porque um Melhor Amigo mostra o PC ja com o bonus aplicado, e
+ *                 um solver que parasse em 50 nao acharia solucao pra ele.
+ */
+interface TetoDeNivel {
+  /** `maxNormalUpgradeLevel` — ate onde da pra pagar power-up. */
+  cap: number;
+  /** `defaultCpBoostAdditionalLevel` — o bonus de Melhor Amigo. */
+  bonusMelhorAmigo: number;
+  /** `cap + bonusMelhorAmigo`. O maior nivel que um Pokemon pode APARENTAR. */
+  capObservavel: number;
+}
+
+function extractTetoDeNivel(templates: Template[]): TetoDeNivel {
+  const t = templates.find((x) => x.templateId === "POKEMON_UPGRADE_SETTINGS");
+  const up = required(t?.data?.pokemonUpgrades, "POKEMON_UPGRADE_SETTINGS.pokemonUpgrades");
+  const cap = required(up.maxNormalUpgradeLevel, "pokemonUpgrades.maxNormalUpgradeLevel") as number;
+  const bonus = (up.defaultCpBoostAdditionalLevel as number | undefined) ?? 0;
+
+  // Sanidade: um teto fora deste intervalo e mudanca grande demais pra passar
+  // calada. Melhor o ETL parar do que gerar um dataset que mente.
+  if (!Number.isFinite(cap) || cap < 40 || cap > 100) {
+    throw new Error(`maxNormalUpgradeLevel implausivel: ${cap}`);
+  }
+
+  return { cap, bonusMelhorAmigo: bonus, capObservavel: cap + bonus };
+}
 
 interface Template {
   templateId: string;
@@ -90,21 +142,29 @@ function formSuffix(pokemonId: string, form: string | undefined): string {
 
 // ------------------------------------------------------------------ extracao
 
-function extractCpm(templates: Template[]): number[] {
+function extractCpm(templates: Template[], teto: TetoDeNivel): number[] {
   const t = templates.find((x) => x.templateId === "PLAYER_LEVEL_SETTINGS");
   const raw = required(t?.data?.playerLevel?.cpMultiplier, "PLAYER_LEVEL_SETTINGS.cpMultiplier");
-  if (!Array.isArray(raw) || raw.length < LEVEL_CAP) {
-    throw new Error(`cpMultiplier tem ${raw?.length} entradas, esperava >= ${LEVEL_CAP}`);
+  if (!Array.isArray(raw) || raw.length < teto.capObservavel) {
+    throw new Error(
+      `cpMultiplier tem ${raw?.length} entradas, esperava >= ${teto.capObservavel}`,
+    );
   }
 
-  // O array vem com padding: acima do cap o mesmo valor se repete. Cortamos no
-  // cap real para nao sugerir que existe nivel 60.
-  const trimmed = (raw as number[]).slice(0, LEVEL_CAP);
-  const last = trimmed[LEVEL_CAP - 1];
-  if (last !== 0.8653) {
+  /*
+   * Corta no teto OBSERVAVEL, nao no de power-up.
+   *
+   * O array vem longo (hoje 80 entradas, acompanhando o teto de treinador) e
+   * com plato no fim. Cortar em 50 pareceria mais "correto", mas quebraria o
+   * solver de nivel: um Melhor Amigo esta em 51 e o `cpmForLevel` levantaria
+   * RangeError justamente no Pokemon mais investido da colecao.
+   */
+  const trimmed = (raw as number[]).slice(0, teto.capObservavel);
+  const noCap = trimmed[teto.cap - 1];
+  if (noCap !== 0.8403) {
     console.warn(
-      `AVISO: CPM do nivel ${LEVEL_CAP} e ${last}, esperava 0.8653. ` +
-        `O cap de nivel pode ter mudado — confira antes de confiar nos custos.`,
+      `AVISO: CPM do nivel ${teto.cap} e ${noCap}, esperava 0.8403. ` +
+        `A curva de CPM mudou — confira antes de confiar nos custos.`,
     );
   }
   return trimmed;
@@ -163,6 +223,14 @@ interface OutSpecies {
    * padrao de Unown, "_normal" redundante). `null` quando a forma e real.
    */
   cosmeticOf: string | null;
+  /**
+   * Grupo de custo dos Max Ataques — o `breadTierGroup` do GAME_MASTER.
+   *
+   * ⚠️ NAO significa "pode Dynamax". Quase toda especie tem um; ele so diz
+   * quanto custaria subir os Max Ataques SE aquele individuo puder. Ver
+   * `extractDynamax`.
+   */
+  maxGrupo: string | null;
   /** Id do sprite no PokeAPI. `null` quando nao ha arte — cai no monograma. */
   spriteId: number | null;
   /**
@@ -388,6 +456,72 @@ async function fetchMoveNames(
 }
 
 /**
+ * A CATEGORIA da Pokedex — "o Pokemon Semente".
+ *
+ * ⚠️ ISTO E UM INTERRUPTOR DE BUILD, e ele e a razao de existir deste bloco.
+ *
+ * `dex.ts` tem um compromisso escrito de nao embarcar texto da Pokemon Company,
+ * e a categoria E texto deles. A decisao de incluir foi do dono desta build, que
+ * a mantem pessoal e nao publicada — a mesma decisao que ja vale pros sprites
+ * oficiais, e registrada no plano ("build pessoal, com sprites").
+ *
+ * Desligar esta constante nao esconde a categoria da tela: remove o texto do
+ * ARQUIVO. O dataset publicavel sai sem ele, e a locucao volta a nao ter
+ * categoria sozinha, porque o app so mostra o que existe no dado. E o mesmo
+ * desenho do `SpriteProvider`, e pelo mesmo motivo: trocar de build pessoal pra
+ * build publicavel tem que ser uma linha, nao uma refatoracao.
+ *
+ * ── De onde vem, e por que NAO da PokeAPI ───────────────────────────────────
+ *
+ * O caminho obvio seria a PokeAPI (`pokemon_species_names.csv`, campo `genus`),
+ * que o ETL ja usa pra sprites. Ele nao serve: aquele CSV **nao tem
+ * portugues** (nao ha linha de idioma 13 nenhuma) e nao tem russo. O app fala
+ * dez idiomas e o dono joga em portugues — a categoria apareceria em ingles no
+ * meio de uma frase em portugues, ou nao apareceria pra ele.
+ *
+ * Os textos do proprio jogo tem `pokemon_category_0001` nos DEZ idiomas, sao a
+ * traducao oficial, e o ETL ja baixa exatamente esses arquivos pros nomes de
+ * golpe. Sai de graca e sai certo.
+ */
+const INCLUIR_CATEGORIA = true;
+
+async function fetchCategories(
+  species: OutSpecies[],
+): Promise<Record<string, Record<string, string>>> {
+  if (!INCLUIR_CATEGORIA) return {};
+
+  // Uma categoria por DEX, nao por forma: Charizard e Charizard Mega X sao o
+  // mesmo "Pokemon Chamas", e o jogo so publica a chave por numero.
+  const dexes = Array.from(new Set(species.map((s) => s.dex))).sort((a, b) => a - b);
+  const out: Record<string, Record<string, string>> = {};
+
+  for (const spec of LANGUAGES) {
+    try {
+      const res = await fetch(urlFor(spec));
+      if (!res.ok) throw new Error(`respondeu ${res.status}`);
+      const map = toMap(await res.json());
+
+      const cats: Record<string, string> = {};
+      for (const dex of dexes) {
+        const valor = map[`pokemon_category_${String(dex).padStart(4, "0")}`];
+        if (valor) cats[String(dex)] = valor;
+      }
+      out[spec.code] = cats;
+      console.log(`  ${spec.code.padEnd(7)} ${Object.keys(cats).length} categorias`);
+    } catch (err) {
+      // Mesmo criterio dos nomes de golpe: sem categoria a locucao continua
+      // correta, so mais curta. Derrubar o dataset por isso seria trocar um
+      // problema pequeno por um grande.
+      console.warn(
+        `  AVISO: categoria ${spec.code} falhou (${err instanceof Error ? err.message : String(err)})`,
+      );
+    }
+  }
+
+  return out;
+}
+
+/**
  * Marca formas cosmeticas.
  *
  * O GAME_MASTER traz ~2.470 entradas para ~1.020 especies porque cada fantasia,
@@ -477,6 +611,7 @@ function extractSpecies(templates: Template[]): OutSpecies[] {
       evolvesInto,
       candyToEvolve,
       cosmeticOf: null,
+      maxGrupo: typeof s.breadTierGroup === "string" ? s.breadTierGroup : null,
       spriteId: null,
       heightDm: null,
       weightHg: null,
@@ -572,6 +707,77 @@ function extractMoves(templates: Template[]): { fast: OutMove[]; charged: OutMov
   return { fast, charged };
 }
 
+/**
+ * Dynamax, Gigantamax e as Batalhas Max.
+ *
+ * ⚠️ NO GAME_MASTER A MECANICA NAO SE CHAMA DYNAMAX. Ela se chama **BREAD**.
+ *
+ * Era esse o motivo de o plano registrar "apareceram nas fontes e nunca foram
+ * investigados": procurar por `DYNAMAX` no GAME_MASTER devolve o golpe do
+ * Eternatus (Dynamax Cannon), um par de luvas de avatar e uma animacao — e mais
+ * nada. Da pra concluir com toda a confianca do mundo que a mecanica nao
+ * existe. Ela existe: sao 209 templates, e todos comecam com `BREAD`.
+ *
+ * (Gigantamax e `SOURDOUGH`, pao fermentado. Alguem no time se divertiu.)
+ *
+ * O que da pra afirmar a partir dos dados, e que e o que este bloco extrai:
+ *
+ *  · A mecanica esta LIGADA — `BREAD_FEATURE_FLAGS.enabled` e
+ *    `battleEnabled`, com nivel minimo de treinador.
+ *  · QUAIS especies fazem Gigantamax — `allowedSourdoughPokemon` e uma lista
+ *    fechada e explicita. E o unico fato per-especie duro da mecanica inteira.
+ *  · QUANTO CUSTA subir os Max Ataques de cada especie — cada uma tem um
+ *    `breadTierGroup`, e cada grupo tem sua tabela de doce/doce XL/particulas.
+ *
+ * ⚠️ E o que NAO da, que importa igual: **nao existe lista de quem pode
+ * Dynamax**. No jogo isso e propriedade do INDIVIDUO (vem de ter sido pego numa
+ * Batalha Max), nao da especie — 2.450 das 2.466 especies tem `breadTierGroup`,
+ * o que so diz "se um dia esta especie aparecer, o custo dela e este". Um app
+ * que transformasse isso em "este Pokemon pode Dynamax" estaria inventando.
+ */
+interface DadosDynamax {
+  ligado: boolean;
+  nivelMinimo: number | null;
+  /** Ids de especie (normalizados) que fazem Gigantamax. Lista fechada. */
+  gigantamax: string[];
+  /** Custo de subir cada Max Ataque, por grupo de custo. */
+  custoPorGrupo: Record<string, unknown>;
+}
+
+function extractDynamax(templates: Template[]): DadosDynamax {
+  const flags = templates.find((t) => t.templateId === "BREAD_FEATURE_FLAGS")?.data
+    ?.breadFeatureFlags;
+  const shared = templates.find((t) => t.templateId === "BREAD_SHARED_SETTINGS")?.data
+    ?.breadSettings;
+
+  const gigantamax = Array.from(
+    new Set<string>(
+      ((shared?.allowedSourdoughPokemon ?? []) as Array<{ pokemonId?: string }>)
+        .map((p) => p.pokemonId)
+        .filter((id): id is string => typeof id === "string")
+        .map(normalizeId),
+    ),
+  ).sort();
+
+  const custoPorGrupo: Record<string, unknown> = {};
+  for (const t of templates) {
+    if (!t.templateId.startsWith("BREAD_MOVE_LEVEL_SETTINGS_")) continue;
+    const s = t.data?.breadMoveLevelSettings;
+    if (!s) continue;
+    // `group` vem como "GROUP_1" numas e como o numero 7 noutras. O sufixo do
+    // templateId e o unico identificador que aparece igual nos dois casos, e e
+    // ele que casa com o `breadTierGroup` da especie.
+    custoPorGrupo[t.templateId.replace("BREAD_MOVE_LEVEL_SETTINGS_", "")] = s;
+  }
+
+  return {
+    ligado: flags?.enabled === true && flags?.battleEnabled === true,
+    nivelMinimo: typeof flags?.minimumPlayerLevel === "number" ? flags.minimumPlayerLevel : null,
+    gigantamax,
+    custoPorGrupo,
+  };
+}
+
 function extractSettings(templates: Template[]): Record<string, unknown> {
   const battle = templates.find((t) => t.templateId === "BATTLE_SETTINGS")?.data?.battleSettings;
   const combat = templates.find((t) => t.templateId === "COMBAT_SETTINGS")?.data?.combatSettings;
@@ -594,11 +800,13 @@ async function main(): Promise<void> {
 
   console.log(`lendo ${templates.length} templates (batchId ${stamp.batchId})`);
 
-  const cpm = extractCpm(templates);
+  const teto = extractTetoDeNivel(templates);
+  const cpm = extractCpm(templates, teto);
   const typeChart = extractTypeChart(templates);
   const species = extractSpecies(templates);
   const { fast, charged } = extractMoves(templates);
   const settings = extractSettings(templates);
+  const dynamax = extractDynamax(templates);
 
   const spritesResolved = await resolveSpriteIds(species);
   // Depois dos sprites de propósito: o CSV e indexado pelo id do PokeAPI, que e
@@ -607,6 +815,7 @@ async function main(): Promise<void> {
 
   console.log("buscando traducoes oficiais:");
   const moveNames = await fetchMoveNames([...fast, ...charged]);
+  const categoryNames = await fetchCategories(species);
 
   /**
    * Rankings pre-calculados.
@@ -678,7 +887,12 @@ async function main(): Promise<void> {
       batchId: stamp.batchId,
       uploadTime: stamp.uploadTime,
       generatedAt: new Date().toISOString(),
-      levelCap: LEVEL_CAP,
+      /** O teto que se PAGA. Base do "PC maximo" e de todo custo. */
+      levelCap: teto.cap,
+      /** O bonus de Melhor Amigo, que nao se compra. Hoje 1. */
+      buddyBonusLevels: teto.bonusMelhorAmigo,
+      /** `levelCap + buddyBonusLevels`. Ate onde o solver de nivel procura. */
+      observableLevelCap: teto.capObservavel,
     },
     cpm,
     typeChart,
@@ -687,7 +901,15 @@ async function main(): Promise<void> {
     chargedMoves: charged,
     /** Nome oficial do golpe por idioma. O `name` em ingles fica no proprio golpe. */
     moveNames,
+    /**
+     * "o Pokemon Semente", por idioma e por numero da Pokedex.
+     *
+     * Vazio quando `INCLUIR_CATEGORIA` esta desligada — ver a nota la. O app
+     * so fala da categoria quando ela existe aqui.
+     */
+    categoryNames,
     settings,
+    dynamax,
     rankings: {
       raidOverall,
       raidByType,
@@ -709,7 +931,8 @@ async function main(): Promise<void> {
       `  tamanhos:  ${sizesResolved} com altura e peso`,
       `  idiomas:   ${Object.keys(moveNames).length}`,
       `  tipos:     ${Object.keys(typeChart).length}`,
-      `  cpm:       ${cpm.length} niveis (cap ${LEVEL_CAP}, ultimo ${cpm[cpm.length - 1]})`,
+      `  cpm:       ${cpm.length} niveis (power-up ate ${teto.cap}, +${teto.bonusMelhorAmigo} de Melhor Amigo, ultimo ${cpm[cpm.length - 1]})`,
+      `  dynamax:   ${dynamax.ligado ? "ligado" : "desligado"}, ${dynamax.gigantamax.length} com Gigantamax, ${Object.keys(dynamax.custoPorGrupo).length} grupos de custo`,
       `  rankings:  ${raidOverall.length} de raide, ${Object.keys(raidByType).length} tipos, 3 ligas`,
       `  saida:     ${(json.length / 1_048_576).toFixed(2)} MB em ${outPath}`,
     ].join("\n"),

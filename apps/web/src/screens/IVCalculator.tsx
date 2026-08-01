@@ -9,6 +9,7 @@ import {
   computeCPAtLevel,
   ivPercentOf,
   ivTotalOf,
+  fazGigantamax,
   levelsMatchingHp,
   rankOf,
   solveLevel,
@@ -18,7 +19,7 @@ import {
 
 import type { LeituraOcr } from "../scan/ocr.ts";
 
-import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
+import { tetoObservavel, type Dataset, type DatasetSpecies } from "../data/useDataset.ts";
 import { useT } from "../i18n/t.ts";
 import { useSetup } from "../onboarding/setup.ts";
 import { IVBar } from "../ui/IVBar.tsx";
@@ -89,17 +90,21 @@ export function IVCalculator({ species, data, onClose, owned }: Props) {
    * de formato que se escreva.
    *
    * A prova sai de graca: com o IV exato vindo das barras, PC e PS
-   * sobredeterminam o nivel. Se nenhum dos 109 niveis produz aquele par, os
-   * numeros nao existem juntos — e ai um deles foi lido errado. Descartar e a
-   * resposta honesta, e os campos continuam la pra digitar.
+   * sobredeterminam o nivel. Se nenhum nivel produz aquele par, os numeros nao
+   * existem juntos — e ai um deles foi lido errado. Descartar e a resposta
+   * honesta, e os campos continuam la pra digitar.
    *
    * Sem PC, o PS sozinho ainda vale: ele tambem tem que corresponder a algum
    * nivel, e ja estreita bastante o intervalo.
+   *
+   * ⚠️ O teto aqui e o OBSERVAVEL, nao o de power-up. Ver `tetoObservavel`:
+   * usar o de power-up recusaria o print de um Melhor Amigo, que e legitimo e
+   * esta um nivel acima do que se pode comprar.
    */
   const aceitarNumeros = (numeros: LeituraOcr) => {
     const base = ivsDoPrint.current;
     if (!base) return;
-    const cap = data.version.levelCap;
+    const cap = tetoObservavel(data.version);
 
     if (numeros.pc !== null && numeros.ps !== null) {
       const possiveis = solveLevel(data.cpm, species.baseStats, base, {
@@ -301,6 +306,7 @@ export function IVCalculator({ species, data, onClose, owned }: Props) {
               ? (species.candyToEvolve[species.evolvesInto[0]] ?? null)
               : null
           }
+          gigantamax={fazGigantamax(species.id, data.dynamax)}
         />
       </div>
 

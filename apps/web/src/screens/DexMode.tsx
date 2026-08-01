@@ -208,8 +208,32 @@ export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
     if (!ficha || !alvo) return [];
 
     const nomeTipo = (tp: string) => t(typeKey(tp) as "type.normal");
+
+    /*
+     * ⚠️ A CATEGORIA ABRE A LOCUÇÃO — é a assinatura do aparelho da série.
+     *
+     * "Bulbasaur, o Pokémon Semente." Qualquer pessoa reconhece essa frase de
+     * ouvido, e sem ela a locução soa como relatório em vez de Pokédex. Era a
+     * única peça que faltava, e ela ficou pendente por meses porque é texto da
+     * Pokémon Company — decisão de quem assume o risco, não minha. Ele decidiu.
+     *
+     * Vem dos textos do PRÓPRIO JOGO, nos dez idiomas (`pokemon_category_0001`),
+     * e não da PokeAPI — o CSV de lá não tem português nem russo. Ver
+     * `fetchCategories` no ETL, inclusive o interruptor que tira o texto do
+     * arquivo numa build publicável.
+     *
+     * Sem categoria no dataset, a linha some e a locução segue como sempre foi.
+     */
+    const categoria = data.categoryNames?.[language]?.[String(alvo.dex)];
+
     const linhas = [
-      t("dex.line.name", { name: ficha.name, dex: ficha.dexNumber }),
+      categoria
+        ? t("dex.line.nameCategory", {
+            name: ficha.name,
+            dex: ficha.dexNumber,
+            category: categoria,
+          })
+        : t("dex.line.name", { name: ficha.name, dex: ficha.dexNumber }),
       t("dex.line.types", { types: ficha.types.map(nomeTipo).join(" / ") }),
       t(`dex.build.${ficha.build}` as Key),
     ];

@@ -19,7 +19,7 @@ const valido = {
   typeChart: { normal: [] },
   typeOrder: Array.from({ length: 18 }, (_, i) => `t${i}`),
   settings: { battle: {} },
-  version: { levelCap: 55 },
+  version: { levelCap: 50 },
 };
 
 describe("validacao do dataset", () => {
