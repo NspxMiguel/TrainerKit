@@ -26,6 +26,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # ⚠️ HISTORICO INTEIRO, e nao o clone raso do padrao.
+          #
+          # A versao do app e `maior.menor.<numero de commits>` — foi o conserto
+          # do "versao a gente ja fez umas 30 kkkk, e ate agr ta na mesma
+          # 0.1.0". Com `fetch-depth: 1` o `git rev-list --count HEAD` devolve
+          # 1: nao falha, nao avisa, devolve um numero plausivel. Todo deploy
+          # publicaria 0.5.1, e o defeito que a versao automatica veio consertar
+          # voltaria identico — so que agora silencioso.
+          #
+          # Este workflow nunca chegou a rodar (Actions desligado na conta), o
+          # que quer dizer que o erro estava esperando o primeiro deploy.
+          fetch-depth: 0
 
       # Sem `version`: o `packageManager` do package.json ja fixa a versao, e
       # declarar nos dois lugares faz a action abortar por ambiguidade.

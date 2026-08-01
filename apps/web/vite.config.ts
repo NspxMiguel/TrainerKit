@@ -45,13 +45,35 @@ function lerVersao(): string {
     readFileSync(fileURLToPath(new URL("../../package.json", import.meta.url)), "utf8"),
   ).version as string;
   const [maior, menor] = base.split(".");
+  const raiz = fileURLToPath(new URL("../..", import.meta.url));
+  const git = (args: string[]): string =>
+    execFileSync("git", args, { cwd: raiz, encoding: "utf8" }).trim();
+
   try {
-    const commits = execFileSync("git", ["rev-list", "--count", "HEAD"], {
-      cwd: fileURLToPath(new URL("../..", import.meta.url)),
-      encoding: "utf8",
-    }).trim();
-    return `${maior}.${menor}.${commits}`;
+    /*
+     * ⚠️ CLONE RASO CONTA 1 COMMIT, e o build sairia 0.5.1 PARA SEMPRE.
+     *
+     * O `actions/checkout` clona com `fetch-depth: 1` por padrão. Nesse clone o
+     * `git rev-list --count HEAD` devolve 1 — não falha, não avisa, devolve um
+     * número plausível. A versão automática que ele pediu ("a cada push uma
+     * nova versao") nasceria congelada no primeiro deploy, e o sintoma seria
+     * justamente o que ela veio consertar: "até agr ta na mesma 0.1.0".
+     *
+     * O workflow ganhou `fetch-depth: 0`. Isto aqui é o cinto: se alguém
+     * construir de um clone raso de novo, o build GRITA em vez de mentir baixo.
+     */
+    if (git(["rev-parse", "--is-shallow-repository"]) === "true") {
+      console.warn(
+        "\n  AVISO: clone RASO — a contagem de commits não vale, e a versão sairia errada.\n" +
+          "  Em CI use `fetch-depth: 0` no actions/checkout; aqui, `git fetch --unshallow`.\n" +
+          `  Caindo na versão base do package.json: ${base}\n`,
+      );
+      return base;
+    }
+    return `${maior}.${menor}.${git(["rev-list", "--count", "HEAD"])}`;
   } catch {
+    // Sem git (tarball baixado, container sem o binário): a versão base já é
+    // verdadeira, só não é específica.
     return base;
   }
 }
