@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 import react from "@vitejs/plugin-react";
@@ -14,18 +15,32 @@ import { VitePWA } from "vite-plugin-pwa";
  */
 const base = process.env.TK_BASE ?? "/";
 
+/** A versao vem do `package.json` da raiz — a unica copia que existe. */
+const versao = JSON.parse(
+  readFileSync(fileURLToPath(new URL("../../package.json", import.meta.url)), "utf8"),
+).version as string;
+
 export default defineConfig({
   base,
   /**
-   * Carimbo de quando este build saiu.
+   * Carimbo de quando este build saiu, e a VERSAO.
    *
-   * Existe pra responder "o app atualizou ou nao?" olhando a tela, em vez de
-   * adivinhar. `0.1.0` sozinho nunca muda e por isso nao respondia nada.
+   * O carimbo existe pra responder "o app atualizou ou nao?" olhando a tela.
+   *
+   * ⚠️ A versao passou a sair daqui pelo mesmo motivo, e por causa de um defeito
+   * que ele apontou: "versao a gente ja fez umas 30 kkkk, e até agr ta na mesma
+   * 0.1.0". Ela estava escrita a mao em TRES lugares (`SettingsScreen` duas
+   * vezes e `FeedbackScreen`) alem dos dois `package.json` — cinco copias, e
+   * subir a versao exigia lembrar das cinco. Ninguem lembra das cinco.
+   *
+   * Agora ha uma fonte: o `package.json` da raiz. A tela e o relato de bug leem
+   * `__TK_VERSAO__`, e subir a versao volta a ser mexer num numero so.
    */
   define: {
     __TK_BUILD__: JSON.stringify(
       new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC",
     ),
+    __TK_VERSAO__: JSON.stringify(versao),
   },
   resolve: {
     alias: {

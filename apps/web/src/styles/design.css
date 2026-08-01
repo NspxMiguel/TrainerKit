@@ -4033,9 +4033,13 @@
 .tk-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  /* Quebra em duas linhas quando o idioma não cabe — ver a nota em
+     `.tk-row-label`. `row-gap` menor que o `column-gap` porque na vertical 12px
+     separariam demais duas partes da MESMA linha. */
+  flex-wrap: wrap;
+  gap: 2px 12px;
   min-height: 52px;
-  padding: 0 16px;
+  padding: 6px 16px;
   width: 100%;
   background: none;
   border: 0;
@@ -4104,26 +4108,59 @@
  * No sistema é assim: o rótulo tem a largura que precisa e o valor corta com
  * reticências. Quem quer o valor inteiro entra na linha.
  */
+/*
+ * ⚠️ A LINHA QUEBRA EM DUAS quando o idioma não cabe numa — e não trunca.
+ *
+ * "testa tudo em todos os idiomas ... toma cuidado com dublagem e etc."
+ *
+ * Medido em 360px, que é a largura de Android mais comum do mundo: a linha de
+ * Ajustes tem ~98px de cromo (selo 30, vãos 24, seta 12, recuo 32), sobrando
+ * ~262 pra rótulo + valor. "Как ты пользуешься" com "Только смотреть" não cabe
+ * em 262px, e nenhuma distribuição de flex faz caber — em alemão, francês,
+ * russo e japonês as duas pontas saíam com reticências ao mesmo tempo.
+ *
+ * Escolher QUEM corta era o enquadramento errado: com os dois cortados, a
+ * pessoa não lê nem o assunto nem o valor. A saída é a que todo app de ajustes
+ * usa em idioma comprido — o valor desce pra segunda linha, alinhado à direita,
+ * e o rótulo passa a poder quebrar em vez de sumir pela borda.
+ *
+ * `flex-wrap` faz isso sozinho e SÓ quando precisa: com `flex-shrink: 0` no
+ * valor, ele não encolhe, então ou cabe na linha ou desce inteiro. Em português
+ * e inglês nada muda — nunca desce.
+ */
 .tk-row-label {
-  flex: 0 1 auto;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
 }
 
 .tk-row-value {
   /*
-   * ⚠️ Base ZERO, e não `auto`.
+   * ⚠️ `0 1 auto` — não cresce, encolhe se precisar, e parte do próprio tamanho.
    *
-   * Com base automática os dois encolhiam em proporção e a linha saía com as
-   * DUAS pontas cortadas — "Como vo…" ao lado de "Montar minha…", que é pior
-   * que qualquer uma delas cortada sozinha.
+   * Já foi `1 1 auto` (os dois cresciam e as DUAS pontas saíam cortadas) e
+   * depois `1 1 0`, que é o que estava aqui. O `1 1 0` conserta o sintoma de um
+   * jeito que cria outro, e ele só aparece em idioma comprido:
    *
-   * Com base zero o valor só ocupa o que sobrou depois do rótulo inteiro, e é
-   * ele quem corta. O assunto é o que identifica a linha; o valor a pessoa vê
-   * entrando nela.
+   * `flex-grow: 1` nos dois faz a sobra ser DIVIDIDA. O rótulo então fica mais
+   * largo do que o texto dele precisa, e o valor recebe metade do que sobrou —
+   * mesmo quando havia espaço de sobra pros dois inteiros. Medido em 360px:
+   * "Nur nachschlagen" cortado por 71px em alemão, "Juste consulter" por 92 em
+   * francês, "Только смотреть" por 99 em russo. Em português e inglês as
+   * palavras são curtas e a divisão nunca chegava a doer.
+   *
+   * Com `grow: 0` no valor, toda a sobra vai pro rótulo e o valor fica com o
+   * tamanho do texto dele. Quando não cabe mesmo, os dois encolhem — e aí o
+   * valor cede mais, porque parte de uma base maior. A intenção do comentário
+   * antigo se mantém: o assunto é o que identifica a linha.
    */
-  flex: 1 1 0;
+  /* `shrink: 0` é o que troca "encolher até truncar" por "descer uma linha".
+     `margin-left: auto` mantém ele colado na direita quando desce sozinho. */
+  flex: 0 0 auto;
+  max-width: 100%;
+  margin-left: auto;
   text-align: right;
 }
 
@@ -4914,10 +4951,14 @@
     border-radius: calc(var(--tk-r-card) - var(--tk-s2));
   }
 
+  /* ⚠️ O ativo NAO cresce na coluna, e a lente tem a mesma altura dele.
+     Crescer 4px numa lista faz o item empurrar os de baixo a cada troca de aba —
+     na barra deitada isso e o movimento que da vida, numa coluna e tremor. E com
+     as duas alturas iguais a lente encaixa exata, sem sobrar borda de um lado. */
   .tk-tab[aria-current="page"],
   [data-platform] .tk-tab[aria-current="page"] {
     flex: none;
-    height: 56px;
+    height: 52px;
     margin: 0;
   }
 
@@ -4933,11 +4974,33 @@
    * `top`. As três variáveis (`--tk-tab-i`, `--tk-tabs`, `--tk-tab-ativo`)
    * continuam sendo as mesmas que o React escreve — o que muda é qual eixo lê.
    */
-  .tk-tab-bolha {
+  /*
+   * ⚠️ E ELA PRECISA DA MESMA ESPECIFICIDADE DAS OUTRAS, senão nem chega a valer.
+   *
+   * "bugado" — com a lente aparecendo como uma barra amarela vertical encostada
+   * na direita da coluna, sem relação nenhuma com o item ativo.
+   *
+   * Este seletor era `.tk-tab-bolha` puro, (0,1,0). A regra da barra assente é
+   * `[data-platform="android"|"desktop"|"ipad"] .tk-tab-bolha`, (0,2,0) — e
+   * especificidade ganha de ordem, então a geometria HORIZONTAL do Material
+   * continuava valendo dentro de uma coluna de 216px: `left` em fração da barra,
+   * `width` em fração da barra, `top`/`bottom` esticando pela altura toda.
+   *
+   * É a terceira colisão do mesmo tipo neste par de blocos. Por isso o `bottom`
+   * e o `height` são REPOSTOS explicitamente aqui, e não deixados por conta do
+   * que vier: a regra que ela substitui declara os dois, e o que não for
+   * desfeito continua valendo.
+   */
+  .tk-tab-bolha,
+  [data-platform] .tk-tab-bolha {
     top: calc(var(--tk-s2) + var(--tk-tab-i, 0) * (52px + 2px));
+    bottom: auto;
     left: var(--tk-s2);
     right: var(--tk-s2);
     width: auto;
+    /* A MESMA altura do item — ver a nota do `[aria-current]` acima. Encaixe
+       exato: nada do item sobra pra fora da lente, e nada da lente sobra pra
+       fora do item. */
     height: 52px;
     border-radius: calc(var(--tk-r-card) - var(--tk-s2));
   }

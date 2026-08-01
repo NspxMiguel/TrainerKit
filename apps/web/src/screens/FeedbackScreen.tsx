@@ -38,7 +38,7 @@ export function FeedbackScreen() {
     "",
     "",
     "---",
-    `${t("feedback.ctx.app")}: TrainerKit 0.1.0`,
+    `${t("feedback.ctx.app")}: TrainerKit ${__TK_VERSAO__}`,
     `${t("feedback.ctx.lang")}: ${navigator.language}`,
     `${t("feedback.ctx.device")}: ${navigator.userAgent}`,
   ].join("\n");
