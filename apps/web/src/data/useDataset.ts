@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { looksLikeDataset, resolvedDatasetUrl, useDataSource } from "./source.ts";
 
-import type { BaseStats, RankedSpecies } from "@trainerkit/core";
+import type { BaseStats, DadosDynamax, RankedSpecies } from "@trainerkit/core";
 
 /** Uma fonte declarada pelo proprio dataset. */
 export interface DatasetSource {
@@ -42,6 +42,12 @@ export interface DatasetSpecies {
   weightHg?: number | null;
   /** Lendario, mitico ou Ultra Beast — a classe que aparece em raide tier 5. */
   legendary?: boolean;
+  /**
+   * Grupo de custo dos Max Ataques (`breadTierGroup`).
+   *
+   * ⚠️ Não é "pode Dynamax" — quase toda espécie tem um. Ver `dynamax.ts`.
+   */
+  maxGrupo?: string | null;
 }
 
 export interface DatasetMove {
@@ -60,7 +66,15 @@ export interface Dataset {
     batchId: string;
     uploadTime: string;
     generatedAt: string;
+    /**
+     * Ate onde da pra PAGAR power-up (`maxNormalUpgradeLevel`). E o teto do
+     * "PC maximo" e de todo custo de poeira e doce.
+     */
     levelCap: number;
+    /** O bonus de Melhor Amigo, que nao se compra. Hoje 1. */
+    buddyBonusLevels?: number;
+    /** `levelCap + buddyBonusLevels`. Ver `tetoObservavel`. */
+    observableLevelCap?: number;
   };
   cpm: number[];
   /**
@@ -77,6 +91,14 @@ export interface Dataset {
   /** Nome oficial do golpe por idioma: `moveNames["pt-BR"]["counter_fast"]`. */
   moveNames?: Record<string, Record<string, string>>;
   /**
+   * A categoria da Pokédex por idioma e número: `categoryNames["pt-BR"]["1"]`
+   * é "Pokémon Semente". Vem dos textos do próprio jogo.
+   *
+   * ⚠️ Ausente numa build publicável — ver `INCLUIR_CATEGORIA` no ETL. Quem lê
+   * tem que tratar a ausência, não assumir que sempre há categoria.
+   */
+  categoryNames?: Record<string, Record<string, string>>;
+  /**
    * Constantes de batalha do proprio GAME_MASTER — STAB, bonus de sombroso,
    * energia maxima. Nunca digitadas a mao: elas mudam com o jogo, e um numero
    * defasado aqui faz o app mentir com confianca.
@@ -90,6 +112,13 @@ export interface Dataset {
     raidByType: Record<string, RankedSpecies[]>;
     statProductByLeague: Record<"great" | "ultra" | "master", RankedSpecies[]>;
   };
+  /**
+   * Dynamax, Gigantamax e Batalhas Max — o bloco `BREAD` do GAME_MASTER.
+   *
+   * Opcional porque só o ETL daqui extrai isso: uma base de terceiro apontada
+   * pelo usuário não vai ter, e aí a ficha simplesmente não fala do assunto.
+   */
+  dynamax?: DadosDynamax;
   settings: {
     battle: {
       sameTypeAttackBonusMultiplier: number;
@@ -154,6 +183,26 @@ export function useDataset(): DatasetState {
   }, [source]);
 
   return state;
+}
+
+/**
+ * O maior nível que um Pokémon pode APARENTAR — e não o maior que se compra.
+ *
+ * ⚠️ Existem dois tetos e confundi-los é o defeito que este acessor evita:
+ *
+ *   `version.levelCap` (50) é até onde dá pra PAGAR power-up. É o número do
+ *   "PC máximo" e de todo custo — ninguém consegue investir além dele.
+ *
+ *   Este aqui (51) é até onde dá pra OBSERVAR. O Melhor Amigo soma um nível na
+ *   hora da batalha e o jogo mostra o PC já com o bônus. Um solver de nível que
+ *   parasse em 50 não acharia solução nenhuma pro Pokémon mais investido da
+ *   coleção — e a tela diria "esses números não existem juntos" pra um print
+ *   perfeitamente correto.
+ *
+ * Base de terceiro pode não declarar o campo; aí assumimos o bônus de hoje.
+ */
+export function tetoObservavel(version: Dataset["version"]): number {
+  return version.observableLevelCap ?? version.levelCap + (version.buddyBonusLevels ?? 1);
 }
 
 /** Data de referencia do dataset, formatada como o protótipo mostra (dd/MM). */

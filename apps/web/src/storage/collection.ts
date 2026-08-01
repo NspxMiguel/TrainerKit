@@ -436,14 +436,35 @@ export function useCollection(): { items: OwnedPokemon[] | null; reload: () => v
  *
  * Nao e recurso de luxo: e a unica coisa que sobrevive a um despejo do
  * navegador. Fica acessivel sempre, nao escondido atras de "avancado".
+ *
+ * ⚠️ SALVA TODAS AS CONTAS, e isto era um bug de perda de dados.
+ *
+ * A versao 1 chamava `listPokemon()`, que filtra pela coleção ATIVA. Quem
+ * tivesse duas contas e baixasse o backup levava para casa metade da coleção —
+ * sem erro, sem aviso, e com um arquivo que parecia completo. O sintoma só
+ * apareceria no dia do desastre, que é o único dia em que já não dá pra
+ * consertar.
+ *
+ * As coleções vão junto com os Pokémon: sem elas, restaurar num aparelho novo
+ * recriaria bichos apontando para contas que não existem, e eles não
+ * apareceriam em lugar nenhum (o filtro de `listPokemon` não casaria com nada).
  */
 export async function exportJson(): Promise<string> {
-  const items = await listPokemon();
-  return JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), items }, null, 2);
+  const [items, colecoes] = await Promise.all([db.pokemon.toArray(), listarColecoes()]);
+  return JSON.stringify(
+    {
+      version: 2,
+      exportedAt: new Date().toISOString(),
+      colecoes,
+      items: items.map((row) => ({ ...row, colecaoId: row.colecaoId ?? COLECAO_PADRAO })),
+    },
+    null,
+    2,
+  );
 }
 
 export async function importJson(text: string): Promise<number> {
-  const parsed = JSON.parse(text) as { items?: unknown };
+  const parsed = JSON.parse(text) as { items?: unknown; colecoes?: unknown };
   if (!Array.isArray(parsed.items)) {
     throw new Error("Arquivo não parece um backup do TrainerKit.");
   }
@@ -453,7 +474,46 @@ export async function importJson(text: string): Promise<number> {
     if (!row.speciesId || !row.ivs) throw new Error("Backup com entrada inválida.");
   }
 
-  await db.pokemon.bulkPut(rows);
+  /*
+   * ⚠️ NENHUM POKÉMON PODE ENTRAR NUMA COLEÇÃO QUE NÃO EXISTE.
+   *
+   * O `colecaoId` é um UUID gerado no aparelho de origem. Restaurar num
+   * aparelho novo — que é justamente para o que serve um backup — gravava
+   * linhas apontando para um id que nunca existiu aqui. Elas ficam no banco,
+   * ocupam espaço, e some do app: `listPokemon` filtra pela coleção ativa e
+   * nenhuma coleção tem aquele id.
+   *
+   * Backup v2 traz as coleções e nós as recriamos. Backup v1 não traz nada
+   * disso, e aí o destino honesto é a coleção que está ABERTA: é onde a pessoa
+   * está olhando e onde ela vai procurar o que acabou de importar.
+   */
+  const doArquivo = Array.isArray(parsed.colecoes) ? (parsed.colecoes as Colecao[]) : [];
+  // `listarColecoes` (e nao `db.colecoes.toArray`) porque ele GARANTE que existe
+  // pelo menos uma: num aparelho zerado a migracao nao roda, e sem esta chamada
+  // o destino dos orfaos seria uma colecao inexistente — o bug de novo.
+  const jaAqui = await listarColecoes();
+  const existentes = new Set(jaAqui.map((c) => c.id));
+
+  const aCriar = doArquivo.filter((c) => c && c.id && !existentes.has(c.id));
+  if (aCriar.length > 0) {
+    await db.colecoes.bulkPut(
+      aCriar.map((c) => ({
+        id: c.id,
+        nome: c.nome?.trim() || "Conta importada",
+        criadaEm: c.criadaEm ?? new Date().toISOString(),
+      })),
+    );
+    for (const c of aCriar) existentes.add(c.id);
+  }
+
+  const ativa = colecaoAtiva();
+  const destinoOrfao = existentes.has(ativa) ? ativa : jaAqui[0]!.id;
+  await db.pokemon.bulkPut(
+    rows.map((row) => ({
+      ...row,
+      colecaoId: row.colecaoId && existentes.has(row.colecaoId) ? row.colecaoId : destinoOrfao,
+    })),
+  );
   emit();
   return rows.length;
 }

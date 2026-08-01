@@ -79,6 +79,14 @@ export interface VerdictInput {
   lucky?: boolean;
   shadow?: boolean;
   /**
+   * A especie faz Gigantamax.
+   *
+   * ⚠️ Da ESPECIE, nao deste individuo — `fazGigantamax` responde por especie
+   * e nao existe dado que responda por individuo. Ausente vira `false`, entao
+   * quem nao passar continua com o comportamento antigo.
+   */
+  gigantamax?: boolean;
+  /**
    * "eu tenho esse", sem IV medido.
    *
    * ⚠️ Os `ivs` vêm zerados porque o tipo exige três números — não porque
@@ -223,6 +231,35 @@ export function decide(input: VerdictInput): Verdict {
       towards: "investir",
       weight: 0.6,
       because: msg("verdict.lucky.cost"),
+    });
+  }
+
+  /*
+   * ------------------------------------------------------------- Gigantamax
+   *
+   * ⚠️ A MECANICA QUE O MOTOR IGNORAVA INTEIRA.
+   *
+   * O plano registrava o risco em uma frase: "se o jogo ja tem, o motor de
+   * veredito esta ignorando uma mecanica inteira". Tem — ver `dynamax.ts`, e o
+   * motivo de ninguem ter achado (no GAME_MASTER a mecanica se chama BREAD).
+   *
+   * Das tres coisas que os dados permitem afirmar, so UMA muda um veredito, e e
+   * esta: a especie faz Gigantamax. As outras duas (custo dos Max Ataques,
+   * papel na Batalha Max) sao informacao pra ficha, nao razao pra guardar ou
+   * soltar um bicho especifico.
+   *
+   * Peso 0.7, e nao mais: Gigantamax e da ESPECIE, nao deste individuo. Nao
+   * transforma um 20% em bom Pokemon — o `iv.fraco` continua com 0.8 e continua
+   * vencendo, que e o certo. O que ele impede e o caso que o Miguel apontou: um
+   * Snorlax medio ser mandado embora sem ninguem mencionar que ele e uma das 31
+   * especies que fazem Gigantamax, e que o jogo cobra caro pra repor.
+   */
+  if (input.gigantamax) {
+    signals.push({
+      rule: "dynamax.gigantamax",
+      towards: "guardar",
+      weight: 0.7,
+      because: msg("verdict.gigantamax"),
     });
   }
 

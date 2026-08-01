@@ -9,7 +9,10 @@ import {
   MASTER_LEAGUE,
   ULTRA_LEAGUE,
   computeCPAtLevel,
+  custoDosMaxAtaques,
+  fazGigantamax,
   groupIdenticalContexts,
+  papelNaBatalhaMax,
   rankMovesets,
   shadowDamageMultiplier,
   topSpreads,
@@ -17,9 +20,10 @@ import {
   type Context,
   type League,
   type MoveWithPvp,
+  type PapelMax,
 } from "@trainerkit/core";
 
-import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
+import { tetoObservavel, type Dataset, type DatasetSpecies } from "../data/useDataset.ts";
 import { moveLabel, useLanguage, useShowTranslation } from "../i18n/language.ts";
 import { useT, type Key } from "../i18n/t.ts";
 import { useSetup } from "../onboarding/setup.ts";
@@ -53,6 +57,15 @@ interface Props {
 }
 
 const PERFECT = { atk: 15, def: 15, hp: 15 };
+
+/** Papel na Batalha Max → chave de tradução. Mapa explícito: as duas uniões são
+    fechadas, e ligá-las por concatenação de string mataria as duas travas. */
+const PAPEL_MAX_KEY: Record<PapelMax, Key> = {
+  atacante: "species.maxRole.atacante",
+  guarda: "species.maxRole.guarda",
+  espirito: "species.maxRole.espirito",
+  equilibrado: "species.maxRole.equilibrado",
+};
 
 const LEAGUES: readonly League[] = [GREAT_LEAGUE, ULTRA_LEAGUE, MASTER_LEAGUE];
 
@@ -166,6 +179,22 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
 
   const cpAt = (level: number) =>
     computeCPAtLevel(data.cpm, species.baseStats, PERFECT, level);
+
+  /*
+   * O que dá pra afirmar sobre a Batalha Max desta espécie.
+   *
+   * `null` quando o dataset não traz o bloco — uma base de terceiro apontada
+   * pelo usuário não vai ter, e aí a ficha simplesmente não fala do assunto em
+   * vez de mostrar campos vazios.
+   */
+  const maxInfo = useMemo(() => {
+    if (!data.dynamax) return null;
+    return {
+      gigantamax: fazGigantamax(species.id, data.dynamax),
+      papel: papelNaBatalhaMax(species.baseStats),
+      custo: custoDosMaxAtaques(species.maxGrupo, data.dynamax),
+    };
+  }, [data.dynamax, species.id, species.baseStats, species.maxGrupo]);
 
   const moveName = (id: string): string =>
     data.fastMoves.find((m) => m.id === id)?.name ??
@@ -469,6 +498,7 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
           }
           lucky={salvo.lucky}
           shadow={salvo.shadow}
+          gigantamax={fazGigantamax(species.id, data.dynamax)}
         />
       )}
 
@@ -670,17 +700,97 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
         {t("species.maxCP")}
       </div>
       <section className="tk-card" style={{ marginTop: 10 }}>
+        {/*
+          ⚠️ A terceira coluna e o MELHOR AMIGO, e nao um terceiro teto.
+
+          Aqui era `[40, 50, data.version.levelCap]` de quando o app achava que
+          o teto era 55. Com o teto correto (50) as duas ultimas colunas viravam
+          o mesmo numero impresso duas vezes.
+
+          Trocar por 40/50/51 nao e so tapar o buraco: essa e exatamente a
+          pergunta que o jogador faz na hora de gastar 100.000 de poeira — ate
+          onde eu compro, e o que o Melhor Amigo adiciona de graca por cima.
+        */}
         <div style={{ display: "flex", gap: 24 }}>
-          {[40, 50, data.version.levelCap].map((level) => (
+          {[...new Set([40, data.version.levelCap, tetoObservavel(data.version)])].map((level) => (
             <div key={level}>
               <div style={{ font: "800 22px/1.1 var(--tk-font)", letterSpacing: "-0.02em" }}>
                 {cpAt(level).toLocaleString(language)}
               </div>
-              <div className="tk-caption">{t("common.level")} {level}</div>
+              <div className="tk-caption">
+                {level > data.version.levelCap
+                  ? t("species.bestBuddy")
+                  : `${t("common.level")} ${level}`}
+              </div>
             </div>
           ))}
         </div>
       </section>
+
+      {/*
+        ⚠️ BATALHA MAX — a mecânica que o app inteiro ignorava.
+
+        "Dynamax / Gigantamax / Max Battles. O plano registra que apareceram nas
+        fontes de 2026 e nunca foram investigados."
+
+        Está tudo no GAME_MASTER; o que escondia era o nome — lá a mecânica se
+        chama BREAD, e Gigantamax é SOURDOUGH. Ver `dynamax.ts`.
+
+        ⚠️ O QUE ESTE BLOCO NÃO DIZ: que este Pokémon "pode Dynamax". Isso é
+        propriedade do indivíduo (vem de ter sido pego numa Batalha Max) e não
+        existe no dado. Dizer que pode seria inventar a premissa, e um app que
+        decide não pode fazer isso. Ele fala do que é fato por espécie: quem faz
+        Gigantamax, o papel que os stats sugerem, e quanto custam os Max Ataques.
+      */}
+      {data.dynamax?.ligado && maxInfo !== null && (
+        <>
+          <div className="tk-overline" style={{ display: "block", marginTop: 24 }}>
+            {t("species.maxBattle")}
+          </div>
+          <section className="tk-card" style={{ marginTop: 10, display: "grid", gap: 10 }}>
+            {maxInfo.gigantamax && (
+              <div className="tk-row tk-row--semselo">
+                <span className="tk-row-meio">
+                  <span className="tk-row-label">{t("species.gigantamax")}</span>
+                </span>
+                <span className="tk-row-value">{t("common.yes")}</span>
+              </div>
+            )}
+            <div className="tk-row tk-row--semselo">
+              <span className="tk-row-meio">
+                <span className="tk-row-label">{t("species.maxRole")}</span>
+              </span>
+              <span className="tk-row-value">{t(PAPEL_MAX_KEY[maxInfo.papel])}</span>
+            </div>
+            {maxInfo.custo && (
+              <div className="tk-row tk-row--semselo">
+                <span className="tk-row-meio">
+                  <span className="tk-row-label">{t("species.maxCost")}</span>
+                </span>
+                <span className="tk-row-value">
+                  {t("species.maxCostValue", {
+                    candy: (
+                      maxInfo.custo.ataque.doces +
+                      maxInfo.custo.guarda.doces +
+                      maxInfo.custo.espirito.doces
+                    ).toLocaleString(language),
+                    xl: (
+                      maxInfo.custo.ataque.docesXL +
+                      maxInfo.custo.guarda.docesXL +
+                      maxInfo.custo.espirito.docesXL
+                    ).toLocaleString(language),
+                  })}
+                </span>
+              </div>
+            )}
+            {/* Leitura, e a tela diz que é. O papel vem dos stats base — não há
+                ranking oficial de Batalha Max em lugar nenhum. */}
+            <p className="tk-caption" style={{ lineHeight: 1.55 }}>
+              {t("species.maxNote")}
+            </p>
+          </section>
+        </>
+      )}
 
       <div className="tk-overline" style={{ display: "block", marginTop: 24 }}>
         {t("species.bestMoves")}

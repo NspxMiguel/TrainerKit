@@ -21,6 +21,8 @@ export type MessageKey =
   | "verdict.raid.attack"
   | "verdict.shadow.bonus"
   | "verdict.lucky.cost"
+  /** A especie faz Gigantamax — lista fechada do GAME_MASTER, ver `dynamax.ts`. */
+  | "verdict.gigantamax"
   /**
    * Sem IV informado, o app NAO decide — ele pede o IV.
    *

@@ -20,6 +20,7 @@
  */
 import { readdirSync, readFileSync } from "node:fs";
 import { extname, join } from "node:path";
+import { pathToFileURL } from "node:url";
 import { inflateSync } from "node:zlib";
 
 import { scanAppraisalBars } from "@trainerkit/core";
@@ -126,6 +127,19 @@ export function lerPng(buf: Buffer): Bitmap {
   return { data: out, width, height };
 }
 
+/*
+ * ⚠️ O RUNNER SÓ RODA QUANDO ESTE ARQUIVO É O PROGRAMA.
+ *
+ * Sem esta guarda, `import { lerPng } from "./ler-prints.ts"` executava a
+ * varredura inteira como efeito colateral do import — e com o `argv` de quem
+ * importou, que aponta pra outra coisa. O decodificador é a parte reutilizável;
+ * o laço que percorre a pasta é o programa.
+ */
+if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
+  principal();
+}
+
+function principal(): void {
 const pasta = process.argv[2];
 if (pasta === undefined) {
   console.error("uso: pnpm --filter @trainerkit/web ler-prints <pasta>");
@@ -165,3 +179,4 @@ for (const nome of arquivos) {
    nunca pode acontecer é ler ERRADO — por isso a saída mostra o IV lido, e não
    um "ok". */
 console.log(`\nlidos ${lidos} · recusados ${recusados}`);
+}
