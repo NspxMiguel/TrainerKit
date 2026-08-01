@@ -550,6 +550,38 @@ function markCosmeticForms(species: OutSpecies[]): void {
     if (!canonical || canonical.id === s.id) continue;
     if (signature(s) === signature(canonical)) s.cosmeticOf = canonical.id;
   }
+
+  /*
+   * ⚠️ A LINHA DE EVOLUCAO TAMBEM APONTA PRO CANONICO.
+   *
+   * Sem isto, `ivysaur.evolvesInto` sai como `["venusaur_normal"]` — o
+   * canonico evoluindo pra uma forma COSMETICA. O GAME_MASTER e assim mesmo: o
+   * `evolutionBranch` cita a forma, nao a especie.
+   *
+   * E daqui que saiam os ids cosmeticos na colecao de quem usa o app. Evoluir
+   * grava `evolvesInto[0]`, entao quem evoluiu um Ivysaur ficou com um
+   * `venusaur_normal` guardado — e ai a ficha aberta pela Pokedex (que navega
+   * `venusaur`) nao reconhecia o proprio Pokemon da pessoa. Foi exatamente esse
+   * o caminho do "ele duplico e tem 2 venusaur agr".
+   *
+   * As telas ja canonizam na leitura, e continuam — dado velho existe. Isto
+   * fecha a TORNEIRA: daqui pra frente nao nasce id cosmetico novo.
+   *
+   * Feito depois de `cosmeticOf` estar preenchido, e nao junto: o mapa precisa
+   * estar completo antes de qualquer reescrita.
+   */
+  const canonizar = (id: string): string => {
+    const alvo = species.find((x) => x.id === id);
+    return alvo?.cosmeticOf ?? id;
+  };
+
+  for (const s of species) {
+    s.evolvesInto = s.evolvesInto.map(canonizar);
+    const doces: Record<string, number> = {};
+    for (const [para, custo] of Object.entries(s.candyToEvolve)) doces[canonizar(para)] = custo;
+    s.candyToEvolve = doces;
+    if (s.parent) s.parent = canonizar(s.parent);
+  }
 }
 
 function extractSpecies(templates: Template[]): OutSpecies[] {

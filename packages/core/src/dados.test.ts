@@ -44,6 +44,8 @@ interface Especie {
   heightDm?: number | null;
   weightHg?: number | null;
   cosmeticOf: string | null;
+  evolvesInto: string[];
+  candyToEvolve: Record<string, number>;
 }
 
 interface Dataset {
@@ -279,5 +281,55 @@ describe("integridade do dataset", () => {
     expect(isObtainable("eternatus_eternamax")).toBe(false);
     const eternamax = data.species.find((s) => s.id === "eternatus_eternamax");
     if (eternamax) expect(eternamax.baseStats.def).toBeGreaterThan(400);
+  });
+});
+
+/*
+ * ⚠️ A LINHA DE EVOLUCAO NAO PODE APONTAR PRA FORMA COSMETICA.
+ *
+ * O GAME_MASTER cita a FORMA no `evolutionBranch`, nao a especie: cru, o
+ * `ivysaur.evolvesInto` sai como `["venusaur_normal"]`. E dai que saiam os ids
+ * cosmeticos na colecao de quem usa o app — evoluir grava `evolvesInto[0]`,
+ * entao quem evoluiu um Ivysaur ficava com um `venusaur_normal` guardado, e a
+ * ficha aberta pela Pokedex (que navega `venusaur`) nao reconhecia o proprio
+ * Pokemon da pessoa.
+ *
+ * O ETL reescreve isso pro canonico. Este teste e a torneira: se alguem mexer
+ * ali e a reescrita sumir, o defeito volta em silencio, uma evolucao por vez.
+ */
+describe("linha de evolucao", () => {
+  const cosmeticas = new Set(
+    data.species.filter((s) => s.cosmeticOf !== null).map((s) => s.id),
+  );
+  const porId = new Map(data.species.map((s) => [s.id, s]));
+
+  it("ninguem evolui PARA uma forma cosmetica", () => {
+    for (const s of data.species) {
+      for (const alvo of s.evolvesInto) {
+        expect(cosmeticas.has(alvo), `${s.id} evolui pra ${alvo}, que e cosmetica`).toBe(false);
+      }
+    }
+  });
+
+  it("o custo em doce usa a mesma chave que o alvo da evolucao", () => {
+    for (const s of data.species) {
+      for (const alvo of s.evolvesInto) {
+        // Uma chave que nao case com o alvo faz a tela mostrar "evoluir" sem
+        // custo, ou pior, cobrar o doce de outra especie.
+        if (Object.keys(s.candyToEvolve).length === 0) continue;
+        expect(
+          Object.prototype.hasOwnProperty.call(s.candyToEvolve, alvo),
+          `${s.id}: doce sem entrada pra ${alvo}`,
+        ).toBe(true);
+      }
+    }
+  });
+
+  it("todo alvo de evolucao existe no dataset", () => {
+    for (const s of data.species) {
+      for (const alvo of s.evolvesInto) {
+        expect(porId.has(alvo), `${s.id} evolui pra ${alvo}, que nao existe`).toBe(true);
+      }
+    }
   });
 });
