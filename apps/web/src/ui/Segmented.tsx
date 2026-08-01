@@ -73,7 +73,19 @@ export function Segmented<T extends string>({
           aria-pressed={o.value === value}
           onClick={() => onChange(o.value)}
         >
-          {o.label}
+          {/*
+            ⚠️ O RÓTULO NUM `<span>`, e o corte mora nele.
+
+            O botão precisa de `overflow: visible` pra a área de toque de 44px
+            (um `::after` maior que ele) valer — conteúdo cortado por
+            `overflow: hidden` não é tocável fora da caixa, então o alvo
+            invisível existia e não funcionava.
+
+            Só que o corte com reticências EXIGE `overflow: hidden`. As duas
+            coisas não cabem no mesmo elemento: o corte desce pro span, e o botão
+            fica livre pra crescer a área de toque.
+          */}
+          <span className="tk-segment-txt">{o.label}</span>
         </button>
       ))}
     </div>

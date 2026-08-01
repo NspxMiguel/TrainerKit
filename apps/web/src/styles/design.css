@@ -5241,3 +5241,38 @@
     font-size: clamp(24px, 5vw, 34px);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ALVOS DE TOQUE DO MODO POKÉDEX
+   ═══════════════════════════════════════════════════════════════════════════
+
+   "clica em tudo, testar tudo, ocr, tudo tudo tudo msm."
+
+   Varrendo o aparelho botão a botão, três alvos abaixo dos 44px que o app
+   promete: a seta de voltar (40×40), o selo BETA (45×21) e — o pior — o
+   contador "Capturados: 4", que é um botão de **13px de altura**. Ele é a porta
+   pra lista dos capturados, e foi ele que ele mesmo pediu que abrisse algo:
+   "kd a colection ai na pokedex?".
+
+   Os três estão em contentores com `overflow: visible`, então aqui o truque
+   vale: a área cresce, o desenho não muda. Foi conferido com `elementFromPoint`
+   que o toque acima da borda visível cai no botão certo — no chip da fila de
+   tipos ele NÃO valia, porque lá o pai rola (ver a nota em `.tk-chip`).
+*/
+.tk-dexdev-close,
+.tk-dexdev-count-btn,
+.tk-beta {
+  position: relative;
+}
+
+.tk-dexdev-close::after,
+.tk-dexdev-count-btn::after,
+.tk-beta::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100%, 44px);
+  height: 44px;
+  transform: translate(-50%, -50%);
+}
