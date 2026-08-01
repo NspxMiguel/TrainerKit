@@ -205,6 +205,29 @@ export function tetoObservavel(version: Dataset["version"]): number {
   return version.observableLevelCap ?? version.levelCap + (version.buddyBonusLevels ?? 1);
 }
 
+/**
+ * Colapsa forma cosmética na espécie de verdade.
+ *
+ * ⚠️ CONTAR `speciesId` CRU CONTA A MESMA ESPÉCIE DUAS VEZES.
+ *
+ * O GAME_MASTER traz ~2.470 entradas para ~1.180 espécies: cada fantasia, cada
+ * letra de Unown e um "_NORMAL" redundante viram template próprio. O ETL já
+ * marca essas entradas com `cosmeticOf`, apontando para a forma canônica —
+ * ninguém estava lendo.
+ *
+ * O sintoma apareceu no contador da Pokédex: "Vistos: 9" com oito espécies. O
+ * Venusaur entrava duas vezes, como `venusaur` (aberto no Modo Pokédex) e como
+ * `venusaur_normal` (o da coleção). Numa Pokédex o contador de vistos é metade
+ * da razão de ela existir — errar nele é errar no que a tela promete.
+ *
+ * Devolve uma função e não um Map porque quem conta faz isso dentro de um laço:
+ * o índice é montado uma vez e a busca é O(1).
+ */
+export function canonico(species: readonly DatasetSpecies[]): (id: string) => string {
+  const mapa = new Map(species.map((s) => [s.id, s.cosmeticOf ?? s.id]));
+  return (id) => mapa.get(id) ?? id;
+}
+
 /** Data de referencia do dataset, formatada como o protótipo mostra (dd/MM). */
 export function datasetLabel(version: Dataset["version"]): string {
   const ms = Number(version.uploadTime);

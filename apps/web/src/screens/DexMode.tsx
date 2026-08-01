@@ -9,7 +9,7 @@ import { mensagemDeErro } from "../ai/erro.ts";
 import { chat } from "../ai/provider.ts";
 import { identifySpecies, visionAvailable } from "../ai/vision.ts";
 import { fold } from "../data/fold.ts";
-import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
+import { canonico, type Dataset, type DatasetSpecies } from "../data/useDataset.ts";
 import { useLanguage } from "../i18n/language.ts";
 import { useT, type Key } from "../i18n/t.ts";
 import { useSetup } from "../onboarding/setup.ts";
@@ -128,10 +128,19 @@ export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
     if (alvo) markSeen(alvo.id);
   }, [alvo]);
 
+  /*
+   * ⚠️ CONTA ESPÉCIE, e não linha da coleção.
+   *
+   * Era `new Set(items.map(o => o.speciesId))`, e o `speciesId` pode ser uma
+   * forma COSMÉTICA: `venusaur` e `venusaur_normal` são o mesmo Pokémon com
+   * dois ids. Quem tivesse os dois via "Capturados" contar 2. Ver `canonico`.
+   */
+  const canon = useMemo(() => canonico(data.species), [data.species]);
+
   const capturados = useMemo(() => {
     if (setup.mode !== "colecao") return 0;
-    return new Set((items ?? []).map((o) => o.speciesId)).size;
-  }, [items, setup.mode]);
+    return new Set((items ?? []).map((o) => canon(o.speciesId))).size;
+  }, [items, setup.mode, canon]);
 
   /*
    * VISTOS inclui os CAPTURADOS, porque nao existe capturar sem ter visto.
@@ -147,10 +156,14 @@ export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
    */
   const vistosTotal = useMemo(() => {
     if (setup.mode !== "colecao") return vistos;
-    const uniao = new Set(seenIds());
-    for (const o of items ?? []) uniao.add(o.speciesId);
+    /* Os dois lados passam pelo canônico: o registro de vistos guarda o id da
+       ficha aberta, a coleção guarda o id do bicho salvo, e nada garante que
+       sejam a mesma escrita da mesma espécie. Foi exatamente essa diferença que
+       fez o contador dizer 9 para oito espécies. */
+    const uniao = new Set([...seenIds()].map(canon));
+    for (const o of items ?? []) uniao.add(canon(o.speciesId));
     return uniao.size;
-  }, [items, setup.mode, vistos]);
+  }, [items, setup.mode, vistos, canon]);
 
   /** Sugestoes por nome. */
   const sugestoes = useMemo(() => {
@@ -428,7 +441,10 @@ export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
   };
 
   const cor = alvo ? typeColor(alvo.types[0] ?? "normal") : "#6b7280";
-  const jaTenho = alvo !== null && (items ?? []).some((o) => o.speciesId === alvo.id);
+  // Pelo canônico, como os contadores acima: `venusaur_normal` na coleção é o
+  // mesmo bicho que o `venusaur` que esta tela navega.
+  const jaTenho =
+    alvo !== null && (items ?? []).some((o) => canon(o.speciesId) === canon(alvo.id));
 
   return createPortal(
     <div
