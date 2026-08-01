@@ -11,7 +11,8 @@
     "icons": "node --experimental-strip-types scripts/make-icons.ts",
     "test": "vitest run",
     "audit:bundle": "tsx scripts/audit-bundle.ts",
-    "ocr:fetch": "tsx scripts/fetch-ocr.ts"
+    "ocr:fetch": "tsx scripts/fetch-ocr.ts",
+    "ler-prints": "tsx scripts/ler-prints.ts"
   },
   "dependencies": {
     "@mlc-ai/web-llm": "^0.2.84",
