@@ -128,6 +128,24 @@ export const ACOES_QUE_COBRAM: readonly Action[] = [
 ];
 
 /**
+ * Discordar deste veredito pede um MOTIVO?
+ *
+ * So o `transferir`. Os motivos que o app oferece — gosto dele, eu uso, e um
+ * desafio meu — respondem "por que voce FICA com ele", e essa pergunta so
+ * existe quando o conselho foi soltar. Discordar de "investir" e "nao vou
+ * gastar poeira nele"; de "evoluir", "nao vou evoluir"; de "descobrir", "nao
+ * vou escanear agora". Nenhum dos tres diz isso.
+ *
+ * ⚠️ Mora aqui, e nao na tela, pelo mesmo motivo de `ACOES_QUE_COBRAM`: e a
+ * terceira regra desta familia, e as duas primeiras viraram defeito justamente
+ * por estarem escritas dentro de um componente. Aqui ela e testavel sem montar
+ * React, sem IndexedDB e sem navegador.
+ */
+export function pedeMotivo(action: Action): boolean {
+  return action === "transferir";
+}
+
+/**
  * O veredito de hoje ja foi cumprido?
  *
  * Duas condicoes, e as duas ja moraram espalhadas por quatro arquivos:

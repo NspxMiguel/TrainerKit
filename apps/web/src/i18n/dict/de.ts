@@ -105,7 +105,7 @@ export const DE: Dict = {
   "species.maxBattle": "Max Kampf",
   "species.gigantamax": "Gigadynamax",
   "species.maxRole": "Vorgeschlagene Rolle",
-  "species.maxCost": "Max Attacken auf Stufe 3",
+  "species.maxCost": "Max Attacken steigern",
   "species.maxCostValue": "{candy} Bonbons + {xl} XL",
   "species.maxNote": "Die Rolle wird aus den Basiswerten abgeleitet — es gibt keine offizielle Rangliste. Ob DIESES Exemplar dynamaxen kann, hängt davon ab, wie es gefangen wurde, und steht in keinen Daten.",
   "species.maxRole.atacante": "Angriff",

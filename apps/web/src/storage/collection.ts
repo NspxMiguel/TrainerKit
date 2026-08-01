@@ -33,7 +33,20 @@ import type { IVs } from "@trainerkit/core";
  * agrupar por motivo. Um booleano jogaria fora a única parte que o app não
  * consegue recalcular sozinho.
  */
-export type MeuMotivo = "gosto" | "uso" | "desafio";
+/**
+ * ⚠️ O QUARTO VALOR, `outro`, NÃO É UM MOTIVO — é a ausência de um.
+ *
+ * Os três primeiros respondem "por que você fica com ele", e essa pergunta só
+ * existe quando o app mandou SOLTAR. Discordar de "Investir" é "não vou gastar
+ * poeira nele"; de "Evoluir", "não vou evoluir"; de "Descobrir", "não vou
+ * escanear agora". Nenhum dos três diz isso, e oferecê-los ali era pedir que a
+ * pessoa escolhesse a menos errada de três respostas erradas.
+ *
+ * Nesses casos o app não pergunta: registra `outro` e cala a boca. O motivo
+ * nunca entrou em conta nenhuma — a faxina só olha se EXISTE motivo, e o cartão
+ * só o repete de volta. Perguntar sem usar a resposta é atrito.
+ */
+export type MeuMotivo = "gosto" | "uso" | "desafio" | "outro";
 
 export interface OwnedPokemon {
   id: string;

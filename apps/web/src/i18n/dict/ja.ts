@@ -105,7 +105,7 @@ export const JA: Dict = {
   "species.maxBattle": "マックスバトル",
   "species.gigantamax": "キョダイマックス",
   "species.maxRole": "おすすめの役割",
-  "species.maxCost": "マックスわざをレベル3に",
+  "species.maxCost": "マックスわざの強化",
   "species.maxCostValue": "アメ{candy}個 + XL{xl}個",
   "species.maxNote": "役割は種族値からの推定です。公式のランキングはありません。この個体がダイマックスできるかは捕まえ方によって決まり、どのデータにも載っていません。",
   "species.maxRole.atacante": "こうげき",

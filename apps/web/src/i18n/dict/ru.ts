@@ -105,7 +105,7 @@ export const RU: Dict = {
   "species.maxBattle": "Макс-битва",
   "species.gigantamax": "Гигантамакс",
   "species.maxRole": "Предлагаемая роль",
-  "species.maxCost": "Макс-приёмы до уровня 3",
+  "species.maxCost": "Прокачать макс-приёмы",
   "species.maxCostValue": "{candy} конфет + {xl} XL",
   "species.maxNote": "Роль выведена из базовых характеристик — официального рейтинга для этого нет. Может ли ЭТОТ экземпляр в динамакс, зависит от того, как он пойман, и этого нет ни в каких данных.",
   "species.maxRole.atacante": "Атака",
