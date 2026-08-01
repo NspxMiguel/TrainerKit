@@ -121,8 +121,22 @@ function Linha({
   return (
     <button type="button" className="tk-row" onClick={onOpen} data-tone={tone}>
       <IconeAjuste selo={selo} />
-      <span className="tk-row-label">{label}</span>
-      <span className="tk-row-value">{value !== undefined && value !== "" ? value : ""}</span>
+      {/*
+        ⚠️ O RÓTULO E O VALOR NUM GRUPO PRÓPRIO — o selo e a seta ficam fora.
+
+        A linha quebra em duas quando o idioma é comprido (alemão, francês,
+        russo). Com os quatro filhos no mesmo flex, quem descia junto era
+        também a SETA: numa linha de rótulo longo e valor vazio — "Apagar todos
+        os dados do app" — ela ia sozinha pra segunda linha e ficava um `›`
+        solto embaixo do texto.
+
+        Quebrar é do miolo, não da moldura. O selo abre a linha e a seta fecha,
+        sempre, em qualquer idioma; o que se reorganiza é o que está entre eles.
+      */}
+      <span className="tk-row-meio">
+        <span className="tk-row-label">{label}</span>
+        <span className="tk-row-value">{value !== undefined && value !== "" ? value : ""}</span>
+      </span>
       {/* A seta como SVG, e não o caractere "›": o glifo muda de desenho e de
           peso conforme a fonte que o sistema resolve, e numa coluna de nove
           linhas essa variação aparece. O handoff desenha 8×14. */}

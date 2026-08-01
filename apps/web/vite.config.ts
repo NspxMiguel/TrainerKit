@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
@@ -15,10 +16,47 @@ import { VitePWA } from "vite-plugin-pwa";
  */
 const base = process.env.TK_BASE ?? "/";
 
-/** A versao vem do `package.json` da raiz — a unica copia que existe. */
-const versao = JSON.parse(
-  readFileSync(fileURLToPath(new URL("../../package.json", import.meta.url)), "utf8"),
-).version as string;
+/**
+ * A VERSAO SE ESCREVE SOZINHA, a cada commit.
+ *
+ * "faz o negocio da atualizacao. q ta a anos na 0.1.0. coloca q a cada release,
+ * ou a cada push uma nova versao."
+ *
+ * Ele contou certo: foram ~170 commits com `0.1.0` na tela. E a razao nao era
+ * preguiça, era o desenho — subir a versao dependia de alguem LEMBRAR de subir,
+ * e num projeto de uma pessoa so ninguem lembra. Trocar as cinco copias por uma
+ * (o `package.json`) resolveu a divergencia; nao resolveu o esquecimento.
+ *
+ * Agora o numero tem duas partes e nenhuma e digitada a mao:
+ *
+ *   · MAIOR.MENOR vem do `package.json`, e e a unica coisa que eu mexo quando
+ *     alguma coisa grande muda. Hoje 0.5;
+ *   · a CORRECAO e a contagem de commits do repositorio. Cada commit e um
+ *     numero novo, entao todo push publica uma versao que nunca existiu antes.
+ *
+ * `git rev-list --count HEAD` e a fonte: ela nao depende de tag, de CI nem de
+ * nada que possa estar desligado — e o Actions desta conta esta, justamente.
+ *
+ * Sem git (um .zip do codigo, um CI raso), cai no `.0` do package.json em vez de
+ * quebrar o build. Versao errada e ruim; build que nao sai e pior.
+ */
+function lerVersao(): string {
+  const base = JSON.parse(
+    readFileSync(fileURLToPath(new URL("../../package.json", import.meta.url)), "utf8"),
+  ).version as string;
+  const [maior, menor] = base.split(".");
+  try {
+    const commits = execFileSync("git", ["rev-list", "--count", "HEAD"], {
+      cwd: fileURLToPath(new URL("../..", import.meta.url)),
+      encoding: "utf8",
+    }).trim();
+    return `${maior}.${menor}.${commits}`;
+  } catch {
+    return base;
+  }
+}
+
+const versao = lerVersao();
 
 export default defineConfig({
   base,

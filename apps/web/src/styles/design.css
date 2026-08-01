@@ -4033,11 +4033,11 @@
 .tk-row {
   display: flex;
   align-items: center;
-  /* Quebra em duas linhas quando o idioma não cabe — ver a nota em
-     `.tk-row-label`. `row-gap` menor que o `column-gap` porque na vertical 12px
-     separariam demais duas partes da MESMA linha. */
-  flex-wrap: wrap;
-  gap: 2px 12px;
+  /* ⚠️ A LINHA NÃO QUEBRA — quem quebra é o `.tk-row-meio`. Ver a nota lá e no
+     `SettingsScreen.tsx`: com a quebra aqui, a SETA descia junto e sobrava um
+     `›` solto embaixo do rótulo. */
+  flex-wrap: nowrap;
+  gap: 12px;
   min-height: 52px;
   padding: 6px 16px;
   width: 100%;
@@ -4128,6 +4128,30 @@
  * valor, ele não encolhe, então ou cabe na linha ou desce inteiro. Em português
  * e inglês nada muda — nunca desce.
  */
+/*
+ * O miolo da linha: é ele que quebra em duas quando o idioma não cabe numa.
+ *
+ * Medido em 360px, que é a largura de Android mais comum do mundo: a linha de
+ * Ajustes tem ~98px de cromo (selo 30, vãos 24, seta 12, recuo 32), sobrando
+ * ~262 pra rótulo + valor. "Как ты пользуешься" com "Только смотреть" não cabe
+ * em 262px, e nenhuma distribuição de flex faz caber — em alemão, francês,
+ * russo e japonês as duas pontas saíam com reticências ao mesmo tempo.
+ *
+ * Escolher QUEM corta era o enquadramento errado: com os dois cortados, a
+ * pessoa não lê nem o assunto nem o valor. O valor desce pra segunda linha,
+ * alinhado à direita, e o rótulo passa a poder quebrar em vez de sumir pela
+ * borda. Em português e inglês nada muda — nunca desce.
+ */
+.tk-row-meio {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  /* Na vertical 12px separariam demais duas partes da MESMA linha. */
+  gap: 2px 12px;
+}
+
 .tk-row-label {
   flex: 1 1 auto;
   min-width: 0;
