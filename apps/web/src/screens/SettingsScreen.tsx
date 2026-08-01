@@ -275,7 +275,7 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
         <Linha
           selo="atualizacoes"
           label={t("settings.updates")}
-          value={t("settings.version", { version: "0.1.0" })}
+          value={t("settings.version", { version: __TK_VERSAO__ })}
           onOpen={() => setPainel("updates")}
         />
         <Linha
@@ -497,7 +497,7 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
           <section className="tk-card">
             <div className="tk-row">
               <span className="tk-row-label">
-                {t("settings.version", { version: "0.1.0" })}
+                {t("settings.version", { version: __TK_VERSAO__ })}
               </span>
               <span className="tk-row-value" style={{ font: "500 11px var(--tk-mono)" }}>
                 {t("settings.buildOf", { date: __TK_BUILD__ })}

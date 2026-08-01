@@ -7,6 +7,8 @@
  * do `package.json` nao muda a cada correcao, entao ela nunca respondia isso.
  */
 declare const __TK_BUILD__: string;
+/** A versao do `package.json` da raiz, injetada pelo Vite. Ver `vite.config.ts`. */
+declare const __TK_VERSAO__: string;
 
 /**
  * URL da funcao que guarda a chave compartilhada da IA.
