@@ -623,8 +623,17 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
           botao de perfil num app sem perfil. O destino dele (a lista "Meus")
           tambem nao existe ali.
 
-          A troca de contas em si ainda nao existe; por enquanto ele leva pra
-          colecao, que e o unico lugar que fala do treinador hoje.
+          ⚠️ E a troca de contas EXISTE — este comentario dizia que nao.
+
+          Ele foi escrito quando o disco so levava pra colecao ("a troca de
+          contas em si ainda nao existe; por enquanto ele leva pra colecao"), e
+          ficou pra tras quando a tela `Colecoes` ganhou criar, renomear, trocar
+          e apagar. Hoje o avatar abre exatamente o que ele pediu.
+
+          Comentario que descreve um estado antigo e pior que comentario nenhum:
+          quem le acredita, e neste arquivo essa categoria de erro ja custou
+          varias caçadas — so que sempre no sentido contrario, com o comentario
+          prometendo mais do que o codigo dava.
         */}
         {colecao && (
           <button
