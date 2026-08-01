@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 
-import { ACOES_QUE_COBRAM, ACTION_KEYS, decide, type VerdictInput } from "@trainerkit/core";
+import {
+  ACOES_QUE_COBRAM,
+  ACTION_KEYS,
+  cumpriu,
+  decide,
+  type VerdictInput,
+} from "@trainerkit/core";
 
 import { explainVerdict } from "../ai/explain.ts";
 import { useAi } from "../ai/provider.ts";
@@ -111,7 +117,7 @@ export function VerdictCard({ owned, ...props }: Props) {
   // A prop `owned` e uma foto do momento em que a tela abriu; quem responde ao
   // toque e o banco. Sem reler daqui, o botao nao mudava de estado.
   const atual = items?.find((x) => x.id === owned?.id) ?? owned;
-  const feito = atual?.doneAction === verdict.action;
+  const feito = cumpriu(verdict.action, atual?.doneAction);
   /** Houve conta? "Descobrir o IV" não é uma conclusão, é um pedido de dado. */
   const temRastro = verdict.signals.length > 0;
   /** A pessoa discordou e o app aceitou. Ver `OwnedPokemon.meuMotivo`. */
@@ -210,9 +216,25 @@ export function VerdictCard({ owned, ...props }: Props) {
         conhece o veredito, e vale nos dois lugares que mostram o cartao (a
         ficha e a calculadora de IV).
       */}
-      {/* "Já fiz isso" só existe onde há algo a fazer. Marcar como cumprido um
-          "me dá o IV" seria dizer que o IV chegou. */}
-      {owned && temRastro && (
+      {/*
+        ⚠️ "Já fiz isso" só existe onde há algo a fazer — e este comentário
+        AFIRMAVA isso sem que o código fizesse.
+
+        A condição era `owned && temRastro`. O `temRastro` cobre metade da
+        promessa: "descobrir" não emite sinal nenhum, então o botão já não
+        aparecia num "me dá o IV" (marcar aquilo como cumprido seria dizer que o
+        IV chegou). A outra metade nunca existiu: num "Guardar" o botão aparecia
+        e pedia pra confirmar que você concluiu... não fazer nada.
+
+        É o mesmo defeito do "Discordo", no mesmo cartão, e eu o encontrei
+        porque o comentário que escrevi ao consertar o outro dizia "quem
+        oferecer uma saída (Discordo, Já fiz isso) tem que perguntar a esta
+        lista" — e eu tinha aplicado só numa das duas.
+
+        As duas condições agora: a ação tem que COBRAR (tira o "Guardar") e tem
+        que ter havido conta (tira o "Descobrir").
+      */}
+      {owned && temRastro && ACOES_QUE_COBRAM.includes(verdict.action) && (
         <button
           type="button"
           className="tk-done"

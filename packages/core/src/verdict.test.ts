@@ -3,7 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
-import { ACOES_QUE_COBRAM, decide, formatTrace, type Action } from "./verdict.js";
+import { ACOES_QUE_COBRAM, cumpriu, decide, formatTrace, type Action } from "./verdict.js";
 import type { BaseStats } from "./types.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -182,5 +182,27 @@ describe("quais vereditos cobram alguma coisa", () => {
     // Se alguem criar uma acao nova, ela cai aqui e tem que ser classificada de
     // proposito — em vez de silenciosamente virar "nao cobra".
     expect(naoCobram).toEqual(["guardar"]);
+  });
+});
+
+describe("cumpriu", () => {
+  it("so vale quando a acao marcada e a mesma de hoje", () => {
+    expect(cumpriu("investir", "investir")).toBe(true);
+    expect(cumpriu("investir", "evoluir")).toBe(false);
+    expect(cumpriu("investir", null)).toBe(false);
+    expect(cumpriu("investir", undefined)).toBe(false);
+  });
+
+  /*
+   * ⚠️ O CASO QUE CURA DADO VELHO.
+   *
+   * Enquanto o app deixava marcar "Guardar" como feito, ele gravou
+   * `doneAction: "guardar"` em Pokemon reais. Se `cumpriu` respeitasse essa
+   * marca, essas linhas mostrariam "✓ FEITO" pra sempre — sem nenhum botao pra
+   * desmarcar, porque o botao saiu. Trocar UI morta por estado sem saida seria
+   * pior que o defeito original.
+   */
+  it("ignora um 'guardar' marcado como feito por uma versao antiga", () => {
+    expect(cumpriu("guardar", "guardar")).toBe(false);
   });
 });

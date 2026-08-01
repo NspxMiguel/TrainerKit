@@ -3,6 +3,7 @@ import { useMemo, useState, type CSSProperties } from "react";
 import {
   ACOES_QUE_COBRAM,
   ACTION_KEYS,
+  cumpriu,
   decide,
   fazGigantamax,
   ivTotalOf,
@@ -460,7 +461,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
           // Cumprido so quando a acao marcada e a MESMA que o veredito indica
           // hoje: subiu de nivel e virou "evoluir"? Volta a cobrar, porque e
           // outra coisa a fazer.
-          feito: owned.doneAction === verdict.action,
+          feito: cumpriu(verdict.action, owned.doneAction),
         },
       ];
     });

@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
 
 import {
+  ACOES_QUE_COBRAM,
   ACTION_KEYS,
   avaliarTroca,
+  cumpriu,
   decide,
   fazGigantamax,
   ivTotalOf,
@@ -295,7 +297,7 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
                     className="tk-owned-dot"
                     style={{
                       background:
-                        owned.doneAction === verdict.action
+                        cumpriu(verdict.action, owned.doneAction)
                           ? "var(--tk-txt3)"
                           : TONE[verdict.action],
                     }}
@@ -392,39 +394,56 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
                   Ele so conta como cumprido se a acao marcada for a MESMA que o
                   veredito indica hoje. Subiu de nivel e o conselho virou
                   "evoluir"? Volta a cobrar, porque e outra coisa a fazer.
+
+                  ⚠️ NUM "GUARDAR" ELE VOLTA A SER ETIQUETA, e nao some.
+
+                  Aqui o controle E o rotulo do veredito — diferente do cartao
+                  da ficha, onde "Feito" e um botao a parte. Esconder deixaria a
+                  linha sem dizer o que o app acha. Entao ele perde o toque e
+                  fica so a palavra: "Guardar" nao e uma acao que se conclui, e
+                  marcar como feito trocava a palavra "GUARDAR" por "FEITO",
+                  escondendo o veredito em troca de nada.
                 */}
-                <button
-                  type="button"
-                  className="tk-owned-act"
-                  data-done={owned.doneAction === verdict.action || undefined}
-                  aria-pressed={owned.doneAction === verdict.action}
-                  style={
-                    owned.doneAction === verdict.action
-                      ? undefined
-                      : { color: TONE[verdict.action] }
-                  }
-                  title={
-                    owned.doneAction === verdict.action
-                      ? t("collection.undoDone")
-                      : t("collection.markDone")
-                  }
-                  onClick={() =>
-                    void setDoneAction(
-                      owned.id,
-                      owned.doneAction === verdict.action ? null : verdict.action,
-                    )
-                  }
-                >
-                  {/* O "○" e o que faz o rotulo LER como botao. Sem ele era uma
-                      palavra colorida, e o Miguel passou semanas sem descobrir
-                      que dava pra tocar: "sem jeito de tirar isso". */}
-                  <span className="tk-done-mark" aria-hidden="true">
-                    {owned.doneAction === verdict.action ? "✓" : "○"}
+                {ACOES_QUE_COBRAM.includes(verdict.action) ? (
+                  <button
+                    type="button"
+                    className="tk-owned-act"
+                    data-done={cumpriu(verdict.action, owned.doneAction) || undefined}
+                    aria-pressed={cumpriu(verdict.action, owned.doneAction)}
+                    style={
+                      cumpriu(verdict.action, owned.doneAction)
+                        ? undefined
+                        : { color: TONE[verdict.action] }
+                    }
+                    title={
+                      cumpriu(verdict.action, owned.doneAction)
+                        ? t("collection.undoDone")
+                        : t("collection.markDone")
+                    }
+                    onClick={() =>
+                      void setDoneAction(
+                        owned.id,
+                        cumpriu(verdict.action, owned.doneAction) ? null : verdict.action,
+                      )
+                    }
+                  >
+                    {/* O "○" e o que faz o rotulo LER como botao. Sem ele era uma
+                        palavra colorida, e o Miguel passou semanas sem descobrir
+                        que dava pra tocar: "sem jeito de tirar isso". */}
+                    <span className="tk-done-mark" aria-hidden="true">
+                      {cumpriu(verdict.action, owned.doneAction) ? "✓" : "○"}
+                    </span>
+                    {cumpriu(verdict.action, owned.doneAction)
+                      ? t("collection.done")
+                      : t(ACTION_KEYS[verdict.action] as Key)}
+                  </button>
+                ) : (
+                  /* Sem "○": ele e o que promete toque, e aqui nao ha o que
+                     tocar. A palavra fica, com a cor do veredito. */
+                  <span className="tk-owned-act" style={{ color: TONE[verdict.action] }}>
+                    {t(ACTION_KEYS[verdict.action] as Key)}
                   </span>
-                  {owned.doneAction === verdict.action
-                    ? t("collection.done")
-                    : t(ACTION_KEYS[verdict.action] as Key)}
-                </button>
+                )}
 
                 {/*
                   O "✕" SAIU daqui, e foi pra ficha do Pokemon com confirmacao.
