@@ -5,13 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "pnpm ocr:fetch && tsc -b && vite build && pnpm audit:bundle",
+    "build": "pnpm ocr:fetch && pnpm fontes && tsc -b && vite build && pnpm audit:bundle",
     "preview": "vite preview --port 4273 --strictPort",
     "typecheck": "tsc --noEmit",
     "icons": "node --experimental-strip-types scripts/make-icons.ts",
     "test": "vitest run",
     "audit:bundle": "tsx scripts/audit-bundle.ts",
     "ocr:fetch": "tsx scripts/fetch-ocr.ts",
+    "fontes": "tsx scripts/fetch-fontes.ts",
     "ler-prints": "tsx scripts/ler-prints.ts",
     "test:prints": "TK_PRINTS_PNG=${TK_PRINTS_PNG:-$HOME/Downloads} vitest run src/scan/barras.png.test.ts"
   },

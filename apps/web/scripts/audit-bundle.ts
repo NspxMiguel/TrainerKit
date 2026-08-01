@@ -12,7 +12,7 @@
  *
  * O que e permitido esta na lista branca e cada item tem motivo escrito.
  */
-import { readdir, stat } from "node:fs/promises";
+import { readdir, readFile, stat } from "node:fs/promises";
 import { dirname, extname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -77,6 +77,42 @@ for (const file of files) {
 // quebrado, e vale falhar aqui em vez de descobrir em producao.
 if (!files.some((f) => f.endsWith("dataset/gamedata.json"))) {
   problems.push("o dataset nao esta no bundle: o app abriria sem conseguir calcular nada");
+}
+
+/*
+ * ⚠️ NENHUM HOST DE TERCEIRO NO HTML OU NO CSS.
+ *
+ * A tela de Privacidade promete que "se voce deixar a IA e a voz desligadas,
+ * NADA SAI", e lista nominalmente quem recebe algo. Uma tag de fonte, de icone
+ * ou de analytics entregue por CDN quebra essa frase em silencio: a requisicao
+ * sai na abertura do app, com tudo desligado, levando IP e User-Agent.
+ *
+ * Ja aconteceu uma vez — o `index.html` pedia as fontes ao Google, e o Google
+ * nao estava na lista de terceiros. Agora as fontes sao auto-hospedadas
+ * (`scripts/fetch-fontes.ts`) e isto aqui impede a volta.
+ *
+ * ⚠️ SO HTML E CSS. O JavaScript FALA com terceiro de proposito — Groq, a voz
+ * neural, os sprites da PokeAPI — e todos sao opcionais, declarados na tela e
+ * so disparam por acao da pessoa. O que nao pode e um recurso que o navegador
+ * busca SOZINHO ao abrir a pagina, porque esse ninguem escolheu.
+ */
+const HOSTS_PERMITIDOS = [
+  // Nenhum. A lista existe pra que uma excecao futura seja escrita e explicada,
+  // em vez de aparecer como um `if` no meio do laco.
+];
+
+for (const file of files) {
+  const ext = extname(file).toLowerCase();
+  if (ext !== ".html" && ext !== ".css" && !file.endsWith(".webmanifest")) continue;
+
+  const texto = await readFile(file, "utf8");
+  for (const [, url] of texto.matchAll(/https?:\/\/([\w.-]+)/g)) {
+    if (HOSTS_PERMITIDOS.includes(url!)) continue;
+    problems.push(
+      `${relative(DIST, file)} busca de terceiro ao abrir: ${url} — ` +
+        `a tela de Privacidade diz que nada sai com a IA e a voz desligadas`,
+    );
+  }
 }
 
 if (problems.length > 0) {
