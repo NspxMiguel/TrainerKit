@@ -5000,3 +5000,137 @@
     box-shadow: var(--tk-e3);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   O HERO DEITADO — em tela larga, a arte e a decisão ficam LADO A LADO
+   ═══════════════════════════════════════════════════════════════════════════
+
+   "ja porto pra tudo? pc, 16:9 16:10 10:16 4:3, pc vertical, pc horizontal
+   tudo ... pra ver se ta tudo funcionando corretamente. se nao ta cagado."
+
+   Estruturalmente estava tudo certo em todas: nada vazava, nada ficava fora da
+   tela, nenhum alvo abaixo de 44px. O que estava errado era de PROPORÇÃO, e só
+   aparece medindo.
+
+   Em 1024×768 o hero fica com 740 de largura e 323 de altura. A faixa da arte
+   herda 740×175, e o sprite sai com **256px** — porque quem o limita é a regra
+   da cara livre (`95cqh / cara`), que é uma conta VERTICAL. Sobravam 484px de
+   largura sem uso, e o Pokémon aparecia pequeno no meio de uma faixa vazia.
+
+   A causa é a pilha: `grid-template-rows: 1fr auto` põe a decisão EMBAIXO da
+   arte, então as duas disputam a altura — que é justamente o que falta numa tela
+   deitada — e ignoram a largura, que é o que sobra. Empilhar é o desenho certo
+   pro telefone, onde a proporção é a oposta.
+
+   Deitado, elas ficam lado a lado: a arte pega a coluna esquerda e a altura
+   INTEIRA do hero (sem os 146px do bloco de decisão comendo por baixo), e o
+   nome, a frase e os botões ocupam a direita. O mesmo hero, girado — e é o que
+   qualquer app faz ao virar a tela.
+
+   ⚠️ Só na HOME (`.tk-home > .tk-hero`). O hero da ficha da espécie é outra
+   coisa: lá ele é o cabeçalho de uma folha que rola, e empilhado está certo em
+   qualquer largura.
+*/
+@media (min-width: 900px) {
+  .tk-home > .tk-hero {
+    grid-template-rows: 1fr;
+    /* A arte fica com o que sobrar; a decisão pede no mínimo 300 e no máximo 40%
+       — abaixo de 300 o botão e a frase começam a quebrar em duas linhas. */
+    grid-template-columns: 1fr minmax(300px, 40%);
+    align-items: center;
+    /*
+     * ⚠️ O CUSTO DO BLOCO DE DECISÃO VAI A ZERO, e isso é o que solta o sprite.
+     *
+     * `--tk-hero-bloco` existe pra a arte saber quanto espaço há ABAIXO dela
+     * antes do nome. Lado a lado não há nada abaixo: a coluna da arte é o hero
+     * inteiro. Deixar os 146px aqui faria a conta reservar espaço pra um bloco
+     * que está do lado, e o bicho continuaria pequeno pelo motivo errado.
+     */
+    --tk-hero-bloco: 0px;
+  }
+
+  .tk-home > .tk-hero > .tk-hero-art {
+    grid-row: 1;
+    grid-column: 1;
+    height: 100%;
+  }
+
+  .tk-home > .tk-hero > .tk-hero-base {
+    grid-row: 1;
+    grid-column: 2;
+    justify-content: center;
+    padding: var(--tk-s6) var(--tk-s6) var(--tk-s6) 0;
+    /*
+     * O véu do bloco de decisão era VERTICAL — ele escurecia de cima pra baixo
+     * porque o texto pousava sobre a barriga do sprite. Lado a lado o texto não
+     * pousa sobre nada: ele tem coluna própria. O véu sai, e o que garante o
+     * contraste passa a ser o degradê do próprio hero, que nesse ponto já está
+     * na parte clara (tema claro) ou escura (tema escuro) da rampa.
+     */
+    background: none;
+    text-align: left;
+    align-items: flex-start;
+  }
+
+  /* Alinhados à esquerda junto com o bloco: centralizado numa coluna estreita ao
+     lado de uma arte grande, o texto parecia solto no meio do nada. */
+  .tk-home > .tk-hero > .tk-hero-base .tk-hero-name,
+  .tk-home > .tk-hero > .tk-hero-base .tk-hero-frase {
+    text-align: left;
+  }
+
+  .tk-home > .tk-hero > .tk-hero-acoes {
+    justify-content: flex-start;
+  }
+
+  /* O número gigante acompanha a arte em vez de ficar no meio do hero: no meio,
+     ele passaria por trás do NOME, que é onde ele não pode estar. */
+  .tk-home > .tk-hero > .tk-hero-numero {
+    left: 30%;
+  }
+}
+
+/*
+ * ⚠️ A SOMBRA DE CHÃO SAI no hero deitado, e a razão é que ela DESCOLOU.
+ *
+ * `.tk-hero-chao` é uma elipse em `bottom: 2%` da caixa da arte. Empilhado isso
+ * cai debaixo dos pés, porque a caixa da arte termina onde a silhueta termina.
+ * Lado a lado, a caixa da arte é o hero INTEIRO e o sprite fica alinhado pelo
+ * topo — medido em 1080×1920: pés em y=578, sombra em y=636. Cinquenta e oito
+ * pixels de distância, e o que se vê é uma mancha cinza boiando abaixo do bicho.
+ *
+ * Dava pra recalcular a posição dela a partir de `--tk-art-alt` e do lado do
+ * sprite, mas isso seria reconstruir no CSS uma conta que já mora no `min()` da
+ * imagem — e duas cópias da mesma conta é o que já dessincronizou o hero três
+ * vezes. Aqui a sombra sai, e a profundidade fica por conta dos `drop-shadow`
+ * da própria arte, que acompanham a silhueta por construção.
+ */
+@media (min-width: 900px) {
+  .tk-home > .tk-hero > .tk-hero-art .tk-hero-chao,
+  .tk-home > .tk-hero > .tk-hero-chao {
+    display: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TELA MUITO ALTA — monitor em pé, e o app não pode ficar amontoado no topo
+   ═══════════════════════════════════════════════════════════════════════════
+
+   "pc vertical" — medido em 1080×1920: a coluna da home ocupa os 1.856px, mas o
+   CONTEÚDO acaba em y=892. Mil pixels de vazio embaixo, com tudo espremido em
+   cima. O hero tem teto de 620px (pra não virar meia página num tablet), então
+   ele não absorve a sobra, e nada mais na coluna é elástico.
+
+   `safe center` distribui a sobra em vez de empilhar tudo no topo — e o `safe`
+   é o que impede o efeito colateral clássico do `center` em flexbox: quando o
+   conteúdo é MAIOR que a caixa, `center` corta o começo e a rolagem não alcança.
+   Com `safe`, nesse caso ele cai pra `start` sozinho.
+
+   A partir de 1000px de altura, que é onde a sobra começa a ser visível — abaixo
+   disso a home já usa a tela inteira e centralizar não mudaria nada.
+*/
+@media (min-height: 1000px) {
+  .tk-home {
+    justify-content: safe center;
+  }
+}

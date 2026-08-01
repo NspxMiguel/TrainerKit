@@ -2459,6 +2459,29 @@
 }
 
 /*
+ * ⚠️ ALVO DE 44px NUM SEGMENTO DE 32.
+ *
+ * Achado varrendo o app em 1366×768: "Todos · 1.182" e "Meus · 4" saíam 426×32,
+ * e o app tem compromisso escrito de 44px em qualquer coisa tocável. O
+ * segmentado compacto tem 32 de propósito — é a altura do controle do sistema em
+ * contexto denso, e engordar pra 44 empurraria a grade da Pokédex pra baixo.
+ *
+ * Mesma saída dos outros três casos deste arquivo (o avatar, o ✕ do pop-up, os
+ * pontinhos de paginação): separar o que se VÊ do que se TOCA. A área cresce só
+ * na vertical, então ela não invade o segmento vizinho — os três dividem a
+ * largura, e é na largura que uma sobreposição roubaria o toque.
+ */
+.tk-segment[data-compact] .tk-segment-btn::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 44px;
+  transform: translateY(-50%);
+}
+
+/*
  * Quatro opcoes num controle desenhado pra tres.
  *
  * A opcao "Grátis" da IA virou a quarta, e o mesmo espaco passou a ser dividido
