@@ -58,12 +58,25 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
+    <!--
+      ⚠️ AS FONTES SAO DA MESMA ORIGEM, e nao do CDN do Google.
+
+      Aqui havia dois `preconnect` e um `stylesheet` apontando pra
+      `fonts.googleapis.com`. A tela de Privacidade promete, com estas palavras:
+      "Se voce deixar a IA e a voz desligadas, NADA SAI" — e lista quem recebe
+      algo (Groq, Microsoft, ElevenLabs, Vercel, GitHub Pages). O Google nao
+      estava na lista, e mesmo assim toda abertura do app entregava IP e
+      User-Agent pra ele, antes de a pessoa tocar em nada.
+
+      Havia duas saidas: declarar o Google, ou tirar o Google. A segunda deixa a
+      frase verdadeira em vez de menor — e conserta o offline de quebra, porque
+      sem internet o app caia pra fonte do sistema e mudava de cara.
+
+      Os arquivos vem de `pnpm --filter @trainerkit/web fontes`, que o `build`
+      roda antes. Ver a nota longa em `scripts/fetch-fontes.ts`, inclusive a
+      licenca (SIL OFL 1.1, que permite redistribuir).
+    -->
+    <link href="/fontes/fontes.css" rel="stylesheet" />
   </head>
   <body>
     <div id="root"></div>

@@ -79,6 +79,16 @@ export function PrivacyScreen() {
         t("privacy.third.photo"),
         t("privacy.third.ms"),
         t("privacy.third.eleven"),
+        /*
+          ⚠️ AS IMAGENS FALTAVAM NESTA LISTA, e a frase de cima dizia "só a IA e
+          a voz". Os sprites são buscados do GitHub enquanto a pessoa navega,
+          com a IA e a voz desligadas — então a promessa estava errada por
+          omissão. É o mesmo descuido das fontes, que vinham do CDN do Google e
+          agora são auto-hospedadas; aqui não dá pra auto-hospedar (são milhares
+          de imagens), então a saída certa é DECLARAR e apontar as duas formas
+          de desligar: baixar pro aparelho, ou "Sem imagens".
+        */
+        t("privacy.third.img"),
         t("privacy.third.host"),
         t("privacy.third.none"),
       ])}
