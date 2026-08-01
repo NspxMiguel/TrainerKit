@@ -2355,7 +2355,9 @@
    */
   overscroll-behavior-x: contain;
   display: flex;
-  gap: 6px;
+  /* 10 na vertical: e o que impede a area de toque de um chip de encostar na
+     do chip da linha de cima. Ver a nota em `.tk-chip`. */
+  gap: 10px 6px;
   overflow-x: auto;
   scrollbar-width: none;
   padding-bottom: 2px;
@@ -2372,14 +2374,50 @@
 
 .tk-chip {
   flex: none;
-  height: 32px;
+  /*
+   * ⚠️ 36px, e nao 32 — e o vao da fila subiu junto pra 10.
+   *
+   * Medido no "Monta um time": os dezenove chips de tipo saiam 32px de altura,
+   * contra o compromisso de 44 do app. Aqui o truque da area invisivel de 44
+   * NAO serve sozinho: os chips ficam em GRADE, com quebra de linha, e o vao
+   * entre linhas era 6px. Crescer 6 pra cada lado faria a area de um chip
+   * encostar na do chip de cima — e um toque perto da borda acionaria o errado,
+   * que e pior que o alvo pequeno.
+   *
+   * Com 36 de altura a area cresce so 4 pra cada lado, e com 10 de vao sobram
+   * 2px entre uma area e a seguinte. A grade fica ~12% mais alta; e o preco de
+   * o dedo acertar o tipo que ele mirou.
+   */
+  height: 36px;
   padding: 0 14px;
-  border-radius: 16px;
+  border-radius: 18px;
   background: var(--tk-surf2);
   border: 1px solid var(--tk-line);
   font: 600 12px var(--tk-font);
   color: var(--tk-txt2);
   white-space: nowrap;
+  position: relative;
+}
+
+/*
+ * ⚠️ O CHIP QUE E BOTAO TEM 44px DE VERDADE — aqui o truque da area invisivel
+ * NAO funciona, e eu tentei antes de descobrir.
+ *
+ * `.tk-chips` e um contentor que ROLA na horizontal (`overflow-x`), e rolagem
+ * num eixo recorta o outro: um `::after` de 44px dentro de um chip de 36 e
+ * cortado pelo proprio scroller. Medi com `elementFromPoint` — o toque 3px acima
+ * do chip caía na folha, nao nele. A area existia no CSS e nao existia no dedo.
+ *
+ * E a diferenca pro segmentado, onde o mesmo truque funciona: la o trilho tem
+ * 3px de recuo e `overflow: visible`, entao ha pra onde crescer.
+ *
+ * Sem para onde crescer, so resta crescer de verdade. Custa 8px de altura numa
+ * fila que rola — o preço mais barato desta varredura inteira.
+ */
+button.tk-chip,
+.tk-chip[role="button"] {
+  height: 44px;
+  border-radius: 22px;
 }
 
 .tk-chip[data-on] {
@@ -2443,10 +2481,21 @@
   background: none;
   color: var(--tk-txt3);
   font: 600 13px var(--tk-font);
+  /* ⚠️ `visible`: o corte mudou pro `.tk-segment-txt`. Ver a nota no
+     `ui/Segmented.tsx` — com `hidden` aqui, a área de toque de 44px era
+     recortada pela caixa de 38 e não valia nada. */
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 200ms var(--tk-ease-glass);
+}
+
+.tk-segment-txt {
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: color 200ms var(--tk-ease-glass);
 }
 
 .tk-segment-btn[data-on] {
@@ -2459,19 +2508,20 @@
 }
 
 /*
- * ⚠️ ALVO DE 44px NUM SEGMENTO DE 32.
+ * ⚠️ ALVO DE 44px EM TODO SEGMENTO — 32px no compacto, 38 no normal.
  *
- * Achado varrendo o app em 1366×768: "Todos · 1.182" e "Meus · 4" saíam 426×32,
- * e o app tem compromisso escrito de 44px em qualquer coisa tocável. O
- * segmentado compacto tem 32 de propósito — é a altura do controle do sistema em
- * contexto denso, e engordar pra 44 empurraria a grade da Pokédex pra baixo.
+ * Achado varrendo o app: "Todos · 1.182" e "Meus · 4" saíam 426×32 na Pokédex, e
+ * "Raide"/"PvP" saíam 284×38 no "Monta um time". O app tem compromisso escrito
+ * de 44px em qualquer coisa tocável.
  *
- * Mesma saída dos outros três casos deste arquivo (o avatar, o ✕ do pop-up, os
- * pontinhos de paginação): separar o que se VÊ do que se TOCA. A área cresce só
- * na vertical, então ela não invade o segmento vizinho — os três dividem a
- * largura, e é na largura que uma sobreposição roubaria o toque.
+ * As duas alturas são de propósito — é a altura do controle do sistema, e
+ * engordar pra 44 empurraria a grade e o formulário pra baixo. Mesma saída dos
+ * outros casos deste arquivo (o avatar, o ✕ do pop-up, os pontinhos): separar o
+ * que se VÊ do que se TOCA. A área cresce só na VERTICAL, então ela não invade o
+ * segmento vizinho — eles dividem a LARGURA, e é ali que uma sobreposição
+ * roubaria o toque.
  */
-.tk-segment[data-compact] .tk-segment-btn::after {
+.tk-segment-btn::after {
   content: "";
   position: absolute;
   left: 0;
