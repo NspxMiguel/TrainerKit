@@ -107,6 +107,27 @@ export interface VerdictInput {
 const ACTIONS: readonly Action[] = ["investir", "evoluir", "guardar", "transferir"];
 
 /**
+ * Os vereditos que COBRAM alguma coisa.
+ *
+ * ⚠️ Mora aqui, e nao na tela, porque DUAS telas dependem dele e elas ja se
+ * contradisseram uma vez ("aq diz investir e no outro diz transferir").
+ *
+ * `guardar` esta de fora: e o veredito de quem nao precisa fazer nada. Ele nao
+ * entra na fila da home, nao aparece na faxina e nao cobra nada — e foi
+ * exatamente por isso que o botao "Discordo" era UI morta num "Guardar":
+ * discordar silencia uma cobranca que nunca existiu.
+ *
+ * Quem oferecer uma saida ("Discordo", "Já fiz isso") tem que perguntar a esta
+ * lista se ha o que sair.
+ */
+export const ACOES_QUE_COBRAM: readonly Action[] = [
+  "descobrir",
+  "evoluir",
+  "investir",
+  "transferir",
+];
+
+/**
  * Chave de traducao de cada acao. Nao e o rotulo — o rotulo depende do idioma e
  * mora no dicionario da interface.
  */
