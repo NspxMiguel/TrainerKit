@@ -7,7 +7,7 @@ import {
   type MoveWithPvp,
 } from "@trainerkit/core";
 
-import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
+import { canonico, type Dataset, type DatasetSpecies } from "../data/useDataset.ts";
 import type { OwnedPokemon } from "../storage/collection.ts";
 
 /**
@@ -547,7 +547,17 @@ export function speciesDossier(
 
   /* ------------------------------------------------------- os dele */
 
-  const meus = owned.filter((o) => o.speciesId === species.id);
+  /*
+   * ⚠️ PELO CANÔNICO, senão a IA jura que ele não tem o bicho.
+   *
+   * A comparação era de id cru, e a coleção guarda o id da FORMA: o Venusaur
+   * dele está salvo como `venusaur_normal` e a ficha aberta pela Pokédex é
+   * `venusaur`. O dossiê saía sem a linha "o jogador tem 1", e o modelo então
+   * responde com toda a confiança que ele não tem nenhum — a mesma família dos
+   * dois defeitos que ele já pegou ("nao é 0. nao ta cadastrado porraaaaaa").
+   */
+  const canon = canonico(data.species);
+  const meus = owned.filter((o) => canon(o.speciesId) === canon(species.id));
   if (meus.length > 0) {
     linhas.push(
       `O jogador tem ${meus.length}: ` +

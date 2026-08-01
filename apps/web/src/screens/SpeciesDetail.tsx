@@ -23,7 +23,12 @@ import {
   type PapelMax,
 } from "@trainerkit/core";
 
-import { tetoObservavel, type Dataset, type DatasetSpecies } from "../data/useDataset.ts";
+import {
+  canonico,
+  tetoObservavel,
+  type Dataset,
+  type DatasetSpecies,
+} from "../data/useDataset.ts";
 import { moveLabel, useLanguage, useShowTranslation } from "../i18n/language.ts";
 import { useT, type Key } from "../i18n/t.ts";
 import { useSetup } from "../onboarding/setup.ts";
@@ -138,10 +143,24 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
    * Procurando por id primeiro (quando veio) e por especie depois, a mesma tela
    * responde as duas perguntas com o mesmo Pokemon, venha de onde vier.
    */
+  /*
+   * ⚠️ A BUSCA POR ESPÉCIE PASSA PELO CANÔNICO.
+   *
+   * "ele duplico e tem 2 venusaur agr" — o conserto daquela vez foi procurar
+   * por espécie quando `owned` não veio. Mas a comparação era de id CRU, e o
+   * id da coleção pode ser uma forma cosmética: o Venusaur dele está salvo
+   * como `venusaur_normal`, e a Pokédex abre `venusaur` (a lista só mostra as
+   * formas canônicas). Os dois são o mesmo Pokémon com duas escritas.
+   *
+   * Sem isto, abrir Venusaur pela Pokédex mostrava a ficha como se ele não
+   * tivesse nenhum: sem veredito, sem "Ver o IV do meu", e com "Eu tenho esse"
+   * oferecido — que criaria exatamente o segundo Venusaur de novo.
+   */
+  const canon = useMemo(() => canonico(data.species), [data.species]);
   const salvo =
     items?.find((x) => x.id === owned?.id) ??
     owned ??
-    items?.find((x) => x.speciesId === especieAberta.id);
+    items?.find((x) => canon(x.speciesId) === canon(especieAberta.id));
   const species =
     (salvo ? data.species.find((s) => s.id === salvo.speciesId) : undefined) ?? especieAberta;
   /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
