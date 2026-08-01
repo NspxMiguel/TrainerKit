@@ -489,7 +489,7 @@
        linear-gradient(180deg, p1 0%, p2 48%, p3 72%)"). Com elas o brilho fica
        no terco final em vez de espalhado, que e o volume que ele reconheceu
        como melhor. */
-    linear-gradient(180deg, var(--tk-hero-grad, var(--tk-tipo-normal)), transparent 100%);
+    linear-gradient(180deg, var(--tk-hero-grad, var(--tk-tipo-normal)), var(--tk-hero-fim, transparent) 100%);
   overflow: hidden;
 }
 
@@ -506,7 +506,7 @@
   background: linear-gradient(
     180deg,
     var(--tk-hero-grad-claro, var(--tk-hero-grad, var(--tk-tipo-normal))),
-    transparent 100%
+    var(--tk-hero-fim, transparent) 100%
   );
 }
 
@@ -515,7 +515,7 @@
     background: linear-gradient(
       180deg,
       var(--tk-hero-grad-claro, var(--tk-hero-grad, var(--tk-tipo-normal))),
-      transparent 100%
+      var(--tk-hero-fim, transparent) 100%
     );
   }
 }
@@ -523,9 +523,42 @@
 @media (min-width: 640px) {
   .tk-hero {
     width: auto;
+    /*
+     * ⚠️ `max-width: none` — sem isto o hero fica preso em 448px.
+     *
+     * No telefone ele é full-bleed por um truque: `width: 100vw` pra escapar da
+     * goteira, com `max-width: var(--tk-container)` pra não estourar a coluna.
+     * Virando cartão, `width: auto` já o devolve pro fluxo — mas o teto ficou,
+     * e o teto é o token do TELEFONE.
+     *
+     * Passava despercebido entre 700 e 899px, onde o token vira 680 e coincide
+     * com a coluna. Acima de 900 a coluna vai pra 860 e o token continua 448:
+     * medido, o hero saía com 448 no meio de uma coluna de 860, enquanto o botão
+     * de escanear e os dois cartões abaixo ocupavam os 860. Um cartão mais
+     * estreito que todo o resto da tela, sem motivo visível.
+     */
+    max-width: none;
     margin-left: 0;
     margin-right: 0;
     border-radius: 28px;
+    /*
+     * ⚠️ AQUI O HERO VOLTA A FECHAR, e é o oposto do que ele faz no telefone.
+     *
+     * No telefone ele é FULL-BLEED: não tem borda em lugar nenhum, e o pé
+     * dissolve em `transparent` justamente pra não haver emenda com a página
+     * (ver a nota longa sobre o pé do hero, lá em cima).
+     *
+     * A partir de 640px ele deixa de encostar nas bordas e vira um CARTÃO, com
+     * raio de 28px. E aí a mesma dissolução vira defeito: um cartão com três
+     * arestas nítidas e a quarta desbotando parece inacabado — foi o que a
+     * captura em 768×1024 mostrou.
+     *
+     * As duas formas estão certas, cada uma pro que ela é: quem não tem borda
+     * dissolve, quem tem borda fecha. `--tk-hero-fim` é o que decide, e as três
+     * camadas do hero (degradê, scrim e véu do bloco de decisão) leem ele — então
+     * não há como uma fechar e a outra não.
+     */
+    --tk-hero-fim: var(--tk-hero-ink);
   }
 }
 
@@ -746,7 +779,7 @@
     rgba(var(--tk-hero-veu), 0) 0%,
     rgba(var(--tk-hero-veu), 0) 50%,
     rgba(var(--tk-hero-veu), var(--tk-hero-veu-forca, 0.55)) 82%,
-    rgba(var(--tk-hero-veu), 0) 100%
+    var(--tk-hero-fim, rgba(var(--tk-hero-veu), 0)) 100%
   );
   pointer-events: none;
 }
@@ -881,7 +914,7 @@
     transparent 0%,
     color-mix(in srgb, var(--tk-hero-ink) 62%, transparent) 42%,
     color-mix(in srgb, var(--tk-hero-ink) 72%, transparent) 88%,
-    transparent 100%
+    var(--tk-hero-fim, transparent) 100%
   );
   color: var(--tk-hero-texto);
 }
@@ -3746,173 +3779,7 @@
   }
 }
 
-@media (min-width: 900px) {
-  .tk-shell {
-    flex-direction: row;
-    justify-content: center;
-    max-width: 1180px;
-    align-items: stretch;
-    gap: var(--tk-s6);
-    padding: 0 var(--tk-gutter);
-  }
 
-  /* A barra deixa de ser flutuante e vira coluna: ela some do rodape, entao o
-     conteudo nao precisa mais reservar espaco embaixo. */
-  .tk-main,
-  [data-platform="iphone"] .tk-main {
-    flex: 1;
-    min-width: 0;
-    /*
-     * Largura util, nao largura maxima.
-     *
-     * Deixar o conteudo esticar ate os 896px que sobram parece "usar a tela",
-     * mas uma linha de texto de 896px e ilegivel — o olho perde o comeco da
-     * linha seguinte. O que ganha com tela grande e a GRADE de especies, e essa
-     * usa `auto-fill` e se vira sozinha. Os cartoes de texto ficam num limite
-     * confortavel e o conjunto centraliza no que sobra.
-     */
-    max-width: 860px;
-    padding: var(--tk-s8) 0 var(--tk-s8);
-  }
-
-  .tk-tabbar,
-  [data-platform="iphone"] .tk-tabbar {
-    /* Antes do conteudo. No DOM o <main> vem primeiro porque no celular a barra
-       fica embaixo; deitado ela precisa ficar a esquerda, e `order` resolve sem
-       mexer na ordem de leitura nem no foco do teclado. */
-    order: -1;
-    position: sticky;
-    top: var(--tk-s8);
-    left: auto;
-    bottom: auto;
-    transform: none;
-    width: 216px;
-    max-width: 216px;
-    height: max-content;
-    /*
-     * ⚠️ `flex-direction: column`, e nao `grid-template-columns`.
-     *
-     * Aqui dizia `grid-template-columns: 1fr; grid-auto-rows: 52px` — e a barra
-     * e `display: flex`. As duas propriedades de grade nao faziam NADA: no iPad
-     * deitado a barra aparecia como uma pilula horizontal flutuando no topo,
-     * por cima do hero. Medido em 1194x834.
-     *
-     * A regra foi escrita pra uma versao anterior da barra, que era grade, e
-     * sobreviveu a troca pro flex sem ninguem notar — porque ninguem abre o app
-     * num iPad deitado durante o desenvolvimento.
-     */
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: var(--tk-s2);
-    border-radius: var(--tk-r-card);
-    align-self: start;
-    margin-top: max(var(--tk-safe-top), calc(env(safe-area-inset-top) + var(--tk-s3)));
-  }
-
-  /*
-   * Na coluna, o item ativo cresce em ALTURA, nao em fatia de linha.
-   *
-   * `flex: 1` e `flex: 1.25` sao a animacao da barra deitada do celular, onde a
-   * barra e uma linha e os itens dividem a largura. Numa coluna de altura
-   * automatica eles esticariam os tres itens pra preencher nada — e o ativo
-   * ficaria com 66px de largura em vez de altura.
-   */
-  .tk-tab,
-  [data-platform="iphone"] .tk-tab {
-    flex: none;
-    width: 100%;
-    height: 52px;
-    margin: 0;
-    border-radius: calc(var(--tk-r-card) - var(--tk-s2));
-  }
-
-  .tk-tab[aria-current="page"],
-  [data-platform="iphone"] .tk-tab[aria-current="page"] {
-    flex: none;
-    height: 56px;
-    margin: 0;
-  }
-
-  /*
-   * ⚠️ A LENTE VIAJA NA VERTICAL, e as contas dela são todas horizontais.
-   *
-   * `.tk-tab-bolha` posiciona por `left`/`width` em fração da barra — é o
-   * desenho da barra DEITADA. Numa coluna ela vira um oval de 85px encalhado no
-   * canto de cima, por cima do ícone da primeira aba. Foi o que apareceu no
-   * iPad deitado assim que a barra virou coluna de verdade.
-   *
-   * Aqui ela troca de eixo: altura de uma linha, largura cheia, e o passo é em
-   * `top`. As três variáveis (`--tk-tab-i`, `--tk-tabs`, `--tk-tab-ativo`)
-   * continuam sendo as mesmas que o React escreve — o que muda é qual eixo lê.
-   */
-  .tk-tab-bolha {
-    top: calc(var(--tk-s2) + var(--tk-tab-i, 0) * (52px + 2px));
-    left: var(--tk-s2);
-    right: var(--tk-s2);
-    width: auto;
-    height: 52px;
-    border-radius: calc(var(--tk-r-card) - var(--tk-s2));
-  }
-
-  /* Deitada, a aba e icone + rotulo lado a lado, alinhados a esquerda — a
-     mesma leitura de uma lista, que e o que uma barra lateral e. */
-  .tk-tab,
-  [data-platform="iphone"] .tk-tab {
-    flex-direction: row;
-    justify-content: flex-start;
-    gap: var(--tk-s3);
-    padding: 0 var(--tk-s4);
-  }
-
-  .tk-tab-label,
-  [data-platform="iphone"] .tk-tabbar .tk-tab-label {
-    font-size: 14px;
-    max-height: none;
-  }
-
-  /*
-   * ⚠️ O bloco do `.tk-tab-pill` foi APAGADO daqui.
-   *
-   * Ele mirava uma pilula absoluta que viajava entre as abas — desenho que foi
-   * substituido faz tempo por "o item ativo E a bolha" (ver `.tk-tab`). O
-   * seletor nao casava com nada havia varias versoes, e ficou dando a impressao
-   * de que a barra lateral estava resolvida.
-   */
-
-  /* Sem barra embaixo nao ha borda de rolagem pra suavizar, e o botao de
-     adicionar volta pro canto do CONTEUDO, nao da janela. */
-  .tk-scroll-edge {
-    display: none;
-  }
-
-  .tk-fab,
-  [data-platform="iphone"] .tk-fab {
-    bottom: var(--tk-s8);
-    right: max(var(--tk-gutter), calc(50vw - 1180px / 2 + var(--tk-gutter)));
-  }
-
-  .tk-strip,
-  [data-platform="iphone"] .tk-strip {
-    bottom: var(--tk-s5);
-    max-width: 420px;
-  }
-
-  /* Com o dobro de largura, tres colunas de especie viram um desperdicio de
-     linha. `auto-fill` acha quantas cabem em vez de eu adivinhar. */
-  .tk-species-grid {
-    grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
-  }
-
-  /* As folhas continuam sendo uma coluna legivel — texto longo em 1180px de
-     largura e ilegivel, e essa e a unica coisa que a tela grande NAO melhora. */
-  .tk-sheet-full {
-    max-width: 620px;
-    border-radius: var(--tk-r-sheet);
-    inset: var(--tk-s6) 0;
-    box-shadow: var(--tk-e3);
-  }
-}
 
 @media (min-width: 900px) {
   [data-platform="iphone"] .tk-tabbar[data-min] {
@@ -3948,7 +3815,27 @@
 */
 @media (max-height: 700px) {
   .tk-home > .tk-hero {
-    min-height: 200px;
+    /*
+     * ⚠️ O PISO É DA FAIXA DA ARTE, e não do hero — e essa é a correção.
+     *
+     * Eram 200px de hero, escolhidos pra "o Pokémon não sumir". Medido em
+     * 360×640, com o piso valendo: hero 200, bloco de decisão 147, faixa da arte
+     * **53px**, e o Hoopa saiu com 77 de lado. Um selo, não um retrato.
+     *
+     * O erro é de contabilidade: `--tk-hero-bloco` é um custo FIXO em pixels
+     * (nome + frase + botão + recuos), então tudo que o piso não cobre além dele
+     * é o que sobra pra arte. 200 menos 146 são 54 — o número que apareceu na
+     * tela.
+     *
+     * Escrito como `bloco + 150`, o piso passa a dizer o que quer dizer: cento e
+     * cinquenta pixels de bicho, custe o que custar de altura total. E acompanha
+     * sozinho se o bloco de decisão mudar de tamanho — que é o tipo de coisa que
+     * já dessincronizou três vezes neste arquivo.
+     *
+     * A home rola, e isso continua sendo o custo aceito aqui: "rolagem é um
+     * custo pequeno; um hero sem Pokémon não é um hero".
+     */
+    min-height: calc(var(--tk-hero-bloco, 146px) + 150px);
   }
 
   /* A fila de seleções encostava na barra e as etiquetas "✓ FEITO" saíam
@@ -4916,4 +4803,200 @@
    vidro dela mostraria o véu borrado e mais nada. */
 .tk-pop-corpo > :first-child {
   margin-top: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TELA LARGA — a barra vira coluna
+   ═══════════════════════════════════════════════════════════════════════════
+
+   ⚠️ ESTE BLOCO ESTAVA MORTO EM TRÊS DAS QUATRO PLATAFORMAS, e a causa é a de
+   sempre neste arquivo: especificidade.
+
+   Ele mirava `.tk-tabbar` (0,1,0) e `[data-platform="iphone"] .tk-tabbar`
+   (0,2,0). Depois dele, o bloco "barra assente" declara
+   `[data-platform="android"|"desktop"|"ipad"] .tk-tabbar` — também (0,2,0), e
+   mais abaixo no arquivo. Resultado: no iPhone o modo coluna funcionava, e no
+   computador, no Android e no iPad a `.tk-shell` virava `row` (o layout de
+   coluna) enquanto a barra continuava sendo uma faixa horizontal de 1112px
+   presa no topo. Medido em 1280×800: barra em `y: 52`, largura 1112.
+
+   Ou seja: o "port pra tudo" que ele pediu funcionava exatamente no aparelho em
+   que ele NÃO abriria o app no computador.
+
+   Duas mudanças fazem o bloco valer em todas:
+     · `[data-platform]` sem valor casa qualquer plataforma, com a mesma
+       especificidade (0,2,0) das regras da barra assente;
+     · o bloco foi movido pro FIM do arquivo, porque com especificidade igual
+       quem decide é a ordem.
+
+   Mover em vez de subir a especificidade é de propósito: `!important` ou um
+   seletor mais forte aqui venceria hoje e esconderia a próxima colisão. Ordem é
+   uma regra que se lê.
+*/
+@media (min-width: 900px) {
+  .tk-shell {
+    flex-direction: row;
+    justify-content: center;
+    max-width: 1180px;
+    align-items: stretch;
+    gap: var(--tk-s6);
+    padding: 0 var(--tk-gutter);
+  }
+
+  /* A barra deixa de ser flutuante e vira coluna: ela some do rodape, entao o
+     conteudo nao precisa mais reservar espaco embaixo. */
+  .tk-main,
+  [data-platform] .tk-main {
+    flex: 1;
+    min-width: 0;
+    /*
+     * Largura util, nao largura maxima.
+     *
+     * Deixar o conteudo esticar ate os 896px que sobram parece "usar a tela",
+     * mas uma linha de texto de 896px e ilegivel — o olho perde o comeco da
+     * linha seguinte. O que ganha com tela grande e a GRADE de especies, e essa
+     * usa `auto-fill` e se vira sozinha. Os cartoes de texto ficam num limite
+     * confortavel e o conjunto centraliza no que sobra.
+     */
+    max-width: 860px;
+    padding: var(--tk-s8) 0 var(--tk-s8);
+  }
+
+  .tk-tabbar,
+  [data-platform] .tk-tabbar {
+    /* Antes do conteudo. No DOM o <main> vem primeiro porque no celular a barra
+       fica embaixo; deitado ela precisa ficar a esquerda, e `order` resolve sem
+       mexer na ordem de leitura nem no foco do teclado. */
+    order: -1;
+    position: sticky;
+    top: var(--tk-s8);
+    left: auto;
+    bottom: auto;
+    transform: none;
+    width: 216px;
+    max-width: 216px;
+    height: max-content;
+    /*
+     * ⚠️ `flex-direction: column`, e nao `grid-template-columns`.
+     *
+     * Aqui dizia `grid-template-columns: 1fr; grid-auto-rows: 52px` — e a barra
+     * e `display: flex`. As duas propriedades de grade nao faziam NADA: no iPad
+     * deitado a barra aparecia como uma pilula horizontal flutuando no topo,
+     * por cima do hero. Medido em 1194x834.
+     *
+     * A regra foi escrita pra uma versao anterior da barra, que era grade, e
+     * sobreviveu a troca pro flex sem ninguem notar — porque ninguem abre o app
+     * num iPad deitado durante o desenvolvimento.
+     */
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--tk-s2);
+    border-radius: var(--tk-r-card);
+    align-self: start;
+    margin-top: max(var(--tk-safe-top), calc(env(safe-area-inset-top) + var(--tk-s3)));
+  }
+
+  /*
+   * Na coluna, o item ativo cresce em ALTURA, nao em fatia de linha.
+   *
+   * `flex: 1` e `flex: 1.25` sao a animacao da barra deitada do celular, onde a
+   * barra e uma linha e os itens dividem a largura. Numa coluna de altura
+   * automatica eles esticariam os tres itens pra preencher nada — e o ativo
+   * ficaria com 66px de largura em vez de altura.
+   */
+  .tk-tab,
+  [data-platform] .tk-tab {
+    flex: none;
+    width: 100%;
+    height: 52px;
+    margin: 0;
+    border-radius: calc(var(--tk-r-card) - var(--tk-s2));
+  }
+
+  .tk-tab[aria-current="page"],
+  [data-platform] .tk-tab[aria-current="page"] {
+    flex: none;
+    height: 56px;
+    margin: 0;
+  }
+
+  /*
+   * ⚠️ A LENTE VIAJA NA VERTICAL, e as contas dela são todas horizontais.
+   *
+   * `.tk-tab-bolha` posiciona por `left`/`width` em fração da barra — é o
+   * desenho da barra DEITADA. Numa coluna ela vira um oval de 85px encalhado no
+   * canto de cima, por cima do ícone da primeira aba. Foi o que apareceu no
+   * iPad deitado assim que a barra virou coluna de verdade.
+   *
+   * Aqui ela troca de eixo: altura de uma linha, largura cheia, e o passo é em
+   * `top`. As três variáveis (`--tk-tab-i`, `--tk-tabs`, `--tk-tab-ativo`)
+   * continuam sendo as mesmas que o React escreve — o que muda é qual eixo lê.
+   */
+  .tk-tab-bolha {
+    top: calc(var(--tk-s2) + var(--tk-tab-i, 0) * (52px + 2px));
+    left: var(--tk-s2);
+    right: var(--tk-s2);
+    width: auto;
+    height: 52px;
+    border-radius: calc(var(--tk-r-card) - var(--tk-s2));
+  }
+
+  /* Deitada, a aba e icone + rotulo lado a lado, alinhados a esquerda — a
+     mesma leitura de uma lista, que e o que uma barra lateral e. */
+  .tk-tab,
+  [data-platform] .tk-tab {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: var(--tk-s3);
+    padding: 0 var(--tk-s4);
+  }
+
+  .tk-tab-label,
+  [data-platform] .tk-tabbar .tk-tab-label {
+    font-size: 14px;
+    max-height: none;
+  }
+
+  /*
+   * ⚠️ O bloco do `.tk-tab-pill` foi APAGADO daqui.
+   *
+   * Ele mirava uma pilula absoluta que viajava entre as abas — desenho que foi
+   * substituido faz tempo por "o item ativo E a bolha" (ver `.tk-tab`). O
+   * seletor nao casava com nada havia varias versoes, e ficou dando a impressao
+   * de que a barra lateral estava resolvida.
+   */
+
+  /* Sem barra embaixo nao ha borda de rolagem pra suavizar, e o botao de
+     adicionar volta pro canto do CONTEUDO, nao da janela. */
+  .tk-scroll-edge {
+    display: none;
+  }
+
+  .tk-fab,
+  [data-platform] .tk-fab {
+    bottom: var(--tk-s8);
+    right: max(var(--tk-gutter), calc(50vw - 1180px / 2 + var(--tk-gutter)));
+  }
+
+  .tk-strip,
+  [data-platform] .tk-strip {
+    bottom: var(--tk-s5);
+    max-width: 420px;
+  }
+
+  /* Com o dobro de largura, tres colunas de especie viram um desperdicio de
+     linha. `auto-fill` acha quantas cabem em vez de eu adivinhar. */
+  .tk-species-grid {
+    grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  }
+
+  /* As folhas continuam sendo uma coluna legivel — texto longo em 1180px de
+     largura e ilegivel, e essa e a unica coisa que a tela grande NAO melhora. */
+  .tk-sheet-full {
+    max-width: 620px;
+    border-radius: var(--tk-r-sheet);
+    inset: var(--tk-s6) 0;
+    box-shadow: var(--tk-e3);
+  }
 }
