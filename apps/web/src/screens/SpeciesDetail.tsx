@@ -749,21 +749,21 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
           </div>
           <section className="tk-card" style={{ marginTop: 10, display: "grid", gap: 10 }}>
             {maxInfo.gigantamax && (
-              <div className="tk-row tk-row--semselo">
+              <div className="tk-row tk-row--semselo tk-row--empilha">
                 <span className="tk-row-meio">
                   <span className="tk-row-label">{t("species.gigantamax")}</span>
                 </span>
                 <span className="tk-row-value">{t("common.yes")}</span>
               </div>
             )}
-            <div className="tk-row tk-row--semselo">
+            <div className="tk-row tk-row--semselo tk-row--empilha">
               <span className="tk-row-meio">
                 <span className="tk-row-label">{t("species.maxRole")}</span>
               </span>
               <span className="tk-row-value">{t(PAPEL_MAX_KEY[maxInfo.papel])}</span>
             </div>
             {maxInfo.custo && (
-              <div className="tk-row tk-row--semselo">
+              <div className="tk-row tk-row--semselo tk-row--empilha">
                 <span className="tk-row-meio">
                   <span className="tk-row-label">{t("species.maxCost")}</span>
                 </span>

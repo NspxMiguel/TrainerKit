@@ -3,7 +3,14 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
-import { ACOES_QUE_COBRAM, cumpriu, decide, formatTrace, type Action } from "./verdict.js";
+import {
+  ACOES_QUE_COBRAM,
+  cumpriu,
+  decide,
+  formatTrace,
+  pedeMotivo,
+  type Action,
+} from "./verdict.js";
 import type { BaseStats } from "./types.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -204,5 +211,34 @@ describe("cumpriu", () => {
    */
   it("ignora um 'guardar' marcado como feito por uma versao antiga", () => {
     expect(cumpriu("guardar", "guardar")).toBe(false);
+  });
+});
+
+describe("pedeMotivo", () => {
+  /*
+   * "Gosto dele", "Eu uso ele mesmo", "É um desafio meu" respondem "por que
+   * voce FICA com ele". Essa pergunta so existe quando o conselho foi SOLTAR.
+   */
+  it("so o transferir pede motivo", () => {
+    expect(pedeMotivo("transferir")).toBe(true);
+    for (const a of ["investir", "evoluir", "descobrir"] as const) {
+      expect(pedeMotivo(a), a).toBe(false);
+    }
+  });
+
+  /*
+   * Discordar de "guardar" nao existe (o botao nem aparece), mas a funcao tem
+   * que responder alguma coisa — e o "false" e o certo: se um dia ele voltar a
+   * cobrar, quem for mexer tem que decidir de proposito, nao herdar um "sim".
+   */
+  it("guardar nao pede motivo, mesmo nao chegando aqui hoje", () => {
+    expect(pedeMotivo("guardar")).toBe(false);
+  });
+
+  it("so pede motivo onde ha cobranca — as duas regras nao podem se contradizer", () => {
+    const todas: Action[] = ["investir", "evoluir", "guardar", "transferir", "descobrir"];
+    for (const a of todas) {
+      if (pedeMotivo(a)) expect(ACOES_QUE_COBRAM, a).toContain(a);
+    }
   });
 });

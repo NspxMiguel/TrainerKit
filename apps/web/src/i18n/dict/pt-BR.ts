@@ -113,7 +113,7 @@ export const PT_BR: Dict = {
   "species.maxBattle": "Batalha Max",
   "species.gigantamax": "Gigantamax",
   "species.maxRole": "Papel sugerido",
-  "species.maxCost": "Max Ataques no nível 3",
+  "species.maxCost": "Subir os Max Ataques",
   "species.maxCostValue": "{candy} doces + {xl} XL",
   "species.maxNote": "O papel vem dos stats base — não existe ranking oficial disso. Se ESTE aqui pode Dynamax depende de como você o pegou, e isso não está em dado nenhum.",
   "species.maxRole.atacante": "Ataque",

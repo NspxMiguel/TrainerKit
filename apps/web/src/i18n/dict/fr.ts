@@ -105,7 +105,7 @@ export const FR: Dict = {
   "species.maxBattle": "Combat Max",
   "species.gigantamax": "Gigamax",
   "species.maxRole": "Rôle suggéré",
-  "species.maxCost": "Capacités Max niveau 3",
+  "species.maxCost": "Monter les Capacités Max",
   "species.maxCostValue": "{candy} bonbons + {xl} XL",
   "species.maxNote": "Le rôle vient des stats de base — il n’existe aucun classement officiel. Savoir si CELUI-CI peut Dynamax dépend de sa capture, et cela n’est dans aucune donnée.",
   "species.maxRole.atacante": "Attaque",

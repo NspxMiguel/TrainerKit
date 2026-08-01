@@ -5,6 +5,7 @@ import {
   ACTION_KEYS,
   cumpriu,
   decide,
+  pedeMotivo,
   type VerdictInput,
 } from "@trainerkit/core";
 
@@ -48,6 +49,10 @@ const MOTIVO_KEY: Record<MeuMotivo, Key> = {
   gosto: "verdict.mine.gosto",
   uso: "verdict.mine.uso",
   desafio: "verdict.mine.desafio",
+  // `outro` nunca é exibido — ver a nota em `MeuMotivo` e o `?` logo abaixo.
+  // A entrada existe porque o `Record` é exaustivo, e é bom que seja: uma união
+  // nova sem tradução tem que quebrar a compilação, não a tela.
+  outro: "verdict.mine.kept",
 };
 
 export function VerdictCard({ owned, ...props }: Props) {
@@ -350,12 +355,28 @@ export function VerdictCard({ owned, ...props }: Props) {
 
         A lista mora no core justamente para a home e este cartão não divergirem
         de novo.
+
+        ⚠️ E A PERGUNTA "POR QUÊ?" SÓ APARECE NO TRANSFERIR.
+
+        Os três motivos — gosto dele, eu uso, é um desafio meu — respondem "por
+        que você FICA com ele", e essa pergunta só existe quando o app mandou
+        soltar. Discordar de "Investir" é "não vou gastar poeira nele"; de
+        "Evoluir", "não vou evoluir". Oferecer os três ali era pedir que a
+        pessoa escolhesse a menos errada de três respostas erradas.
+
+        Nos outros o toque em "Discordo" já resolve: grava `outro` e silencia.
+        Não é preguiça de escrever mais motivos — é que o motivo nunca entrou em
+        conta nenhuma. A faxina só olha se EXISTE motivo; o cartão só o repete
+        de volta. Perguntar sem usar a resposta é atrito puro.
       */}
       {owned && temRastro && ACOES_QUE_COBRAM.includes(verdict.action) && (
         meuMotivo ? (
           <div className="tk-meu-motivo">
             <span>
-              {t("verdict.mine.kept")} — {t(MOTIVO_KEY[meuMotivo])}
+              {/* Sem sufixo quando não houve motivo escolhido: "Decisão sua —
+                  Outro" seria uma palavra a mais dizendo nada. */}
+              {t("verdict.mine.kept")}
+              {meuMotivo === "outro" ? "" : ` — ${t(MOTIVO_KEY[meuMotivo])}`}
             </span>
             <button
               type="button"
@@ -391,7 +412,12 @@ export function VerdictCard({ owned, ...props }: Props) {
             type="button"
             className="tk-btn tk-btn--ghost tk-btn--block"
             style={{ height: 38, fontSize: 12.5, marginTop: 4 }}
-            onClick={() => setDiscordando(true)}
+            onClick={() => {
+              // A regra mora no core (`pedeMotivo`), não neste componente —
+              // as duas regras irmãs viraram defeito por estarem só aqui.
+              if (pedeMotivo(verdict.action)) setDiscordando(true);
+              else void setMeuMotivo(owned.id, "outro");
+            }}
           >
             {t("verdict.disagree")}
           </button>

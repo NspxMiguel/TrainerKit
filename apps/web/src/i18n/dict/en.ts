@@ -129,7 +129,7 @@ const EN = {
   "species.maxBattle": "Max Battle",
   "species.gigantamax": "Gigantamax",
   "species.maxRole": "Suggested role",
-  "species.maxCost": "Max Moves at level 3",
+  "species.maxCost": "Leveling the Max Moves",
   "species.maxCostValue": "{candy} candy + {xl} XL",
   "species.maxNote": "The role comes from base stats — there is no official ranking for this. Whether THIS one can Dynamax depends on how it was caught, and that is in no dataset.",
   "species.maxRole.atacante": "Attack",

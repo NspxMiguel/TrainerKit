@@ -105,7 +105,7 @@ export const IT: Dict = {
   "species.maxBattle": "Lotta Max",
   "species.gigantamax": "Gigamax",
   "species.maxRole": "Ruolo suggerito",
-  "species.maxCost": "Mosse Max al livello 3",
+  "species.maxCost": "Potenziare le Mosse Max",
   "species.maxCostValue": "{candy} caramelle + {xl} XL",
   "species.maxNote": "Il ruolo deriva dalle statistiche base: non esiste una classifica ufficiale. Se QUESTO esemplare può Dynamax dipende da come è stato catturato, e non è in nessun dato.",
   "species.maxRole.atacante": "Attacco",

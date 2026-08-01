@@ -105,7 +105,7 @@ export const KO: Dict = {
   "species.maxBattle": "맥스 배틀",
   "species.gigantamax": "거다이맥스",
   "species.maxRole": "추천 역할",
-  "species.maxCost": "맥스 기술 레벨 3",
+  "species.maxCost": "맥스 기술 강화",
   "species.maxCostValue": "사탕 {candy}개 + XL {xl}개",
   "species.maxNote": "역할은 종족값에서 추정한 것으로, 공식 순위는 없습니다. 이 개체가 다이맥스할 수 있는지는 잡은 방식에 달려 있고, 어떤 데이터에도 없습니다.",
   "species.maxRole.atacante": "공격",

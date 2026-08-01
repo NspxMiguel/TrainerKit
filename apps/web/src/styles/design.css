@@ -4152,6 +4152,38 @@
   gap: 2px 12px;
 }
 
+/*
+ * ⚠️ A LINHA QUE EMPILHA QUANDO NÃO CABE.
+ *
+ * O `.tk-row` normal é `nowrap` de propósito — nos Ajustes a seta `›` descia
+ * junto e sobrava um chevron solto embaixo do rótulo. Mas nas linhas SEM seta,
+ * onde o valor é uma frase e não uma palavra, o `nowrap` produz o oposto: o
+ * rótulo se espreme até quebrar em quatro linhas enquanto o valor fica numa só.
+ *
+ * Achado no cartão da Batalha Max em 320px e alemão: "Max Attacken auf Stufe 3"
+ * virou quatro linhas ao lado de "501 Bonbons + 150 XL". Em 390px e português
+ * cabia — que é exatamente por que isto não aparece testando num tamanho só.
+ *
+ * Aqui o valor desce inteiro pra segunda linha, alinhado à direita, e o rótulo
+ * recupera a largura toda. Só para linhas sem seta.
+ */
+.tk-row--empilha {
+  flex-wrap: wrap;
+}
+
+.tk-row--empilha > .tk-row-meio {
+  /* Base grande o bastante pra o valor não caber junto quando o espaço aperta —
+     e aí ele quebra pra linha de baixo inteiro, em vez de espremer o rótulo. */
+  flex: 1 1 60%;
+}
+
+.tk-row--empilha > .tk-row-value {
+  margin-left: auto;
+  /* Já na segunda linha, o valor pode ocupar tudo e não precisa truncar. */
+  white-space: normal;
+  text-align: right;
+}
+
 .tk-row-label {
   flex: 1 1 auto;
   min-width: 0;
