@@ -5094,7 +5094,20 @@
    coisa: lá ele é o cabeçalho de uma folha que rola, e empilhado está certo em
    qualquer largura.
 */
-@media (min-width: 900px) {
+/*
+ * ⚠️ A CONDIÇÃO NÃO É LARGURA, É FORMATO — e isso é uma correção.
+ *
+ * Era só `min-width: 900px`, o que deixava de fora o caso mais apertado que
+ * existe: o TELEFONE DEITADO. Medido em 844×390, a ficha do Venusaur ocupava
+ * 280px de hero numa tela de 390 — 72% — e o cartão de veredito começava abaixo
+ * da dobra. A tela larga estava resolvida e a tela BAIXA não.
+ *
+ * O que decide se a arte e a decisão cabem lado a lado não é quantos pixels de
+ * largura há: é a PROPORÇÃO entre largura e altura. 3/2 com altura até 620px é
+ * exatamente "está deitado e é baixo" — pega telefone e tablet virados, e não
+ * pega nenhum aparelho em pé.
+ */
+@media (min-width: 900px), (min-aspect-ratio: 3 / 2) and (max-height: 620px) {
   .tk-home > .tk-hero {
     grid-template-rows: 1fr;
     /* A arte fica com o que sobrar; a decisão pede no mínimo 300 e no máximo 40%
@@ -5168,7 +5181,7 @@
  * vezes. Aqui a sombra sai, e a profundidade fica por conta dos `drop-shadow`
  * da própria arte, que acompanham a silhueta por construção.
  */
-@media (min-width: 900px) {
+@media (min-width: 900px), (min-aspect-ratio: 3 / 2) and (max-height: 620px) {
   .tk-home > .tk-hero > .tk-hero-art .tk-hero-chao,
   .tk-home > .tk-hero > .tk-hero-chao {
     display: none;
@@ -5195,5 +5208,36 @@
 @media (min-height: 1000px) {
   .tk-home {
     justify-content: safe center;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TELEFONE DEITADO — a ficha não pode ser só o hero
+   ═══════════════════════════════════════════════════════════════════════════
+
+   "analiza todas as telas e todas as resolucoes horizontal vertical 4:3 tudo.
+   pode ficar feio em algumas."
+
+   Ficou. Medido em 844×390 (iPhone deitado), a ficha da espécie: hero com 280px
+   numa tela de 390 — 72% — e o cartão de veredito, que é o ASSUNTO da tela,
+   começando abaixo da dobra. Quem abre a ficha deitado vê um retrato e precisa
+   rolar pra descobrir o que o app achou.
+
+   O hero da ficha não tem teto (`max-height: none`), porque em pé ele é o
+   cabeçalho de uma folha que rola e crescer com a arte está certo. Deitado, o
+   mesmo comportamento come a tela.
+
+   `56svh` deixa o veredito começar sempre acima da dobra, e `svh` e não `vh`
+   pelo mesmo motivo de sempre: no iOS o `vh` conta a barra retraída e erra pra
+   mais justo onde o espaço é menor.
+*/
+@media (min-aspect-ratio: 3 / 2) and (max-height: 620px) {
+  .tk-hero--ficha {
+    max-height: 56svh;
+  }
+
+  /* A fila de tipos e o número encostavam no nome com o hero espremido. */
+  .tk-hero--ficha .tk-hero-name {
+    font-size: clamp(24px, 5vw, 34px);
   }
 }
