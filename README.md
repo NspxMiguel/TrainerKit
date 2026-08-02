@@ -68,7 +68,7 @@ The app also **ships no Pokémon artwork**. By default each species shows a badg
 ## Build from source
 
 ```bash
-git clone https://github.com/spxmiguel/TrainerKit.git   # download the source
+git clone https://github.com/NspxMiguel/TrainerKit.git   # download the source
 cd TrainerKit
 pnpm install                                            # install dependencies
 pnpm --filter @trainerkit/dataset refresh               # download GAME_MASTER and build the dataset (~15s, needs network)
@@ -122,4 +122,4 @@ MIT — see [LICENSE](LICENSE). The license covers this repository's code; game 
 
 ---
 
-Made by [@spxmiguel](https://github.com/spxmiguel)
+Made by [@NspxMiguel](https://github.com/NspxMiguel)
