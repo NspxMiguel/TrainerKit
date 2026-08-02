@@ -7,7 +7,7 @@
 # A conta do GitHub foi sinalizada ("tomei flag do github"). As consequencias
 # so apareceram quando eu fui conferir, e sao tres:
 #
-#   · `github.com/spxmiguel/TrainerKit` responde 404 pra quem nao esta logado,
+#   · `github.com/NspxMiguel/TrainerKit` responde 404 pra quem nao esta logado,
 #     mesmo com a API autenticada dizendo que o repo e publico;
 #   · o GitHub Actions NUNCA rodou — zero execucoes, com o workflow correto no
 #     lugar e Actions habilitado. Como o dataset e gerado no CI, o site do
