@@ -71,16 +71,6 @@ export function useFolha(onClose: () => void): {
   const [saindo, setSaindo] = useState(false);
   const timer = useRef<number | null>(null);
 
-  // Enquanto esta folha existe, a barra de abas fica escondida.
-  useEffect(() => {
-    abertas += 1;
-    mudou();
-    return () => {
-      abertas -= 1;
-      mudou();
-    };
-  }, []);
-
   // Desmontar no meio da saida (o pai fechou sozinho) nao pode deixar um
   // `setTimeout` de pe chamando `onClose` numa tela que ja nao existe.
   useEffect(
@@ -107,6 +97,33 @@ export function useFolha(onClose: () => void): {
 
   const fechar = useCallback(() => sair(onClose), [sair, onClose]);
 
+  /*
+   * Enquanto esta folha existe, ela esta na pilha.
+   *
+   * A pilha SUBSTITUI o contador `abertas` que morava aqui. Eram dois fatos
+   * sobre a mesma coisa — quantas folhas ha, e qual e a de cima — e manter os
+   * dois em paralelo e como o contador some de sincronia.
+   *
+   * O `ref` no meio e o que permite registrar UMA vez. `fechar` troca de
+   * identidade sempre que `onClose` troca; um efeito com `[fechar]` na
+   * dependencia se desfaria e refaria a cada render do pai, e entre o desfazer e
+   * o refazer a pilha fica vazia por um instante — tempo suficiente pro
+   * `useSyncExternalStore` ler "nenhuma folha aberta" e a barra lateral piscar.
+   */
+  const fecharRef = useRef(fechar);
+  fecharRef.current = fechar;
+
+  useEffect(() => {
+    const entrada = () => fecharRef.current();
+    pilha.push(entrada);
+    mudou();
+    return () => {
+      const i = pilha.indexOf(entrada);
+      if (i !== -1) pilha.splice(i, 1);
+      mudou();
+    };
+  }, []);
+
   const ref = useRef<HTMLDivElement>(null);
   useGestoVoltar(ref, fechar);
 
@@ -125,7 +142,7 @@ export function useFolha(onClose: () => void): {
  * sem passar. Uma store nova exigiria lembrar de registrar cada uma, que e
  * exatamente o tipo de "lembrar" que ja falhou tres vezes neste arquivo.
  */
-let abertas = 0;
+const pilha: Array<() => void> = [];
 const ouvintesFolha = new Set<() => void>();
 
 function mudou(): void {
@@ -140,7 +157,22 @@ export function useTemFolha(): boolean {
         ouvintesFolha.delete(fn);
       };
     },
-    () => abertas > 0,
+    () => pilha.length > 0,
     () => false,
   );
+}
+
+/**
+ * Fecha a folha de cima, animada, como se fosse a seta de voltar dela.
+ *
+ * Existe pro veu de tela larga (`.tk-folha-scrim`): clicar fora fecha o dialogo
+ * — no computador isso nao e um extra, e o que a pessoa TENTA primeiro, antes
+ * de procurar a seta. No celular o veu nem e desenhado, entao isto nunca roda.
+ *
+ * "De cima" e o fim da pilha porque folha abre folha: a ficha de uma especie sai
+ * de dentro do Monta um Time, que saiu da Pokedex. Fechar a de baixo deixaria a
+ * de cima orfa por cima de um veu que ja nao existe.
+ */
+export function fecharFolhaDeCima(): void {
+  pilha.at(-1)?.();
 }
