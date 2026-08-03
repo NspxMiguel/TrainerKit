@@ -3710,6 +3710,26 @@
   color: var(--tk-ultra-fg);
 }
 
+/*
+ * ⚠️ O ✓ APARECIA NAS DEZ LINHAS.
+ *
+ * Nada nunca escondeu este elemento: o React o imprime em todo item, e a unica
+ * regra que existia pintava ele de violeta — em todos. A lista de idiomas de
+ * Ajustes mostrava dez idiomas todos marcados como o atual, que e exatamente a
+ * informacao que a lista existe pra dar.
+ *
+ * Passou despercebido porque a linha selecionada TAMBEM muda de peso e de cor
+ * (`[data-on]` acima): olhando rapido a linha certa se destaca, e os outros
+ * nove ✓ leem como enfeite de lista. So aparece como erro quando se procura
+ * "qual esta marcado" — que e o que alguem faz na primeira vez.
+ *
+ * `visibility` e nao `display`: a coluna de 18px continua reservada, senao o
+ * nome de cada idioma se estica e a lista dança a cada troca.
+ */
+.tk-lista-radio-item:not([data-on]) .tk-lista-radio-check {
+  visibility: hidden;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    TELA LARGA: a faixa da saudação deixa de existir
    ═══════════════════════════════════════════════════════════════════════════
@@ -3880,7 +3900,23 @@
   width: 100%;
   max-width: none;
   height: calc(64px + env(safe-area-inset-bottom));
-  padding: 0 0 env(safe-area-inset-bottom);
+  /*
+   * ⚠️ A SUPERFÍCIE vai de ponta a ponta; os ITENS param onde o conteúdo para.
+   *
+   * "largura cheia" ali em cima é o Material, e continua valendo pra superfície
+   * — uma barra assente que não encosta nas bordas fica com cara de peça solta.
+   * O que estava errado era os TRÊS ITENS também se espalharem pela janela: numa
+   * janela de PC com 800px o conteúdo tem 680 centrados (`--tk-container` na
+   * faixa de 700–899) e as abas ficavam em 133, 400 e 666 — nenhuma delas
+   * alinhada com nada do que está por cima.
+   *
+   * No celular isto não muda um pixel, e é o teste de que a conta está certa:
+   * em 390px o container é 448, `100% - 448` dá negativo, o `max(0px, …)` zera
+   * o recuo e a barra é exatamente o que sempre foi. O recuo só nasce quando a
+   * janela é mais larga que o texto — que é a definição do problema.
+   */
+  --tk-barra-recuo: max(0px, calc((100% - var(--tk-container)) / 2));
+  padding: 0 var(--tk-barra-recuo) env(safe-area-inset-bottom);
   border-radius: 0;
   /* Opaca de verdade: `--tk-elev` é o único token de superfície que não é véu.
      A tinta da espécie continua, porque ela é do app e não da plataforma. */
@@ -3947,8 +3983,26 @@
   /* 12px de folga lateral, e não 8: a barra é full-bleed, então a pílula da
      PRIMEIRA e da ÚLTIMA aba encosta na borda da tela. 12 é o que dá pra ver que
      ela é uma peça pousada e não um bloco que vazou. */
-  width: calc(100% / var(--tk-tabs, 3) - 24px);
-  left: calc(var(--tk-tab-i, 0) * 100% / var(--tk-tabs, 3) + 12px);
+  /*
+   * ⚠️ A PÍLULA MEDE A FAIXA ÚTIL, e não a barra.
+   *
+   * Ela é `position: absolute`, então `100%` aqui é a caixa de recheio da barra
+   * — a JANELA inteira, recuo incluído. Enquanto o recuo era zero as duas contas
+   * davam no mesmo, e foi por isso que dividir a barra em três funcionou por
+   * tanto tempo. Assim que os itens passaram a parar na largura do conteúdo, a
+   * pílula continuaria dividindo a janela: no PC a 800px ela apareceria uns 60px
+   * à esquerda da aba que devia estar marcando.
+   *
+   * É a quarta vez que este elemento erra por medir a régua errada — as outras
+   * três estão contadas logo acima e no bloco de tela larga. Por isso a faixa
+   * útil é um token e não uma conta repetida: quem mudar o recuo da barra muda a
+   * pílula junto, sem precisar saber que ela existe.
+   */
+  --tk-barra-util: calc(100% - 2 * var(--tk-barra-recuo, 0px));
+  width: calc(var(--tk-barra-util) / var(--tk-tabs, 3) - 24px);
+  left: calc(
+    var(--tk-barra-recuo, 0px) + var(--tk-tab-i, 0) * var(--tk-barra-util) / var(--tk-tabs, 3) + 12px
+  );
   border-radius: 18px;
   /*
    * ⚠️ OPACO E MISTURADO NA SUPERFÍCIE, e não uma cor escura translúcida.
@@ -4914,6 +4968,29 @@
   margin-top: 0;
 }
 
+/*
+ * O QUE HA ATRAS DE UMA FOLHA — nada, no celular; a tela inteira, deitado.
+ *
+ * Fica desligado por padrao de proposito. No celular a folha e `inset: 0` e
+ * cobre tudo: um veu embaixo dela seria uma camada de tela cheia com blur que
+ * ninguem chega a ver, pintada a cada folha aberta. `display: none` nao custa
+ * nada; um `backdrop-filter` invisivel custa quadro.
+ *
+ * Quem liga e o bloco de >=900px, junto com a folha que encolhe pra 620px. Ver
+ * a nota do `.tk-sheet-full` la embaixo pro que aparecia sem ele.
+ */
+.tk-folha-scrim {
+  display: none;
+  position: fixed;
+  inset: 0;
+  /* Entre a barra lateral (1, no bloco deitado) e as folhas (20 e 30). */
+  z-index: 15;
+  background: var(--tk-scrim);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  animation: tk-fade 0.18s var(--tk-ease-out) both;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    TELA LARGA — a barra vira coluna
    ═══════════════════════════════════════════════════════════════════════════
@@ -4943,10 +5020,44 @@
    uma regra que se lê.
 */
 @media (min-width: 900px) {
+  /*
+   * As tres medidas do layout deitado, num lugar so.
+   *
+   * ⚠️ Elas ESTAVAM copiadas na mao. `.tk-fab` dizia `50vw - 1180px / 2 + gutter`
+   * com o 1180 digitado de novo, a 165 linhas do `max-width: 1180px` da
+   * `.tk-shell` — duas copias de um numero que precisa ser o mesmo. Mudar a
+   * largura da coluna em um lugar e o botao de adicionar sair de alinhamento no
+   * outro e o tipo de bug que so aparece depois, e longe da causa.
+   *
+   * `--tk-borda-direita`: a borda direita da SHELL em coordenada de janela. Todo
+   * flutuante ancorado no conteudo usa isto — sem ela cada um inventa a sua
+   * conta e eles param em colunas diferentes.
+   *
+   * `--tk-centro-conteudo`: o centro da `.tk-main`, que NAO e o centro da tela.
+   * A shell e centrada, mas a barra lateral come 216px da esquerda dela: o meio
+   * do conteudo fica meia barra + meio vao a direita do meio da janela.
+   */
+  :root {
+    --tk-shell-max: 1180px;
+    --tk-lateral: 216px;
+    --tk-folha-max: 620px;
+    --tk-borda-direita: max(
+      var(--tk-gutter),
+      calc(50vw - var(--tk-shell-max) / 2 + var(--tk-gutter))
+    );
+    --tk-centro-conteudo: calc(50% + (var(--tk-lateral) + var(--tk-s6)) / 2);
+    /* A borda direita da FOLHA, por dentro do recuo dela. Quem mora dentro de um
+       diálogo se ancora no diálogo, não na janela. */
+    --tk-borda-folha: max(
+      var(--tk-gutter),
+      calc(50vw - var(--tk-folha-max) / 2 + var(--tk-gutter))
+    );
+  }
+
   .tk-shell {
     flex-direction: row;
     justify-content: center;
-    max-width: 1180px;
+    max-width: var(--tk-shell-max);
     align-items: stretch;
     gap: var(--tk-s6);
     padding: 0 var(--tk-gutter);
@@ -4982,9 +5093,18 @@
     left: auto;
     bottom: auto;
     transform: none;
-    width: 216px;
-    max-width: 216px;
+    width: var(--tk-lateral);
+    max-width: var(--tk-lateral);
     height: max-content;
+    /*
+     * Abaixo do escurecimento das folhas — ver `.tk-folha-scrim`.
+     *
+     * Na barra deitada do celular ela e `z-index: 50` porque flutua sobre o
+     * conteudo. Aqui ela e uma coluna no fluxo, e os 50 so serviam pra ela
+     * pintar POR CIMA da folha aberta (que e 20) — o que era o motivo real de a
+     * barra ter de sumir quando uma folha abria.
+     */
+    z-index: 1;
     /*
      * ⚠️ `flex-direction: column`, e nao `grid-template-columns`.
      *
@@ -5111,13 +5231,24 @@
   .tk-fab,
   [data-platform] .tk-fab {
     bottom: var(--tk-s8);
-    right: max(var(--tk-gutter), calc(50vw - 1180px / 2 + var(--tk-gutter)));
+    right: var(--tk-borda-direita);
   }
 
   .tk-strip,
   [data-platform] .tk-strip {
     bottom: var(--tk-s5);
     max-width: 420px;
+    /*
+     * ⚠️ `left` E `transform` PRECISAM VIR JUNTOS, e este bloco mexia so em
+     * `bottom` e `max-width`.
+     *
+     * A regra do celular e `left: 50%; transform: translateX(-50%)` — centro da
+     * JANELA. Deitado, o conteudo nao esta no centro da janela: a barra lateral
+     * empurra a `.tk-main` 120px pra direita. A faixa de download ficava
+     * visivelmente desalinhada da lista cujo progresso ela relata.
+     */
+    left: var(--tk-centro-conteudo);
+    transform: translateX(-50%);
   }
 
   /* Com o dobro de largura, tres colunas de especie viram um desperdicio de
@@ -5129,10 +5260,151 @@
   /* As folhas continuam sendo uma coluna legivel — texto longo em 1180px de
      largura e ilegivel, e essa e a unica coisa que a tela grande NAO melhora. */
   .tk-sheet-full {
-    max-width: 620px;
+    max-width: var(--tk-folha-max);
     border-radius: var(--tk-r-sheet);
     inset: var(--tk-s6) 0;
     box-shadow: var(--tk-e3);
+    border: 1px solid var(--tk-line);
+  }
+
+  /*
+   * ⚠️ A FOLHA SO VIRA DIALOGO SE HOUVER ALGO ATRAS DELA. Nao havia.
+   *
+   * "app pra pc bem bugado ainda" — e o print era este: a ficha do Bulbasaur
+   * como uma coluna de 620px no meio da tela, e a lista da Pokedex aparecendo
+   * inteira do lado direito dela, viva, rolavel e clicavel. Nao parecia um
+   * dialogo aberto sobre a lista; parecia a lista ter escorregado pra fora do
+   * lugar.
+   *
+   * No CELULAR isso nunca existiu porque a folha e `inset: 0`: ela cobre tudo,
+   * entao "o que ha atras" e uma pergunta sem consequencia. Deitada, a folha
+   * encolheu pra 620px e o de tras apareceu — e ninguem escreveu o de tras.
+   *
+   * O escurecimento e um ELEMENTO, e nao `box-shadow: 0 0 0 100vmax` na propria
+   * folha. A sombra pintaria igual e nao PEGARIA CLIQUE: dava pra abrir uma
+   * segunda especie clicando na lista "por tras" do dialogo, empilhando fichas
+   * que so o Escape desfazia. Metade de um scrim e escurecer; a outra metade e
+   * ser um alvo.
+   */
+  .tk-folha-scrim {
+    display: block;
+  }
+
+  /*
+   * ⚠️ E A BARRA VOLTA A APARECER quando uma folha abre.
+   *
+   * `[data-oculta] { opacity: 0 }` (App.css) e a regra do celular, e la ela tem
+   * motivo escrito: a barra flutua com vidro proprio, e vidro sob uma folha vira
+   * mancha borrada no canto. Deitada a barra nao flutua sobre nada — ela e uma
+   * coluna AO LADO da folha. O efeito era o app perder a navegacao inteira ao
+   * abrir qualquer especie, ajuste, time ou calculadora: nove telas sem lugar
+   * nenhum visivel pra onde voltar.
+   *
+   * Quem apaga a barra agora e o escurecimento passando por cima dela, que e o
+   * que um dialogo faz com o resto da janela. Ela continua `aria-hidden` pelo
+   * React, entao pro leitor de tela nada mudou.
+   */
+  .tk-tabbar[data-oculta],
+  [data-platform] .tk-tabbar[data-oculta] {
+    opacity: 1;
+  }
+
+  /*
+   * O onboarding tinha o MESMO buraco, e e a primeira tela do app.
+   *
+   * `.tk-onb` nao aparecia em media query nenhuma: no computador ele abria como
+   * uma coluna opaca de 448px com o app rodando dos dois lados dela — a
+   * saudacao da home, os atalhos e a barra lateral todos legiveis e clicaveis em
+   * volta de um formulario que diz "comece por aqui".
+   */
+  .tk-onb {
+    inset: var(--tk-s8) 0;
+    max-width: 480px;
+    border-radius: var(--tk-r-sheet);
+    box-shadow: var(--tk-e3);
+    border: 1px solid var(--tk-line);
+    /*
+     * ⚠️ E ELE PARA DE ESTICAR ATE O CHAO.
+     *
+     * `inset: 32px 0` sozinho faz o cartao ter a altura da janela inteira. Como
+     * o corpo do onboarding e `flex: 1` com o conteudo no topo e o botao no
+     * rodape, numa janela de 900px isso vira "Mais uma coisa" la em cima,
+     * "Comecar" la embaixo, e 400px de nada entre os dois. No celular esse vao
+     * nao existe porque a tela toda tem a altura de um telefone.
+     *
+     * `margin: auto` com topo e base fixos e a altura limitada e o que centra o
+     * que sobra — sem ele o cartao encolhe pro topo.
+     */
+    max-height: min(760px, calc(100dvh - 2 * var(--tk-s8)));
+    margin: auto;
+  }
+
+  /*
+   * `6vh` de respiro no topo e medida de celular.
+   *
+   * Numa janela de 1080px de altura viram 65px de vazio somados aos 52 que os
+   * pontinhos de progresso ja ocupam — e o passo do idioma, que e o unico com
+   * conteudo alto, perdia essa altura toda antes da primeira linha da lista.
+   */
+  .tk-onb-body {
+    padding-top: var(--tk-s5);
+  }
+
+  /* Mesma historia, mesma correcao: o aparelho da Pokedex e `inset: 0` de 448px
+     e nao tinha uma linha de desktop em lugar nenhum do arquivo. */
+  .tk-dex {
+    inset: var(--tk-s6) 0;
+    max-width: 560px;
+    border-radius: var(--tk-r-sheet);
+    box-shadow: var(--tk-e3);
+  }
+
+  /*
+   * A bolha da IA para de morar no canto da JANELA.
+   *
+   * `right: max(gutter, safe-area-right)` cola ela na borda do monitor, a meio
+   * metro do conteudo que ela comenta — no print ela e uma estrela violeta
+   * solta no canto inferior direito, sem relacao visivel com nada. Mesma ancora
+   * do `.tk-fab` agora: os dois sao botoes flutuantes do conteudo, e dois
+   * flutuantes em colunas diferentes leem como um deles estar perdido.
+   *
+   * O `bottom` reservava 62px pra barra de abas do rodape. Deitado nao ha barra
+   * embaixo — havia 62px de vao sem dono.
+   *
+   * ⚠️ A ancora e a FOLHA, e nao a coluna de conteudo.
+   *
+   * `AiBubble` so e usada pela ficha da especie, e a ficha e sempre uma folha
+   * cheia — a bolha nunca aparece fora de uma. Presa na borda da shell ela
+   * flutuava do lado de fora do dialogo, sobre o veu, comentando uma tela da
+   * qual visivelmente nao fazia parte. E o `padding-bottom` de
+   * `.tk-sheet-full--com-bolha`, que existe pra ela nao pousar em cima da
+   * tabela de stats, so faz sentido se ela estiver mesmo sobre a folha.
+   */
+  .tk-bubble {
+    right: var(--tk-borda-folha);
+    bottom: calc(var(--tk-s6) + var(--tk-s4));
+  }
+
+  /*
+   * E a conversa vira um balao ancorado — o que o comentario dela ja dizia.
+   *
+   * `.tk-chat` (App.css) explica que ela e folha de baixo pra cima "nao um balao
+   * ancorado na bolha: balao ancorado e desenho de DESKTOP; no celular ele fica
+   * apertado contra o rodape e o teclado o cobre inteiro". O desenho de desktop
+   * estava descrito e nunca escrito: no computador ela era uma laje de 448px
+   * grudada no fundo da janela, longe da bolha que a abriu.
+   */
+  .tk-chat {
+    /* Logo acima da bolha que a abriu: mesma borda direita, e a base sobe os
+       54px dela mais um respiro. */
+    inset: auto var(--tk-borda-folha)
+      calc(var(--tk-s6) + var(--tk-s4) + 54px + var(--tk-s3)) auto;
+    width: 400px;
+    max-width: calc(100vw - 2 * var(--tk-gutter));
+    max-height: min(60dvh, 520px);
+    margin: 0;
+    border-radius: var(--tk-r-card);
+    border-bottom: 1px solid var(--tk-line);
   }
 }
 
@@ -5347,4 +5619,129 @@
   width: max(100%, 44px);
   height: 44px;
   transform: translate(-50%, -50%);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   O MOUSE — o app inteiro respondia ao dedo e a nada mais
+   ═══════════════════════════════════════════════════════════════════════════
+
+   "app pra pc bem bugado ainda"
+
+   Contado antes de escrever isto: 43 regras `:active` e 3 `:hover` no app todo.
+   `:active` e o idioma do toque — o cartao afunda 3% enquanto o dedo esta nele e
+   volta quando sai. No computador esse estado dura os 80ms do clique e nada mais
+   acontece: passar o mouse por cima de qualquer lista, aba, chip ou cartao nao
+   muda um pixel.
+
+   Isso nao aparece como um bug numa tela — aparece como o app inteiro parecer
+   congelado, e e a diferenca entre "esta carregando?" e "isto e clicavel". Foi o
+   que mais pesou na frase la em cima, mais do que qualquer desalinhamento.
+
+   ── Por que `(hover: hover) and (pointer: fine)` e nao uma largura ───────────
+
+   Quem precisa de hover e quem tem PONTEIRO, nao quem tem tela grande. Um iPad
+   com teclado e trackpad passa nesta consulta com 1024px de largura e ganha o
+   realce; um celular deitado com 900px de largura nao passa, e e o certo — no
+   toque o `:hover` gruda depois do clique e o item fica aceso ate voce tocar em
+   outro lugar. E o bug classico de portar hover pro celular.
+
+   ── Os degraus ──────────────────────────────────────────────────────────────
+
+   `--tk-surf` (5% branco), `--tk-surf2` (8,5%) e `--tk-surf3` (14%) sao veus
+   translucidos, entao "um degrau acima" e uma conta que funciona sobre qualquer
+   fundo — nao ha cor de hover pra inventar por classe. A unica regra de hover
+   que ja existia no app (`.tk-species-cell`) faz exatamente isto; aqui ela so
+   deixa de ser a unica.
+*/
+@media (hover: hover) and (pointer: fine) {
+  /* Fundo transparente → primeiro degrau. */
+  .tk-row:hover,
+  .tk-evo:hover,
+  .tk-lite:hover,
+  .tk-banner-open:hover,
+  .tk-strip-cell:hover,
+  .tk-sheet-close:hover,
+  /* A aba ATIVA fica de fora: atras dela ja esta a lente de vidro, e um veu por
+     cima dela suja o unico elemento do app que tem cor propria. */
+  .tk-tab:not([aria-current="page"]):hover {
+    background-color: var(--tk-surf);
+  }
+
+  /* Primeiro degrau → segundo. */
+  .tk-tile:hover,
+  .tk-quick:hover,
+  .tk-act:hover,
+  .tk-owned:hover,
+  .tk-teamrow:hover,
+  .tk-species-cell:hover {
+    background-color: var(--tk-surf2);
+  }
+
+  /* Segundo degrau → terceiro. */
+  .tk-chip:hover,
+  .tk-option:hover,
+  .tk-done:hover {
+    background-color: var(--tk-surf3);
+  }
+
+  /* Cor propria: quem ja tem um tom de hover no sistema usa o dele. */
+  .tk-cta:hover,
+  .tk-fab:hover {
+    background-color: var(--tk-pri-h);
+  }
+
+  .tk-bubble:hover {
+    border-color: var(--tk-txt2);
+  }
+
+  /*
+   * ⚠️ SEM `background` de atalho, so `background-color`.
+   *
+   * Metade destes elementos carrega degrade, imagem de sprite ou `background-
+   * clip` na propria regra. `background: var(--tk-surf2)` e a forma curta e
+   * apaga TODAS as camadas de uma vez — o cartao do aparelho da Pokedex
+   * (`.tk-dexopen`, que e um degrade vermelho) perderia o degrade ao passar o
+   * mouse e voltaria ao passar de novo. Piscar assim le como falha de
+   * renderizacao, nao como realce.
+   */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   A BARRA DE ROLAGEM, de volta em quem tem mouse
+   ═══════════════════════════════════════════════════════════════════════════
+
+   `base.css` zera `::-webkit-scrollbar` no app inteiro, e no celular esta certo:
+   a barra do iOS aparece sozinha enquanto se rola e some, e uma barra desenhada
+   por cima dela ficaria dobrada.
+
+   No computador ela e a unica indicacao de que a lista CONTINUA. Sem ela, uma
+   grade de 1.182 especies parece terminar onde a janela termina — e nao ha
+   momentum nem repique pra sugerir o contrario, porque no mouse a rolagem so
+   acontece se a pessoa ja souber que da pra rolar.
+
+   Fina e translucida: ela informa e nao entra no desenho. Os 3px de borda
+   transparente com `background-clip: content-box` sao o que da o polegar de 4px
+   dentro de uma pista de 10 — sem eles a barra fica com cara de sistema antigo.
+*/
+@media (hover: hover) and (pointer: fine) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--tk-surf3);
+    background-clip: content-box;
+    border: 3px solid transparent;
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--tk-line2);
+    background-clip: content-box;
+  }
 }

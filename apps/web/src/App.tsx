@@ -13,7 +13,7 @@ import { requestPersistence, type PersistState } from "./storage/persist.ts";
 import { IconGearFill, IconGridFill, IconHomeFill } from "./ui/Icons.tsx";
 import { SpriteDownloadPanel, SpriteDownloadStrip } from "./ui/SpriteDownload.tsx";
 import { UpdateBanner } from "./ui/UpdateBanner.tsx";
-import { useTemFolha } from "./ui/folha.ts";
+import { fecharFolhaDeCima, useTemFolha } from "./ui/folha.ts";
 import { useTabBarMinimize } from "./ui/useTabBarMinimize.ts";
 
 /*
@@ -180,6 +180,24 @@ export function App() {
           ))}
         </nav>
       </div>
+
+      {/*
+        O que ha ATRAS de uma folha, em tela larga.
+
+        So e desenhado a partir de 900px — no celular a folha e `inset: 0` e
+        cobre tudo, entao nao ha "atras". Ver `.tk-folha-scrim` no design.css.
+
+        O onboarding entra na conta porque ele tambem encolhe pra uma coluna e
+        tambem deixa o app aparecendo em volta — mas sem o clique pra fechar:
+        ainda nao ha nada pra onde voltar.
+      */}
+      {(temFolha || !setup.done) && (
+        <div
+          className="tk-folha-scrim"
+          aria-hidden="true"
+          onClick={temFolha ? fecharFolhaDeCima : undefined}
+        />
+      )}
 
       {!setup.done && <Onboarding />}
       <SpriteDownloadPanel />
