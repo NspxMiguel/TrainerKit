@@ -21,7 +21,7 @@ import type { LeituraOcr } from "../scan/ocr.ts";
 
 import { tetoObservavel, type Dataset, type DatasetSpecies } from "../data/useDataset.ts";
 import { useT } from "../i18n/t.ts";
-import { useSetup } from "../onboarding/setup.ts";
+import { tetoDePowerUp, useSetup } from "../onboarding/setup.ts";
 import { IVBar } from "../ui/IVBar.tsx";
 import { addPokemon, type OwnedPokemon } from "../storage/collection.ts";
 import { AmongYours } from "../ui/AmongYours.tsx";
@@ -299,7 +299,7 @@ export function IVCalculator({ species, data, onClose, owned }: Props) {
           ivs={ivs}
           level={levels?.[0]?.level ?? 20}
           cpm={data.cpm}
-          levelCap={data.version.levelCap}
+          levelCap={tetoDePowerUp(setup.level, data.version.levelCap)}
           evolvesInto={species.evolvesInto}
           candyToEvolve={
             species.evolvesInto[0]
@@ -441,7 +441,7 @@ export function IVCalculator({ species, data, onClose, owned }: Props) {
           name={species.name}
           baseStats={species.baseStats}
           cpm={data.cpm}
-          levelCap={data.version.levelCap}
+          levelCap={tetoDePowerUp(setup.level, data.version.levelCap)}
           ivs={ivs}
         />
       )}

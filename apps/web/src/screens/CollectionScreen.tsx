@@ -24,6 +24,7 @@ import {
 } from "../storage/collection.ts";
 import { TOM_VEREDITO as TONE } from "../ui/tomVeredito.ts";
 import { AskBox } from "../ui/AskBox.tsx";
+import { tetoDePowerUp, useSetup } from "../onboarding/setup.ts";
 import { setEmGrade, useEmGrade } from "../ui/vistaColecao.ts";
 import { IconGrid, IconList, IconPlus } from "../ui/Icons.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
@@ -40,6 +41,7 @@ interface Props {
 export function CollectionScreen({ dataset, embutida = false }: Props) {
   const { items, reload } = useCollection();
   const { t, language } = useT();
+  const setup = useSetup();
   const [picking, setPicking] = useState(false);
   /* Guarda a ESPECIE e o bicho salvo. Sem o segundo, a tela de IV abria em
      branco pedindo pra escanear algo que ja estava gravado no aparelho. */
@@ -73,7 +75,7 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
         ivs: owned.ivs,
         level: owned.level ?? 20,
         cpm: dataset.data.cpm,
-        levelCap: dataset.data.version.levelCap,
+        levelCap: tetoDePowerUp(setup.level, dataset.data.version.levelCap),
         evolvesInto: s.evolvesInto,
         candyToEvolve: s.evolvesInto[0]
           ? (s.candyToEvolve[s.evolvesInto[0]] ?? null)
@@ -85,7 +87,7 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
 
       return { owned, species: s, verdict };
     });
-  }, [items, ready, species, dataset]);
+  }, [items, ready, species, dataset, setup.level]);
 
   /*
    * Quantos podem sair, contado ANTES de a pessoa abrir a faxina.
@@ -130,9 +132,12 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
       // Sem dataset o `cpm` vem vazio e nada e calculado; o teto so precisa ser
       // um numero valido. O do core, e nao um literal, pra este nao virar o
       // ultimo lugar do app dizendo 55 depois de o teto mudar.
-      levelCap: dataset.status === "ready" ? dataset.data.version.levelCap : MAX_POWERUP_LEVEL,
+      levelCap: tetoDePowerUp(
+        setup.level,
+        dataset.status === "ready" ? dataset.data.version.levelCap : MAX_POWERUP_LEVEL,
+      ),
     }).soltos.length;
-  }, [items, ready, species, dataset]);
+  }, [items, ready, species, dataset, setup.level]);
 
   const download = async () => {
     const json = await exportJson();

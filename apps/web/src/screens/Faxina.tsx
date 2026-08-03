@@ -17,6 +17,7 @@ import {
   useCollection,
   type OwnedPokemon,
 } from "../storage/collection.ts";
+import { tetoDePowerUp, useSetup } from "../onboarding/setup.ts";
 import { useFolha } from "../ui/folha.ts";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 
@@ -53,6 +54,7 @@ export function Faxina({ data, onClose }: Props) {
   const { saindo, ref: refFolha, fechar } = useFolha(onClose);
   const { t, tm, language } = useT();
   const { items } = useCollection();
+  const setup = useSetup();
 
   /** Marcados pra sair. */
   const [marcados, setMarcados] = useState<Set<string>>(() => new Set());
@@ -133,9 +135,9 @@ export function Faxina({ data, onClose }: Props) {
       bichos,
       especies,
       cpm: data.cpm,
-      levelCap: data.version.levelCap,
+      levelCap: tetoDePowerUp(setup.level, data.version.levelCap),
     });
-  }, [items, especiePor, data.cpm, data.version.levelCap]);
+  }, [items, especiePor, data.cpm, data.version.levelCap, setup.level]);
 
   /*
    * ⚠️ SÓ OS "SEM DÚVIDA" NASCEM MARCADOS.

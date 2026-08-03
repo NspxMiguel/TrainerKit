@@ -135,8 +135,22 @@ export function App() {
         <nav
           className="tk-tabbar"
           data-min={minimized || undefined}
-          data-oculta={temFolha || undefined}
-          aria-hidden={temFolha || undefined}
+          /*
+           * ⚠️ O SETUP TAMBEM ESCONDE A BARRA, e nao escondia.
+           *
+           * `.tk-onb` e `z-index: 20` e a barra e 50: no celular ela ficava
+           * flutuando POR CIMA da primeira tela do app, tapando o botao de
+           * avancar. Apareceu quando o passo do nivel deixou aquela tela mais
+           * alta, mas o defeito nao e do passo — a barra sempre esteve por cima,
+           * so que ate entao sobrava vazio embaixo do botao pra disfarcar.
+           *
+           * A regra ja existia e so nao cobria este caso: a barra some quando ha
+           * uma tela cheia por cima. O onboarding e uma, e ainda por cima e a
+           * unica em que as tres abas nao levam a lugar nenhum — nada foi
+           * configurado ainda.
+           */
+          data-oculta={temFolha || !setup.done || undefined}
+          aria-hidden={temFolha || !setup.done || undefined}
           aria-label={t("nav.aria")}
           style={{
             /*
