@@ -5,6 +5,7 @@ import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
 import { useLanguage } from "../i18n/language.ts";
 import { useT } from "../i18n/t.ts";
 import { useCollection } from "../storage/collection.ts";
+import { detectPlatform } from "../storage/install.ts";
 import { IconGrid, IconList } from "../ui/Icons.tsx";
 import { setEmGrade, useEmGrade } from "../ui/vistaColecao.ts";
 import { SpeciesBrowser, type SortId } from "../ui/SpeciesBrowser.tsx";
@@ -193,6 +194,27 @@ export function PokedexScreen({ dataset, intent }: Props) {
         anuncia um OBJETO, e um objeto que muda de cor com o Pokemon da vez
         deixa de parecer um objeto.
       */}
+      {/*
+        ⚠️ NAO EXISTE NO COMPUTADOR.
+
+        "modo pokedex nem faz sentido no computador..."
+
+        E nao faz mesmo, e o motivo esta na propria tela: o aparelho e uma coisa
+        que se SEGURA. Ele desenha a carcaca vermelha em volta de um visor, abre
+        a camera traseira pra pessoa APONTAR pra alguma coisa e le a ficha em voz
+        alta. Num monitor, apontar e segurar nao existem — sobra um desenho de
+        aparelho parado no meio da tela pedindo permissao de webcam.
+
+        O porteiro e `desktop` e nao "tela grande" de proposito: o iPad continua
+        tendo o modo, deitado inclusive, porque um iPad E um aparelho que se
+        segura e aponta. O que muda a resposta e o formato do aparelho, nao
+        quantos pixels ele tem.
+
+        `detectPlatform()` e chamado direto, sem hook: a plataforma nao muda
+        durante a sessao — trocar de computador pra iPad no meio do uso nao e uma
+        coisa que aconteca.
+      */}
+      {detectPlatform() !== "desktop" && (
       <button type="button" className="tk-dexopen" onClick={() => setDexOpen(true)}>
         <span className="tk-dexopen-tile" aria-hidden="true">
           <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
@@ -218,6 +240,7 @@ export function PokedexScreen({ dataset, intent }: Props) {
           </svg>
         </span>
       </button>
+      )}
 
       {/*
         Uma lista so, que se reordena.
