@@ -12,7 +12,7 @@ import { fold } from "../data/fold.ts";
 import { canonico, type Dataset, type DatasetSpecies } from "../data/useDataset.ts";
 import { useLanguage } from "../i18n/language.ts";
 import { useT, type Key } from "../i18n/t.ts";
-import { useSetup } from "../onboarding/setup.ts";
+import { tetoDePowerUp, useSetup } from "../onboarding/setup.ts";
 import { typeColor, typeInk, typeKey } from "../sprites/provider.ts";
 import { useCollection } from "../storage/collection.ts";
 import { markSeen, seenIds, useSeenCount, wasSeen } from "../storage/seen.ts";
@@ -203,7 +203,7 @@ export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
       types: alvo.types,
       baseStats: alvo.baseStats,
       cpm: data.cpm,
-      levelCap: data.version.levelCap,
+      levelCap: tetoDePowerUp(setup.level, data.version.levelCap),
       evolvesInto: alvo.evolvesInto,
       raidRank: posRaide >= 0 ? { type: tipoPrimario, position: posRaide + 1 } : null,
       leagueRank: melhorLiga,

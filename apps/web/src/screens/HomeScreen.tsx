@@ -15,7 +15,7 @@ import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
 import { moveLabel, useLanguage } from "../i18n/language.ts";
 import { useT, type Key } from "../i18n/t.ts";
 import type { PokedexIntent } from "../App.tsx";
-import { useSetup } from "../onboarding/setup.ts";
+import { tetoDePowerUp, useSetup } from "../onboarding/setup.ts";
 import { typeColor, typeKey } from "../sprites/provider.ts";
 import { useSpriteSettings } from "../sprites/settings.ts";
 import {
@@ -425,7 +425,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
         ivs: owned.ivs,
         level: owned.level ?? 20,
         cpm: data.cpm,
-        levelCap: data.version.levelCap,
+        levelCap: tetoDePowerUp(setup.level, data.version.levelCap),
         evolvesInto: s.evolvesInto,
         candyToEvolve: s.evolvesInto[0]
           ? (s.candyToEvolve[s.evolvesInto[0]] ?? null)

@@ -11,6 +11,7 @@ import {
 
 import type { Dataset } from "../data/useDataset.ts";
 import type { OwnedPokemon } from "../storage/collection.ts";
+import { getSetup, tetoDePowerUp } from "../onboarding/setup.ts";
 import { chat } from "./provider.ts";
 
 /**
@@ -88,7 +89,9 @@ export function collectionFacts(
       ivs: owned.ivs,
       level: owned.level ?? 20,
       cpm,
-      levelCap: data.version.levelCap,
+      /* Fora de componente: `getSetup()` em vez do hook. O dossie e montado sob
+         demanda, na hora da pergunta — nao ha render pra assinar. */
+      levelCap: tetoDePowerUp(getSetup().level, data.version.levelCap),
       evolvesInto: sp.evolvesInto,
       candyToEvolve: sp.evolvesInto[0]
         ? (sp.candyToEvolve[sp.evolvesInto[0]] ?? null)

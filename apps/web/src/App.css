@@ -1635,6 +1635,72 @@
   margin-top: var(--tk-s6);
 }
 
+/* ── nivel do treinador: quatro pilulas numa linha ──────────────────────────
+   "grade de pílulas 52px com rótulo INÍCIO/MÉDIO/ALTO/MÁX" (handoff, passo 2).
+
+   `1fr` quatro vezes e nao `auto-fit`: sao sempre quatro, e uma grade que
+   reflui deixaria "MÁX" sozinho numa segunda linha em alemao, onde o rotulo e
+   mais longo. */
+.tk-onb-niveis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--tk-s2);
+  margin-top: var(--tk-s5);
+}
+
+.tk-onb-nivel {
+  display: grid;
+  gap: 2px;
+  place-content: center;
+  min-height: 52px;
+  padding: 0 var(--tk-s2);
+  border-radius: var(--tk-r-input);
+  background: var(--tk-surf);
+  border: 1px solid var(--tk-line);
+  color: var(--tk-txt);
+  transition: background-color 0.12s var(--tk-ease), border-color 0.12s var(--tk-ease);
+}
+
+.tk-onb-nivel-n {
+  font: 800 19px/1 var(--tk-font);
+  text-align: center;
+}
+
+/* 9,5px e o piso do desenho, e ele so vale pra rotulo curto como este —
+   ver a nota da escala tipografica no handoff. */
+.tk-onb-nivel-r {
+  font: 800 9.5px/1 var(--tk-font);
+  letter-spacing: 0.08em;
+  text-align: center;
+  color: var(--tk-txt2);
+  /* Alemao ("MITTEL") e russo ("ВЫСОКИЙ") estouram 4 colunas de 74px. Cortar e
+     pior que encolher: o numero acima ja diz tudo, o rotulo so qualifica. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tk-onb-nivel[data-on] {
+  background: color-mix(in srgb, var(--tk-ultra-fg) 18%, transparent);
+  border-color: color-mix(in srgb, var(--tk-ultra-fg) 45%, transparent);
+}
+
+.tk-onb-nivel[data-on] .tk-onb-nivel-r {
+  color: var(--tk-ultra-fg-strong);
+}
+
+/* O cartao que diz o que a escolha MUDA. Sem ele as quatro pilulas sao um
+   formulario; com ele viram uma decisao informada. */
+.tk-onb-nivel-nota {
+  margin-top: var(--tk-s4);
+  padding: var(--tk-s4);
+  border-radius: var(--tk-r-card);
+  background: color-mix(in srgb, var(--tk-ultra-fg) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tk-ultra-fg) 24%, transparent);
+  font: 400 14px/1.5 var(--tk-font);
+  color: var(--tk-txt);
+}
+
 .tk-onb-foot {
   flex: none;
   display: grid;

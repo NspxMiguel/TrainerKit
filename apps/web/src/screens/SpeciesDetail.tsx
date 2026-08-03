@@ -31,7 +31,7 @@ import {
 } from "../data/useDataset.ts";
 import { moveLabel, useLanguage, useShowTranslation } from "../i18n/language.ts";
 import { useT, type Key } from "../i18n/t.ts";
-import { useSetup } from "../onboarding/setup.ts";
+import { tetoDePowerUp, useSetup } from "../onboarding/setup.ts";
 import {
   addPokemon,
   removePokemon,
@@ -508,7 +508,7 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
           ivs={salvo.ivs}
           level={salvo.level ?? 20}
           cpm={data.cpm}
-          levelCap={data.version.levelCap}
+          levelCap={tetoDePowerUp(setup.level, data.version.levelCap)}
           evolvesInto={species.evolvesInto}
           candyToEvolve={
             species.evolvesInto[0]
@@ -637,7 +637,7 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
           name={species.name}
           baseStats={species.baseStats}
           cpm={data.cpm}
-          levelCap={data.version.levelCap}
+          levelCap={tetoDePowerUp(setup.level, data.version.levelCap)}
         />
       )}
 

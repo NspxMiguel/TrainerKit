@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 
+import { MAX_POWERUP_LEVEL } from "@trainerkit/core";
+
 import { setGroqKey } from "../ai/groq.ts";
 import { hasWebGPU } from "../ai/local.ts";
 import { setProvider, sharedAvailable, type AiProvider } from "../ai/provider.ts";
@@ -9,7 +11,13 @@ import { useT } from "../i18n/t.ts";
 import { InstallGuide } from "../screens/InstallGuide.tsx";
 import { useInstallState } from "../storage/install.ts";
 import { IconDownload, IconGrid, IconSearch } from "../ui/Icons.tsx";
-import { updateSetup, type UsageMode } from "./setup.ts";
+import {
+  TRAINER_LEVELS,
+  tetoDePowerUp,
+  updateSetup,
+  type TrainerLevel,
+  type UsageMode,
+} from "./setup.ts";
 
 /**
  * Primeira abertura.
@@ -53,6 +61,12 @@ export function Onboarding() {
    */
   const [dir, setDir] = useState<1 | -1>(1);
   const [name, setName] = useState("");
+  /*
+   * 50 e o padrao, e ele NAO e neutro — e o que o app assumia antes de esta
+   * escolha existir. Ver a nota do `DEFAULT_SETUP`: comecar em 20 faria a
+   * primeira tela do app ja mudar o veredito de quem so quer passar batido.
+   */
+  const [level, setLevel] = useState<TrainerLevel>(50);
   const [mode, setMode] = useState<UsageMode>("consulta");
   const [assistant, setAssistant] = useState(true);
   const [iaEscolha, setIaEscolha] = useState<AiProvider>("off");
@@ -108,7 +122,7 @@ export function Onboarding() {
     const limpa = chave.trim();
     if (iaEscolha === "groq" && limpa !== "") setGroqKey(limpa);
     setProvider(iaEscolha === "groq" && limpa === "" ? "off" : iaEscolha);
-    updateSetup({ done: true, mode, assistant, name: name.trim() });
+    updateSetup({ done: true, mode, assistant, name: name.trim(), level });
   };
 
   const go = (delta: 1 | -1) => {
@@ -198,6 +212,70 @@ export function Onboarding() {
                 aria-label={t("onb.nameAria")}
               />
             </div>
+
+            {/*
+              O NIVEL DO TREINADOR — "Nome + nível" e um passo so no handoff.
+
+              ⚠️ Ele nao e um dado de perfil: e o unico campo do setup que muda
+              VEREDITO. Ver `tetoDePowerUp`. O `levelCap` que alimenta o calculo
+              sempre existiu e estava fixo no teto do jogo, que e o teto de quem
+              ja terminou — o app respondia "até 1.260 de PC no nível 50" pra
+              quem so consegue chegar ao 22.
+
+              Por isso o cartao abaixo diz a conta em vez de um elogio. Ele
+              troca a cada toque, com o teto real da escolha, e e a unica coisa
+              nesta tela que a pessoa pode conferir depois no jogo.
+            */}
+            <h2 className="tk-onb-sub" style={{ marginTop: "var(--tk-s6)" }}>
+              {t("onb.level.title")}
+            </h2>
+
+            <div className="tk-onb-niveis" role="group" aria-label={t("onb.level.title")}>
+              {TRAINER_LEVELS.map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  className="tk-onb-nivel"
+                  data-on={n === level || undefined}
+                  aria-pressed={n === level}
+                  onClick={() => setLevel(n)}
+                >
+                  <span className="tk-onb-nivel-n">{n}</span>
+                  <span className="tk-onb-nivel-r">
+                    {t(
+                      n === 20
+                        ? "onb.level.start"
+                        : n === 30
+                          ? "onb.level.mid"
+                          : n === 40
+                            ? "onb.level.high"
+                            : "onb.level.max",
+                    )}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/*
+              O teto vem de `tetoDePowerUp` e nao de `level + 2` escrito aqui: e
+              a MESMA funcao que o veredito usa. Duas contas do mesmo numero em
+              lugares diferentes e como a tela passa a prometer um teto e o
+              calculo usar outro.
+            */}
+            <p className="tk-onb-nivel-nota">
+              {/*
+                `MAX_POWERUP_LEVEL` do core, e nao `50` escrito aqui.
+
+                O setup roda antes de o dataset existir, entao nao da pra ler o
+                `version.levelCap` real — e um literal faria desta tela o ultimo
+                lugar do app dizendo 50 depois de o jogo subir o teto. E a mesma
+                nota que ja esta em `CollectionScreen`.
+              */}
+              {t("onb.level.what", {
+                nivel: level,
+                teto: tetoDePowerUp(level, MAX_POWERUP_LEVEL),
+              })}
+            </p>
           </>
         )}
 
