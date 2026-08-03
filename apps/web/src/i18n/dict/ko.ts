@@ -557,7 +557,7 @@ export const KO: Dict = {
   "ai.provider.local": "기기",
   "ai.offDetail": "AI 없이도 앱이 모두 판단합니다. 판정과 순위, 팀은 여기서 계산합니다. AI는 화면에 이미 있는 내용을 다시 쓰고, 컬렉션에 대한 자유로운 질문에 답할 뿐입니다.",
   "ai.groqDetail": "내 키로 Groq에 바로 연결합니다. 제 서버는 거치지 않고, 묻는 사람이 비용을 냅니다. 무료 한도로도 충분합니다.",
-  "ai.local.what": "모델이 휴대폰 GPU에서 돌아갑니다. 키도 계정도 필요 없고, 첫 다운로드 후에는 오프라인에서도 됩니다.",
+  "ai.local.what": "모델이 기기 GPU에서 돌아갑니다. 키도 계정도 필요 없고, 첫 다운로드 후에는 오프라인에서도 됩니다.",
   "ai.local.size": "첫 다운로드",
   "ai.local.vram": "비디오 메모리",
   "ai.local.overGb": "1 GB 이상",
