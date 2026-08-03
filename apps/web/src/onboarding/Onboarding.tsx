@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { setGroqKey } from "../ai/groq.ts";
 import { hasWebGPU } from "../ai/local.ts";
 import { setProvider, sharedAvailable, type AiProvider } from "../ai/provider.ts";
+import { LANGUAGES, setLanguage, useLanguage } from "../i18n/language.ts";
 import { useT } from "../i18n/t.ts";
 import { InstallGuide } from "../screens/InstallGuide.tsx";
 import { useInstallState } from "../storage/install.ts";
@@ -17,11 +18,31 @@ import { updateSetup, type UsageMode } from "./setup.ts";
  * embaixo — e assim que app se comporta; rolar pra achar o "continuar" e
  * comportamento de site.
  *
- * O idioma saiu daqui. Ele ja e detectado pelo aparelho no `language.ts`, e
- * quem quiser trocar acha em Ajustes. Pedir idioma na primeira tela era pedir
- * uma decisao que o sistema ja tinha tomado.
+ * ── O IDIOMA VOLTOU, e o comentario que o tirou daqui merece ficar registrado ─
+ *
+ * Dizia: "O idioma saiu daqui. Ele ja e detectado pelo aparelho no
+ * `language.ts`, e quem quiser trocar acha em Ajustes. Pedir idioma na primeira
+ * tela era pedir uma decisao que o sistema ja tinha tomado."
+ *
+ * O sistema tinha tomado a decisao ERRADA, e o dono do app foi quem descobriu:
+ * "pelo q eu vi, no setup nao pediu idioma... e nem puxo o idioma correto, sou
+ * do brasil e puxo ingles pra mim."
+ *
+ * A deteccao nao tem bug — o navegador dele responde `en-US`, porque o sistema
+ * dele esta em ingles, como o de muita gente no Brasil. O erro foi de premissa:
+ * "idioma do aparelho" e "idioma da pessoa" sao a mesma coisa na maioria dos
+ * casos e nao em todos, e nas ferramentas de jogo essa diferenca e enorme —
+ * metade da comunidade roda tudo em ingles de proposito.
+ *
+ * Por isso ele e o PRIMEIRO passo, antes ate do nome: e a unica escolha do setup
+ * que muda o texto de todos os passos seguintes. Perguntar depois seria mostrar
+ * tres telas no idioma errado pra so entao oferecer o certo.
+ *
+ * A lista nao precisa de titulo traduzido pra funcionar: "Português", "Español",
+ * "日本語" se identificam sozinhos, com bandeira. E isso resolve o ovo-e-galinha
+ * de rotular a tela de escolher idioma num idioma que ainda nao foi escolhido.
  */
-type StepId = "boas-vindas" | "modo" | "ia" | "instalar";
+type StepId = "idioma" | "boas-vindas" | "modo" | "ia" | "instalar";
 
 export function Onboarding() {
   const [step, setStep] = useState(0);
@@ -39,6 +60,18 @@ export function Onboarding() {
   const [guideOpen, setGuideOpen] = useState(false);
   const install = useInstallState();
   const { t } = useT();
+  /*
+   * O idioma nao fica em `useState` como as outras escolhas.
+   *
+   * As outras (nome, modo, IA) so valem no `finish()`, e por bom motivo — ver a
+   * nota la. Esta e o contrario: ela precisa valer NA HORA, porque e ela que
+   * traduz os proprios passos seguintes. Guardar pro fim faria a pessoa escolher
+   * "Português" e continuar lendo "How do you want to use it?" ate o final.
+   *
+   * Trocar de ideia tambem nao custa nada: `setLanguage` ja e a store global do
+   * app, a mesma que Ajustes usa, e o setup nao tem estado que dependa dela.
+   */
+  const language = useLanguage();
 
   /**
    * O passo de instalar so existe se ainda houver o que instalar.
@@ -58,8 +91,8 @@ export function Onboarding() {
    * aparelho, ou nada.
    */
   const steps: StepId[] = install.installed
-    ? ["boas-vindas", "modo", "ia"]
-    : ["boas-vindas", "modo", "ia", "instalar"];
+    ? ["idioma", "boas-vindas", "modo", "ia"]
+    : ["idioma", "boas-vindas", "modo", "ia", "instalar"];
 
   const current = steps[step]!;
   const last = step === steps.length - 1;
@@ -110,6 +143,40 @@ export function Onboarding() {
       </div>
 
       <div className="tk-onb-body" key={current} data-dir={dir === 1 ? "fwd" : "back"}>
+        {current === "idioma" && (
+          <>
+            {/* `settings.language` em vez de uma chave nova: e a mesma palavra, ja
+                existe nos dez dicionarios, e o titulo aqui e quase decorativo —
+                quem nao le o idioma atual reconhece a propria lingua na lista. */}
+            <h1 className="tk-onb-title">{t("settings.language")}</h1>
+
+            {/* A MESMA lista de Ajustes, mesma classe. Ver a nota de
+                `SettingsScreen`: lista e nao seletor, com o ✓ a direita. Duas
+                telas que fazem a mesma escolha com desenhos diferentes e como o
+                app "parece tres apps" — a queixa do briefing. */}
+            <div className="tk-card tk-lista-radio">
+              {LANGUAGES.map((l) => (
+                <button
+                  key={l.code}
+                  type="button"
+                  className="tk-lista-radio-item"
+                  data-on={l.code === language || undefined}
+                  aria-pressed={l.code === language}
+                  onClick={() => setLanguage(l.code)}
+                >
+                  <span className="tk-lista-radio-glifo" aria-hidden="true">
+                    {l.flag}
+                  </span>
+                  <span className="tk-lista-radio-nome">{l.label}</span>
+                  <span className="tk-lista-radio-check" aria-hidden="true">
+                    ✓
+                  </span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
         {current === "boas-vindas" && (
           <>
             <div className="tk-onb-mark" aria-hidden="true">
@@ -306,7 +373,14 @@ export function Onboarding() {
             className="tk-btn tk-btn--primary tk-btn--block"
             onClick={() => (last ? finish() : go(1))}
           >
-            {step === 0 ? t("onb.start") : last ? t("onb.open") : t("onb.continue")}
+            {/* "Comecar" mora na tela do NOME, e nao mais no passo 0 — o passo 0
+                agora e o idioma, e "Comecar" antes de escolher a lingua prometia
+                que a proxima tela ja era o app. */}
+            {current === "boas-vindas"
+              ? t("onb.start")
+              : last
+                ? t("onb.open")
+                : t("onb.continue")}
           </button>
         ) : (
           <>

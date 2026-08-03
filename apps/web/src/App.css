@@ -1532,6 +1532,22 @@
   flex-direction: column;
   justify-content: flex-start;
   padding-top: 6vh;
+  /*
+   * ⚠️ ROLA QUANDO NAO COUBER — e o comentario do topo do arquivo diz o
+   * contrario ("Telas que NAO ROLAM").
+   *
+   * A intencao continua valendo e nao mudou: nenhum passo DEVE precisar de
+   * rolagem, e o botao de avancar continua fixo no rodape, fora daqui. O que
+   * mudou e que agora existe um passo que nao cabe em aparelho nenhum — a lista
+   * de dez idiomas tem 560px so de linhas. Sem isto ela era cortada no meio do
+   * "Français", e os quatro idiomas de baixo simplesmente nao existiam.
+   *
+   * Vale pros outros passos tambem, e ai deixa de ser so a lista: em celular
+   * deitado (390px de altura) o passo da IA com cinco opcoes ja estourava.
+   * "Nao rola" e uma meta de desenho; cortar conteudo e um bug.
+   */
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 /*
