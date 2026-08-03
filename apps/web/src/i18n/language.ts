@@ -60,13 +60,38 @@ const store = {
   },
 };
 
-/** Palpite inicial pelo idioma do aparelho, caindo em ingles. */
+/**
+ * Palpite inicial pelo idioma do aparelho, caindo em ingles.
+ *
+ * ⚠️ LE A LISTA INTEIRA, e nao so `navigator.language`.
+ *
+ * `navigator.language` e a PRIMEIRA preferencia; `navigator.languages` e a fila
+ * toda, que e o que o navegador manda no `Accept-Language`. Quem tem o navegador
+ * em holandes e portugues em segundo (`["nl-NL", "pt-BR", "en"]`) caia direto no
+ * ingles: "nl-NL" nao esta na lista de suportados, "nl" tambem nao, e a funcao
+ * desistia ali sem nunca olhar o segundo item. O portugues estava declarado e
+ * era ignorado.
+ *
+ * ⚠️ E ISTO CONTINUA SENDO UM PALPITE — por isso o setup pergunta.
+ *
+ * "sou do brasil e puxo ingles pra mim". E ele esta certo e a funcao tambem: o
+ * navegador dele diz `en-US`, porque o Windows/Chrome dele esta em ingles, como
+ * o de muita gente no Brasil. Idioma do aparelho nao e idioma da pessoa, e
+ * nenhuma conta aqui dentro descobre isso — quem sabe e ele. Ver o passo
+ * "idioma" no `Onboarding`, que voltou a existir por causa disto.
+ */
 function detect(): string {
-  const wanted = globalThis.navigator?.language ?? "en";
-  const exact = LANGUAGES.find((l) => l.code === wanted);
-  if (exact) return exact.code;
-  const base = LANGUAGES.find((l) => l.code.split("-")[0] === wanted.split("-")[0]);
-  return base?.code ?? "en";
+  const fila = globalThis.navigator?.languages?.length
+    ? globalThis.navigator.languages
+    : [globalThis.navigator?.language ?? "en"];
+
+  for (const wanted of fila) {
+    const exact = LANGUAGES.find((l) => l.code === wanted);
+    if (exact) return exact.code;
+    const base = LANGUAGES.find((l) => l.code.split("-")[0] === wanted.split("-")[0]);
+    if (base) return base.code;
+  }
+  return "en";
 }
 
 let current = store.get(KEY) ?? detect();
