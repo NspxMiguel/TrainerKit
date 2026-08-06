@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { PokedexIntent } from "../App.tsx";
 import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
@@ -15,6 +15,7 @@ import { Segmented } from "../ui/Segmented.tsx";
 import { CollectionScreen } from "./CollectionScreen.tsx";
 import { DexMode } from "./DexMode.tsx";
 import { SpeciesDetail } from "./SpeciesDetail.tsx";
+import { useTelaLarga } from "../ui/telaLarga.ts";
 
 interface Props {
   dataset: DatasetState;
@@ -31,6 +32,35 @@ interface Props {
  */
 export function PokedexScreen({ dataset, intent }: Props) {
   const [selected, setSelected] = useState<DatasetSpecies | null>(null);
+  /*
+   * ⚠️ A FICHA MUDA DE NATUREZA, e nao so de tamanho.
+   *
+   * "Pokédex em lista + ficha lado a lado (como um cliente de e-mail)", do
+   * documento de desktop. Na tela larga a ficha deixa de ser uma folha por cima
+   * e vira a segunda coluna: ela nao tampa a lista, nao escurece nada e nao tem
+   * o que fechar. No celular continua exatamente a folha de sempre.
+   *
+   * Isto e JS e nao media query porque muda ONDE o no e montado — ver a nota
+   * inteira em `ui/telaLarga.ts`.
+   */
+  const telaLarga = useTelaLarga();
+
+  /*
+   * A raiz precisa saber que a ficha virou coluna.
+   *
+   * Nao e gosto por atributo global: a bolha da IA e a conversa se portam pro
+   * `<body>` e nao sao descendentes da ficha, entao a unica forma de o CSS
+   * delas reagir a isto e por um sinal que chegue la em cima. Mesmo recurso que
+   * a tira de download ja usa (`dataset.tkStrip`).
+   */
+  const fichaEmColuna = telaLarga && selected !== null;
+  useEffect(() => {
+    if (!fichaEmColuna) return;
+    document.documentElement.dataset.tkFicha = "coluna";
+    return () => {
+      delete document.documentElement.dataset.tkFicha;
+    };
+  }, [fichaEmColuna]);
   const [dexOpen, setDexOpen] = useState(false);
   const { t } = useT();
   const setup = useSetup();
@@ -101,7 +131,7 @@ export function PokedexScreen({ dataset, intent }: Props) {
     );
   }
 
-  return (
+  const conteudo = (
     <>
       <h1 className="tk-h1">{t("pokedex.title")}</h1>
 
@@ -284,7 +314,7 @@ export function PokedexScreen({ dataset, intent }: Props) {
         />
       )}
 
-      {selected && (
+      {selected && !telaLarga && (
         <SpeciesDetail
           species={selected}
           data={dataset.data}
@@ -293,5 +323,33 @@ export function PokedexScreen({ dataset, intent }: Props) {
         />
       )}
     </>
+  );
+
+  /*
+   * Na tela larga a Pokedex vira duas colunas: a lista a esquerda e a ficha a
+   * direita, na proporcao `1.3fr 1fr` do documento.
+   *
+   * ⚠️ SEM ESPECIE ESCOLHIDA A COLUNA NAO NASCE VAZIA — a lista ocupa tudo.
+   * Uma segunda coluna com "selecione algo" e um pedaco de tela pedindo
+   * desculpa; a lista usando a largura inteira ate alguem escolher e so a
+   * mesma tela reagindo ao que existe.
+   */
+  if (!telaLarga) return conteudo;
+
+  return (
+    <div className="tk-dex-split" data-aberta={selected ? "" : undefined}>
+      <div className="tk-dex-lista">{conteudo}</div>
+      {selected && (
+        <aside className="tk-dex-ficha">
+          <SpeciesDetail
+            species={selected}
+            data={dataset.data}
+            onClose={() => setSelected(null)}
+            onPickSpecies={setSelected}
+            embutida
+          />
+        </aside>
+      )}
+    </div>
   );
 }

@@ -5133,6 +5133,110 @@
     margin-top: max(var(--tk-safe-top), calc(env(safe-area-inset-top) + var(--tk-s3)));
   }
 
+  /* ── POKEDEX EM DUAS COLUNAS ─────────────────────────────────────────────
+     "Pokédex em lista + ficha lado a lado (como um cliente de e-mail)", com a
+     proporcao `1.3fr 1fr` do documento de desktop.
+
+     ⚠️ SEM FICHA ABERTA A LISTA OCUPA TUDO — `data-aberta` e quem liga a
+     segunda coluna. Uma coluna vazia esperando escolha e tela pedindo
+     desculpa; a lista inteira ate alguem clicar e a mesma tela usando o que
+     tem. */
+  .tk-dex-split {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--tk-s6);
+    align-items: start;
+  }
+
+  .tk-dex-split[data-aberta] {
+    grid-template-columns: 1.3fr 1fr;
+  }
+
+  .tk-dex-lista {
+    min-width: 0;
+  }
+
+  /*
+   * ⚠️ A FICHA GRUDA E ROLA SOZINHA.
+   *
+   * Sem `position: sticky` ela acompanharia a rolagem da lista: numa Pokedex de
+   * 1.182 linhas, rolar pra procurar o proximo Pokemon levaria a ficha do atual
+   * pra fora da tela — que e exatamente o que um cliente de e-mail nao faz.
+   *
+   * `max-height` + `overflow-y` porque a ficha e alta (hero, veredito, rastro,
+   * ataques, ligas): sem os dois, grudar so prenderia o topo e o resto ficaria
+   * inalcancavel.
+   */
+  .tk-dex-ficha {
+    position: sticky;
+    top: var(--tk-s5);
+    min-width: 0;
+    max-height: calc(100dvh - 2 * var(--tk-s5));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: 28px;
+    background: var(--tk-surf);
+    border: 1px solid var(--tk-line);
+  }
+
+  /*
+   * A ficha em modo coluna perde tudo que era de folha: nao e `fixed`, nao tem
+   * recuo de tela cheia e nao reserva o pe pra bolha da IA — ela mora dentro de
+   * um cartao que ja tem borda e cantos.
+   */
+  .tk-ficha-coluna {
+    position: static;
+    inset: auto;
+    width: auto;
+    max-width: none;
+    height: auto;
+    max-height: none;
+    /* O pe reserva a altura da bolha da IA, como o `--com-bolha` fazia na
+       folha: sem isto a ultima linha da ficha fica embaixo dela. */
+    padding: 0 0 calc(54px + 2 * var(--tk-s4));
+    background: none;
+    border: 0;
+    border-radius: inherit;
+    box-shadow: none;
+    overflow: visible;
+    animation: none;
+  }
+
+  /* O hero da ficha e full-bleed dentro do cartao: os cantos de cima tem que
+     ser os do cartao, senao aparece um fio da superficie por tras dele. */
+  .tk-ficha-coluna > .tk-hero {
+    border-radius: 28px 28px 0 0;
+  }
+
+  /* O conteudo abaixo do hero precisa do respiro que a folha dava pelo recuo
+     dela. */
+  .tk-ficha-coluna > *:not(.tk-hero) {
+    padding-inline: var(--tk-s5);
+  }
+
+  /*
+   * ⚠️ A BOLHA DA IA E FILHA DO `<body>`, e por isso a ancora vem da RAIZ.
+   *
+   * `AiBubble` se porta pro `<body>` com `createPortal` — ela nunca e
+   * descendente da ficha, entao nenhum seletor tipo `.tk-ficha-coluna
+   * .tk-bubble` a alcanca. Foi assim que a primeira tentativa "funcionou" na
+   * medicao e nao mudou nada.
+   *
+   * Como folha, ela se ancora em `--tk-borda-folha`, a borda direita da folha.
+   * Como coluna nao ha folha, e essa conta joga a bolha pra dentro da LISTA:
+   * medido em 1920px, ela cairia em 1238 enquanto a ficha comeca em 1526.
+   * Numa janela de 1440 dava certo por coincidencia, que e o pior jeito de dar
+   * certo.
+   *
+   * `--tk-borda-direita` e a borda direita da shell — a mesma que a coluna da
+   * ficha encosta. Quem liga isto e o `data-tk-ficha` que a `PokedexScreen`
+   * escreve na raiz.
+   */
+  [data-tk-ficha="coluna"] .tk-bubble,
+  [data-tk-ficha="coluna"] .tk-chat {
+    right: var(--tk-borda-direita);
+  }
+
   /* ── FERRAMENTAS ─────────────────────────────────────────────────────────
      "acesso direto a Calculadora de IV/Raide/Montar time", do documento de
      desktop. No celular as tres so abrem de dentro de uma ficha; aqui elas sao
