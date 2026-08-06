@@ -267,8 +267,18 @@ export default defineConfig({
         description:
           "Decide o que fazer com cada Pokemon: investir, evoluir, guardar ou transferir.",
         lang: "pt-BR",
-        theme_color: "#07080B",
-        background_color: "#07080B",
+        /*
+         * `#0A0C10`, do handoff — e nao `#07080B`, que estava aqui sem
+         * justificativa nenhuma.
+         *
+         * Os dois existem no app: `--tk-bg` e `#0a0c10`, e `#07080b` e a parada
+         * MAIS EXTERNA do `--tk-screen`, o gradiente radial. O manifest pinta a
+         * tela de abertura, e o que aparece nela e o fundo do app — nao a beirada
+         * do gradiente. Escolher a beirada deixava a abertura um tom mais escura
+         * que a tela que vem depois dela.
+         */
+        theme_color: "#0A0C10",
+        background_color: "#0A0C10",
         display: "standalone",
         /*
          * Sem trava de orientacao.
