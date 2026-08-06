@@ -16,6 +16,10 @@ const EN = {
   "nav.pokedex": "Pokédex",
   "nav.settings": "Settings",
   "nav.aria": "Main navigation",
+  "side.tools": "TOOLS",
+  "side.calc": "IV calculator",
+  "side.offline": "OFFLINE MODE",
+  "side.offlineBody": "Everything downloaded. The app works without internet.",
 
   // ---------------------------------------------------------------------- comum
   "common.back": "Back",
