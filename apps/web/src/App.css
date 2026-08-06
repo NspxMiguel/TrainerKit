@@ -1701,6 +1701,24 @@
   color: var(--tk-txt);
 }
 
+/* ── FERRAMENTAS e MODO OFFLINE da barra lateral ────────────────────────────
+   Existem no DOM sempre e aparecem só na tela larga — ver a nota longa em
+   `App.tsx`: "não duplique lógica; é a mesma tela reagindo ao espaço".
+   `display: none` também tira do leitor de tela, que é o que importa aqui. */
+.tk-side-tools,
+.tk-side-offline {
+  display: none;
+}
+
+/* A grade da barra desktop precisa saber que as secoes ocupam a linha toda.
+   Sem isto elas entram como colunas e a barra vira cinco itens numa fila. */
+@media (min-width: 900px) {
+  .tk-side-tools,
+  .tk-side-offline {
+    display: grid;
+  }
+}
+
 .tk-onb-foot {
   flex: none;
   display: grid;

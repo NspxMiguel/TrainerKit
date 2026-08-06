@@ -6,6 +6,10 @@ export const PT_BR: Dict = {
   "nav.pokedex": "Pokédex",
   "nav.settings": "Ajustes",
   "nav.aria": "Navegação principal",
+  "side.tools": "FERRAMENTAS",
+  "side.calc": "Calculadora de IV",
+  "side.offline": "MODO OFFLINE",
+  "side.offlineBody": "Tudo baixado. O app funciona sem internet.",
 
   "common.back": "Voltar",
   "common.close": "Fechar",

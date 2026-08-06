@@ -5039,7 +5039,10 @@
    */
   :root {
     --tk-shell-max: 1180px;
-    --tk-lateral: 216px;
+    /* 248px é a medida do `TrainerKit Desktop.dc.html`. Eram 216, de quando a
+       barra só tinha três abas; com FERRAMENTAS embaixo, "Calculadora de IV"
+       em alemão ("IV-Rechner") e russo ("Калькулятор IV") precisa do espaço. */
+    --tk-lateral: 248px;
     --tk-folha-max: 620px;
     --tk-borda-direita: max(
       var(--tk-gutter),
@@ -5095,6 +5098,10 @@
     transform: none;
     width: var(--tk-lateral);
     max-width: var(--tk-lateral);
+    /* A barra deixa de ser só três abas: ela tem seções agora, e a de baixo
+       (o selo de offline) tem de encostar no pé em vez de flutuar colada nas
+       ferramentas. Ver `.tk-side-offline`. */
+    align-content: start;
     height: max-content;
     /*
      * Abaixo do escurecimento das folhas — ver `.tk-folha-scrim`.
@@ -5125,6 +5132,87 @@
     align-self: start;
     margin-top: max(var(--tk-safe-top), calc(env(safe-area-inset-top) + var(--tk-s3)));
   }
+
+  /* ── FERRAMENTAS ─────────────────────────────────────────────────────────
+     "acesso direto a Calculadora de IV/Raide/Montar time", do documento de
+     desktop. No celular as tres so abrem de dentro de uma ficha; aqui elas sao
+     destino, porque numa tela larga sobra coluna pra isso. */
+  .tk-side-tools {
+    display: grid;
+    gap: 2px;
+    /* 22px do desenho. `grid-column: 1 / -1` porque a barra e grade: sem isto a
+       secao entraria como se fosse mais uma aba. */
+    grid-column: 1 / -1;
+    margin-top: 22px;
+  }
+
+  .tk-side-legenda {
+    margin: 0;
+    padding: 0 4px 8px;
+    font: 700 11px/1 var(--tk-font);
+    letter-spacing: 0.08em;
+    color: var(--tk-txt3);
+  }
+
+  .tk-side-tool {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    /* 44px de alvo, como qualquer coisa tocavel do app — e aqui vale tambem
+       pra quem usa teclado: a linha inteira e o alvo, nao so o texto. */
+    min-height: 44px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 12px;
+    background: none;
+    font: 500 14px/1.2 var(--tk-font);
+    color: var(--tk-txt2);
+    text-align: left;
+    transition:
+      background-color 0.12s var(--tk-ease),
+      color 0.12s var(--tk-ease);
+  }
+
+  .tk-side-tool > span {
+    flex: 1;
+    min-width: 0;
+    /* Alemao e russo estouram 248px. Reticencia e melhor que a palavra
+       quebrando em duas linhas e desalinhando a coluna de icones. */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /*
+   * ⚠️ O SELO ENCOSTA NO PE DA BARRA, e por isso o `margin-top: auto`.
+   *
+   * Ele e o unico item da barra que nao e navegacao: e um estado. Colado
+   * embaixo das ferramentas parecia um quarto botao que nao clica. No pe, lido
+   * como rodape, ele volta a ser o que e — um aviso sobre o app, nao um
+   * destino.
+   */
+  .tk-side-offline {
+    display: grid;
+    gap: 6px;
+    grid-column: 1 / -1;
+    margin-top: auto;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--tk-v-investir) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--tk-v-investir) 18%, transparent);
+  }
+
+  .tk-side-offline-t {
+    font: 700 11px/1 var(--tk-font);
+    letter-spacing: 0.06em;
+    color: var(--tk-v-investir);
+  }
+
+  .tk-side-offline-d {
+    font: 400 12px/1.4 var(--tk-font);
+    color: var(--tk-txt2);
+  }
+
 
   /*
    * Na coluna, o item ativo cresce em ALTURA, nao em fatia de linha.

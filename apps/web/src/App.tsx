@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react";
 
-import { datasetLabel, useDataset } from "./data/useDataset.ts";
+import { datasetLabel, useDataset, type DatasetSpecies } from "./data/useDataset.ts";
 import { Onboarding } from "./onboarding/Onboarding.tsx";
 import { useSetup } from "./onboarding/setup.ts";
 import { CollectionScreen } from "./screens/CollectionScreen.tsx";
@@ -10,7 +10,19 @@ import { SettingsScreen } from "./screens/SettingsScreen.tsx";
 import { useT, type Key } from "./i18n/t.ts";
 import { detectPlatform } from "./storage/install.ts";
 import { requestPersistence, type PersistState } from "./storage/persist.ts";
-import { IconGearFill, IconGridFill, IconHomeFill } from "./ui/Icons.tsx";
+import { IVCalculator } from "./screens/IVCalculator.tsx";
+import { RaidCounters } from "./screens/RaidCounters.tsx";
+import { SpeciesPicker } from "./screens/SpeciesPicker.tsx";
+import { TeamBuilder } from "./screens/TeamBuilder.tsx";
+import { useOffline } from "./storage/offline.ts";
+import {
+  IconCamera,
+  IconGearFill,
+  IconGridFill,
+  IconHomeFill,
+  IconShield,
+  IconSwords,
+} from "./ui/Icons.tsx";
 import { SpriteDownloadPanel, SpriteDownloadStrip } from "./ui/SpriteDownload.tsx";
 import { UpdateBanner } from "./ui/UpdateBanner.tsx";
 import { fecharFolhaDeCima, useTemFolha } from "./ui/folha.ts";
@@ -72,6 +84,10 @@ export function App() {
   const setup = useSetup();
   const dataset = useDataset();
   const [persist, setPersist] = useState<PersistState | null>(null);
+  const offline = useOffline(
+    dataset.status === "ready" ? dataset.data.species.length : 0,
+    dataset.status,
+  );
 
   useEffect(() => {
     void requestPersistence().then(setPersist);
@@ -91,6 +107,42 @@ export function App() {
   const temFolha = useTemFolha();
 
   const species = dataset.status === "ready" ? dataset.data.species : [];
+
+  /*
+   * As FERRAMENTAS da barra lateral — só existem na tela larga.
+   *
+   * "sidebar fixa (Início/Pokédex/Ajustes + acesso direto a Calculadora de
+   * IV/Raide/Montar time)", do `TrainerKit Desktop.dc.html`.
+   *
+   * ⚠️ QUEM ESCONDE NO CELULAR É O CSS, e não um `if` aqui. O handoff é
+   * explícito: "não duplique lógica — é a mesma tela reagindo ao espaço
+   * disponível, não uma segunda tela". Com `display: none` o leitor de tela
+   * também não anuncia, que é o que um `if` daria de bom — sem o custo de a
+   * navegação existir em duas versões que precisam ser mantidas iguais.
+   *
+   * ⚠️ DUAS DELAS PRECISAM DE UMA ESPÉCIE, e é por isso que existe o `pedindo`.
+   * `RaidCounters` recebe `boss` e `IVCalculator` recebe `species` — abrir
+   * qualquer uma das duas "no vazio" não é possível nem faria sentido: a
+   * pergunta delas é sempre sobre um Pokémon. Então a ferramenta abre o
+   * `SpeciesPicker` que a coleção já usa, e só então a tela. "Montar time" não
+   * pede nada porque a pergunta dela é sobre a coleção inteira.
+   */
+  const [ferramenta, setFerramenta] = useState<"calc" | "raide" | "time" | null>(null);
+  const [pedindo, setPedindo] = useState<"calc" | "raide" | null>(null);
+  const [alvo, setAlvo] = useState<DatasetSpecies | null>(null);
+
+  const abrirFerramenta = (qual: "calc" | "raide" | "time") => {
+    if (qual === "time") {
+      setFerramenta("time");
+      return;
+    }
+    setPedindo(qual);
+  };
+
+  const fecharFerramenta = () => {
+    setFerramenta(null);
+    setAlvo(null);
+  };
 
   /*
    * As tres abas sempre aparecem.
@@ -192,6 +244,45 @@ export function App() {
               <span className="tk-tab-label">{t(labelKey)}</span>
             </button>
           ))}
+
+          {/* Ver a nota longa em `abrirFerramenta`: isto some no celular pelo
+              CSS, não por condição aqui. */}
+          <div className="tk-side-tools">
+            <p className="tk-side-legenda">{t("side.tools")}</p>
+            <button type="button" className="tk-side-tool" onClick={() => abrirFerramenta("calc")}>
+              <IconCamera size={17} />
+              <span>{t("side.calc")}</span>
+            </button>
+            <button type="button" className="tk-side-tool" onClick={() => abrirFerramenta("raide")}>
+              <IconShield size={17} />
+              <span>{t("raid.title")}</span>
+            </button>
+            <button type="button" className="tk-side-tool" onClick={() => abrirFerramenta("time")}>
+              <IconSwords size={17} />
+              <span>{t("team.title")}</span>
+            </button>
+          </div>
+
+          {/*
+            ⚠️ O SELO SÓ APARECE QUANDO É VERDADE.
+
+            O desenho traz o cartão verde "MODO OFFLINE · Tudo baixado. O app
+            funciona sem internet." como parte fixa da sidebar. Fixo ele seria
+            uma afirmação falsa na maior parte do tempo — as imagens das
+            espécies são ~150 MB e vêm sob demanda, então o app recém-instalado
+            NÃO funciona inteiro sem rede.
+
+            `useOffline` mede o `CacheStorage` de verdade (ver
+            `storage/offline.ts`). Enquanto faltar alguma coisa, o selo não
+            existe; quando tudo estiver guardado, ele aparece dizendo algo que
+            dá para conferir puxando o cabo da internet.
+          */}
+          {offline?.every((i) => i.estado === "guardado") && (
+            <div className="tk-side-offline">
+              <span className="tk-side-offline-t">{t("side.offline")}</span>
+              <span className="tk-side-offline-d">{t("side.offlineBody")}</span>
+            </div>
+          )}
         </nav>
       </div>
 
@@ -210,6 +301,47 @@ export function App() {
           className="tk-folha-scrim"
           aria-hidden="true"
           onClick={temFolha ? fecharFolhaDeCima : undefined}
+        />
+      )}
+
+      {/*
+        As ferramentas da barra lateral, montadas aqui e nao dentro da aba.
+
+        Elas precisam sobreviver a troca de aba — abrir a calculadora e depois
+        clicar em "Pokedex" nao pode fechar a calculadora, e se ela morasse
+        dentro de `<HomeScreen>` morreria junto com a aba.
+      */}
+      {pedindo !== null && dataset.status === "ready" && (
+        <SpeciesPicker
+          data={dataset.data}
+          onPick={(s) => {
+            setAlvo(s);
+            setFerramenta(pedindo);
+            setPedindo(null);
+          }}
+          onClose={() => setPedindo(null)}
+        />
+      )}
+
+      {ferramenta === "calc" && alvo && dataset.status === "ready" && (
+        <IVCalculator species={alvo} data={dataset.data} onClose={fecharFerramenta} />
+      )}
+
+      {ferramenta === "raide" && alvo && dataset.status === "ready" && (
+        <RaidCounters boss={alvo} data={dataset.data} onClose={fecharFerramenta} />
+      )}
+
+      {ferramenta === "time" && dataset.status === "ready" && (
+        <TeamBuilder
+          data={dataset.data}
+          onClose={fecharFerramenta}
+          onPickSpecies={() => {
+            /* Abrir a ficha a partir do time fecharia a folha do time por baixo
+               dela. Na barra lateral a ferramenta e um destino, nao um passo de
+               um fluxo — quem quer a ficha tem a Pokedex do lado. */
+            fecharFerramenta();
+            go("pokedex");
+          }}
         />
       )}
 
