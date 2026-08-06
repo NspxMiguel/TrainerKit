@@ -34,6 +34,9 @@ import { DataSourceSettings } from "./DataSourceSettings.tsx";
 import { SpriteSettings } from "./SpriteSettings.tsx";
 import { VoiceSettings } from "./VoiceSettings.tsx";
 import { WipeDialog } from "../ui/WipeDialog.tsx";
+import { useOffline } from "../storage/offline.ts";
+import { SpriteDownloadButton } from "../ui/SpriteDownload.tsx";
+import { usePrefetch } from "../sprites/prefetch.ts";
 
 interface Props {
   datasetLabel: string | null;
@@ -182,6 +185,11 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
   const language = useLanguage();
   const showTranslation = useShowTranslation();
   const sprites = useSpriteSettings();
+  /* Remede quando um download termina: `pre.done` sobe e a chave muda. Sem
+     isto o cartao continuaria dizendo "sob demanda" com as imagens ja no
+     aparelho, ate alguem fechar e reabrir Ajustes. */
+  const pre = usePrefetch();
+  const offline = useOffline(species.length, `${pre.status}:${pre.done}`);
   const ai = useAi();
   const { t } = useT();
   const setup = useSetup();
@@ -455,7 +463,57 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
 
       {painel === "storage" && (
         <SettingsSheet title={t("settings.storage")} onClose={fechar}>
+          {/*
+            ⚠️ ESTE CARTAO MEDE. Ele nao simula progresso.
+
+            O handoff pede "um cartao com barra de progresso e a lista do que
+            esta sendo baixado: especies e evolucoes, tabela de tipos e
+            counters, regras de veredito, os prints do usuario, e a voz neural".
+
+            Quatro desses cinco nao tem o que baixar — o `gamedata.json` (que E
+            as especies, as evolucoes, os tipos e os counters, tudo no mesmo
+            arquivo) e o codigo das regras entram no PRE-CACHE do service
+            worker, e os prints nunca sairam do aparelho. Uma barra enchendo por
+            cima de coisas que ja estao la seria carregamento de mentira.
+
+            Entao a lista pergunta ao `CacheStorage` e mostra a resposta. Ver
+            `storage/offline.ts`, inclusive pro que ficou de fora e por que.
+          */}
+          <p className="tk-caption" style={{ margin: "0 2px 8px", lineHeight: 1.5 }}>
+            {t("offline.sub")}
+          </p>
           <section className="tk-card">
+            {offline?.map((item) => (
+              <div className="tk-row" key={item.id}>
+                <span className="tk-row-label">{t(`offline.${item.id}` as const)}</span>
+                <span
+                  className="tk-row-value"
+                  style={item.estado === "guardado" ? { color: "var(--tk-succ)" } : undefined}
+                >
+                  {/* A contagem so aparece nas imagens, e so enquanto faltam:
+                      "1.182 de 1.182" ao lado de "No aparelho" e ruido. */}
+                  {item.estado === "pendente" && item.contagem && item.contagem.feito > 0
+                    ? t("offline.imagensConta", {
+                        feito: item.contagem.feito,
+                        total: item.contagem.total,
+                      })
+                    : t(item.estado === "guardado" ? "offline.guardado" : "offline.pendente")}
+                </span>
+              </div>
+            ))}
+          </section>
+
+          {/*
+            O UNICO que falta de verdade: ~150 MB de imagens.
+
+            Reaproveita o botao que ja existe em Ajustes → Imagens, com o mesmo
+            aviso de tamanho ANTES de comecar e o mesmo progresso. Duas telas
+            baixando a mesma coisa com desenhos diferentes e como o app "parece
+            tres apps".
+          */}
+          <SpriteDownloadButton species={species} />
+
+          <section className="tk-card" style={{ marginTop: 12 }}>
             {install.installed ? (
               <div className="tk-row">
                 <span className="tk-row-label">{t("settings.installed")}</span>
