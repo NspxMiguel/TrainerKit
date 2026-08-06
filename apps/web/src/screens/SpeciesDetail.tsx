@@ -59,6 +59,15 @@ interface Props {
   onPickSpecies?: (s: DatasetSpecies) => void;
   /** O Pokemon salvo, quando a tela vem da Colecao. */
   owned?: OwnedPokemon | undefined;
+  /**
+   * Renderizada como COLUNA da Pokedex, e nao como folha por cima dela.
+   *
+   * Mesmo nome que `CollectionScreen` ja usa pra mesma ideia. Ver a nota longa
+   * em `ui/telaLarga.ts`: e a unica diferenca de layout do app que CSS nao
+   * resolve, porque muda ONDE o no e montado — folha vai por `createPortal` no
+   * `<body>`, coluna fica na arvore da propria tela.
+   */
+  embutida?: boolean;
 }
 
 const PERFECT = { atk: 15, def: 15, hp: 15 };
@@ -113,7 +122,14 @@ function StatBar({ label, value }: { label: string; value: number }) {
   );
 }
 
-export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpecies, owned }: Props) {
+export function SpeciesDetail({
+  species: especieAberta,
+  data,
+  onClose,
+  onPickSpecies,
+  owned,
+  embutida = false,
+}: Props) {
   /*
    * ⚠️ A ESPECIE SEGUE O POKEMON SALVO, e nao a foto de quando a tela abriu.
    *
@@ -180,21 +196,31 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
   const { t } = useT();
   useShowTranslation(); // re-renderiza ao ligar/desligar a traducao
 
+  /*
+   * ⚠️ OS DOIS EFEITOS ABAIXO SAO DE FOLHA, e nao de coluna.
+   *
+   * Travar o rolar do `<body>` existe pra folha nao deixar a pagina de tras
+   * rolando junto. Como coluna, a ficha E a pagina: travar aqui congelaria a
+   * propria Pokedex, e o Escape fecharia uma tela que nao esta por cima de
+   * nada — sumindo com a ficha por um atalho que ninguem pediu.
+   */
   useEffect(() => {
+    if (embutida) return;
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = previous;
     };
-  }, []);
+  }, [embutida]);
 
   useEffect(() => {
+    if (embutida) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") fechar();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [fechar]);
+  }, [fechar, embutida]);
 
   const cpAt = (level: number) =>
     computeCPAtLevel(data.cpm, species.baseStats, PERFECT, level);
@@ -375,9 +401,27 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
     fez a bolha virar botão de linha uma vez ("essa estrela ali de baixo tira").
     É o mesmo respiro que toda lista com botão flutuante tem.
   */
-  return createPortal(
-    <div ref={refFolha}
-      className="tk-sheet-full tk-sheet-full--com-bolha" role="dialog" aria-modal="true" aria-label={species.name} data-saindo={saindo || undefined}>
+  /*
+   * ⚠️ EMBUTIDA NAO E DIALOGO, e por isso perde `role`, `aria-modal` e o portal.
+   *
+   * Como coluna ela nao esta por cima de nada: nao ha o que fechar, nao ha foco
+   * pra prender e anunciar "dialogo" faria o leitor de tela prometer uma saida
+   * que nao existe. O `data-saindo` tambem sai — a animacao de folha saindo e
+   * de quem estava por cima.
+   */
+  const corpo = (
+    <div
+      ref={embutida ? undefined : refFolha}
+      className={embutida ? "tk-ficha-coluna" : "tk-sheet-full tk-sheet-full--com-bolha"}
+      {...(embutida
+        ? { "aria-label": species.name }
+        : {
+            role: "dialog",
+            "aria-modal": true,
+            "aria-label": species.name,
+            "data-saindo": saindo || undefined,
+          })}
+    >
       {/*
         O MESMO HERO DA HOME, aqui na ficha.
 
@@ -446,14 +490,18 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
         <span className="tk-hero-scrim" aria-hidden="true" />
 
         <div className="tk-hero-topo">
-          <button
-            type="button"
-            className="tk-sheet-close"
-            onClick={fechar}
-            aria-label={t("common.back")}
-          >
-            ‹
-          </button>
+          {/* Como coluna nao ha pra onde voltar: a lista esta do lado, visivel,
+              e a seta prometeria uma navegacao que nao existe. */}
+          {!embutida && (
+            <button
+              type="button"
+              className="tk-sheet-close"
+              onClick={fechar}
+              aria-label={t("common.back")}
+            >
+              ‹
+            </button>
+          )}
         </div>
 
         <div className="tk-hero-base">
@@ -1089,9 +1137,10 @@ export function SpeciesDetail({ species: especieAberta, data, onClose, onPickSpe
         os counters abertos, a pergunta seria sobre outra coisa que nao a tela
         na frente.
       */}
-    </div>,
-    document.body,
+    </div>
   );
+
+  return embutida ? corpo : createPortal(corpo, document.body);
 }
 
 /**
