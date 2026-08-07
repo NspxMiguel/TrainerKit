@@ -38,6 +38,8 @@ export const RU: Dict = {
   "home.trainer": "Тренер",
   "home.todayPick": "ГЛАВНОЕ СЕГОДНЯ",
   "home.yourCollection": "Твоя коллекция",
+  "home.pedemDecisao": "Ждут решения",
+  "home.armazenamento": "Офлайн-хранилище",
   "home.hero.best": "Ваш лучший",
   "home.hero.topRaid": "Лучший рейд-атакующий сейчас",
   "home.empty.title": "Коллекция пуста",

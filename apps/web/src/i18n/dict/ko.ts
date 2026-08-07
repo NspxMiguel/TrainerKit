@@ -38,6 +38,8 @@ export const KO: Dict = {
   "home.trainer": "트레이너",
   "home.todayPick": "오늘의 추천",
   "home.yourCollection": "내 컬렉션",
+  "home.pedemDecisao": "결정 필요",
+  "home.armazenamento": "오프라인 저장",
   "home.hero.best": "내 최고 개체",
   "home.hero.topRaid": "지금 최고의 레이드 어태커",
   "home.empty.title": "컬렉션이 비어 있어요",

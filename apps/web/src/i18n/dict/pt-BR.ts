@@ -41,6 +41,8 @@ export const PT_BR: Dict = {
   "home.trainer": "Treinador",
   "home.todayPick": "DESTAQUE DE HOJE",
   "home.yourCollection": "Sua coleção",
+  "home.pedemDecisao": "Pedem decisão",
+  "home.armazenamento": "Armazenamento offline",
   "home.hero.best": "O seu melhor",
   "home.hero.topRaid": "Melhor atacante de raide agora",
   "home.empty.title": "Sua coleção está vazia",

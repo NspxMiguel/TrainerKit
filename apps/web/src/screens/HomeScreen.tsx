@@ -1,5 +1,7 @@
 import { useMemo, useState, type CSSProperties } from "react";
 
+import { useTelaLarga } from "../ui/telaLarga.ts";
+
 import {
   ACOES_QUE_COBRAM,
   ACTION_KEYS,
@@ -26,6 +28,7 @@ import {
 } from "../storage/collection.ts";
 import { useInstallState } from "../storage/install.ts";
 import type { PersistState } from "../storage/persist.ts";
+import { formatBytes } from "../storage/tamanho.ts";
 import { DidYouKnow } from "../ui/DidYouKnow.tsx";
 import { Esqueleto, Offline, Vazio } from "../ui/Estados.tsx";
 import { IconAlert, IconCamera, IconShield, IconSwords } from "../ui/Icons.tsx";
@@ -395,6 +398,24 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
   const ready = dataset.status === "ready";
   const data = ready ? dataset.data : null;
   const colecao = setup.mode === "colecao";
+  /*
+   * Cinco na tela larga, quatro no celular — e o "VER MAIS" continua sendo o
+   * ultimo dos dois jeitos.
+   *
+   * A grade do desktop tem seis colunas (documento). Cinco bichos mais o
+   * destino fecham a linha exata; quatro deixariam um buraco no fim e seis
+   * empurrariam o "VER MAIS" pra uma segunda linha sozinho, que e pior que o
+   * buraco. A regra dele continua valendo: "no lugar do 5 um ver mais".
+   */
+  const telaLarga = useTelaLarga();
+  const naFila = telaLarga ? 5 : NA_FILA;
+  /* Só as canônicas, como a contagem do seletor da Pokédex — `cosmeticOf`
+     marca variações de fantasia, que têm stats idênticos e ficam fora da
+     busca. Contá-las daria um total que não bate com a lista. */
+  const totalEspecies =
+    dataset.status === "ready"
+      ? dataset.data.species.filter((s) => !s.cosmeticOf).length
+      : 0;
 
   /** A colecao com veredito calculado, ordenada: quem pede acao primeiro. */
   const meus = useMemo(() => {
@@ -620,9 +641,35 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
         finalmente tem onde morar.
       */}
       <header className="tk-home-topo">
-        <p className="tk-saudacao">
-          {t(greetingKey())}, {setup.name.trim() || t("home.trainer")}.
-        </p>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p className="tk-saudacao">
+            {t(greetingKey())}, {setup.name.trim() || t("home.trainer")}.
+          </p>
+          {/*
+            A LINHA DA DATA — so na tela larga, e por isso o CSS a esconde.
+
+            "Quarta, 30 de julho · 4 decisões esperam você", do documento de
+            desktop. No celular a saudacao ja ocupa a largura toda e a segunda
+            linha empurraria o hero pra fora da primeira tela — que e o que a
+            nota do `.tk-hero` chama de "favor sem scroll na tela de inicio".
+
+            `toLocaleDateString` no idioma do app: quem escolheu japones nao
+            quer "Quarta" nem "Wednesday".
+          */}
+          <p className="tk-home-data">
+            {new Date().toLocaleDateString(language, {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+            })}
+            {meus !== null && meus.agir.length > 0 &&
+              ` · ${
+                meus.agir.length === 1
+                  ? t("home.needsDecision.one")
+                  : t("home.needsDecision.many", { count: meus.agir.length })
+              }`}
+          </p>
+        </div>
         {/*
           O avatar abre a TROCA DE CONTA, e nao mais a lista "Meus".
 
@@ -696,6 +743,15 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
 
       {dataset.status === "ready" && (
         <>
+          {/*
+            ⚠️ O HERO GANHA UM IRMAO NA TELA LARGA, e por isso o embrulho.
+
+            No documento de desktop o destaque nao ocupa a largura toda: ele
+            divide a linha com um cartao de numeros, em `1.3fr 1fr`. No celular
+            este `<div>` e transparente — a regra da grade so existe a partir de
+            900px, entao aqui embaixo ele nao muda um pixel do que ja havia.
+          */}
+          <div className="tk-home-linha1">
           {hero && (
             <Hero
               species={hero.species}
@@ -757,6 +813,47 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
                 : {})}
             />
           )}
+
+          {/*
+            O CARTAO DE NUMEROS — so na tela larga.
+
+            "Coleção 247 / 1.182 · Pedem decisão 4 · Armazenamento offline
+            1,2 GB", do documento de desktop.
+
+            ⚠️ A POEIRA ESTELAR DO DESENHO NAO ESTA AQUI. O documento mostra a
+            linha, e o app nao guarda esse dado em lugar nenhum — nao ha de onde
+            tirar sem pedir pra pessoa digitar. Inventar um numero num app cuja
+            tese e "todo numero que ele diz foi calculado" seria o pior tipo de
+            fidelidade ao desenho. Fica de fora ate existir de onde ler.
+          */}
+          {colecao && (
+            <aside className="tk-home-numeros">
+              <div className="tk-home-num">
+                <span className="tk-home-num-r">{t("home.yourCollection")}</span>
+                <span className="tk-home-num-v">
+                  {(items?.length ?? 0).toLocaleString(language)} /{" "}
+                  {totalEspecies.toLocaleString(language)}
+                </span>
+              </div>
+              {meus !== null && meus.agir.length > 0 && (
+                <div className="tk-home-num">
+                  <span className="tk-home-num-r">{t("home.pedemDecisao")}</span>
+                  <span className="tk-home-num-v tk-home-num-v--ultra">
+                    {meus.agir.length.toLocaleString(language)}
+                  </span>
+                </div>
+              )}
+              {persist?.supported === true && persist.usageBytes != null && (
+                <div className="tk-home-num">
+                  <span className="tk-home-num-r">{t("home.armazenamento")}</span>
+                  <span className="tk-home-num-v tk-home-num-v--ok">
+                    {formatBytes(persist.usageBytes)}
+                  </span>
+                </div>
+              )}
+            </aside>
+          )}
+          </div>
 
           {/*
             Uma acao principal, uma secundaria.
@@ -840,7 +937,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
               </div>
 
               <div className="tk-strip-row">
-                {meus.porIv.slice(0, NA_FILA).map((d, i) => (
+                {meus.porIv.slice(0, naFila).map((d, i) => (
                   <button
                     key={d.id}
                     type="button"
@@ -937,12 +1034,12 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
                   Pokemon na colecao ele aparecia mesmo assim, prometendo uma
                   lista que era a mesma que ja estava na tela.
                 */}
-                {meus.porIv.length > NA_FILA && (
+                {meus.porIv.length > naFila && (
                 <button
                   type="button"
                   className="tk-strip-cell tk-strip-cell--mais"
                   onClick={() => onGo("pokedex", { view: "mine" })}
-                  style={{ ["--tk-i" as string]: NA_FILA }}
+                  style={{ ["--tk-i" as string]: naFila }}
                 >
                   <span className="tk-strip-mais-anel" aria-hidden="true">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none"

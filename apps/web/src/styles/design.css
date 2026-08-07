@@ -5057,32 +5057,55 @@
     );
   }
 
+  /*
+   * ⚠️ A CASCA VAI DE PONTA A PONTA — era uma coluna de 1180px centrada.
+   *
+   * "acho q ta igual o q te mandei nao", com razao. Eu tinha encaixado as
+   * pecas do desenho (ferramentas, selo de offline, duas colunas) DENTRO da
+   * casca de celular, e enquanto ela existisse tudo continuaria parecendo o app
+   * de telefone esticado: a barra flutuando como cartao no meio da esquerda, e
+   * o conteudo espremido numa coluna com vazio dos dois lados.
+   *
+   * O `TrainerKit Desktop.dc.html` e edge-to-edge: `height:100%; display:flex;
+   * overflow:hidden` na raiz, barra colada na borda esquerda com fio divisorio,
+   * e o conteudo ocupando o resto com rolagem PROPRIA. Quem rola deixa de ser a
+   * pagina e passa a ser a coluna — que e o que faz a barra ficar parada sem
+   * `position: sticky` e o que um app de computador faz.
+   */
   .tk-shell {
     flex-direction: row;
-    justify-content: center;
-    max-width: var(--tk-shell-max);
+    justify-content: flex-start;
+    max-width: none;
     align-items: stretch;
-    gap: var(--tk-s6);
-    padding: 0 var(--tk-gutter);
+    gap: 0;
+    padding: 0;
+    height: 100dvh;
+    overflow: hidden;
   }
 
   /* A barra deixa de ser flutuante e vira coluna: ela some do rodape, entao o
      conteudo nao precisa mais reservar espaco embaixo. */
+  /*
+   * ⚠️ O TETO DE 860px SAIU, e o argumento que o sustentava continua valendo —
+   * so nao era trabalho DELE.
+   *
+   * Dizia: "uma linha de texto de 896px e ilegivel, o olho perde o comeco da
+   * linha seguinte". Verdade, e por isso quem tem texto corrido (a ficha, os
+   * cartoes) limita a PROPRIA largura. Limitar a coluna inteira pra proteger o
+   * texto tambem estreitava a lista, a grade e a Pokedex, que nao tem esse
+   * problema — e era isso que deixava vazio dos dois lados.
+   *
+   * `28px 36px 40px` sao os recuos do documento de desktop.
+   */
   .tk-main,
   [data-platform] .tk-main {
     flex: 1;
     min-width: 0;
-    /*
-     * Largura util, nao largura maxima.
-     *
-     * Deixar o conteudo esticar ate os 896px que sobram parece "usar a tela",
-     * mas uma linha de texto de 896px e ilegivel — o olho perde o comeco da
-     * linha seguinte. O que ganha com tela grande e a GRADE de especies, e essa
-     * usa `auto-fill` e se vira sozinha. Os cartoes de texto ficam num limite
-     * confortavel e o conjunto centraliza no que sobra.
-     */
-    max-width: 860px;
-    padding: var(--tk-s8) 0 var(--tk-s8);
+    max-width: none;
+    height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 28px 36px 40px;
   }
 
   .tk-tabbar,
@@ -5091,18 +5114,40 @@
        fica embaixo; deitado ela precisa ficar a esquerda, e `order` resolve sem
        mexer na ordem de leitura nem no foco do teclado. */
     order: -1;
-    position: sticky;
-    top: var(--tk-s8);
+    /*
+     * ⚠️ `relative`, e NAO `static` — a lente depende disto.
+     *
+     * Trocar pra `sticky` nao fazia falta (quem rola agora e a `.tk-main`), e
+     * eu troquei pra `static`. Ai a `.tk-tab-bolha`, que e `position: absolute`
+     * com `left: 8px; right: 8px`, perdeu o ancestral posicionado e passou a se
+     * medir pela JANELA: virou uma faixa clara de 1424px atravessando o topo da
+     * tela, por cima da saudacao. Medido, nao suposto.
+     *
+     * `relative` da a ela o mesmo container que tinha antes sem trazer de volta
+     * a grudacao que nao serve mais.
+     */
+    position: relative;
     left: auto;
     bottom: auto;
     transform: none;
     width: var(--tk-lateral);
     max-width: var(--tk-lateral);
+    /* Colada na borda: altura inteira, fio divisorio a direita e um veu de 2%
+       pra separar da tela sem virar cartao. Medidas do documento. */
+    height: 100%;
+    padding: 18px 14px;
+    border-radius: 0;
+    border: 0;
+    border-right: 1px solid var(--tk-line);
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+    margin: 0;
     /* A barra deixa de ser só três abas: ela tem seções agora, e a de baixo
        (o selo de offline) tem de encostar no pé em vez de flutuar colada nas
        ferramentas. Ver `.tk-side-offline`. */
     align-content: start;
-    height: max-content;
     /*
      * Abaixo do escurecimento das folhas — ver `.tk-folha-scrim`.
      *
@@ -5127,63 +5172,214 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
-    padding: var(--tk-s2);
-    border-radius: var(--tk-r-card);
-    align-self: start;
-    margin-top: max(var(--tk-safe-top), calc(env(safe-area-inset-top) + var(--tk-s3)));
+    align-self: stretch;
   }
 
-  /* ── POKEDEX EM DUAS COLUNAS ─────────────────────────────────────────────
-     "Pokédex em lista + ficha lado a lado (como um cliente de e-mail)", com a
-     proporcao `1.3fr 1fr` do documento de desktop.
-
-     ⚠️ SEM FICHA ABERTA A LISTA OCUPA TUDO — `data-aberta` e quem liga a
-     segunda coluna. Uma coluna vazia esperando escolha e tela pedindo
-     desculpa; a lista inteira ate alguem clicar e a mesma tela usando o que
-     tem. */
-  .tk-dex-split {
+  /* ── INICIO EM DUAS COLUNAS ──────────────────────────────────────────────
+     "hero maior e coleção em grade", com o cartao de numeros ao lado, em
+     `1.3fr 1fr` — a proporcao do documento de desktop. */
+  .tk-home-linha1 {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--tk-s6);
-    align-items: start;
-  }
-
-  .tk-dex-split[data-aberta] {
     grid-template-columns: 1.3fr 1fr;
+    gap: var(--tk-s5);
+    align-items: stretch;
+    margin-bottom: var(--tk-s5);
   }
 
-  .tk-dex-lista {
-    min-width: 0;
+  /* Sem colecao nao ha cartao de numeros, e ai o hero fica com a linha toda. */
+  .tk-home-linha1:has(> .tk-hero:only-child) {
+    grid-template-columns: 1fr;
   }
 
   /*
-   * ⚠️ A FICHA GRUDA E ROLA SOZINHA.
+   * ⚠️ O HERO PARA DE SANGRAR na tela larga.
    *
-   * Sem `position: sticky` ela acompanharia a rolagem da lista: numa Pokedex de
-   * 1.182 linhas, rolar pra procurar o proximo Pokemon levaria a ficha do atual
-   * pra fora da tela — que e exatamente o que um cliente de e-mail nao faz.
+   * Ele e `width: 100vw` com `margin-left: calc(50% - 50vw)` pra escapar da
+   * goteira — no celular isso e certo, o hero vai de borda a borda. Com a casca
+   * edge-to-edge a conta passou a medir a JANELA enquanto ele mora numa coluna
+   * que comeca depois da barra: o resultado foi o hero deslocado pra esquerda e
+   * a home inteira parecendo quebrada.
    *
-   * `max-height` + `overflow-y` porque a ficha e alta (hero, veredito, rastro,
-   * ataques, ligas): sem os dois, grudar so prenderia o topo e o resto ficaria
-   * inalcancavel.
+   * Aqui ele e um cartao dentro da grade, entao nao ha goteira pra escapar.
    */
-  .tk-dex-ficha {
-    position: sticky;
-    top: var(--tk-s5);
-    min-width: 0;
-    max-height: calc(100dvh - 2 * var(--tk-s5));
-    overflow-y: auto;
-    overscroll-behavior: contain;
+  .tk-home > .tk-home-linha1 > .tk-hero {
+    width: auto;
+    max-width: none;
+    margin: 0;
+    border-radius: 28px;
+    overflow: hidden;
+  }
+
+  .tk-home-numeros {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--tk-s4);
+    padding: var(--tk-s6);
     border-radius: 28px;
     background: var(--tk-surf);
     border: 1px solid var(--tk-line);
   }
 
+  .tk-home-num {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--tk-s4);
+  }
+
+  .tk-home-num-r {
+    font: 400 14px/1.3 var(--tk-font);
+    color: var(--tk-txt2);
+  }
+
+  .tk-home-num-v {
+    font: 700 15px/1.2 var(--tk-font);
+    /* Tabular: tres numeros empilhados com larguras de digito diferentes
+       dancam a cada atualizacao da colecao. */
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .tk-home-num-v--ultra {
+    color: var(--tk-ultra-fg);
+  }
+
+  .tk-home-num-v--ok {
+    color: var(--tk-v-investir);
+  }
+
+  /* A saudacao e a data dividem a linha com o avatar, como no documento. */
+  .tk-home-topo {
+    align-items: flex-start;
+  }
+
+  .tk-home-data {
+    /* O `display: none` do celular mora no `App.css`, que esta na camada
+       `legado` — sem isto a data nunca aparece. */
+    display: block;
+    margin: 4px 0 0;
+    font: 400 13.5px/1.4 var(--tk-font);
+    color: var(--tk-txt2);
+  }
+
   /*
-   * A ficha em modo coluna perde tudo que era de folha: nao e `fixed`, nao tem
-   * recuo de tela cheia e nao reserva o pe pra bolha da IA — ela mora dentro de
-   * um cartao que ja tem borda e cantos.
+   * A coleção como GRADE de seis, e não fila apertada.
+   *
+   * No celular a fila cabe quatro e o quinto lugar é o "VER MAIS" — decisão
+   * dele ("ao invez de uma faixa com scroll pro lado, coloca tipo, no lugar do
+   * 5 um ver mais"). Na tela larga cabem os seis do documento de desktop, e o
+   * "VER MAIS" continua sendo o último: cinco bichos e o destino, fechando a
+   * linha exata sem sobra.
    */
+  .tk-strip-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--tk-s4);
+  }
+
+  .tk-strip-cell {
+    width: auto;
+  }
+
+  /* ── POKEDEX: LISTA FIXA + FICHA NO RESTO ────────────────────────────────
+     "Pokédex em lista + ficha lado a lado (como um cliente de e-mail)".
+
+     ⚠️ A LISTA E 340px FIXOS, e nao uma fracao. Era `1.3fr 1fr`, que eu tinha
+     tirado do documento — so que aquela proporcao e do INICIO (hero + cartao de
+     numeros). Na Pokedex o documento diz `width:340px` na coluna da lista, e a
+     diferenca importa: em fracao a lista cresce junto com a janela, e uma
+     linha de "Bulbasaur · IV 96 · PC 2.874" com 600px de largura e quase toda
+     espaco vazio entre o nome e o chip.
+
+     ⚠️ SEM FICHA ABERTA A LISTA OCUPA TUDO — `data-aberta` liga a segunda
+     coluna. Coluna vazia esperando escolha e tela pedindo desculpa. */
+  /* Grade de duas linhas: a barra de topo atravessa as duas colunas, e as
+     colunas dividem o que sobra da altura. */
+  .tk-dex-split {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 0;
+    align-items: stretch;
+    /* Anula o recuo da `.tk-main`: as duas colunas vao de ponta a ponta e cada
+       uma poe o proprio respiro, como no documento. */
+    margin: -28px -36px -40px;
+    height: calc(100% + 68px);
+    min-height: 0;
+  }
+
+  .tk-dex-lista {
+    min-width: 0;
+    height: 100%;
+    overflow-y: auto;
+    padding: 28px 36px 40px;
+  }
+
+  .tk-dex-split[data-aberta] {
+    grid-template-columns: 340px minmax(0, 1fr);
+  }
+
+  .tk-dex-split[data-aberta] .tk-dex-lista {
+    padding: 20px 20px 40px;
+    border-right: 1px solid var(--tk-line);
+  }
+
+  /* A barra de topo ocupa a linha inteira, nas duas configuracoes. */
+  .tk-dex-topo {
+    grid-column: 1 / -1;
+    padding: 28px 36px 16px;
+    border-bottom: 1px solid var(--tk-line);
+  }
+
+  /*
+   * ⚠️ TITULO, SELETOR E BUSCA NA MESMA LINHA, como no documento.
+   *
+   * Os tres sao irmaos diretos do cabecalho, entao um `flex` aqui alinha os
+   * tres sem precisar embrulhar cada um — e o campo de busca fica com o `flex:
+   * 1` pra comer a sobra, que e o que o desenho mostra.
+   */
+  .tk-dex-topo {
+    display: flex;
+    align-items: center;
+    gap: var(--tk-s5);
+    flex-wrap: wrap;
+  }
+
+  .tk-dex-topo > .tk-h1 {
+    margin: 0;
+    flex: none;
+  }
+
+  /*
+   * ⚠️ O SELETOR NAO ESTICA. Ele era `flex: 1` e virava uma barra de 1.100px
+   * com "Todos · 1.182" perdido no meio — a busca, que no documento divide esta
+   * linha com ele, mora dentro do `SpeciesBrowser` e ficou na coluna da lista.
+   *
+   * Enquanto ela nao subir pra ca, o seletor fica no tamanho dele e a linha
+   * termina onde o conteudo termina, em vez de fingir que ha algo a direita.
+   */
+  .tk-dex-topo > *:last-child {
+    flex: 0 1 auto;
+    max-width: 420px;
+  }
+
+  /*
+   * ⚠️ A FICHA ROLA SOZINHA, e nao junto com a lista.
+   *
+   * Numa Pokedex de 1.182 linhas, rolar pra procurar o proximo Pokemon levaria
+   * a ficha do atual pra fora da tela — que e exatamente o que um cliente de
+   * e-mail nao faz. Duas colunas, duas rolagens.
+   */
+  .tk-dex-ficha {
+    min-width: 0;
+    height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  /* Como coluna a ficha perde tudo que era de folha: nao e `fixed`, nao tem
+     recuo de tela cheia e nao e um cartao — ela E o painel. */
   .tk-ficha-coluna {
     position: static;
     inset: auto;
@@ -5191,27 +5387,26 @@
     max-width: none;
     height: auto;
     max-height: none;
-    /* O pe reserva a altura da bolha da IA, como o `--com-bolha` fazia na
-       folha: sem isto a ultima linha da ficha fica embaixo dela. */
+    /* O pe reserva a altura da bolha da IA, como o `--com-bolha` fazia. */
     padding: 0 0 calc(54px + 2 * var(--tk-s4));
     background: none;
     border: 0;
-    border-radius: inherit;
+    border-radius: 0;
     box-shadow: none;
     overflow: visible;
     animation: none;
   }
 
-  /* O hero da ficha e full-bleed dentro do cartao: os cantos de cima tem que
-     ser os do cartao, senao aparece um fio da superficie por tras dele. */
+  /* O hero vira a faixa larga do topo do painel, como no documento. */
   .tk-ficha-coluna > .tk-hero {
-    border-radius: 28px 28px 0 0;
+    border-radius: 0;
+    margin: 0;
+    width: auto;
+    max-width: none;
   }
 
-  /* O conteudo abaixo do hero precisa do respiro que a folha dava pelo recuo
-     dela. */
   .tk-ficha-coluna > *:not(.tk-hero) {
-    padding-inline: var(--tk-s5);
+    padding-inline: 32px;
   }
 
   /*
@@ -5235,6 +5430,84 @@
   [data-tk-ficha="coluna"] .tk-bubble,
   [data-tk-ficha="coluna"] .tk-chat {
     right: var(--tk-borda-direita);
+  }
+
+  /*
+   * ⚠️ A LENTE NAO EXISTE NA BARRA LATERAL, e nao e simplificacao — e conserto.
+   *
+   * Ela se posiciona por INDICE (`--tk-tab-i` vezes a fracao da barra), e essa
+   * conta pressupoe que os itens comecam no topo. Com a marca ocupando o
+   * primeiro lugar, a lente passou a pousar EM CIMA dela: o nome do app sumia
+   * atras de um retangulo claro, e o item ativo ficava sem marca nenhuma.
+   *
+   * Dava pra somar a altura da marca na conta. Nao vale: o documento de desktop
+   * nao tem lente viajante — o item ativo la e um retangulo com fundo tingido,
+   * parado. Um indicador que viaja e gramatica de barra de abas, onde os itens
+   * sao irmaos numa fila; numa lista vertical com secoes ("FERRAMENTAS", o selo
+   * de offline) ele viajaria por cima de coisas que nao sao abas.
+   */
+  .tk-tab-bolha {
+    display: none;
+  }
+
+  .tk-tab[aria-current="page"] {
+    background: color-mix(in srgb, var(--tk-ultra-fg) 14%, transparent);
+  }
+
+  .tk-tab[aria-current="page"] .tk-tab-label {
+    color: var(--tk-ultra-fg-strong);
+  }
+
+  /* ── MARCA ───────────────────────────────────────────────────────────────
+     "TrainerKit" com o tile de 34px, raio 11, no topo da barra. Medidas do
+     documento de desktop. */
+  .tk-side-marca {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px 20px;
+  }
+
+  .tk-side-marca-tile {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+    background: linear-gradient(160deg, #33394a, #14171e 70%);
+    border: 0.5px solid rgba(255, 255, 255, 0.14);
+    display: grid;
+    align-content: center;
+    justify-items: start;
+    gap: 3px;
+    padding: 0 8px;
+  }
+
+  /* As tres barras da marca atual, em miniatura. A terceira e a verde que
+     "decide" — e o que o nome do commit da marca chama de "tres barras e uma
+     decisao". */
+  .tk-side-marca-tile > span {
+    display: block;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--tk-txt);
+  }
+
+  .tk-side-marca-tile > span:nth-child(1) {
+    width: 11px;
+  }
+
+  .tk-side-marca-tile > span:nth-child(2) {
+    width: 15px;
+  }
+
+  .tk-side-marca-tile > span:nth-child(3) {
+    width: 8px;
+    background: var(--tk-v-investir);
+  }
+
+  .tk-side-marca-nome {
+    font: 700 15px/1 var(--tk-font);
+    letter-spacing: -0.01em;
   }
 
   /* ── FERRAMENTAS ─────────────────────────────────────────────────────────

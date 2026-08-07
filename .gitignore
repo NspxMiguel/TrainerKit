@@ -65,3 +65,6 @@ apps/web/public/dataset/
 # este arquivo. O lockfile de verdade do repo e o pnpm-lock.yaml — dois
 # lockfiles no mesmo repo e a receita pra versoes divergirem sem ninguem ver.
 package-lock.json
+
+# Mockup do handoff servido localmente pra comparar lado a lado. Nao vai pro repo.
+apps/web/public/_handoff/

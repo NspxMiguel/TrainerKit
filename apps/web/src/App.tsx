@@ -230,6 +230,29 @@ export function App() {
             acende no lugar: a bolha aparecia no destino em vez de ir ate ele.
             Parecia certo em screenshot e errado em uso.
           */}
+          {/*
+            A MARCA no topo da barra — so na tela larga.
+
+            "TrainerKit" com o tile de 34px ao lado, do documento de desktop. No
+            celular a barra e uma capsula de tres abas no rodape: nao ha topo, e
+            um nome ali comeria o espaco das proprias abas. Some pelo CSS, como
+            as FERRAMENTAS.
+
+            ⚠️ O DESENHO DO TILE E O ICONE ATUAL, e nao o ovo do handoff. O ovo
+            e a marca escolhida, mas ele so existe como SVG com paths bezier — e
+            o gerador de icones deste repo desenha proceduralmente, sem
+            rasterizador de path. Ate isso ser resolvido, repetir aqui o icone
+            que o app ja usa e honesto; inventar um terceiro desenho nao.
+          */}
+          <div className="tk-side-marca">
+            <span className="tk-side-marca-tile" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </span>
+            <span className="tk-side-marca-nome">TrainerKit</span>
+          </div>
+
           <span className="tk-tab-bolha" aria-hidden="true" />
           {visibleTabs.map(({ id, labelKey, Icon }) => (
             <button

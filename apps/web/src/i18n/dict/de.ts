@@ -38,6 +38,8 @@ export const DE: Dict = {
   "home.trainer": "Trainer",
   "home.todayPick": "HEUTE IM FOKUS",
   "home.yourCollection": "Deine Sammlung",
+  "home.pedemDecisao": "Brauchen Entscheidung",
+  "home.armazenamento": "Offline-Speicher",
   "home.hero.best": "Dein bester",
   "home.hero.topRaid": "Bester Raid-Angreifer aktuell",
   "home.empty.title": "Deine Sammlung ist leer",
