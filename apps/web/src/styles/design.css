@@ -494,6 +494,29 @@
 }
 
 /*
+ * ⚠️ O HERO SO SOBE QUANDO ELE E O PROXIMO — com um aviso no meio, subir e
+ * COBRIR o aviso.
+ *
+ * O `margin-top: calc(var(--tk-safe-top) * -1)` acima existe pra o hero encostar
+ * na borda de cima da tela: ele cancela os 52px de respiro que a `.tk-main` da
+ * ao topo. A conta so fecha quando o que vem antes dele e a saudacao.
+ *
+ * Achado medindo a home estreita: com o convite de instalar aberto, o hero
+ * comecava em 187px e o aviso terminava em 213 — 26px do aviso, incluindo o fim
+ * da frase "Instalado, o TrainerKit fica protegido", desapareciam debaixo do
+ * degrade. Nao era corte de texto (o `scrollHeight` do aviso batia com o
+ * `clientHeight`): era o hero pintando por cima.
+ *
+ * `:has()` pergunta exatamente o que importa — "ha um aviso nesta home?" — em
+ * vez de listar os avisos que existem hoje. Quando nao ha, nada muda: a regra
+ * inteira nem casa.
+ */
+.tk-home:has(> .tk-banner) > .tk-home-linha1 > .tk-hero,
+.tk-home:has(> .tk-banner) > .tk-hero {
+  margin-top: 0;
+}
+
+/*
  * O degrade CLARO, quando o tema e claro. Ver a nota das variaveis do hero.
  *
  * ⚠️ Duas regras iguais, uma pro atributo e outra pra media query, e nao uma so
