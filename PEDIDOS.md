@@ -132,3 +132,36 @@ auditoria de imagem OK ("todas arte propria"). Conferido no navegador em
 
 **Apagar quando ele disser que ficou igual.** Enquanto ele não disser, o pedido
 segue aberto — a régua é a dele, não a minha.
+
+## [ABERTO] `publicar.sh` ficou desatualizado depois da migração de conta
+
+**Achado em:** 07/08/2026, publicando a busca da home. Não é pedido dele — é um
+problema que apareceu no caminho e que ele precisa decidir.
+
+**O que o script acha que existe:** dois projetos na Vercel, `trainerkit` (o app,
+em `trainerkit.vercel.app`) e `trainerkit-ia` (as funções, em
+`trainerkit-ia.vercel.app`, "com as chaves nos cofres dele").
+
+**O que existe de verdade na conta nova (time `nspx`):** UM projeto só,
+`trainerkit`. E nem `trainerkit.vercel.app` nem `trainerkit-ia.vercel.app`
+pertencem a este time — `vercel inspect trainerkit.vercel.app` responde "Can't
+find the deployment under the context nspx". São da conta antiga. O endereço
+real do app hoje é **`trainerkit-zeta.vercel.app`**.
+
+**A consequência, medida:** o script faz dois deploys, e o segundo (o da raiz,
+que era pra ser a API) cai no MESMO projeto do app e vira a produção. Depois de
+rodar, `trainerkit-zeta.vercel.app` estava servindo a landing "TrainerKit · IA"
+no lugar do app. Repus com `vercel promote` no deploy do app — o app está no ar
+e com o bundle certo (`index-BihipxOU.js`, com a busca nova dentro).
+
+**As três linhas do fim do script ("no ar: …") estão mentindo:** são `echo`
+fixos, não leem o que a Vercel devolveu.
+
+**Decisão que é dele:** criar o projeto `trainerkit-ia` na conta nova e mover as
+chaves pra lá, ou servir app e API do mesmo projeto (um `vercel.json` só). Não
+mexi no arranjo de hospedagem sem ele mandar.
+
+**Detalhe menor, pré-existente:** o build da API na Vercel cospe `TS2835` em
+`api/ai.ts:49` (import sem extensão). É de propósito — o comentário acima da
+linha explica que cada lado fala a língua do seu empacotador — o `tsconfig.api.json`
+local passa e o deploy completa. Só barulho no log.
