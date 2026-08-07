@@ -61,7 +61,10 @@ export function Esqueleto({ linhas = 4 }: { linhas?: number }) {
   return (
     <div className="tk-card" aria-busy="true" aria-label={t("common.loading")}>
       {Array.from({ length: linhas }, (_, i) => (
-        <div key={i} className="tk-esq-linha">
+        /* `--tk-i` defasa o brilho de cada linha em 120ms — sem isso as quatro
+           brilham em uníssono e o conjunto pisca em bloco, que lê como erro de
+           renderização e não como carregamento. */
+        <div key={i} className="tk-esq-linha" style={{ ["--tk-i" as string]: i }}>
           <span className="tk-esq tk-esq-tile" />
           <span style={{ flex: 1, minWidth: 0 }}>
             <span className="tk-esq tk-esq-titulo" />

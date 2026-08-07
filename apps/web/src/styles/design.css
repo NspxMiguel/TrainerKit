@@ -6294,3 +6294,228 @@
     background-clip: content-box;
   }
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TRANSIÇÃO 8 · TOQUE — a única que acontece em TODA interação
+   ═══════════════════════════════════════════════════════════════════════════
+
+   "scale(.965) no press, halo que expande e desaparece no release, 200ms."
+
+   ⚠️ ESTA É A QUE MAIS SE SENTE, e era a que faltava.
+
+   O app tinha onze regras `:active`, cada uma inventando o próprio jeito de
+   responder ao toque: umas mudavam `opacity`, outras `background`, outras nada.
+   Onze respostas diferentes pra mesma pergunta ("o app registrou meu toque?") é
+   o que faz uma interface parecer inconsistente sem ninguém saber apontar onde.
+
+   Aqui é uma regra só, e ela vale pra qualquer coisa clicável que não tenha
+   pedido tratamento próprio. `:where()` mantém a especificidade em ZERO: quem
+   já tem um `:active` escrito continua ganhando sem precisar de `!important`.
+
+   ⚠️ `scale` E NÃO `opacity`: no sol, apagar o botão some com ele. A regra do
+   sistema de movimento é explícita — "nenhuma animação reduz contraste no meio
+   do caminho".
+*/
+:where(button, [role="button"], a):active:not(:disabled) {
+  transform: scale(0.965);
+}
+
+/* Botão largo encolhe MENOS: 3,5% de 340px são 12px de deslocamento, e isso
+   lê como a tela inteira pulando. O handoff separa os três casos. */
+:where(.tk-btn--block, .tk-cta, .tk-row, .tk-side-tool):active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+/* Ícone redondo encolhe MAIS: em 44px, 3,5% são 1,5px — quase nada. */
+:where(.tk-avatar, .tk-filter-btn, .tk-sheet-close, .tk-bubble):active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+:where(button, [role="button"], a):not(:disabled) {
+  /* Só a volta é animada. A ida é imediata de propósito: atraso entre o dedo e
+     o encolhimento é exatamente o que faz um app parecer lento. */
+  transition: transform var(--tk-dur-micro) var(--tk-ease-out);
+}
+
+:where(button, [role="button"], a):active:not(:disabled) {
+  transition-duration: 0s;
+}
+
+/*
+ * O halo que expande e some no release.
+ *
+ * `::after` em vez de elemento: nenhum componente precisa saber que isto
+ * existe. Fica atrás do conteúdo (`z-index: -1`) e some sozinho — não há
+ * estado em JS, não há limpeza, e uma segunda batida reinicia do zero porque a
+ * transição é do `:active`.
+ */
+:where(.tk-btn, .tk-cta, .tk-tab, .tk-side-tool, .tk-row)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: currentColor;
+  opacity: 0;
+  transform: scale(0.9);
+  pointer-events: none;
+  z-index: -1;
+  transition:
+    opacity var(--tk-dur-micro) var(--tk-ease-out),
+    transform var(--tk-dur-micro) var(--tk-ease-out);
+}
+
+:where(.tk-btn, .tk-cta, .tk-tab, .tk-side-tool, .tk-row):active::after {
+  opacity: 0.09;
+  transform: scale(1);
+  transition-duration: 0s;
+}
+
+/* `position` só se ainda não tiver: o halo é absoluto e precisa de âncora. */
+:where(.tk-btn, .tk-cta, .tk-tab, .tk-side-tool, .tk-row) {
+  position: relative;
+}
+
+/*
+ * ⚠️ `prefers-reduced-motion` CORTA O DESLOCAMENTO, e mantém o resto.
+ *
+ * A regra do sistema: "corta translate, scale e loops; mantém só opacidade em
+ * 200ms". Quem pediu menos movimento continua precisando saber que o toque foi
+ * registrado — tirar TUDO deixaria o app sem resposta nenhuma, que é pior que
+ * o movimento.
+ */
+@media (prefers-reduced-motion: reduce) {
+  :where(button, [role="button"], a):active:not(:disabled) {
+    transform: none;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TRANSIÇÃO 2 · A ASSINATURA — a palavra do veredito assentando
+   ═══════════════════════════════════════════════════════════════════════════
+
+   "As regras voam pro centro e colapsam na palavra, que assenta com um leve
+   overshoot; a confiança preenche depois. É o único momento do app que se
+   permite ser teatral — e é o momento certo, porque é a tese do produto."
+
+   ⚠️ O QUE EU **NÃO** FIZ, e por quê: as regras não "voam pro centro".
+
+   No protótipo elas estão visíveis antes de colapsar. No app o rastro nasce
+   COLAPSADO — "POR QUÊ · 3 REGRAS" é um cartão que se abre — então não há o que
+   voar: as regras não estão na tela quando o veredito aparece. Encenar isso
+   exigiria mostrá-las por 400ms só pra escondê-las de novo, o que é uma
+   animação anunciando a si mesma.
+
+   O que sobrevive, e é o núcleo: a palavra ASSENTA com overshoot, e a barra de
+   confiança preenche DEPOIS dela. Essa ordem é a tese — primeiro o veredito,
+   depois o quanto ele é seguro.
+*/
+.tk-veredito-palavra {
+  font: 800 26px/1.1 var(--tk-font);
+  letter-spacing: -0.02em;
+  margin: 8px 0 6px;
+  animation: tk-martelo 420ms var(--tk-ease-out) both;
+}
+
+@keyframes tk-martelo {
+  0% {
+    opacity: 0;
+    /* Vem de CIMA e um pouco maior: é a palavra caindo no lugar, não crescendo
+       do nada. `1.06` é o overshoot mínimo que o handoff pede — acima disso
+       vira brinquedo, que é a regra "overshoot só na palavra e no press". */
+    transform: translateY(-6px) scale(1.06);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(0) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* A confiança preenche DEPOIS da palavra: 420ms é onde `tk-martelo` termina. */
+.tk-meter-fill {
+  animation-delay: 420ms;
+}
+
+/* O rastro entra em cascata quando alguém abre — 40ms por regra. */
+.tk-trace-linha {
+  animation: tk-in-up 260ms var(--tk-ease-out) both;
+  animation-delay: calc(var(--tk-i, 0) * 40ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tk-veredito-palavra,
+  .tk-trace-linha {
+    animation: tk-fade 200ms both;
+  }
+
+  .tk-meter-fill {
+    animation-delay: 0s;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TRANSIÇÃO 7 · ESQUELETO — o brilho que atravessa
+   ═══════════════════════════════════════════════════════════════════════════
+
+   "esqueleto com a mesma geometria da lista real, brilho atravessando em 1,4s,
+   defasagem por linha."
+
+   ⚠️ O BRILHO SUBSTITUI O PULSO, e não se soma a ele.
+
+   O esqueleto pulsava (`tk-pulso`, 1,6s de opacidade). Pulso e brilho juntos
+   dão duas batidas fora de fase na mesma superfície, e o olho lê como
+   travamento — o oposto do que um esqueleto existe pra dizer.
+
+   ⚠️ E O BRILHO NÃO É UM `background-position` ANIMADO. Animar posição de
+   gradiente repinta o elemento inteiro a cada quadro, fora da GPU. Um
+   `::after` com `translateX` anda na camada de composição e não custa layout —
+   que importa porque isto roda enquanto o app ainda está carregando dados.
+*/
+.tk-esq {
+  position: relative;
+  overflow: hidden;
+  /* Sem pulso: quem anuncia atividade agora é o brilho. */
+  animation: none;
+}
+
+.tk-esq::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.07) 45%,
+    rgba(255, 255, 255, 0.07) 55%,
+    transparent
+  );
+  animation: tk-brilho 1.4s var(--tk-ease-inout) infinite;
+  /* Defasagem por linha: sem ela as quatro linhas brilham em uníssono e o
+     conjunto pisca em bloco, que lê como erro de renderização. */
+  animation-delay: calc(var(--tk-i, 0) * 120ms);
+}
+
+@keyframes tk-brilho {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tk-esq::after {
+    animation: none;
+  }
+
+  /* Sem movimento, o esqueleto precisa de ALGUM sinal de que a tela está viva.
+     Opacidade em 200ms é o que a regra permite. */
+  .tk-esq {
+    animation: tk-pulso 1.6s ease-in-out infinite;
+  }
+}
