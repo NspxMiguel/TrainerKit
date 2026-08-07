@@ -7,6 +7,7 @@ import { CollectionScreen } from "./screens/CollectionScreen.tsx";
 import { HomeScreen } from "./screens/HomeScreen.tsx";
 import { PokedexScreen } from "./screens/PokedexScreen.tsx";
 import { SettingsScreen } from "./screens/SettingsScreen.tsx";
+import { useLanguage } from "./i18n/language.ts";
 import { useT, type Key } from "./i18n/t.ts";
 import { detectPlatform } from "./storage/install.ts";
 import { requestPersistence, type PersistState } from "./storage/persist.ts";
@@ -15,6 +16,7 @@ import { RaidCounters } from "./screens/RaidCounters.tsx";
 import { SpeciesPicker } from "./screens/SpeciesPicker.tsx";
 import { TeamBuilder } from "./screens/TeamBuilder.tsx";
 import { useOffline } from "./storage/offline.ts";
+import { usePendencias } from "./storage/pendencias.ts";
 import {
   IconCamera,
   IconGearFill,
@@ -81,9 +83,13 @@ export function App() {
     setIntent(withIntent ?? null);
   };
   const { t } = useT();
+  const language = useLanguage();
   const setup = useSetup();
   const dataset = useDataset();
   const [persist, setPersist] = useState<PersistState | null>(null);
+  /* O selo do documento de desktop: "Pokédex 4". A regra de "pede decisão" mora
+     em `storage/pendencias.ts` — a mesma que a fila da Home lê. */
+  const pendencias = usePendencias(dataset);
   const offline = useOffline(
     dataset.status === "ready" ? dataset.data.species.length : 0,
     dataset.status,
@@ -265,6 +271,21 @@ export function App() {
               <Icon size={20} />
               {/* Rotulo sempre visivel: o prototipo proibe icone sem rotulo na navegacao. */}
               <span className="tk-tab-label">{t(labelKey)}</span>
+              {/*
+                O selo so existe na Pokedex, so quando ha o que decidir, e so na
+                barra lateral (o CSS o esconde no celular, onde a aba tem 50px
+                de altura e nao ha onde por um numero sem apertar o rotulo).
+
+                `aria-hidden`: o numero ja e dito pelo proprio destino — quem
+                entra na Pokedex ve "1 pede uma decisão" escrito. Anuncia-lo na
+                aba faria o leitor de tela ler "Pokédex 4", que soa como o nome
+                da aba.
+              */}
+              {id === "pokedex" && pendencias > 0 && (
+                <span className="tk-tab-selo" aria-hidden="true">
+                  {pendencias.toLocaleString(language)}
+                </span>
+              )}
             </button>
           ))}
 
