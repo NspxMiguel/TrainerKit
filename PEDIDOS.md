@@ -202,7 +202,23 @@ chave foi colada no campo do NOME da variável, não no valor: a variável nasce
 chamada `gsk_...`. **Nome de variável não é criptografado** — aparece em
 listagem, painel e log, e essa apareceu no meu terminal também. Removi a
 variável malformada, mas remover não desvaza: a chave tem que ser considerada
-queimada. Gerar outra em `console.groq.com/keys`, revogar a atual, e:
+queimada.
+
+**Medido em 07/08/2026, e a ordem importa:** a chave que está EM PRODUÇÃO agora
+é a queimada — a `TrainerKit` / `gsk_...CJlW` do console, criada no mesmo dia.
+Ele corrigiu a variável, mas repôs o mesmo valor. Então **apagar a chave no
+console antes de trocar o valor na Vercel derruba a IA do app.**
+
+Como medi, já que não dá pra ler o valor: `vercel env pull` devolve
+`[REDACTED: SENSITIVE]` (a variável está marcada como Sensitive), então comparar
+prefixo não prova nada — foi por aí que eu errei antes. O que prova é disparar
+chamadas pelo proxy e ver qual linha do `console.groq.com/keys` conta: subiu a
+da `gsk_...CJlW`, a `gsk_...IMcj` ficou parada.
+
+Ordem certa, então — criar a nova ANTES de apagar a velha:
+
+1. `console.groq.com/keys` → **Create API Key** (não apagar nada ainda);
+2. trocar o valor e redeployar:
 
 ```
 vercel link --project trainerkit-ia --yes
@@ -211,7 +227,18 @@ vercel env add GROQ_API_KEY production
 vercel deploy --prod --yes
 ```
 
-Não precisa republicar o app — a chave vive só no servidor.
+3. conferir que a IA responde:
+
+```
+curl -s -X POST https://trainerkit-ia-gules.vercel.app/api/ai \
+  -H 'Content-Type: application/json' \
+  -d '{"messages":[{"role":"user","content":"responda exatamente: ok"}],"maxTokens":10}'
+```
+
+4. **só então** apagar a `gsk_...CJlW` no console (lixeira vermelha na linha).
+
+Não precisa republicar o app — a chave vive só no servidor. Em 07/08/2026 ele
+disse "nao precisa apaga, deixa ai, dps eu faço", então isto fica aberto.
 
 **Detalhe menor, pré-existente:** o build da API na Vercel cospe `TS2835` em
 `api/ai.ts:49` (import sem extensão). É de propósito — o comentário acima da
