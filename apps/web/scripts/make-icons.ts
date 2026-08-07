@@ -42,10 +42,10 @@ type Tema = "dark" | "light";
 
 interface Paleta {
   readonly bg: readonly [number, number, number];
-  /** As duas primeiras barras: as que o app LE. */
-  readonly bar: readonly [number, number, number];
-  /** A terceira: a DECISAO. Sempre o verde de "Investir" do tema. */
-  readonly decision: readonly [number, number, number];
+  /** A casca do ovo. */
+  readonly casca: readonly [number, number, number];
+  /** A luz que escapa pela fenda. */
+  readonly luz: readonly [number, number, number];
 }
 
 const PALETAS: Record<Tema, Paleta> = {
@@ -53,13 +53,13 @@ const PALETAS: Record<Tema, Paleta> = {
   // aparece como um cinza sujo ao lado dos icones vizinhos.
   dark: {
     bg: [0x00, 0x00, 0x00],
-    bar: [0xff, 0xff, 0xff],
-    decision: [0x37, 0xd3, 0x99], // --tk-succ do tema escuro
+    casca: [0xf4, 0xf6, 0xfa], // #F4F6FA, do handoff
+    luz: [0x6e, 0x4b, 0xff], // #6E4BFF
   },
   light: {
     bg: [0xff, 0xff, 0xff],
-    bar: [0x10, 0x13, 0x19], // --tk-txt do tema claro
-    decision: [0x0b, 0x8a, 0x5f], // --tk-succ do tema claro: o verde escuro
+    casca: [0x22, 0x26, 0x2f], // #22262F, a versao de fundo claro
+    luz: [0x8a, 0x6b, 0xff], // #8A6BFF
   },
 };
 
@@ -131,73 +131,129 @@ function roundedRectSdf(
 }
 
 /**
- * A marca: tres barras crescentes, a ultima apontando pra frente.
+ * A marca: um OVO CHOCANDO — a metade de cima levantada, borda de quebra em
+ * zigue-zague e luz violeta escapando de dentro.
  *
- * Coordenadas normalizadas em [0,1] sobre o tile, para o desenho escalar junto
- * com o tamanho pedido. Devolve `null` fora da marca, ou a cor do pixel.
+ * Opcao 8a do documento de exploracao, e a razao dela existir esta escrita la:
+ * "A Poké Ball está fora — a forma (esfera com faixa equatorial e botão
+ * central) é marca registrada da Nintendo/Niantic". O ovo diz "aqui nasce um
+ * Pokemon" sem tomar emprestada forma de ninguem.
  *
- * Os numeros sao escolhidos para o grupo ficar centrado nos DOIS eixos: as tres
- * barras mais os dois vaos somam 0,40 de altura comecando em 0,30, e a extensao
- * horizontal vai de 0,26 ate 0,74. Foi exatamente isso que faltou no PNG
- * original — a marca encostava em cima e a esquerda e sobrava vazio na diagonal
- * oposta, o que num icone de app salta aos olhos.
+ * ── Por que redesenhado em SDF, e nao rasterizado do SVG ───────────────────
+ *
+ * O handoff entrega o ovo como SVG com paths bezier. Este gerador nao tem
+ * rasterizador de path — ele escreve o PNG na mao, com CRC32 proprio e zero
+ * dependencia, e `scripts/audit-bundle.ts` afirma por escrito que os icones
+ * saem daqui. As alternativas eram escrever um rasterizador de bezier (algumas
+ * centenas de linhas, com antialias) ou puxar `sharp`/`resvg` so pra gerar
+ * icone.
+ *
+ * O desenho e simples o bastante pra nao precisar de nenhum dos dois: um corpo
+ * de ovo, uma linha quebrada e um brilho. O que se perde e a curva exata dos
+ * beziers; o que se ganha e o gerador continuar sendo a unica fonte dos PNGs,
+ * que e o que o auditor promete.
+ *
+ * Coordenadas normalizadas em [0,1] sobre o tile, como a marca anterior.
  */
-const BAR_H = 0.105; // espessura de cada barra
-const BAR_GAP = 0.072; // vao entre elas
-const MARK_LEFT = 0.255;
-/** Comprimento de cada barra. A terceira ganha cabeca de seta depois do corpo. */
-const BAR_LEN = [0.2, 0.3, 0.33] as const;
-/** Vao entre o corpo da terceira barra e a cabeca da seta. */
-const HEAD_GAP = 0.028;
-/** Comprimento e meia-altura da cabeca. Mais alta que a barra, de proposito. */
-const HEAD_LEN = 0.115;
-const HEAD_H = 0.093;
 
-/** Onde a ponta da seta termina. A barra simplificada vai ate aqui. */
-const MARK_RIGHT = MARK_LEFT + BAR_LEN[2] + HEAD_GAP + HEAD_LEN;
+/** Centro e raios do corpo. `CY` abaixo do meio: ovo tem a barriga embaixo. */
+const OVO_CX = 0.5;
+const OVO_CY = 0.55;
+const OVO_RX = 0.285;
+const OVO_RY = 0.365;
+/** Quanto a metade de cima sobe. 3,6px em 48 do handoff = 0,075. */
+const LEVANTA = 0.075;
+/** Altura media da quebra. */
+const FENDA = 0.475;
 
 /**
- * @param simple Sem a cabeca de seta, com a terceira barra indo ate o fim.
- *   Ligado nos tamanhos minimos: a 16 px a cabeca tem tres pixels de base e o
- *   vao que a separa do corpo tem menos de um. Ela nao vira seta, vira sujeira
- *   verde — e some junto com a legibilidade da terceira barra. Desenhar menos
- *   nesse tamanho mostra mais.
+ * Meia-largura do ovo naquela altura.
+ *
+ * E uma elipse com o raio horizontal crescendo de cima pra baixo (`1 + 0.13 *
+ * ny`): sem essa inclinacao sai um ovo simetrico, que le como bola.
  */
-function markAt(
+function meiaLargura(ny: number): number {
+  if (ny < -1 || ny > 1) return 0;
+  return OVO_RX * (1 + 0.13 * ny) * Math.sqrt(1 - ny * ny);
+}
+
+function dentroDoOvo(u: number, v: number): boolean {
+  const ny = (v - OVO_CY) / OVO_RY;
+  return Math.abs(u - OVO_CX) <= meiaLargura(ny);
+}
+
+/**
+ * A altura da quebra naquele `u` — onda triangular.
+ *
+ * @param dentes Quantos picos. Menos dentes nos tamanhos pequenos: a 32px cada
+ *   dente tem menos de um pixel de base e o zigue-zague vira uma linha borrada,
+ *   que e pior que uma linha reta. Mesma logica do `simple` da marca anterior —
+ *   desenhar menos mostra mais.
+ */
+function alturaDaFenda(u: number, dentes: number, amp: number): number {
+  const t = (u - OVO_CX) / OVO_RX;
+  const fase = (((t * dentes) % 2) + 2) % 2;
+  const onda = Math.abs(fase - 1) * 2 - 1;
+  return FENDA + amp * onda;
+}
+
+function ovoAt(
   u: number,
   v: number,
-  simple: boolean,
+  simples: boolean,
   paleta: Paleta,
 ): readonly [number, number, number] | null {
-  const top = 0.5 - (3 * BAR_H + 2 * BAR_GAP) / 2;
-  const r = BAR_H / 2;
-  const rowY = (i: number): number => top + i * (BAR_H + BAR_GAP) + BAR_H / 2;
+  const dentes = simples ? 2.2 : 3.4;
+  const amp = simples ? 0.016 : 0.026;
+  /*
+   * ⚠️ A FENDA ENGROSSA NOS TAMANHOS PEQUENOS, e o handoff pede isso por
+   * escrito: "nos raios pequenos (34px), engrosse os traços: a fenda tem que
+   * continuar legível".
+   *
+   * Medido no favicon de 32px com o valor unico de 0,075: a abertura dava 2,4
+   * pixels, e depois do antialias sobrava um risco violeta claro dentro de uma
+   * mancha branca — o ovo lia como uma pedra. Em 0,115 sao 3,7 pixels, e a
+   * fenda volta a ser a coisa que se ve primeiro.
+   *
+   * Nao da pra usar 0,115 em tudo: no icone de 512 a mesma proporcao abre um
+   * vao largo demais e as duas metades deixam de parecer o MESMO ovo.
+   */
+  const levanta = simples ? 0.115 : LEVANTA;
+  const fenda = alturaDaFenda(u, dentes, amp);
 
-  // Cabeca de seta primeiro: ela e mais ALTA que a barra, entao precisa ser
-  // testada fora do laco das barras — o corte por `dy > r` de la descartaria
-  // justamente os pixels que fazem dela uma seta.
-  if (!simple) {
-    const headCy = rowY(2);
-    const headBase = MARK_LEFT + BAR_LEN[2]! + HEAD_GAP;
-    if (u >= headBase && u <= headBase + HEAD_LEN) {
-      const t = (u - headBase) / HEAD_LEN;
-      if (Math.abs(v - headCy) <= HEAD_H * (1 - t)) return paleta.decision;
-    }
+  // Metade de BAIXO: o ovo normal, do zigue-zague pra baixo.
+  if (v >= fenda && dentroDoOvo(u, v)) return paleta.casca;
+
+  // Metade de CIMA: desenhada a partir de um ponto `LEVANTA` mais abaixo, que e
+  // o que a faz aparecer levantada. O teste da fenda usa o MESMO ponto de
+  // origem, senao a casca de cima ficaria cortada na altura errada.
+  const origem = v + levanta;
+  if (origem < alturaDaFenda(u, dentes, amp) && dentroDoOvo(u, origem)) {
+    return paleta.casca;
   }
 
-  for (let i = 0; i < 3; i++) {
-    const cy = rowY(i);
-    if (Math.abs(v - cy) > r) continue;
-
-    const len = simple && i === 2 ? MARK_RIGHT - MARK_LEFT : BAR_LEN[i]!;
-
-    // Corpo da barra: capsula, ou seja, distancia ao segmento horizontal.
-    const xa = MARK_LEFT + r;
-    const xb = MARK_LEFT + len - r;
-    const nearest = Math.max(xa, Math.min(xb, u));
-    if (Math.hypot(u - nearest, v - cy) <= r) {
-      return i === 2 ? paleta.decision : paleta.bar;
-    }
+  /*
+   * A luz saindo pela fenda: a faixa entre a casca levantada e a de baixo.
+   *
+   * Ela nao e um retangulo — segue a mesma onda, entao a luz aparece exatamente
+   * onde a casca abriu. A intensidade cai do centro da fenda pras bordas do
+   * ovo, que e o que faz ela parecer vindo de DENTRO em vez de pintada por
+   * cima.
+   */
+  if (v < fenda && v > fenda - levanta - 0.012) {
+    const ny = (v - OVO_CY) / OVO_RY;
+    const meia = meiaLargura(ny);
+    if (meia <= 0) return null;
+    const lateral = Math.abs(u - OVO_CX) / meia;
+    if (lateral > 1) return null;
+    // Perto da borda a luz apaga: 1 no centro, 0 na casca.
+    const forca = Math.max(0, 1 - lateral * lateral);
+    if (forca < 0.12) return null;
+    return [
+      Math.round(paleta.bg[0] + (paleta.luz[0] - paleta.bg[0]) * forca),
+      Math.round(paleta.bg[1] + (paleta.luz[1] - paleta.bg[1]) * forca),
+      Math.round(paleta.bg[2] + (paleta.luz[2] - paleta.bg[2]) * forca),
+    ] as const;
   }
 
   return null;
@@ -213,10 +269,10 @@ function renderIcon(size: number, maskable: boolean, tema: Tema): Uint8Array {
   const half = size / 2 - inset;
   const radius = maskable ? size / 2 : size * 0.235; // raio = 1/3 do lado (prototipo)
   const monoScale = maskable ? 0.78 : 1;
-  // Abaixo disto a cabeca de seta nao cabe em pixel nenhum. Ver `markAt`.
-  // O limite saiu de comparar 32 px lado a lado: com seta ela vira um borrao
-  // verde grudado na barra; sem ela a marca fica limpa e ainda diz a mesma
-  // coisa. Os tamanhos que importam pro icone (180 pra cima) ficam com a seta.
+  // Abaixo disto o zigue-zague nao cabe em pixel nenhum. Ver `alturaDaFenda`:
+  // com 3,4 dentes a 32px cada um tem menos de um pixel de base e a quebra vira
+  // uma linha borrada — pior que uma linha quase reta. Desenhar menos mostra
+  // mais, e e a mesma decisao que a marca anterior tomava com a cabeca de seta.
   const simple = size <= 40;
 
   for (let y = 0; y < size; y++) {
@@ -244,7 +300,7 @@ function renderIcon(size: number, maskable: boolean, tema: Tema): Uint8Array {
         for (const ox of [-0.375, -0.125, 0.125, 0.375]) {
           const u = (px + ox - size / 2) / (size * monoScale) + 0.5;
           const w = (py + oy - size / 2) / (size * monoScale) + 0.5;
-          const color = markAt(u, w, simple, paleta);
+          const color = ovoAt(u, w, simple, paleta);
           if (!color) continue;
           hits++;
           mr += color[0];
