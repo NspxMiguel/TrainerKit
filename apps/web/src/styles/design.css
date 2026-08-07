@@ -6736,3 +6736,109 @@
     view-transition-name: none;
   }
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TRANSIÇÃO 3 · TROCA DE ABA — o conteúdo entra em cascata
+   ═══════════════════════════════════════════════════════════════════════════
+
+   "A lente de vidro viaja entre os itens em 420ms enquanto o conteúdo entra em
+   cascata (título, depois a grade, 24ms de atraso por item)."
+
+   A lente já viajava. O que faltava era a cascata: o `.tk-main` inteiro fazia
+   um `tk-fade` de 140ms em bloco, e bloco não é cascata — a tela toda pisca de
+   uma vez e nada indica que o título vem antes da grade.
+
+   ⚠️ O `key={tab}` NO `App` É O QUE FAZ ISTO DISPARAR, e é a razão de a cascata
+   poder ser CSS puro: o React remonta a árvore a cada troca, então as animações
+   de entrada rodam de novo sozinhas. Sem o `key` seria preciso um estado de
+   "entrando" em JS, com limpeza e tudo que vem junto.
+
+   ⚠️ E ELA NÃO RODA DURANTE O USO DA TELA, só na troca. Filtrar a Pokédex não
+   remonta o `<main>` — remonta a lista lá dentro. Se a cascata morasse nos
+   ITENS da grade, cada tecla digitada na busca reanimaria 1.182 células.
+*/
+.tk-main > * {
+  animation: tk-in-up var(--tk-dur-base) var(--tk-ease-out) both;
+}
+
+/*
+ * 24ms por filho, teto de 6 — os dois números são do handoff ("stagger 24–40ms,
+ * máx. 6 itens").
+ *
+ * ⚠️ O TETO É O PONTO. Sem ele, a décima seção da Pokédex entraria 240ms depois
+ * da primeira, e a vigésima em meio segundo — a cascata deixa de ser ritmo e
+ * vira espera. Seis é onde o olho ainda lê "um depois do outro"; além disso ele
+ * já leu a tela inteira.
+ *
+ * `nth-child` explícito em vez de `--tk-i` porque isto é ordem no DOM, não
+ * dado: nenhum componente precisa saber que está numa cascata, e nenhum precisa
+ * passar índice pra ganhar o efeito.
+ */
+.tk-main > *:nth-child(1) { animation-delay: 0ms; }
+.tk-main > *:nth-child(2) { animation-delay: 24ms; }
+.tk-main > *:nth-child(3) { animation-delay: 48ms; }
+.tk-main > *:nth-child(4) { animation-delay: 72ms; }
+.tk-main > *:nth-child(5) { animation-delay: 96ms; }
+.tk-main > *:nth-child(n + 6) { animation-delay: 120ms; }
+
+/* O `.tk-main` deixa de piscar em bloco: quem anima agora são os filhos. */
+.tk-main {
+  animation: none;
+}
+
+/*
+ * ⚠️ NA POKEDEX DE PC O `.tk-main` TEM UM FILHO SO, e sem isto a cascata nao
+ * existe la.
+ *
+ * Medido: `.tk-main > *` devolveu um unico `.tk-dex-split` — o embrulho das
+ * duas colunas. A regra aplicava certinho e nao havia o que escalonar, porque a
+ * barra de topo, a lista e a ficha sao netos e nao filhos.
+ *
+ * "titulo, depois a grade" e exatamente essa ordem: a barra de topo entra
+ * primeiro, a lista em seguida, a ficha por ultimo.
+ */
+.tk-dex-split > *,
+.tk-home > * {
+  animation: tk-in-up var(--tk-dur-base) var(--tk-ease-out) both;
+}
+
+/*
+ * A Home tem o mesmo formato: `.tk-main` guarda um `.tk-home` so, e as secoes
+ * (saudacao, destaque, acoes, colecao) sao netas. Medido igual — `.tk-main > *`
+ * devolvia um elemento unico e a cascata nao tinha o que escalonar.
+ */
+.tk-home > *:nth-child(1) { animation-delay: 0ms; }
+.tk-home > *:nth-child(2) { animation-delay: 24ms; }
+.tk-home > *:nth-child(3) { animation-delay: 48ms; }
+.tk-home > *:nth-child(4) { animation-delay: 72ms; }
+.tk-home > *:nth-child(5) { animation-delay: 96ms; }
+.tk-home > *:nth-child(n + 6) { animation-delay: 120ms; }
+
+.tk-dex-split > *:nth-child(1) { animation-delay: 0ms; }
+.tk-dex-split > *:nth-child(2) { animation-delay: 24ms; }
+.tk-dex-split > *:nth-child(3) { animation-delay: 48ms; }
+
+/*
+ * ⚠️ A FICHA NAO ENTRA EM CASCATA QUANDO E ELA QUE ESTA CHEGANDO.
+ *
+ * Ela e o terceiro filho do split, entao herdaria os 48ms de atraso — e ai,
+ * abrindo uma especie, a ficha faria a cascata de troca de ABA por cima da
+ * transicao de elemento compartilhado, que ja e a animacao daquele momento.
+ * Duas animacoes disputando o mesmo elemento e o que a regra do sistema chama
+ * de "uma coisa se move por vez".
+ *
+ * O `view-transition-name` so existe enquanto ha ficha aberta, entao ele serve
+ * de sinal exato: se a ficha esta ali, quem manda e a transicao compartilhada.
+ */
+.tk-dex-split > .tk-dex-ficha {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tk-main > *,
+  .tk-dex-split > *,
+  .tk-home > * {
+    animation: tk-fade var(--tk-dur-micro) both;
+  }
+}
