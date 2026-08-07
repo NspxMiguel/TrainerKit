@@ -5278,8 +5278,48 @@
     gap: var(--tk-s4);
   }
 
+  /*
+   * ⚠️ A CELULA VIRA CARTAO na tela larga — no celular ela e um anel.
+   *
+   * O documento de desktop desenha a colecao como seis cartoes: tile quadrado
+   * grande com o gradiente do tipo, nome embaixo e o chip do veredito. A tira
+   * de aneis de 48px e do celular, onde a largura nao permite outra coisa.
+   *
+   * O tile em si continua sendo o mesmo `SpeciesTile` de 48px vindo do React —
+   * quem o estica e a regra abaixo, porque o tamanho e prop e nao daria pra
+   * mudar so na tela larga sem passar o `telaLarga` pra dentro da celula.
+   */
   .tk-strip-cell {
     width: auto;
+    min-width: 0;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 20px;
+    background: var(--tk-surf);
+    border: 1px solid var(--tk-line);
+    transition:
+      background-color 0.12s var(--tk-ease),
+      border-color 0.12s var(--tk-ease);
+  }
+
+  /* Quem dita o tamanho e a prop `size` do `SpeciesTile` (ver a nota no
+     `HomeScreen`); aqui so o arredondamento do cartao. */
+  .tk-strip-cell .tk-mono,
+  .tk-strip-cell img {
+    border-radius: 16px;
+  }
+
+  /* O nome aparece — na tira do celular ele nao cabe, e o rotulo do veredito
+     sozinho basta. Aqui ha largura pra dizer de quem e o veredito. */
+  .tk-strip-nome {
+    display: block;
+    font: 600 12.5px/1.2 var(--tk-font);
+    color: var(--tk-txt);
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
   }
 
   /* ── POKEDEX: LISTA FIXA + FICHA NO RESTO ────────────────────────────────
