@@ -86,10 +86,49 @@ implementando o pacote por conta própria.
 checklist de regressão, tirada dos 393 avisos `⚠️` e das 90 falas dele citadas no
 código, com "como conferir" item a item.
 
-**Pendente do pacote (só se ele pedir):** ícone do ovo chocando. Custo real:
-`apps/web/scripts/make-icons.ts` desenha a marca atual PROCEDURALMENTE (SDF, zero
-dependência, PNG escrito na mão com CRC32); o ovo vem como SVG com paths bezier
-e o gerador não tem rasterizador. Três caminhos, já perguntados a ele e ainda sem
-resposta: escrever o rasterizador, adicionar dependência, ou redesenhar em SDF.
+~~**Pendente do pacote:** ícone do ovo chocando.~~ — FEITO, commit `0e5ade6`.
+Caminho escolhido dos três: redesenhado em SDF, sem rasterizador e sem
+dependência nova. O `make-icons.ts` continua desenhando a marca proceduralmente.
 
 **Apagar quando a revisão pós-import estiver entregue.**
+
+## [ABERTO] TrainerKit — "esperando ficar igual" ao desenho de desktop
+
+**Pedido em:** 06/08/2026
+
+**Palavras dele:** "acho q ta igual o q te mandei nao" → "n está igual.
+esperando ficar igual. só para quando tiver igual/melhor" → "mas ainda ta bem
+diferente po, app desktop, animações e etc" → "mockup. animacoes urgente plss".
+
+**Regra que vale pra tudo aqui:** "só mexe no desing, de coisas q n tem no
+desing, funções que a gente colocou q n tem no desing, o resto deixa igual".
+E: **o celular está pronto e não se mexe.**
+
+**Feito (todos no ar):**
+1. Casca de desktop própria, barra lateral com FERRAMENTAS, ficha como segunda
+   coluna da Pokédex — `3307b2b`, `c5c04ec`, `919e38e`.
+2. Busca no cabeçalho da Pokédex, ficha em duas sub-colunas, rótulos do
+   desenho — `b9dd2b8`.
+3. Coleção da home em cartões na tela larga, hero compacto — `b57c469`,
+   `5285c3a`.
+4. As oito animações do documento — `05b45ba`, `088b119`, `6064a66`.
+5. Selo de pendências na aba Pokédex — `b66ada7`.
+6. Ícone do ovo chocando — `0e5ade6`.
+7. **Busca "Buscar na coleção" no cabeçalho da home** — `89ab9e1`. Era o último
+   buraco contra o mockup. Ela não filtra a home (a home não lista nada): a
+   primeira tecla leva pra Pokédex com o termo junto, e lá o campo já nasce com
+   o texto e o foco. Rótulo e destino andam juntos — com coleção vai pra "Meus",
+   sem coleção vai pra "Todos".
+
+**Consertado no caminho (bugs do celular, achados ao conferir 375×812):**
+- `a02bdf2` — o hero pintava por cima do convite de instalar: 26px do aviso
+  sumiam debaixo do degradê.
+- `d7b8a32` — o cartão de números do PC vazava no celular como três linhas de
+  texto solto. Bug meu, de quando a grade de desktop nasceu.
+
+**Como está agora:** typecheck limpo, 174 testes passando, build do app com a
+auditoria de imagem OK ("todas arte propria"). Conferido no navegador em
+1440×900 e 375×812.
+
+**Apagar quando ele disser que ficou igual.** Enquanto ele não disser, o pedido
+segue aberto — a régua é a dele, não a minha.
