@@ -990,7 +990,14 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
                       speciesId={d.species.id}
                       name={d.species.name}
                       types={d.species.types}
-                      size={48}
+                      /*
+                        ⚠️ O TAMANHO E PROP, e nao CSS — `SpeciesTile` escreve
+                        `width`/`height` inline, e estilo inline ganha de
+                        qualquer classe. Eu tinha tentado esticar por
+                        `width: 100%` na regra do cartao e o tile continuou em
+                        48px, sem erro nenhum aparecer.
+                      */
+                      size={telaLarga ? 92 : 48}
                     />
                     {/*
                       O ROTULO DO VEREDITO, que faltava.
@@ -1005,6 +1012,10 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
                       informacao estava so no `aria-label`, entao existia pra
                       leitor de tela e nao pra quem enxerga mal cor.
                     */}
+                    {/* O nome so aparece na tela larga (o CSS esconde no
+                        celular): la a celula e um cartao e ha largura pra dizer
+                        de QUEM e o veredito, em vez de so qual e. */}
+                    <span className="tk-strip-nome">{d.species.name}</span>
                     <span className="tk-strip-verdito">
                       {/*
                         O visto vem ANTES da palavra, e nao no lugar dela.
