@@ -8,6 +8,8 @@ export const KO: Dict = {
   "nav.aria": "기본 내비게이션",
   "side.tools": "도구",
   "side.calc": "IV 계산기",
+  "side.raid": "레이드",
+  "side.team": "팀 짜기",
   "side.offline": "오프라인 모드",
   "side.offlineBody": "전부 내려받았습니다. 인터넷 없이 동작합니다.",
   "common.back": "뒤로",

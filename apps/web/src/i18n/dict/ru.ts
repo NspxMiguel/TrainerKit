@@ -8,6 +8,8 @@ export const RU: Dict = {
   "nav.aria": "Основная навигация",
   "side.tools": "ИНСТРУМЕНТЫ",
   "side.calc": "Калькулятор IV",
+  "side.raid": "Рейд",
+  "side.team": "Собрать команду",
   "side.offline": "ОФЛАЙН-РЕЖИМ",
   "side.offlineBody": "Всё загружено. Приложение работает без интернета.",
   "common.back": "Назад",

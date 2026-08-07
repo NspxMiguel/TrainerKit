@@ -1728,6 +1728,12 @@
   }
 }
 
+/* O embrulho do topo da ficha e transparente no celular: os filhos continuam
+   sendo filhos diretos da folha, e nenhuma regra existente muda. */
+.tk-ficha-topo {
+  display: contents;
+}
+
 .tk-onb-foot {
   flex: none;
   display: grid;
