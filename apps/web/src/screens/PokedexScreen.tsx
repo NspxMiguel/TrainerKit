@@ -131,7 +131,18 @@ export function PokedexScreen({ dataset, intent }: Props) {
     );
   }
 
-  const conteudo = (
+  /*
+   * ⚠️ O CABECALHO SAI DA COLUNA DA LISTA na tela larga.
+   *
+   * No documento de desktop o titulo, o seletor "Todos/Meus" e a busca ficam
+   * numa BARRA horizontal acima das duas colunas. Dentro da coluna de 340px
+   * eles empilhavam e espremiam a busca — o filtro virava um botao de 30px
+   * colado no campo.
+   *
+   * No celular ele continua sendo o comeco da tela, na ordem de sempre: quem
+   * junta as duas partes e o `conteudo` la embaixo.
+   */
+  const cabecalho = (
     <>
       <h1 className="tk-h1">{t("pokedex.title")}</h1>
 
@@ -280,6 +291,11 @@ export function PokedexScreen({ dataset, intent }: Props) {
         filtro ao invés de simplesmente melhores". E a mesma pergunta ("qual
         Pokemon?") com a resposta ordenada pelo que importa naquele momento.
       */}
+    </>
+  );
+
+  const lista = (
+    <>
       {meus ? (
         <CollectionScreen dataset={dataset} embutida />
       ) : (
@@ -334,11 +350,19 @@ export function PokedexScreen({ dataset, intent }: Props) {
    * desculpa; a lista usando a largura inteira ate alguem escolher e so a
    * mesma tela reagindo ao que existe.
    */
+  const conteudo = (
+    <>
+      {cabecalho}
+      {lista}
+    </>
+  );
+
   if (!telaLarga) return conteudo;
 
   return (
     <div className="tk-dex-split" data-aberta={selected ? "" : undefined}>
-      <div className="tk-dex-lista">{conteudo}</div>
+      <div className="tk-dex-topo">{cabecalho}</div>
+      <div className="tk-dex-lista">{lista}</div>
       {selected && (
         <aside className="tk-dex-ficha">
           <SpeciesDetail

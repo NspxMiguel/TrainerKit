@@ -54,6 +54,8 @@ const EN = {
   "home.trainer": "Trainer",
   "home.todayPick": "TODAY’S PICK",
   "home.yourCollection": "Your collection",
+  "home.pedemDecisao": "Needs a decision",
+  "home.armazenamento": "Offline storage",
   "home.hero.best": "Your best one",
   "home.hero.topRaid": "Best raid attacker right now",
   "home.empty.title": "Your collection is empty",

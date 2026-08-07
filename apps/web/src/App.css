@@ -1705,8 +1705,13 @@
    Existem no DOM sempre e aparecem só na tela larga — ver a nota longa em
    `App.tsx`: "não duplique lógica; é a mesma tela reagindo ao espaço".
    `display: none` também tira do leitor de tela, que é o que importa aqui. */
+.tk-side-marca,
 .tk-side-tools,
-.tk-side-offline {
+.tk-side-offline,
+/* A data so cabe na tela larga: no celular a saudacao ja ocupa a linha toda e
+   uma segunda linha empurraria o hero pra fora da primeira tela — que e o que
+   a nota do `.tk-hero` chama de "favor sem scroll na tela de inicio". */
+.tk-home-data {
   display: none;
 }
 
@@ -1716,6 +1721,10 @@
   .tk-side-tools,
   .tk-side-offline {
     display: grid;
+  }
+
+  .tk-side-marca {
+    display: flex;
   }
 }
 

@@ -35,6 +35,7 @@ import { SpriteSettings } from "./SpriteSettings.tsx";
 import { VoiceSettings } from "./VoiceSettings.tsx";
 import { WipeDialog } from "../ui/WipeDialog.tsx";
 import { useOffline } from "../storage/offline.ts";
+import { formatBytes } from "../storage/tamanho.ts";
 import { SpriteDownloadButton } from "../ui/SpriteDownload.tsx";
 import { usePrefetch } from "../sprites/prefetch.ts";
 
@@ -83,20 +84,6 @@ const THEME_KEYS: Record<Theme, Key> = {
   claro: "settings.theme.light",
   escuro: "settings.theme.dark",
 };
-
-/**
- * Tamanho legivel.
- *
- * Uma casa decimal so quando ela diz algo: "796,0 MB" finge uma precisao que
- * ninguem pediu e ainda ocupa dois caracteres a toa numa linha ja apertada.
- */
-function formatBytes(n: number): string {
-  if (n < 1024) return `${n} B`;
-  if (n < 1024 * 1024) return `${Math.round(n / 1024)} KB`;
-  if (n < 1024 * 1024 * 1024) return `${Math.round(n / 1048576)} MB`;
-  const gb = n / 1073741824;
-  return `${gb >= 10 ? Math.round(gb) : gb.toFixed(1)} GB`;
-}
 
 /**
  * Uma linha do índice: selo, assunto, valor atual, chevron.

@@ -38,6 +38,8 @@ export const JA: Dict = {
   "home.trainer": "トレーナー",
   "home.todayPick": "きょうのイチオシ",
   "home.yourCollection": "あなたのコレクション",
+  "home.pedemDecisao": "要判断",
+  "home.armazenamento": "オフライン保存",
   "home.hero.best": "あなたの最高個体",
   "home.hero.topRaid": "今いちばんのレイドアタッカー",
   "home.empty.title": "コレクションが空です",
