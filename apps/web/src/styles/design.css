@@ -1728,6 +1728,25 @@
 }
 
 /*
+ * ⚠️ O CARTAO DE NUMEROS TAMBEM NAO EXISTE no celular — e ele estava VAZANDO.
+ *
+ * Bug meu, achado ao conferir a home estreita depois de por a busca: o cartao
+ * nasceu junto com a grade `1.3fr 1fr` do documento de desktop e toda a
+ * aparencia dele (o fundo, a borda, o `space-between` de cada linha, o tamanho
+ * do rotulo) mora dentro da media query de 900px. No celular ele nao sumia:
+ * virava um `<aside>` cru logo abaixo do hero, com "Your collection6 / 1.182"
+ * grudado numa linha, sem fundo e sem separacao — tres linhas de texto solto no
+ * meio de uma tela que o Miguel tinha dado como pronta.
+ *
+ * Nao ha o que salvar dele aqui embaixo: os dois numeros que importam ja estao
+ * na tela, no "SUA COLEÇÃO · 3 PEDEM DECISÃO" que encima a fila, e o
+ * armazenamento mora nos Ajustes. Some, como a linha da data e a busca.
+ */
+.tk-home-numeros {
+  display: none;
+}
+
+/*
  * A busca da home NAO EXISTE no celular.
  *
  * "favor sem scroll na tela de inicio": a coluna reparte a altura entre a
