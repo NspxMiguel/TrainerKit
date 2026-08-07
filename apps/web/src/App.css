@@ -95,11 +95,14 @@
  *
  * Com `max()` o valor e 52 no navegador e 71 instalado (o relogio mais 12px de
  * folga), que e o que o iOS faz nos apps dele.
+ *
+ * O `max()` mora no `--tk-respiro-topo` porque o hero precisa do MESMO valor
+ * com o sinal trocado pra sangrar ate a borda. Ver o token.
  */
 .tk-main {
   flex: 1;
-  padding: max(var(--tk-safe-top), calc(env(safe-area-inset-top) + var(--tk-s3)))
-    var(--tk-gutter) calc(72px + max(var(--tk-s5), env(safe-area-inset-bottom)));
+  padding: var(--tk-respiro-topo) var(--tk-gutter)
+    calc(72px + max(var(--tk-s5), env(safe-area-inset-bottom)));
 }
 
 /* A barra flutuante ocupa mais altura util que a assente: 12px de folga
@@ -1455,8 +1458,8 @@
   flex-direction: column;
   max-width: var(--tk-container);
   margin: 0 auto;
-  padding: max(var(--tk-safe-top), calc(env(safe-area-inset-top) + var(--tk-s3)))
-    var(--tk-gutter) calc(var(--tk-s5) + max(var(--tk-s5), env(safe-area-inset-bottom)));
+  padding: var(--tk-respiro-topo) var(--tk-gutter)
+    calc(var(--tk-s5) + max(var(--tk-s5), env(safe-area-inset-bottom)));
 }
 
 /* Voltar a esquerda, progresso centralizado. O botao sai do fluxo com
@@ -3547,8 +3550,8 @@ button.tk-chip,
   overscroll-behavior: contain;
   max-width: var(--tk-container);
   margin: 0 auto;
-  padding: max(var(--tk-safe-top), calc(env(safe-area-inset-top) + var(--tk-s3)))
-    var(--tk-gutter) calc(var(--tk-s8) + max(var(--tk-s5), env(safe-area-inset-bottom)));
+  padding: var(--tk-respiro-topo) var(--tk-gutter)
+    calc(var(--tk-s8) + max(var(--tk-s5), env(safe-area-inset-bottom)));
   animation: tk-rise 0.26s var(--tk-ease-glass) both;
 }
 

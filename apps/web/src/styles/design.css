@@ -354,7 +354,16 @@
   max-width: var(--tk-container);
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
-  margin-top: calc(var(--tk-safe-top) * -1);
+  /*
+   * Sobe ate a borda de cima, cancelando o padding da `.tk-main`.
+   *
+   * ⚠️ O VALOR E O `--tk-respiro-topo`, e nao o `--tk-safe-top`. Ler o token
+   * cru aqui cancelava 52px de um padding que no iPhone vale 71 — o hero
+   * parava 19px abaixo da borda e o cabecalho, que e absoluto, caia por cima
+   * dele. Era a "falta de safe area" que o Miguel viu no aparelho dele.
+   * Mesmo remedio do `.tk-hero--ficha` logo abaixo, pelo mesmo motivo.
+   */
+  margin-top: calc(var(--tk-respiro-topo) * -1);
   /*
    * ⚠️ ALTURA FLUIDA, e nao os 474px fixos do handoff.
    *
@@ -497,8 +506,8 @@
  * ⚠️ O HERO SO SOBE QUANDO ELE E O PROXIMO — com um aviso no meio, subir e
  * COBRIR o aviso.
  *
- * O `margin-top: calc(var(--tk-safe-top) * -1)` acima existe pra o hero encostar
- * na borda de cima da tela: ele cancela os 52px de respiro que a `.tk-main` da
+ * O `margin-top: calc(var(--tk-respiro-topo) * -1)` acima existe pra o hero
+ * encostar na borda de cima da tela: ele cancela o respiro que a `.tk-main` da
  * ao topo. A conta so fecha quando o que vem antes dele e a saudacao.
  *
  * Achado medindo a home estreita: com o convite de instalar aberto, o hero
@@ -877,7 +886,7 @@
    * barra que so tem um botao redondo dentro. O `var(…, …)` mantem o valor
    * antigo onde o token nao existe (o hero da home, que nao vive em folha).
    */
-  padding: var(--tk-folha-topo, max(var(--tk-safe-top), calc(env(safe-area-inset-top) + var(--tk-s3))))
+  padding: var(--tk-folha-topo, var(--tk-respiro-topo))
     20px 0;
   display: flex;
   justify-content: space-between;
@@ -1686,7 +1695,7 @@
    * exatamente esta. Sobra visivel so o pedaço acima do hero, que e a faixa da
    * saudacao.
    */
-  height: calc(var(--tk-safe-top) + 200px);
+  height: calc(var(--tk-respiro-topo) + 200px);
   /*
    * ⚠️ A FAIXA CONTINUA A RAMPA DO HERO, em vez de ser uma cor chapada.
    *
@@ -1710,13 +1719,17 @@
      * ⚠️ A RAMPA TERMINA ONDE O HERO COMEÇA, e não no fim da faixa.
      *
      * Foi o erro da primeira tentativa: eu ramponei ao longo dos 200px inteiros
-     * da faixa, mas o hero começa em `--tk-safe-top + 52px` — no cruzamento a
-     * rampa ainda estava na metade, e a emenda ficou PIOR que a de antes.
+     * da faixa, mas o hero começa em `--tk-respiro-topo + 52px` — no cruzamento
+     * a rampa ainda estava na metade, e a emenda ficou PIOR que a de antes.
+     *
+     * ⚠️ `--tk-respiro-topo`, e não `--tk-safe-top`: a saudação começa onde a
+     * `.tk-main` a coloca, que num iPhone com entalhe é 71px e não 52. Com o
+     * token cru a rampa terminava 19px acima do hero e a emenda voltava.
      *
      * Os 52px são a linha da saudação (42) mais o respiro (10). Depois disso a
      * cor segura chapada: o resto da faixa vive atrás do hero, que é opaco.
      */
-      var(--tk-accent-topo, transparent) calc(var(--tk-safe-top) + 52px),
+      var(--tk-accent-topo, transparent) calc(var(--tk-respiro-topo) + 52px),
     var(--tk-accent-topo, transparent) 100%
   );
   z-index: -1;
@@ -3245,7 +3258,7 @@
       )
       0,
     var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent))
-      calc(var(--tk-safe-top) + 52px),
+      calc(var(--tk-respiro-topo) + 52px),
     var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent)) 100%
   );
 }
@@ -3270,7 +3283,7 @@
       )
       0,
     var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent))
-      calc(var(--tk-safe-top) + 52px),
+      calc(var(--tk-respiro-topo) + 52px),
     var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent)) 100%
   );
   }
@@ -7097,8 +7110,38 @@
    remonta o `<main>` — remonta a lista lá dentro. Se a cascata morasse nos
    ITENS da grade, cada tecla digitada na busca reanimaria 1.182 células.
 */
+/*
+ * ⚠️ `backwards`, e NUNCA `both` — em toda regra de cascata daqui pra baixo.
+ *
+ * `both` mantem a animacao valendo pra sempre depois que ela acaba, e o valor
+ * que ela deixa aplicado NAO e `none`: e a identidade, `matrix(1,0,0,1,0,0)`.
+ * Qualquer transform, inclusive a identidade, faz o elemento virar BLOCO
+ * CONTINENTE de todo `position: fixed` que mora dentro dele. Com `both`, todo
+ * filho do `.tk-main` virava uma tela dentro da tela.
+ *
+ * Foi o que quebrou o app no iPhone do Miguel — "tudo bugado irmao, scroll em
+ * diversas partes do site... sem safearea":
+ *
+ *   · a faixa de cor do topo (`.tk-home-topo::before`, `fixed`) parava de valer
+ *     a TELA e passava a valer a COLUNA: virava um retangulo azul com moldura
+ *     preta em volta, comecando na saudacao em vez da borda de cima;
+ *   · e toda folha cheia aberta pela home — ficha de especie, calculadora de
+ *     IV, contra-ataques, monta um time — e `position: fixed; inset: 0`. Presa
+ *     dentro do `.tk-home`, ela deixava de cobrir a tela e o `overflow-y` dela
+ *     passava a rolar uma caixa do tamanho errado. E o "scroll bugado".
+ *
+ * O diagnostico ja estava escrito neste arquivo, em `.tk-fax-bar` — la a barra
+ * aparecia no topo da folha com `top: -30` e `scrollTop: 729`. Naquele dia foi
+ * contornado com `sticky` num lugar so; a causa continuou de pe pra todo o
+ * resto.
+ *
+ * `backwards` da exatamente a mesma entrada: o quadro `from` vale durante o
+ * atraso da cascata, a animacao roda igual, e no fim o elemento volta pro
+ * estilo dele — que ja e `opacity: 1` e `transform: none`, porque nenhum destes
+ * keyframes tem `to`. Muda o que sobra depois, e so.
+ */
 .tk-main > * {
-  animation: tk-in-up var(--tk-dur-base) var(--tk-ease-out) both;
+  animation: tk-in-up var(--tk-dur-base) var(--tk-ease-out) backwards;
 }
 
 /*
@@ -7137,9 +7180,11 @@
  * "titulo, depois a grade" e exatamente essa ordem: a barra de topo entra
  * primeiro, a lista em seguida, a ficha por ultimo.
  */
+/* `backwards` pelo mesmo motivo do `.tk-main > *` — e aqui e onde doia, porque
+   e o `.tk-home` que prende a faixa do topo e as folhas da home. */
 .tk-dex-split > *,
 .tk-home > * {
-  animation: tk-in-up var(--tk-dur-base) var(--tk-ease-out) both;
+  animation: tk-in-up var(--tk-dur-base) var(--tk-ease-out) backwards;
 }
 
 /*

@@ -275,3 +275,99 @@ a passo acima fica escrito só pro dia em que ele mudar de ideia.
 `api/ai.ts:49` (import sem extensão). É de propósito — o comentário acima da
 linha explica que cada lado fala a língua do seu empacotador — o `tsconfig.api.json`
 local passa e o deploy completa. Só barulho no log.
+
+## [ABERTO] TrainerKit — celular no iPhone de verdade: scroll quebrado e sem safe area
+
+**Pedido em:** 07/08/2026
+
+**Palavras dele:** "nossa, tudo bugado irmao. scroll em diversas partes do site.
+ta bem bugado e bem diferent do claude desing, sem safearea e etc"
+
+**Contexto:** ele abriu o servidor de desenvolvimento no iPhone dele
+(`http://10.0.0.72:5273/`), no Safari **e** instalado na tela de início. Mandou
+quatro prints. O que dá pra ver neles:
+
+1. **Safari, home** — "Boa noite, Treinador." colado no topo, o bloco do
+   cabeçalho aparece **cortado em cima**, com **faixa preta à esquerda e à
+   direita** e **barra de rolagem própria** no lado direito. Ou seja: caixa com
+   `overflow` e altura presa onde não devia ter.
+2. **Instalado, ficha do Metapod** — o sprite entra **por baixo da Ilha
+   Dinâmica**, sem respiro, e tem um **retângulo verde claro** aparecendo atrás
+   dele (parece caixa de placeholder que ficou visível).
+3. **Instalado, home** — essa é a que está mais perto do certo.
+
+**Por que eu não peguei antes:** eu só conferi em 375×812 no navegador do Mac.
+Ali não existe entalhe, não existe Ilha Dinâmica, `env(safe-area-inset-*)` é
+tudo zero e o scroll do iOS se comporta diferente. Emulação de largura **não
+substitui** aparelho de verdade — anotar isso e usar o simulador de iOS daqui
+pra frente.
+
+**Cuidado:** "o celular está pronto e não se mexe" continua valendo pro
+**desenho**. Isto aqui é conserto de bug, não redesenho.
+
+### O que era, de fato (07/08/2026)
+
+Dois defeitos separados, os dois medidos — não deduzidos.
+
+**1. `animation-fill-mode: both` fazia a coluna virar uma tela dentro da tela.**
+Esta é a causa do "scroll em diversas partes do site".
+
+`.tk-main > *` e `.tk-home > *` animavam com `animation: tk-in-up … both`. O
+`both` mantém a animação valendo **pra sempre** depois que ela acaba, e o valor
+que sobra aplicado **não é `none`**: é a identidade, `matrix(1,0,0,1,0,0)`.
+Qualquer transform, inclusive a identidade, faz o elemento virar **bloco
+continente** de todo `position: fixed` que mora dentro dele. Medido no Chromium:
+`.tk-home` computava `transform: matrix(1, 0, 0, 1, 0, 0)`.
+
+Consequência, e bate print a print com o que ele mandou:
+
+- a faixa de cor do topo (`.tk-home-topo::before`, `fixed`) parava de valer a
+  TELA e passava a valer a COLUNA — virava o **retângulo azul com moldura preta
+  em volta** do print 1, começando na saudação em vez da borda de cima;
+- toda folha cheia aberta pela home (ficha de espécie, calculadora de IV,
+  contra-ataques, monta um time) é `position: fixed; inset: 0`. Presa dentro do
+  `.tk-home`, deixava de cobrir a tela e o `overflow-y` dela passava a rolar uma
+  caixa do tamanho errado. **Esse é o scroll bugado**, e é também a barra de
+  rolagem própria que apareceu no lado direito.
+
+O diagnóstico já estava escrito no `design.css`, em `.tk-fax-bar` — naquele dia
+foi contornado com `sticky` num lugar só e a causa ficou de pé pro resto.
+
+Conserto: `both` → **`backwards`** nas regras de cascata. Mesma entrada (o quadro
+`from` vale durante o atraso), e no fim o elemento volta pro estilo dele, que já
+é `opacity: 1; transform: none` — nenhum destes keyframes tem `to`.
+
+**2. O hero cancelava um `max()` com um número fixo.** Essa é a "falta de safe
+area". A `.tk-main` empurrava por `max(52, env(safe-area-inset-top) + 12)` e o
+`.tk-hero` puxava de volta **52px fixos**. Num aparelho sem entalhe os dois dão
+52 e batem — que é exatamente por que isso passou por toda a conferência feita
+em aba de navegador. No iPhone dele: 71 contra 52, sobravam **19px** de faixa
+entre a Ilha Dinâmica e a arte, e o cabeçalho caía por cima do hero.
+
+Conserto: token único `--tk-respiro-topo`, lido nos dois lados — mesmo remédio
+que o `--tk-folha-topo` da folha cheia já usava. Passaram a ler o token a
+`.tk-main`, a `.tk-onb`, a `.tk-dex`, o `margin-top` negativo do hero, a altura
+da faixa de cor e as três paradas do gradiente dela.
+
+**Conferido no simulador de iPhone 17 Pro, no app instalado** (é o único lugar
+onde `env(safe-area-inset-top)` vale 59 de verdade): a arte do hero sobe até a
+borda de cima sem emenda e sem moldura; a folha de espécie cobre a tela inteira
+e rola de ponta a ponta; a lista da Pokédex rola normal. `typecheck` limpo,
+174 testes passando.
+
+**O que NÃO era bug:** o "retângulo esverdeado" atrás do sprite do Metapod é o
+`.tk-hero-numero`, o número da dex em marca-d'água gigante. Pro "11" ele lê como
+uma barra vertical. Não mexi.
+
+### Pergunta pra ele, dessa mesma volta
+
+**Conteúdo rolando por baixo do relógio.** Quando a lista da Pokédex ou uma folha
+longa rolam, o texto passa por trás da barra de status e **encosta no relógio** —
+dá pra ver "Subir os Ma…" em cima de "7:39". A barra de baixo já tem remédio pra
+isso (`.tk-scroll-edge`, um degradê que apaga o conteúdo antes da barra de abas,
+citando a HIG da Apple). Em cima não tem nada — e **de propósito**: o desenho diz
+"A COR SOBE ATÉ O TOPO — inclusive por trás da barra de status", que é o que faz
+o hero ficar bonito. Um degradê no topo escureceria a arte do hero. Não improvisei:
+**quer o degradê em cima também, ou fica como está?**
+
+**Apagar quando ele disser que parou de bugar no aparelho dele.**
