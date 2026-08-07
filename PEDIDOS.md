@@ -161,6 +161,45 @@ fixos, não leem o que a Vercel devolveu.
 chaves pra lá, ou servir app e API do mesmo projeto (um `vercel.json` só). Não
 mexi no arranjo de hospedagem sem ele mandar.
 
+**RESPONDIDO em 07/08/2026** — palavras dele: *"pode faze tudo ai, criar vercel
+e etc"*. Ou seja: criar o projeto na conta nova e deixar o `publicar.sh`
+funcionando de ponta a ponta. **Limite que continua valendo:** não digito chave
+em campo nenhum — se faltar segredo, ele mesmo põe, ou vai CLI→CLI sem o valor
+passar por mim.
+
+**Feito em 07/08/2026:**
+1. Projeto `trainerkit-ia` criado no time `nspx` e a API publicada nele.
+   Responde: `{"error":"GROQ_API_KEY nao configurada no servidor"}` com 503 —
+   que é a mensagem que o próprio `api/ai.ts` escreveu pra este caso. A função
+   está de pé, só falta a chave.
+2. **Os dois deploys agora fixam o projeto pelo nome.** A `.vercel/` é ignorada
+   pelo git, então o vínculo da raiz dependia do que tinha rodado antes na
+   máquina — era isso que fazia a API derrubar o app da produção.
+3. **Endereço público ≠ endereço óbvio.** `trainerkit-ia-nspx.vercel.app`
+   responde **401 "Protected deployment"** (Deployment Protection); o que serve
+   é `trainerkit-ia-gules.vercel.app`. Como a URL vai gravada DENTRO do build do
+   app, esse 401 não apareceria no deploy — apareceria em cada pedido de IA do
+   usuário. Está anotado no script e no cabeçalho do `api/ai.ts`.
+4. Endereços corretos hoje: app `trainerkit-zeta.vercel.app`, API
+   `trainerkit-ia-gules.vercel.app/api/ai`.
+
+**FALTA (e é só ele que pode fazer):** pôr as duas chaves no projeto
+`trainerkit-ia` — `GROQ_API_KEY` (texto da IA) e `ELEVENLABS_API_KEY` (voz).
+Elas ficaram na conta velha da Vercel, sem acesso daqui.
+
+```
+vercel link --project trainerkit-ia --yes
+vercel env add GROQ_API_KEY production
+vercel env add ELEVENLABS_API_KEY production
+pnpm publicar
+```
+
+**⚠️ NÃO republiquei o app de propósito.** O que está no ar ainda aponta pro
+`trainerkit-ia.vercel.app` da conta VELHA — que testei e responde, tem chave e
+funciona. Republicar antes das chaves novas trocaria uma IA que funciona por uma
+que devolve 503. Depois que ele rodar os comandos acima, tudo passa a viver na
+conta nova de uma vez.
+
 **Detalhe menor, pré-existente:** o build da API na Vercel cospe `TS2835` em
 `api/ai.ts:49` (import sem extensão). É de propósito — o comentário acima da
 linha explica que cada lado fala a língua do seu empacotador — o `tsconfig.api.json`

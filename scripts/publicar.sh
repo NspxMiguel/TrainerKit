@@ -19,6 +19,20 @@
 # `.github/workflows/deploy.yml` continua no repositorio de proposito: quando a
 # conta voltar, ele volta a funcionar sozinho e este script vira redundante.
 #
+# ⚠️ OS ENDERECOS MUDARAM com a conta, em 07/08/2026.
+#
+# A Vercel migrou junto com o GitHub: o time agora e `nspx`, e os enderecos
+# antigos (`trainerkit.vercel.app`, `trainerkit-ia.vercel.app`) NAO pertencem
+# mais a ele — `vercel inspect trainerkit.vercel.app` responde "Can't find the
+# deployment under the context nspx". Ficaram na conta velha, servindo um build
+# de meses atras pra quem abrir.
+#
+# Custou uma producao errada pra descobrir: este script fazia dois deploys, e o
+# da RAIZ caia no MESMO projeto do app (a `.vercel/project.json` da raiz apontava
+# pra `trainerkit`), virava a producao e derrubava o app. Depois de publicar, o
+# endereco do app servia a landing "TrainerKit · IA". Por isso os DOIS deploys
+# agora fixam o projeto pelo nome — ver a nota do `vercel link` mais abaixo.
+#
 # Uso:  pnpm publicar
 set -euo pipefail
 
@@ -26,7 +40,17 @@ cd "$(dirname "$0")/.."
 RAIZ="$PWD"
 PALCO="${TMPDIR:-/tmp}/trainerkit-publicar"
 
-PROXY="https://trainerkit-ia.vercel.app/api/ai"
+# ⚠️ O `-gules` NAO E ENFEITE, e trocar por `trainerkit-ia-nspx.vercel.app`
+# quebra o app em silencio.
+#
+# A Vercel da tres enderecos a cada projeto. O `<projeto>-<time>` cai atras da
+# Deployment Protection e responde 401 "Protected deployment" pra quem nao esta
+# logado — medido. O publico e este, o do sufixo sorteado no dia em que o
+# projeto nasceu. Como ele vai gravado DENTRO do build do app, um 401 aqui nao
+# apareceria no deploy: apareceria em cada pedido de IA do usuario.
+APP="https://trainerkit-zeta.vercel.app"
+API="https://trainerkit-ia-gules.vercel.app"
+PROXY="$API/api/ai"
 
 echo "→ dataset do dia (baixa o GAME_MASTER, ~18 MB)"
 pnpm --filter @trainerkit/dataset refresh
@@ -60,15 +84,24 @@ cp "$RAIZ/deploy/vercel-web.json" "$PALCO/vercel.json"
 echo "→ vinculando o palco ao projeto trainerkit"
 (cd "$PALCO" && vercel link --project trainerkit --yes >/dev/null)
 
-echo "→ app  → trainerkit.vercel.app"
+echo "→ app  → $APP"
 (cd "$PALCO" && vercel deploy --prod --yes)
 
 # As funcoes moram no outro projeto, com as chaves nos cofres dele. Publicar da
 # RAIZ usa o `vercel.json` de la, que serve `public-vercel/` e o `api/`.
-echo "→ API  → trainerkit-ia.vercel.app"
-(cd "$RAIZ" && vercel deploy --prod --yes)
+#
+# ⚠️ O `link` AQUI E O CONSERTO, e nao burocracia repetida.
+#
+# A `.vercel/` e ignorada pelo git, entao o vinculo da raiz depende de o que
+# rodou antes nesta maquina — e numa maquina onde a raiz estivesse vinculada ao
+# projeto do APP, este deploy viraria a producao DELE e derrubaria o que a linha
+# de cima acabou de publicar. Foi exatamente o que aconteceu em 07/08/2026.
+# Fixar o projeto pelo nome tira a pergunta: nao importa como a pasta esta
+# vinculada, a API vai pra API.
+echo "→ API  → $API"
+(cd "$RAIZ" && vercel link --project trainerkit-ia --yes >/dev/null && vercel deploy --prod --yes)
 
 echo
 echo "no ar:"
-echo "  app  https://trainerkit.vercel.app"
-echo "  api  https://trainerkit-ia.vercel.app/api/ai"
+echo "  app  $APP"
+echo "  api  $PROXY"
