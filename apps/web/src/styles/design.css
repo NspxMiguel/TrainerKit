@@ -1055,6 +1055,13 @@
   transform: scale(0.95);
 }
 
+/* Escondido por padrao: quem o mostra e o bloco de >=900px, onde o botao deixa
+   de ser um circulo de 48px e vira pilula com a palavra. No celular o circulo
+   continua se explicando pelo `aria-label`, e o layout nao muda um pixel. */
+.tk-hero-feito-rot {
+  display: none;
+}
+
 /* ─────────────────────────────────────────── a lente que viaja ─────────── */
 
 /*
@@ -5233,6 +5240,20 @@
     flex-direction: column;
     gap: 2px;
     align-self: stretch;
+    /*
+     * ⚠️ `stretch`, e nao o `center` herdado da barra deitada.
+     *
+     * Na barra do celular ela e uma LINHA e `align-items: center` centraliza os
+     * itens na vertical — certo la. Virando coluna, o mesmo `center` passou a
+     * centralizar na HORIZONTAL, e tudo que nao tem largura propria encolheu
+     * pro tamanho do texto e foi pro meio: a marca ficou em 128px de 219, e a
+     * legenda "FERRAMENTAS", a lista de ferramentas e o selo de offline em
+     * 129px. Medido — as abas escapavam so porque tem `width: 100%` explicito.
+     *
+     * No documento a coluna e toda alinhada a esquerda, com os icones das
+     * ferramentas na mesma vertical dos icones das abas.
+     */
+    align-items: stretch;
   }
 
   /* ── HERO COMPACTO ───────────────────────────────────────────────────────
@@ -5396,6 +5417,59 @@
   .tk-home-linha1 > .tk-hero .tk-hero-acoes {
     margin-top: 10px;
     justify-content: flex-start;
+    gap: 10px;
+  }
+
+  /*
+   * ⚠️ AQUI O BOTAO E VIOLETA, e no celular continua branco. Nao e capricho:
+   * a razao do branco simplesmente nao existe nesta largura.
+   *
+   * A nota do `.tk-hero-cta` explica o branco — "sobre um gradiente colorido,
+   * violeta sobre violeta some", e branco e o unico tom que aguenta os dez
+   * tipos. No celular o hero E a arte: o botao vive em cima do gradiente da
+   * especie. Na tela larga o hero virou cartao neutro, o gradiente ficou no
+   * tile de 74px ao lado, e o botao passou a viver sobre superficie escura —
+   * onde o violeta do documento de desktop e o que se destaca, e o branco e que
+   * vira uma pastilha sem dono.
+   *
+   * `--tk-ultra` ja e `linear-gradient(180deg,#7657ff,#6e4bff)`, a mesma coisa
+   * que o documento pede; nao ha hex novo entrando no app por causa disto.
+   */
+  .tk-home-linha1 > .tk-hero .tk-hero-cta {
+    height: 42px;
+    padding: 0 20px;
+    background: var(--tk-ultra);
+    color: #fff;
+    font: 600 14.5px var(--tk-font);
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--tk-ultra-solid) 40%, transparent);
+  }
+
+  /*
+   * O SEGUNDO BOTAO GANHA A PALAVRA — no celular ele e so o icone.
+   *
+   * O documento escreve "Já fiz isso" por extenso. No celular o circulo de 48px
+   * se defende pelo `aria-label`, porque a coluna nao comporta duas pilulas
+   * largas lado a lado; aqui comporta, e um icone sozinho num cartao espacoso e
+   * adivinhacao. O rotulo vem do MESMO texto que ja alimentava o `aria-label`,
+   * entao ele acompanha os tres estados (evoluiu / desfazer / marcar) e os dez
+   * idiomas sem chave nova.
+   */
+  .tk-home-linha1 > .tk-hero .tk-hero-feito {
+    width: auto;
+    height: 42px;
+    padding: 0 20px;
+    gap: 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--tk-txt2);
+    font: 600 14.5px var(--tk-font);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .tk-home-linha1 > .tk-hero .tk-hero-feito-rot {
+    display: inline;
   }
 
   /* ── INICIO EM DUAS COLUNAS ──────────────────────────────────────────────
@@ -5516,13 +5590,51 @@
   }
 
   /*
+   * O DESTINO SOBE PRO CABECALHO — so na tela larga.
+   *
+   * O documento de desktop poe "Ver tudo na Pokédex →" a direita do titulo da
+   * secao, e usa as seis colunas da grade pra seis Pokemon. No celular ele
+   * continua sendo o cartao no fim da fila, que foi decisao dele ("ao invez de
+   * uma faixa com scroll pro lado, coloca tipo, no lugar do 5 um ver mais") — e
+   * la ele e o unico jeito de chegar na Pokedex sem gastar uma das quatro
+   * colunas com um botao.
+   *
+   * `baseline` e nao `center`: os dois textos tem tamanhos diferentes (11px do
+   * overline contra 12.5px do link) e alinhar pelo centro deixaria as letras
+   * desencontradas na mesma linha.
+   */
+  .tk-overline--sec {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--tk-s3);
+  }
+
+  /* Link, e nao botao: o documento desenha texto violeta sem moldura. O `all:
+     unset` nao serve aqui porque levaria junto o `cursor` e a herança de fonte
+     que a gente quer. */
+  .tk-overline-verdex {
+    flex: none;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: 700 12.5px var(--tk-font);
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--tk-ultra-fg-strong);
+    cursor: pointer;
+    transition: opacity 0.12s var(--tk-ease);
+  }
+
+  .tk-overline-verdex:hover {
+    opacity: 0.78;
+  }
+
+  /*
    * A coleção como GRADE de seis, e não fila apertada.
    *
-   * No celular a fila cabe quatro e o quinto lugar é o "VER MAIS" — decisão
-   * dele ("ao invez de uma faixa com scroll pro lado, coloca tipo, no lugar do
-   * 5 um ver mais"). Na tela larga cabem os seis do documento de desktop, e o
-   * "VER MAIS" continua sendo o último: cinco bichos e o destino, fechando a
-   * linha exata sem sobra.
+   * Seis colunas com seis Pokemon: o "VER MAIS" saiu daqui (subiu pro
+   * cabecalho, nota acima), entao a linha fecha exata com bicho em toda coluna.
    */
   .tk-strip-row {
     display: grid;
@@ -5544,8 +5656,11 @@
   .tk-strip-cell {
     width: auto;
     min-width: 0;
-    gap: 10px;
-    padding: 12px;
+    /* 8px e 14px/10px sao os do documento de desktop. O padding lateral menor
+       que o vertical e de proposito: e ele que deixa o tile quase encostar nas
+       bordas e virar o assunto do cartao. */
+    gap: 8px;
+    padding: 14px 10px;
     border-radius: 20px;
     background: var(--tk-surf);
     border: 1px solid var(--tk-line);
@@ -5554,11 +5669,69 @@
       border-color 0.12s var(--tk-ease);
   }
 
-  /* Quem dita o tamanho e a prop `size` do `SpeciesTile` (ver a nota no
-     `HomeScreen`); aqui so o arredondamento do cartao. */
+  /*
+   * O VEREDITO VIRA CHIP — no celular ele e texto solto embaixo do anel.
+   *
+   * Do documento de desktop: fundo e borda tingidos do tom do veredito, em
+   * volta da mesma palavra. Como o anel do tile saiu (nota acima), o chip passa
+   * a ser o unico lugar onde a cor do veredito aparece — e continua vindo
+   * acompanhada da palavra, que e o que garante a leitura sem depender de cor.
+   *
+   * `color-mix` com `transparent` em vez de cor fixa: o tom chega em
+   * `--tk-cell-tone` por celula e muda com o veredito, entao os 16%/30% do
+   * documento precisam ser calculados, nao escritos.
+   */
+  .tk-strip-verdito {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.05em;
+    background: color-mix(in srgb, var(--tk-cell-tone, var(--tk-text-3)) 16%, transparent);
+    border: 1px solid color-mix(in srgb, var(--tk-cell-tone, var(--tk-text-3)) 30%, transparent);
+  }
+
+  /*
+   * ⚠️ O TILE PRECISA DE `!important`, e nao e preguica.
+   *
+   * `SpeciesTile` escreve `width`, `height`, `border-radius` e `font-size`
+   * INLINE (ver a nota do hero no `HomeScreen`), e estilo inline ganha de
+   * qualquer classe. A nota antiga aqui dizia que "a regra abaixo estica o
+   * tile" — nao esticava: so trocava o raio, e nem isso, porque o inline
+   * vencia. O cartao ficou com um anel de 56px onde o desenho pede um
+   * quadrado do tamanho do cartao.
+   *
+   * ⚠️ E O RAIO NAO PODE VIR DA PROP. Foi o que fazia o tile sair REDONDO.
+   *
+   * O componente calcula `borderRadius = size / 3` a partir da prop (92 aqui,
+   * logo 31px), enquanto o `max-width: 56px` do bloco de cima encolhia a caixa
+   * para 56. Raio 31 numa caixa de 56 e um circulo — medido na tela, nao
+   * suposto. Com o tile ocupando a coluna inteira o raio fixo de 16px do
+   * documento volta a fazer sentido.
+   */
   .tk-strip-cell .tk-mono,
-  .tk-strip-cell img {
-    border-radius: 16px;
+  .tk-strip-cell--mais .tk-strip-mais-anel {
+    width: 100% !important;
+    height: auto !important;
+    max-width: none;
+    aspect-ratio: 1;
+    border-radius: 16px !important;
+    /* 19px e o do documento; o inline manda 25px, calculado de uma caixa que
+       nao existe mais. */
+    font-size: 19px !important;
+  }
+
+  /*
+   * SEM O ANEL DE COR no cartao — o veredito passa a ser o chip.
+   *
+   * Na tira do celular o anel colorido E o veredito, porque nao ha largura pra
+   * mais nada. Aqui embaixo o rotulo virou chip com fundo e borda, entao o anel
+   * repetiria a mesma informacao contornando um tile que ja e colorido — dois
+   * cercos concentricos em volta da arte.
+   */
+  .tk-strip-cell .tk-mono {
+    box-shadow: none;
   }
 
   /* O nome aparece — na tira do celular ele nao cabe, e o rotulo do veredito
@@ -5786,11 +5959,28 @@
     display: none;
   }
 
-  .tk-tab[aria-current="page"] {
+  /*
+   * ⚠️ PRECISA DO `[data-platform]` JUNTO — e a QUARTA colisao do mesmo tipo.
+   *
+   * O retangulo tingido do item ativo simplesmente nao aparecia: a barra so
+   * marcava o ativo pela cor do rotulo. A causa e a mesma das tres anteriores
+   * (ver as notas da `.tk-tab-bolha` e do `.tk-tab` mais abaixo): la em cima
+   * existe `[data-platform="android"|"desktop"|"ipad"] .tk-tab[aria-current]`
+   * com `background: none`, que e (0,3,0). Este seletor sozinho e (0,2,0), e
+   * especificidade ganha de ordem E de media query — a regra nem chegava a
+   * valer dentro do bloco de tela larga.
+   *
+   * Com o `[data-platform]` a frente empatam em (0,3,0), e ai sim a ordem
+   * decide: esta vem depois. 14% de `--tk-ultra-fg` e raio 11 sao os do
+   * documento (medidos nele: `rgba(159,139,255,.14)`).
+   */
+  .tk-tab[aria-current="page"],
+  [data-platform] .tk-tab[aria-current="page"] {
     background: color-mix(in srgb, var(--tk-ultra-fg) 14%, transparent);
   }
 
-  .tk-tab[aria-current="page"] .tk-tab-label {
+  .tk-tab[aria-current="page"] .tk-tab-label,
+  [data-platform] .tk-tab[aria-current="page"] .tk-tab-label {
     color: var(--tk-ultra-fg-strong);
   }
 
@@ -5872,25 +6062,43 @@
 
   .tk-side-legenda {
     margin: 0;
-    padding: 0 4px 8px;
+    /* 12px de recuo, o mesmo das abas e das ferramentas: a legenda comeca na
+       vertical do texto que ela nomeia, e nao 8px antes. */
+    padding: 0 12px 8px;
     font: 700 11px/1 var(--tk-font);
     letter-spacing: 0.08em;
-    color: var(--tk-txt3);
+    /*
+     * ⚠️ NAO DA PRA PEDIR ESTE TOM PELO TOKEN — nao existe um mais fraco.
+     *
+     * No documento a legenda esta em 35% e as ferramentas em 60%: ela e a
+     * etiqueta da secao, nao mais um item dela. Aqui as duas estavam no mesmo
+     * cinza e "FERRAMENTAS" competia com "Calculadora de IV".
+     *
+     * `--tk-txt3` e `--tk-txt4` PARECEM degraus, mas os tres (txt2, txt3, txt4)
+     * apontam pro mesmo `--tk-text-2` — 0,72 no escuro. Trocar de token nao
+     * mudaria nada; trocar pra txt4 deixaria igual tambem. Dai o `color-mix`:
+     * 48% de 0,72 da os 0,35 do documento, e no claro ele desce na mesma
+     * proporcao em vez de virar um cinza fixo pensado pro escuro.
+     */
+    color: color-mix(in srgb, var(--tk-txt2) 48%, transparent);
   }
 
   .tk-side-tool {
     display: flex;
     align-items: center;
     gap: 10px;
-    /* 44px de alvo, como qualquer coisa tocavel do app — e aqui vale tambem
-       pra quem usa teclado: a linha inteira e o alvo, nao so o texto. */
-    min-height: 44px;
-    padding: 0 10px;
+    /* 38px e a altura do documento. A linha inteira continua sendo o alvo (nao
+       so o texto), que era o motivo real dos 44px daqui — e no dedo eles
+       voltam, na regra de `pointer: coarse` junto com a das abas. */
+    min-height: 38px;
+    padding: 0 12px;
     border: 0;
     border-radius: 12px;
     background: none;
-    font: 500 14px/1.2 var(--tk-font);
-    color: var(--tk-txt2);
+    font: 500 13.5px/1.2 var(--tk-font);
+    /* 60% do documento — ver a nota da legenda logo acima sobre por que isto
+       nao vem de um token. */
+    color: color-mix(in srgb, var(--tk-txt2) 83%, transparent);
     text-align: left;
     transition:
       background-color 0.12s var(--tk-ease),
@@ -5946,13 +6154,16 @@
    * automatica eles esticariam os tres itens pra preencher nada — e o ativo
    * ficaria com 66px de largura em vez de altura.
    */
+  /* 40px, raio 11 e recuo de 12 sao os do documento de desktop, medidos nele.
+     Estavam 52/14/16, que numa lista de tres abas somava 36px a mais de coluna e
+     empurrava as ferramentas pra baixo. */
   .tk-tab,
   [data-platform] .tk-tab {
     flex: none;
     width: 100%;
-    height: 52px;
+    height: 40px;
     margin: 0;
-    border-radius: calc(var(--tk-r-card) - var(--tk-s2));
+    border-radius: 11px;
   }
 
   /* ⚠️ O ativo NAO cresce na coluna, e a lente tem a mesma altura dele.
@@ -5962,8 +6173,30 @@
   .tk-tab[aria-current="page"],
   [data-platform] .tk-tab[aria-current="page"] {
     flex: none;
-    height: 52px;
+    height: 40px;
     margin: 0;
+  }
+
+  /*
+   * ⚠️ 40px E ALVO DE MOUSE — no dedo ele nao serve.
+   *
+   * Este bloco e `min-width: 900px`, e um iPad deitado (1366px) entra nele.
+   * A altura do documento e desenhada pra ponteiro fino; num alvo tocavel ela
+   * fica abaixo dos 44px que o resto do app respeita. `pointer: coarse`
+   * separa os dois casos pela unica coisa que importa aqui — o que aponta —
+   * em vez de tentar adivinhar pelo `data-platform`.
+   */
+  @media (pointer: coarse) {
+    .tk-tab,
+    [data-platform] .tk-tab,
+    .tk-tab[aria-current="page"],
+    [data-platform] .tk-tab[aria-current="page"] {
+      height: 48px;
+    }
+
+    .tk-side-tool {
+      min-height: 44px;
+    }
   }
 
   /*
@@ -5997,7 +6230,11 @@
    */
   .tk-tab-bolha,
   [data-platform] .tk-tab-bolha {
-    top: calc(var(--tk-s2) + var(--tk-tab-i, 0) * (52px + 2px));
+    /* 40px + o `gap: 2px` da coluna — a mesma altura de item declarada acima.
+       Esta conta hoje nao pinta nada (a lente e `display: none` na barra
+       lateral, ver a nota la em cima), mas fica coerente pra nao virar
+       armadilha de quem religar. */
+    top: calc(var(--tk-s2) + var(--tk-tab-i, 0) * (40px + 2px));
     bottom: auto;
     left: var(--tk-s2);
     right: var(--tk-s2);
@@ -6005,8 +6242,8 @@
     /* A MESMA altura do item — ver a nota do `[aria-current]` acima. Encaixe
        exato: nada do item sobra pra fora da lente, e nada da lente sobra pra
        fora do item. */
-    height: 52px;
-    border-radius: calc(var(--tk-r-card) - var(--tk-s2));
+    height: 40px;
+    border-radius: 11px;
   }
 
   /* Deitada, a aba e icone + rotulo lado a lado, alinhados a esquerda — a
@@ -6016,7 +6253,9 @@
     flex-direction: row;
     justify-content: flex-start;
     gap: var(--tk-s3);
-    padding: 0 var(--tk-s4);
+    /* 12px do documento — era `--tk-s4` (16), e os 4px a mais desalinhavam a
+       coluna de icones das abas da coluna de icones das ferramentas. */
+    padding: 0 12px;
   }
 
   .tk-tab-label,

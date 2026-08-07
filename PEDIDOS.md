@@ -126,9 +126,35 @@ E: **o celular está pronto e não se mexe.**
 - `d7b8a32` — o cartão de números do PC vazava no celular como três linhas de
   texto solto. Bug meu, de quando a grade de desktop nasceu.
 
-**Como está agora:** typecheck limpo, 174 testes passando, build do app com a
-auditoria de imagem OK ("todas arte propria"). Conferido no navegador em
-1440×900 e 375×812.
+**Rodada de 07/08/2026 — barra lateral e cartões da coleção:**
+8. Seis cartões preenchem a grade de seis colunas. O "VER MAIS" saiu do fim da
+   fila e virou "Ver tudo →" à direita do título da seção, como no documento.
+9. Barra lateral igual ao documento: marca encostada à esquerda, linhas de 40px
+   com raio 11, a pílula violeta `rgba(159,139,255,.14)` no item ativo (ela
+   **nunca tinha aparecido** — `[data-platform=…] .tk-tab[aria-current]` de
+   `design.css:4008` vence por especificidade quem estiver dentro do `@media`),
+   legenda FERRAMENTAS apagada e ferramentas em 38px/13,5px.
+10. Os símbolos do veredito nos cartões (`↑ INVESTIR`, `✦ EVOLUIR`,
+    `◆ GUARDAR`, `→ TRANSFERIR`), só na tela larga.
+
+**Como está agora:** typecheck limpo, 174 testes passando. Conferido no
+navegador em 1440×900 e 375×812 — no celular os quatro itens acima não chegam:
+rótulo sem símbolo, cabeçalho sem link, cartão "VER MAIS" de volta, barra de
+abas deitada de 63px.
+
+**Três coisas que precisam da palavra dele antes de eu mexer** (regra dele: "Se
+algo do desenho conflitar com o código existente, me pergunte em vez de
+improvisar"):
+- **Poeira estelar** — é a 4ª linha do cartão de números no desenho, e o app não
+  guarda esse número em lugar nenhum. Só ele pode dizer quanto tem, e pedir isso
+  seria campo novo no setup, que é do celular.
+- **Chip do hero** — no desenho o "✦ EVOLUIR" carrega a decisão e o botão é
+  neutro ("Ver a conta"); no app quem carrega é o botão ("Power up"). Pôr os
+  dois é dizer a mesma coisa duas vezes.
+- **Cor dos selos** — o desenho pinta por TIPO (Garchomp sai violeta porque
+  Dragão é violeta). O app pinta pela ESPÉCIE, e isso foi **pedido dele**: "mesmo
+  sem sprite… tem q aparecer a cor do pokemon", justamente porque o "MW" do
+  Mewtwo saía rosa. Igualar ao desenho desfaz o pedido — deixei como está.
 
 **Apagar quando ele disser que ficou igual.** Enquanto ele não disser, o pedido
 segue aberto — a régua é a dele, não a minha.
@@ -237,8 +263,13 @@ curl -s -X POST https://trainerkit-ia-gules.vercel.app/api/ai \
 
 4. **só então** apagar a `gsk_...CJlW` no console (lixeira vermelha na linha).
 
-Não precisa republicar o app — a chave vive só no servidor. Em 07/08/2026 ele
-disse "nao precisa apaga, deixa ai, dps eu faço", então isto fica aberto.
+Não precisa republicar o app — a chave vive só no servidor.
+
+**DECIDIDO POR ELE em 07/08/2026: fica como está.** Primeiro "nao precisa apaga,
+deixa ai, dps eu faço", depois, já sabendo que a chave em produção é a queimada:
+*"ta cara, fodase, deixa, eu quero q continue vazada. so continua"*. Avisei duas
+vezes, ele decidiu duas vezes — assunto encerrado, não levantar de novo. O passo
+a passo acima fica escrito só pro dia em que ele mudar de ideia.
 
 **Detalhe menor, pré-existente:** o build da API na Vercel cospe `TS2835` em
 `api/ai.ts:49` (import sem extensão). É de propósito — o comentário acima da

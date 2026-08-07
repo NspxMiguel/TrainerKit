@@ -59,6 +59,30 @@ interface Props {
   onGo: (tab: "pokedex", intent?: PokedexIntent) => void;
 }
 
+/**
+ * O simbolo que abre o veredito no cartao da tela larga.
+ *
+ * Vem do desenho, que traz o mapa pronto: `investir:'↑ INVESTIR'`,
+ * `evoluir:'✦ EVOLUIR'`, `guardar:'◆ GUARDAR'`, `transferir:'→ TRANSFERIR'`.
+ *
+ * ⚠️ SO ENFEITE, DE PROPOSITO. O simbolo vem SEMPRE acompanhado da palavra, e
+ * nunca no lugar dela — a mesma regra do "✓ FEITO" logo abaixo. Sozinho ele
+ * seria informacao por forma, e quem nao decora quatro glifos ficaria sem o
+ * veredito. Por isso tambem fica fora do `aria-label` do cartao: pra leitor de
+ * tela "seta pra cima investir" e ruido, nao reforco.
+ *
+ * ⚠️ O `descobrir` NAO EXISTE NO DESENHO — o mapa de la tem quatro entradas, e
+ * o app tem cinco acoes. O "?" e escolha minha, e e a escolha honesta: esse
+ * veredito e literalmente uma pergunta ("eu nao sei, me da o IV", como diz o
+ * comentario do `Action` no core), entao o simbolo diz o mesmo que a palavra.
+ */
+const ACTION_GLYPHS: Record<Action, string> = {
+  investir: "↑",
+  evoluir: "✦",
+  guardar: "◆",
+  transferir: "→",
+  descobrir: "?",
+};
 
 /**
  * O que a home mostra da colecao.
@@ -374,6 +398,22 @@ function Hero({
                   <path d="M4 12.5l5 5L20 6.5" />
                 </svg>
               )}
+              {/*
+                A PALAVRA so aparece na tela larga — o CSS a esconde no celular.
+
+                "Já fiz isso" e o rotulo do documento de desktop. O texto e o
+                MESMO do `aria-label` acima, de proposito: assim ele acompanha
+                os tres estados e os dez idiomas sem chave nova, e nao ha risco
+                de o botao dizer uma coisa pra quem ve e outra pra quem ouve.
+
+                `aria-hidden` porque o `aria-label` do botao ja anuncia este
+                texto; sem isso o leitor de tela leria a mesma frase duas vezes.
+              */}
+              <span className="tk-hero-feito-rot" aria-hidden="true">
+                {t(
+                  evolui ? "collection.evolved" : feito ? "collection.undoDone" : "collection.markDone",
+                )}
+              </span>
             </button>
           )}
         </div>
@@ -413,16 +453,21 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
      escolher "coleção" no setup ainda tem zero bichos. Ver `.tk-home-busca`. */
   const temColecao = colecao && (items?.length ?? 0) > 0;
   /*
-   * Cinco na tela larga, quatro no celular — e o "VER MAIS" continua sendo o
-   * ultimo dos dois jeitos.
+   * SEIS na tela larga, quatro no celular.
    *
-   * A grade do desktop tem seis colunas (documento). Cinco bichos mais o
-   * destino fecham a linha exata; quatro deixariam um buraco no fim e seis
-   * empurrariam o "VER MAIS" pra uma segunda linha sozinho, que e pior que o
-   * buraco. A regra dele continua valendo: "no lugar do 5 um ver mais".
+   * Era cinco mais o cartao "VER MAIS", pra fechar as seis colunas. O documento
+   * de desktop nao faz assim: ele poe SEIS bichos na grade e manda o destino
+   * pro cabecalho, como link ("Ver tudo na Pokédex →", a direita de "SUA
+   * COLEÇÃO"). Fecha a linha do mesmo jeito e devolve uma coluna a colecao —
+   * era um sexto do espaco gasto com um botao.
+   *
+   * ⚠️ NO CELULAR NAO MUDA NADA: la continuam quatro mais o "VER MAIS" no
+   * quinto lugar, que e a regra dele — "ao invez de uma faixa com scroll pro
+   * lado, coloca tipo, no lugar do 5 um ver mais". O cabecalho e estreito
+   * demais pra caber titulo e link na mesma linha.
    */
   const telaLarga = useTelaLarga();
-  const naFila = telaLarga ? 5 : NA_FILA;
+  const naFila = telaLarga ? 6 : NA_FILA;
   /* Só as canônicas, como a contagem do seletor da Pokédex — `cosmeticOf`
      marca variações de fantasia, que têm stats idênticos e ficam fora da
      busca. Contá-las daria um total que não bate com a lista. */
@@ -977,23 +1022,52 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
                   Quantos voce tem se conta na fila abaixo; o que precisa estar
                   escrito e o que COBRA algo de voce. */}
               <div className="tk-overline tk-overline--sec">
-                {t("home.yourCollection")}
-                {meus.agir.length > 0 && (
-                  <>
-                    {/* O separador fica FORA do destaque, e nao por estilo.
-                        Ele morava dentro, e saia "SUA COLEÇÃO· 4 PEDEM UMA
-                        DECISÃO", grudado. A causa nao esta aqui: uma regra la
-                        embaixo do CSS deu `display: inline-block` a este span
-                        pra poder anima-lo, e caixa inline-block COME o proprio
-                        espaco inicial. Fora dela o espaco e texto normal e
-                        sobrevive a qualquer regra de animacao futura. */}
-                    {" · "}
-                    <span className="tk-overline-hot">
-                      {meus.agir.length === 1
-                        ? t("home.needsDecision.one")
-                        : t("home.needsDecision.many", { count: meus.agir.length })}
-                    </span>
-                  </>
+                {/* Titulo e contador num grupo SO.
+                    Na tela larga este cabecalho vira `flex` pra encaixar o link
+                    a direita, e flex trata cada pedaco de texto solto como um
+                    item proprio: sem este `span`, o titulo, o "·" e o contador
+                    viravam tres itens e a caixa espalhava os tres pela linha
+                    inteira. Aqui dentro eles continuam sendo uma frase so. No
+                    celular e um `span` inline no meio do texto — nao muda nada. */}
+                <span className="tk-overline-sec-t">
+                  {t("home.yourCollection")}
+                  {meus.agir.length > 0 && (
+                    <>
+                      {/* O separador fica FORA do destaque, e nao por estilo.
+                          Ele morava dentro, e saia "SUA COLEÇÃO· 4 PEDEM UMA
+                          DECISÃO", grudado. A causa nao esta aqui: uma regra la
+                          embaixo do CSS deu `display: inline-block` a este span
+                          pra poder anima-lo, e caixa inline-block COME o proprio
+                          espaco inicial. Fora dela o espaco e texto normal e
+                          sobrevive a qualquer regra de animacao futura. */}
+                      {" · "}
+                      <span className="tk-overline-hot">
+                        {meus.agir.length === 1
+                          ? t("home.needsDecision.one")
+                          : t("home.needsDecision.many", { count: meus.agir.length })}
+                      </span>
+                    </>
+                  )}
+                </span>
+                {/*
+                  O DESTINO VIRA LINK NO CABECALHO — so na tela larga.
+
+                  "Ver tudo na Pokédex →", a direita do titulo, e o que o
+                  documento de desktop desenha; no celular ele continua sendo o
+                  cartao no fim da fila (ver a nota do `naFila`). Reaproveita a
+                  chave `home.seeAll` que o cartao ja usava, entao os dez
+                  idiomas vem juntos sem chave nova — a unica diferenca pro
+                  documento e nao repetir "na Pokédex", que a seta e o contexto
+                  ja dizem.
+                */}
+                {telaLarga && meus.porIv.length > naFila && (
+                  <button
+                    type="button"
+                    className="tk-overline-verdex"
+                    onClick={() => onGo("pokedex", { view: "mine" })}
+                  >
+                    {t("home.seeAll")} →
+                  </button>
                 )}
               </div>
 
@@ -1085,8 +1159,18 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
                         falha que o rotulo do veredito existe pra corrigir. Com
                         a palavra junto, quem enxerga mal cor le "FEITO" e quem
                         bate o olho ve o visto.
+
+                        O simbolo do veredito (`ACTION_GLYPHS`) entra pela mesma
+                        porta e com a mesma regra — e por isso `telaLarga`: no
+                        celular esta caixa e um rotulo estreito debaixo do anel,
+                        onde "↑ INVESTIR" so tira letra da palavra. O desenho
+                        pede o simbolo no CARTAO, e cartao so existe aqui.
                       */}
-                      {d.feito ? `✓ ${t("collection.done")}` : t(ACTION_KEYS[d.verdict.action] as Key)}
+                      {d.feito
+                        ? `✓ ${t("collection.done")}`
+                        : telaLarga
+                          ? `${ACTION_GLYPHS[d.verdict.action]} ${t(ACTION_KEYS[d.verdict.action] as Key)}`
+                          : t(ACTION_KEYS[d.verdict.action] as Key)}
                     </span>
                   </button>
                 ))}
@@ -1106,7 +1190,10 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
                   Pokemon na colecao ele aparecia mesmo assim, prometendo uma
                   lista que era a mesma que ja estava na tela.
                 */}
-                {meus.porIv.length > naFila && (
+                {/* `!telaLarga`: na tela larga o destino subiu pro cabecalho da
+                    secao (ver a nota do link ali em cima), e manter o cartao
+                    aqui embaixo seria o mesmo botao duas vezes na mesma tela. */}
+                {!telaLarga && meus.porIv.length > naFila && (
                 <button
                   type="button"
                   className="tk-strip-cell tk-strip-cell--mais"
