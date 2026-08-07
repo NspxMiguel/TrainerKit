@@ -8,6 +8,8 @@ export const PT_BR: Dict = {
   "nav.aria": "Navegação principal",
   "side.tools": "FERRAMENTAS",
   "side.calc": "Calculadora de IV",
+  "side.raid": "Raide",
+  "side.team": "Montar time",
   "side.offline": "MODO OFFLINE",
   "side.offlineBody": "Tudo baixado. O app funciona sem internet.",
 

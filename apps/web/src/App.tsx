@@ -278,11 +278,11 @@ export function App() {
             </button>
             <button type="button" className="tk-side-tool" onClick={() => abrirFerramenta("raide")}>
               <IconShield size={17} />
-              <span>{t("raid.title")}</span>
+              <span>{t("side.raid")}</span>
             </button>
             <button type="button" className="tk-side-tool" onClick={() => abrirFerramenta("time")}>
               <IconSwords size={17} />
-              <span>{t("team.title")}</span>
+              <span>{t("side.team")}</span>
             </button>
           </div>
 

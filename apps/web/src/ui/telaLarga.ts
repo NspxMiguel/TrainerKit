@@ -32,11 +32,29 @@ import { useSyncExternalStore } from "react";
  */
 const CONSULTA = "(min-width: 900px)";
 
+/**
+ * ⚠️ ESCUTA `resize` TAMBEM, e nao so o `change` da media query.
+ *
+ * O `change` e o sinal certo e e o barato — dispara uma vez, na virada. Mas ele
+ * NAO chegou numa das medicoes: redimensionei de 1440 pra 390 com o app aberto,
+ * `matchMedia(...).matches` ja respondia `false`, e a Pokedex continuou em duas
+ * colunas porque o React nunca foi avisado. Em carga limpa o mesmo tamanho
+ * renderiza certo, entao nao e erro de conta — e o evento que nao veio.
+ *
+ * Nao vou apostar o layout num evento que ja falhou na minha frente. O `resize`
+ * e redundante de proposito: quando os dois vem, `useSyncExternalStore` compara
+ * o resultado de `ler()` e ignora o segundo — nao ha re-render duplicado,
+ * porque o valor nao mudou.
+ */
 function inscrever(fn: () => void): () => void {
   if (typeof matchMedia !== "function") return () => {};
   const mq = matchMedia(CONSULTA);
   mq.addEventListener("change", fn);
-  return () => mq.removeEventListener("change", fn);
+  addEventListener("resize", fn);
+  return () => {
+    mq.removeEventListener("change", fn);
+    removeEventListener("resize", fn);
+  };
 }
 
 function ler(): boolean {

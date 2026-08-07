@@ -541,6 +541,19 @@ export function SpeciesDetail({
         disso chegava aos olhos. E a tese do produto inteiro: "decide, e aceita
         ser conferido".
       */}
+      {/*
+        ⚠️ O EMBRULHO EXISTE SO PRO DESKTOP, e nao reordena nada.
+
+        No documento de desktop a ficha divide a primeira faixa em duas: o
+        veredito (com a barra de confianca e o rastro) a esquerda, e as acoes a
+        direita. Este `<div>` e o unico jeito de dizer isso ao CSS sem mexer na
+        ORDEM do JSX — e a ordem tem que ficar como esta, porque ela e a mesma
+        no celular e e ela que o teclado e o leitor de tela seguem.
+
+        No celular ele e transparente: `display: contents`, entao os filhos
+        continuam sendo filhos diretos da ficha e nenhuma regra existente muda.
+      */}
+      <div className="tk-ficha-topo">
       {salvo && (
         <VerdictCard
           owned={salvo}
@@ -661,6 +674,7 @@ export function SpeciesDetail({
           {confirmandoTirar ? t("collection.removeSure") : t("collection.remove")}
         </button>
       )}
+      </div>
 
 
       {/*

@@ -6,7 +6,7 @@ import { useLanguage } from "../i18n/language.ts";
 import { useT } from "../i18n/t.ts";
 import { useCollection } from "../storage/collection.ts";
 import { detectPlatform } from "../storage/install.ts";
-import { IconGrid, IconList } from "../ui/Icons.tsx";
+import { IconGrid, IconList, IconSearch } from "../ui/Icons.tsx";
 import { setEmGrade, useEmGrade } from "../ui/vistaColecao.ts";
 import { SpeciesBrowser, type SortId } from "../ui/SpeciesBrowser.tsx";
 import { useSetup } from "../onboarding/setup.ts";
@@ -44,6 +44,9 @@ export function PokedexScreen({ dataset, intent }: Props) {
    * inteira em `ui/telaLarga.ts`.
    */
   const telaLarga = useTelaLarga();
+  /* A busca sobe pro cabecalho na tela larga — ver a nota da prop `busca` no
+     `SpeciesBrowser`. No celular ela continua morando la dentro. */
+  const [busca, setBusca] = useState("");
 
   /*
    * A raiz precisa saber que a ficha virou coluna.
@@ -302,6 +305,7 @@ export function PokedexScreen({ dataset, intent }: Props) {
         <SpeciesBrowser
           data={dataset.data}
           onPick={setSelected}
+          {...(telaLarga ? { busca, onBusca: setBusca } : {})}
           {...(intent?.view === "best"
             ? { initialSort: (intent.mode === "raid" ? "raid" : "great") as SortId }
             : {})}
@@ -361,7 +365,26 @@ export function PokedexScreen({ dataset, intent }: Props) {
 
   return (
     <div className="tk-dex-split" data-aberta={selected ? "" : undefined}>
-      <div className="tk-dex-topo">{cabecalho}</div>
+      <div className="tk-dex-topo">
+        {cabecalho}
+        {/* O campo do documento: pilula de 42px com a lupa. So aparece em
+            "Todos" — em "Meus" quem lista e a `CollectionScreen`, que tem a
+            propria busca. */}
+        {!meus && (
+          <div className="tk-search tk-dex-busca">
+            <IconSearch size={16} />
+            <input
+              type="search"
+              inputMode="search"
+              autoComplete="off"
+              placeholder={t("pokedex.searchPlaceholder")}
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              aria-label={t("pokedex.search")}
+            />
+          </div>
+        )}
+      </div>
       <div className="tk-dex-lista">{lista}</div>
       {selected && (
         <aside className="tk-dex-ficha">

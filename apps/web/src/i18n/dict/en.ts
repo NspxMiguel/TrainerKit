@@ -18,6 +18,8 @@ const EN = {
   "nav.aria": "Main navigation",
   "side.tools": "TOOLS",
   "side.calc": "IV calculator",
+  "side.raid": "Raid",
+  "side.team": "Build a team",
   "side.offline": "OFFLINE MODE",
   "side.offlineBody": "Everything downloaded. The app works without internet.",
 

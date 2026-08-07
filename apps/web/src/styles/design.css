@@ -5359,9 +5359,18 @@
    * Enquanto ela nao subir pra ca, o seletor fica no tamanho dele e a linha
    * termina onde o conteudo termina, em vez de fingir que ha algo a direita.
    */
-  .tk-dex-topo > *:last-child {
+  /* O seletor fica no tamanho dele; quem come a sobra e a busca, como no
+     documento ("Todos · 1.182 / Meus · 247" e o campo ao lado). */
+  .tk-dex-topo > div:not(.tk-dex-busca) {
     flex: 0 1 auto;
     max-width: 420px;
+  }
+
+  .tk-dex-busca {
+    flex: 1;
+    min-width: 220px;
+    max-width: 380px;
+    margin: 0;
   }
 
   /*
@@ -5405,10 +5414,45 @@
     max-width: none;
   }
 
-  .tk-ficha-coluna > *:not(.tk-hero) {
+  .tk-ficha-coluna > *:not(.tk-hero):not(.tk-ficha-topo) {
     padding-inline: 32px;
   }
 
+  /*
+   * ⚠️ A PRIMEIRA FAIXA DA FICHA EM DUAS COLUNAS.
+   *
+   * No documento: veredito (com confianca e rastro) a esquerda, acoes a
+   * direita. Quem divide e o `.tk-ficha-topo`, um embrulho que so existe pra
+   * isso — a ORDEM do JSX nao mudou, porque ela e a mesma do celular e e ela
+   * que o teclado e o leitor de tela seguem.
+   *
+   * ⚠️ NAO USEI `columns` do CSS. Ele corta o conteudo onde a altura acabar,
+   * entao o cartao do veredito poderia comecar numa coluna e terminar na outra.
+   *
+   * O resto da ficha (stats, ataques, ligas, evolucao) continua em coluna
+   * unica: sao pares "titulo + cartao" soltos, e parti-los em duas colunas
+   * separaria titulo de conteudo na virada.
+   */
+  .tk-ficha-topo {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+    align-items: start;
+    gap: 12px 20px;
+    padding-inline: 32px;
+  }
+
+  /* O cartao do veredito ocupa a esquerda inteira; os botoes empilham na
+     direita, cada um na sua linha. */
+  .tk-ficha-topo > .tk-card {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    margin: 0;
+  }
+
+  .tk-ficha-topo > .tk-btn {
+    grid-column: 2;
+    margin: 0;
+  }
   /*
    * ⚠️ A BOLHA DA IA E FILHA DO `<body>`, e por isso a ancora vem da RAIZ.
    *

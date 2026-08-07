@@ -24,6 +24,19 @@ interface Props {
    * de um fluxo de duas etapas.
    */
   simple?: boolean;
+  /**
+   * A busca mora FORA, e este componente so obedece.
+   *
+   * Na tela larga o documento de desktop poe titulo, seletor e busca numa barra
+   * horizontal acima das duas colunas — e o campo nao pode viver aqui dentro,
+   * que e a coluna da esquerda. Quando `busca` vem preenchido, este componente
+   * para de desenhar o proprio campo e le o de fora.
+   *
+   * Sem os dois, tudo continua exatamente como era: campo proprio, estado
+   * proprio. E o caminho do celular, e ele nao muda.
+   */
+  busca?: string | undefined;
+  onBusca?: ((v: string) => void) | undefined;
 }
 
 /** Quantos resultados desenhar de uma vez. 1.182 tiles juntos travam o scroll. */
@@ -96,8 +109,22 @@ const SORT_WHY: Record<SortId, Key> = {
  * lista que se reordena: a mesma pergunta ("qual Pokemon?") com a resposta
  * ordenada pelo que importa naquele momento.
  */
-export function SpeciesBrowser({ data, onPick, initialSort = "dex", simple = false }: Props) {
-  const [query, setQuery] = useState("");
+export function SpeciesBrowser({
+  data,
+  onPick,
+  initialSort = "dex",
+  simple = false,
+  busca,
+  onBusca,
+}: Props) {
+  const [queryInterna, setQueryInterna] = useState("");
+  /* Controlado por fora quando `onBusca` existe; senao, estado proprio. */
+  const controlado = onBusca !== undefined;
+  const query = controlado ? (busca ?? "") : queryInterna;
+  const setQuery = (v: string) => {
+    if (controlado) onBusca(v);
+    else setQueryInterna(v);
+  };
   const [limit, setLimit] = useState(PAGE);
   const [sort, setSort] = useState<SortId>(initialSort);
   const [tipo, setTipo] = useState<string | null>(null);
@@ -254,7 +281,12 @@ export function SpeciesBrowser({ data, onPick, initialSort = "dex", simple = fal
         Charizard" com um filtro de tipo esquecido é pior que o painel grande.
       */}
       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-        <div className="tk-search" style={{ flex: 1, minWidth: 0 }}>
+        {/* Com a busca la em cima, o campo daqui nao existe — mas o botao de
+            filtro fica, porque ele e da LISTA e nao do cabecalho. */}
+        <div
+          className="tk-search"
+          style={{ flex: 1, minWidth: 0, display: controlado ? "none" : undefined }}
+        >
           <IconSearch size={18} />
           <input
             type="search"

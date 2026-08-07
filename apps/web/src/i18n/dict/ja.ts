@@ -8,6 +8,8 @@ export const JA: Dict = {
   "nav.aria": "メインナビゲーション",
   "side.tools": "ツール",
   "side.calc": "IV計算",
+  "side.raid": "レイド",
+  "side.team": "チームを組む",
   "side.offline": "オフラインモード",
   "side.offlineBody": "すべてダウンロード済み。ネットなしで動きます。",
   "common.back": "戻る",
