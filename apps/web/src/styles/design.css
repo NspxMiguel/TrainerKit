@@ -6682,3 +6682,57 @@
     animation: tk-pulso 1.6s ease-in-out infinite;
   }
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TRANSIÇÃO 1 · ABRIR A FICHA — elemento compartilhado
+   ═══════════════════════════════════════════════════════════════════════════
+
+   "O tile do tipo cresce e vira o cabeçalho — nada de tela nova aparecendo do
+   nada. 440ms, a lista some em 300ms."
+
+   ⚠️ O DESTINO É REGRA DE CSS; A ORIGEM É JS. E os dois lados têm razões
+   diferentes pra isso.
+
+   `view-transition-name` precisa ser ÚNICO no documento no instante da captura.
+   No destino isso é grátis: só existe uma ficha aberta por vez, então uma regra
+   fixa nunca duplica. Na origem não dá — a lista tem 1.182 células, e marcar
+   todas faria o navegador desistir da transição inteira, sem avisar. Por isso a
+   origem recebe o nome só no clique, e o `ui/transicao.ts` o remove no fim.
+
+   ⚠️ E É O HERO, e não a folha inteira. O documento mostra o quadrado do tipo
+   virando a faixa do topo; dar o nome à folha faria a tela inteira inflar a
+   partir de um tile de 72px, que é outra animação — e uma feia.
+*/
+.tk-sheet-full > .tk-hero,
+.tk-ficha-coluna > .tk-hero {
+  view-transition-name: tk-especie;
+}
+
+::view-transition-group(tk-especie) {
+  animation-duration: var(--tk-dur-sheet);
+  animation-timing-function: var(--tk-ease-out);
+}
+
+/* O resto da tela troca em 300ms, como o documento pede — mais rápido que o
+   elemento que viaja, pra que ele seja o assunto e não o pano de fundo. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--tk-dur-base);
+  animation-timing-function: var(--tk-ease-out);
+}
+
+/*
+ * ⚠️ `prefers-reduced-motion` DESLIGA A TRANSIÇÃO INTEIRA aqui.
+ *
+ * Nas outras eu mantive a opacidade, porque cortar tudo deixaria o app sem
+ * resposta. Esta é diferente: ela existe só pra explicar de onde a ficha veio,
+ * e quem pediu menos movimento não perde informação nenhuma sem ela — a ficha
+ * abre, que é o que importa.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .tk-sheet-full > .tk-hero,
+  .tk-ficha-coluna > .tk-hero {
+    view-transition-name: none;
+  }
+}
