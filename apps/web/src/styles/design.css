@@ -5175,6 +5175,169 @@
     align-self: stretch;
   }
 
+  /* ── HERO COMPACTO ───────────────────────────────────────────────────────
+     O hero do documento de desktop: cartao de superficie NEUTRA com um brilho
+     violeta no canto, tile de 74px com o gradiente do tipo, e ao lado o nome,
+     o veredito e a frase. Nada de arte ocupando a altura toda.
+
+     ⚠️ ISTO DESFAZ, NO PC, UMA COISA QUE ELE PEDIU.
+
+     O hero grande nasceu de "ficou sem graça / sem cara de Pokémon" e "tudo com
+     o mesmo peso" — ver a nota do componente `Hero`. Ele continua valendo no
+     CELULAR, onde a primeira tela e uma coluna so e o Pokemon precisa dominar.
+     Na tela larga o destaque divide a linha com o cartao de numeros, e um
+     retrato de 320px ao lado de tres linhas de texto desequilibra a linha
+     inteira — que e o que o documento resolve encolhendo o bicho.
+
+     Ele pediu "mockup" olhando os dois lado a lado. Fica registrado que a
+     escolha anterior era dele tambem, pra quem ler isto daqui a seis meses nao
+     achar que alguem simplesmente ignorou o pedido antigo. */
+  .tk-home-linha1 > .tk-hero {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 18px;
+    padding: 26px;
+    min-height: 0;
+    background: var(--tk-surf);
+    border: 1px solid var(--tk-line);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+
+  /* O brilho violeta do canto, no lugar do degrade de tela cheia. */
+  .tk-home-linha1 > .tk-hero > .tk-hero-brilho {
+    top: -40px;
+    right: -40px;
+    left: auto;
+    bottom: auto;
+    width: 280px;
+    height: 220px;
+    background: radial-gradient(closest-side, rgba(124, 92, 255, 0.2), transparent);
+    filter: none;
+  }
+
+  /*
+   * A arte vira TILE de 74px, e o gradiente do tipo vem com ela.
+   *
+   * `--tk-hero-grad` ja esta no elemento (o React escreve a paleta da especie
+   * ali); antes ele pintava o cartao inteiro. Aqui ele pinta so o tile, que e
+   * exatamente o que o documento desenha.
+   */
+  .tk-home-linha1 > .tk-hero > .tk-hero-art {
+    position: relative;
+    inset: auto;
+    flex: none;
+    width: 74px;
+    height: 74px;
+    border-radius: 22px;
+    overflow: hidden;
+    /*
+     * ⚠️ `--tk-hero-grad` GUARDA SO AS PARADAS, e nao o gradiente inteiro.
+     *
+     * O valor e `#28483c 0%, #588d7a 48%, #46a280 72%`. Escrevi
+     * `background: var(--tk-hero-grad)` e o resultado foi background NENHUM —
+     * declaracao invalida e descartada calada, sem erro em lugar nenhum. Quem
+     * monta o gradiente e sempre quem usa; ver os outros usos no arquivo.
+     *
+     * `135deg` e o angulo que o documento usa nos tiles ("linear-gradient(135deg,
+     * p1, p2 55%, p3)"); o hero de tela cheia usa 180.
+     */
+    background: linear-gradient(135deg, var(--tk-hero-grad));
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    display: grid;
+    place-items: center;
+    margin: 0;
+    transform: none;
+  }
+
+  /*
+   * ⚠️ AQUI NAO SE MEXE EM `width` NEM EM `font-size`. Quem manda e o inline.
+   *
+   * `SpeciesTile` escreve os dois a partir da prop `size`, e a prop ja recebe
+   * 74 na tela larga (ver `HomeScreen`). Eu tinha escrito uma regra pra forcar
+   * o tamanho e ela fez o oposto:
+   *
+   *   `font: 800 22px/1 var(--tk-mono-font, var(--tk-font))`
+   *
+   * `--tk-mono-font` nao existe. Declaracao com `var()` so e validada na hora
+   * de computar, e quando a substituicao falha a propriedade inteira nao cai
+   * pro valor escrito — cai pro HERDADO. O herdado do `.tk-hero-art` era o
+   * monograma gigante, entao o "22px" virou 62,9px e o `width: 100%` foi junto:
+   * o monograma media 86px dentro de um tile de 74 e vazava pela borda.
+   *
+   * Erro meu duas vezes seguidas na mesma tela, das duas por escrever CSS
+   * contra um valor que o React ja tinha escrito certo.
+   */
+  .tk-home-linha1 > .tk-hero > .tk-hero-art .tk-mono--bare {
+    display: grid;
+    place-items: center;
+  }
+
+  /*
+   * ⚠️ O TETO DO MONOGRAMA, e o `!important` aqui e obrigatorio.
+   *
+   * A regra do hero grande e `font-size: min(85cqh, 190px) !important` — e ela
+   * NAO esta errada: ela dimensiona a letra pela altura do contentor, pra que o
+   * "VE" ocupe o hero quando nao ha sprite. O que mudou foi o contentor: num
+   * tile de 74px, 85cqh dao exatamente os 62,9px que eu vi vazando pela borda.
+   *
+   * Entao o conserto nao e desligar a formula — e baixar o TETO dela. `26px` e
+   * o limite pro tile compacto; o `85cqh` continua mandando em telas menores, e
+   * uma letra de 26px num quadrado de 74 e a proporcao que o documento desenha.
+   *
+   * `!important` porque so ele vence outro `!important`. Nao ha caminho sem, a
+   * nao ser reescrever a regra do hero grande — que continua certa pro celular.
+   */
+  .tk-home-linha1 > .tk-hero > .tk-hero-art[data-sem-imagem] .tk-mono {
+    font-size: min(85cqh, 26px) !important;
+    letter-spacing: -0.02em;
+  }
+
+  /* O chao e o scrim eram da arte grande: num tile de 74px nao ha o que
+     aterrar nem o que escurecer. */
+  .tk-home-linha1 > .tk-hero > .tk-hero-art .tk-hero-chao,
+  .tk-home-linha1 > .tk-hero > .tk-hero-scrim {
+    display: none;
+  }
+
+  .tk-home-linha1 > .tk-hero > .tk-hero-base {
+    /* O degrade de escurecimento vinha da versao de tela cheia, onde o texto
+       pousava EM CIMA da arte. Aqui ele pousa num cartao liso, e o degrade
+       virava um retangulo escuro solto atras das letras. */
+    background: none;
+    position: relative;
+    inset: auto;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 0;
+    text-align: left;
+  }
+
+  .tk-home-linha1 > .tk-hero .tk-hero-name {
+    font: 700 24px/1.15 var(--tk-font);
+    letter-spacing: -0.01em;
+  }
+
+  .tk-home-linha1 > .tk-hero .tk-hero-frase {
+    font: 400 15px/1.5 var(--tk-font);
+    color: var(--tk-txt2);
+    max-width: 560px;
+    margin: 2px 0 0;
+  }
+
+  /* Os botoes ficam lado a lado e do TAMANHO deles — no celular eram largos
+     porque a coluna era estreita. */
+  .tk-home-linha1 > .tk-hero .tk-hero-acoes {
+    margin-top: 10px;
+    justify-content: flex-start;
+  }
+
   /* ── INICIO EM DUAS COLUNAS ──────────────────────────────────────────────
      "hero maior e coleção em grade", com o cartao de numeros ao lado, em
      `1.3fr 1fr` — a proporcao do documento de desktop. */
