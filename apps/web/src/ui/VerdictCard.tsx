@@ -142,13 +142,22 @@ export function VerdictCard({ owned, ...props }: Props) {
     <section className="tk-card" style={{ borderColor: color }}>
       <div className="tk-overline">{t("verdict.title")}</div>
 
+      {/*
+        A PALAVRA ganhou classe, e a razao e a animacao-assinatura.
+        
+        "as três regras voam pro centro e colapsam na palavra do veredito, que
+        assenta com overshoot mínimo; a confiança preenche depois. É o único
+        momento teatral do app, e é o certo: é a tese do produto virando
+        movimento."
+        
+        A `key` remonta o no quando o veredito MUDA — sem ela, evoluir um
+        Pokemon trocaria a palavra sem nenhum movimento, e a assinatura so
+        tocaria uma vez por sessao.
+      */}
       <div
-        style={{
-          font: "800 26px/1.1 var(--tk-font)",
-          letterSpacing: "-0.02em",
-          color,
-          margin: "8px 0 6px",
-        }}
+        key={verdict.action}
+        className="tk-veredito-palavra"
+        style={{ color }}
       >
         {t(ACTION_KEYS[verdict.action] as Key)}
       </div>
@@ -294,8 +303,15 @@ export function VerdictCard({ owned, ...props }: Props) {
       */}
       {traceOpen && (
         <div style={{ display: "grid", gap: 10, marginTop: 12 }}>
-          {verdict.signals.map((s) => (
-            <div key={s.rule} className="tk-trace-linha">
+          {verdict.signals.map((s, i) => (
+            <div
+              key={s.rule}
+              className="tk-trace-linha"
+              /* Cascata de 40ms por regra, o maximo do handoff ("stagger
+                 24–40ms, máx. 6 itens"). Sao tres regras, entao o ultimo
+                 chega em 80ms — rapido o bastante pra nao virar espera. */
+              style={{ ["--tk-i" as string]: i }}
+            >
               <span className="tk-trace-bolha" style={{ background: TONE[s.towards] }} aria-hidden="true" />
               <span>
                 <span className="tk-trace-porque">{tm(s.because)}</span>
