@@ -12,12 +12,18 @@
  *
  *   1. REVOGUE a chave que voce colou no chat. Ela esta num transcript e deve ser
  *      considerada vazada. Gere outra em console.groq.com/keys.
- *   2. Na Vercel, no projeto: Settings → Environment Variables →
- *      `GROQ_API_KEY` = a chave NOVA. Marque as tres (Production, Preview,
- *      Development). Nunca commite esse valor.
- *   3. No build do app, defina `VITE_TK_AI_PROXY` com a URL desta funcao
- *      (ex.: `https://trainerkit.vercel.app/api/ai`). Sem essa variavel o app
- *      simplesmente nao oferece a opcao compartilhada — nada quebra.
+ *   2. Na Vercel, no projeto `trainerkit-ia` (NAO no `trainerkit`, que e o app):
+ *      Settings → Environment Variables → `GROQ_API_KEY` = a chave NOVA. Marque
+ *      as tres (Production, Preview, Development). Nunca commite esse valor.
+ *      Pela linha de comando, que nao imprime o valor em lugar nenhum:
+ *          vercel link --project trainerkit-ia --yes
+ *          vercel env add GROQ_API_KEY production
+ *   3. No build do app, defina `VITE_TK_AI_PROXY` com a URL desta funcao. O
+ *      `publicar.sh` ja faz isso — hoje com
+ *      `https://trainerkit-ia-gules.vercel.app/api/ai`, que e o endereco
+ *      PUBLICO do projeto (o `-nspx` responde 401 atras da Deployment
+ *      Protection). Sem essa variavel o app simplesmente nao oferece a opcao
+ *      compartilhada — nada quebra.
  *
  * O QUE ESTA FUNCAO PROTEGE, e o que ela nao protege:
  *
