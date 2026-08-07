@@ -32,7 +32,7 @@ import type { PersistState } from "../storage/persist.ts";
 import { formatBytes } from "../storage/tamanho.ts";
 import { DidYouKnow } from "../ui/DidYouKnow.tsx";
 import { Esqueleto, Offline, Vazio } from "../ui/Estados.tsx";
-import { IconAlert, IconCamera, IconShield, IconSwords } from "../ui/Icons.tsx";
+import { IconAlert, IconCamera, IconSearch, IconShield, IconSwords } from "../ui/Icons.tsx";
 import { InstallBanner } from "../ui/InstallBanner.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 import { enquadrar, usarPaleta } from "../ui/paleta.ts";
@@ -409,6 +409,9 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
   const ready = dataset.status === "ready";
   const data = ready ? dataset.data : null;
   const colecao = setup.mode === "colecao";
+  /* "Ha coleção pra buscar?" — o modo sozinho nao responde: quem acabou de
+     escolher "coleção" no setup ainda tem zero bichos. Ver `.tk-home-busca`. */
+  const temColecao = colecao && (items?.length ?? 0) > 0;
   /*
    * Cinco na tela larga, quatro no celular — e o "VER MAIS" continua sendo o
    * ultimo dos dois jeitos.
@@ -681,6 +684,53 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
               }`}
           </p>
         </div>
+        {/*
+          A BUSCA DA HOME NAO BUSCA NA HOME — ela leva pra lista, com o termo.
+
+          "Buscar na coleção", canto direito do cabecalho, no documento de
+          desktop. A home nao tem lista pra filtrar: o que ela tem e um
+          destaque, uma fila de seis e uns numeros. Um campo que filtrasse
+          "aqui" nao teria o que filtrar.
+
+          Entao ele e uma PORTA. Digitou a primeira letra, a Pokedex abre ja com
+          o termo e com o cursor no campo de la — o resto do que a pessoa esta
+          digitando cai no lugar certo, sem ela perceber a troca. E a mesma
+          ideia do `PokedexIntent`: o atalho chega onde o texto dele promete.
+
+          ⚠️ O DESTINO SEGUE O QUE EXISTE, e por isso o rotulo tambem muda.
+          Sem colecao (modo consulta, ou colecao vazia) nao ha "coleção" pra
+          buscar; mandar pra "Meus" entregaria uma lista vazia e um campo
+          preenchido, que e a falha que o comentario do `mine` descreve. Nesse
+          caso o campo diz "Buscar Pokémon" e vai pra "Todos".
+
+          ⚠️ QUEM ESCONDE NO CELULAR E O CSS — ver `.tk-home-busca`. La embaixo
+          a aba Pokedex fica a um toque de distancia na barra, e o campo so
+          roubaria altura da primeira dobra ("favor sem scroll na tela de
+          inicio").
+        */}
+        <form
+          className="tk-search tk-home-busca"
+          role="search"
+          onSubmit={(e) => e.preventDefault()}
+        >
+          <IconSearch size={15} />
+          <input
+            type="search"
+            inputMode="search"
+            autoComplete="off"
+            placeholder={t(temColecao ? "home.search" : "home.searchAll")}
+            aria-label={t(temColecao ? "home.search" : "home.searchAll")}
+            onChange={(e) => {
+              const termo = e.target.value;
+              if (termo) {
+                onGo("pokedex", {
+                  view: temColecao ? "mine" : "browse",
+                  busca: termo,
+                });
+              }
+            }}
+          />
+        </form>
         {/*
           O avatar abre a TROCA DE CONTA, e nao mais a lista "Meus".
 

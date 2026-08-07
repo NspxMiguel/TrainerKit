@@ -50,7 +50,7 @@ export type Tab = "inicio" | "pokedex" | "ajustes";
  * prometeu. Levar junto a intenção é o que faz o atalho chegar onde diz.
  */
 export type PokedexIntent =
-  | { view: "browse" }
+  | { view: "browse"; busca?: string }
   | { view: "best"; mode: "raid" | "pvp" }
   /**
    * "os MEUS", nao a especie.
@@ -60,7 +60,7 @@ export type PokedexIntent =
    * em lugar nenhum. Era a mesma falha dos atalhos antigos: o botao prometia um
    * destino e a navegacao entregava outro, porque so o nome da aba viajava.
    */
-  | { view: "mine" };
+  | { view: "mine"; busca?: string };
 
 const TABS: ReadonlyArray<{
   id: Tab;

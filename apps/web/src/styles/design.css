@@ -1704,6 +1704,24 @@
   flex: none;
 }
 
+/*
+ * A busca da home NAO EXISTE no celular.
+ *
+ * "favor sem scroll na tela de inicio": a coluna reparte a altura entre a
+ * saudacao, o hero e a fila, e o hero e o unico elastico — cada pixel que um
+ * campo de 48px ocupasse aqui sairia direto do Pokemon. E a troca seria ruim
+ * duas vezes, porque no celular a aba Pokedex esta a UM toque na barra de
+ * baixo, com a busca dela ja no lugar.
+ *
+ * Na tela larga a sobra e horizontal e nao vertical: o campo ocupa o vazio a
+ * direita da saudacao, que hoje nao serve pra nada. Por isso ele nasce
+ * escondido e so a media query de 900px o acende — a mesma regra da linha da
+ * data logo acima.
+ */
+.tk-home-busca {
+  display: none;
+}
+
 .tk-saudacao {
   /*
    * ⚠️ UMA LINHA, com o corpo se ajustando a largura da tela.
@@ -5424,6 +5442,35 @@
     margin: 4px 0 0;
     font: 400 13.5px/1.4 var(--tk-font);
     color: var(--tk-txt2);
+  }
+
+  /*
+   * O campo do documento de desktop: pilula de 42px, 280 de largura, no canto
+   * direito do cabecalho.
+   *
+   * `flex: none` porque ele TEM um tamanho — sem isso o `justify-content:
+   * space-between` do `.tk-home-topo` o esticaria ate encostar na saudacao em
+   * telas de 1920, e uma barra de busca de 900px de largura na home nao e o que
+   * o documento desenha nem o que alguem precisa.
+   */
+  .tk-home-busca {
+    display: flex;
+    flex: none;
+    width: 280px;
+    height: 42px;
+    border-radius: 999px;
+    /* Alinha com a PRIMEIRA linha do bloco de texto (a saudacao), e nao com o
+       centro do conjunto saudacao+data — o documento poe os dois na mesma
+       linha de base. */
+    align-self: flex-start;
+    margin-top: 2px;
+  }
+
+  /* 14px e o tamanho do documento. O 16px da base existe pra impedir o zoom
+     automatico do Safari ao focar um campo, que e comportamento de celular — e
+     este campo nao existe no celular. */
+  .tk-home-busca input {
+    font-size: 14px;
   }
 
   /*
