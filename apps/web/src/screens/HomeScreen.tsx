@@ -1,6 +1,7 @@
 import { useMemo, useState, type CSSProperties } from "react";
 
 import { useTelaLarga } from "../ui/telaLarga.ts";
+import { PEDEM_ACAO } from "../storage/pendencias.ts";
 
 import {
   ACOES_QUE_COBRAM,
@@ -67,20 +68,15 @@ interface Props {
  * e o veredito de quem nao precisa fazer nada, e portanto nao merece espaco na
  * primeira tela.
  *
- * `descobrir` vem PRIMEIRO, e a ordem aqui e a ordem da fila. Enquanto o IV nao
- * for medido, nenhum dos outros vereditos daquele Pokemon vale — e escanear um
- * print custa menos que qualquer uma das outras tres acoes.
+ * ⚠️ A LISTA `PEDEM_ACAO` MUDOU DE ENDERECO: ela agora mora em
+ * `storage/pendencias.ts`, e esta tela a IMPORTA.
  *
- * ⚠️ A LISTA E A MESMA DO CORE, so reordenada. Ela era um literal aqui e o
- * cartao de veredito nao consultava lista nenhuma — foi assim que o botao
- * "Discordo" acabou aparecendo num "Guardar", oferecendo silenciar uma cobranca
- * que esta lista ja dizia que nao existe. Duas telas com a mesma regra escrita
- * em dois lugares divergem; ja divergiram antes, neste mesmo app.
+ * O motivo e o mesmo que a nota antiga ja dava — "duas telas com a mesma regra
+ * escrita em dois lugares divergem; ja divergiram antes, neste mesmo app". O
+ * selo da barra lateral precisava do mesmo criterio, e copiar o filtro pra la
+ * teria criado exatamente a divergencia que a nota previa: o selo dizendo 4 e a
+ * fila mostrando 3.
  */
-const PEDEM_ACAO: readonly Action[] = [
-  "descobrir",
-  ...ACOES_QUE_COBRAM.filter((a) => a !== "descobrir"),
-];
 
 /**
  * Quantos Pokemon aparecem na fila. O quinto lugar e sempre o "VER MAIS".

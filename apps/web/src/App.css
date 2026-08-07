@@ -1705,6 +1705,7 @@
    Existem no DOM sempre e aparecem só na tela larga — ver a nota longa em
    `App.tsx`: "não duplique lógica; é a mesma tela reagindo ao espaço".
    `display: none` também tira do leitor de tela, que é o que importa aqui. */
+.tk-tab-selo,
 .tk-strip-nome,
 .tk-side-marca,
 .tk-side-tools,
@@ -1726,6 +1727,10 @@
 
   .tk-side-marca {
     display: flex;
+  }
+
+  .tk-tab-selo {
+    display: inline-block;
   }
 }
 

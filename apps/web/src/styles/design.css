@@ -5705,6 +5705,17 @@
     color: var(--tk-ultra-fg-strong);
   }
 
+  /* O selo de contagem da aba, do documento: 11/700 violeta em pilula. */
+  .tk-tab-selo {
+    margin-left: auto;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font: 700 11px/1.3 var(--tk-font);
+    font-variant-numeric: tabular-nums;
+    color: var(--tk-ultra-fg);
+    background: color-mix(in srgb, var(--tk-ultra-fg) 16%, transparent);
+  }
+
   /* ── MARCA ───────────────────────────────────────────────────────────────
      "TrainerKit" com o tile de 34px, raio 11, no topo da barra. Medidas do
      documento de desktop. */
