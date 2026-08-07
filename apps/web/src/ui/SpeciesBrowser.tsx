@@ -5,6 +5,7 @@ import { computeCPAtLevel, rankDefenders } from "@trainerkit/core";
 import { fold } from "../data/fold.ts";
 import type { Dataset, DatasetSpecies } from "../data/useDataset.ts";
 import { useT, type Key } from "../i18n/t.ts";
+import { comElementoCompartilhado, tileDe } from "./transicao.ts";
 import { useSetup } from "../onboarding/setup.ts";
 import { typeKey } from "../sprites/provider.ts";
 import { useCollection } from "../storage/collection.ts";
@@ -413,7 +414,13 @@ export function SpeciesBrowser({
           <ul className="tk-species-grid">
             {shown.map((s, i) => (
               <li key={s.id}>
-                <button type="button" className="tk-species-cell" onClick={() => onPick(s)}>
+                <button
+                  type="button"
+                  className="tk-species-cell"
+                  /* O tile viaja pro cabecalho da ficha. Ver `ui/transicao.ts`;
+                     onde a API nao existe, abre sem animacao como antes. */
+                  onClick={(e) => comElementoCompartilhado(tileDe(e), () => onPick(s))}
+                >
                   <SpeciesTile
                     spriteId={s.spriteId}
                     dex={s.dex}
