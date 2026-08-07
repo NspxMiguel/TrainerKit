@@ -183,22 +183,35 @@ passar por mim.
 4. Endereços corretos hoje: app `trainerkit-zeta.vercel.app`, API
    `trainerkit-ia-gules.vercel.app/api/ai`.
 
-**FALTA (e é só ele que pode fazer):** pôr as duas chaves no projeto
-`trainerkit-ia` — `GROQ_API_KEY` (texto da IA) e `ELEVENLABS_API_KEY` (voz).
-Elas ficaram na conta velha da Vercel, sem acesso daqui.
+**"pega no meu chrome, contas logadas" (07/08/2026)** — conferido: o Chrome está
+logado em `miguel-6729`, o MESMO usuário do CLI, e `vercel teams ls` só lista
+`Nspx`. Não havia segunda conta pra onde passar. Os endereços velhos
+(`trainerkit.vercel.app`, `trainerkit-ia.vercel.app`) estão numa conta que não
+está logada ali.
+
+**FECHADO em 07/08/2026.** Ele pôs as duas chaves, redeployei a API e rodei o
+`pnpm publicar`. Estado final, tudo medido:
+- app `trainerkit-zeta.vercel.app`, bundle `index-c1LyeuTU.js`, apontando pra
+  `trainerkit-ia-gules.vercel.app/api/ai`;
+- API respondendo de verdade (`{"text":"ok"}` num prompt real do Groq);
+- **a produção do app sobreviveu ao deploy da API** — que era o bug. O conserto
+  do `publicar.sh` se provou sozinho.
+
+**⚠️ FALTA ELE ROTACIONAR A CHAVE DO GROQ.** No primeiro `vercel env add` a
+chave foi colada no campo do NOME da variável, não no valor: a variável nasceu
+chamada `gsk_...`. **Nome de variável não é criptografado** — aparece em
+listagem, painel e log, e essa apareceu no meu terminal também. Removi a
+variável malformada, mas remover não desvaza: a chave tem que ser considerada
+queimada. Gerar outra em `console.groq.com/keys`, revogar a atual, e:
 
 ```
 vercel link --project trainerkit-ia --yes
+vercel env rm GROQ_API_KEY production
 vercel env add GROQ_API_KEY production
-vercel env add ELEVENLABS_API_KEY production
-pnpm publicar
+vercel deploy --prod --yes
 ```
 
-**⚠️ NÃO republiquei o app de propósito.** O que está no ar ainda aponta pro
-`trainerkit-ia.vercel.app` da conta VELHA — que testei e responde, tem chave e
-funciona. Republicar antes das chaves novas trocaria uma IA que funciona por uma
-que devolve 503. Depois que ele rodar os comandos acima, tudo passa a viver na
-conta nova de uma vez.
+Não precisa republicar o app — a chave vive só no servidor.
 
 **Detalhe menor, pré-existente:** o build da API na Vercel cospe `TS2835` em
 `api/ai.ts:49` (import sem extensão). É de propósito — o comentário acima da
