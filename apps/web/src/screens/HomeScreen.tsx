@@ -148,6 +148,9 @@ function Hero({
   onToggleFeito?: (() => void) | undefined;
 }) {
   const { t } = useT();
+  /* O hero encolhe pra 74px na tela larga (documento de desktop) e continua
+     sendo o retrato de 220px no celular. Ver a nota do `size` abaixo. */
+  const telaLarga = useTelaLarga();
 
   /*
    * A cor sai da ESPECIE, por tabela — nao do tipo, nem do sprite.
@@ -295,7 +298,19 @@ function Hero({
           speciesId={species.id}
           name={species.name}
           types={species.types}
-          size={220}
+          /*
+            ⚠️ 220 NO CELULAR, 74 NA TELA LARGA — e o tamanho e PROP, nao CSS.
+            
+            `SpeciesTile` escreve `width`/`height`/`font-size` inline, e estilo
+            inline ganha de qualquer classe: eu tentei encolher o tile do hero
+            por CSS e o monograma continuou em 62,9px vazando de um tile de
+            74px, sem erro nenhum aparecer. Segunda vez que este mesmo detalhe
+            me pegou nesta tela — a primeira foi na tira da colecao.
+            
+            Os 74px sao a medida do hero compacto do documento de desktop; os
+            220 sao o retrato que ele pediu no celular ("sem cara de Pokémon").
+          */
+          size={telaLarga ? 74 : 220}
           bare
         />
         {/* A sombra de contato no chao. Sem ela o bicho flutua e a profundidade
