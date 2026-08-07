@@ -46,7 +46,21 @@ export function PokedexScreen({ dataset, intent }: Props) {
   const telaLarga = useTelaLarga();
   /* A busca sobe pro cabecalho na tela larga — ver a nota da prop `busca` no
      `SpeciesBrowser`. No celular ela continua morando la dentro. */
-  const [busca, setBusca] = useState("");
+  /*
+   * ⚠️ A BUSCA PODE CHEGAR PRONTA, vinda do campo da home.
+   *
+   * Quem digitou "gar" la em cima nao quer digitar de novo aqui. O termo viaja
+   * na intencao e vira o valor inicial; o `key={tab}` na `App` remonta esta
+   * tela a cada navegacao, entao isto e lido de novo em toda vinda — nao e um
+   * valor que congela no primeiro mount.
+   *
+   * `semente` fica guardado porque e ele, e nao o `busca` de agora, que decide
+   * o foco automatico: assim que a pessoa apagar o texto o campo continua sendo
+   * o dela, e nao um campo que rouba o cursor a cada tecla.
+   */
+  const semente =
+    intent?.view === "browse" || intent?.view === "mine" ? (intent.busca ?? "") : "";
+  const [busca, setBusca] = useState(semente);
 
   /*
    * A raiz precisa saber que a ficha virou coluna.
@@ -300,7 +314,7 @@ export function PokedexScreen({ dataset, intent }: Props) {
   const lista = (
     <>
       {meus ? (
-        <CollectionScreen dataset={dataset} embutida />
+        <CollectionScreen dataset={dataset} embutida {...(telaLarga ? { busca } : {})} />
       ) : (
         <SpeciesBrowser
           data={dataset.data}
@@ -367,23 +381,34 @@ export function PokedexScreen({ dataset, intent }: Props) {
     <div className="tk-dex-split" data-aberta={selected ? "" : undefined}>
       <div className="tk-dex-topo">
         {cabecalho}
-        {/* O campo do documento: pilula de 42px com a lupa. So aparece em
-            "Todos" — em "Meus" quem lista e a `CollectionScreen`, que tem a
-            propria busca. */}
-        {!meus && (
-          <div className="tk-search tk-dex-busca">
-            <IconSearch size={16} />
-            <input
-              type="search"
-              inputMode="search"
-              autoComplete="off"
-              placeholder={t("pokedex.searchPlaceholder")}
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-              aria-label={t("pokedex.search")}
-            />
-          </div>
-        )}
+        {/*
+          O campo do documento: pilula de 42px com a lupa.
+
+          ⚠️ ELE SERVE AS DUAS ABAS — este comentario dizia que so servia
+          "Todos", "porque em Meus quem lista e a `CollectionScreen`, que tem a
+          propria busca". Ela NAO tem: fui atras do campo dela pra ligar o termo
+          que vem da home e nao existe campo nenhum ali, nem nunca existiu. O
+          comentario descrevia uma tela que eu imaginei.
+
+          Com o campo unico as duas listas respondem ao mesmo termo, e trocar de
+          aba mantem a busca — que e o que "uma aba, uma pergunta, duas
+          respostas" ja prometia logo acima.
+        */}
+        <div className="tk-search tk-dex-busca">
+          <IconSearch size={16} />
+          <input
+            type="search"
+            inputMode="search"
+            autoComplete="off"
+            /* Chegou com termo da home: o cursor continua de onde a pessoa
+               parou de digitar, em vez de ela ter que clicar aqui. */
+            autoFocus={semente !== ""}
+            placeholder={t("pokedex.searchPlaceholder")}
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            aria-label={t("pokedex.search")}
+          />
+        </div>
       </div>
       <div className="tk-dex-lista">{lista}</div>
       {selected && (

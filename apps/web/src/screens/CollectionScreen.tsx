@@ -14,6 +14,7 @@ import {
 } from "@trainerkit/core";
 
 import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
+import { fold } from "../data/fold.ts";
 import { useT, type Key } from "../i18n/t.ts";
 import type { OwnedPokemon } from "../storage/collection.ts";
 import {
@@ -26,7 +27,7 @@ import { TOM_VEREDITO as TONE } from "../ui/tomVeredito.ts";
 import { AskBox } from "../ui/AskBox.tsx";
 import { tetoDePowerUp, useSetup } from "../onboarding/setup.ts";
 import { setEmGrade, useEmGrade } from "../ui/vistaColecao.ts";
-import { IconGrid, IconList, IconPlus } from "../ui/Icons.tsx";
+import { IconGrid, IconList, IconPlus, IconSearch } from "../ui/Icons.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 import { Faxina } from "./Faxina.tsx";
 import { SpeciesDetail } from "./SpeciesDetail.tsx";
@@ -36,9 +37,20 @@ interface Props {
   /** Dentro da aba Pokédex: sem título próprio, pra não repetir o de cima. */
   embutida?: boolean;
   dataset: DatasetState;
+  /**
+   * O termo do campo de busca, que mora FORA desta tela.
+   *
+   * Mesmo arranjo da prop `busca` do `SpeciesBrowser`, e pelo mesmo motivo: na
+   * tela larga o campo fica no cabeçalho da Pokédex, uma coluna acima desta
+   * lista, e serve as duas abas. Aqui só chega o texto.
+   *
+   * ⚠️ NENHUM CAMPO NASCE AQUI DENTRO quando isto vem vazio — no celular a
+   * coleção continua exatamente a lista de sempre, sem nada novo no topo.
+   */
+  busca?: string;
 }
 
-export function CollectionScreen({ dataset, embutida = false }: Props) {
+export function CollectionScreen({ dataset, embutida = false, busca = "" }: Props) {
   const { items, reload } = useCollection();
   const { t, language } = useT();
   const setup = useSetup();
@@ -88,6 +100,30 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
       return { owned, species: s, verdict };
     });
   }, [items, ready, species, dataset, setup.level]);
+
+  /**
+   * A lista depois do filtro — e `rows` continua sendo a coleção inteira.
+   *
+   * A separação importa: a faxina, o alternador grade/lista e a caixa de
+   * perguntas falam da COLEÇÃO, não do que está na tela agora. Se eles lessem o
+   * filtrado, buscar "gar" faria a faxina dizer "1 pode sair" quando há 23, e o
+   * alternador sumiria em qualquer busca sem resultado.
+   *
+   * `fold` é o mesmo normalizador da busca da Pokédex — sem ele "Nidoran♀" não
+   * responde a "nidoran" e nenhum nome com acento responde ao termo sem acento.
+   * Casa o `id` também, que é o que faz "mr-mime" achar "Mr. Mime".
+   */
+  const visiveis = useMemo(() => {
+    if (rows === null) return null;
+    const q = fold(busca);
+    if (!q) return rows;
+    return rows.filter(
+      ({ species: s }) => s !== null && (fold(s.name).includes(q) || fold(s.id).includes(q)),
+    );
+  }, [rows, busca]);
+
+  /** Tem coleção, mas ela está escondida atrás de um termo? Ver os dois vazios. */
+  const filtrando = fold(busca) !== "" && rows !== null && rows.length > 0;
 
   /*
    * Quantos podem sair, contado ANTES de a pessoa abrir a faxina.
@@ -237,15 +273,31 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
         </div>
       )}
 
-      {rows === null ? (
+      {visiveis === null ? (
         <p className="tk-body">{t("common.loading")}</p>
-      ) : rows.length === 0 ? (
+      ) : /*
+           ⚠️ DOIS VAZIOS DIFERENTES, e a diferença não é cosmética.
+           "Sua coleção está vazia · nada salvo ainda" numa coleção de 247
+           bichos filtrada por "xyz" é uma informação falsa — e a saída que ela
+           oferece ("cadastre um") não é a que a pessoa precisa (apagar a
+           busca). Cada vazio responde ao seu próprio motivo.
+         */
+      visiveis.length === 0 ? (
         <div className="tk-empty">
+          {/* O símbolo segue o motivo: o `+` só faz sentido quando a saída é
+              cadastrar. Numa busca sem resultado ele convidaria pro lugar
+              errado. */}
           <div className="tk-empty-mark">
-            <IconPlus size={26} />
+            {filtrando ? <IconSearch size={24} /> : <IconPlus size={26} />}
           </div>
-          <div className="tk-empty-title">{t("collection.empty.title")}</div>
-          <p className="tk-body">{t("collection.empty.body")}</p>
+          <div className="tk-empty-title">
+            {t(filtrando ? "collection.noMatch.title" : "collection.empty.title")}
+          </div>
+          <p className="tk-body">
+            {filtrando
+              ? t("collection.noMatch.body", { q: busca })
+              : t("collection.empty.body")}
+          </p>
         </div>
       ) : (
         // Cartao UNICO na vista de lista (handoff §3) — ver `.tk-meus` no
@@ -253,7 +305,7 @@ export function CollectionScreen({ dataset, embutida = false }: Props) {
         <div
           className={grade ? "tk-species-grid tk-cascade" : "tk-card tk-meus tk-cascade"}
         >
-          {rows.map(({ owned, species: s, verdict }, i) => {
+          {visiveis.map(({ owned, species: s, verdict }, i) => {
             if (!s || !verdict) return null;
 
             /*
