@@ -28,6 +28,7 @@ import {
 import { SpriteDownloadPanel, SpriteDownloadStrip } from "./ui/SpriteDownload.tsx";
 import { UpdateBanner } from "./ui/UpdateBanner.tsx";
 import { fecharFolhaDeCima, useTemFolha } from "./ui/folha.ts";
+import { useRolouDoTopo } from "./ui/useRolouDoTopo.ts";
 import { useTabBarMinimize } from "./ui/useTabBarMinimize.ts";
 
 /*
@@ -102,6 +103,10 @@ export function App() {
   // O recolhimento e comportamento do iOS 26. No Android a barra do Material e
   // assente e nao se mexe — recolher la pareceria bug, nao refinamento.
   const minimized = useTabBarMinimize(detectPlatform() === "iphone");
+
+  // O vidro da borda de cima so entra depois que o conteudo sai do topo — se
+  // ficasse aceso sempre, escureceria o hero, que sobe ate a borda de proposito.
+  const rolou = useRolouDoTopo();
 
   /*
    * A barra some quando uma folha de tela cheia esta aberta.
@@ -189,6 +194,11 @@ export function App() {
         {/* Apaga o conteudo pouco antes de ele passar por tras do vidro — o
             "scroll edge effect" que a Apple usa nas barras do sistema. */}
         <div className="tk-scroll-edge" aria-hidden="true" />
+
+        {/* O mesmo efeito na borda de CIMA, onde quem fica por cima do conteudo
+            e a barra de status do sistema. Fora do `.tk-main` de proposito: ele
+            remonta a cada troca de aba, e o vidro nao pode piscar junto. */}
+        <div className="tk-topo-edge" data-on={rolou || undefined} aria-hidden="true" />
 
         <nav
           className="tk-tabbar"

@@ -658,6 +658,85 @@
 }
 
 /*
+ * O mesmo efeito na borda de CIMA — e aqui quem fica por cima do conteudo nao e
+ * uma barra nossa, e a barra de status do sistema.
+ *
+ * "degrade c pa fica legal ne? deixa o app perfeito po, deixa bonitao"
+ *
+ * Sem isto, no iPhone dele o texto subia e ENCOSTAVA NO RELOGIO: "Subir os Ma…"
+ * cruzado com "7:39". Em aba de navegador nao acontece, porque ali a barra de
+ * status nao fica sobre a pagina — foi por isso que passou por toda a conferencia
+ * feita no Mac.
+ *
+ * ⚠️ VIDRO, e nao o degrade de `--tk-bg` do irmao de baixo.
+ *
+ * Nao e capricho: e a mesma licao ja escrita no `.tk-fax-bar`. O degrade chapado
+ * funciona LA porque o trabalho dele e apagar o conteudo pouco antes da barra de
+ * abas, que e quem de fato cobre. Aqui nao ha barra nenhuma embaixo do efeito —
+ * ele E a barra. E na home ele cai justamente sobre a faixa de cor da especie
+ * (`.tk-home-topo::before`): um degrade de `--tk-bg` viraria uma mancha escura
+ * sobre o azul, enquanto o vidro assume a cor do que passa por tras.
+ *
+ * ⚠️ A ALTURA DERIVA DO RECORTE, e nao e um numero escolhido.
+ *
+ * `env(safe-area-inset-top)` e exatamente "quanto de sistema ha por cima do meu
+ * conteudo no topo": 59px num iPhone com entalhe, 20px num sem entalhe instalado
+ * na tela de inicio, e ZERO numa aba de navegador ou no computador. Multiplicar
+ * esse numero faz a peca aparecer so onde ela faz falta e sumir sozinha onde nao
+ * faz — sem media query, sem `[data-platform]`, sem lista de aparelhos.
+ *
+ * O 1,7 e o desbote embaixo trabalham juntos: o vidro vale cheio ate 58% da
+ * altura, que da ~1x o recorte — ou seja, exatamente a faixa da barra de status —
+ * e desaparece ao longo do resto. Sem o desbote sobraria uma LINHA RETA no meio
+ * da tela, que e pior que o problema original.
+ */
+.tk-topo-edge {
+  position: fixed;
+  top: 0;
+  /* Largura da TELA, nao da coluna do app — mesmo motivo do `.tk-scroll-edge`. */
+  left: 0;
+  right: 0;
+  height: calc(env(safe-area-inset-top) * 1.7);
+  background: var(--tk-glass-bg);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  mask-image: linear-gradient(to bottom, #000 0 58%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0 58%, transparent 100%);
+  pointer-events: none;
+  /*
+   * Acima da folha cheia (20) e da barra de acao dela (40), abaixo da barra de
+   * abas (50) e dos veus de dialogo (60), que sao modais e cobrem tudo.
+   *
+   * A regra que decide os dois lados: passa por BAIXO o que ROLA, passa por CIMA
+   * o que a pessoa acabou de abrir. Foi por ela que o balao do selo BETA subiu
+   * pro 46 — ele nascia aos ~48pt, dentro da parte opaca, e saia borrado.
+   */
+  z-index: 45;
+  opacity: 0;
+  transition: opacity var(--tk-dur-base) var(--tk-ease-out);
+}
+
+.tk-topo-edge[data-on] {
+  opacity: 1;
+}
+
+/*
+ * Sem transparencia, sem vidro — mas o efeito FICA.
+ *
+ * Diferente do `.tk-scroll-edge`, que pode sumir porque a barra de abas dele
+ * vira fundo solido e cobre sozinha, aqui nao ha nada por baixo pra assumir o
+ * trabalho: apagar isto devolveria o texto cruzado com o relogio pra justamente
+ * quem pediu menos transparencia. Entao troca de material e continua.
+ */
+@media (prefers-reduced-transparency: reduce) {
+  .tk-topo-edge {
+    background: var(--tk-bg);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+/*
  * Sem transparencia, sem vidro.
  *
  * Quem liga "Reduzir transparencia" nos ajustes de acessibilidade nao esta
@@ -1404,7 +1483,16 @@
  */
 .tk-beta-pop {
   position: fixed;
-  z-index: 30;
+  /*
+   * Acima do `.tk-topo-edge` (45), e nao no 30 de antes.
+   *
+   * O balao se cola LOGO ABAIXO do selo (`r.bottom + 8`). Com o Modo Pokedex
+   * rolado, o selo sobe pro alto da tela e o balao nasce por volta dos 48pt —
+   * dentro da parte opaca do vidro. Por baixo dele o aviso sairia borrado e
+   * lavado, e um balao que a pessoa ACABOU de abrir nao e conteudo rolando:
+   * e a resposta ao toque dela.
+   */
+  z-index: 46;
   /* Valores de partida; o `BetaBadge` sobrescreve antes de pintar. */
   top: 0;
   left: 0;

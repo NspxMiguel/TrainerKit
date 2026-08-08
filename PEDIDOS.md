@@ -359,15 +359,72 @@ e rola de ponta a ponta; a lista da Pokédex rola normal. `typecheck` limpo,
 `.tk-hero-numero`, o número da dex em marca-d'água gigante. Pro "11" ele lê como
 uma barra vertical. Não mexi.
 
-### Pergunta pra ele, dessa mesma volta
-
-**Conteúdo rolando por baixo do relógio.** Quando a lista da Pokédex ou uma folha
-longa rolam, o texto passa por trás da barra de status e **encosta no relógio** —
-dá pra ver "Subir os Ma…" em cima de "7:39". A barra de baixo já tem remédio pra
-isso (`.tk-scroll-edge`, um degradê que apaga o conteúdo antes da barra de abas,
-citando a HIG da Apple). Em cima não tem nada — e **de propósito**: o desenho diz
-"A COR SOBE ATÉ O TOPO — inclusive por trás da barra de status", que é o que faz
-o hero ficar bonito. Um degradê no topo escureceria a arte do hero. Não improvisei:
-**quer o degradê em cima também, ou fica como está?**
-
 **Apagar quando ele disser que parou de bugar no aparelho dele.**
+
+---
+
+## [ABERTO] TrainerKit — degradê no topo, atrás da barra de status
+
+**Pedido em:** 08/08/2026
+
+**Palavras dele:** "degrade c pa fica legal ne? deixa o app perfeito po, deixa
+bonitao"
+
+**O que ele está respondendo:** eu tinha perguntado, no fim do conserto do
+iPhone, se ele queria o degradê em cima também. Quando a lista da Pokédex ou uma
+folha longa rolam, o texto passa por trás da barra de status e **encosta no
+relógio** — dá pra ver "Subir os Ma…" em cima de "7:39". A barra de baixo já tem
+remédio pra isso (`.tk-scroll-edge`, citando a HIG da Apple: *"obscuring content
+that scrolls beneath them"*); em cima não tinha nada.
+
+**A parte delicada:** o desenho manda a cor subir até o topo, **inclusive por
+trás da barra de status** — é o que faz o hero ficar bonito. Um degradê fixo ali
+escureceria a arte do hero o tempo todo. Então tem que ser um degradê que **só
+aparece quando rolou**, como o iOS faz: com o hero no lugar, nada por cima; assim
+que o conteúdo sobe pra debaixo do relógio, ele entra.
+
+### Como ficou (08/08/2026)
+
+`.tk-topo-edge`, uma faixa presa no topo da tela, fora do `.tk-main` de propósito
+— o `.tk-main` remonta a cada troca de aba e o vidro não pode piscar junto.
+
+Três decisões que valem estar escritas:
+
+1. **É vidro, não é degradê de `--tk-bg`.** O irmão de baixo (`.tk-scroll-edge`)
+   pode ser chapado porque o trabalho dele é apagar o conteúdo pouco antes da
+   barra de abas, que é quem de fato cobre. Aqui não há barra nenhuma embaixo do
+   efeito — ele *é* a barra. E na home ele cai justo sobre a faixa de cor da
+   espécie: chapado viraria mancha escura sobre o azul; o vidro assume a cor do
+   que passa por trás. O desbote (`mask-image`) é o degradê que ele pediu.
+2. **A altura deriva do recorte, não é número escolhido:**
+   `calc(env(safe-area-inset-top) * 1.7)`. Esse `env` é literalmente "quanto de
+   sistema há por cima do meu conteúdo": 59px no iPhone com entalhe, 20px num sem
+   entalhe instalado, e **zero** em aba de navegador e no PC. Então a peça
+   aparece só onde faz falta e some sozinha onde não faz — sem media query, sem
+   `[data-platform]`, sem lista de aparelhos.
+3. **Só acende depois que rolou** (`useRolouDoTopo`), que era a parte delicada
+   acima. O ouvinte é de **captura**, porque `scroll` não borbulha e neste app
+   rolam duas coisas: a janela e cada `.tk-sheet-full`.
+
+Um efeito colateral achado e consertado junto: o balão do selo BETA (`.tk-beta-pop`)
+nasce colado embaixo do selo. Com o Modo Pokédex rolado, o selo sobe pro alto e o
+balão nascia por volta dos 48pt — **dentro** da parte opaca do vidro, saindo
+borrado. Subiu de `z-index: 30` pra `46`. A regra que decide os dois lados: passa
+por baixo o que **rola**, passa por cima o que a pessoa **acabou de abrir**.
+
+**Conferido no iPhone 17 Pro (PWA instalado, que é o único lugar onde o
+`safe-area-inset-top` é 59 de verdade):** hero parado com o vidro apagado e a arte
+inteira até a borda; lista da Pokédex rolada com o vidro aceso e o relógio legível;
+folha da espécie rolando por conta própria também acende; abrir a folha **apaga** o
+vidro mesmo com a janela rolada atrás; voltar ao topo apaga de volta. `pnpm -r
+typecheck` limpo e `pnpm -r test` em 180 passando | 7 pulados (eram 174 — as 6
+novas são do `useRolouDoTopo.test.tsx`).
+
+Esse teste existe porque **conferir isto dirigindo o navegador não funciona**: a
+aba em segundo plano não roda quadro nenhum. Medido, uma `window.scrollTo` levou o
+`scrollY` de 700 pra 900 e o contador de eventos ficou em **zero** — sem quadro não
+há evento de `scroll` nem `requestAnimationFrame`. O hook parecia quebrado e estava
+parado. A foto do simulador responde por uma tela; o teste responde pelas quatro
+saídas do filtro (janela, folha, coisa que rola de lado, pedaço no meio da tela).
+
+**Apagar quando ele confirmar que ficou bonito no aparelho dele.**
