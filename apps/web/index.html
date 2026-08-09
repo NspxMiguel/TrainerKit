@@ -23,15 +23,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="TrainerKit" />
-    <!-- Escuro e o padrao: e como o app abre, e e o `background_color` do
-         manifest. O iOS copia UM arquivo na hora de instalar e nao volta a
-         olhar, entao o icone instalado nao muda depois — o `media` aqui so
-         decide qual e copiado, quando o Safari o respeita. -->
-    <link
-      rel="apple-touch-icon"
-      href="/apple-touch-icon-light.png"
-      media="(prefers-color-scheme: light)"
-    />
+    <!-- ⚠️ UM SO `apple-touch-icon`, e o escuro. A variante clara com `media`
+         estava aqui e foi TIRADA: o iOS copia UM arquivo na hora de instalar e
+         nunca mais olha, entao quem instalasse de dia levava pra sempre o tile
+         branco — foi exatamente o que apareceu na tela inicial do Miguel, um
+         quadrado branco com um ovo preto dentro, enquanto o app abre no escuro.
+         O `media` nao "escolhe melhor", ele sorteia pelo horario da instalacao.
+         O claro continua sendo gerado e continua servindo o favicon, que esse
+         sim troca sozinho. -->
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <!-- Dois tamanhos renderizados NO tamanho, nao encolhidos do 512: a marca

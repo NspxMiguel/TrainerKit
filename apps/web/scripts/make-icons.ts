@@ -28,40 +28,96 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = join(HERE, "..", "public");
 
 /*
- * Fundo solido, preto ou branco. O gradiente saiu.
+ * ⚠️ O TILE E O GRADIENTE DO HANDOFF, e nao o preto chapado que estava aqui.
  *
- * Instalado, o icone senta ao lado dos icones do sistema — e ali um tile com
- * gradiente roxo-azul briga com tudo em volta, ainda mais no iOS, onde o
- * conjunto e sobrio. Preto no tema escuro, branco no claro: o icone deixa de
- * competir e a marca (as tres barras) fica sendo a unica coisa que se ve.
+ * O que este bloco dizia antes: *"Fundo solido, preto ou branco. O gradiente
+ * saiu. Instalado, o icone senta ao lado dos icones do sistema — e ali um tile
+ * com gradiente roxo-azul briga com tudo em volta."*
  *
- * Cada variante tem a propria paleta, porque as barras brancas do tema escuro
- * simplesmente sumiriam no branco.
+ * Duas coisas erradas nisso. A primeira e que o handoff nao pede gradiente
+ * roxo-azul: pede `linear-gradient(160deg,#33394A,#14171E 70%)`, que e grafite
+ * indo pra quase-preto — um cinza com volume, exatamente o registro dos icones
+ * do sistema. Eu troquei uma coisa por outra e argumentei contra a que nao
+ * estava escrita. A segunda e que a troca era minha, num arquivo que o Miguel
+ * me mandou seguir; ele pediu por escrito pra eu PERGUNTAR quando o desenho
+ * conflitar, e eu improvisei.
+ *
+ * O resultado apareceu na tela inicial: preto chapado, sem quina iluminada, o
+ * ovo boiando num vazio. *"os icones novos do app ainda n estao aplicados
+ * corretamente"*.
  */
 type Tema = "dark" | "light";
 
 interface Paleta {
-  readonly bg: readonly [number, number, number];
+  /** As duas paradas do tile, do handoff. A 0% e a 70%. */
+  readonly tile0: readonly [number, number, number];
+  readonly tile1: readonly [number, number, number];
   /** A casca do ovo. */
   readonly casca: readonly [number, number, number];
   /** A luz que escapa pela fenda. */
   readonly luz: readonly [number, number, number];
+  /**
+   * Forca da quina iluminada. O handoff pede
+   * `inset 0 1.5px 1px rgba(255,255,255,.22)` — luz branca no escuro; no tile
+   * claro a mesma luz branca nao aparece, entao la a quina ESCURECE de leve,
+   * que e o que da relevo sobre branco.
+   */
+  readonly quina: readonly [number, number, number];
+  readonly quinaAlfa: number;
+  /**
+   * Onde a quina aparece. `-1` = luz na aresta de cima (tile escuro, luz do
+   * ambiente batendo por cima). `+1` = sombra na de baixo — no tile claro uma
+   * luz branca sobre branco nao existe, e o que da relevo e a aresta de baixo
+   * escurecendo.
+   */
+  readonly quinaLado: -1 | 1;
 }
 
 const PALETAS: Record<Tema, Paleta> = {
-  // Preto puro, nao o `--tk-bg` (#07080b): no icone, um preto quase-preto
-  // aparece como um cinza sujo ao lado dos icones vizinhos.
   dark: {
-    bg: [0x00, 0x00, 0x00],
+    tile0: [0x33, 0x39, 0x4a], // #33394A
+    tile1: [0x14, 0x17, 0x1e], // #14171E
     casca: [0xf4, 0xf6, 0xfa], // #F4F6FA, do handoff
     luz: [0x6e, 0x4b, 0xff], // #6E4BFF
+    quina: [0xff, 0xff, 0xff],
+    quinaAlfa: 0.22, // rgba(255,255,255,.22), do handoff
+    quinaLado: -1,
   },
   light: {
-    bg: [0xff, 0xff, 0xff],
+    tile0: [0xff, 0xff, 0xff], // #FFFFFF
+    tile1: [0xe3, 0xe6, 0xec], // #E3E6EC
     casca: [0x22, 0x26, 0x2f], // #22262F, a versao de fundo claro
     luz: [0x8a, 0x6b, 0xff], // #8A6BFF
+    quina: [0x8f, 0x96, 0xa6],
+    quinaAlfa: 0.45,
+    quinaLado: 1,
   },
 };
+
+/**
+ * A cor do tile naquele ponto — `linear-gradient(160deg, tile0, tile1 70%)`.
+ *
+ * 160deg no CSS e o ANGULO DA DIRECAO medido a partir de "pra cima", no sentido
+ * horario. O vetor sai `(sen 160, -cos 160)` = `(0.342, 0.940)`, ou seja
+ * levemente pra direita e bastante pra baixo. E o eixo do degrade vai de canto a
+ * canto da caixa projetada nesse vetor, e nao de borda a borda — por isso a
+ * normalizacao usa `|sen| + |cos|`.
+ */
+function tileAt(u: number, v: number, paleta: Paleta): readonly [number, number, number] {
+  const rad = (160 * Math.PI) / 180;
+  const dx = Math.sin(rad);
+  const dy = -Math.cos(rad);
+  const comprimento = Math.abs(dx) + Math.abs(dy);
+  // Projecao do ponto no eixo, trazida de [-L/2, L/2] pra [0, 1].
+  const bruto = ((u - 0.5) * dx + (v - 0.5) * dy) / comprimento + 0.5;
+  // A parada final e 70%: depois dela o degrade e chapado.
+  const t = Math.max(0, Math.min(1, bruto / 0.7));
+  return [
+    paleta.tile0[0] + (paleta.tile1[0] - paleta.tile0[0]) * t,
+    paleta.tile0[1] + (paleta.tile1[1] - paleta.tile0[1]) * t,
+    paleta.tile0[2] + (paleta.tile1[2] - paleta.tile0[2]) * t,
+  ] as const;
+}
 
 const crcTable = (() => {
   const t = new Uint32Array(256);
@@ -197,11 +253,41 @@ function alturaDaFenda(u: number, dentes: number, amp: number): number {
   return FENDA + amp * onda;
 }
 
+/** Distancia de um ponto a um segmento, pros raios de luz. */
+function distSegmento(
+  u: number,
+  v: number,
+  ax: number,
+  ay: number,
+  bx: number,
+  by: number,
+): number {
+  const vx = bx - ax;
+  const vy = by - ay;
+  const t = Math.max(0, Math.min(1, ((u - ax) * vx + (v - ay) * vy) / (vx * vx + vy * vy)));
+  return Math.hypot(u - (ax + vx * t), v - (ay + vy * t));
+}
+
+/*
+ * Os tres raios que descem da fenda, do SVG do handoff:
+ * `M20.5 22.5l-2.5 5  M27.5 22.5l2.5 5  M24 21.5v6`, traco 2, ponta redonda.
+ * Dividido por 48 pra virar coordenada normalizada. Eles abrem em leque —
+ * e o que faz a luz parecer VINDO de dentro do ovo em vez de pousada em cima.
+ */
+const RAIOS = [
+  [0.427, 0.469, 0.375, 0.573],
+  [0.573, 0.469, 0.625, 0.573],
+  [0.5, 0.448, 0.5, 0.573],
+] as const;
+/** Metade do traco de 2 em 48. */
+const RAIO_ESPESSURA = 1 / 48;
+
 function ovoAt(
   u: number,
   v: number,
   simples: boolean,
   paleta: Paleta,
+  fundo: readonly [number, number, number],
 ): readonly [number, number, number] | null {
   const dentes = simples ? 2.2 : 3.4;
   const amp = simples ? 0.016 : 0.026;
@@ -222,7 +308,18 @@ function ovoAt(
   const fenda = alturaDaFenda(u, dentes, amp);
 
   // Metade de BAIXO: o ovo normal, do zigue-zague pra baixo.
-  if (v >= fenda && dentroDoOvo(u, v)) return paleta.casca;
+  if (v >= fenda && dentroDoOvo(u, v)) {
+    // Os raios sao pintados SOBRE a casca de baixo — luz batendo por dentro.
+    // Nos tamanhos pequenos eles nao entram: com 2/48 de traco, a 32px cada
+    // raio tem 1,3 pixel e os tres viram uma mancha roxa unica sobre a casca,
+    // que le como sujeira. Mesma regra do zigue-zague.
+    if (!simples) {
+      for (const [ax, ay, bx, by] of RAIOS) {
+        if (distSegmento(u, v, ax, ay, bx, by) <= RAIO_ESPESSURA) return paleta.luz;
+      }
+    }
+    return paleta.casca;
+  }
 
   // Metade de CIMA: desenhada a partir de um ponto `LEVANTA` mais abaixo, que e
   // o que a faz aparecer levantada. O teste da fenda usa o MESMO ponto de
@@ -250,9 +347,9 @@ function ovoAt(
     const forca = Math.max(0, 1 - lateral * lateral);
     if (forca < 0.12) return null;
     return [
-      Math.round(paleta.bg[0] + (paleta.luz[0] - paleta.bg[0]) * forca),
-      Math.round(paleta.bg[1] + (paleta.luz[1] - paleta.bg[1]) * forca),
-      Math.round(paleta.bg[2] + (paleta.luz[2] - paleta.bg[2]) * forca),
+      fundo[0] + (paleta.luz[0] - fundo[0]) * forca,
+      fundo[1] + (paleta.luz[1] - fundo[1]) * forca,
+      fundo[2] + (paleta.luz[2] - fundo[2]) * forca,
     ] as const;
   }
 
@@ -267,7 +364,8 @@ function renderIcon(size: number, maskable: boolean, tema: Tema): Uint8Array {
   // borda. Entao o tile ocupa tudo e o monograma encolhe pro centro.
   const inset = maskable ? 0 : size * 0.06;
   const half = size / 2 - inset;
-  const radius = maskable ? size / 2 : size * 0.235; // raio = 1/3 do lado (prototipo)
+  // 30/112 do handoff — o mesmo raio que ele usa no tile grande, 112/418.
+  const radius = maskable ? size / 2 : size * (30 / 112);
   const monoScale = maskable ? 0.78 : 1;
   // Abaixo disto o zigue-zague nao cabe em pixel nenhum. Ver `alturaDaFenda`:
   // com 3,4 dentes a 32px cada um tem menos de um pixel de base e a quebra vira
@@ -285,9 +383,10 @@ function renderIcon(size: number, maskable: boolean, tema: Tema): Uint8Array {
       const coverage = Math.max(0, Math.min(1, 0.5 - d));
       if (coverage <= 0) continue;
 
-      let r: number = paleta.bg[0];
-      let g: number = paleta.bg[1];
-      let b: number = paleta.bg[2];
+      const fundo = tileAt(px / size, py / size, paleta);
+      let r: number = fundo[0];
+      let g: number = fundo[1];
+      let b: number = fundo[2];
 
       // A marca por cima, com antialias por supersampling 4x4. Quatro amostras
       // bastavam pro monograma, que era todo reto; a ponta da barra decisiva e
@@ -300,7 +399,7 @@ function renderIcon(size: number, maskable: boolean, tema: Tema): Uint8Array {
         for (const ox of [-0.375, -0.125, 0.125, 0.375]) {
           const u = (px + ox - size / 2) / (size * monoScale) + 0.5;
           const w = (py + oy - size / 2) / (size * monoScale) + 0.5;
-          const color = ovoAt(u, w, simple, paleta);
+          const color = ovoAt(u, w, simple, paleta, fundo);
           if (!color) continue;
           hits++;
           mr += color[0];
@@ -313,6 +412,44 @@ function renderIcon(size: number, maskable: boolean, tema: Tema): Uint8Array {
         r = r * (1 - a) + (mr / hits) * a;
         g = g * (1 - a) + (mg / hits) * a;
         b = b * (1 - a) + (mb / hits) * a;
+      }
+
+      /*
+       * A QUINA ILUMINADA, que e o que separa um tile de um quadrado pintado.
+       *
+       * O handoff pede duas coisas: `border: .5px solid rgba(255,255,255,.14)`
+       * em volta inteira, e `inset 0 1.5px 1px rgba(255,255,255,.22)` — uma luz
+       * empurrada 1,5px PRA BAIXO e recortada por dentro, que por isso so
+       * aparece na aresta de CIMA. E a luz do ambiente batendo na quina, o
+       * mesmo truque dos icones do iOS.
+       *
+       * Aqui a segunda sai deslocando a forma e perguntando onde ela ja saiu:
+       * amostrar 1,5px acima equivale a baixar o retangulo. Onde o deslocado ja
+       * e de fora mas o real ainda e de dentro, tem luz.
+       */
+      if (!maskable) {
+        const escala = size / 112; // o tile do handoff mede 112
+        // A borda fina: o que esta dentro da forma mas fora dela encolhida.
+        const dentro = Math.max(0, Math.min(1, 0.5 - (d + 0.5 * escala)));
+        const borda = coverage - dentro;
+        // A luz da quina: a forma empurrada `quinaLado` * 1,5px.
+        const dQuina = roundedRectSdf(
+          px,
+          py - paleta.quinaLado * 1.5 * escala,
+          size / 2,
+          size / 2,
+          half,
+          half,
+          radius,
+        );
+        const faixa = Math.max(escala, 0.5);
+        const quina =
+          Math.max(0, Math.min(1, (dQuina + 0.5 * escala) / faixa)) * coverage;
+
+        const a = Math.min(1, borda * 0.14 + quina * paleta.quinaAlfa);
+        r = r * (1 - a) + paleta.quina[0] * a;
+        g = g * (1 - a) + paleta.quina[1] * a;
+        b = b * (1 - a) + paleta.quina[2] * a;
       }
 
       rgba[i] = Math.round(r);
