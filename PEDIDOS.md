@@ -465,6 +465,16 @@ Na foto do aparelho dele sobra um vazio grande entre os dois cartões de baixo
 **Feito em 08/08/2026, esperando ele conferir.** Entrou a tira "melhores de
 raide" no pé da home de consulta, que era onde estava o buraco de ~450px.
 
+**Achei o resto da causa em 09/08/2026** (ele pediu uma análise: *"mais algo q vc
+acha legal implementar, ou q ta faltando?"*). A tira encheu o miolo, mas o vazio
+colado na barra era outra coisa: a `.tk-main` reservava `84px + área segura` =
+118pt no rodapé, e a barra termina aos 68. Eram 50pt de preto sem dono — sobra de
+reserva, não falta de conteúdo — e tinha acabado de piorar, porque a barra desceu
+e o 84 ficou parado. Agora a reserva é medida pela própria barra
+(`--tk-barra-teto + 12`). O hero come a sobra e o Pokémon ficou grande sozinho.
+Conferido no aparelho: sem scroll, e a Pokédex continua passando por baixo do
+vidro sem cortar item.
+
 **Apagar quando ele disser que a home encheu.**
 
 ---
