@@ -84,6 +84,40 @@ tem ação, resumo, atalhos e a dica; falta variar conforme o dia.
 
 ---
 
+## O que eu achei olhando o app hoje (09/08/2026)
+
+Ele pediu: *"mais algo q vc acha legal implementar, ou q ta faltando? analiza
+ai"*. Estas são novas — as de cima continuam valendo.
+
+### A base do jogo não tem data
+
+O `gamedata.json` tem `version: 6` e a lista de fontes, mas **nenhuma data de
+geração**. O arquivo `data/source.ts` diz, com todas as letras, que "a base
+envelhece por conta propria" e que "quem precisa do dado de hoje nao devia
+depender do meu deploy" — só que o app não conta pra ninguém quantos dias tem a
+base que está usando. Quem apontou pra uma fonte própria também não tem como
+saber se ela parou de ser atualizada.
+
+Custa pouco: um `generatedAt` gravado no build, uma linha em Ajustes ("base do
+jogo: 12 dias") e um aviso discreto quando passa de uns 30. É a diferença entre
+um dado velho e um dado velho **que se anuncia**.
+
+### A Início no modo "só consulta" ainda acaba no vazio
+
+O *"ta faltando coisa ali em baixo"* dele nunca foi resolvido pra quem escolheu
+não ter coleção: a tela termina na fila de atacantes de raide e sobra uma faixa
+preta até a barra de abas. O dataset já tem o que preencher —
+`rankings.statProductByLeague` (PvP) e o motor de ginásio. Uma segunda fila
+("melhores de Grande Liga", ou "quem segura ginásio") custa o tamanho exato do
+buraco e não inventa dado nenhum.
+
+### Antes de gastar o passe
+
+Reforçando a ideia que já está aqui em cima, agora com o motor conferido:
+`bossCatchRange` e os counters já estão prontos e usados na tela de raide. O que
+falta é só a **pergunta feita antes**: "dá pra você?" em vez de "quem eu levo?".
+De todas as ideias do arquivo, é a que muda mais o que o app é.
+
 ## Dívidas técnicas
 
 **O CI não exercita o scanner.** Os 26 prints reais que validaram a leitura

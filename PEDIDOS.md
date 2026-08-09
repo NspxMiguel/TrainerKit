@@ -428,3 +428,279 @@ parado. A foto do simulador responde por uma tela; o teste responde pelas quatro
 saídas do filtro (janela, folha, coisa que rola de lado, pedaço no meio da tela).
 
 **Apagar quando ele confirmar que ficou bonito no aparelho dele.**
+
+---
+
+## [ABERTO] TrainerKit — o vidro da barra de abas ficou estranho nos dois modos
+
+**Pedido em:** 08/08/2026
+
+**Palavras dele:** "nao gostei da aplicacao do liquid glass aq.... esse preto ali
+fico estranho dms. modo claro tbm estranho..."
+
+Veio com duas fotos lado a lado da **barra de abas**: a do app no escuro e a do
+desenho no claro. No escuro a nossa barra é um retângulo **preto chapado**; no
+desenho ela é azul-marinho translúcida, com a aba escolhida num comprimido azul
+que se lê como vidro. No claro ele também não gostou.
+
+**Feito em 08/08/2026, esperando ele conferir.** A barra ganhou vidro próprio
+(`--tk-barra-vidro`), com um piso de opacidade — antes ela dependia de sorte com
+o que estava atrás, e sobre o `--tk-bg` preto o desfoque não tinha material. No
+claro a tinta da espécie passou a ser misturada com o texto antes de entrar na
+barra, senão o acento cru virava um pastel bege dele mesmo.
+
+**Apagar quando ele disser que a barra ficou boa nos dois modos.**
+
+---
+
+## [ABERTO] TrainerKit — a home está "pra cima dms" e falta coisa embaixo
+
+**Pedido em:** 08/08/2026
+
+**Palavras dele:** "eu sinto q ta pra cima dms, ta faltando coisa ali em baixo tbm"
+
+Na foto do aparelho dele sobra um vazio grande entre os dois cartões de baixo
+(Monta um Time / Ginásio) e a barra de abas.
+
+**Feito em 08/08/2026, esperando ele conferir.** Entrou a tira "melhores de
+raide" no pé da home de consulta, que era onde estava o buraco de ~450px.
+
+**Apagar quando ele disser que a home encheu.**
+
+---
+
+## [ABERTO] TrainerKit — sugestão de pra que usar o Pokémon (raide, PvP e etc)
+
+**Pedido em:** 08/08/2026
+
+**Palavras dele:** "coloca nos pokemon tbm, sujestao para oq usar, reid, pvp e etc"
+
+Ou seja: na ficha da espécie, dizer **pra que aquele Pokémon serve** — raide,
+PvP, ginásio — e não só os números.
+
+**Feito em 08/08/2026, esperando ele conferir.** Bloco "pra que usar" na ficha,
+lendo a POSIÇÃO nos rankings que o ETL já calcula (`packages/core/src/usos.ts`) —
+não o formato dos stats, que mente. Diz "#9 entre os 30 melhores" ao lado, e
+"Não briga em nada. Só Pokédex." quando é verdade.
+
+**Apagar quando ele disser que ficou bom.**
+
+---
+
+## [ABERTO] TrainerKit — os ícones novos não estão aplicados corretamente
+
+**Pedido em:** 08/08/2026
+
+**Palavras dele:** "kd novos icones? os icones novos do app ainda n estao
+aplicados corretamente"
+
+**Feito em 08/08/2026, esperando ele conferir.** Eram duas coisas: o
+`apple-touch-icon` claro no `index.html` (o iOS copia UM arquivo na hora de
+instalar, então quem instalasse de dia ficava com o quadrado branco pra sempre) e
+a marca DENTRO do app, que ainda era o desenho velho de três barrinhas com seta
+verde — no setup e na barra lateral. Agora as duas são o ovo do handoff.
+
+**Apagar quando ele vir o ícone novo no lugar certo.**
+
+---
+
+## [ABERTO] TrainerKit — tirar o aviso de PWA deixa a tela "mt pra cima"
+
+**Pedido em:** 08/08/2026
+
+**Palavras dele:** "acabei de descobrir, quando vc tira a msg de pwa q fica assim
+estranho, mt pra cima"
+
+Descoberta dele: é **fechar o aviso de instalar o PWA** que empurra o conteúdo
+pra cima e deixa a tela estranha. Provavelmente é o mesmo sintoma do item de
+cima, com a causa achada.
+
+**Feito em 08/08/2026, esperando ele conferir.** Ele achou o gatilho, mas não
+era a causa: o aviso estava TAPANDO o vazio do pé da home, e fechá-lo só mostrava
+o buraco que já existia. Resolvido junto com o item de cima.
+
+**Apagar quando ele disser que fechar o aviso não estraga mais nada.**
+
+---
+
+## [ABERTO] TrainerKit — a arte do Pokémon passa por baixo do notch
+
+**Pedido em:** 08/08/2026
+
+**Palavras dele:** "bug... ultramassando o notch"
+
+Foto do iPhone na ficha do **Weedle**: o desenho do bicho sobe até a Dynamic
+Island e some por baixo dela. A cabeça do Weedle fica atrás do recorte.
+
+**Feito em 08/08/2026, esperando ele conferir.** O `margin-top` negativo do hero
+da ficha levava o hero INTEIRO pra borda de cima — a intenção era só o degradê, mas
+a arte é a primeira faixa da grade e subia junto. Agora a faixa da arte devolve o
+recuo (`--tk-folha-topo`, o mesmo token da seta de voltar) e a altura do hero soma
+o mesmo valor, pra o bicho não encolher: o fundo continua começando na borda, a
+silhueta começa abaixo do entalhe. `styles/design.css`, `.tk-hero--ficha`.
+
+**Conferido no aparelho em 09/08/2026.** Quando ele abriu o PWA no simulador do
+iPhone 17 Pro deu pra ver com Ilha Dinâmica de verdade, o que não dava aqui
+(`env(safe-area-inset-top)` é 0 no Safari do simulador e no pane). Ficha do
+Regigigas: o degradê continua indo até a borda de cima e a arte começa ~136pt
+abaixo dela, livre da ilha.
+
+**Apagar quando ele disser que a arte parou de entrar no notch.**
+
+---
+
+## [ABERTO] TrainerKit — a barra de abas tapa a fileira de raide
+
+**Pedido em:** 09/08/2026
+
+Print da home no iPhone, sem texto; ele apontou o defeito escolhendo entre as
+opções que ofereci. A fileira **BEST RAID ATTACKERS** fica com os tiles cortados
+ao meio pela barra flutuante de Home/Pokédex/Ajustes, e sobra branco embaixo da
+barra.
+
+**Feito em 09/08/2026, esperando ele conferir.** A causa era o hero nunca ter
+sido elástico no celular: o `.tk-home-linha1` (embrulho que nasceu pra grade de
+duas colunas do PC) quebrava calado todas as regras `.tk-home > .tk-hero`, então
+a coluna tinha altura fixa — sobrava vazio nas telas altas e transbordava por
+baixo da barra nas baixas. Agora o embrulho é uma coluna flexível e o hero cresce
+e encolhe com a tela. Medido a 402×874 e 402×740: fileira inteira acima da barra,
+sem vazio e sem rolagem.
+
+**Apagar quando ele disser que a fileira aparece inteira acima da barra.**
+
+---
+
+## [ABERTO] TrainerKit — faixa azul sólida no topo da home
+
+**Pedido em:** 09/08/2026
+
+No mesmo print: acima do hero há uma tira de cor chapada, com corte reto, antes
+de o degradê começar. Parece bloco a mais ou o degradê começando no lugar errado.
+
+**Feito em 09/08/2026, esperando ele conferir.** A tira eram 38px de layout que a
+saudação ocupava e o hero cobria: a saudação ficava invisível atrás do hero, e o
+que sobrava à vista era o meio da rampa de cor do `.tk-home-topo::before`, que só
+termina 104px abaixo do topo — daí o corte reto. A saudação agora flutua sobre o
+degradê (ela já tem tinta escolhida pela luminância do topo), o hero começa em
+y=0 e a rampa não aparece mais sozinha. A arte do Pokémon desce o tanto da faixa
+da saudação, pra cara continuar livre. Com aviso de PWA na tela a saudação volta
+pra fila, e no PC ela continua sendo a primeira linha da coluna, como no
+documento.
+
+**Apagar quando ele disser que o topo da home não tem mais aquela tira.**
+
+---
+
+## [ABERTO] TrainerKit — no PWA do iPhone, "Language" cola na lista de escolhas
+
+**Pedido em:** 09/08/2026
+
+Palavras dele: *"olha o simulador de iphone... consegui abrir pwa pra vc testar,
+ja vi primeiro bug na tela principal, olha language colado nas escolhas"*.
+
+Primeira tela do onboarding no PWA instalado (iPhone 17 Pro). O título
+**Language** encosta no cartão da lista — a borda de cima do cartão passa em cima
+do rabo das letras, sem respiro nenhum entre o título e "English".
+
+**Feito em 09/08/2026, conferido no PWA do iPhone.** O `.tk-onb-title` nao tem
+margem embaixo de proposito — quem afasta e o bloco de baixo, e todos eles trazem
+o proprio `margin-top`. A lista de idiomas era a unica excecao: ela e a MESMA
+lista de Ajustes, e la vive dentro de uma secao que ja dava o respiro. Agora
+`.tk-onb-body > .tk-card` tem 20px de topo, sem tocar na lista de Ajustes.
+
+**Apagar quando ele disser que o título tem folga acima da lista.**
+
+---
+
+## [ABERTO] TrainerKit — dois idiomas somem da lista do setup
+
+**Achado por mim em:** 09/08/2026, testando o PWA no iPhone 17 Pro logo depois do
+bug do título colado.
+
+`LANGUAGES` tem dez idiomas. No PWA aparecem **oito**: 한국어 e Русский são
+cortados, e a tela não rola pra alcançar. Quem fala coreano ou russo não consegue
+escolher o próprio idioma no setup.
+
+**Feito em 09/08/2026, conferido no PWA do iPhone.** Não era corte: item de
+coluna flex encolhe por padrão, e a lista ainda tem `overflow: hidden` (é o que
+faz os cantos arredondados cortarem as linhas). Então ela não transbordava — ela
+**espremia** e comia as duas últimas linhas por dentro. O corpo via um filho que
+cabia e nunca criava rolagem, apesar de o `.tk-onb-body` ter `overflow-y: auto`.
+Com `flex: none` nos filhos do corpo o cartão fica com a altura das dez linhas e
+a rolagem acontece. Conferido rolando até Русский no aparelho.
+
+**Apagar quando ele disser que a lista chega até Русский.**
+
+---
+
+## [ABERTO] TrainerKit — a barra de abas some na ficha do Pokémon
+
+**Pedido em:** 09/08/2026
+
+**Palavras dele:** *"a barrinha com liquid glass poderia continuar aparecendo ali
+po. até mais simples de ir pra tela inicial."*
+
+Print da ficha do Regigigas no PWA: a barra Home/Pokédex/Ajustes não aparece
+enquanto a ficha está aberta. Ele quer ela ali, como atalho pra voltar pra home.
+
+**Feito em 09/08/2026, conferido no PWA do iPhone — esperando ele conferir.**
+A barra aparece na ficha e tocar numa aba fecha a ficha e leva pra aba (sem isso
+o botão trocaria a aba por baixo e pareceria não funcionar). Só na ficha: as
+folhas com rodapé próprio (Faxina, seleções em massa) ficariam com duas barras no
+mesmo canto. **Isto contraria o handoff**, que manda a barra sumir com folha
+aberta — está escrito no código que a decisão é dele.
+
+**Apagar quando ele disser que a barra aparece na ficha.**
+
+---
+
+## [ABERTO] TrainerKit — a barra de abas está feia
+
+**Pedido em:** 09/08/2026
+
+**Palavras dele:** *"essa barra tbm ta muito ruim e feia. melhora ai, claude desing
+ta lindona, e essa ai horrivel."*
+
+Comparando com o resto do app (que ele acha bonito), a barra flutuante da home
+destoa.
+
+**Feito em 09/08/2026, conferido no PWA do iPhone (escuro e claro) — esperando
+ele conferir.**
+Havia DUAS barras de vidro pintando o mesmo elemento: o `App.css` continuava
+desenhando os pseudo-elementos antigos (um anel borrado de 10px em cada borda,
+mais brilho e reflexo até 76%) por cima do desenho novo — numa barra de 50px
+isso deixava 30px de miolo entre duas bordas gordas, que é o efeito de plástico
+da captura. Os pseudo antigos foram desligados e o reflexo virou um fio de luz no
+topo. A lente da aba ativa era mais ESCURA que a barra no modo escuro (parecia
+borrão); agora acende — filme claro, sem sombra projetada, com folga maior nas
+laterais pra não colar na borda da barra na curva. O texto da aba ativa desceu de
+74% pra 45% da cor da espécie, senão perderia contraste contra a lente clara.
+
+**Apagar quando ele disser que a barra ficou bonita.**
+
+---
+
+## [ABERTO] TrainerKit — a barra de abas está muito pra cima
+
+**Pedido em:** 09/08/2026
+
+**Palavras dele:** *"tbm ela ta mt pra cima"*
+
+No print da home no PWA sobra uma faixa preta grande embaixo da barra, entre ela e
+a borda de baixo da tela.
+
+**Feito em 09/08/2026, conferido no PWA do iPhone — esperando ele conferir.**
+A conta somava a área segura ao respiro (`18px + área segura`), o que dava 52pt e
+deixava ~58pt de preto embaixo da barra — mais vazio do que a altura dela. A área
+segura não se soma ao respiro, ela SUBSTITUI parte dele:
+`max(12px, área segura - 8px)`, que dá 26pt no iPhone (o handoff pede 24) e 12px
+onde não há área segura. A bolha da IA subiu junto, senão cruzaria a barra por
+16px agora que a barra aparece na ficha.
+
+**Ele pediu de novo em 09/08/2026: "deixa mais pra baixo".** Desceu pra
+`max(10px, área segura - 16px)`, 18pt no iPhone. **Esse é o piso**: os ~13pt de
+baixo são do indicador de início (o risquinho branco), e cobrir ele põe um botão
+em cima de onde começa o gesto de sair do app. Pra descer mais, teria que ser
+diminuindo a altura da barra, não o respiro.
+
+**Apagar quando ele disser que a barra desceu.**

@@ -25,9 +25,15 @@ import {
   IconShield,
   IconSwords,
 } from "./ui/Icons.tsx";
+import { MarcaOvo } from "./ui/MarcaOvo.tsx";
 import { SpriteDownloadPanel, SpriteDownloadStrip } from "./ui/SpriteDownload.tsx";
 import { UpdateBanner } from "./ui/UpdateBanner.tsx";
-import { fecharFolhaDeCima, useTemFolha } from "./ui/folha.ts";
+import {
+  fecharFolhaDeCima,
+  fecharTodasAsFolhas,
+  useBarraTapada,
+  useTemFolha,
+} from "./ui/folha.ts";
 import { useRolouDoTopo } from "./ui/useRolouDoTopo.ts";
 import { useTabBarMinimize } from "./ui/useTabBarMinimize.ts";
 
@@ -80,6 +86,19 @@ export function App() {
   const [intent, setIntent] = useState<PokedexIntent | null>(null);
 
   const go = (next: Tab, withIntent?: PokedexIntent) => {
+    /*
+     * ⚠️ TROCAR DE ABA FECHA AS FOLHAS ABERTAS.
+     *
+     * Antes isto nao precisava existir: com folha aberta a barra sumia, entao
+     * `go` so era chamado com a tela livre. A ficha agora deixa a barra a mostra
+     * ("ate mais simples de ir pra tela inicial"), e sem esta linha o toque em
+     * "Inicio" trocaria a aba POR BAIXO da ficha — a pessoa continuaria vendo o
+     * Pokemon e concluiria que o botao nao funciona.
+     *
+     * Cada folha sai animada, e a Inicio ja esta montada por tras: o efeito e o
+     * da ficha deslizando pra fora e revelando a aba nova.
+     */
+    fecharTodasAsFolhas();
     setTab(next);
     setIntent(withIntent ?? null);
   };
@@ -109,13 +128,22 @@ export function App() {
   const rolou = useRolouDoTopo();
 
   /*
-   * A barra some quando uma folha de tela cheia esta aberta.
-   *
-   * Regra do redesenho, e ela tem motivo tecnico: a barra flutua com vidro
-   * proprio, e vidro mostra o que esta ATRAS. Com uma folha por cima, o "atras"
-   * vira a folha, e a barra fica sendo uma mancha borrada no canto.
+   * Ha folha aberta? Serve pro VEU de tela larga e pro clique fora — nao pra
+   * barra de abas, que agora pergunta outra coisa (`useBarraTapada`).
    */
   const temFolha = useTemFolha();
+
+  /*
+   * A barra some quando ha uma folha que a TAPA — e a ficha da especie deixou
+   * de ser uma delas.
+   *
+   * A regra do redesenho era "some com qualquer folha de tela cheia", e ela tem
+   * motivo tecnico: a barra flutua com vidro proprio, e vidro mostra o que esta
+   * ATRAS; com uma folha por cima, o "atras" vira a folha. Ele pesou o outro
+   * lado e decidiu: *"a barrinha com liquid glass poderia continuar aparecendo
+   * ali po. ate mais simples de ir pra tela inicial."* Ver `useFolha`.
+   */
+  const barraTapada = useBarraTapada();
 
   const species = dataset.status === "ready" ? dataset.data.species : [];
 
@@ -217,8 +245,8 @@ export function App() {
            * unica em que as tres abas nao levam a lugar nenhum — nada foi
            * configurado ainda.
            */
-          data-oculta={temFolha || !setup.done || undefined}
-          aria-hidden={temFolha || !setup.done || undefined}
+          data-oculta={barraTapada || !setup.done || undefined}
+          aria-hidden={barraTapada || !setup.done || undefined}
           aria-label={t("nav.aria")}
           style={{
             /*
@@ -254,18 +282,14 @@ export function App() {
             um nome ali comeria o espaco das proprias abas. Some pelo CSS, como
             as FERRAMENTAS.
 
-            ⚠️ O DESENHO DO TILE E O ICONE ATUAL, e nao o ovo do handoff. O ovo
-            e a marca escolhida, mas ele so existe como SVG com paths bezier — e
-            o gerador de icones deste repo desenha proceduralmente, sem
-            rasterizador de path. Ate isso ser resolvido, repetir aqui o icone
-            que o app ja usa e honesto; inventar um terceiro desenho nao.
+            ⚠️ O TILE E O OVO DO HANDOFF, e nao mais as tres barrinhas. O
+            comentario antigo aqui dizia que o ovo "so existe como SVG com paths
+            bezier" e que o gerador de icones nao rasteriza path — verdade pro
+            PNG, e irrelevante aqui: isto e um navegador, o SVG desenha sozinho.
+            Ver `ui/MarcaOvo.tsx`.
           */}
           <div className="tk-side-marca">
-            <span className="tk-side-marca-tile" aria-hidden="true">
-              <span />
-              <span />
-              <span />
-            </span>
+            <MarcaOvo size={34} />
             <span className="tk-side-marca-nome">TrainerKit</span>
           </div>
 

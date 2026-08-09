@@ -98,9 +98,43 @@
   --tk-border-strong: rgba(255, 255, 255, 0.11);
   --tk-sep: rgba(255, 255, 255, 0.07);
 
-  /* O vidro da barra de abas e das folhas. */
+  /* O vidro das folhas. */
   --tk-glass-bg: rgba(28, 30, 38, 0.4);
   --tk-glass-border: rgba(255, 255, 255, 0.12);
+
+  /*
+   * ⚠️ A BARRA DE ABAS TEM VIDRO PROPRIO, mais opaco que o das folhas.
+   *
+   * Uma folha sempre abre POR CIMA de conteudo, entao 40% de opacidade deixa
+   * ver alguma coisa atras e o desfoque tem material. A barra nao escolhe o que
+   * fica atras dela: no rodape da Inicio ela pousa sobre `--tk-bg`, que e
+   * #0A0C10. `rgba(28,30,38,.4)` sobre #0A0C10 da #12141C — uma diferenca de
+   * oito niveis, que nao se ve. O desfoque tambem nao ajuda: borrar preto da
+   * preto. Era a barra sumindo, e foi o que o Miguel viu: *"esse preto ali fico
+   * estranho dms"*.
+   *
+   * 58% sobre um cinza mais alto poe um PISO: sobre o preto ela sai #191D26 e
+   * aparece; sobre um cartao ou uma foto os 42% que restam continuam deixando
+   * passar. O vidro nao mudou de ideia, ele so parou de depender de ter sorte
+   * com o que esta atras.
+   */
+  --tk-barra-vidro: rgba(40, 44, 56, 0.58);
+
+  /*
+   * A MARCA — o tile do ovo, com as cores exatas do handoff.
+   *
+   * Sao as mesmas do gerador de PNG (`scripts/make-icons.ts`), de proposito: o
+   * icone na tela de inicio e a marca dentro do app tem que ser o MESMO
+   * desenho, que e o que ele cobrou em *"os icones novos do app ainda n estao
+   * aplicados corretamente"*. Se um dia mudar, muda nos dois.
+   */
+  --tk-marca-tile0: #33394a;
+  --tk-marca-tile1: #14171e;
+  --tk-marca-casca: #f4f6fa;
+  --tk-marca-luz: #6e4bff;
+  --tk-marca-halo: #c4b5ff;
+  --tk-marca-borda: rgba(255, 255, 255, 0.14);
+  --tk-marca-brilho: rgba(255, 255, 255, 0.22);
 
   /* Violeta "Ultra": reservado pra ACAO DO APP (botao primario, aba ativa,
      link). Nunca pra conteudo — conteudo usa a cor do tipo do Pokemon. */
@@ -282,6 +316,19 @@
 
   --tk-glass-bg: rgba(255, 255, 255, 0.6);
   --tk-glass-border: rgba(20, 24, 33, 0.08);
+  /* No claro o problema e o oposto do escuro — ver `--tk-barra-tinta`. */
+  --tk-barra-vidro: rgba(255, 255, 255, 0.66);
+
+  /* A marca no claro: o tile inverte (branco→cinza) e a casca escurece, como
+     nas duas fileiras do handoff. A racha clareia junto, senao o violeta escuro
+     some contra a casca #22262F. */
+  --tk-marca-tile0: #ffffff;
+  --tk-marca-tile1: #e3e6ec;
+  --tk-marca-casca: #22262f;
+  --tk-marca-luz: #8a6bff;
+  --tk-marca-halo: #8a6bff;
+  --tk-marca-borda: rgba(20, 24, 33, 0.1);
+  --tk-marca-brilho: rgba(255, 255, 255, 0.9);
 
   --tk-ultra: linear-gradient(180deg, #6b4bff, #5b3df5);
   --tk-ultra-solid: #5b3df5;
@@ -422,6 +469,16 @@
 
     --tk-glass-bg: rgba(255, 255, 255, 0.6);
     --tk-glass-border: rgba(20, 24, 33, 0.08);
+    --tk-barra-vidro: rgba(255, 255, 255, 0.66);
+
+    /* Marca no claro — ver a nota no bloco `[data-tk="light"]`. */
+    --tk-marca-tile0: #ffffff;
+    --tk-marca-tile1: #e3e6ec;
+    --tk-marca-casca: #22262f;
+    --tk-marca-luz: #8a6bff;
+    --tk-marca-halo: #8a6bff;
+    --tk-marca-borda: rgba(20, 24, 33, 0.1);
+    --tk-marca-brilho: rgba(255, 255, 255, 0.9);
 
     --tk-ultra: linear-gradient(180deg, #6b4bff, #5b3df5);
     --tk-ultra-solid: #5b3df5;

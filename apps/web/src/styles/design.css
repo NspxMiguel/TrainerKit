@@ -23,6 +23,31 @@
 /* ─────────────────────────────────────────────── barra de abas ─────────── */
 
 /*
+ * A geometria da barra num lugar so, porque agora ha um segundo morador.
+ *
+ * A bolha da IA mora no mesmo canto e precisa pousar ACIMA da barra desde que a
+ * ficha deixou de escondê-la. Se as duas repetissem a conta, bastaria mexer numa
+ * pra elas se sobreporem — e sobrepor e o defeito que estes tokens existem pra
+ * impedir, nao um risco teorico: com a barra em `bottom: 26` e 50 de altura, e a
+ * bolha em `bottom: 60`, elas se cruzavam por 16px.
+ */
+:root {
+  --tk-barra-h: 50px;
+  /*
+   * ⚠️ ELA ENTRA NA AREA SEGURA DE PROPOSITO. "deixa mais pra baixo", com a barra
+   * ja em 26pt — entao o piso agora nao e mais o topo da area segura, e o
+   * INDICADOR DE INICIO, o risquinho branco do iPhone. Ele ocupa os ~13pt de
+   * baixo; 18pt deixa a barra pousada logo acima dele, sem encostar.
+   *
+   * Abaixo disso nao da pra ir sem cobrir o risquinho — e ai o gesto de sair do
+   * app passa a comecar em cima de um botao.
+   */
+  --tk-barra-baixo: max(10px, calc(env(safe-area-inset-bottom) - 16px));
+  /* Onde termina a barra, medido do rodape da tela pra cima. */
+  --tk-barra-teto: calc(var(--tk-barra-baixo) + var(--tk-barra-h));
+}
+
+/*
  * Ela FLUTUA: 26px de cada lado, 24px do rodape, 58px de altura, pilula
  * completa. E a diferenca entre "barra de navegacao web" (encostada na borda)
  * e "barra do sistema" (pousada sobre o conteudo).
@@ -40,7 +65,28 @@
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: calc(18px + env(safe-area-inset-bottom));
+  /*
+   * ⚠️ A AREA SEGURA NAO SE SOMA AO RESPIRO — ela SUBSTITUI parte dele.
+   *
+   * "tbm ela ta mt pra cima."
+   *
+   * Era `18px + env(safe-area-inset-bottom)`. Num iPhone com barra de gestos
+   * isso da 18 + 34 = **52px**, e medido na captura do iPhone 17 Pro sobravam
+   * ~58px de preto embaixo da pilula: mais espaco vazio do que a propria barra
+   * tem de altura. O handoff pede 24px do rodape, e a barra do proprio iOS mora
+   * mais ou menos ai.
+   *
+   * O erro e de leitura do que a area segura significa. Ela nao e "mais um
+   * respiro alem do meu": ela e a faixa que o SISTEMA ja reserva, e um elemento
+   * flutuante so precisa nao ENTRAR nela. Somar os dois conta o respiro duas
+   * vezes, e e por isso que o vao cresce justamente nos aparelhos onde ele ja
+   * era grande.
+   *
+   * `env - 8` da 26px no iPhone (o 24 do handoff, com um fio a mais pra pilula
+   * nao raspar na barra de gestos) e cai no piso de 12px onde nao ha area
+   * segura nenhuma — telefone com botao fisico, navegador de PC, iPad.
+   */
+  bottom: var(--tk-barra-baixo);
   /*
    * ⚠️ 50px, e nao os 58px do handoff — "ta muito grande isso aq do inicio
    * pokedex e etc".
@@ -53,7 +99,7 @@
    * O que NAO encolheu: o alvo de toque continua com 50px de altura por 100+ de
    * largura, bem acima dos 44px minimos.
    */
-  height: 50px;
+  height: var(--tk-barra-h);
   /*
    * ⚠️ A LARGURA DO ITEM ATIVO MORA AQUI, e nao em dois lugares.
    *
@@ -95,6 +141,45 @@
     transform 0.28s var(--tk-ease-out);
 }
 
+/*
+ * ⚠️ HAVIA DUAS BARRAS DE VIDRO PINTANDO A MESMA BARRA, e o resultado era a
+ * "horrivel" da captura.
+ *
+ * "essa barra tbm ta muito ruim e feia. melhora ai, claude desing ta lindona, e
+ * essa ai horrivel."
+ *
+ * O `App.css` tem uma implementacao inteira de liquid glass pro iPhone, de
+ * antes do redesenho: `--tk-glass-ios` de fundo, `saturate(3) contrast(1.12)
+ * brightness(1.16)` no desfoque, e DOIS pseudo-elementos — um brilho radial e
+ * um anel de 10px com desfoque proprio, recortado por mascara.
+ *
+ * As PROPRIEDADES dela morreram sozinhas: este arquivo nao tem camada e as
+ * redeclara todas. Os PSEUDO-ELEMENTOS nao — ninguem aqui declara `::before`
+ * nem `::after` da barra, entao os dois continuaram desenhando por cima do
+ * vidro novo. E um anel de 10px numa barra de 50px de altura nao le como quina
+ * de vidro: le como moldura. Sobravam 30px de miolo entre duas bordas gordas e
+ * claras, que e exatamente o "cinza de plastico" que aparece na foto.
+ *
+ * Fica so o realce de cima, que e o que o handoff pede ("inset 0 1px 1px" mais
+ * um degrade curto no topo). Uma luz, nao tres.
+ */
+[data-platform="iphone"] .tk-tabbar::after {
+  display: none;
+}
+
+[data-platform="iphone"] .tk-tabbar::before {
+  /*
+   * Um FIO de luz, nao meia barra clara.
+   *
+   * Com o degrade indo ate 52% da altura, os 25px de cima ficavam visivelmente
+   * mais claros que os 25px de baixo — e uma capsula bipartida na horizontal nao
+   * le como vidro, le como plastico moldado. A luz de uma superficie curva vive
+   * nos primeiros milimetros.
+   */
+  background: linear-gradient(to bottom, var(--tk-glass-sheen), transparent 14%);
+  opacity: 0.45;
+}
+
 /* Some quando ha folha de tela cheia: o vidro mostra o que esta ATRAS, e atras
    passa a ser a folha — viraria uma mancha borrada no canto, sem funcao. */
 .tk-tabbar[data-oculta] {
@@ -134,8 +219,12 @@
 }
 
 .tk-tab-label {
-  font: 500 9.5px/1.1 var(--tk-font);
-  letter-spacing: 0;
+  /* 10px e 0,01em, do handoff. Os 9,5px de antes vieram de quando a barra tinha
+     58px e cada pixel de rotulo disputava com o icone; a barra encolheu, o
+     rotulo continuou encolhido, e "Settings" saia miudo demais pro tamanho do
+     alvo. */
+  font: 500 10px/1.1 var(--tk-font);
+  letter-spacing: 0.01em;
 }
 
 .tk-tab[aria-current="page"] {
@@ -1111,25 +1200,43 @@
   position: absolute;
   top: 5px;
   height: 40px;
+  /*
+   * ⚠️ 7px de folga lateral, e nao 4 — a lente ainda mordia a ponta da barra.
+   *
+   * Com a lente na primeira aba, a folga de 4px era medida em RETA, mas as duas
+   * pecas sao capsulas: o raio da barra e 25px e o da lente e 20px, e na altura
+   * da curva a distancia real entre as duas cai pra quase zero. O olho le as
+   * duas bordas como uma so, grossa — que e a "pilula dentro da pilula" da
+   * captura, e o mesmo sintoma que ele ja tinha apontado antes.
+   *
+   * 7px e a menor folga em que a curva da lente ainda anda por dentro da curva
+   * da barra em toda a volta.
+   */
   left: calc(
-    var(--tk-tab-i, 0) * 100% / (var(--tk-tabs, 3) - 1 + var(--tk-tab-ativo)) + 4px
+    var(--tk-tab-i, 0) * 100% / (var(--tk-tabs, 3) - 1 + var(--tk-tab-ativo)) + 7px
   );
   width: calc(
-    var(--tk-tab-ativo) * 100% / (var(--tk-tabs, 3) - 1 + var(--tk-tab-ativo)) - 8px
+    var(--tk-tab-ativo) * 100% / (var(--tk-tabs, 3) - 1 + var(--tk-tab-ativo)) - 14px
   );
   border-radius: 999px;
   pointer-events: none;
-  background: rgba(16, 18, 26, 0.3);
-  backdrop-filter: blur(8px) saturate(160%);
-  -webkit-backdrop-filter: blur(8px) saturate(160%);
-  box-shadow:
-    inset 0 2.5px 4px -1.5px rgba(255, 255, 255, 0.45),
-    inset 0 -2.5px 4px -1.5px rgba(255, 255, 255, 0.28),
-    inset 3px 0 4px -2px rgba(255, 255, 255, 0.16),
-    inset -3px 0 4px -2px rgba(255, 255, 255, 0.16),
-    /* Sombra curta: dentro da barra, uma longa so suja o vidro em volta — e o
-       que ela fazia (descolar do fundo) o `inset` ja faz sozinho. */
-    0 3px 8px rgba(0, 0, 0, 0.3);
+  /*
+   * ⚠️ COR E LUZ SO NOS TOKENS `--tk-lente-*`, mais abaixo neste arquivo.
+   *
+   * Aqui morava a receita literal do tema escuro — fundo, quatro refracoes e
+   * sombra — e ela estava MORTA: o bloco de tokens redeclara as tres
+   * propriedades por inteiro, sem camada e depois. Ficavam dois valores pro
+   * mesmo pixel, e o que estava escrito aqui era o que NAO pintava.
+   *
+   * Nao e detalhe de arrumacao: foi lendo estes valores mortos que eu descrevi
+   * a lente como escura. Ela ja e o que o tema disser.
+   *
+   * A saturacao continua aqui porque e material, nao cor: 130% em cima dos 180%
+   * da barra ja e o teto — mais que isso e a cor de tras vaza acesa pela lente e
+   * a pilula muda de cor a cada Pokemon.
+   */
+  backdrop-filter: blur(8px) saturate(130%);
+  -webkit-backdrop-filter: blur(8px) saturate(130%);
   transition:
     left 0.42s var(--tk-ease-out),
     width 0.42s var(--tk-ease-out);
@@ -1485,6 +1592,19 @@
 .tk-home {
   display: flex;
   flex-direction: column;
+  /* Ancora da saudacao flutuante — ver `.tk-home-topo`. Sem isto ela se
+     penduraria na `.tk-main` e subiria pra dentro do entalhe. */
+  position: relative;
+  /*
+   * A FAIXA DA SAUDACAO: do alto da tela ate o fim do "Boa noite, Miguel.".
+   *
+   * Um token so, lido em tres lugares (piso do hero, recuo da arte e, por
+   * consequencia, onde o nome do Pokemon pode chegar). Sao o respiro do topo
+   * mais a linha da saudacao (26px) mais 8 de folga. Escrever nos tres seria
+   * pedir pra eles se separarem no dia em que o respiro mudar — foi o que
+   * aconteceu com o `--tk-safe-top` da ficha.
+   */
+  --tk-saud-faixa: calc(var(--tk-respiro-topo) + 34px);
   /*
    * 10px e nao 12: sao 5 vaos na coluna, entao dois pixels em cada devolvem 10
    * ao hero. Parece pouco escrito e nao e — junto com a saudacao numa linha e a
@@ -1510,7 +1630,31 @@
  * sem isso — e sem ele a coluna estouraria a tela exatamente nos aparelhos
  * baixos, que sao os que mais precisam do ajuste.
  */
-.tk-home > .tk-hero {
+/*
+ * ⚠️ O EMBRULHO `linha1` TAMBEM PRECISA SER ELASTICO — senao o `flex: 1` daqui
+ * de baixo nao alcanca ninguem.
+ *
+ * `.tk-home-linha1` nasceu pra grade de duas colunas do PC (hero + cartao de
+ * numeros). No celular ele ficou como um `div` comum entre a coluna e o hero, e
+ * isso quebrou os dois seletores de filho direto logo abaixo: o hero parou de
+ * receber `flex: 1` e parou de receber `min-height: 0`, entao passou a valer o
+ * `min-height: 320px` do `.tk-hero` — altura FIXA.
+ *
+ * Era esse o outro defeito do print: a coluna somava menos que a tela e sobrava
+ * um vao morto embaixo da fileira de raide; numa tela mais baixa (o Safari com
+ * a barra de endereco) a mesma coluna passa do fim e a fileira vai parar
+ * debaixo da barra de abas, que e flutuante. O hero, que e o unico bloco que
+ * deveria absorver a diferenca, ficava parado em 320px nos dois casos.
+ */
+.tk-home > .tk-home-linha1 {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.tk-home > .tk-hero,
+.tk-home > .tk-home-linha1 > .tk-hero {
   flex: 1 1 auto;
   /*
    * ⚠️ PISO DE 46% DA TELA, e nao `min-height: 0`.
@@ -1541,6 +1685,52 @@
    */
   min-height: 0;
 }
+
+/*
+ * ⚠️ UM PISO, SIM — mas medido pela SAUDACAO, nao pelo tamanho do bicho.
+ *
+ * O zero acima continua certo pelo motivo que ele diz: piso escolhido pra o
+ * Pokemon ficar bonito e palpite sobre o que os outros blocos ocupam. Este aqui
+ * e outra coisa — e a condicao pra saudacao flutuante nao colidir.
+ *
+ * Com a saudacao fora do fluxo (ver `.tk-home-topo`), ela ocupa a faixa
+ * `--tk-respiro-topo` ate ~+26px SOBRE o hero. O bloco do nome vive no pe do
+ * hero e tem altura fixa (`--tk-hero-bloco`), entao quanto mais baixo o hero,
+ * mais alto o nome sobe. Medido a 402x660: hero de 182px punha "Eternatus" aos
+ * 36px — em cima do "Up late, Trainer.".
+ *
+ * O piso e "o nome comeca abaixo da saudacao" mais o minimo pra o bicho existir:
+ * a faixa da saudacao, o bloco do nome, e `--tk-hero-arte-min`. As duas
+ * primeiras parcelas nao sao opiniao — se o respiro mudar (entalhe) ou o bloco
+ * crescer, elas acompanham sozinhas.
+ *
+ * A terceira e o unico numero escolhido aqui, e ela existe por causa das telas
+ * baixas. A 402x660 (classe iPhone SE) ha ~427px de blocos fixos abaixo do hero
+ * (CTA, os dois botoes, a fileira de raide, a barra); sem esta parcela o hero
+ * ficava com 233px, o bloco levava 146 e o recuo da arte comia os 87 que
+ * sobravam — a arte ficava com ZERO e o Pokemon sumia da home. Com ela a home
+ * rola ~100px NESSAS telas, e so nelas: a 402x740 o hero elastico ja passa do
+ * piso, entao nada muda e nada rola.
+ */
+.tk-home > .tk-home-linha1 > .tk-hero {
+  min-height: calc(var(--tk-saud-faixa) + var(--tk-hero-bloco) + var(--tk-hero-arte-min, 100px));
+}
+
+/*
+ * ⚠️ E A ARTE COMECA ABAIXO DA SAUDACAO — "deixa sempre a cara livre, sem nada".
+ *
+ * A regra dele vale pro texto que o app poe por cima do bicho, e a saudacao
+ * passou a ser um desses textos. Sem este recuo a faixa de cima da grade comeca
+ * na borda da tela e o topo da silhueta (5% dela) cai bem atras do "Boa noite,
+ * Fulano." — a mesma cara tapada da ficha, so que por outra coisa.
+ *
+ * Mesmo movimento do `.tk-hero--ficha > .tk-hero-art`, e pela mesma razao: o
+ * DEGRADE continua indo ate a borda de cima, so a silhueta e que nao.
+ */
+.tk-home > .tk-home-linha1 > .tk-hero > .tk-hero-art {
+  margin-top: var(--tk-saud-faixa);
+}
+
 .tk-cta {
   /*
    * ⚠️ 58px e 54px sao as MEDIDAS DO HANDOFF ("pílula 54px" e "duas
@@ -1576,8 +1766,10 @@
  */
 .tk-hero--ficha {
   /* Altura propria: aqui nao ha coluna de tela cheia repartindo sobra, porque
-     a ficha rola. Proporcional a tela mesmo assim — o handoff pede 38svh. */
-  height: clamp(280px, 38svh, 420px);
+     a ficha rola. Proporcional a tela mesmo assim — o handoff pede 38svh.
+     +`--tk-folha-topo`: ver a nota da arte logo abaixo — os 38svh sao o hero
+     VISIVEL, e o pedaco que sangra pra debaixo do entalhe e a mais. */
+  height: calc(clamp(280px, 38svh, 420px) + var(--tk-folha-topo, var(--tk-safe-top)));
   min-height: 0;
   max-height: none;
   /*
@@ -1593,6 +1785,33 @@
   margin-top: calc(var(--tk-folha-topo, var(--tk-safe-top)) * -1);
   margin-bottom: 20px;
   border-radius: 0 0 30px 30px;
+}
+
+/*
+ * ⚠️ QUEM SANGRA PRA DEBAIXO DO ENTALHE E O DEGRADE, NAO O BICHO.
+ *
+ * "bug... ultramassando o notch"
+ *
+ * Foto da ficha do Weedle: a cabeca dele desaparecia atras da ilha dinamica. O
+ * `margin-top` negativo acima leva o hero INTEIRO pra borda de cima da tela —
+ * era essa a intencao pro gradiente, e continua sendo — mas a arte e a primeira
+ * faixa da grade, entao ela subia junto e o topo da silhueta (5% da caixa, ~9px
+ * num iPhone) caia dentro do recorte.
+ *
+ * Devolver o recuo AQUI, na faixa da arte, separa as duas coisas: o fundo
+ * continua comecando na borda, a silhueta comeca abaixo do entalhe.
+ *
+ * ⚠️ E por isso que a altura do hero soma o mesmo token. Se so a arte descesse,
+ * a faixa dela perderia os ~63px do entalhe e o Pokemon encolheria de novo —
+ * "pokemon muito pequeno" ja foi reclamacao dele uma vez. Somando os dois, os
+ * 38svh do handoff passam a valer pro hero VISIVEL e a arte fica do tamanho
+ * desenhado; o que cresce e so o pedaco escondido debaixo da barra de status.
+ *
+ * O mesmo token da barra da seta de voltar (`.tk-hero-topo`), pelo motivo de
+ * sempre: os tres tem que se mexer juntos quando o recuo da folha mudar.
+ */
+.tk-hero--ficha > .tk-hero-art {
+  margin-top: var(--tk-folha-topo, var(--tk-safe-top));
 }
 
 /* A seta de voltar, em vidro escuro sobre o gradiente — o mesmo material do
@@ -1737,14 +1956,80 @@
   transition: background 0.5s var(--tk-ease-out);
 }
 
+/*
+ * ⚠️ A SAUDACAO FLUTUA SOBRE O HERO — nao e uma faixa da coluna.
+ *
+ * Ele mandou o print da home e apontou "a faixa azul no topo": uma tira de cor
+ * chapada, com corte reto, antes de o degrade comecar. Medindo, eram DOIS
+ * defeitos com a mesma origem.
+ *
+ * A saudacao era um item no fluxo, 26px de texto + 10 de vao. O hero, logo
+ * depois, sobe `-(--tk-respiro-topo)` pra encostar na borda de cima — entao ele
+ * comecava em 38px em vez de 0 e pintava POR CIMA da saudacao. "Up late,
+ * Trainer." existia no DOM, com a cor certa, e nunca apareceu no celular:
+ * `elementFromPoint` no meio dela devolvia `.tk-hero`. O que sobrava visivel
+ * eram os 38px da faixa `.tk-home-topo::before` — e a rampa dela termina em
+ * `--tk-respiro-topo + 52px`, ou seja, aos 38px ainda estava no meio do
+ * caminho. Dai a cor chapada mais funda com emenda dura: o "bloco a mais".
+ *
+ * Tirar a saudacao do fluxo resolve os dois de uma vez, e e o que o desenho
+ * sempre disse — ver a nota do `.tk-hero`: "o nome do treinador flutua sobre
+ * ele". Mesmo movimento (e mesmo motivo) do `.tk-hero-topo` na ficha: "a barra
+ * nunca foi conteudo empilhado, e um controle sobre o gradiente".
+ *
+ * O hero passa a comecar em 0, sem faixa nenhuma acima, e a tinta ja estava
+ * pronta pra isso: `.tk-saudacao` usa `--tk-accent-topo-ink`, escolhido por
+ * luminancia contra a PRIMEIRA PARADA do gradiente do hero — que e exatamente
+ * o que fica atras dela agora.
+ *
+ * So no celular: na tela larga (>=900px) o hero e um cartao dentro da grade e
+ * a saudacao divide a linha com a busca, entao la ela volta pro fluxo.
+ */
 .tk-home-topo {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding-top: 2px;
   flex: none;
+}
+
+/*
+ * ⚠️ O `z-index` VAI NOS FILHOS, e nao no `.tk-home-topo`.
+ *
+ * Foi a primeira tentativa e ela pintou uma tarja: com `z-index` no proprio
+ * cabecalho ele vira contexto de empilhamento, e o `::before` — a faixa de cor
+ * de 252px, que existe pra cobrir o topo quando o hero NAO sobe (caso do aviso
+ * de instalacao) — sobe junto dentro desse contexto. O `z-index: -1` dele
+ * passa a valer so contra os irmaos de dentro, e a faixa cobria os primeiros
+ * 245px do Pokemon.
+ *
+ * Nos filhos, o contexto continua sendo a raiz: o texto sobe acima do hero
+ * (que e `position: relative` sem z-index) e a faixa continua embaixo de tudo,
+ * onde sempre esteve.
+ */
+.tk-home-topo > * {
+  position: relative;
+  z-index: 1;
+}
+
+/*
+ * ⚠️ COM AVISO NA HOME, A SAUDACAO VOLTA PRA FILA.
+ *
+ * Mesma condicao (e o mesmo `:has`) que ja impede o hero de subir quando ha um
+ * aviso — ver a nota logo abaixo do `.tk-hero`. Se ela continuasse flutuando no
+ * topo, cairia justamente em cima do "Instale o TrainerKit": o aviso e o
+ * primeiro do fluxo, e o hero, que era o fundo dela, foi pra baixo dele.
+ *
+ * Repetir a pergunta em vez de listar avisos vale aqui pelo mesmo motivo de la:
+ * quando nao ha aviso, a regra nem casa.
+ */
+.tk-home:has(> .tk-banner) > .tk-home-topo {
+  position: static;
 }
 
 /*
@@ -1970,7 +2255,11 @@
    * quem tem que ceder é o suporte. Por isso a barra escurece/tinge mais no
    * claro, e não menos.
    */
-  background: color-mix(in srgb, var(--tk-accent, transparent) var(--tk-barra-tinta, 12%), var(--tk-glass-bg));
+  background: color-mix(
+    in srgb,
+    var(--tk-barra-cor, var(--tk-accent, transparent)) var(--tk-barra-tinta, 12%),
+    var(--tk-barra-vidro)
+  );
   transition:
     background 0.5s var(--tk-ease-out),
     opacity 0.22s var(--tk-ease-out),
@@ -2598,7 +2887,20 @@
 .tk-bubble {
   position: fixed;
   right: 18px;
-  bottom: calc(26px + env(safe-area-inset-bottom));
+  /*
+   * ⚠️ ACIMA DA BARRA DE ABAS, que voltou a existir aqui.
+   *
+   * Ela morava em `26px + area segura` — 60px do rodape num iPhone —, e isso
+   * estava certo enquanto a ficha escondia a barra: o canto era so dela. Com a
+   * barra a mostra na ficha ("ate mais simples de ir pra tela inicial"), a barra
+   * ocupa de 26 a 76 e a bolha de 60 a 114: dezesseis pixels de sobreposicao,
+   * bem no canto direito, que e onde ficam "Ajustes" e a estrela.
+   *
+   * `--tk-barra-teto` e onde a barra acaba. Os 12px sao o mesmo vao que separa a
+   * barra do rodape — a bolha pousa sobre a barra com o respiro que a barra tem
+   * sobre a tela.
+   */
+  bottom: calc(var(--tk-barra-teto) + 12px);
   width: 54px;
   height: 54px;
   border-radius: 999px;
@@ -4472,20 +4774,51 @@
   --tk-chao-perto: rgba(0, 0, 0, 0.5);
   --tk-chao-longe: rgba(0, 0, 0, 0.18);
 
-  /* A lente que viaja entre as abas. */
-  --tk-lente-fundo: rgba(16, 18, 26, 0.3);
-  --tk-lente-borda: transparent;
-  --tk-lente-luz-topo: rgba(255, 255, 255, 0.45);
-  --tk-lente-luz-pe: rgba(255, 255, 255, 0.28);
-  --tk-lente-luz-lado: rgba(255, 255, 255, 0.16);
-  --tk-lente-sombra: 0 3px 8px rgba(0, 0, 0, 0.3);
+  /*
+   * A lente que viaja entre as abas.
+   *
+   * ⚠️ NO ESCURO ELA ACENDE. Era o contrario, e era o defeito.
+   *
+   * O fundo dela era `rgba(16,18,26,.3)` — mais ESCURO que a propria barra
+   * (`--tk-barra-vidro`, que sai perto de #191D26 sobre o preto). Uma lente que
+   * escurece o suporte nao le como peca acesa: le como mancha. O que se via na
+   * captura era isso, e as quatro refracoes brancas em volta pioravam — davam a
+   * mancha um contorno difuso, que e a receita de "borrado".
+   *
+   * Agora e um filme de LUZ: 10% de branco sobre a barra a levam pra perto de
+   * #2C2F38, uma diferenca que se ve de relance, e uma unica luz no topo com um
+   * fio de borda fecham a peca. A regra continua a mesma do resto do app — no
+   * escuro o selecionado e mais claro que o suporte; no claro, mais branco.
+   *
+   * As luzes laterais foram a zero de proposito. Numa pilula de 40px de altura
+   * elas caem em cima da curva, e o que deveria ser espessura vira um halo.
+   */
+  --tk-lente-fundo: rgba(255, 255, 255, 0.1);
+  --tk-lente-borda: rgba(255, 255, 255, 0.16);
+  --tk-lente-luz-topo: rgba(255, 255, 255, 0.26);
+  --tk-lente-luz-pe: rgba(255, 255, 255, 0.05);
+  --tk-lente-luz-lado: transparent;
+  /* Sem sombra projetada: a lente esta DENTRO da barra, e sombra de peca dentro
+     de peca e o que fazia a borda dela sair difusa em vez de definida. */
+  --tk-lente-sombra: 0 0 0 rgba(0, 0, 0, 0);
   /* A sombra da barra de abas contra a tela. */
   --tk-barra-sombra: 0 12px 30px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.14);
   --tk-barra-tinta: 12%;
   --tk-indicador-forca: 26%;
-  /* No escuro a pílula ACENDE, então a cor da espécie já é a mais forte da
-     barra e quase não precisa ceder. */
-  --tk-aba-ativa: color-mix(in srgb, var(--tk-accent-fg, var(--tk-ultra-solid)) 74%, var(--tk-text));
+  /*
+   * ⚠️ 74% ERAM CONTRA A LENTE ESCURA. A lente virou clara, a conta mudou.
+   *
+   * A medicao antiga (12,4:1 nas inativas contra 5,15:1 na ativa) foi feita
+   * quando a lente ESCURECIA a barra: a aba ativa tinha o fundo mais escuro da
+   * peca, e um lavanda a 74% de especie ainda sobrevivia ali. Agora a lente
+   * clareia, o fundo da ativa e o mais CLARO da barra, e o mesmo lavanda perdeu
+   * o contraste que tinha — o defeito voltaria pela porta oposta.
+   *
+   * 45% mantem a matiz da especie (no Eternatus sai um azul-lavanda, nao um
+   * cinza) e devolve o brilho. E a mesma logica de sempre: a cor tem que ser
+   * garantida contra a superficie em que ela POUSA, e a superficie mudou.
+   */
+  --tk-aba-ativa: color-mix(in srgb, var(--tk-accent-fg, var(--tk-ultra-solid)) 45%, var(--tk-text));
 
   /* Cartões e botões secundários: base, quanto de espécie entra, e o relevo. */
   --tk-cartao-base: var(--tk-surface-2);
@@ -4543,6 +4876,22 @@
    * ativo ficava em 2,4:1 em cima dela.
    */
   --tk-barra-tinta: 26%;
+  /*
+   * ⚠️ NO CLARO A BARRA PEGA A COR APAGADA, e nao o acento cru.
+   *
+   * Os 26% acima existem por causa da lente e continuam: no claro a peca
+   * selecionada é branca, e o suporte tem que ceder. O que estava errado era o
+   * QUE se mistura. 26% de um acento cru sobre vidro branco entrega o acento
+   * quase puro em versao pastel — na Pokedex do Weedle a barra saiu bege, cor de
+   * areia. *"modo claro tbm estranho"*.
+   *
+   * Misturando o acento com a tinta da pagina antes, a barra continua
+   * escurecendo o tanto que a lente precisa, e continua sendo POSSIVEL ver de
+   * que espécie ela veio — só que como um cinza puxado pro tom, e nao como a cor
+   * chapada. Cor de suporte se vê de canto de olho; ela nao pode ser a coisa
+   * mais saturada da tela.
+   */
+  --tk-barra-cor: color-mix(in srgb, var(--tk-accent, transparent) 42%, var(--tk-text));
   --tk-indicador-forca: 42%;
   /* No claro a conta é outra: `--tk-accent-fg-claro` tem luminância ≤ 0,146, e
      sobre a pílula clara isso dá 4,4:1 — abaixo do mínimo e MUITO abaixo dos
@@ -4552,7 +4901,8 @@
   --tk-lente-borda: rgba(16, 19, 25, 0.08);
   --tk-lente-luz-topo: rgba(255, 255, 255, 0.9);
   --tk-lente-luz-pe: rgba(16, 19, 25, 0.04);
-  --tk-lente-luz-lado: rgba(255, 255, 255, 0.5);
+  /* Sem luz lateral: numa pilula de 40px ela cai na curva e vira halo. */
+  --tk-lente-luz-lado: transparent;
   --tk-lente-sombra: 0 2px 8px rgba(16, 19, 25, 0.18);
   --tk-barra-sombra:
     0 8px 24px -6px rgba(16, 19, 25, 0.16), 0 1px 2px rgba(16, 19, 25, 0.06),
@@ -4637,7 +4987,8 @@
     --tk-lente-borda: rgba(16, 19, 25, 0.08);
     --tk-lente-luz-topo: rgba(255, 255, 255, 0.9);
     --tk-lente-luz-pe: rgba(16, 19, 25, 0.04);
-    --tk-lente-luz-lado: rgba(255, 255, 255, 0.5);
+    /* Sem luz lateral: numa pilula de 40px ela cai na curva e vira halo. */
+  --tk-lente-luz-lado: transparent;
     --tk-lente-sombra: 0 2px 8px rgba(16, 19, 25, 0.18);
     --tk-barra-sombra:
       0 8px 24px -6px rgba(16, 19, 25, 0.16), 0 1px 2px rgba(16, 19, 25, 0.06),
@@ -5559,8 +5910,12 @@
     color: var(--tk-v-investir);
   }
 
-  /* A saudacao e a data dividem a linha com o avatar, como no documento. */
+  /* A saudacao e a data dividem a linha com o avatar, como no documento.
+     `position: static` desfaz o flutuar do celular: aqui ela e a PRIMEIRA LINHA
+     da coluna, com a busca do lado, e o hero e um cartao que nao sobe pra
+     borda — nao ha gradiente pra ela flutuar em cima. */
   .tk-home-topo {
+    position: static;
     align-items: flex-start;
   }
 
@@ -6018,42 +6373,9 @@
     padding: 6px 8px 20px;
   }
 
-  .tk-side-marca-tile {
-    flex: none;
-    width: 34px;
-    height: 34px;
-    border-radius: 11px;
-    background: linear-gradient(160deg, #33394a, #14171e 70%);
-    border: 0.5px solid rgba(255, 255, 255, 0.14);
-    display: grid;
-    align-content: center;
-    justify-items: start;
-    gap: 3px;
-    padding: 0 8px;
-  }
-
-  /* As tres barras da marca atual, em miniatura. A terceira e a verde que
-     "decide" — e o que o nome do commit da marca chama de "tres barras e uma
-     decisao". */
-  .tk-side-marca-tile > span {
-    display: block;
-    height: 3px;
-    border-radius: 2px;
-    background: var(--tk-txt);
-  }
-
-  .tk-side-marca-tile > span:nth-child(1) {
-    width: 11px;
-  }
-
-  .tk-side-marca-tile > span:nth-child(2) {
-    width: 15px;
-  }
-
-  .tk-side-marca-tile > span:nth-child(3) {
-    width: 8px;
-    background: var(--tk-v-investir);
-  }
+  /* O tile de 34px do documento de desktop — o desenho e o mesmo `.tk-marca-ovo`
+     do setup, so que menor. Ver a nota longa no `App.css`: aqui tambem eram as
+     tres barrinhas antigas. */
 
   .tk-side-marca-nome {
     font: 700 15px/1 var(--tk-font);

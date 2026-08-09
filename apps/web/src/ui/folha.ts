@@ -29,7 +29,29 @@ import { useGestoVoltar } from "./gestoVoltar.ts";
 /** Precisa bater com a duracao de `[data-saindo]` no CSS. */
 const DURACAO = 180;
 
-export function useFolha(onClose: () => void): {
+export function useFolha(
+  onClose: () => void,
+  opcoes?: {
+    /**
+     * Esta folha deixa a barra de abas aparecendo?
+     *
+     * ⚠️ ISTO CONTRARIA O HANDOFF, e e decisao dele: *"a barrinha com liquid
+     * glass poderia continuar aparecendo ali po. ate mais simples de ir pra
+     * tela inicial."*
+     *
+     * O documento de desenho diz "some quando uma folha de tela cheia esta
+     * aberta", e o motivo escrito aqui embaixo (o vidro passaria a borrar a
+     * folha, sem funcao) continua verdadeiro. So que ele pesou outra coisa: da
+     * ficha de um Pokemon nao ha atalho pra Inicio — e preciso voltar, e as
+     * vezes voltar duas vezes, porque ficha abre de dentro de ficha.
+     *
+     * Fica por folha, e nao global, porque nem toda folha pode: as que tem
+     * rodape proprio (`.tk-sheet-full--barra`, a Faxina e as selecoes em massa)
+     * teriam duas barras empilhadas no mesmo canto.
+     */
+    mantemBarra?: boolean;
+  },
+): {
   saindo: boolean;
   /**
    * A raiz da folha. Espalhe em quem tem `tk-sheet-full`.
@@ -113,8 +135,13 @@ export function useFolha(onClose: () => void): {
   const fecharRef = useRef(fechar);
   fecharRef.current = fechar;
 
+  // Lido uma vez, no registro: uma folha nao troca de ideia sobre a barra no
+  // meio da vida, e reagir a isso exigiria refazer o efeito — que e exatamente
+  // o que a nota acima explica que nao pode acontecer.
+  const mantemBarra = opcoes?.mantemBarra ?? false;
+
   useEffect(() => {
-    const entrada = () => fecharRef.current();
+    const entrada: Folha = { fechar: () => fecharRef.current(), mantemBarra };
     pilha.push(entrada);
     mudou();
     return () => {
@@ -122,7 +149,7 @@ export function useFolha(onClose: () => void): {
       if (i !== -1) pilha.splice(i, 1);
       mudou();
     };
-  }, []);
+  }, [mantemBarra]);
 
   const ref = useRef<HTMLDivElement>(null);
   useGestoVoltar(ref, fechar);
@@ -142,22 +169,44 @@ export function useFolha(onClose: () => void): {
  * sem passar. Uma store nova exigiria lembrar de registrar cada uma, que e
  * exatamente o tipo de "lembrar" que ja falhou tres vezes neste arquivo.
  */
-const pilha: Array<() => void> = [];
+type Folha = { fechar: () => void; mantemBarra: boolean };
+
+const pilha: Folha[] = [];
 const ouvintesFolha = new Set<() => void>();
 
 function mudou(): void {
   for (const fn of ouvintesFolha) fn();
 }
 
+function assinar(fn: () => void): () => void {
+  ouvintesFolha.add(fn);
+  return () => {
+    ouvintesFolha.delete(fn);
+  };
+}
+
 export function useTemFolha(): boolean {
+  return useSyncExternalStore(assinar, () => pilha.length > 0, () => false);
+}
+
+/**
+ * A barra de abas tem que sumir agora?
+ *
+ * ⚠️ NAO E O MESMO QUE `useTemFolha`, e foi por isso que virou funcao propria.
+ *
+ * "Ha folha aberta" e "a barra tem que sumir" eram a mesma pergunta ate ele
+ * pedir a barra de volta na ficha. Agora sao duas: o veu de tela larga e o
+ * congelamento da rolagem continuam olhando pra qualquer folha, e so a barra
+ * olha pra ESTA.
+ *
+ * Basta UMA folha que tape pra barra sumir. Ficha abre ficha, e ficha tambem
+ * abre a Faxina — se a de cima tem rodape proprio, a barra nao pode estar la,
+ * mesmo que a de baixo permitisse.
+ */
+export function useBarraTapada(): boolean {
   return useSyncExternalStore(
-    (fn) => {
-      ouvintesFolha.add(fn);
-      return () => {
-        ouvintesFolha.delete(fn);
-      };
-    },
-    () => pilha.length > 0,
+    assinar,
+    () => pilha.some((f) => !f.mantemBarra),
     () => false,
   );
 }
@@ -174,5 +223,20 @@ export function useTemFolha(): boolean {
  * de cima orfa por cima de um veu que ja nao existe.
  */
 export function fecharFolhaDeCima(): void {
-  pilha.at(-1)?.();
+  pilha.at(-1)?.fechar();
+}
+
+/**
+ * Fecha TODAS as folhas abertas, cada uma com a animacao de saida dela.
+ *
+ * Existe por causa da barra de abas na ficha: com a barra visivel por cima de
+ * uma folha, tocar em "Inicio" tem que levar pra Inicio. Sem isto a aba trocaria
+ * por baixo e a pessoa continuaria vendo a ficha — um botao que parece nao
+ * funcionar, que e pior do que nao ter o botao.
+ *
+ * Itera sobre uma COPIA: cada `fechar` acaba desmontando a folha, e desmontar
+ * mexe na pilha durante o laco.
+ */
+export function fecharTodasAsFolhas(): void {
+  for (const folha of [...pilha]) folha.fechar();
 }
