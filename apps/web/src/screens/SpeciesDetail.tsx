@@ -16,6 +16,7 @@ import {
   rankMovesets,
   shadowDamageMultiplier,
   topSpreads,
+  usos,
   withFrustration,
   type Context,
   type League,
@@ -30,7 +31,7 @@ import {
   type DatasetSpecies,
 } from "../data/useDataset.ts";
 import { moveLabel, useLanguage, useShowTranslation } from "../i18n/language.ts";
-import { useT, type Key } from "../i18n/t.ts";
+import { formatNumber, useT, type Key } from "../i18n/t.ts";
 import { tetoDePowerUp, useSetup } from "../onboarding/setup.ts";
 import {
   addPokemon,
@@ -50,6 +51,67 @@ import { useSpriteSettings } from "../sprites/settings.ts";
 import { enquadrar, usarPaleta } from "../ui/paleta.ts";
 import { IVCalculator } from "./IVCalculator.tsx";
 import { RaidCounters } from "./RaidCounters.tsx";
+
+/**
+ * PRA QUE USAR — a resposta que a ficha nao dava.
+ *
+ * *"coloca nos pokemon tbm, sujestao para oq usar, reid, pvp e etc"*. A ficha
+ * ja trazia os stats base e o que o assistente ACHA do formato do bicho, e as
+ * duas coisas exigem que a pessoa saiba converter numero em decisao. Este bloco
+ * faz a conversao: onde ele entra, quao bom ele e la, e em que posicao — o
+ * numero fica junto porque "Dos melhores" sem o "#7 de 812" atras e opiniao.
+ *
+ * A ausencia tambem e resposta, e por isso o caso vazio nao esconde o bloco:
+ * "Não briga em nada. Só Pokédex." fecha a pergunta. Sumir com a secao deixaria
+ * a pessoa procurando a informacao em outra tela.
+ */
+const NIVEL_KEY = { topo: "usos.topo", bom: "usos.bom", serve: "usos.serve" } as const;
+const ONDE_KEY = {
+  raide: "usos.raide",
+  great: "usos.great",
+  ultra: "usos.ultra",
+  master: "usos.master",
+} as const;
+
+function BlocoUsos({ speciesId, data }: { speciesId: string; data: Dataset }) {
+  const { t, language } = useT();
+  const lista = useMemo(() => usos(speciesId, data.rankings), [speciesId, data.rankings]);
+
+  // Base de terceiro sem rankings: a secao some inteira. Sem lista nao ha
+  // posicao, e sem posicao este bloco seria exatamente o palpite que ele existe
+  // pra substituir.
+  if (!data.rankings) return null;
+
+  return (
+    <>
+      <div className="tk-overline" style={{ display: "block", marginTop: 24 }}>
+        {t("usos.title")}
+      </div>
+      <section className="tk-card" style={{ marginTop: 10, display: "grid", gap: 10 }}>
+        {lista.length === 0 ? (
+          <p className="tk-body" style={{ margin: 0 }}>
+            {t("usos.none")}
+          </p>
+        ) : (
+          lista.map((u) => (
+            <div className="tk-row tk-row--semselo tk-row--empilha" key={u.onde}>
+              <span className="tk-row-meio">
+                <span className="tk-row-label">{t(ONDE_KEY[u.onde])}</span>
+                <span className="tk-caption">
+                  {t("usos.pos", {
+                    n: formatNumber(u.posicao, language),
+                    total: formatNumber(u.total, language),
+                  })}
+                </span>
+              </span>
+              <span className="tk-row-value">{t(NIVEL_KEY[u.nivel])}</span>
+            </div>
+          ))
+        )}
+      </section>
+    </>
+  );
+}
 
 interface Props {
   species: DatasetSpecies;
@@ -182,7 +244,9 @@ export function SpeciesDetail({
   /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
      caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
      escape volta a piscar, e so aquele. */
-  const { saindo, ref: refFolha, fechar } = useFolha(onClose);
+  /* `mantemBarra`: a ficha e a unica folha que deixa a barra de abas visivel —
+     "ate mais simples de ir pra tela inicial". Ver a nota em `useFolha`. */
+  const { saindo, ref: refFolha, fechar } = useFolha(onClose, { mantemBarra: true });
   /* Tirar da colecao pede dois toques — ver o botao la embaixo. */
   const [confirmandoTirar, setConfirmandoTirar] = useState(false);
 
@@ -748,7 +812,11 @@ export function SpeciesDetail({
       */}
       {salvo && <BlocoTroca owned={salvo} baseStats={species.baseStats} />}
 
-      <div className="tk-overline" style={{ display: "block", marginTop: 26 }}>
+      {/* Antes dos stats base de proposito: a conclusao vem primeiro, os
+          numeros que a sustentam vem logo abaixo. */}
+      <BlocoUsos speciesId={species.id} data={data} />
+
+      <div className="tk-overline" style={{ display: "block", marginTop: 24 }}>
         {t("species.baseStats")}
       </div>
       <section className="tk-card" style={{ marginTop: 10, display: "grid", gap: 10 }}>

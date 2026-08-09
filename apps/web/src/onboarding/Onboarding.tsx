@@ -11,6 +11,7 @@ import { useT } from "../i18n/t.ts";
 import { InstallGuide } from "../screens/InstallGuide.tsx";
 import { useInstallState } from "../storage/install.ts";
 import { IconDownload, IconGrid, IconSearch } from "../ui/Icons.tsx";
+import { MarcaOvo } from "../ui/MarcaOvo.tsx";
 import {
   TRAINER_LEVELS,
   tetoDePowerUp,
@@ -193,11 +194,7 @@ export function Onboarding() {
 
         {current === "boas-vindas" && (
           <>
-            <div className="tk-onb-mark" aria-hidden="true">
-              <span />
-              <span />
-              <span />
-            </div>
+            <MarcaOvo size={84} className="tk-onb-mark" />
             <h1 className="tk-onb-title">TrainerKit</h1>
             <p className="tk-onb-sub">{t("onb.tagline")}</p>
 
@@ -429,7 +426,7 @@ export function Onboarding() {
 
         {current === "instalar" && (
           <>
-            <div className="tk-onb-mark tk-onb-mark--small" aria-hidden="true">
+            <div className="tk-marca-ovo tk-onb-mark tk-onb-mark--small" aria-hidden="true">
               <IconDownload size={30} />
             </div>
             <h1 className="tk-onb-title">{t("onb.lastThing")}</h1>

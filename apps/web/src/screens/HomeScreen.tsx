@@ -16,7 +16,7 @@ import {
 
 import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
 import { moveLabel, useLanguage } from "../i18n/language.ts";
-import { useT, type Key } from "../i18n/t.ts";
+import { formatNumber, useT, type Key } from "../i18n/t.ts";
 import type { PokedexIntent } from "../App.tsx";
 import { tetoDePowerUp, useSetup } from "../onboarding/setup.ts";
 import { typeColor, typeKey } from "../sprites/provider.ts";
@@ -1231,6 +1231,109 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
           */}
           {colecao && !meus && (
             <Vazio titulo={t("home.empty.title")} frase={t("home.empty.body")} />
+          )}
+
+          {/*
+            ⚠️ O QUE FECHA A HOME NO MODO SO CONSULTA.
+
+            *"eu sinto q ta pra cima dms, ta faltando coisa ali em baixo tbm"*, e
+            depois a causa: *"quando vc tira a msg de pwa q fica assim estranho,
+            mt pra cima"*.
+
+            Tirar o aviso de PWA nao movia nada pra cima — ele devolvia ao hero o
+            sangramento negativo de 71px que o `:has(> .tk-banner)` cancelava, e
+            a coluna inteira subia. So que 71px sozinhos nao explicam o buraco: a
+            home no modo consulta ACABAVA nas duas acoes, e dali pro rodape
+            sobravam ~450px de nada. O aviso estava tampando o furo, e por isso
+            tirar ele foi o que revelou o furo.
+
+            O desenho fecha a Inicio com a "Tira da coleção". Quem escolheu so
+            consultar nao tem colecao — mas tem a mesma pergunta ("e agora, o que
+            eu uso?"), e o dataset ja responde: `raidOverall` e ranking
+            calculado, com moveset, nao lista escolhida a dedo. Entao a tira
+            existe nos dois modos; muda de QUEM ela fala.
+
+            Comeca no segundo colocado porque o primeiro ja e o hero desta tela,
+            logo acima, com o rotulo "Melhor atacante de raide agora". Repetir
+            ele aqui embaixo faria a fila abrir com o bicho que a pessoa acabou
+            de ver.
+          */}
+          {!colecao && data?.rankings && (
+            <>
+              <div className="tk-overline tk-overline--sec">
+                <span>{t("usos.tira")}</span>
+                {telaLarga && (
+                  <button
+                    type="button"
+                    className="tk-overline-verdex"
+                    onClick={() => onGo("pokedex", { view: "best", mode: "raid" })}
+                  >
+                    {t("home.seeAll")} →
+                  </button>
+                )}
+              </div>
+
+              <div className="tk-strip-row">
+                {data.rankings.raidOverall
+                  .slice(1, 1 + naFila)
+                  .map((r, i) => {
+                    const sp = data.species.find((s) => s.id === r.speciesId);
+                    if (!sp) return null;
+                    // A posicao REAL na lista, e nao o indice da fatia: o
+                    // primeiro cartao daqui e o #2 do jogo.
+                    const posicao = i + 2;
+                    return (
+                      <button
+                        key={r.speciesId}
+                        type="button"
+                        className="tk-strip-cell"
+                        style={{
+                          ["--tk-cell-tone" as string]: "var(--tk-border-strong)",
+                          ["--tk-i" as string]: i,
+                        }}
+                        onClick={() => abrirEspecie(sp)}
+                        aria-label={`#${posicao} · ${sp.name}`}
+                        title={`#${posicao} · ${sp.name}`}
+                      >
+                        <SpeciesTile
+                          spriteId={sp.spriteId}
+                          dex={sp.dex}
+                          speciesId={sp.id}
+                          name={sp.name}
+                          types={sp.types}
+                          size={telaLarga ? 92 : 48}
+                        />
+                        <span className="tk-strip-nome">{sp.name}</span>
+                        {/* O numero e o rotulo. A tira da colecao poe o veredito
+                            aqui; esta poe a colocacao, que e a informacao
+                            equivalente — diz por que aquele bicho esta na fila e
+                            em que ordem ler. */}
+                        <span className="tk-strip-verdito">
+                          #{formatNumber(posicao, language)}
+                        </span>
+                      </button>
+                    );
+                  })}
+
+                {!telaLarga && (
+                  <button
+                    type="button"
+                    className="tk-strip-cell tk-strip-cell--mais"
+                    onClick={() => onGo("pokedex", { view: "best", mode: "raid" })}
+                    style={{ ["--tk-i" as string]: naFila }}
+                  >
+                    <span className="tk-strip-mais-anel" aria-hidden="true">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                           stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"
+                           strokeLinejoin="round">
+                        <path d="M9 5l7 7-7 7" />
+                      </svg>
+                    </span>
+                    <span className="tk-strip-verdito">{t("home.seeAll")}</span>
+                  </button>
+                )}
+              </div>
+            </>
           )}
 
           {/*
