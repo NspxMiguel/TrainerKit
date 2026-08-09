@@ -30,7 +30,7 @@ import {
 } from "../storage/updates.ts";
 import { InstallGuide } from "./InstallGuide.tsx";
 import { AiSettings } from "./AiSettings.tsx";
-import { DataSourceSettings } from "./DataSourceSettings.tsx";
+import { DataSourceSettings, textoIdade } from "./DataSourceSettings.tsx";
 import { SpriteSettings } from "./SpriteSettings.tsx";
 import { VoiceSettings } from "./VoiceSettings.tsx";
 import { WipeDialog } from "../ui/WipeDialog.tsx";
@@ -41,6 +41,8 @@ import { usePrefetch } from "../sprites/prefetch.ts";
 
 interface Props {
   datasetLabel: string | null;
+  /** Idade da base em dias, ou `null` se ela nao carimba. Ver `datasetIdadeDias`. */
+  datasetIdade: number | null;
   persist: PersistState | null;
   /** Precisa da lista pra saber quantas imagens existem pra baixar. */
   species: readonly DatasetSpecies[];
@@ -163,7 +165,7 @@ function Linha({
  * pra ver a configuracao inteira de relance, e cada assunto ganha a tela toda
  * quando e a vez dele.
  */
-export function SettingsScreen({ datasetLabel, persist, species, sources }: Props) {
+export function SettingsScreen({ datasetLabel, datasetIdade, persist, species, sources }: Props) {
   const update = useUpdate();
   const [updateMsg, setUpdateMsg] = useState<string | null>(null);
   const [wipeOpen, setWipeOpen] = useState(false);
@@ -252,7 +254,13 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
         <Linha
           selo="dados"
           label={t("settings.gameData")}
-          value={datasetLabel ?? undefined}
+          /* Data e idade na mesma linha: "07/08 · de 2 dias". Sozinha, a data
+             nao distingue dois dias de dois anos — ver `datasetIdadeDias`. */
+          value={
+            datasetLabel
+              ? [datasetLabel, textoIdade(t, datasetIdade)].filter(Boolean).join(" · ")
+              : undefined
+          }
           onOpen={() => setPainel("data")}
         />
         <Linha
@@ -438,7 +446,11 @@ export function SettingsScreen({ datasetLabel, persist, species, sources }: Prop
 
       {painel === "data" && (
         <SettingsSheet title={t("settings.gameData")} onClose={fechar}>
-          <DataSourceSettings datasetLabel={datasetLabel} sources={sources} />
+          <DataSourceSettings
+            datasetLabel={datasetLabel}
+            datasetIdade={datasetIdade}
+            sources={sources}
+          />
         </SettingsSheet>
       )}
 

@@ -1,6 +1,11 @@
 import { useEffect, useState, type CSSProperties } from "react";
 
-import { datasetLabel, useDataset, type DatasetSpecies } from "./data/useDataset.ts";
+import {
+  datasetIdadeDias,
+  datasetLabel,
+  useDataset,
+  type DatasetSpecies,
+} from "./data/useDataset.ts";
 import { Onboarding } from "./onboarding/Onboarding.tsx";
 import { useSetup } from "./onboarding/setup.ts";
 import { CollectionScreen } from "./screens/CollectionScreen.tsx";
@@ -209,6 +214,12 @@ export function App() {
             <SettingsScreen
               datasetLabel={
                 dataset.status === "ready" ? datasetLabel(dataset.data.version) : null
+              }
+              /* A data sozinha nao diz se a base esta velha — ver
+                 `datasetIdadeDias`. Sai daqui junto com o rotulo porque as duas
+                 se leem na mesma linha e tem que sair do mesmo relogio. */
+              datasetIdade={
+                dataset.status === "ready" ? datasetIdadeDias(dataset.data.version) : null
               }
               persist={persist}
               species={species}

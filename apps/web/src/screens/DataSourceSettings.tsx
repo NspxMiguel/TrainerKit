@@ -8,11 +8,27 @@ import {
   setDataSource,
   useDataSource,
 } from "../data/source.ts";
-import { useT, type Key } from "../i18n/t.ts";
-import type { DatasetSource } from "./../data/useDataset.ts";
+import { useT, type Key, type TFunction } from "../i18n/t.ts";
+import { DIAS_PRA_AVISAR, type DatasetSource } from "./../data/useDataset.ts";
+
+/**
+ * "07/08 · de 2 dias" — a data mais a idade.
+ *
+ * Mora aqui e e exportada porque as duas telas que mostram a base leem a MESMA
+ * linha: a lista de Ajustes e o painel de dentro. Duas formatacoes paralelas e
+ * como elas se separam no dia em que uma muda.
+ */
+export function textoIdade(t: TFunction, dias: number | null): string | null {
+  if (dias === null) return null;
+  if (dias === 0) return t("data.age.today");
+  if (dias === 1) return t("data.age.one");
+  return t("data.age.many", { n: dias });
+}
 
 interface Props {
   datasetLabel: string | null;
+  /** Idade da base em dias, ou `null` se ela nao carimba. */
+  datasetIdade: number | null;
   /** Fontes declaradas pelo dataset carregado — nao pelo app. */
   sources?: DatasetSource[] | undefined;
 }
@@ -29,7 +45,7 @@ interface Props {
  * daria tela branca ou, muito pior, numeros calculados sobre lixo — o unico
  * tipo de erro que este app nao pode cometer.
  */
-export function DataSourceSettings({ datasetLabel, sources }: Props) {
+export function DataSourceSettings({ datasetLabel, datasetIdade, sources }: Props) {
   const source = useDataSource();
   const { t } = useT();
   const [url, setUrl] = useState(getDataSource() ?? "");
@@ -38,6 +54,8 @@ export function DataSourceSettings({ datasetLabel, sources }: Props) {
   const [open, setOpen] = useState(false);
 
   const custom = source !== null;
+  const idade = textoIdade(t, datasetIdade);
+  const velha = datasetIdade !== null && datasetIdade >= DIAS_PRA_AVISAR;
 
   const apply = async () => {
     const target = url.trim();
@@ -101,8 +119,24 @@ export function DataSourceSettings({ datasetLabel, sources }: Props) {
 
         <div className="tk-row">
           <span className="tk-row-label">{t("settings.datasetVersion")}</span>
-          <span className="tk-row-value">{datasetLabel ?? "—"}</span>
+          <span className="tk-row-value">
+            {datasetLabel ?? "—"}
+            {idade && <span className="tk-caption"> · {idade}</span>}
+          </span>
         </div>
+
+        {/*
+          O aviso so aparece quando ha o que avisar.
+
+          Um "esta atualizada" permanente seria ruido em 99% das aberturas — e
+          treinaria a pessoa a nao ler a linha justamente ate o dia em que ela
+          passa a dizer outra coisa. Ver `DIAS_PRA_AVISAR`.
+        */}
+        {velha && (
+          <p className="tk-caption" style={{ margin: "8px 2px 0", lineHeight: 1.55, color: "var(--tk-warn)" }} role="status">
+            {t("data.stale", { n: datasetIdade as number })}
+          </p>
+        )}
         <button type="button" className="tk-row" onClick={() => setOpen((v) => !v)}>
           <span className="tk-row-label">{t("data.source")}</span>
           <span className="tk-row-value">

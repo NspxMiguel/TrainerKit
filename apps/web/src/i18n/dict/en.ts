@@ -823,6 +823,11 @@ const EN = {
   "data.provides.translations": "Official move names in 10 languages",
   "data.provides.spriteIndex": "Image index only — no art is bundled",
   "data.sourcesNone": "This dataset does not say where its numbers come from.",
+  /* A idade da base, e nao so a data: ver `datasetIdadeDias`. */
+  "data.age.today": "from today",
+  "data.age.one": "1 day old",
+  "data.age.many": "{n} days old",
+  "data.stale": "This data is {n} days old. The game has moved on since — point at a fresher source below, or update the app.",
   "ai.example": "“Which of mine is best for Great League?”",
   "sprites.customDetail": "A manifest link or a .zip.",
   "sprites.manifestAria": "Manifest address",

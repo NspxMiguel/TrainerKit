@@ -714,3 +714,41 @@ em cima de onde começa o gesto de sair do app. Pra descer mais, teria que ser
 diminuindo a altura da barra, não o respiro.
 
 **Apagar quando ele disser que a barra desceu.**
+
+---
+
+## [ABERTO] TrainerKit — "mais algo q vc acha legal implementar, ou q ta faltando? analiza ai"
+
+**Pedido em:** 09/08/2026
+
+**Palavras dele:** *"n sei mais nada. mais algo q vc acha legal implementar, ou q
+ta faltando? analiza ai"* — e depois, aprovando o plano, *"ok"* e *"dale"*.
+
+Análise escrita em `IDEIAS.md`, seção "O que eu achei olhando o app hoje
+(09/08/2026)".
+
+**Duas coisas que eu disse errado pra ele, e já corrigi no IDEIAS.md:**
+
+1. Eu falei que a base do jogo **não tinha data**. Tinha: o ETL grava
+   `uploadTime` e `generatedAt`, e Ajustes já mostrava `07/08`. Eu li `len()` do
+   objeto `version` e tomei o `6` por um valor.
+2. Eu falei que o **"vale a pena esse raide?"** não existia. Existe:
+   `screens/RaidCounters.tsx` já dá o veredito (`raid.solo` /
+   `raid.needTrainers` / `raid.hopeless`) mais a faixa de PC de captura.
+
+**Feito em 09/08/2026, conferido no PWA do iPhone — esperando ele conferir.**
+O buraco que sobrava da (1) era a **idade** da base: `07/08` não responde "está
+velha?", porque dois dias e um ano se escrevem igual. Agora sai
+`07/08 · 2 days old` nas duas telas que mostram a base (a linha de Ajustes e o
+painel "Game data"), mais um aviso quando passa de 30 dias. Conta pelo
+`uploadTime`, o relógio do próprio jogo, e não pelo do meu build — senão a data
+e a idade sairiam de relógios diferentes.
+
+**O que ficou de fora, porque conflita com o desenho e eu não improviso:** no
+celular a tela de raide está a três toques. Os atalhos de Calculadora / Raide /
+Time são só de desktop, e a fileira de ações da Início é de duas colunas **de
+propósito** (App.css:2363 documenta que a terceira coluna quebrava "Monta um
+time pra mim" em três linhas). Pôr um atalho de raide ali é decisão dele.
+
+**Apagar quando ele conferir a idade da base e disser o que fazer com o atalho
+de raide.**

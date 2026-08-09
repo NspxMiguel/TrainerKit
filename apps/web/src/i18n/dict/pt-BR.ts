@@ -796,6 +796,11 @@ export const PT_BR: Dict = {
   "data.provides.translations": "Nomes oficiais dos ataques em 10 idiomas",
   "data.provides.spriteIndex": "Só o índice das imagens — nenhuma arte vai no app",
   "data.sourcesNone": "Esta base não diz de onde vêm os números dela.",
+  /* A idade da base, e nao so a data: ver `datasetIdadeDias`. */
+  "data.age.today": "de hoje",
+  "data.age.one": "de 1 dia",
+  "data.age.many": "de {n} dias",
+  "data.stale": "Essa base tem {n} dias. O jogo já mudou desde então — aponte pra uma fonte mais nova aqui embaixo, ou atualize o app.",
   "ai.example": "“Qual dos meus é melhor pra Great League?”",
   "ask.title": "Pergunte sobre a sua coleção",
   "ask.send": "Enviar",

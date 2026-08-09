@@ -56,11 +56,19 @@ dois não deram".
 
 Junto com a faxina, transforma o app de "consulto um" em "resolvo a sessão".
 
-### 2. Vale a pena esse raide?
+### 2. ~~Vale a pena esse raide?~~ — já existe; o que falta é chegar nela
 
-Antes de gastar o passe: *"você derruba sozinho em 2 min"*, *"você derruba mas
-cai 3 vezes"*, *"nem com a sala cheia"*. O motor de counters já calcula isso —
-falta virar uma resposta que se dá **antes** de entrar, não durante.
+Também errei aqui. `screens/RaidCounters.tsx` já mostra o veredito antes de
+entrar: `raid.canYou` com `raid.solo` / `raid.needTrainers` / `raid.hopeless`,
+mais a faixa de PC de captura (`bossCatchRange`). O motor é o `estimateRaid` do
+core.
+
+O que sobra é **caminho**: no celular a tela de raide está a três toques. Os
+atalhos da barra lateral (Calculadora / Raide / Time) são só de desktop, e a
+fileira de ações da Início é de duas colunas **de propósito** — App.css:2363
+documenta que a terceira coluna quebrava "Monta um time pra mim" em três
+linhas. Ou seja: pôr um botão de raide ali conflita com o desenho, e conflito
+de desenho é pergunta pro Miguel, não coisa pra eu improvisar.
 
 ---
 
@@ -89,18 +97,18 @@ tem ação, resumo, atalhos e a dica; falta variar conforme o dia.
 Ele pediu: *"mais algo q vc acha legal implementar, ou q ta faltando? analiza
 ai"*. Estas são novas — as de cima continuam valendo.
 
-### A base do jogo não tem data
+### ~~A base do jogo não tem data~~ — eu errei, e o que faltava era menos
 
-O `gamedata.json` tem `version: 6` e a lista de fontes, mas **nenhuma data de
-geração**. O arquivo `data/source.ts` diz, com todas as letras, que "a base
-envelhece por conta propria" e que "quem precisa do dado de hoje nao devia
-depender do meu deploy" — só que o app não conta pra ninguém quantos dias tem a
-base que está usando. Quem apontou pra uma fonte própria também não tem como
-saber se ela parou de ser atualizada.
+**Correção (09/08/2026).** Eu escrevi aqui que o dataset não tinha data de
+geração. Não é verdade: o ETL já grava `uploadTime` e `generatedAt`, e Ajustes
+já mostrava `07/08`. O que me enganou foi ler `len()` do objeto `version` e
+tomar o `6` por um valor.
 
-Custa pouco: um `generatedAt` gravado no build, uma linha em Ajustes ("base do
-jogo: 12 dias") e um aviso discreto quando passa de uns 30. É a diferença entre
-um dado velho e um dado velho **que se anuncia**.
+O buraco de verdade era menor e mais específico: **`07/08` não responde "está
+velha?"**. Dois dias e um ano se escrevem igual. Feito no mesmo dia — a idade
+em dias ao lado da data, nas duas telas que mostram a base, e um aviso quando
+passa de 30 dias (`DIAS_PRA_AVISAR`, em `data/useDataset.ts`). Conta pelo
+`uploadTime`, o relógio do próprio jogo, e não pelo do meu build.
 
 ### A Início no modo "só consulta" ainda acaba no vazio
 
@@ -113,10 +121,8 @@ buraco e não inventa dado nenhum.
 
 ### Antes de gastar o passe
 
-Reforçando a ideia que já está aqui em cima, agora com o motor conferido:
-`bossCatchRange` e os counters já estão prontos e usados na tela de raide. O que
-falta é só a **pergunta feita antes**: "dá pra você?" em vez de "quem eu levo?".
-De todas as ideias do arquivo, é a que muda mais o que o app é.
+Ver a correção em "2. Vale a pena esse raide?" — o veredito já existe na tela de
+raide. O que falta é o atalho pra ela no celular, e isso esbarra no desenho.
 
 ## Dívidas técnicas
 

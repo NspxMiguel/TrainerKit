@@ -235,3 +235,39 @@ export function datasetLabel(version: Dataset["version"]): string {
   const d = new Date(ms);
   return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
+
+/**
+ * Quantos dias tem a base, ou `null` se ela nao diz.
+ *
+ * ⚠️ "07/08" NAO RESPONDE "esta velha?", e era so isso que a tela mostrava.
+ *
+ * Um dia e um mes sao a mesma coisa pra quem bate o olho: `07/08` de dois dias
+ * atras e `07/08` do ano passado se escrevem igual, e o segundo caso e o unico
+ * que importa. O app inteiro se apoia na ideia de que a base envelhece sozinha
+ * e de que voce pode apontar pra outra fonte (ver `data/source.ts`) — mas quem
+ * apontou pra uma fonte de terceiro nao tinha como perceber que ela parou de
+ * ser atualizada.
+ *
+ * Conta pelo `uploadTime` (o carimbo do PROPRIO jogo), e nao pelo `generatedAt`
+ * (quando o meu ETL rodou), pelos dois motivos: e o mesmo relogio que a data
+ * dd/MM ja usa — dizer "07/08" e "3 dias" a partir de relogios diferentes daria
+ * um par que nao fecha — e o que interessa e a idade do DADO, nao a do meu
+ * build.
+ */
+export function datasetIdadeDias(version: Dataset["version"]): number | null {
+  const ms = Number(version.uploadTime);
+  if (!Number.isFinite(ms)) return null;
+  // Piso em zero: relogio do aparelho atrasado nao vira "base do futuro".
+  return Math.max(0, Math.floor((Date.now() - ms) / 86_400_000));
+}
+
+/**
+ * A partir de quantos dias a base merece um aviso.
+ *
+ * Trinta e o ponto em que o jogo ja mudou de temporada: chefe de raide novo,
+ * ajuste de golpe, especie nova. Abaixo disso o dado velho da respostas
+ * levemente desatualizadas; acima, da respostas sobre um jogo que nao existe
+ * mais — e ai a tela precisa dizer, porque o numero errado com cara de certo e
+ * pior que numero nenhum.
+ */
+export const DIAS_PRA_AVISAR = 30;
