@@ -105,14 +105,31 @@
     calc(72px + max(var(--tk-s5), env(safe-area-inset-bottom)));
 }
 
-/* A barra flutuante ocupa mais altura util que a assente: 12px de folga
-   embaixo mais a sombra. Sem isto o ultimo item da lista fica sob o vidro. */
+/*
+ * A barra flutuante ocupa mais altura util que a assente: sem reserva, o ultimo
+ * item da lista fica sob o vidro.
+ *
+ * ⚠️ A RESERVA E MEDIDA PELA BARRA, e nao por um numero escrito a mao. Era
+ * `84px + area segura` = 118pt, com a barra terminando aos 68 — 50pt de preto
+ * embaixo de tudo, sem dono. E o *"ta faltando coisa ali em baixo"* dele: nao
+ * faltava conteudo, sobrava reserva. Piorou quando a barra desceu, porque o 84
+ * ficou parado.
+ *
+ * Na Inicio quem come a sobra e o hero, que e o unico `flex: 1` da coluna — o
+ * Pokemon cresce sozinho ao devolver esses 38pt, que e a outra coisa que ele
+ * pediu ("legal deixar ele grande").
+ *
+ * Os 12px sao a folga entre o topo da barra e o que vem antes; a area segura ja
+ * esta dentro de `--tk-barra-teto` e somar de novo era o mesmo erro.
+ */
 [data-platform="iphone"] .tk-main {
-  padding-bottom: calc(84px + max(var(--tk-s5), env(safe-area-inset-bottom)));
+  padding-bottom: calc(var(--tk-barra-teto) + 12px);
 }
 
+/* Mesmo pouso da bolha da IA (`.tk-bubble`): logo acima da barra, pela mesma
+   conta. Antes eram 104px fixos, que com a barra em 68 flutuava alto demais. */
 [data-platform="iphone"] .tk-fab {
-  bottom: calc(104px + env(safe-area-inset-bottom));
+  bottom: calc(var(--tk-barra-teto) + 12px);
   animation: tk-fade 0.14s var(--tk-ease) both;
 }
 
