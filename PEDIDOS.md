@@ -752,3 +752,26 @@ time pra mim" em três linhas). Pôr um atalho de raide ali é decisão dele.
 
 **Apagar quando ele conferir a idade da base e disser o que fazer com o atalho
 de raide.**
+
+---
+
+## [ABERTO] TrainerKit — o ícone na tela inicial está com "bordas esquisitas"
+
+**Pedido em:** 09/08/2026
+
+**Palavras dele:** *"o icone n está legal igual o laranja (outro app meu) ta com
+essas bordas esquisitas... primeiro o app é branco dps reto o icone?? da uma
+revisada no code ai"*
+
+Print da tela inicial do iPhone dele: **dois ícones de ovo lado a lado** — um
+com tile branco e ovo escuro, outro com tile escuro e ovo branco. Os outros
+ícones da tela (o terminal laranja, WhatsApp, Música) são arte de borda a borda,
+sem moldura por dentro.
+
+**O que eu já medi antes de mexer:** o `apple-touch-icon.png` sai 180x180 com
+**10 linhas totalmente transparentes no topo** (recuo de 6%) e **cantos
+arredondados próprios** (raio 30/112). O iOS arredonda por conta dele de
+qualquer jeito — então o que vai pra tela é o nosso tile arredondado *dentro* do
+recorte do sistema. Daí a moldura dupla.
+
+**Apagar quando ele disser que o ícone ficou igual aos outros.**
