@@ -775,3 +775,46 @@ qualquer jeito — então o que vai pra tela é o nosso tile arredondado *dentro
 recorte do sistema. Daí a moldura dupla.
 
 **Apagar quando ele disser que o ícone ficou igual aos outros.**
+
+---
+
+## [ABERTO] TrainerKit — texto honesto no "Sobre": app independente, pode ter bug
+
+**Pedido em:** 09/08/2026
+
+**Palavras dele:** *"la no about, da aquela vitimizada, falando q é um app
+independente, q pode e encontrara bugs até pq nao tenho qm testar, so conseguiu
+testar o app num poco x3 pro e um iphone 17 pro e etc. se se achar bugs manda
+pro feedback e etc."*
+
+Os dois aparelhos são **Poco X3 Pro** e **iPhone 17 Pro** — nomear os dois, é o
+que dá credibilidade à frase. E o texto tem que levar pro canal de feedback que
+já existe, senão é desabafo sem saída.
+
+**Apagar quando ele ler o texto e aprovar.**
+
+---
+
+## [ABERTO] TrainerKit — "deixa o app com cara de app de vdd", produção e bughunt
+
+**Pedido em:** 09/08/2026
+
+**Palavras dele:** *"deixa o app com cara de app de vdd, checa coisa por coisa,
+deixando o o app pra producao, bughunt e etc."*
+
+Não é uma tela: é passar o app inteiro, item por item, e deixar em estado de
+produção. Caça a bug incluída.
+
+**Apagar quando ele conferir a lista do que eu achei e consertei.**
+
+---
+
+## [ABERTO] TrainerKit — parar de repetir a logo dentro do app
+
+**Pedido em:** 09/08/2026
+
+**Palavras dele:** *"n precisa colocar a logo do app em tudo dentro do app, o
+cara ja viu a logo quando abriu o app, as vezes (quase sempre) fica esdruxulo
+colocar a logo dnv pro cara ve"*
+
+**Apagar quando ele confirmar que sumiu de onde incomodava.**
