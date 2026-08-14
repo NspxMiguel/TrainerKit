@@ -11,7 +11,6 @@ import { useT } from "../i18n/t.ts";
 import { InstallGuide } from "../screens/InstallGuide.tsx";
 import { useInstallState } from "../storage/install.ts";
 import { IconDownload, IconGrid, IconSearch } from "../ui/Icons.tsx";
-import { MarcaOvo } from "../ui/MarcaOvo.tsx";
 import {
   TRAINER_LEVELS,
   tetoDePowerUp,
@@ -194,7 +193,24 @@ export function Onboarding() {
 
         {current === "boas-vindas" && (
           <>
-            <MarcaOvo size={84} className="tk-onb-mark" />
+            {/*
+              O OVO DE 84px SAIU DAQUI.
+
+              "n precisa colocar a logo do app em tudo dentro do app, o cara ja
+              viu a logo quando abriu o app, as vezes (quase sempre) fica
+              esdruxulo colocar a logo dnv pro cara ve".
+
+              E o caso mais claro disso no app inteiro: a pessoa acabou de tocar
+              num icone de ovo de 60pt na tela inicial, o iOS mostrou o nome
+              embaixo dele, e a segunda tela do app devolvia o MESMO ovo em 84px
+              com o MESMO nome logo abaixo. Numa tela de boas-vindas o que falta
+              nao e reconhecimento — e saber o que o app faz, e isso quem diz e
+              a linha de baixo.
+
+              O titulo fica: todo passo do onboarding tem um `h1`, e sem ele
+              este passo comecaria no campo de nome, sem dizer onde a pessoa
+              esta.
+            */}
             <h1 className="tk-onb-title">TrainerKit</h1>
             <p className="tk-onb-sub">{t("onb.tagline")}</p>
 
