@@ -88,6 +88,19 @@ const THEME_KEYS: Record<Theme, Key> = {
 };
 
 /**
+ * Os aparelhos em que o app foi DE FATO testado, e que o "Sobre" nomeia.
+ *
+ * ⚠️ ESCRITO UMA VEZ, e não dez. A frase mora nos dez dicionários; a lista de
+ * aparelhos entra nela por parâmetro. Se fosse escrita dentro de cada tradução,
+ * o dia em que ele testar num terceiro telefone daria nove arquivos desatualizados
+ * e nenhum aviso — e a frase perde o efeito exatamente por ser específica.
+ *
+ * Não é uma lista de "aparelhos suportados": é o contrário disso. Ela existe pra
+ * dizer onde o app NUNCA rodou.
+ */
+const APARELHOS_TESTADOS = ["Poco X3 Pro", "iPhone 17 Pro"];
+
+/**
  * Uma linha do índice: selo, assunto, valor atual, chevron.
  *
  * ⚠️ O SELO veio do handoff (opção 5g) e faltava. "kd ajustes tipo apple? ta la
@@ -641,6 +654,36 @@ export function SettingsScreen({ datasetLabel, datasetIdade, persist, species, s
 
       {painel === "about" && (
         <SettingsSheet title={t("settings.about")} onClose={fechar} cheia>
+          {/*
+            QUEM FEZ E ONDE FOI TESTADO vem ANTES do aviso de marca registrada.
+
+            A ordem nao e detalhe: o aviso legal e o que o app precisa dizer, e
+            isto aqui e o que a PESSOA precisa saber. Quem abre "Sobre" num app
+            de terceiro esta perguntando "posso confiar nisso?", e a resposta
+            honesta e a lista de aparelhos em que ele de fato rodou.
+          */}
+          <section className="tk-card" style={{ display: "grid", gap: 10 }}>
+            <p className="tk-caption" style={{ lineHeight: 1.6 }}>
+              {t("about.solo")}
+            </p>
+            <p className="tk-caption" style={{ lineHeight: 1.6 }}>
+              {t("about.devices", { aparelhos: APARELHOS_TESTADOS.join(" · ") })}
+            </p>
+            <p className="tk-caption" style={{ lineHeight: 1.6 }}>
+              {t("about.tellMe")}
+            </p>
+
+            {/* Leva pro canal que ja existe, em vez de repetir o e-mail aqui:
+                um endereco escrito em dois lugares e um endereco que um dia vai
+                estar errado num deles. */}
+            <button type="button" className="tk-lite" onClick={() => setPainel("feedback")}>
+              <span className="tk-lite-t">{t("about.toFeedback")}</span>
+              <span className="tk-lite-go" aria-hidden="true">
+                ›
+              </span>
+            </button>
+          </section>
+
           <section className="tk-card">
             <p className="tk-caption" style={{ lineHeight: 1.6 }}>
               {t("settings.disclaimer")}

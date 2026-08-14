@@ -413,6 +413,25 @@ const EN = {
   "privacy.minors.body": "The app asks for and collects no personal data, from anyone, at any age. Even so, using the AI and the voice sends text to third-party services, so we recommend that minors use it with a guardian's supervision.",
   "privacy.controller.title": "DATA CONTROLLER (LGPD ART. 41)",
   "privacy.controller.body": "TrainerKit is a personal project with no company behind it. For any privacy question or request: {contact}",
+  /*
+   * O SOBRE DIZ EM QUE APARELHOS O APP FOI TESTADO, e nao so o que ele e.
+   *
+   * Pedido dele: *"da aquela vitimizada, falando q e um app independente, q pode
+   * e encontrara bugs ate pq nao tenho qm testar, so conseguiu testar o app num
+   * poco x3 pro e um iphone 17 pro"*. Os dois nomes sao o que da credibilidade —
+   * "pode ter bugs" e o que todo app diz; "so rodou nestes dois telefones" e
+   * informacao que a pessoa usa pra saber o quanto confiar na tela.
+   *
+   * A lista de aparelhos entra por parametro (`APARELHOS_TESTADOS`) pra ela ser
+   * escrita UMA vez, e nao dez.
+   */
+  "about.solo":
+    "This is an independent app, made by one person. No test team, no QA, no beta group — so yes, it has bugs, and the ones still in here are the ones I haven't run into yet.",
+  "about.devices":
+    "It was tested on the phones I actually own: {aparelhos}. Anything else — another Android, an older iPhone, a tablet, a browser on a computer — I have never watched it run. If a screen looks broken, a number looks wrong, or a label spills out of its button, that is the most likely reason.",
+  "about.tellMe":
+    "If you find one, tell me — it is the only way it gets fixed. A screenshot and one line about what you were doing is enough.",
+  "about.toFeedback": "Report a problem",
   "settings.disclaimer":
     "Independent fan-made app, not affiliated with Scopely Explore (formerly Niantic), The Pokémon Company or Nintendo. Trademarks belong to their respective owners.",
   "settings.disclaimer2":

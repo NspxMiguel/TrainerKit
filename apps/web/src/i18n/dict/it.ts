@@ -373,6 +373,13 @@ export const IT: Dict = {
   "privacy.minors.body": "L’app non chiede né raccoglie alcun dato personale, di nessuno, a nessuna età. Ciò detto, IA e voce inviano testo a servizi di terzi: consigliamo ai minori di usarle con la supervisione di un adulto.",
   "privacy.controller.title": "TITOLARE DEL TRATTAMENTO",
   "privacy.controller.body": "TrainerKit è un progetto personale, senza azienda dietro. Per qualsiasi domanda o richiesta sulla privacy: {contact}",
+  "about.solo":
+    "Questa è un'app indipendente, fatta da una persona sola. Niente team di test, niente QA, niente gruppo beta — quindi sì, ha dei bug, e quelli rimasti sono quelli in cui non sono ancora incappato io.",
+  "about.devices":
+    "È stata provata sui telefoni che possiedo: {aparelhos}. Tutto il resto — un altro Android, un iPhone più vecchio, un tablet, un browser sul computer — non l'ho mai vista girare. Se una schermata sembra rotta, un numero sembra sbagliato o un testo esce da un pulsante, molto probabilmente è per questo.",
+  "about.tellMe":
+    "Se ne trovi uno, dimmelo — è l'unico modo perché venga sistemato. Bastano uno screenshot e una riga su cosa stavi facendo.",
+  "about.toFeedback": "Segnala un problema",
   "settings.disclaimer": "App indipendente creata da fan, senza legami con Scopely Explore (ex Niantic), The Pokémon Company o Nintendo. I marchi appartengono ai rispettivi titolari.",
   "settings.disclaimer2": "Funziona solo leggendo gli screenshot che fornisci tu. Non accede ai server del gioco, e nessuna immagine lascia il dispositivo.",
   "settings.version": "Versione {version}",

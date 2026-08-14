@@ -373,6 +373,13 @@ export const KO: Dict = {
   "privacy.minors.body": "앱은 나이와 무관하게 누구에게도 개인정보를 요구하거나 수집하지 않습니다. 다만 AI와 음성은 제3자에게 텍스트를 보내므로, 미성년자는 보호자와 함께 사용하기를 권합니다.",
   "privacy.controller.title": "관리자 연락처",
   "privacy.controller.body": "TrainerKit은 회사가 없는 개인 프로젝트입니다. 개인정보 관련 문의는: {contact}",
+  "about.solo":
+    "혼자 만드는 독립 앱입니다. 테스트 팀도, QA도, 베타 그룹도 없습니다. 그래서 버그가 있습니다. 아직 남아 있는 건 제가 아직 마주치지 못한 것들입니다.",
+  "about.devices":
+    "직접 가진 휴대폰에서만 확인했습니다: {aparelhos}. 그 밖의 기기 — 다른 안드로이드, 더 오래된 아이폰, 태블릿, 컴퓨터 브라우저 — 에서는 한 번도 돌려본 적이 없습니다. 화면이 깨져 보이거나 숫자가 이상하거나 글자가 버튼 밖으로 넘친다면 대개 그 때문입니다.",
+  "about.tellMe":
+    "발견하면 알려주세요. 고칠 수 있는 유일한 방법입니다. 스크린샷 하나와 무엇을 하고 있었는지 한 줄이면 충분합니다.",
+  "about.toFeedback": "문제 신고",
   "settings.disclaimer": "팬이 만든 독립 앱이며 Scopely Explore(구 Niantic), 포켓몬 컴퍼니, 닌텐도와 무관합니다. 상표는 각 권리자에게 있습니다.",
   "settings.disclaimer2": "사용자가 제공한 스크린샷을 읽는 것만으로 작동합니다. 게임 서버에 접근하지 않으며, 어떤 이미지도 기기를 벗어나지 않습니다.",
   "settings.version": "버전 {version}",
