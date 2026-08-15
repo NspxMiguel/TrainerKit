@@ -881,4 +881,27 @@ O ponto é o **antes de capturar**: na tela de encontro só aparece o PC, e a
 avaliação do líder (as três barras) só existe depois que o Pokémon está na
 mochila. Então é PC → IV, e não PC+PS → IV como a calculadora faz hoje.
 
+**Entregue em 15/08/2026** (`4f80781`). Fica na calculadora de IV, embaixo do
+convite de anexar print: *"Ainda não capturei — descobrir o IV pelo PC"*.
+
+Escolhe a origem (Selvagem / Raide / Ovo / Pesquisa), marca clima se for o caso,
+digita o PC. O que sai:
+
+- **raide, ovo e pesquisa** — o jogo fixa o nível do encontro, então o PC
+  determina o IV. No topo da faixa a resposta é exata: PC 2.387 num Mewtwo de
+  raide **só** pode ser 15/15/15.
+- **selvagem** — o nível é sorteado. Medido: sobram ~167 combinações de 4.096, e
+  em 800 casos nunca sobrou uma só. A tela mostra a contagem e diz que o PC não
+  decide ali, em vez de fingir precisão.
+- **PC fora da faixa** — avisa e repete os dois extremos válidos. Se o PC couber
+  na faixa do outro clima, aponta isso em vez de recusar.
+
+⚠️ Duas coisas que a medição mudou, e que valem quando ele for testar:
+
+1. "No PC máximo é 100%" vale em **2.455 de 2.466 espécies**. Nas 11 restantes
+   (Caterpie, Kakuna, Jigglypuff, Marill e parentes) o arredondamento junta
+   15/15/14 com 15/15/15 — aí a tela lista as duas em vez de escolher.
+2. No selvagem o PC **não** resolve. Se ele testar por aí primeiro e achar que
+   está quebrado, é isso: está certo, e a tela explica por quê.
+
 **Apagar quando ele testar num encontro de verdade.**
