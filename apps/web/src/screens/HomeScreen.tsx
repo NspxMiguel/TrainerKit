@@ -129,10 +129,9 @@ function greetingKey(): Key {
 /**
  * O destaque da home.
  *
- * A home tinha duas acoes cinzas, um cartao cinza e uma dica cinza — o Miguel:
- * "ficou sem graça / sem cara de Pokémon" e "tudo com o mesmo peso". Estava
- * certo nas duas: sem nenhum elemento dominante a tela lia como lista de
- * Ajustes, e num app de Pokemon isso e um erro de identidade, nao de layout.
+ * A home tinha duas acoes cinzas, um cartao cinza e uma dica cinza: nenhum
+ * elemento dominante, tudo com o mesmo peso, e nenhuma cara de Pokemon. Assim
+ * a tela lia como lista de Ajustes, e num app de Pokemon isso e um erro de identidade, nao de layout.
  *
  * Entao a primeira coisa da tela e UM Pokemon, grande, com a cor do tipo dele
  * atras. E sempre o mais relevante que o app sabe apontar, nunca um enfeite
@@ -246,7 +245,7 @@ function Hero({
       {/*
         Sem imagem, o numero da dex sai de cena.
 
-        "e sem imagens tbm." Nesse modo quem faz o papel de assunto e o
+        No modo sem imagens quem faz o papel de assunto e o
         monograma, e ele fica grande no meio do hero — e o numero gigante atras
         passaria a competir com ele em vez de ficar atras dele, porque letra nao
         tem silhueta pra recortar o algarismo. Duas formas claras do mesmo
@@ -328,7 +327,7 @@ function Hero({
             me pegou nesta tela — a primeira foi na tira da colecao.
             
             Os 74px sao a medida do hero compacto do documento de desktop; os
-            220 sao o retrato que ele pediu no celular ("sem cara de Pokémon").
+            220 sao o retrato que o celular pede, pra a tela ter cara de Pokemon.
           */
           size={telaLarga ? 74 : 220}
           bare
@@ -549,8 +548,8 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
     /*
      * O que JA FOI FEITO sai da lista.
      *
-     * Aqui estava o defeito que o Miguel reclamou duas vezes: "essa desgraça de
-     * investir sem jeito de tirar isso". Havia jeito — o rotulo na linha da
+     * Aqui estava um defeito antigo: um veredito de investir sem jeito visivel
+     * de dar como cumprido. Havia jeito — o rotulo na linha da
      * Colecao era um botao — mas a home nao olhava pra ele. Marcava como feito
      * e o "INVESTIR" continuava no destaque, com o anel aceso na fila. Marcar
      * nao tirava nada da vista, e um botao que nao muda a tela e o mesmo que
@@ -800,7 +799,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
           Ele foi escrito quando o disco so levava pra colecao ("a troca de
           contas em si ainda nao existe; por enquanto ele leva pra colecao"), e
           ficou pra tras quando a tela `Colecoes` ganhou criar, renomear, trocar
-          e apagar. Hoje o avatar abre exatamente o que ele pediu.
+          e apagar. Hoje o avatar abre exatamente essa tela.
 
           Comentario que descreve um estado antigo e pior que comentario nenhum:
           quem le acredita, e neste arquivo essa categoria de erro ja custou
@@ -983,15 +982,15 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
             As tres acoes secundarias numa fileira, nao empilhadas.
 
             Cada linha empilhada custava 46px, e a terceira (o ginasio) faria a
-            home voltar a rolar — o que ele pediu duas vezes pra nao acontecer.
+            home voltar a rolar, o que e proibido nesta tela.
             Em fileira as tres somam 76px em vez de 138, e elas se leem melhor
             juntas: sao as coisas que o app FAZ por voce, ao lado uma da outra.
           */}
           {/*
             DUAS acoes, nao tres.
 
-            A terceira era "Pokédex" — do lado de uma ABA chamada Pokédex. O
-            Miguel: "2 funcoes com o msm nome, pokedex e pokedex". O aparelho
+            A terceira era "Pokédex" — do lado de uma ABA chamada Pokédex: duas
+            funcoes com o mesmo nome, na mesma tela. O aparelho
             mudou pra dentro da aba Pokedex, que e onde ele pertence, e aqui
             sobraram as duas coisas que NAO existem em aba nenhuma: montar time
             e escolher quem fica no ginasio.
@@ -1236,11 +1235,10 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
           {/*
             ⚠️ O QUE FECHA A HOME NO MODO SO CONSULTA.
 
-            *"eu sinto q ta pra cima dms, ta faltando coisa ali em baixo tbm"*, e
-            depois a causa: *"quando vc tira a msg de pwa q fica assim estranho,
-            mt pra cima"*.
+            A tela parecia empurrada pra cima e vazia embaixo, e o gatilho era
+            tirar o aviso de PWA.
 
-            Tirar o aviso de PWA nao movia nada pra cima — ele devolvia ao hero o
+            Tirar o aviso nao movia nada pra cima — ele devolvia ao hero o
             sangramento negativo de 71px que o `:has(> .tk-banner)` cancelava, e
             a coluna inteira subia. So que 71px sozinhos nao explicam o buraco: a
             home no modo consulta ACABAVA nas duas acoes, e dali pro rodape
@@ -1343,8 +1341,8 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
             manter era que o ranking por tipo vivia escondido dentro da Pokedex.
             Isso deixou de ser verdade nesta versao: a aba Pokedex abre com
             "Buscar | Melhores" em cima, entao a lista esta a dois toques de
-            qualquer tela — e o proprio Miguel deu a regra quando tirou os
-            outros: "sendo q simplesmente ja tem a porra do botao".
+            qualquer tela — e a regra que tirou os atalhos anteriores vale aqui
+            igual: nao se duplica um botao que ja existe.
 
             E ha um motivo melhor. O que aquelas listas respondiam mal, o app
             agora responde bem: pra atacar, "Monta um time pra mim" devolve seis

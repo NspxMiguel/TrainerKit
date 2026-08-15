@@ -1,9 +1,8 @@
 /**
  * Os selos de Ajustes, portados LITERALMENTE do handoff (opção 5g).
  *
- * "kd ajustes tipo apple? ta la no claude desing po."
- *
- * Estava lá mesmo, e eu não tinha portado: cada linha de Ajustes tem um selo de
+ * Ajustes precisa ler como Ajustes do sistema, e o handoff já desenhava isso:
+ * cada linha tem um selo de
  * 30×30 com raio 8 e um gradiente próprio, e é ele que faz a tela LER como
  * Ajustes do sistema. Sem os selos, a tela é uma lista de rótulos cinza — a
  * estrutura estava certa (grupos, valor à direita, chevron) e a identidade

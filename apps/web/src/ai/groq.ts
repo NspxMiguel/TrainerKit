@@ -28,7 +28,7 @@ const KEY = "tk:groq";
  * qual responde melhor pra esta tarefa, e escolher errado piora o app sem ela
  * entender por que. Antes eram dois botoes e o padrao era o 8B.
  *
- * VERIFICADO no catalogo da conta do Miguel via `/v1/models`: os dois existem. O
+ * VERIFICADO no catalogo da conta via `/v1/models`: os dois existem. O
  * escolhido e o 70B — a tarefa e reescrever texto curto a partir de dados que o
  * app ja calculou, e ele erra menos nisso sem custo perceptivel de tempo.
  */

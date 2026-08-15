@@ -3,8 +3,8 @@ import { getGroqKey } from "./groq.ts";
 /**
  * Voz de verdade, quando ha chave da Groq.
  *
- * O Miguel: "o narrador da pokex fico paia po. Procura algum serviço free, com
- * voz boa estilo elevenlabs". Ele esta certo — `SpeechSynthesis` usa a voz do
+ * A voz do narrador precisava soar humana sem custar nada, e o caminho antigo
+ * nao dava conta: `SpeechSynthesis` usa a voz do
  * sistema, e a voz do sistema em portugues varia de sofrivel a robotica
  * dependendo do aparelho. Nao ha como consertar isso ajustando `pitch`.
  *
@@ -22,8 +22,8 @@ import { getGroqKey } from "./groq.ts";
  *   O que existe no catalogo e `canopylabs/orpheus-v1-english` — Orpheus, TTS de
  *   verdade, e bom. Mas ele responde 400 "model_terms_required": o ADMIN DA ORG
  *   precisa aceitar os termos em console.groq.com/playground?model=canopylabs%2F
- *   orpheus-v1-english. Eu nao aceito termos em nome de ninguem, entao isto fica
- *   pro Miguel — um clique, uma vez.
+ *   orpheus-v1-english. Aceite de termos e ato do dono da conta, entao isto fica
+ *   pra ele — um clique, uma vez.
  *
  *   ⚠️ E ele e SO INGLES. Lendo portugues, a pronuncia sai errada. Por isso o app
  *   so usa Orpheus quando o idioma da interface e ingles; em qualquer outro a voz
@@ -104,7 +104,7 @@ export async function synthesize(
 
   if (!res.ok) {
     // A mensagem da Groq sobe inteira: quando a voz e invalida, e ela que diz
-    // quais valem. Engolir isso deixaria o Miguel adivinhando.
+    // quais valem. Engolir isso deixaria quem configurou adivinhando.
     const detalhe = await res.text().catch(() => "");
     throw new Error(`${res.status} ${detalhe.slice(0, 240)}`);
   }

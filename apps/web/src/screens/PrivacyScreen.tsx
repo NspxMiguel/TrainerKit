@@ -3,10 +3,10 @@ import { useT } from "../i18n/t.ts";
 /**
  * A política de privacidade — exigida mesmo num app que não coleta nada.
  *
- * O Miguel: "o app ja ta publico no github, entao temos q se preocupar com as
- * leis.... lgpd, leis do paises q tem o idioma e etc."
+ * O app é público no GitHub e é usado em dez idiomas, então a LGPD e as leis
+ * dos países desses idiomas se aplicam.
  *
- * Ele está certo, e a boa notícia é que o app já estava do lado fácil: sem
+ * A boa notícia é que o app já estava do lado fácil: sem
  * conta, sem servidor de dados, sem analytics, sem cookie de rastreamento. O que
  * faltava não era mudar o app — era ESCREVER isso. A LGPD exige transparência
  * (art. 6º, VI) independentemente de haver coleta, e o art. 41 exige um contato.
@@ -38,9 +38,9 @@ const ATUALIZADA = "2026-07-30";
  *
  * Trocar aqui troca nos dez idiomas de uma vez.
  *
- * ⚠️ O e-mail antigo (`miguel.r.moretti.00@gmail.com`) saiu daqui E do histórico
- * do Git: ele era o autor dos 74 commits de um repositório PÚBLICO, ou seja,
- * estava exposto em `git log` pra qualquer um. O histórico foi reescrito e a
+ * ⚠️ O e-mail pessoal antigo saiu daqui E do histórico do Git: ele era o autor
+ * dos 74 primeiros commits de um repositório PÚBLICO, ou seja, estava exposto
+ * em `git log` pra qualquer um. O histórico foi reescrito e a
  * config local do repo aponta pro novo.
  */
 const CONTATO = "spxmiguel@icloud.com";

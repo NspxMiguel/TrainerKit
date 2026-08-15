@@ -320,8 +320,8 @@ function extrairPaleta(bmp: Bitmap): string[] {
 
   /*
    * A primeira cor é a mais numerosa, e ponto. As outras duas competem por
-   * ÁREA × NOVIDADE DE MATIZ, e essa segunda metade não é refinamento — é o
-   * pedido dele.
+   * ÁREA × NOVIDADE DE MATIZ, e essa segunda metade não é refinamento — é
+   * requisito.
    *
    * Só por área, o Dragonite dava laranja, creme e… laranja escuro: as três
    * "cores" eram a mesma superfície em três iluminações, porque o corpo ocupa
@@ -471,7 +471,7 @@ function caixaJusta(bmp: Bitmap): [number, number, number, number] {
  * estava em produção.
  *
  * O teto é 0,95 porque proteger 100% é o mesmo que não deixar o bicho descer, e
- * aí acaba a profundidade que ele pediu ("tipo o relogio da apple"). 181 das
+ * aí acaba a profundidade pedida pelo desenho — a do relógio da Apple. 181 das
  * 1.142 chegam nele — são as formas que são corpo até o chão (Snorlax, Ditto,
  * Machamp de coxa grossa), e para essas a resposta certa é mesmo "quase tudo".
  */
@@ -519,7 +519,8 @@ const RAIZ = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/p
  * ilustração, com margem generosa e variável; os renders 3D do Pokémon HOME são
  * capturas de modelo, quase sempre mais cheias no quadro.
  *
- * "lembresse, testar com pokemons renders 3d e arte oficial. e sem imagens tbm."
+ * O enquadramento tem que ser conferido nas DUAS fontes de imagem, e tambem no
+ * modo sem imagem nenhuma.
  *
  * Se o app usasse a caixa da arte oficial pra posicionar um render 3D, o
  * enquadramento sairia deslocado exatamente como estava antes — só que agora

@@ -5,8 +5,6 @@ import { useTemFolha } from "./folha.ts";
 /**
  * O conteudo ja saiu do topo? — pro vidro da borda de cima.
  *
- * "degrade c pa fica legal ne? deixa o app perfeito po, deixa bonitao"
- *
  * A borda de BAIXO ja tinha remedio: o `.tk-scroll-edge` apaga o conteudo pouco
  * antes de ele passar por tras da barra de abas, citando a HIG da Apple —
  * *"obscuring content that scrolls beneath them"*. Em cima nao havia nada, e no

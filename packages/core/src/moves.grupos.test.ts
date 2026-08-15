@@ -176,8 +176,8 @@ describe("a unificação tem que ACONTECER de verdade, e não só existir", () =
      * A honestidade da unificação mora neste sinalizador: com ele `false` a tela
      * diz "o melhor é o mesmo, e a ordem abaixo segue Tudo"; com ele `true` ela
      * diz "a mesma lista". Se ele mentisse, a unificação passaria a esconder uma
-     * diferença real — que é exatamente o que ele disse para não fazer ("alguns
-     * tem pequenas diferenças entao nao da").
+     * diferença real — e a unificação existe justamente para não esconder
+     * nada: onde as listas diferem, os botões continuam separados.
      */
     const pega = (ids: string[]) =>
       ids.map((i) => porId.get(i)).filter((m): m is MoveWithPvp => m !== undefined);

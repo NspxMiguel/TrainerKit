@@ -17,8 +17,8 @@ interface Props<T extends string> {
 /**
  * Uma escolha entre poucas, sempre com a mesma cara.
  *
- * O Miguel: "muitas interfaces nao seguem o msm estilo visual, favor arrumar".
- * Ele estava certo e o exemplo mais claro era este: a MESMA pergunta — escolha
+ * Varias telas do app nao seguiam o mesmo estilo visual, e o exemplo mais claro
+ * era este: a MESMA pergunta — escolha
  * uma entre duas ou tres — estava desenhada de tres formas diferentes no app.
  * Tema e modo nos Ajustes eram `tk-btn--primary` de 44px; liga nos Rankings era
  * `tk-btn` de 36px com fonte 12; raide/PvP era `tk-chip`. Nenhuma estava errada

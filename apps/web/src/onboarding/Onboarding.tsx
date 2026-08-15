@@ -90,9 +90,9 @@ export function Onboarding() {
   /**
    * O passo de instalar so existe se ainda houver o que instalar.
    *
-   * O Miguel instalou o app na tela de inicio e o setup continuou pedindo pra
-   * instalar — o app estava, literalmente, aberto dentro do proprio icone
-   * enquanto sugeria que ele criasse um. Nao e so um passo inutil: destroi a
+   * Com o app ja instalado na tela de inicio, o setup continuava pedindo pra
+   * instalar — ou seja, o app aberto dentro do proprio icone sugerindo que
+   * alguem criasse um. Nao e so um passo inutil: destroi a
    * confianca, porque o app claramente nao sabe onde esta rodando.
    */
   /*

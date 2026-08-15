@@ -9,8 +9,8 @@ import { useT } from "../i18n/t.ts";
 /**
  * A bolinha da IA, tipo a do WhatsApp.
  *
- * "#42 Bolinha flutuante da IA, tipo o WhatsApp com um logo diferente" — e o
- * pedido dele. O que ela resolve, alem do visual: hoje a IA vive escondida em
+ * Item #42 do handoff: bolinha flutuante da IA, no molde da do WhatsApp. O que
+ * ela resolve, alem do visual: hoje a IA vive escondida em
  * duas telas diferentes (a caixa de perguntas da Coleção e a da Pokédex), e quem
  * nao entra nelas nunca descobre que o app responde pergunta.
  *

@@ -13,8 +13,8 @@ import { useSyncExternalStore } from "react";
  * Ou seja: a versao nova baixa, instala, e fica em `waiting` — parada — ate
  * alguem MANDAR ela assumir. E ninguem mandava. O registro que o plugin
  * injetava era `navigator.serviceWorker.register(...)` e nada mais, e o meu
- * tambem nao postava a mensagem. Por isso o Miguel atualizava a pagina o dia
- * inteiro e continuava vendo a versao velha: nao era cache teimoso, era uma
+ * tambem nao postava a mensagem. Por isso dava pra atualizar a pagina o dia
+ * inteiro e continuar vendo a versao velha: nao era cache teimoso, era uma
  * versao nova pronta, esperando um sinal que nunca vinha.
  *
  * Enquanto houver qualquer aba aberta, o `waiting` nao vira `active` por conta
@@ -165,9 +165,8 @@ export async function checkForUpdate(): Promise<boolean> {
 /**
  * A saida de emergencia.
  *
- * Existe porque a versao presa do Miguel nao tem como receber o botao de
- * atualizar — o codigo do botao esta justamente na versao que ele nao consegue
- * baixar. Isto apaga o service worker e os caches e recarrega do servidor.
+ * Existe porque uma versao presa nao tem como receber o botao de atualizar — o
+ * codigo do botao esta justamente na versao que ela nao consegue baixar. Isto apaga o service worker e os caches e recarrega do servidor.
  *
  * NAO toca na colecao: ela vive em IndexedDB, e os ajustes em localStorage.
  * O que se perde sao os sprites e as fontes ja baixados, que voltam sozinhos.

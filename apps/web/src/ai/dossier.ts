@@ -13,11 +13,11 @@ import type { OwnedPokemon } from "../storage/collection.ts";
 /**
  * Tudo que o app sabe sobre uma especie, em texto, pra IA ler.
  *
- * Nasceu de um erro meu que o Miguel pegou na hora. Ele perguntou pra Pokedex
- * "é bom pra segurar ginásio?" e ela respondeu "Não tem esse dado" — sendo que o
- * app CALCULA exatamente isso desde ontem, no `rankDefenders`. A resposta estava
- * a uma funcao de distancia e o modelo nao tinha como saber, porque eu mandei
- * pra ele so a locucao de oito linhas e escrevi "responda usando SÓ a ficha".
+ * Nasceu de um defeito claro: perguntar a Pokedex "e bom pra segurar ginasio?"
+ * devolvia "Nao tem esse dado" — sendo que o app CALCULA exatamente isso, no
+ * `rankDefenders`. A resposta estava a uma funcao de distancia e o modelo nao
+ * tinha como saber, porque o que chegava a ele era so a locucao de oito linhas,
+ * com a instrucao "responda usando SÓ a ficha".
  *
  * "essa pokedex q devia ser alimentada por ia tambem. tipo a pokedex da
  * serie/filme msm" — o aparelho da serie responde qualquer coisa sobre o bicho
@@ -315,8 +315,7 @@ export function speciesDossier(
     /*
      * "O Blissey aguenta 58.633 oq?"
      *
-     * Pergunta do Miguel, olhando a resposta na tela — e ele matou a charada
-     * sozinho. 58.633 nao e pontos de vida, nem segundos, nem golpes. E um
+     * A pergunta e justa, e ela se responde sozinha: 58.633 nao e pontos de vida, nem segundos, nem golpes. E um
      * INDICE: defesa x vida dividido pelo dano medio que a tabela de tipos
      * deixa ele sofrer. Sozinho nao quer dizer nada; so serve pra comparar um
      * Pokemon com outro.
@@ -553,8 +552,8 @@ export function speciesDossier(
    * A comparação era de id cru, e a coleção guarda o id da FORMA: o Venusaur
    * dele está salvo como `venusaur_normal` e a ficha aberta pela Pokédex é
    * `venusaur`. O dossiê saía sem a linha "o jogador tem 1", e o modelo então
-   * responde com toda a confiança que ele não tem nenhum — a mesma família dos
-   * dois defeitos que ele já pegou ("nao é 0. nao ta cadastrado porraaaaaa").
+   * responde com toda a confiança que ele não tem nenhum — a mesma família do
+   * defeito de tratar IV ausente como IV zero.
    */
   const canon = canonico(data.species);
   const meus = owned.filter((o) => canon(o.speciesId) === canon(species.id));
@@ -566,9 +565,9 @@ export function speciesDossier(
             /*
              * ⚠️ IV NÃO INFORMADO NÃO É IV ZERO.
              *
-             * "nao é 0. nao ta cadastrado porraaaaaa" — e ele perguntou isso
-             * depois de a Pokédex responder "O IV do Bulbasaur do jogador é 0."
-             * sobre um bicho que ele só marcou como "eu tenho esse".
+             * A Pokédex respondia "O IV do Bulbasaur do jogador é 0" sobre um
+             * bicho que só tinha sido marcado como "eu tenho esse" — IV não
+             * informado virava IV zero.
              *
              * Os `ivs` vêm zerados porque o tipo exige três números. O veredito
              * já sabia disso; o dossiê somava os zeros e entregava o resultado
@@ -588,8 +587,8 @@ export function speciesDossier(
             /*
              * ⚠️ OS DOIS NÚMEROS, e a porcentagem primeiro.
              *
-             * "pq o iv é 39?? ta doido man, é 87" — a tela mostrava 39/45 e
-             * 87%, o dossiê mandava só o 39, e a Pokédex respondeu "39". Não
+             * A tela mostrava 39/45 e 87%, o dossiê mandava só o 39, e a
+             * Pokédex respondeu "39". Não
              * estava errada; estava falando outra língua. Quem joga fala em
              * porcentagem, e é isso que a própria tela do app mostra em letra
              * grande.
@@ -639,7 +638,7 @@ export function speciesDossier(
 /**
  * O que a Pokedex pode e nao pode fazer com o dossie.
  *
- * "tipo a pokedex da serie/filme msm": la o aparelho responde qualquer pergunta
+ * A referencia e a Pokedex da serie: la o aparelho responde qualquer pergunta
  * sobre o bicho, no tom de quem esta lendo um registro. Entao o tom aqui e esse
  * — direto, informativo, sem "olá" e sem "espero ter ajudado".
  *
@@ -695,8 +694,8 @@ Regras rígidas:
 /**
  * O idioma da resposta, dito ANTES de tudo e pelo nome.
  *
- * ⚠️ ISTO ESTAVA QUEBRADO, e só apareceu porque o Miguel perguntou "testou a ia
- * em outros idiomas tbm?". Não tinha testado. Testei, e:
+ * ⚠️ ISTO ESTAVA QUEBRADO, e só apareceu quando a IA foi testada fora do
+ * português — coisa que ninguém tinha feito. Testado:
  *
  *   pergunta em inglês  → resposta em PORTUGUÊS
  *   pergunta em japonês → resposta em PORTUGUÊS

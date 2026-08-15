@@ -228,7 +228,7 @@ export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
      * "Bulbasaur, o Pokémon Semente." Qualquer pessoa reconhece essa frase de
      * ouvido, e sem ela a locução soa como relatório em vez de Pokédex. Era a
      * única peça que faltava, e ela ficou pendente por meses porque é texto da
-     * Pokémon Company — decisão de quem assume o risco, não minha. Ele decidiu.
+     * Pokémon Company, então é decisão de quem assume o risco. Foi decidido.
      *
      * Vem dos textos do PRÓPRIO JOGO, nos dez idiomas (`pokemon_category_0001`),
      * e não da PokeAPI — o CSV de lá não tem português nem russo. Ver
@@ -401,10 +401,10 @@ export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
       /*
         O modelo recebe o DOSSIE, nao a locucao.
 
-        Aqui morava o defeito que o Miguel pegou: eu mandava as oito linhas
-        faladas e escrevia "responda usando SÓ a ficha". Ele perguntou "é bom pra
-        segurar ginásio?" e levou "Não tem esse dado" — sendo que o app calcula
-        exatamente isso no `rankDefenders` desde ontem. A resposta existia e o
+        Aqui morava um defeito concreto: o que chegava ao modelo eram as oito
+        linhas faladas, com a instrucao "responda usando SÓ a ficha". Perguntar
+        "e bom pra segurar ginasio?" devolvia "Nao tem esse dado" — sendo que o
+        app calcula exatamente isso no `rankDefenders`. A resposta existia e o
         modelo nao tinha como alcançar.
 
         Agora vai tudo que o app sabe da especie: aguento como defensor, tabela
@@ -741,8 +741,9 @@ export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
             </button>
           )}
 
-          {/* AO VIVO primeiro, foto depois: apontar e o que ele pediu, e mandar
-              print e o caminho alternativo pra quem ja tem a imagem salva. */}
+          {/* AO VIVO primeiro, foto depois: apontar a camera e o caminho
+              principal, e mandar print e a alternativa pra quem ja tem a
+              imagem salva. */}
           {supportsCamera() && (
             <button
               type="button"
@@ -751,9 +752,9 @@ export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
                *
                * Com a casca do aparelho fora, as três ações viraram três pílulas
                * cinzas idênticas e a tela perdeu o centro — nada dizia por onde
-               * começar. "Apontar a câmera" é o que ele descreveu desde o começo
-               * ("VC APONTA PRO POKEMON, MANDA PRINT E ETC"); folhear e anexar
-               * são os caminhos alternativos.
+               * começar. "Apontar a câmera" é o gesto central desta tela desde
+               * o primeiro desenho; folhear e anexar são os caminhos
+               * alternativos.
                */
               className="tk-dexdev-key tk-dexdev-key--block tk-dexdev-key--principal"
               disabled={lendo || camera.state === "starting"}

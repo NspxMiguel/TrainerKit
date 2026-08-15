@@ -1,9 +1,9 @@
 /**
  * ElevenLabs compartilhada — a voz mais cara do app, com o orçamento mais curto.
  *
- * A chave é do Miguel e mora em `ELEVENLABS_API_KEY` na Vercel. Ele nunca me
- * mandou o valor, e é assim que tem que ser: a chave da Groq que ele colou no
- * chat está num transcript pra sempre.
+ * A chave mora em `ELEVENLABS_API_KEY` na Vercel e o valor não passa por aqui
+ * nem por lugar nenhum do repositório — é assim que tem que ser. Chave colada
+ * em conversa é chave vazada.
  *
  * ⚠️ A CONTA, ANTES DO CÓDIGO — ela é quem desenha esta função inteira:
  *
@@ -39,13 +39,13 @@ const MODELO = "eleven_flash_v2_5";
  */
 const VOZES = new Set([
   /*
-   * BRASILEIRAS, da Voice Library — as que o Miguel disse que existiam e eu
-   * tinha dito que não.
+   * BRASILEIRAS, da Voice Library — elas existem, ao contrário do que o app
+   * chegou a afirmar na tela.
    *
-   * Eu havia consultado `/v2/voices`, que é a biblioteca PADRÃO da conta: 21
-   * vozes, todas american/british/australian. Concluí "não existe voz brasileira
-   * na biblioteca gratuita" e escrevi isso na tela do app, com todas as letras.
-   * Estava errado — eu tinha olhado num lugar e afirmado sobre outro.
+   * A consulta anterior era `/v2/voices`, a biblioteca PADRÃO da conta: 21
+   * vozes, todas american/british/australian. Dali saiu a conclusão errada de
+   * que não havia voz brasileira gratuita — olhar num lugar e afirmar sobre
+   * outro.
    *
    * `/v1/shared-voices?language=pt` devolve 40 vozes pt-BR de verdade, com
    * sotaque `brazilian`, criadas e compartilhadas por outros usuários. Estas
@@ -90,10 +90,10 @@ const MAX_CHARS = 400;
 /**
  * Créditos que a função se recusa a encostar.
  *
- * Existe pra a cota NUNCA chegar a zero pela chave compartilhada: se o Miguel
- * quiser usar a própria conta da ElevenLabs pra qualquer outra coisa no fim do
- * mês, ainda vai ter com o que. Sem esta reserva, o "grátis pro povão" comeria
- * a conta dele inteira e ele descobriria tentando usar.
+ * Existe pra a cota NUNCA chegar a zero pela chave compartilhada: o dono da
+ * conta tem que conseguir usá-la pra outra coisa no fim do mês. Sem esta
+ * reserva, o "grátis pro povão" comeria a conta inteira, e a descoberta viria
+ * justamente na hora de precisar dela.
  */
 const RESERVA = 1000;
 
@@ -193,13 +193,12 @@ export default async function handler(req: Request): Promise<Response> {
   /*
    * `?vozes=1` — a lista, com idioma e prévia.
    *
-   * O Miguel: "eleven labs nao tem função de testar vozes... e as vozes nao tao
-   * em portugues, tao em outra lingua. (…) la no eleven labs fala pra qual
-   * lingua q é cada voz."
+   * Faltavam as duas coisas que a própria ElevenLabs já publica: o idioma de
+   * cada voz e um jeito de ouvir antes de escolher.
    *
-   * Ele está certo nas duas. Eu cravei seis ids de cabeça (Rachel, Domi, Sarah,
-   * Josh, Arnold, Adam) — que são todas vozes INGLESAS — e a tela mostrava só o
-   * nome, sem idioma e sem como ouvir. Escolher voz lendo "Domi" é escolher às
+   * A lista anterior eram seis ids cravados de cabeça (Rachel, Domi, Sarah,
+   * Josh, Arnold, Adam) — todas vozes INGLESAS — e a tela mostrava só o nome,
+   * sem idioma e sem como ouvir. Escolher voz lendo "Domi" é escolher às
    * cegas.
    *
    * A ElevenLabs já responde as duas coisas: `labels.accent` / `verified_languages`
@@ -211,10 +210,10 @@ export default async function handler(req: Request): Promise<Response> {
   /*
    * `?compartilhadas=1` — a Voice Library, onde estão as vozes brasileiras.
    *
-   * O Miguel: "eleven labs tem sim vozes brasileiras... tem uma função de criar
-   * voz e compartilhar com os outros, e ai sim tem brasileiro".
+   * As vozes brasileiras existem: são criadas e compartilhadas por outros
+   * usuários, e não aparecem na biblioteca padrão.
    *
-   * Ele está certo e eu tinha olhado no lugar errado. `/v2/voices` devolve a
+   * A consulta anterior era no lugar errado. `/v2/voices` devolve a
    * biblioteca PADRÃO da conta — 21 vozes, todas american/british/australian.
    * As vozes de verdade em português estão na Voice Library pública
    * (`/v1/shared-voices`), criadas por outros usuários e filtráveis por idioma.

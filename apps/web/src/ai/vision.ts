@@ -4,8 +4,8 @@ import { AI_PROXY, getProvider } from "./provider.ts";
 /**
  * "Que Pokemon e esse?" a partir de uma imagem.
  *
- * Isto e a parte da ideia do Miguel que EXIGE um modelo que enxergue: "VC APONTA
- * PRA ALGUM POKEMON, OU TIRA PRINT E MANDA PRA ELE". Duas limitacoes reais, e as
+ * Esta e a parte da Pokedex que EXIGE um modelo que enxergue: apontar a camera
+ * pra um Pokemon, ou mandar um print. Duas limitacoes reais, e as
  * duas ficam visiveis na tela em vez de escondidas:
  *
  * 1. So funciona com a Groq. Os modelos que rodam no aparelho (WebLLM) sao de
@@ -18,7 +18,7 @@ import { AI_PROXY, getProvider } from "./provider.ts";
  * A imagem nao e guardada em lugar nenhum. Vai na requisicao, e acabou — o mesmo
  * princípio do leitor de print.
  *
- * ⚠️ LIMITE REAL, medido na conta do Miguel: 8.000 tokens por minuto no plano
+ * ⚠️ LIMITE REAL, medido na conta: 8.000 tokens por minuto no plano
  * gratuito, e cada imagem custa uns 2.500. Ou seja ~3 fotos por minuto antes de
  * a Groq recusar. Por isso o erro dela sobe inteiro pra tela: "rate limit" e uma
  * informacao acionavel (espere um minuto), nao um defeito do app.
@@ -27,11 +27,11 @@ import { AI_PROXY, getProvider } from "./provider.ts";
 /**
  * Modelo de visao da Groq.
  *
- * ⚠️ O nome anterior — `meta-llama/llama-4-scout-17b-16e-instruct` — dava 404: eu
- * o escrevi de memoria, sem chave pra conferir, e o modelo nao existe no
- * catalogo. Foi exatamente o erro que o Miguel colou pra mim.
+ * ⚠️ O nome anterior — `meta-llama/llama-4-scout-17b-16e-instruct` — dava 404:
+ * foi escrito de memoria, sem chave pra conferir, e o modelo nao existe no
+ * catalogo.
  *
- * Este esta VERIFICADO contra `/v1/models` da conta dele: `qwen/qwen3.6-27b` e o
+ * Este esta VERIFICADO contra `/v1/models` da conta: `qwen/qwen3.6-27b` e o
  * unico do catalogo que aceita imagem — os outros respondem "content must be a
  * string", ele responde sobre a imagem. Testado com a arte oficial do Charizard:
  * devolveu exatamente "Charizard".
@@ -68,10 +68,10 @@ export function visionAvailable(): boolean {
   /*
    * ⚠️ Isto dizia `getGroqKey() !== null` — ou seja, a foto SÓ funcionava com
    * chave própria, e a tela mandava "Falta a chave da Groq" mesmo com a IA
-   * grátis ligada e respondendo o resto do app. O Miguel mandou o print e a
-   * frase: "ao invez de aparecer coloca a chave do groq, usa api free ne".
+   * grátis ligada e respondendo o resto do app — a tela cobrava uma chave que
+   * aquele caminho nem usa.
    *
-   * Ele estava certo, e o conserto de verdade foi no servidor: a função agora
+   * O conserto de verdade foi no servidor: a função agora
    * aceita conteúdo com imagem e o `qwen/qwen3.6-27b` entrou no allowlist.
    * Verificado contra produção com um sprite real — devolveu "Pikachu".
    */

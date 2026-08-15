@@ -7,7 +7,7 @@ lado", "cobertura de tipos". Recheio de calculadora. Nenhuma delas faz alguém
 **abrir** o app — respondem perguntas que a pessoa só faria se já estivesse
 com o app aberto.
 
-O teste que a lista velha não passava: *isso faz o Miguel tirar o celular do
+O teste que a lista velha não passava: *isso faz alguém tirar o celular do
 bolso no meio da rua?*
 
 Quem joga Pokémon GO abre um app auxiliar em três situações, e só três:
@@ -68,13 +68,13 @@ atalhos da barra lateral (Calculadora / Raide / Time) são só de desktop, e a
 fileira de ações da Início é de duas colunas **de propósito** — App.css:2363
 documenta que a terceira coluna quebrava "Monta um time pra mim" em três
 linhas. Ou seja: pôr um botão de raide ali conflita com o desenho, e conflito
-de desenho é pergunta pro Miguel, não coisa pra eu improvisar.
+de desenho se pergunta antes, não se improvisa.
 
 ---
 
 ## Depois, se fizer sentido
 
-**IA local.** O Miguel perguntou e eu não entreguei. Dá pra fazer com WebLLM,
+**IA local.** Perguntado e ainda não entregue. Dá pra fazer com WebLLM,
 mas o menor modelo útil passa de 500 MB de download. Antes de gastar isso do
 usuário: vale? Com a chave da Groq a resposta é instantânea e não custa nada
 de espaço. A IA local só ganha em privacidade — e aqui nada sai do aparelho
@@ -94,8 +94,8 @@ tem ação, resumo, atalhos e a dica; falta variar conforme o dia.
 
 ## O que eu achei olhando o app hoje (09/08/2026)
 
-Ele pediu: *"mais algo q vc acha legal implementar, ou q ta faltando? analiza
-ai"*. Estas são novas — as de cima continuam valendo.
+Levantamento do que falta no app. Estas são novas — as de cima continuam
+valendo.
 
 ### ~~A base do jogo não tem data~~ — eu errei, e o que faltava era menos
 
@@ -112,9 +112,9 @@ passa de 30 dias (`DIAS_PRA_AVISAR`, em `data/useDataset.ts`). Conta pelo
 
 ### A Início no modo "só consulta" ainda acaba no vazio
 
-O *"ta faltando coisa ali em baixo"* dele nunca foi resolvido pra quem escolheu
-não ter coleção: a tela termina na fila de atacantes de raide e sobra uma faixa
-preta até a barra de abas. O dataset já tem o que preencher —
+O vazio no rodapé nunca foi resolvido pra quem escolheu não ter coleção: a
+tela termina na fila de atacantes de raide e sobra uma faixa preta até a barra
+de abas. O dataset já tem o que preencher —
 `rankings.statProductByLeague` (PvP) e o motor de ginásio. Uma segunda fila
 ("melhores de Grande Liga", ou "quem segura ginásio") custa o tamanho exato do
 buraco e não inventa dado nenhum.

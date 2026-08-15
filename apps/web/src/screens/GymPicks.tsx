@@ -32,7 +32,7 @@ const NIVEL_PADRAO = 40;
 /**
  * Quem deixar no ginasio pra farmar moeda.
  *
- * Ideia do Miguel, e ela cabe no app porque a resposta e CALCULAVEL e
+ * A tela cabe no app porque a resposta e CALCULAVEL e
  * CONTRAINTUITIVA — as duas coisas que fazem uma tela valer aqui.
  *
  * O contraintuitivo: o ataque nao conta. Um defensor de ginasio nao escolhe

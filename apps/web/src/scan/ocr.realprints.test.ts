@@ -27,9 +27,9 @@ import {
 /**
  * A taxa de acerto do leitor de PC e PS, em prints REAIS, medida — nao estimada.
  *
- * "OCR validado contra um conjunto de prints reais do Miguel, medindo taxa de
- * acerto por campo — não 'parece funcionar', mas percentual." Esta e a frase do
- * plano, e este arquivo e ela.
+ * O plano pedia OCR validado contra um conjunto de prints REAIS, medindo taxa
+ * de acerto por campo — nao "parece funcionar", mas percentual. Este arquivo e
+ * essa medicao.
  *
  * ⚠️ Os fixtures ficam FORA do repositorio, como os do `scan.realprints`: sao
  * megabytes de arte do jogo. Sem eles o arquivo se ignora — nao falha, pra nao

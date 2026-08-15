@@ -416,9 +416,9 @@ const EN = {
   /*
    * O SOBRE DIZ EM QUE APARELHOS O APP FOI TESTADO, e nao so o que ele e.
    *
-   * Pedido dele: *"da aquela vitimizada, falando q e um app independente, q pode
-   * e encontrara bugs ate pq nao tenho qm testar, so conseguiu testar o app num
-   * poco x3 pro e um iphone 17 pro"*. Os dois nomes sao o que da credibilidade —
+   * O texto assume que o app e independente, feito por uma pessoa so, e que ele
+   * tem bugs porque nao ha quem teste alem dos dois aparelhos nomeados. Os dois
+   * nomes sao o que da credibilidade —
    * "pode ter bugs" e o que todo app diz; "so rodou nestes dois telefones" e
    * informacao que a pessoa usa pra saber o quanto confiar na tela.
    *

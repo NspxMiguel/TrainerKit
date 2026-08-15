@@ -110,8 +110,7 @@
    * fica atras dela: no rodape da Inicio ela pousa sobre `--tk-bg`, que e
    * #0A0C10. `rgba(28,30,38,.4)` sobre #0A0C10 da #12141C — uma diferenca de
    * oito niveis, que nao se ve. O desfoque tambem nao ajuda: borrar preto da
-   * preto. Era a barra sumindo, e foi o que o Miguel viu: *"esse preto ali fico
-   * estranho dms"*.
+   * preto. A barra simplesmente sumia, virando uma mancha preta no rodape.
    *
    * 58% sobre um cinza mais alto poe um PISO: sobre o preto ela sai #191D26 e
    * aparece; sobre um cartao ou uma foto os 42% que restam continuam deixando
@@ -594,8 +593,7 @@
    * ⚠️ Quem for CANCELAR o respiro (o hero, que sangra ate a borda de cima)
    * tem que cancelar ISTO, nunca o `--tk-safe-top` cru.
    *
-   * Era assim que estava, e por isso o app do Miguel apareceu "sem safe area"
-   * no iPhone dele em 07/08/2026: a `.tk-main` empurrava por `max(52, 59+12)`
+   * Era assim que estava, e por isso o app aparecia "sem safe area" no iPhone: a `.tk-main` empurrava por `max(52, 59+12)`
    * = 71px e o hero puxava de volta 52px fixos. Sobrava 19px de faixa entre a
    * Ilha Dinamica e a arte, e o cabecalho caia por cima do hero. Num aparelho
    * sem entalhe os dois davam 52 e batiam — que e exatamente por que isso

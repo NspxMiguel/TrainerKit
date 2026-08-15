@@ -56,7 +56,7 @@ export function IVCalculator({ species, data, onClose, owned }: Props) {
   // lido — sem print nao ha o que mostrar.
   const [ivs, setIvs] = useState<IVs | null>(owned?.ivs ?? null);
   // Caminho de recuperacao: so aparece depois de o print falhar. Ate la a tela
-  // fica no fluxo que o Miguel pediu — anexa e pronto.
+  // fica no fluxo curto: anexa e pronto.
   const setup = useSetup();
   const { t, language } = useT();
   const [manual, setManual] = useState(false);

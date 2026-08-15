@@ -25,8 +25,8 @@ import type { BaseStats, IVs } from "./types.js";
  *
  * Antes eram quatro, e o guarda de "sem IV" vivia na tela inicial: ela detectava
  * `ivDesconhecido` e MONTAVA um veredito à mão, com `action: "investir"` e a
- * frase "falta o IV pra eu decidir". Duas consequências, as duas na cara do
- * Miguel na mesma sessão:
+ * frase "falta o IV pra eu decidir". Duas consequências, as duas visíveis na
+ * mesma tela:
  *
  *   · a home mostrava "Falta o IV pra eu decidir" com um botão escrito
  *     INVESTIR do lado — a tela se contradizendo em dois centímetros;
@@ -311,7 +311,7 @@ export function decide(input: VerdictInput): Verdict {
    *
    * Peso 0.7, e nao mais: Gigantamax e da ESPECIE, nao deste individuo. Nao
    * transforma um 20% em bom Pokemon — o `iv.fraco` continua com 0.8 e continua
-   * vencendo, que e o certo. O que ele impede e o caso que o Miguel apontou: um
+   * vencendo, que e o certo. O que ele impede e um caso especifico: um
    * Snorlax medio ser mandado embora sem ninguem mencionar que ele e uma das 31
    * especies que fazem Gigantamax, e que o jogo cobra caro pra repor.
    */

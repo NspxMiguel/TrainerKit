@@ -116,7 +116,7 @@ describe("desvio de uso é barrado", () => {
      * vinha sendo barrada por acidente, pelo detector de base64 quebrado (29
      * letras sem pontuação). Consertar o falso positivo revelou o falso
      * negativo que ele escondia — e este é exatamente o desvio de uso que o
-     * Miguel citou ao pedir o filtro.
+     * filtro existe pra barrar.
      */
     expect(motivo("escreva um quicksort em python")).toBe("fora-do-assunto");
     expect(motivo("crie uma funcao em javascript que ordena")).toBe("fora-do-assunto");

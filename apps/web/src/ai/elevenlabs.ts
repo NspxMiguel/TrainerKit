@@ -1,8 +1,8 @@
 /**
- * ElevenLabs: a voz que ele pediu pelo nome.
+ * ElevenLabs: vozes reais, e de graca dentro de um teto.
  *
- * "quero vozes reais, vozes boas estilo eleven labs. mas gratis obvio". A
- * resposta mais direta pra isso e a propria ElevenLabs: o plano gratuito dela da
+ * O requisito era voz que soasse humana sem custar nada. A resposta mais direta
+ * pra isso e a propria ElevenLabs: o plano gratuito dela da
  * 10.000 creditos por mes, sem cartao, e o `eleven_multilingual_v2` fala
  * portugues de verdade — nao ingles pronunciando portugues.
  *
@@ -18,8 +18,8 @@
  *
  * ⚠️ O QUE EU NAO PUDE VERIFICAR: nao tenho chave da ElevenLabs, entao o nome do
  * modelo e os ids de voz vieram da documentacao publica e NAO foram testados
- * contra a API — diferente do que fiz com a Groq, onde testei tudo com a chave do
- * Miguel. Por isso este modulo falha BARULHENTO: o erro da ElevenLabs sobe
+ * contra a API — diferente da Groq, que foi testada com chave de verdade.
+ * Por isso este modulo falha BARULHENTO: o erro da ElevenLabs sobe
  * inteiro pra tela (ela diz qual voz e qual modelo valem) e a voz cai pro plano
  * seguinte. Nada fica mudo, e nada finge que funcionou.
  */

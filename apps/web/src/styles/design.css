@@ -8,9 +8,9 @@
  * eu escrevo o desenho novo e ele vence o antigo sem eu precisar caçar e apagar
  * a regra velha correspondente.
  *
- * Isso muda a ordem de trabalho, e foi o Miguel que apontou: em vez de remendar
- * a interface atual peça por peça, a interface DELE vira a base e a nossa vira
- * o que ainda nao foi portado.
+ * Isso inverte a ordem de trabalho: em vez de remendar a interface atual peça
+ * por peça, o desenho novo vira a base e a interface antiga vira o que ainda
+ * nao foi portado.
  *
  * ── De onde vem cada numero ──────────────────────────────────────────────────
  *
@@ -56,7 +56,7 @@
  *
  * Ela dizia: "sem overflow hidden, o item ativo transborda 4px e e o transbordo
  * que da a impressao de peça pousada". Isso valia enquanto a bolha transbordava
- * de propósito. Ela nao transborda mais ("a bolha ta maior q os botoes"), e a
+ * de propósito. Ela nao transborda mais — ficou do tamanho dos botoes —, e a
  * regra virou dano: medido, a bolha esta DENTRO da barra com 5px de folga de
  * cada lado — mas a sombra externa dela se espalha 16px e atravessa a borda
  * arredondada. Era a sombra que continuava lendo como "pilula vazada".
@@ -67,8 +67,6 @@
   transform: translateX(-50%);
   /*
    * ⚠️ A AREA SEGURA NAO SE SOMA AO RESPIRO — ela SUBSTITUI parte dele.
-   *
-   * "tbm ela ta mt pra cima."
    *
    * Era `18px + env(safe-area-inset-bottom)`. Num iPhone com barra de gestos
    * isso da 18 + 34 = **52px**, e medido na captura do iPhone 17 Pro sobravam
@@ -449,7 +447,7 @@
    * ⚠️ O VALOR E O `--tk-respiro-topo`, e nao o `--tk-safe-top`. Ler o token
    * cru aqui cancelava 52px de um padding que no iPhone vale 71 — o hero
    * parava 19px abaixo da borda e o cabecalho, que e absoluto, caia por cima
-   * dele. Era a "falta de safe area" que o Miguel viu no aparelho dele.
+   * dele. Era a "falta de safe area" que aparecia no aparelho de verdade.
    * Mesmo remedio do `.tk-hero--ficha` logo abaixo, pelo mesmo motivo.
    */
   margin-top: calc(var(--tk-respiro-topo) * -1);
@@ -474,11 +472,9 @@
   /*
    * ⚠️ COLUNA FLEX, e nao mais posicionamento absoluto.
    *
-   * "lembresse q tem sprites maiores ne. n é só o dragonitte q vai ficar ai"
-   *
-   * Ele matou a abordagem inteira com uma frase. Eu vinha calibrando `top` e
-   * `size` pro Dragonite — e errei tres vezes seguidas justamente porque cada
-   * numero servia a UM sprite. Snorlax e largo e baixo, Gyarados e comprido,
+   * A abordagem anterior nao tinha como funcionar: `top` e `size` vinham sendo
+   * calibrados pro Dragonite, e erraram tres vezes seguidas justamente porque
+   * cada numero servia a UM sprite. Snorlax e largo e baixo, Gyarados e comprido,
    * Joltik cabe numa unha: qualquer medida fixa quebra em algum deles.
    *
    * Em coluna, quem manda no tamanho e a CAIXA, nao a arte. A saudacao e o
@@ -495,8 +491,8 @@
    * A arte era absoluta sobre o hero INTEIRO, do 6% ao 88%, e o bloco de
    * decisao passava por cima dela. Onde o nome caia dependia da silhueta: no
    * Venusaur ele cruzava a boca, no Machamp o peito, no Hoopa o rosto todo.
-   * Nao havia numero de `top` que servisse pras 1.142 — foi a mesma armadilha
-   * que ele ja tinha matado antes ("n é só o dragonitte q vai ficar ai").
+   * Nao havia numero de `top` que servisse pras 1.142 — a mesma armadilha de
+   * calibrar por um sprite so.
    *
    * Em grade, a faixa de cima E o espaco acima do texto, medido pelo navegador.
    * A arte vira contêiner de tamanho DESSA faixa, e a regra de enquadramento
@@ -785,10 +781,10 @@
 }
 
 /*
- * ⚠️ O BANHO DE COR NO APP INTEIRO — o resto do pedido dele.
+ * ⚠️ O BANHO DE COR NO APP INTEIRO, e nao so no hero.
  *
- * "o pokemon destaque, sempre altera a palheta de cores do app ... maior parte
- * do app laranja."
+ * Requisito do desenho: a especie em destaque tinge a paleta do app inteiro, e
+ * nao apenas o cartao em que ela aparece.
  *
  * O hero sozinho nao cumpre isso: ele e um cartao colorido no topo, e abaixo
  * dele o app seguia cinza igual pra qualquer especie. Este veu leva a cor ate
@@ -1183,16 +1179,15 @@
    * ⚠️ DENTRO DA BARRA: 40px de altura numa barra de 50, com 5px de folga em
    * cima e embaixo e 4px nas laterais.
    *
-   * "bolHA AINDA PRA FORA CARA."
+   * A lente vazava pra fora da barra, e o defeito sobreviveu a tres tentativas
+   * de conserto porque o elemento medido era o ERRADO. Existem duas peças de
+   * vidro aqui: esta lente, que viaja entre as abas, e o fundo do proprio item
+   * ativo. As correcoes anteriores encolheram o item ativo, que ja estava
+   * dentro da barra, enquanto o que aparecia pra fora era a lente, com
+   * `top: -4px` e 66px de altura numa barra que tinha encolhido pra 50.
    *
-   * Ele reclamou tres vezes e eu "consertei" tres vezes — o elemento ERRADO.
-   * Existem duas peças de vidro aqui: esta lente, que viaja entre as abas, e o
-   * fundo do proprio item ativo. Eu vinha medindo e encolhendo o item ativo,
-   * que ja estava dentro da barra, enquanto o que aparecia pra fora era a
-   * lente, com `top: -4px` e 66px de altura numa barra que encolheu pra 50.
-   *
-   * Medir o elemento certo teria custado um comando. Medi o que eu ACHAVA que
-   * era a bolha, achei tudo certo, e reportei consertado — tres vezes.
+   * A licao e pratica: medir o elemento que aparece errado, e nao o que se
+   * supoe ser ele.
    *
    * Os 4px laterais evitam o outro sintoma: encostada na ponta, o raio dela
    * (20px) nao coincide com o da barra (25px) e ela morde a borda arredondada.
@@ -1393,10 +1388,8 @@
   /*
    * ⚠️ A REGRA DA CARA LIVRE MORA AQUI.
    *
-   * "deixa sempre a cara livre, sem nada. a cara e a parte da barriga pra cima."
-   *
-   * Traduzido: a parte da silhueta que vai da BARRIGA PRA CIMA nao pode cruzar o
-   * bloco de decisao.
+   * Requisito do desenho: a parte da silhueta que vai da BARRIGA PRA CIMA nao
+   * pode cruzar o bloco de decisao. Nada passa por cima do rosto.
    * Como a caixa da arte agora termina exatamente onde o nome comeca (ver
    * `.tk-hero`), isso vira uma desigualdade de uma linha:
    *
@@ -1421,7 +1414,7 @@
    * uma especie mal enquadrada — era a fracao errada.
    *
    * 75% cobre os dois formatos. Custa ~17% do tamanho do bicho, e essa e a
-   * troca que ele pediu: "deixa sempre a cara livre, sem nada."
+   * troca certa: cara livre vale mais que bicho grande.
    *
    * O terceiro teto e outro assunto: ele impede que os PES saiam do hero. O que
    * passa de 100% da faixa desce pro bloco de decisao, e o bloco tem altura em
@@ -1433,7 +1426,7 @@
    * uma porcentagem sempre faz aqui: serviu a UM tamanho de tela. Num aparelho
    * pequeno a faixa fica com ~145px, e 120% dela encolheu o Venusaur pra dois
    * tercos do que cabia; a cara ficou livre e o bicho ficou pequeno, que nao e
-   * o que ele pediu. Em tela alta a mesma regra deixaria de proteger.
+   * o objetivo. Em tela alta a mesma regra deixaria de proteger.
    *
    * Com a soma, o limite e exatamente "os pes encostam no fim do hero": em tela
    * baixa quem manda e a regra da cara, em tela alta quem manda e esta. Nenhuma
@@ -1596,7 +1589,7 @@
      penduraria na `.tk-main` e subiria pra dentro do entalhe. */
   position: relative;
   /*
-   * A FAIXA DA SAUDACAO: do alto da tela ate o fim do "Boa noite, Miguel.".
+   * A FAIXA DA SAUDACAO: do alto da tela ate o fim da linha "Boa noite, ...".
    *
    * Um token so, lido em tres lugares (piso do hero, recuo da arte e, por
    * consequencia, onde o nome do Pokemon pode chegar). Sao o respiro do topo
@@ -1663,9 +1656,9 @@
    * hero — foi o que aconteceu quando o estado vazio entrou na home: o
    * Eternatus virou uma sombra atras do nome, num hero de 265px.
    *
-   * O `0` existia pra o hero poder encolher e a home nunca rolar. Mas ele pediu
-   * as duas coisas — "legal deixar ele grande" e "sem scroll na tela de inicio"
-   * — entao o piso tem que ser o maior que ainda CABE.
+   * O `0` existia pra o hero poder encolher e a home nunca rolar. Mas os dois
+   * requisitos valem juntos — hero grande E home sem rolagem —, entao o piso
+   * teria que ser o maior que ainda CABE.
    *
    * ⚠️ Medido, e o piso VOLTOU A SER ZERO.
    *
@@ -1679,7 +1672,7 @@
    * do handoff, saudacao numa linha, vazio compacto) — e nao porque eu reservei
    * um numero pra ele.
    *
-   * O que fez o Eternatus sumir na tela dele nao foi a falta de piso: foi o
+   * O que fez o Eternatus sumir nao foi a falta de piso: foi o
    * estado vazio entrar com um BOTAO que repetia a acao principal, somando
    * ~90px que agora nao existem mais.
    */
@@ -1738,7 +1731,7 @@
    *
    * Nao e detalhe: os 26px a mais saiam direto do hero, que e o unico bloco
    * elastico da coluna. O Pokemon estava menor porque dois botoes estavam
-   * maiores que o desenho — e ele pediu o Pokemon grande.
+   * maiores que o desenho.
    *
    * 58 e nao 54 na acao principal porque ela tem DUAS linhas (titulo e
    * detalhe), que o mockup nao tinha. O alvo continua muito acima dos 44px.
@@ -2041,7 +2034,7 @@
  * do rotulo) mora dentro da media query de 900px. No celular ele nao sumia:
  * virava um `<aside>` cru logo abaixo do hero, com "Your collection6 / 1.182"
  * grudado numa linha, sem fundo e sem separacao — tres linhas de texto solto no
- * meio de uma tela que o Miguel tinha dado como pronta.
+ * meio de uma tela que ja estava dada como pronta.
  *
  * Nao ha o que salvar dele aqui embaixo: os dois numeros que importam ja estao
  * na tela, no "SUA COLEÇÃO · 3 PEDEM DECISÃO" que encima a fila, e o
@@ -2450,7 +2443,7 @@
 /*
  * O MONOGRAMA quando nao ha imagem nenhuma.
  *
- * "e sem imagens tbm." Nesse modo ele deixa de ser o que aparece enquanto a
+ * No modo sem imagens ele deixa de ser o que aparece enquanto a
  * arte carrega e passa a SER a arte — o handoff desenhou o hero assim, com o
  * monograma a 220px, porque partiu do princípio de que o app nunca teria
  * sprite.
@@ -2467,7 +2460,7 @@
    * hero inteiro isso passava; com a faixa terminando onde o nome comeca, um
    * "VE" de 190px numa faixa de 138 saiu pela metade e o nome caiu em cima
    * dele. No modo monograma o "VE" E o assunto, entao tapa-lo e o mesmo defeito
-   * que ele reclamou no sprite — "e sem imagens tbm", como ele ja tinha dito.
+   * do sprite coberto — e este modo existe justamente pra quem desliga imagens.
    *
    * 85cqh deixa a altura de caixa alta em ~61% da faixa, centrada: sobra folga
    * em cima e embaixo em qualquer tela, sem eu escolher um numero por aparelho.
@@ -2947,8 +2940,6 @@
 
 /*
  * ⚠️ O ANEL EXTERNO DE "PEDE ACAO" SAIU.
- *
- * "tira essa borda verde inutil ai q fico paia, deixa igual o laranja"
  *
  * O selo ja tinha um anel na cor do veredito (`box-shadow: 0 0 0 2.5px`) E o
  * rotulo embaixo dizendo a palavra. O `data-hot` do App.css desenhava um
@@ -3466,8 +3457,8 @@
  * O selo BETA é minúsculo de propósito — mas o dedo não é.
  *
  * 36×21px medidos em coreano, onde "베타" é a palavra mais curta das dez; nos
- * outros idiomas ele passa raspando. Ele ABRE uma explicação ao toque (foi um
- * pedido dele), então é um alvo de verdade, e a regra dos 44px vale.
+ * outros idiomas ele passa raspando. Ele ABRE uma explicação ao toque, então é
+ * um alvo de verdade, e a regra dos 44px vale.
  *
  * Área de toque maior que a área pintada, como no resto do arquivo: crescer o
  * selo estragaria o que ele é — uma marca discreta ao lado do título.
@@ -3537,9 +3528,8 @@
    * ⚠️ NO CLARO O TOPO TEM QUE SER MAIS COR, e não mais branco. Eu tinha
    * copiado a rampa do escuro literalmente, e o sinal estava trocado.
    *
-   * "e porra vc dnv tiro o degrade" / "ja falei varias vezes, nao ta se
-   * conectando" — e ele circulou de vermelho exatamente a faixa entre a saudação
-   * e o hero.
+   * O sintoma: o degradê sumia e a faixa entre a saudação e o hero deixava de
+   * se conectar, com um corte visível entre as duas.
    *
    * A conta antiga misturava 75% da cor com `--tk-hero-ink`, e no tema claro
    * `--tk-hero-ink` é o BRANCO do app. Ou seja: claro no alto da tela, cor no
@@ -4389,8 +4379,8 @@
   /*
    * ⚠️ OPACO E MISTURADO NA SUPERFÍCIE, e não uma cor escura translúcida.
    *
-   * "botao de inicio dnv ferrado" — terceira versão desta pílula, e as duas
-   * anteriores erraram pelo mesmo motivo, com sinais opostos:
+   * Terceira versão desta pílula, e as duas anteriores erraram pelo mesmo
+   * motivo, com sinais opostos:
    *
    *  1. `--tk-accent` cru a 30%: a cor CHEIA do bicho. Num Pokémon amarelo some
    *     na barra clara, num escuro vira um borrão. O contraste do indicador
@@ -4460,9 +4450,7 @@
    AJUSTES: o selo colorido de cada linha, como o handoff desenha (5g)
    ═══════════════════════════════════════════════════════════════════════════
 
-   "kd ajustes tipo apple? ta la no claude desing po."
-
-   Estava mesmo, e eu não tinha portado. As medidas são literais: selo de 30×30
+   As medidas são literais, do handoff: selo de 30×30
    com raio 8, 12px de vão, linha de 52px, rótulo em 16, valor em 15 a meia
    opacidade, e a seta em 8×14.
 */
@@ -4699,9 +4687,9 @@
    DENTRO DE UMA FOLHA, O FUNDO NÃO TEM TINTA DA ESPÉCIE
    ═══════════════════════════════════════════════════════════════════════════
 
-   "aq era pra te um degrade, nao esse negocio verde ali voltando do nada."
+   O fundo devia ser degrade, e uma faixa verde voltava do nada no meio dele.
 
-   A segunda metade da mesma queixa. Tirar a cauda resolveu a faixa colorida
+   A segunda metade do mesmo defeito. Tirar a cauda resolveu a faixa colorida
    logo abaixo do hero, mas sobrava a outra fonte de verde: `--tk-screen` tem
    uma tinta RADIAL da espécie centrada em 42% da altura da janela — e numa
    folha isso cai exatamente sob o hero.
@@ -4709,9 +4697,8 @@
    Ou seja: o hero descia até o preto e o FUNDO devolvia a cor três dedos
    abaixo. Duas peças diferentes produzindo o mesmo defeito.
 
-   Na home a tinta continua — ela nasceu de um pedido dele ("sem cor no meio")
-   e lá o hero ocupa metade da tela, então a cor no miolo é a continuação
-   natural. Numa folha o hero JÁ é a cor, e o que a página tem a fazer é sair
+   Na home a tinta continua — lá o hero ocupa metade da tela, então a cor no
+   miolo é a continuação natural dele. Numa folha o hero JÁ é a cor, e o que a página tem a fazer é sair
    do caminho: descer até o fundo e ficar lá.
 */
 .tk-sheet-full {
@@ -4883,7 +4870,7 @@
    * selecionada é branca, e o suporte tem que ceder. O que estava errado era o
    * QUE se mistura. 26% de um acento cru sobre vidro branco entrega o acento
    * quase puro em versao pastel — na Pokedex do Weedle a barra saiu bege, cor de
-   * areia. *"modo claro tbm estranho"*.
+   * areia, e nao uma barra de suporte.
    *
    * Misturando o acento com a tinta da pagina antes, a barra continua
    * escurecendo o tanto que a lente precisa, e continua sendo POSSIVEL ver de
@@ -5437,8 +5424,8 @@
    coluna) enquanto a barra continuava sendo uma faixa horizontal de 1112px
    presa no topo. Medido em 1280×800: barra em `y: 52`, largura 1112.
 
-   Ou seja: o "port pra tudo" que ele pediu funcionava exatamente no aparelho em
-   que ele NÃO abriria o app no computador.
+   Ou seja: o port "pra todas as plataformas" funcionava em exatamente uma — e
+   justamente a que não é o computador.
 
    Duas mudanças fazem o bloco valer em todas:
      · `[data-platform]` sem valor casa qualquer plataforma, com a mesma
@@ -5491,9 +5478,8 @@
   /*
    * ⚠️ A CASCA VAI DE PONTA A PONTA — era uma coluna de 1180px centrada.
    *
-   * "acho q ta igual o q te mandei nao", com razao. Eu tinha encaixado as
-   * pecas do desenho (ferramentas, selo de offline, duas colunas) DENTRO da
-   * casca de celular, e enquanto ela existisse tudo continuaria parecendo o app
+   * A tela larga nao estava igual ao desenho. As pecas (ferramentas, selo de
+   * offline, duas colunas) tinham sido encaixadas DENTRO da casca de celular, e enquanto ela existisse tudo continuaria parecendo o app
    * de telefone esticado: a barra flutuando como cartao no meio da esquerda, e
    * o conteudo espremido numa coluna com vazio dos dois lados.
    *
@@ -5625,18 +5611,17 @@
      violeta no canto, tile de 74px com o gradiente do tipo, e ao lado o nome,
      o veredito e a frase. Nada de arte ocupando a altura toda.
 
-     ⚠️ ISTO DESFAZ, NO PC, UMA COISA QUE ELE PEDIU.
+     ⚠️ ISTO DESFAZ, NO PC, UMA DECISÃO ANTERIOR — de propósito.
 
-     O hero grande nasceu de "ficou sem graça / sem cara de Pokémon" e "tudo com
-     o mesmo peso" — ver a nota do componente `Hero`. Ele continua valendo no
+     O hero grande nasceu porque a home sem ele não tinha hierarquia: tudo com
+     o mesmo peso, sem cara de Pokémon — ver a nota do componente `Hero`. Ele continua valendo no
      CELULAR, onde a primeira tela e uma coluna so e o Pokemon precisa dominar.
      Na tela larga o destaque divide a linha com o cartao de numeros, e um
      retrato de 320px ao lado de tres linhas de texto desequilibra a linha
      inteira — que e o que o documento resolve encolhendo o bicho.
 
-     Ele pediu "mockup" olhando os dois lado a lado. Fica registrado que a
-     escolha anterior era dele tambem, pra quem ler isto daqui a seis meses nao
-     achar que alguem simplesmente ignorou o pedido antigo. */
+     As duas decisões valem, cada uma na sua largura. Fica registrado pra quem
+     ler isto daqui a seis meses não achar que o hero grande foi esquecido. */
   .tk-home-linha1 > .tk-hero {
     display: flex;
     flex-direction: row;
@@ -6976,8 +6961,6 @@
    ALVOS DE TOQUE DO MODO POKÉDEX
    ═══════════════════════════════════════════════════════════════════════════
 
-   "clica em tudo, testar tudo, ocr, tudo tudo tudo msm."
-
    Varrendo o aparelho botão a botão, três alvos abaixo dos 44px que o app
    promete: a seta de voltar (40×40), o selo BETA (45×21) e — o pior — o
    contador "Capturados: 4", que é um botão de **13px de altura**. Ele é a porta
@@ -7441,8 +7424,8 @@
  * CONTINENTE de todo `position: fixed` que mora dentro dele. Com `both`, todo
  * filho do `.tk-main` virava uma tela dentro da tela.
  *
- * Foi o que quebrou o app no iPhone do Miguel — "tudo bugado irmao, scroll em
- * diversas partes do site... sem safearea":
+ * Foi o que quebrou o app no iPhone, com dois sintomas ao mesmo tempo: rolagem
+ * errada em varias partes e area segura ignorada.
  *
  *   · a faixa de cor do topo (`.tk-home-topo::before`, `fixed`) parava de valer
  *     a TELA e passava a valer a COLUNA: virava um retangulo azul com moldura

@@ -1,14 +1,14 @@
 # Checklist de revisão pós-import da interface nova
 
-O Miguel vai importar a interface do `design_handoff_trainerkit_redesign` por
-conta própria. Este arquivo existe para a revisão que vem **depois**: é a lista
+A interface do `design_handoff_trainerkit_redesign` será importada por fora
+deste repositório. Este arquivo existe para a revisão que vem **depois**: é a lista
 do que o app faz hoje e que um redesenho de UI tende a levar junto sem querer.
 
 **Como usar:** para cada item, reproduza o "como conferir". Se falhar, a função
 sumiu na troca e precisa voltar.
 
-**De onde isto saiu:** o código tem **393 avisos `⚠️`** e **90 falas do Miguel
-citadas em comentário**. Quase todo item aqui é uma correção que já custou uma
+**De onde isto saiu:** o código tem **393 avisos `⚠️`** marcando decisões que
+não devem ser desfeitas. Quase todo item aqui é uma correção que já custou uma
 rodada — a fala é a prova de que alguém tropeçou nela antes.
 
 > Nota de método: cada `⚠️` no código marca uma armadilha real. Se o arquivo que
@@ -25,10 +25,10 @@ aconteceram com o app publicado.
 
 | O que | Por quê (fala original) | Como conferir |
 |---|---|---|
-| A espécie **segue o Pokémon salvo**, não a foto de quando a tela abriu | *"cliquei em evoluir e o bulbasauro n foi, ja fiz e n foi."* Sem isso, evoluir mantinha a tela em "Bulbasaur" com o botão armado, e o toque seguinte pulava o Ivysaur direto pro Venusaur | Salve um Bulbasaur, evolua pela ficha. A ficha tem de virar Ivysaur e o botão oferecer o passo seguinte |
-| Acha o salvo **mesmo sem receber `owned`** | *"ele duplico e tem 2 venusaur agr."* Abrindo pela Pokédex, o app agia como se você não tivesse o bicho e oferecia "Salvar", criando uma segunda linha | Tenha um Venusaur salvo, abra Venusaur **pela Pokédex**. Tem de mostrar o veredito, não "Eu tenho esse" |
+| A espécie **segue o Pokémon salvo**, não a foto de quando a tela abriu | Evoluir não trocava a espécie na tela. Sem isso, evoluir mantinha a tela em "Bulbasaur" com o botão armado, e o toque seguinte pulava o Ivysaur direto pro Venusaur | Salve um Bulbasaur, evolua pela ficha. A ficha tem de virar Ivysaur e o botão oferecer o passo seguinte |
+| Acha o salvo **mesmo sem receber `owned`** | A mesma espécie entrava duas vezes na coleção. Abrindo pela Pokédex, o app agia como se você não tivesse o bicho e oferecia "Salvar", criando uma segunda linha | Tenha um Venusaur salvo, abra Venusaur **pela Pokédex**. Tem de mostrar o veredito, não "Eu tenho esse" |
 | A busca por espécie passa pelo **canônico** | O da coleção pode ser `venusaur_normal` e a Pokédex abre `venusaur` — mesmo bicho, duas escritas | idem acima, com uma forma cosmética |
-| `ivDesconhecido` chega ao `VerdictCard` | Sem isso a ficha dizia *"Transferir · IV 0 de 45 · confiança 65%"* pra quem só marcou "eu tenho esse" | Marque "Eu tenho esse" sem escanear. Tem de dizer "Falta o IV pra eu decidir" |
+| `ivDesconhecido` chega ao `VerdictCard` | Sem isso a ficha dizia "Transferir · IV 0 de 45 · confiança 65%" pra quem só marcou "eu tenho esse" | Marque "Eu tenho esse" sem escanear. Tem de dizer "Falta o IV pra eu decidir" |
 
 ## 2. Faxina — `screens/Faxina.tsx`
 
@@ -79,7 +79,7 @@ aconteceram com o app publicado.
 | O que | Por quê |
 |---|---|
 | Se mudar o que sai do aparelho, **este texto muda junto** | A tela promete por escrito o que sai e o que não sai |
-| A **foto** manda a imagem pra fora, e isso está declarado | *"Quase passou batido"* — identificar Pokémon por foto manda a imagem |
+| A **foto** manda a imagem pra fora, e isso está declarado | Identificar Pokémon por foto manda a imagem pra fora, e a lista não dizia |
 | As **imagens** estavam faltando na lista e a frase dizia "só a IA" | Já foi corrigido uma vez |
 
 **Como conferir:** leia a tela e compare com o que o app realmente faz. Se a
@@ -92,7 +92,7 @@ interface nova mudar qualquer caminho de rede, a tela tem de acompanhar.
 | Renomear coleção com **campo próprio**, não `prompt()` | `prompt()` é diálogo de navegador no meio de um app |
 | Feedback é **`mailto:`**, não formulário | Formulário exigiria servidor — e o app promete não ter |
 | O e-mail no feedback é **botão de copiar**, não texto | — |
-| "Ajude o projeto" **saiu**: *"tire o ajude o projeto"* | Não reintroduza |
+| "Ajude o projeto" **saiu** da tela de Ajustes | Não reintroduza |
 
 ---
 

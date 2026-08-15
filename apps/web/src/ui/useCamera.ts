@@ -3,8 +3,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 /**
  * A camera ao vivo da Pokedex.
  *
- * O Miguel: "nao funcionando modo live da pokedex. so tem opcao de usar foto".
- * Ele estava certo e a razao e simples: `<input type="file" capture>` NAO e camera
+ * O modo ao vivo da Pokedex nao funcionava: so havia a opcao de mandar foto.
+ * A razao e simples: `<input type="file" capture>` NAO e camera
  * ao vivo. Ele abre o app de camera do sistema, tira uma foto, fecha e devolve o
  * arquivo. Funciona, mas nao e apontar — e fotografar.
  *

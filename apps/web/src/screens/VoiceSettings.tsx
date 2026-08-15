@@ -22,8 +22,7 @@ import {
 /**
  * Uma pergunta, uma lista.
  *
- * O Miguel: "voz da pokedex totalmente confuso. organiza ai. tem umas 30 opcao
- * de voz e ninguem sabe oq é de vdd."
+ * Trinta opções de voz, nenhuma delas dizendo o que era.
  *
  * A tela anterior estava organizada por MOTOR: uma seção pro Kokoro (com botão
  * de baixar 95 MB), uma pra neural (com interruptor), uma pra ElevenLabs (com
@@ -141,10 +140,10 @@ export function VoiceSettings() {
   /*
    * Se a prévia foi lida por OUTRA voz, a tela diz.
    *
-   * Era o buraco que fez o Miguel achar que Brian, Eric e Adriano eram a mesma
-   * voz: o Adriano devolve 402 (voz de biblioteca em plano gratuito), o app
-   * caía calado pra neural, e o rótulo continuava dizendo "Adriano". Ele não
-   * tinha como saber sem comparar os áudios byte a byte — que foi o que eu
+   * Era o buraco que fazia Brian, Eric e Adriano soarem como a mesma voz: o
+   * Adriano devolve 402 (voz de biblioteca em plano gratuito), o app caía calado
+   * pra neural, e o rótulo continuava dizendo "Adriano". Não havia como
+   * perceber sem comparar os áudios byte a byte — que foi o que eu
    * acabei tendo que fazer.
    *
    * A escolha dele não é desfeita: só fica dito quem leu de verdade.

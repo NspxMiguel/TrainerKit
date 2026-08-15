@@ -25,10 +25,10 @@ const VOZ_KEY = "tk:dex-11-voz";
 /**
  * As vozes REAIS da conta, por idioma — buscadas na API, nao escritas de cabeca.
  *
- * ⚠️ O QUE ESTAVA AQUI ERA INVENTADO, e o Miguel pegou pelo ouvido: "os nomes
- * tao errados kkk, sarah ta com voz de homem".
+ * ⚠️ O QUE ESTAVA AQUI ERA INVENTADO, e dava pra ouvir: o rotulo "Sarah" saia
+ * com voz de homem.
  *
- * Eu tinha cravado seis pares nome/id de memoria. Conferindo contra
+ * Eram seis pares nome/id cravados de memoria. Conferindo contra
  * `/v2/voices`: QUATRO DOS SEIS IDS NAO EXISTEM na conta (Rachel, Domi, Josh,
  * Arnold). So Sarah e Adam eram reais.
  *
@@ -55,7 +55,7 @@ export const ELEVEN_VOICES: Record<
    * chamada falhava, o app caia calado pra voz neural, e o rotulo "Adriano"
    * ficava em cima de outra voz.
    *
-   * Era isso que o Miguel ouviu como "voz de brian e adriano e eric =": Brian e
+   * Era o que fazia Brian, Adriano e Eric soarem iguais: Brian e
    * Eric sao diferentes de verdade (audios de 35.152 e 30.973 bytes), o Adriano
    * e que era os outros dois.
    *
@@ -157,8 +157,8 @@ export function setElevenSharedOn(on: boolean): void {
 /**
  * As vozes deste idioma — e o INGLES como saida quando ele nao tem nenhuma.
  *
- * O Miguel: "coloca opção de usar em ingles quando nao disponivel na sua lingua.
- * pra todos os idiomas tem q ve ne pae".
+ * Quando o idioma nao tem voz nenhuma, a saida e oferecer o ingles — e nao
+ * esconder o recurso.
  *
  * Coreano e russo nao tem NENHUMA voz da ElevenLabs nesta conta. Sem esta saida,
  * quem usa o app nessas duas linguas simplesmente nao veria a opcao existir —

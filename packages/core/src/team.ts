@@ -3,7 +3,7 @@ import type { TypeChart } from "./types-chart.js";
 /**
  * Montar um time, e virar lista de caça.
  *
- * A ideia e do Miguel: em vez de "veja o ranking", o app MONTA um time pra um
+ * Em vez de "veja o ranking", o app MONTA um time pra um
  * objetivo e voce sai atras do que falta. A diferenca nao e de apresentacao —
  * um ranking e uma lista de trinta nomes que ninguem decora; um time e seis
  * nomes com um proposito, e isso cabe na cabeca.

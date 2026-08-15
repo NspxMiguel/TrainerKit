@@ -8,8 +8,8 @@ import { useT } from "../i18n/t.ts";
  *
  * Antes era a palavra "BETA" sozinha no canto da tela de IV. Ela avisava que
  * algo pode dar errado sem dizer o que nem onde — o que e pior que nao avisar,
- * porque deixa a pessoa desconfiada do app inteiro. O Miguel pediu o texto e ele
- * e simples: foi testado num iPhone 17 Pro e num Poco X3 Pro, e em qualquer
+ * porque deixa a pessoa desconfiada do app inteiro. O texto e simples: foi
+ * testado num iPhone 17 Pro e num Poco X3 Pro, e em qualquer
  * outro aparelho o leitor de print e o primeiro suspeito.
  *
  * Abre por toque E por passar o mouse, porque os dois existem: no celular nao

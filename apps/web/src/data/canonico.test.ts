@@ -10,8 +10,9 @@ import { canonico, type DatasetSpecies } from "./useDataset.ts";
  *
  * ⚠️ O DEFEITO QUE ISTO FECHA, e ele já tinha sido "consertado" uma vez.
  *
- * "ele duplico e tem 2 venusaur agr". Naquela vez o conserto foi a ficha
- * procurar o Pokémon salvo POR ESPÉCIE quando não recebia o registro pronto.
+ * A mesma espécie entrava duas vezes na coleção. Naquela vez o conserto foi a
+ * ficha procurar o Pokémon salvo POR ESPÉCIE quando não recebia o registro
+ * pronto.
  * Só que a comparação era `owned.speciesId === species.id`, de id cru — e o
  * GAME_MASTER escreve a mesma espécie de dois jeitos: a coleção guarda
  * `venusaur_normal` (que foi o que o scanner gravou) e a Pokédex navega

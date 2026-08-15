@@ -7,9 +7,8 @@ import { useSyncExternalStore } from "react";
  * aparece na tela, e o service worker guarda. Isso e certo pra quem so quer
  * consultar um Pokemon — ninguem devia baixar 900 imagens pra ver uma.
  *
- * Mas quem vai FICAR usando paga o preco em cada tela nova: o Miguel viu os
- * sprites chegando devagar, um por um, e a grade piscando monograma antes de
- * cada imagem. Pra esse caso o certo e o oposto — baixa tudo uma vez, aceita
+ * Mas quem vai FICAR usando paga o preco em cada tela nova: os sprites chegam
+ * devagar, um por um, e a grade pisca monograma antes de cada imagem. Pra esse caso o certo e o oposto — baixa tudo uma vez, aceita
  * esperar, e depois nunca mais.
  *
  * Por que `fetch` puro e nao `cache.put`: o service worker ja intercepta estas

@@ -19,8 +19,8 @@ import { chat } from "./provider.ts";
  *
  * A primeira versao da IA reescrevia o veredito que o app ja tinha escrito.
  * Isso e quase nada: o numero ja estava na tela, a frase ja estava pronta, e o
- * modelo so trocava as palavras. O Miguel perguntou "pra que serve isso?" e a
- * resposta honesta era "pra pouco".
+ * modelo so trocava as palavras — trabalho de modelo pra entregar o que ja
+ * estava pronto.
  *
  * O que um modelo faz e o app nao: entender uma pergunta solta. "Qual dos meus
  * presta pra Great?", "o que eu transfiro?", "vale subir o Machamp?" — sao

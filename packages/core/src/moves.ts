@@ -334,9 +334,9 @@ export const CONTEXT_KEYS: Record<Context, { title: string; detail: string }> = 
 /**
  * Contextos que dao EXATAMENTE a mesma recomendacao, agrupados.
  *
- * O Miguel: "tem alguns pokemon, tipo o eternatus, que sla, raide, pra tudo e
- * pvp sao iguais, so muda pra rocket. entao, daria pra unificar todos q sao
- * iguais. pra n deixar diversos botoes, que no final sao exatamente iguais".
+ * Em muitas especies — o Eternatus e o caso claro — raide, uso geral e PvP
+ * pedem o MESMO moveset, e so o de Rocket muda. Quatro botoes identicos nao
+ * informam nada; um botao unico, dizendo que os quatro coincidem, informa.
  *
  * Ele descreveu uma questao de interface, mas a decisao e de DADO: so o core
  * sabe se dois contextos coincidem, e isso muda de especie pra especie. O

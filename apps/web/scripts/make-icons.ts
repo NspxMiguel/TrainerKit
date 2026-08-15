@@ -37,10 +37,9 @@ const OUT_DIR = join(HERE, "..", "public");
  * Duas coisas erradas nisso. A primeira e que o handoff nao pede gradiente
  * roxo-azul: pede `linear-gradient(160deg,#33394A,#14171E 70%)`, que e grafite
  * indo pra quase-preto — um cinza com volume, exatamente o registro dos icones
- * do sistema. Eu troquei uma coisa por outra e argumentei contra a que nao
- * estava escrita. A segunda e que a troca era minha, num arquivo que o Miguel
- * me mandou seguir; ele pediu por escrito pra eu PERGUNTAR quando o desenho
- * conflitar, e eu improvisei.
+ * do sistema. Uma coisa foi trocada por outra, com argumento contra a que nem
+ * estava escrita. A segunda e que a troca contrariou o handoff sem pergunta:
+ * conflito com o desenho se pergunta, nao se improvisa.
  *
  * O resultado apareceu na tela inicial: preto chapado, sem quina iluminada, o
  * ovo boiando num vazio. *"os icones novos do app ainda n estao aplicados

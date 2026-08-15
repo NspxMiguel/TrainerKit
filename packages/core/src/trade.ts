@@ -4,8 +4,8 @@ import type { BaseStats, IVs } from "./types.js";
 /**
  * Vale trocar este?
  *
- * O pedido do Miguel, tres vezes: "Tag de trocar (IV melhor, chance de lucky,
- * bom pra bicho ruim de IV mas boa espécie)".
+ * Uma etiqueta de troca: IV melhor do outro lado, chance de lucky, e o caso do
+ * bicho de IV ruim mas de espécie boa.
  *
  * A pergunta e diferente da do veredito, e por isso isto NAO virou uma quinta
  * acao de `decide()`. O veredito responde "o que eu faco com este?" e as

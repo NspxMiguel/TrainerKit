@@ -5,7 +5,7 @@
  * ressalva sobre a origem dessas vozes, esta la. Aqui so o cliente.
  *
  * Isto e o que faltava: das quatro vozes que o app tem, esta e a unica que junta
- * as tres coisas que o Miguel pediu — humana, gratis, e sem nada pra configurar.
+ * as tres exigencias — humana, gratis, e sem nada pra configurar.
  * Kokoro so fala ingles, ElevenLabs pede chave e e paga, e a do sistema em
  * portugues e a Luciana.
  */
@@ -50,9 +50,9 @@ export const EDGE_VOICES: Record<string, ReadonlyArray<{ id: string; label: stri
     /*
      * A Francisca saiu.
      *
-     * O Miguel ouviu as tres e disse: "menos a francisca, isso é pt portugal".
-     * A Microsoft rotula ela como pt-BR, mas quem fala o idioma ouve o sotaque —
-     * e nesse julgamento quem manda e o ouvido dele, nao a etiqueta do catalogo.
+     * A Microsoft rotula a Francisca como pt-BR, mas o sotaque dela e de
+     * Portugal, e quem fala o idioma ouve na primeira frase — nesse julgamento
+     * quem manda e o ouvido, nao a etiqueta do catalogo.
      * O id continua no allowlist da funcao: tirar de la quebraria quem ja tinha
      * escolhido ela, e `getEdgeVoice` ja cai na primeira da lista nesse caso.
      */
@@ -109,8 +109,8 @@ export function edgeVoicesFor(language: string): ReadonlyArray<{ id: string; lab
 /**
  * A voz que vai falar, garantidamente DO IDIOMA pedido.
  *
- * ⚠️ Esta função é a trava contra o defeito que o Miguel nomeou: "PEGA AS VOZES
- * DA TAL LINGUA, NAO USAR UMA VOZ BRASILEIRA FALANDO JAPA".
+ * ⚠️ Esta função é a trava contra um defeito concreto: uma voz brasileira lendo
+ * texto em japonês, porque a preferência salva venceu o idioma da tela.
  *
  * A regra é uma só e vale pra qualquer origem: uma voz só é usada se estiver na
  * lista DAQUELE idioma. Preferência salva que não está na lista é descartada, e
@@ -195,7 +195,7 @@ export async function edgeSynthesize(
    *
    * O GET e o que permite o CDN guardar: mesma voz + mesmo texto = mesma URL, e
    * a partir da segunda pessoa o audio sai do cache sem custar nada nem acordar
-   * a funcao. Foi o que ele pediu — "ele fica tipo em cache apos alguem usar".
+   * a funcao: o primeiro ouvinte paga a sintese pelos seguintes.
    */
   const podeCachear = compartilhavel && corte.length <= MAX_URL_CHARS;
 

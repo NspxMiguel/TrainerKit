@@ -101,8 +101,8 @@ describe("aguento de ginasio no texto", () => {
 
   it("o numero do aguento nunca sai sem dizer que e um indice", () => {
     /*
-     * "O Blissey aguenta 58.633 oq?" — a pergunta do Miguel, e ela e justa: o
-     * numero nao tem unidade. O dossie tem que dizer isso na cara, senao o
+     * "O Blissey aguenta 58.633 o que?" — a pergunta e justa: o numero nao tem
+     * unidade. O dossie tem que dizer isso na cara, senao o
      * modelo apresenta o indice como se fosse vida ou segundos.
      */
     const texto = dossie("blissey");

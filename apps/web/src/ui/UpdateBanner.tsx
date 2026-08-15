@@ -15,7 +15,7 @@ import { IconDownload } from "./Icons.tsx";
  * como promessa. Atualizar leva um segundo porque o arquivo ja esta no
  * aparelho; o botao so solta o freio.
  *
- * As tres saidas sao do Miguel, e cada uma quer dizer uma coisa diferente:
+ * As tres saidas dizem coisas diferentes, e por isso sao tres:
  *
  *   Atualizar — agora.
  *   Daqui a 3 dias — some por tres dias, pra quem esta no meio de alguma coisa.

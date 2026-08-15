@@ -32,7 +32,7 @@
    * do fundo do proprio `.tk-app`. O gradiente existia, era calculado, e ficava
    * coberto por uma cor solida em cima.
    *
-   * O efeito visivel — o que o Miguel fotografou lado a lado: as ABAS ficavam
+   * O efeito visivel, com as duas telas lado a lado: as ABAS ficavam
    * pretas chapadas (#07080b), enquanto a ficha da especie e as folhas de
    * Ajustes, que pintam `--tk-screen` diretamente, mostravam o azul do
    * gradiente. Duas telas do mesmo app com fundos diferentes, sem nada no codigo
@@ -111,13 +111,13 @@
  *
  * ⚠️ A RESERVA E MEDIDA PELA BARRA, e nao por um numero escrito a mao. Era
  * `84px + area segura` = 118pt, com a barra terminando aos 68 — 50pt de preto
- * embaixo de tudo, sem dono. E o *"ta faltando coisa ali em baixo"* dele: nao
+ * embaixo de tudo, sem dono. O sintoma era a tela terminar num vazio: nao
  * faltava conteudo, sobrava reserva. Piorou quando a barra desceu, porque o 84
  * ficou parado.
  *
  * Na Inicio quem come a sobra e o hero, que e o unico `flex: 1` da coluna — o
- * Pokemon cresce sozinho ao devolver esses 38pt, que e a outra coisa que ele
- * pediu ("legal deixar ele grande").
+ * Pokemon cresce sozinho ao devolver esses 38pt, e hero grande e o que esta
+ * desenhado pra essa tela.
  *
  * Os 12px sao a folga entre o topo da barra e o que vem antes; a area segura ja
  * esta dentro de `--tk-barra-teto` e somar de novo era o mesmo erro.
@@ -165,10 +165,10 @@
 /*
  * Na home o nome mantem os 34px, com respiro menor embaixo.
  *
- * Uma versao encolheu isto pra 26px numa linha, pra ganhar 44px de altura, e o
- * Miguel notou na hora: "a saudação encolheu". O nome e a unica coisa da tela
- * que e sobre ELE — trocar isso por mais informacao foi trocar a coisa certa
- * pela errada. O que se corta pra caber e informacao, nunca a identidade.
+ * Uma versao encolheu isto pra 26px numa linha, pra ganhar 44px de altura, e a
+ * perda salta aos olhos: o nome e a unica coisa da tela que e sobre QUEM esta
+ * usando — trocar isso por mais informacao foi trocar a coisa certa pela
+ * errada. O que se corta pra caber e informacao, nunca a identidade.
  */
 .tk-h1--home {
   margin-bottom: var(--tk-s4);
@@ -678,9 +678,7 @@
  * O mesmo efeito na borda de CIMA — e aqui quem fica por cima do conteudo nao e
  * uma barra nossa, e a barra de status do sistema.
  *
- * "degrade c pa fica legal ne? deixa o app perfeito po, deixa bonitao"
- *
- * Sem isto, no iPhone dele o texto subia e ENCOSTAVA NO RELOGIO: "Subir os Ma…"
+ * Sem isto, no iPhone o texto subia e ENCOSTAVA NO RELOGIO: "Subir os Ma…"
  * cruzado com "7:39". Em aba de navegador nao acontece, porque ali a barra de
  * status nao fica sobre a pagina — foi por isso que passou por toda a conferencia
  * feita no Mac.
@@ -1057,11 +1055,10 @@
  * repintava a tela INTEIRA de outra cor — e a diferenca crescia conforme
  * rolava, porque um lado e degrade e o outro nao.
  *
- * Era a "quebra de continuidade" que o Miguel apontava ha varias sessoes: "nao
- * primeiro um fundo preto, e dps um fundo rosa choque". Eu ja tinha corrigido
- * a mesma costura em DOIS vizinhos — o `.tk-onb` (a nota logo acima dele diz
- * isso com todas as letras) e o `.tk-dex` — e deixei de fora justamente a
- * classe que serve OITO telas. Consertar o sintoma onde ele aparece, em vez da
+ * E a quebra de continuidade que vinha de varias versoes: um fundo numa tela e
+ * outro na seguinte. A mesma costura ja tinha sido corrigida em DOIS vizinhos —
+ * o `.tk-onb` (a nota logo acima dele diz isso com todas as letras) e o
+ * `.tk-dex` — e ficou de fora justamente a classe que serve OITO telas. Consertar o sintoma onde ele aparece, em vez da
  * regra que o causa, e o que fez isso durar tanto.
  *
  * O token `--tk-sheet` foi APAGADO junto, nos dois temas. Guardar uma cor de
@@ -1897,9 +1894,9 @@
  *
  * ⚠️ ISTO ERA TRES BARRINHAS COM UMA SETA VERDE, e era o desenho ANTIGO. O
  * icone do aparelho ja e o ovo rachado; quem instalava via o ovo na tela de
- * inicio e abria o app pra ser recebido por outro simbolo. Foi metade do
- * *"os icones novos do app ainda n estao aplicados corretamente"* — a outra
- * metade era o `apple-touch-icon` no `index.html`.
+ * inicio e abria o app pra ser recebido por outro simbolo. Era metade do
+ * defeito de "icone novo nao aplicado" — a outra metade era o
+ * `apple-touch-icon` no `index.html`.
  *
  * O tile e CSS e o ovo e SVG (`ui/MarcaOvo.tsx`), pelo mesmo motivo de sempre:
  * um PNG de 84px numa tela de densidade 3 fica mole. As cores vem de
@@ -2227,9 +2224,9 @@ button.tk-owned-act:active {
 /*
  * "Ja fiz isso".
  *
- * O Miguel reclamou duas vezes do mesmo: "essa desgraça de investir sem jeito
- * de tirar isso". Havia jeito — o rotulo colorido na linha da Colecao era um
- * botao — mas nada nele dizia isso, e a home nem olhava pro que fora marcado.
+ * Um veredito marcado nao tinha como ser desfeito. Havia jeito — o rotulo
+ * colorido na linha da Colecao era um botao — mas nada nele dizia isso, e a
+ * home nem olhava pro que fora marcado.
  * Agora e um botao com forma de botao, marca de alternancia, e aparece nos tres
  * lugares onde o veredito cobra: destaque da home, linha da Colecao e o cartao
  * do veredito.
@@ -2268,9 +2265,8 @@ button.tk-owned-act:active {
  * A bolinha do veredito, com respiro.
  *
  * ⚠️ Sem o `margin-right` isto saia "○Keep" e "○Power up" colados, sem espaco
- * nenhum — o Miguel: "os nomes colado nessa bolinha". Em fonte pequena e
- * monoespacada o simbolo grudava na palavra e virava um borrao que nem lia como
- * duas coisas.
+ * nenhum. Em fonte pequena e monoespacada o simbolo gruda na palavra e vira um
+ * borrao que nem le como duas coisas.
  *
  * `inline-block` junto: sem ele o `margin` num inline puro se comporta diferente
  * conforme o que vem antes, e o espaco variava de linha pra linha.
@@ -2355,8 +2351,8 @@ button.tk-owned-act:active {
 /*
  * Montar time, Pokedex e Ginasio, numa fileira.
  *
- * Empilhadas custavam 46px cada, e a terceira fazia a home voltar a rolar — o
- * que o Miguel pediu duas vezes pra nao acontecer. Em fileira somam 76px em vez
+ * Empilhadas custavam 46px cada, e a terceira fazia a home voltar a rolar, o
+ * que e proibido nesta tela. Em fileira somam 76px em vez
  * de 138, e ainda leem melhor: sao as coisas que o app FAZ por voce, lado a
  * lado, em vez de tres linhas de menu.
  */
@@ -2394,7 +2390,7 @@ button.tk-owned-act:active {
 }
 
 /* Duas linhas no maximo, centralizado: "Monta um time pra mim" nao cabe em uma
-   coluna de 110px, e cortar com "…" foi exatamente o que ele reclamou na dica. */
+   coluna de 110px, e cortar com "…" e o defeito que a dica ja teve uma vez. */
 .tk-act-t {
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -2465,9 +2461,8 @@ button.tk-owned-act:active {
   /*
    * ⚠️ FOLGA EM CIMA E EMBAIXO, e nao so embaixo.
    *
-   * Aqui estava `padding-bottom: 4px` sozinho, e era o bug que o Miguel vinha
-   * apontando ha muito tempo — "o your colection ta por cima dos pokemons, meio
-   * bugadinho isso".
+   * Aqui estava `padding-bottom: 4px` sozinho, e era um defeito antigo: a
+   * etiqueta da secao parecia estar por cima dos sprites da fila.
    *
    * O anel do veredito e desenhado com `box-shadow: 0 0 0 4px`, que se estende
    * 4px PRA FORA da caixa do elemento. Como esta fila e um contentor de rolagem
@@ -2476,7 +2471,7 @@ button.tk-owned-act:active {
    * cima sumia, e a linha ficava colada na etiqueta "SUA COLEÇÃO".
    *
    * Nao era sobreposicao de texto, como parecia: era o anel decapitado. Por isso
-   * eu nao achava olhando o layout — o espacamento estava certo, o que estava
+   * nao aparecia olhando o layout — o espacamento estava certo, o que estava
    * errado era o contentor comer a sombra.
    *
    * 5px, e nao 4: o `box-shadow` cai num pixel fracionario em telas 3x.
@@ -2961,9 +2956,8 @@ button.tk-chip,
 /*
  * Sem corte.
  *
- * Uma versao cortava a dica em duas linhas com "…" pra caber, e o Miguel: "a
- * dica cortada com …". Ele esta certo — frase cortada no meio parece defeito, e
- * a dica existe justamente pra ser lida. As dicas foram reescritas curtas o
+ * Uma versao cortava a dica em duas linhas com "…" pra caber. Frase cortada no
+ * meio parece defeito, e a dica existe justamente pra ser lida. As dicas foram reescritas curtas o
  * bastante pra caber; se um dia uma nao couber, encurta a dica, nao a caixa.
  */
 .tk-tip-text {
@@ -2976,8 +2970,8 @@ button.tk-chip,
 
 /*
  * A primeira versao da IA reescrevia o veredito que o app ja tinha escrito, e
- * o Miguel perguntou "pra que serve isso?" — a resposta honesta era "pra
- * pouco". O que um modelo faz e o app nao e entender uma pergunta solta.
+ * isso nao acrescentava nada: o calculo ja estava pronto e explicado. O que um
+ * modelo faz e o app nao e entender uma pergunta solta.
  *
  * Marcado com borda propria porque a resposta aqui e do MODELO, ao contrario
  * de todo o resto da tela, que e calculado. A diferenca importa.
@@ -3470,8 +3464,8 @@ button.tk-chip,
  * Entre 700 e 900: barra embaixo, coluna mais larga.
  *
  * Um iPad em pe tem 834px. Com a coluna travada em 448 sobravam 193px de fundo
- * vazio de cada lado — o app parecendo um celular esquecido no meio de uma
- * tela grande, que e exatamente o que o Miguel viu.
+ * vazio de cada lado: o app parecendo um celular esquecido no meio de uma tela
+ * grande.
  *
  * Mas barra lateral aqui seria pior: em retrato ela roubaria um quarto da
  * largura pra quatro itens. O certo e manter a navegacao embaixo, onde o
@@ -3692,9 +3686,9 @@ button.tk-chip,
   /*
    * ⚠️ O FUNDO DA TELA CONTINUA SENDO O DO APP. O vermelho e do APARELHO.
    *
-   * "nao primeiro um fundo preto, e dps um fundo rosa choque" — e antes disso
-   * ele ja tinha dito que a Pokedex e a unica que PODE ser diferente ("tem q ser
-   * diferente de querer"). As duas coisas sao verdade ao mesmo tempo, e a
+   * Duas exigencias que pareciam brigar: o fundo nao pode trocar de cor ao
+   * mudar de tela, e a Pokedex e a unica que PODE ser diferente das outras. As
+   * duas sao verdade ao mesmo tempo, e a
    * contradicao so existia porque a carcaça pintava a tela inteira de borda a
    * borda: ai ela deixa de parecer um objeto e passa a parecer outro app.
    *
@@ -4563,8 +4557,8 @@ button.tk-chip,
  *
  * `.tk-chips` tem margem negativa de propósito: ela existe pra a fila encostar
  * na borda da TELA e sinalizar que continua. Dentro de um cartao com respiro
- * proprio, essa mesma margem joga os chips por cima da borda arredondada — no
- * print do Miguel o ultimo chip aparece cortado atravessando a moldura.
+ * proprio, essa mesma margem joga os chips por cima da borda arredondada: o
+ * ultimo chip sai cortado, atravessando a moldura.
  *
  * Aqui a sangria passa a ser do CARTAO, nao da tela.
  */
@@ -5003,10 +4997,9 @@ button.tk-chip,
 /*
  * O RESPIRO DA BOLHA no fim da ficha.
  *
- * "essa estrela ali de baixo tira" foi dito quando a bolha pousava sobre a
- * tabela de stats. A resposta certa nao era tirar a bolha (ele pediu ela de
- * volta duas vezes) — era reservar o chao dela, que e o que todo app com botao
- * flutuante faz.
+ * A bolha pousava sobre a tabela de stats e virava sujeira em cima do
+ * conteudo. A resposta certa nao era tirar a bolha, que tem lugar proprio no
+ * desenho — era reservar o chao dela, como todo app com botao flutuante faz.
  *
  * A conta e literal: a altura da bolha (54), a distancia dela ate a base
  * (62 da barra de abas + o vao) e um respiro pra ultima peca nao encostar nela.

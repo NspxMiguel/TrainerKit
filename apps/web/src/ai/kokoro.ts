@@ -3,11 +3,9 @@ import type { KokoroTTS } from "kokoro-js";
 /**
  * Voz de verdade, rodando no aparelho, de graça.
  *
- * O Miguel, tres rodadas seguidas: "o narrador da pokex fico paia", "ainda com
- * leitor paia demais", "bem ruim luciana e joana... quero vozes reais, vozes
- * boas estilo eleven labs. mas gratis obvio".
+ * O requisito, refeito em tres rodadas: voz que soe humana, sem custar nada.
  *
- * Ele tem razao e o teto do caminho anterior era baixo: `SpeechSynthesis` usa a
+ * O teto do caminho anterior era baixo: `SpeechSynthesis` usa a
  * voz do SISTEMA, e as vozes de sistema em portugues sao de uma geracao anterior
  * de sintese. Escolher a melhor delas (Luciana em vez de Eddy) foi um conserto
  * real, mas o melhor Luciana possivel ainda e Luciana.

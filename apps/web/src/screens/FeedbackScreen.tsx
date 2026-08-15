@@ -5,9 +5,8 @@ import { useT } from "../i18n/t.ts";
 /**
  * O canal pra dizer que algo está errado.
  *
- * O Miguel: "coloca um botao de feedback la nos ajustes. explica q ta fazendo o
- * projeto tudo sozinho, so eu, as ias e Deus. que pede desculpa se tiver algum
- * erro e ficaria feliz se pudesse comunicar para mim".
+ * A tela diz, com todas as letras, que o projeto e de uma pessoa so, pede
+ * desculpa pelo que estiver errado e abre um caminho pra quem quiser avisar.
  *
  * O texto é dele, não meu — a frase "eu, as IAs e Deus" está lá porque foi assim
  * que ele descreveu o projeto, e trocar isso por "equipe" ou "desenvolvedor
@@ -73,10 +72,10 @@ export function FeedbackScreen() {
       {/*
         ⚠️ O ENDEREÇO VIROU BOTÃO DE COPIAR — antes era só texto.
 
-        "tem uns botoes nas configuracoes q ianda n ta funciondo." Varri as treze
-        telas de Ajustes atrás disso: todas abrem, e todo botão tem gatilho. O
-        único beco sem saída é este — `mailto:` não faz NADA em computador sem
-        app de e-mail configurado, e é exatamente onde ele está testando.
+        Relato de botões que não funcionam em Ajustes. Varredura nas treze telas:
+        todas abrem, e todo botão tem gatilho. O único beco sem saída é este —
+        `mailto:` não faz NADA em computador sem app de e-mail configurado, que é
+        justamente onde o relato apareceu.
 
         O comentário antigo aqui já reconhecia o problema ("aí o botão não faz
         nada. Poder copiar salva o relato") e parava em mostrar o texto: a pessoa

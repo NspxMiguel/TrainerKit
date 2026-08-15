@@ -5,8 +5,8 @@ import type { BaseStats } from "./types.js";
 /**
  * A locucao da Pokedex.
  *
- * A ideia e do Miguel: "PODERIA FUNCIONAR IGUAL UMA POKEDEX DA SERIE, VC APONTA
- * PRO POKEMON, MANDA PRINT E ETC". Na serie o aparelho identifica e ANUNCIA —
+ * A referencia e a Pokedex da serie: apontar pro Pokemon, ou mandar um print.
+ * La o aparelho identifica e ANUNCIA —
  * nome, classificacao, e um fato — numa voz plana de maquina.
  *
  * ⚠️ DECISAO IMPORTANTE, e ela e de projeto e nao de gosto: o texto da Pokedex
@@ -37,8 +37,8 @@ import type { BaseStats } from "./types.js";
  *  · O ROTOM Dex conversa e tem personalidade propria. Isso o app ja faz, e pela
  *    bolinha da IA.
  *
- * ⚠️ A CATEGORIA ENTROU. A decisao era dele, e ele decidiu ("integra as coisas
- * ai ent"), na mesma linha da build pessoal com sprites oficiais.
+ * ⚠️ A CATEGORIA ENTROU, como decisao de quem assume o risco de usar texto do
+ * jogo — mesma linha da build pessoal com sprites oficiais.
  *
  * Ela nao passa por este modulo: a categoria e TEXTO, e este arquivo continua
  * devolvendo so o que o app CALCULOU. Ela e montada onde as frases sao montadas

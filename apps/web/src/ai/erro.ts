@@ -3,10 +3,9 @@ import type { Key } from "../i18n/t.ts";
 /**
  * O erro da IA vira frase, em vez de vazar o codigo interno.
  *
- * O Miguel: "tentei usar aqui no cll e apareceu sem-chave". `sem-chave` e uma
- * string que eu escrevi pra o CODIGO reconhecer — `throw new Error("sem-chave")`
- * — e ela estava chegando inteira na tela dele, porque toda tela fazia
- * `setErro(e.message)` sem passar por lugar nenhum.
+ * `sem-chave` e uma string escrita pra o CODIGO reconhecer —
+ * `throw new Error("sem-chave")` — e ela estava chegando inteira na tela,
+ * porque toda tela fazia `setErro(e.message)` sem passar por lugar nenhum.
  *
  * O padrao e o mesmo do `explain.ts`: nome interno de regra nao e texto de
  * usuario. Aqui era pior, porque `sem-chave` nem explica o que fazer.

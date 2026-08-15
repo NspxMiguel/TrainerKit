@@ -256,7 +256,7 @@ describe("paleta por espécie", () => {
 
   it("mede a silhueta de toda espécie, nas duas fontes de imagem", () => {
     /*
-     * "testo com todos os pokemons ja? procura tudo po."
+     * A conferência é ESPÉCIE POR ESPÉCIE, e não por amostragem.
      *
      * É este teste, e ele achou o que oito espécies na tela não achariam. As
      * medidas têm que ser plausíveis para as 1.142 × 2 fontes: uma caixa
@@ -321,8 +321,6 @@ describe("paleta por espécie", () => {
 
   it("nenhuma silhueta estoura a caixa pela lateral, em nenhuma proporção", () => {
     /*
-     * "procura tudo po."
-     *
      * ⚠️ O que isto protege é o TETO. Ele existe pra não ampliar uma silhueta
      * pequena até mostrar o pixel; se alguém subir esse número achando que
      * "deixa o bicho maior", espécies largas passam a vazar pela lateral. Aqui
@@ -344,10 +342,10 @@ describe("paleta por espécie", () => {
 
   it("a cara fica livre do texto em TODA espécie, nas duas fontes", () => {
     /*
-     * ⚠️ ESTE É O TESTE QUE ELE PEDIU COM TODAS AS LETRAS.
+     * ⚠️ ESTE TESTE É O REQUISITO, ESCRITO COMO CÓDIGO.
      *
-     * "eu nao gsto disso, da cara do pokemon estar tapada. ent testa um por um,
-     * e deixa sempre a cara livre, sem nada. a cara e a parte da barriga pra
+     * A regra é: nada tapa a cara do Pokémon, e isso vale espécie por espécie —
+     * não por amostragem. A cara é a parte da barriga pra
      * cima."
      *
      * "Testa um por um" não é força de expressão neste app — foi assim que
@@ -572,7 +570,7 @@ describe("paleta por espécie", () => {
      * Com a última parada em 0,78+, os 28% que restam até o pé são a rampa entre
      * duas cores quase idênticas, e não há onde ver a emenda.
      *
-     * Assim a cor pode ser forte em cima — que é o que ele pediu — sem que isso
+     * Assim a cor pode ser forte em cima — que é o que o desenho pede — sem que isso
      * custe a continuidade lá embaixo.
      */
     const naoFecham: string[] = [];

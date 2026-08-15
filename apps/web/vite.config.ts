@@ -55,9 +55,9 @@ function lerVersao(): string {
      *
      * O `actions/checkout` clona com `fetch-depth: 1` por padrão. Nesse clone o
      * `git rev-list --count HEAD` devolve 1 — não falha, não avisa, devolve um
-     * número plausível. A versão automática que ele pediu ("a cada push uma
-     * nova versao") nasceria congelada no primeiro deploy, e o sintoma seria
-     * justamente o que ela veio consertar: "até agr ta na mesma 0.1.0".
+     * número plausível. A versão automática — uma por push — nasceria congelada
+     * no primeiro deploy, e o sintoma seria justamente o que ela veio consertar:
+     * o número parado enquanto o app muda.
      *
      * O workflow ganhou `fetch-depth: 0`. Isto aqui é o cinto: se alguém
      * construir de um clone raso de novo, o build GRITA em vez de mentir baixo.

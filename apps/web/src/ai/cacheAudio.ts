@@ -1,8 +1,8 @@
 /**
  * Áudio já gerado não se gera de novo.
  *
- * O Miguel propôs: "a gente fazer um esqueminha de ao uma pessoa mandar
- * qualquer coisa, ele faz o audio e apaga todos os outros".
+ * A ideia inicial era gerar o áudio novo e apagar os anteriores, pra economizar
+ * cota.
  *
  * ⚠️ Apagar não economiza nada, e a razão importa: a cota da ElevenLabs é
  * consumida na GERAÇÃO, por caractere sintetizado. O que já foi gerado já foi

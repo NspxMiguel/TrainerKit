@@ -1,9 +1,8 @@
 /**
  * O limite da chave compartilhada — e a conta que define qual ele pode ser.
  *
- * O Miguel: "5 eu acho um limite muito baixo, até pq o groq por em quanto n é
- * 100% free? dava pra colocar limite por hora, sla, 30 mensagems por hora. nao
- * sei como funciona o groq... analiza bem."
+ * Cinco mensagens por dia era baixo demais pra um serviço que ainda é gratuito.
+ * A pergunta certa é qual teto a conta aguenta, e por hora em vez de por dia.
  *
  * ANALISADO. É grátis, sim — mas não é ilimitado, e o teto não é o que parece:
  *

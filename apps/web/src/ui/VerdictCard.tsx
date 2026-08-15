@@ -35,8 +35,8 @@ import { TOM_VEREDITO as TONE } from "./tomVeredito.ts";
  * O Pokemon salvo, quando o veredito e sobre um bicho da colecao.
  *
  * Sem isto o cartao anunciava "INVESTIR" em verde de 26px e nao oferecia nada —
- * o Miguel, duas vezes: "essa desgraça de investir sem jeito de tirar isso". Um
- * aviso que nao sai depois de atendido para de ser aviso e vira ruido, e pior:
+ * um veredito de investir sem jeito visivel de dar como cumprido. Um aviso que
+ * nao sai depois de atendido para de ser aviso e vira ruido, e pior:
  * ensina a ignorar os outros.
  */
 interface Props extends VerdictInput {

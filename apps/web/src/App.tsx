@@ -277,11 +277,11 @@ export function App() {
           {/*
             A lente de vidro, que VIAJA.
             
-            "ele vai de inicio, se vc clicou em pokedex se arrastando pro lado"
-            — e o documento de animacao do desenho concorda: "a lente de vidro
-            viaja entre os itens em 420ms".
+            A lente sai da aba atual e ANDA ate a tocada, em vez de sumir de uma
+            e nascer na outra — e o documento de animacao do desenho diz o mesmo:
+            "a lente de vidro viaja entre os itens em 420ms".
             
-            Minha primeira versao seguiu o mockup ESTATICO, onde cada item
+            A primeira versao seguiu o mockup ESTATICO, onde cada item
             acende no lugar: a bolha aparecia no destino em vez de ir ate ele.
             Parecia certo em screenshot e errado em uso.
           */}

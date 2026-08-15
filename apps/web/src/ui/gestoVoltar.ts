@@ -3,9 +3,7 @@ import { useEffect, useRef } from "react";
 /**
  * Voltar arrastando da borda esquerda.
  *
- * "coloca tbm voltar puxando pro lado, igual maioria dos android e ios faz."
- *
- * Ele está certo sobre o gesto ser o padrão dos dois sistemas, e o app tinha um
+ * O gesto de voltar arrastando é o padrão do Android e do iOS, e o app tinha um
  * motivo a mais pra precisar dele: instalado na tela de início, um PWA no iOS
  * **não tem o gesto do Safari**. Sem isto, a única saída de uma folha é uma seta
  * de 44px no canto superior — o canto mais longe do polegar de quem segura o

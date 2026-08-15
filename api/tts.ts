@@ -5,12 +5,10 @@ import WebSocket from "ws";
 /**
  * A voz humana em portugues, de graça e sem chave.
  *
- * O Miguel, quatro vezes: "o narrador da pokex fico paia", "ainda com leitor
- * paia demais", "bem ruim luciana e joana... quero vozes reais, vozes boas
- * estilo eleven labs. mas gratis obvio", e por fim "eleven labs é pago, procura
- * um free, q n precisa configurar. chatão."
+ * O requisito, refeito em quatro rodadas: voz que soe humana, em portugues, de
+ * graca e sem nada pra configurar.
  *
- * As saidas que eu ja tinha nao serviam:
+ * As saidas que ja existiam nao serviam:
  *   · `SpeechSynthesis` usa a voz do sistema, e em portugues elas sao de uma
  *     geracao anterior de sintese. Luciana e o teto.
  *   · Kokoro roda no aparelho e e otimo, mas o `kokoro-js` fonemiza SEMPRE em
@@ -23,8 +21,8 @@ import WebSocket from "ws";
  *
  * ⚠️ O QUE ISTO E, DITO SEM ENFEITE: um endpoint interno do Edge, alcançado com
  * os cabeçalhos do Edge. Nao e uma API publica com termos de uso que autorizem
- * isto — e zona cinzenta, eu falei isso pro Miguel antes de escrever, e ele
- * mandou seguir ("deixa todas as opções. quanto mais melhor"). Fica registrado
+ * isto — e zona cinzenta, e a decisao de usar assim mesmo foi tomada com esse
+ * risco na mesa, pra o app ter o maior numero de vozes possivel. Fica registrado
  * aqui porque quem ler este arquivo depois merece saber, e porque o dia em que
  * a Microsoft fechar isto, o app tem que continuar falando — por isso `dexVoice`
  * NUNCA depende so daqui: se esta funcao morrer, a voz cai pro plano seguinte e
@@ -262,11 +260,11 @@ export default async function handler(req: Req, res: Res): Promise<void> {
   /*
    * GET = a MESMA sintese, mas guardavel no CDN.
    *
-   * O Miguel: "tem como mandar as vozes pra um servidor? ai n precisa ficar o
-   * tempo todo gerando dnv (…) ele fica tipo em cache apos alguem usar aquilo".
+   * A sintese nao precisa ser refeita pra cada pessoa: depois que alguem ouve,
+   * o audio pode ficar em cache pra os proximos.
    *
    * O cache que ja existia (`cacheAudio.ts`) e por APARELHO: so ajuda quem
-   * reouve a mesma ficha. O dele e outro e melhor — a ficha do Blissey em
+   * reouve a mesma ficha. Este e melhor — a ficha do Blissey em
    * portugues e IDENTICA pra todo mundo, entao quem ouvir primeiro deveria pagar
    * pelos outros.
    *

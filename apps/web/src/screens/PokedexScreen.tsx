@@ -234,9 +234,8 @@ export function PokedexScreen({ dataset, intent }: Props) {
         O modo Pokedex mora AQUI, e nao na home.
         
         Ele estava como um dos tres botoes de acao da tela inicial, chamado
-        "Pokédex" — do lado de uma ABA chamada Pokédex. O Miguel: "2 funcoes com
-        o msm nome, pokedex e pokedex". Era a mesma redundancia que ele ja tinha
-        apontado nos atalhos, e eu criei de novo.
+        "Pokédex" — do lado de uma ABA chamada Pokédex: duas funcoes com o mesmo
+        nome. Era a mesma redundancia ja removida dos atalhos, recriada aqui.
 
         Aqui nao ha duas: a aba e a Pokedex, e este botao abre o APARELHO — que e
         outra coisa que a mesma aba faz, no lugar onde a pessoa ja esta olhando
@@ -304,8 +303,8 @@ export function PokedexScreen({ dataset, intent }: Props) {
         Uma lista so, que se reordena.
 
         Eram duas atras de "Buscar | Melhores", e "Melhores" escondia quatro
-        rankings atras de mais dois seletores — o Miguel: "coloca uma opção de
-        filtro ao invés de simplesmente melhores". E a mesma pergunta ("qual
+        rankings atras de mais dois seletores. Um filtro resolve melhor que uma
+        aba chamada "Melhores": e a mesma pergunta ("qual
         Pokemon?") com a resposta ordenada pelo que importa naquele momento.
       */}
     </>

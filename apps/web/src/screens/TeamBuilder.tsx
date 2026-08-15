@@ -43,7 +43,7 @@ const SUGESTOES = 6;
 /**
  * "Monta um time pra mim."
  *
- * A ideia do Miguel, e ela e melhor que o ranking que ja existia: um ranking e
+ * Isto e melhor que o ranking que ja existia: um ranking e
  * uma lista de trinta nomes que ninguem decora. Um time e seis nomes com um
  * proposito — e vira LISTA DE CAÇA, porque o app marca o que voce ja tem e o
  * que falta ir buscar.
@@ -90,7 +90,7 @@ export function TeamBuilder({ data, onClose, onPickSpecies }: Props) {
   const setup = useSetup();
 
   const [goal, setGoal] = useState<Goal>("raid");
-  /** `null` e "não sei" — e o estado INICIAL, a pedido do Miguel. */
+  /** `null` e "não sei" — e o estado INICIAL, de proposito. */
   const [tipo, setTipo] = useState<string | null>(null);
   const [busca, setBusca] = useState("");
   const [chefe, setChefe] = useState<DatasetSpecies | null>(null);

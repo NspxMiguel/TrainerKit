@@ -312,9 +312,9 @@ export function CollectionScreen({ dataset, embutida = false, busca = "" }: Prop
               A troca e calculada AQUI, e nao dentro de cada ramo.
               
               Ela nascia so no ramo da LISTA — e a grade e a vista padrao. A
-              etiqueta que o Miguel pediu tres vezes ficava invisivel pra quem
-              nunca trocou de vista, que e todo mundo. Bug meu, do mesmo dia em
-              que a etiqueta entrou.
+              etiqueta ficava invisivel pra quem nunca trocou de vista, que e
+              todo mundo — defeito introduzido no mesmo dia em que a etiqueta
+              entrou.
             */
             const troca = avaliarTroca({
               ivs: owned.ivs,
@@ -485,8 +485,8 @@ export function CollectionScreen({ dataset, embutida = false, busca = "" }: Prop
                     }
                   >
                     {/* O "○" e o que faz o rotulo LER como botao. Sem ele era uma
-                        palavra colorida, e o Miguel passou semanas sem descobrir
-                        que dava pra tocar: "sem jeito de tirar isso". */}
+                        palavra colorida, e dava pra passar semanas sem
+                        descobrir que ela era tocavel. */}
                     <span className="tk-done-mark" aria-hidden="true">
                       {cumpriu(verdict.action, owned.doneAction) ? "✓" : "○"}
                     </span>

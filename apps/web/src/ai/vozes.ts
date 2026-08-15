@@ -5,10 +5,9 @@ import { KOKORO_VOICES } from "./kokoro.ts";
 /**
  * TODAS as vozes numa lista só, ordenadas, cada uma dizendo o que é.
  *
- * O Miguel: "app tbm meio desorganizado. voz da pokedex totalmente confuso.
- * organiza ai. tem umas 30 opcao de voz e ninguem sabe oq é de vdd."
+ * Trinta opções de voz numa tela em que nenhuma delas dizia o que era.
  *
- * Ele descreveu o sintoma; a causa era de arquitetura. A tela estava organizada
+ * Esse era o sintoma; a causa era de arquitetura. A tela estava organizada
  * por MOTOR — uma seção pro Kokoro, uma pra neural, uma pra ElevenLabs, uma pro
  * sistema — cada uma com o próprio interruptor e a própria lista. Quatro
  * escolhas independentes que na verdade respondiam a UMA pergunta: "qual voz lê
@@ -63,18 +62,17 @@ function localeDoEdge(id: string): string {
 /**
  * As vozes da ElevenLabs compartilhada.
  *
- * ⚠️ `nativa: false` SEMPRE — e a razão mudou depois que o Miguel me corrigiu.
+ * ⚠️ `nativa: false` SEMPRE — e a razão mudou depois de uma correção.
  *
- * Eu tinha consultado `/v2/voices` (a biblioteca PADRÃO da conta: 21 vozes,
- * todas american/british/australian) e concluído que "não existe voz brasileira
- * na ElevenLabs gratuita". Escrevi isso na tela do app. Estava errado: eu olhei
- * num lugar e afirmei sobre outro.
+ * A consulta anterior era `/v2/voices` (a biblioteca PADRÃO da conta: 21 vozes,
+ * todas american/british/australian), e dali saiu a conclusão de que "não existe
+ * voz brasileira na ElevenLabs gratuita" — escrita na tela do app. Estava
+ * errado: era olhar num lugar e afirmar sobre outro.
  *
- * Ele disse que existiam, e existem — `/v1/shared-voices?language=pt` devolve 40
- * vozes pt-BR com sotaque `brazilian`, feitas por usuários. Adriano tem 125 mil
- * usos.
+ * Elas existem — `/v1/shared-voices?language=pt` devolve 40 vozes pt-BR com
+ * sotaque `brazilian`, feitas por usuários. Adriano tem 125 mil usos.
  *
- * Só que usá-las pela API esbarra nisto, testado contra a chave dele:
+ * Só que usá-las pela API esbarra nisto, testado contra a chave real:
  *
  *   402 paid_plan_required — "Free users cannot use library voices via the API."
  *
@@ -199,7 +197,7 @@ export function listarVozes(
  * Quem abre a tela e pega a primeira tem que estar pegando a melhor pro idioma
  * dele. Sotaque errado é o defeito mais audível de todos, então `nativa` pesa
  * mais que qualquer outra coisa — inclusive mais que a ElevenLabs, que é a de
- * melhor timbre e a que ele pediu pelo nome.
+ * melhor timbre.
  */
 export function ordenar(vozes: Voz[]): Voz[] {
   const peso = (v: Voz) =>

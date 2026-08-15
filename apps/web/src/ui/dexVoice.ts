@@ -17,7 +17,7 @@ import { synthesize, ttsAvailable } from "../ai/tts.ts";
 /**
  * A voz da Pokedex.
  *
- * O Miguel: "ATÉ IMITAR A VOZ DA POKEDEX ORIGINAL". Duas coisas sobre isso, e
+ * O alvo e imitar a voz da Pokedex original. Duas coisas sobre isso, e
  * vale dizer as duas antes do codigo:
  *
  * 1. Nao da pra CLONAR a voz. A da serie e a performance de um dublador real, e
@@ -34,8 +34,8 @@ import { synthesize, ttsAvailable } from "../ai/tts.ts";
  *
  * Homenagem, nao imitacao. E funciona no iPhone e no Android sem baixar nada.
  *
- * ⚠️ ATUALIZACAO: "o narrador da pokex fico paia po". Ele esta certo, e o motivo
- * nao tem conserto por ajuste: `SpeechSynthesis` usa a voz do SISTEMA, e em
+ * ⚠️ ATUALIZACAO: o narrador soa artificial demais, e o motivo nao tem conserto
+ * por ajuste: `SpeechSynthesis` usa a voz do SISTEMA, e em
  * portugues ela vai de sofrivel a robotica dependendo do aparelho. Mexer em
  * `pitch` nao resolve o timbre.
  *
@@ -43,8 +43,8 @@ import { synthesize, ttsAvailable } from "../ai/tts.ts";
  * sistema fica sendo o PLANO B — pra quem nao tem chave, pra quando a rede cai, e
  * pra quando a Groq recusa o modelo. Nunca fica muda.
  *
- * ⚠️ "Quando da" e mais estreito do que eu esperava, e isso saiu de testar com a
- * chave do Miguel: o unico TTS no catalogo da Groq e o Orpheus, ele exige aceite
+ * ⚠️ "Quando da" e mais estreito do que parecia, e isso saiu de testar com uma
+ * chave de verdade: o unico TTS no catalogo da Groq e o Orpheus, ele exige aceite
  * de termos no console, e e SO INGLES. Pra portugues a voz do sistema continua
  * sendo a certa — voz bonita pronunciando errado e pior que voz feia pronunciando
  * certo. Ver `tts.ts` pro detalhe.
@@ -57,7 +57,7 @@ const VOICE_KEY = "tk:dex-voz";
  * A voz ESCOLHIDA na mao, quando ha uma.
  *
  * A pontuacao automatica acerta na maioria dos aparelhos, mas gosto de voz e
- * gosto — e o Miguel pediu pra poder escolher. Guardado por `voiceURI`, nao por
+ * gosto, entao a escolha manual existe. Guardado por `voiceURI`, nao por
  * nome: dois aparelhos podem ter vozes de nome igual e `voiceURI` e o
  * identificador de verdade.
  */
@@ -214,9 +214,9 @@ export async function beep(): Promise<void> {
 /**
  * Vozes de NOVIDADE da Apple.
  *
- * ⚠️ Aqui estava o "leitor paia" e eu levei tres rodadas pra achar, porque
- * procurei no lugar errado: culpei o timbre do sistema quando o defeito era
- * ESCOLHA. `getVoices()` devolve 180 vozes, dez delas em portugues, e a versao
+ * ⚠️ Aqui estava a causa do narrador soar artificial, e levou tres rodadas pra
+ * achar porque a procura foi no lugar errado: a culpa parecia do timbre do
+ * sistema, quando o defeito era de ESCOLHA. `getVoices()` devolve 180 vozes, dez delas em portugues, e a versao
  * anterior pegava a PRIMEIRA que casasse o idioma. A primeira, em ordem
  * alfabetica, e "Eddy (Portuguese (Brazil))" — uma das vozes caricatas que a
  * Apple embarca pra brincadeira. "Luciana", a voz séria de pt-BR, estava na
@@ -403,7 +403,7 @@ function pararAudio(): void {
  *
  * A Groq lista as vozes validas na mensagem de erro quando a voz esta errada, e
  * eu nao pude verificar o nome delas sem a chave — entao essa mensagem e o
- * caminho pra descobrir, e engoli-la deixaria o Miguel adivinhando.
+ * caminho pra descobrir, e engoli-la deixaria quem configurou adivinhando.
  */
 let ultimoErroTts: string | null = null;
 

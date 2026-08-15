@@ -1,14 +1,14 @@
 /**
  * A chave compartilhada, escondida atras de uma funcao.
  *
- * O Miguel pediu uma "key publica com limites" pra quem nao quer criar conta na
+ * Existe uma chave compartilhada com limites, pra quem nao quer criar conta na
  * Groq. Publica no cliente e impossivel: qualquer chave que chegue ao navegador
  * pode ser lida em dez segundos no painel de rede, e em horas ela estaria num
  * repositorio de chaves vazadas sendo usada pelo mundo. Entao ela vive AQUI, numa
  * variavel de ambiente da Vercel, e o navegador fala com esta funcao.
  *
- * ⚠️ COMO CONFIGURAR (isto e trabalho do Miguel, nao meu — eu nao ponho chave de
- * ninguem em servico nenhum):
+ * ⚠️ COMO CONFIGURAR (feito por quem e dono da chave; ninguem mais poe chave de
+ * terceiro em servico nenhum):
  *
  *   1. REVOGUE a chave que voce colou no chat. Ela esta num transcript e deve ser
  *      considerada vazada. Gere outra em console.groq.com/keys.
@@ -64,8 +64,7 @@ const PERMITIDOS = new Set([
    *
    * Sem isto, `vision.ts` falava direto com a Groq usando a chave DO USUARIO — e
    * a tela dizia "Falta a chave da Groq" mesmo com a IA gratis ligada e
-   * funcionando pro resto. O Miguel viu isso no proprio print: "ao invez de
-   * aparecer coloca a chave do groq, usa api free ne".
+   * funcionando pro resto: a tela cobrava uma chave que aquele caminho nem usa.
    */
   "meta-llama/llama-4-scout-17b-16e-instruct",
   "meta-llama/llama-4-maverick-17b-128e-instruct",
@@ -82,8 +81,8 @@ const PERMITIDOS = new Set([
  *                  Python que ordena uma lista com quicksort"}]}
  *   → 200, com o quicksort inteiro em Python.
  *
- * Ou seja: exatamente o "imagina, os cara usando isso pra programar com api
- * free" que o Miguel previu, e o filtro nao impedia nada — quem chama a funcao
+ * Ou seja: o desvio de uso que o filtro deveria impedir — a rota gratuita
+ * virando modelo de uso geral. O filtro nao impedia nada: quem chama a funcao
  * direto nunca executou o meu JavaScript. O mesmo vale pra cota de 20/dia, que
  * mora no `localStorage`: nao existe pra quem nao usa o app.
  *
@@ -117,8 +116,8 @@ const GUARDA_SISTEMA =
   /*
    * ⚠️ O VOCABULARIO DO PROPRIO APP E ASSUNTO DO APP.
    *
-   * O Miguel perguntou "oq significa ps" e levou "Não é uma pergunta sobre
-   * Pokémon GO". O filtro de regex tinha DEIXADO PASSAR — `ps` esta na lista de
+   * "O que significa PS?" recebia "Não é uma pergunta sobre Pokémon GO". O
+   * filtro de regex tinha DEIXADO PASSAR — `ps` esta na lista de
    * salvo-conduto — e quem recusou foi o modelo, seguindo esta instrucao: uma
    * sigla de duas letras parece conhecimento geral (PlayStation, post scriptum),
    * e a regra mandava recusar conhecimento geral.

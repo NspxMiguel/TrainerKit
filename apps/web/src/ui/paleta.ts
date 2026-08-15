@@ -58,8 +58,8 @@ const CORES = tabela as unknown as Record<string, Entrada>;
  * O enquadramento do sprite, calculado a partir da caixa justa.
  *
  * ⚠️ Isto existe porque a arte oficial NÃO enquadra os Pokémon de forma
- * consistente, e foi o Miguel que apontou: "olha ai, por exemplo o charizard,
- * n combino. tem q testar pokemon por pokemon, pra sempre dar certo."
+ * consistente — o Charizard e o exemplo claro. Nao da pra acertar por regra
+ * geral: tem que valer especie por especie.
  *
  * Medido nas 1.142 artes: a silhueta do Dragonite ocupa 91% da altura do PNG,
  * a do Charizard 71%. Renderizados na MESMA caixa com `object-fit: contain`, um
@@ -119,8 +119,8 @@ export interface Quadro {
  * resolve a geometria com unidades de contêiner (`cqw`/`cqh`), que são a
  * largura e a altura REAIS da caixa naquele aparelho, naquele momento.
  *
- * "testo com todos os pokemons ja? procura tudo po" — era isso que faltava
- * procurar.
+ * A conferência tem que rodar sobre TODAS as espécies, nas duas fontes de
+ * imagem — era isso que faltava.
  */
 export function enquadrar(
   spriteId: number | null,

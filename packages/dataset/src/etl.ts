@@ -561,8 +561,8 @@ function markCosmeticForms(species: OutSpecies[]): void {
    * E daqui que saiam os ids cosmeticos na colecao de quem usa o app. Evoluir
    * grava `evolvesInto[0]`, entao quem evoluiu um Ivysaur ficou com um
    * `venusaur_normal` guardado — e ai a ficha aberta pela Pokedex (que navega
-   * `venusaur`) nao reconhecia o proprio Pokemon da pessoa. Foi exatamente esse
-   * o caminho do "ele duplico e tem 2 venusaur agr".
+   * `venusaur`) nao reconhecia o proprio Pokemon da pessoa. Era esse o caminho
+   * que fazia a mesma especie aparecer duas vezes na colecao.
    *
    * As telas ja canonizam na leitura, e continuam — dado velho existe. Isto
    * fecha a TORNEIRA: daqui pra frente nao nasce id cosmetico novo.

@@ -78,7 +78,7 @@ export function SpriteDownloadButton({ species }: { species: readonly DatasetSpe
 /**
  * O painel de progresso.
  *
- * As duas saidas que o Miguel pediu, e nada alem disso: fica olhando, ou manda
+ * Duas saidas, e nada alem disso: fica olhando, ou manda
  * pro fundo e continua usando. "Parar" existe porque um download de centenas de
  * megabytes que nao da pra cancelar e uma armadilha.
  */

@@ -37,9 +37,9 @@ export type AiProvider = "off" | "groq" | "local" | "shared";
  * O PADRAO E A FUNCAO PUBLICADA, e nao vazio.
  *
  * Antes isto so vinha de `VITE_TK_AI_PROXY`, definida unicamente no workflow do
- * GitHub. Consequencia que o Miguel achou abrindo os Ajustes: no `pnpm dev` a
- * opcao "Grátis" simplesmente NAO EXISTIA — "kd publico?". O app publicado tinha
- * o recurso e o app em que eu trabalho, nao. Toda vez que eu conferia uma tela de
+ * GitHub. Consequencia, visivel abrindo os Ajustes: no `pnpm dev` a opcao
+ * "Grátis" simplesmente NAO EXISTIA. O app publicado tinha o recurso e o app de
+ * desenvolvimento, nao. Toda vez que eu conferia uma tela de
  * IA, conferia a versao errada.
  *
  * A URL nao e segredo: ela ja esta escrita no bundle publicado, que qualquer um

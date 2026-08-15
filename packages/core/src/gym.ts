@@ -6,7 +6,7 @@ import type { BaseStats, IVs } from "./types.js";
 /**
  * Quem deixar no ginasio pra farmar moeda.
  *
- * Ideia do Miguel. E uma pergunta que o app pode responder com conta propria, e
+ * E uma pergunta que o app pode responder com conta propria, e
  * a resposta e CONTRAINTUITIVA — que e justamente onde este app tem serventia.
  *
  * O que decide um defensor NAO e o mesmo que decide um atacante:

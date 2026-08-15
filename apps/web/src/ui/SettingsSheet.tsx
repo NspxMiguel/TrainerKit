@@ -32,9 +32,9 @@ interface Props {
 /**
  * Uma folha de ajuste.
  *
- * Ajustes tinha nove secoes empilhadas numa tela so, 2.780px de altura — o
- * Miguel: "ajustes ta bem bagunçadinho, da pra da uma organizada". Ele estava
- * certo, e o problema nao era a ordem: era tudo estar aberto ao mesmo tempo.
+ * Ajustes tinha nove secoes empilhadas numa tela so, 2.780px de altura — mais
+ * de tres telas de rolagem. O problema nao era a ordem: era tudo estar aberto
+ * ao mesmo tempo.
  * Ninguem entra em Ajustes pra ler nove assuntos, entra pra mexer em um.
  *
  * Entao Ajustes virou indice — uma linha por assunto, com o valor atual a
@@ -88,8 +88,8 @@ export function SettingsSheet({ title, onClose, children, cheia }: Props) {
         {/*
           A volta EM CIMA, o titulo alinhado com o resto do app.
 
-          Antes os dois dividiam uma linha, e o titulo comecava depois do botao. O
-          Miguel: "compara o settings com o about ou o privacy". Medido: em
+          Antes os dois dividiam uma linha, e o titulo comecava depois do botao.
+          Comparando Ajustes com Sobre e Privacidade, medido: em
           Ajustes o titulo comeca a 22px e tem 34px; na folha comecava a 62px e
           tinha 26px. Ao entrar numa folha o titulo PULAVA 40px pra direita e
           encolhia — o app parecia trocar de identidade a cada toque.

@@ -8,7 +8,7 @@
  *
  * A versao anterior usava caracteres de texto (`\u{F0202}`, `⋮`, `⊕`). O
  * primeiro e um codepoint de area privada de uma fonte de icones que o app nao
- * carrega, entao o iPhone desenhava um retangulo qualquer — o Miguel viu tres
+ * carrega, entao o iPhone desenhava um retangulo qualquer — sairam tres
  * tracinhos onde devia estar a seta do Compartilhar. Glifo de fonte que nao
  * esta instalada nao e icone, e loteria.
  *

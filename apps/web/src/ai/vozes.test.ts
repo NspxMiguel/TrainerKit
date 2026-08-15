@@ -78,8 +78,8 @@ describe("as recomendadas de cada idioma", () => {
      *
      * Este teste dizia "ElevenLabs só em inglês", o que era verdade quando as
      * únicas vozes da conta eram as 21 da biblioteca padrão — todas
-     * american/british/australian. Depois o Miguel adicionou o Adriano, da Voice
-     * Library, que é brasileiro de verdade. A regra "só em inglês" passou a
+     * american/british/australian. Depois entrou o Adriano, da Voice Library,
+     * que é brasileiro de verdade. A regra "só em inglês" passou a
      * esconder a melhor voz em português que o app tem.
      *
      * O invariante que importa nunca foi "inglês": é que uma voz só apareça como

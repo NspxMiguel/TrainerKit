@@ -169,7 +169,7 @@ function Linha({
  * Ajustes como indice.
  *
  * Eram nove secoes abertas ao mesmo tempo, 2.780px de altura numa tela de 844 —
- * o Miguel: "ajustes ta bem bagunçadinho, da pra da uma organizada". O problema
+ * ou seja, mais de tres telas de rolagem so pra atravessar. O problema
  * nao era a ordem das secoes, era todas estarem abertas: ninguem entra em
  * Ajustes pra ler nove assuntos, entra pra mexer em UM.
  *

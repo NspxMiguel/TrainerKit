@@ -55,7 +55,7 @@ import { RaidCounters } from "./RaidCounters.tsx";
 /**
  * PRA QUE USAR — a resposta que a ficha nao dava.
  *
- * *"coloca nos pokemon tbm, sujestao para oq usar, reid, pvp e etc"*. A ficha
+ * A ficha precisa sugerir PRA QUE serve o bicho — raide, PvP, ginasio. Ela
  * ja trazia os stats base e o que o assistente ACHA do formato do bicho, e as
  * duas coisas exigem que a pessoa saiba converter numero em decisao. Este bloco
  * faz a conversao: onde ele entra, quao bom ele e la, e em que posicao — o
@@ -195,7 +195,8 @@ export function SpeciesDetail({
   /*
    * ⚠️ A ESPECIE SEGUE O POKEMON SALVO, e nao a foto de quando a tela abriu.
    *
-   * "cliquei em evoluir e o bulbasauro n foi, ja fiz e n foi."
+   * Evoluir nao trocava a especie na tela: o botao dizia "evoluir" de novo, e o
+   * toque seguinte pulava um degrau.
    *
    * A prop `species` e um retrato do instante em que a ficha foi aberta. Depois
    * que evoluir passou a MUDAR a especie do bicho salvo, esse retrato virou
@@ -205,13 +206,13 @@ export function SpeciesDetail({
    *
    * Lendo do registro salvo, a ficha acompanha: evoluiu, ela vira a forma nova,
    * o veredito recalcula e o botao passa a oferecer o proximo passo real. E o
-   * "continua o trajeto" que ele pediu, sem pular degrau.
+   * trajeto continuo da evolucao, sem pular degrau.
    */
   const { items } = useCollection();
   /*
    * ⚠️ Acha o Pokemon salvo MESMO quando a tela nao recebeu `owned`.
    *
-   * "ele duplico e tem 2 venusaur agr"
+   * A mesma especie entrava duas vezes na colecao.
    *
    * Abrindo a especie pela Pokedex, `owned` vem indefinido — e ai o app agia
    * como se voce nao tivesse aquele bicho: a calculadora oferecia "Salvar na
@@ -224,8 +225,8 @@ export function SpeciesDetail({
   /*
    * ⚠️ A BUSCA POR ESPÉCIE PASSA PELO CANÔNICO.
    *
-   * "ele duplico e tem 2 venusaur agr" — o conserto daquela vez foi procurar
-   * por espécie quando `owned` não veio. Mas a comparação era de id CRU, e o
+   * A duplicação já tinha sido "consertada" uma vez, procurando por espécie
+   * quando `owned` não vinha. Mas a comparação era de id CRU, e o
    * id da coleção pode ser uma forma cosmética: o Venusaur dele está salvo
    * como `venusaur_normal`, e a Pokédex abre `venusaur` (a lista só mostra as
    * formas canônicas). Os dois são o mesmo Pokémon com duas escritas.
@@ -591,8 +592,6 @@ export function SpeciesDetail({
         O CARTAO DO VEREDITO — a peça central do handoff, e ela simplesmente
         nao existia nesta tela.
 
-        "ta faltando muita coisa q eu pedi, e muita coisa do app bom de vdd."
-
         O `VerdictCard` ja estava escrito, com barra de confianca e rastro
         auditavel, e era usado SO na calculadora de IV. A ficha — a tela mais
         visitada, e a que o handoff detalha mais — nunca o mostrava. Quem tocava
@@ -690,11 +689,9 @@ export function SpeciesDetail({
       {/*
         ⚠️ `--especie`, e com AR em cima.
 
-        "o ver o iv do meu ta mt colado no negocio de cima. e tbm roxo?"
-
-        Duas coisas na mesma frase, e as duas eram verdade: ele encostava no
-        cartão de veredito (o cartão tem borda na cor do veredito, então "colado"
-        virava uma faixa de duas cores grudadas) e era violeta numa tela inteira
+        Dois defeitos no mesmo botão: ele encostava no cartão de veredito (o
+        cartão tem borda na cor do veredito, então "colado" virava uma faixa de
+        duas cores grudadas) e era violeta numa tela inteira
         pintada com a cor do Pokémon.
       */}
       <button
@@ -776,12 +773,12 @@ export function SpeciesDetail({
           /*
             ⚠️ FLUTUANDO, e nao na linha — e isto e um retorno.
 
-            "o perguntar para pokedex, tira isso. deixa uma bolinha voando pela
-            tela inteira do pokemon. ao clicar na bolinha chama a ia."
+            A entrada da IA na ficha e uma bolha flutuante, e nao uma linha
+            "perguntar para a Pokedex" no meio do conteudo.
 
-            Ele pediu duas vezes. A bolha ja tinha sido bolha, virou botao de
-            linha quando ele disse "essa estrela ali de baixo tira", e o que
-            incomodava naquela versao nao era ela flutuar: era ela POUSAR EM CIMA
+            A bolha ja tinha existido e virou botao de linha uma vez, porque
+            incomodava — mas o que incomodava nao era ela flutuar: era ela
+            POUSAR EM CIMA
             do conteudo — parada sobre a tabela de stats enquanto a ficha rolava
             por baixo.
 
@@ -973,8 +970,8 @@ export function SpeciesDetail({
         ⚠️ TRÊS FRASES, e a do meio é a que impede a unificação de mentir.
 
         Os contextos passaram a ser agrupados pela RECOMENDAÇÃO — o primeiro
-        colocado — e não pelas cinco linhas. Isso é o que ele pediu ("da pra
-        unificar os q sao ="), e é o que tira o Venusaur de quatro botões.
+        colocado — e não pelas cinco linhas. Contextos que recomendam o mesmo
+        viram um só, e é o que tira o Venusaur de quatro botões.
 
         Só que dois contextos podem concordar sobre o melhor e discordar sobre a
         ordem das alternativas. Quando isso acontece, `mesmaLista` vem `false` do
@@ -1125,8 +1122,8 @@ export function SpeciesDetail({
       {/*
         UMA coluna de IV, no formato 14/15/13.
 
-        "na opção melhores iv por liga nao mostra o iv? kkk" — mostrava, e era
-        impossivel de ler. As tres colunas se chamavam "Atq / Def / PS", que sao
+        A tela parecia nao mostrar o IV por liga. Mostrava, e era impossivel de
+        ler. As tres colunas se chamavam "Atq / Def / PS", que sao
         EXATAMENTE as palavras que o app usa pra atributo base duas secoes acima.
         Entao "Atq 0" nao parecia um IV zero, parecia um ataque zero — que seria
         absurdo, e por isso ninguem lia como IV.
@@ -1211,7 +1208,7 @@ export function SpeciesDetail({
       {/*
         A bolha, com o dossie DESTA especie.
 
-        E o "chatbot ao clicar num Pokémon" que ele pediu. O contexto e o mesmo
+        E a conversa com a IA a partir de uma especie. O contexto e o mesmo
         `speciesDossier` que a Pokedex ja usa — nao ha segundo caminho de dados,
         entao as duas telas nunca podem discordar sobre o mesmo bicho.
 

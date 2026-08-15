@@ -1,8 +1,8 @@
 /**
  * O porteiro: o que pode virar pergunta pra IA.
  *
- * O Miguel: "coloca um filtro no assistente de ia tbm. pra tipo, nao poder falar
- * nada alem de pokemon go. imagina, os cara usando isso pra programar com api
+ * O assistente so pode falar de Pokemon GO. Sem isso, a chave compartilhada
+ * vira um modelo de uso geral de graca: dava pra usar a rota pra programar com
  * free kkkkkk. (…) tbm cuidado com injeção de codigo, tem varias formas q podem
  * fazer isso, como codigo morse e etc".
  *
