@@ -818,3 +818,36 @@ cara ja viu a logo quando abriu o app, as vezes (quase sempre) fica esdruxulo
 colocar a logo dnv pro cara ve"*
 
 **Apagar quando ele confirmar que sumiu de onde incomodava.**
+
+---
+
+## [ABERTO] TrainerKit — nada de falas dele em commit, PR e README
+
+**Pedido em:** 09/08/2026
+
+**Palavras dele:** *"so n coloca as minhas falas nos commits e readme pelo amor
+de Deus. la so coisas tecnicas nao eu falando pra se vitimiza kkk. inclusive
+coloca isso no claude md pra nunca mais esquecer"*
+
+Ele escolheu, quando perguntei, **reescrever os 224 commits antigos** (e não só
+valer daqui pra frente) e **varrer os 148 arquivos de código agora** (e não aos
+poucos).
+
+**Feito:**
+
+- regra gravada no `~/.claude/CLAUDE.md` e na memória;
+- 142 arquivos de código varridos, ~200 trechos reescritos — commit `1cfb4cd`
+  na numeração antiga;
+- 225 mensagens de commit reescritas em três passadas (`filter-branch`), com a
+  árvore conferida byte a byte: **nenhum arquivo mudou**;
+- publicado com `--force-with-lease`; `origin/main` agora é `fcadb7d`.
+
+Citação de **fonte técnica** foi mantida de propósito: HIG da Apple, documento
+de handoff, GAME_MASTER, Serebii, mensagens de erro de API. São referência
+verificável, não conversa.
+
+O histórico antigo continua **só na máquina dele**, na branch
+`antes-da-limpeza-de-falas-completo` e na tag `antes-da-limpeza-de-falas` —
+nenhuma das duas foi enviada pro GitHub, de propósito.
+
+**Apagar quando ele conferir que o repositório público está limpo.**
