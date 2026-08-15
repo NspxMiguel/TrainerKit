@@ -2,6 +2,7 @@ export * from "./types.js";
 export * from "./cp.js";
 export * from "./types-chart.js";
 export * from "./iv.js";
+export * from "./encounter.js";
 export * from "./pvp.js";
 export * from "./raid.js";
 export * from "./appraisal.js";

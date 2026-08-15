@@ -200,6 +200,28 @@ const EN = {
   "iv.levelIs": "Level",
   "iv.or": "or",
 
+  // ------------------------------------------- IV pelo PC, antes de capturar
+  "pre.open": "Haven't caught it yet? Find the IV from CP",
+  "pre.title": "Before you catch it",
+  "pre.why": "The encounter screen shows only CP. That is enough when the game fixes the level — a raid, an egg, a research reward. In the wild the level is random, and then it is not.",
+  "pre.origin": "Where it came from",
+  "pre.origin.selvagem": "Wild",
+  "pre.origin.raide": "Raid",
+  "pre.origin.ovo": "Egg",
+  "pre.origin.pesquisa": "Research",
+  "pre.weather": "Weather boosted",
+  "pre.weatherDetail": "Raises the catch level, and with it the whole CP range.",
+  "pre.cp": "CP on the encounter screen",
+  "pre.rangeLabel": "Possible CP",
+  "pre.levelLabel": "Level",
+  "pre.exact": "Only {atk}/{def}/{hp} gives that CP here.",
+  "pre.combos": "{n} combinations still fit that CP.",
+  "pre.wildWeak": "In the wild the level is drawn at random, so CP narrows the range but never settles it.",
+  "pre.impossible.title": "That CP doesn't exist here",
+  "pre.impossible.body": "No level and no IV give CP {cp} for a {name} from this source. From here it comes out between {min} and {max} — check the source, or whether it is really this species.",
+  "pre.impossible.weather": "But it does fit with the weather boost on — turn it on above.",
+  "pre.impossible.noWeather": "But it does fit without the weather boost — turn it off above.",
+
   // -------------------------------------------------------------------- scanner
   "scan.desktopWarning.title": "You're on a computer",
   "scan.desktopWarning.body": "Tested on phone screenshots. Desktop ones usually fail.",

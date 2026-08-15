@@ -25,6 +25,7 @@ import { tetoDePowerUp, useSetup } from "../onboarding/setup.ts";
 import { IVBar } from "../ui/IVBar.tsx";
 import { addPokemon, type OwnedPokemon } from "../storage/collection.ts";
 import { AmongYours } from "../ui/AmongYours.tsx";
+import { AntesDeCapturar } from "../ui/AntesDeCapturar.tsx";
 import { AssistantCard } from "../ui/AssistantCard.tsx";
 import { BetaBadge } from "../ui/BetaBadge.tsx";
 import { VerdictCard } from "../ui/VerdictCard.tsx";
@@ -61,6 +62,8 @@ export function IVCalculator({ species, data, onClose, owned }: Props) {
   const { t, language } = useT();
   const [manual, setManual] = useState(false);
   const [saved, setSaved] = useState(false);
+  // Aberto por toque, e nunca por padrao: ver a nota no bloco que o renderiza.
+  const [antesDeCapturar, setAntesDeCapturar] = useState(false);
   const [cp, setCp] = useState(owned?.cp != null ? String(owned.cp) : "");
   const [hp, setHp] = useState(owned?.hp != null ? String(owned.hp) : "");
   // Ja esta na colecao: nao ha o que salvar de novo.
@@ -246,7 +249,7 @@ export function IVCalculator({ species, data, onClose, owned }: Props) {
       {/* Quem veio da Colecao ja tem o IV: reescanear e opcional, nao o caminho.
           Por isso o convite so aparece pra quem chegou sem nada. */}
       {!jaSalvo && (
-      <div className={ivs ? undefined : "tk-empty-slot"}>
+      <div className={ivs || antesDeCapturar ? undefined : "tk-empty-slot"}>
         <ScanDropzone
           onRead={(read) => {
             setIvs(read);
@@ -265,6 +268,38 @@ export function IVCalculator({ species, data, onClose, owned }: Props) {
           onNumeros={aceitarNumeros}
         />
       </div>
+      )}
+
+      {/*
+        O caminho de quem ainda NAO capturou.
+
+        Aqui a folha de avaliacao nao existe: as tres barras so aparecem depois
+        que o Pokemon esta na mochila, e a decisao de gastar a bola dourada e
+        tomada na tela de encontro, com o PC. Sem isto, a unica saida da tela
+        era anexar um print que ainda nao da pra tirar.
+
+        Fica ABAIXO do convite e em peso leve de propósito. O print continua
+        sendo o caminho principal — ele resolve o IV exato em qualquer origem, e
+        esta secao so resolve quando o jogo fixa o nivel do encontro. Competir
+        com a acao principal trocaria o caminho bom pelo caminho estreito.
+
+        Ao abrir, o `tk-empty-slot` sai: o slot centraliza o convite no meio da
+        TELA, e com a secao aberta a folha vira uma lista que rola, que e a
+        mesma troca que o `ivs` ja faz.
+      */}
+      {!jaSalvo && !ivs && (
+        antesDeCapturar ? (
+          <AntesDeCapturar species={species} data={data} />
+        ) : (
+          <button
+            type="button"
+            className="tk-lite"
+            onClick={() => setAntesDeCapturar(true)}
+          >
+            <span className="tk-lite-t">{t("pre.open")}</span>
+            <span className="tk-lite-go" aria-hidden="true">›</span>
+          </button>
+        )
       )}
 
       {ivs && (
