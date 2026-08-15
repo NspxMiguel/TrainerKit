@@ -867,3 +867,18 @@ O histórico antigo continua **só na máquina dele**, na branch
 nenhuma das duas foi enviada pro GitHub, de propósito.
 
 **Apagar quando ele conferir que o repositório público está limpo.**
+
+---
+
+## [ABERTO] TrainerKit — descobrir o IV pelo PC, antes de capturar
+
+**Pedido em:** 15/08/2026
+
+**Palavras dele:** *"se eu n me engano tbm, tem como descobrir o iv pelo pc tbm,
+adiciona isso tbm, pra descobrir o iv antes de capturar"*
+
+O ponto é o **antes de capturar**: na tela de encontro só aparece o PC, e a
+avaliação do líder (as três barras) só existe depois que o Pokémon está na
+mochila. Então é PC → IV, e não PC+PS → IV como a calculadora faz hoje.
+
+**Apagar quando ele testar num encontro de verdade.**
