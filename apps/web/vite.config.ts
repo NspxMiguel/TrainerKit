@@ -292,9 +292,20 @@ export default defineConfig({
           { src: `${base}icon-192.png`, sizes: "192x192", type: "image/png" },
           { src: `${base}icon-512.png`, sizes: "512x512", type: "image/png" },
           {
-            // Variante propria: o sistema recorta ate 10% de cada borda, entao
-            // este arquivo tem zona segura e o monograma encolhido. Usar o
-            // icone normal aqui faria o Android cortar as pontas do "K".
+            /*
+             * Variante propria, e as duas diferencas dela sao obrigatorias.
+             *
+             * QUADRADO CHEIO, sem raio e sem margem: quem arredonda e o
+             * sistema, e a forma varia por fabricante. Um arquivo com a
+             * propria forma vira forma DENTRO de forma, com um vao entre as
+             * duas. Ele ja foi desenhado como circulo aqui, o que so passava
+             * despercebido em aparelho de mascara redonda.
+             *
+             * MARCA ENCOLHIDA pra 78%: o Android recorta ate 10% de cada
+             * borda e a zona segura da especificacao e o circulo central de
+             * 80%. Os `purpose: "any"` acima nao levam nada disso — ninguem
+             * os mascara, e por isso eles mantem o raio do handoff.
+             */
             src: `${base}icon-maskable-512.png`,
             sizes: "512x512",
             type: "image/png",

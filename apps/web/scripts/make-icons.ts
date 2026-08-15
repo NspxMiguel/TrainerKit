@@ -42,10 +42,33 @@ const OUT_DIR = join(HERE, "..", "public");
  * conflito com o desenho se pergunta, nao se improvisa.
  *
  * O resultado apareceu na tela inicial: preto chapado, sem quina iluminada, o
- * ovo boiando num vazio. *"os icones novos do app ainda n estao aplicados
- * corretamente"*.
+ * ovo boiando num vazio — o icone instalado nao era o icone do desenho.
  */
 type Tema = "dark" | "light";
+
+/**
+ * Como o arquivo vai ser tratado por quem o exibe. E a distincao que decide se
+ * o PNG carrega a propria forma ou entrega um quadrado pro sistema recortar.
+ *
+ * `tile` — NINGUEM recorta. O arquivo desenha a forma inteira: o raio do
+ * handoff, a borda fina de meio pixel e a quina iluminada. E o caso do favicon
+ * (navegador nao mascara nada) e dos icones `purpose: "any"` do manifest.
+ *
+ * `cheio` — O SISTEMA recorta, e por isso o PNG precisa ser um quadrado OPACO
+ * de ponta a ponta, sem raio e sem margem. Vale pro `apple-touch-icon`, que o
+ * iOS mascara com o squircle dele SEMPRE (nao existe atributo pra recusar), e
+ * pro icone `maskable` do Android.
+ *
+ * ⚠️ MANDAR UM `tile` ONDE SE ESPERA `cheio` E O DEFEITO QUE APARECEU NA TELA
+ * INICIAL DO IPHONE. O iOS recorta o squircle dele por fora; entre essa mascara
+ * e o desenho sobra a margem transparente que o arquivo trouxe, e o sistema
+ * pinta esse vao. O que se ve e uma moldura clara em volta de um SEGUNDO canto
+ * arredondado — duas bordas, uma dentro da outra, com um degrau entre elas.
+ *
+ * Nao da pra consertar isso do lado do CSS nem do manifest: quem escolhe a
+ * mascara e o sistema. So da pra parar de mandar a forma junto.
+ */
+type Forma = "tile" | "cheio";
 
 interface Paleta {
   /** As duas paradas do tile, do handoff. A 0% e a 70%. */
@@ -355,17 +378,23 @@ function ovoAt(
   return null;
 }
 
-function renderIcon(size: number, maskable: boolean, tema: Tema): Uint8Array {
+function renderIcon(
+  size: number,
+  forma: Forma,
+  monoScale: number,
+  tema: Tema,
+): Uint8Array {
   const paleta = PALETAS[tema];
   const rgba = new Uint8Array(size * size * 4);
+  const cheio = forma === "cheio";
 
-  // Icone maskable precisa de zona segura: o sistema recorta ate 10% de cada
-  // borda. Entao o tile ocupa tudo e o monograma encolhe pro centro.
-  const inset = maskable ? 0 : size * 0.06;
+  // No `cheio` o tile vai de borda a borda e a forma e um quadrado: raio zero,
+  // margem zero. Quem arredonda e o sistema, e desenhar o raio aqui produz o
+  // canto duplo descrito no tipo `Forma`.
+  const inset = cheio ? 0 : size * 0.06;
   const half = size / 2 - inset;
   // 30/112 do handoff — o mesmo raio que ele usa no tile grande, 112/418.
-  const radius = maskable ? size / 2 : size * (30 / 112);
-  const monoScale = maskable ? 0.78 : 1;
+  const radius = cheio ? 0 : size * (30 / 112);
   // Abaixo disto o zigue-zague nao cabe em pixel nenhum. Ver `alturaDaFenda`:
   // com 3,4 dentes a 32px cada um tem menos de um pixel de base e a quebra vira
   // uma linha borrada — pior que uma linha quase reta. Desenhar menos mostra
@@ -425,8 +454,20 @@ function renderIcon(size: number, maskable: boolean, tema: Tema): Uint8Array {
        * Aqui a segunda sai deslocando a forma e perguntando onde ela ja saiu:
        * amostrar 1,5px acima equivale a baixar o retangulo. Onde o deslocado ja
        * e de fora mas o real ainda e de dentro, tem luz.
+       *
+       * ⚠️ O SINAL AQUI ESTAVA TROCADO, e o efeito era o oposto do documentado.
+       * Amostrar a SDF em `py + δ` descreve a forma subida em δ, e a faixa
+       * "dentro da real, fora da deslocada" cai entao EMBAIXO. Com
+       * `py - quinaLado * δ`, o tema escuro (`quinaLado: -1`) virava `py + δ` e
+       * acendia a aresta de BAIXO, e o claro escurecia a de CIMA. Os dois
+       * temas saiam com o relevo invertido — luz vindo do chao.
+       *
+       * Nao aparecia em teste porque a quina e 22% de branco numa aresta de
+       * 1,5px: da pra olhar o icone e nao saber apontar o que esta errado, so
+       * que ele parece chapado. Foi conferido medindo o brilho medio das duas
+       * arestas, e nao no olho.
        */
-      if (!maskable) {
+      if (!cheio) {
         const escala = size / 112; // o tile do handoff mede 112
         // A borda fina: o que esta dentro da forma mas fora dela encolhida.
         const dentro = Math.max(0, Math.min(1, 0.5 - (d + 0.5 * escala)));
@@ -434,7 +475,7 @@ function renderIcon(size: number, maskable: boolean, tema: Tema): Uint8Array {
         // A luz da quina: a forma empurrada `quinaLado` * 1,5px.
         const dQuina = roundedRectSdf(
           px,
-          py - paleta.quinaLado * 1.5 * escala,
+          py + paleta.quinaLado * 1.5 * escala,
           size / 2,
           size / 2,
           half,
@@ -472,20 +513,35 @@ await mkdir(OUT_DIR, { recursive: true });
  * arquivo uma vez, na hora de instalar. O escuro fica como padrao porque o app
  * abre no escuro e o `background_color` do manifest e preto.
  */
-for (const [size, maskable, name] of [
-  [192, false, "icon-192.png"],
-  [512, false, "icon-512.png"],
-  [512, true, "icon-maskable-512.png"],
-  [180, false, "apple-touch-icon.png"],
+/*
+ * A terceira coluna e quanto do quadro a MARCA ocupa, e os dois `cheio` pedem
+ * numeros diferentes porque as duas mascaras comem coisas diferentes.
+ *
+ * O Android recorta ate 10% de cada borda e a forma da mascara varia por
+ * fabricante — pode ser circulo. A especificacao chama de zona segura o circulo
+ * central de 80%, entao a marca desce pra 0,78 e nada importante encosta na
+ * beirada.
+ *
+ * O iOS usa um squircle so, inscrito no quadrado: ele come as QUINAS e nao
+ * toca no meio das arestas. Marca centrada nao corre risco nenhum, e encolher
+ * ali so deixaria o icone menor que os vizinhos na tela inicial. Fica em 1 — o
+ * mesmo valor dos `tile`, entao o ovo sai do mesmo tamanho em todos os
+ * arquivos e so o fundo em volta e que muda.
+ */
+for (const [size, forma, marca, name] of [
+  [192, "tile", 1, "icon-192.png"],
+  [512, "tile", 1, "icon-512.png"],
+  [512, "cheio", 0.78, "icon-maskable-512.png"],
+  [180, "cheio", 1, "apple-touch-icon.png"],
   // Favicons renderizados NO tamanho, nao encolhidos do 512: o navegador
   // reamostra a imagem grande e a marca vira borrao: sao tres barras finas com
   // vaos de dois pixels. Renderizado direto, com supersampling, ele sai nitido.
-  [32, false, "favicon-32.png"],
-  [16, false, "favicon-16.png"],
+  [32, "tile", 1, "favicon-32.png"],
+  [16, "tile", 1, "favicon-16.png"],
 ] as const) {
   for (const tema of ["dark", "light"] as const) {
     const arquivo = tema === "dark" ? name : name.replace(".png", "-light.png");
-    const png = encodePng(size, size, renderIcon(size, maskable, tema));
+    const png = encodePng(size, size, renderIcon(size, forma, marca, tema));
     await writeFile(join(OUT_DIR, arquivo), png);
     console.log(`${arquivo.padEnd(30)} ${size}x${size}  ${(png.length / 1024).toFixed(1)} KB`);
   }
