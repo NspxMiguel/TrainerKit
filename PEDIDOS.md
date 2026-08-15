@@ -774,6 +774,22 @@ arredondados próprios** (raio 30/112). O iOS arredonda por conta dele de
 qualquer jeito — então o que vai pra tela é o nosso tile arredondado *dentro* do
 recorte do sistema. Daí a moldura dupla.
 
+**Consertado em 09/08/2026** (`c8b9b2c`). Eram três defeitos, não um:
+
+1. `apple-touch-icon.png` saía com raio próprio e margem transparente. Agora é
+   quadrado opaco de ponta a ponta — 0 pixel não-opaco, alfa 255 nas 4 quinas.
+2. O `icon-maskable-512.png` do Android era desenhado como **círculo**
+   (`radius = size/2`). Virou quadrado cheio, com a marca em 78% pra caber na
+   zona segura de 80%.
+3. A quina iluminada estava na aresta errada **nos dois temas** — o sinal do
+   deslocamento estava trocado. Escuro acendia embaixo, claro escurecia em
+   cima. Medido isolando o efeito (render de controle com `quinaAlfa: 0`).
+
+⚠️ **O ícone já instalado no iPhone dele NÃO vai mudar sozinho.** O iOS copia a
+imagem uma vez, na hora de adicionar à tela inicial, e nunca mais relê o
+arquivo. Os dois ovos do print são duas instalações. Pra ver o novo: apagar os
+dois da tela inicial e adicionar de novo.
+
 **Apagar quando ele disser que o ícone ficou igual aos outros.**
 
 ---
