@@ -657,6 +657,7 @@ const EN = {
   "rank.notTierList": "It ranks stat product at the league cap — how much stat a species squeezes under the CP limit. It's blind to typing, moves and the meta, which is where PvP is decided.",
   "rank.raidNote": "Damage and bulk against a neutral target, at level 40 with perfect IVs. For a specific boss, use raid counters on its page.",
   "rank.pvpNote": "Score is relative to first place.",
+  "data.build": "Last rebuild",
   "data.source": "Data source",
   "data.builtin": "From the app",
   "data.custom": "From elsewhere",

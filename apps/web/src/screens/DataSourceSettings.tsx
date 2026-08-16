@@ -29,6 +29,9 @@ interface Props {
   datasetLabel: string | null;
   /** Idade da base em dias, ou `null` se ela nao carimba. */
   datasetIdade: number | null;
+  /** Quando o APP montou esta base — outro relogio. Ver `datasetBuildLabel`. */
+  buildLabel: string | null;
+  buildIdade: number | null;
   /** Fontes declaradas pelo dataset carregado — nao pelo app. */
   sources?: DatasetSource[] | undefined;
 }
@@ -45,7 +48,13 @@ interface Props {
  * daria tela branca ou, muito pior, numeros calculados sobre lixo — o unico
  * tipo de erro que este app nao pode cometer.
  */
-export function DataSourceSettings({ datasetLabel, datasetIdade, sources }: Props) {
+export function DataSourceSettings({
+  datasetLabel,
+  datasetIdade,
+  buildLabel,
+  buildIdade,
+  sources,
+}: Props) {
   const source = useDataSource();
   const { t } = useT();
   const [url, setUrl] = useState(getDataSource() ?? "");
@@ -56,6 +65,7 @@ export function DataSourceSettings({ datasetLabel, datasetIdade, sources }: Prop
   const custom = source !== null;
   const idade = textoIdade(t, datasetIdade);
   const velha = datasetIdade !== null && datasetIdade >= DIAS_PRA_AVISAR;
+  const idadeBuild = textoIdade(t, buildIdade);
 
   const apply = async () => {
     const target = url.trim();
@@ -124,6 +134,27 @@ export function DataSourceSettings({ datasetLabel, datasetIdade, sources }: Prop
             {idade && <span className="tk-caption"> · {idade}</span>}
           </span>
         </div>
+
+        {/*
+          A SEGUNDA linha, e ela e a que responde "o app parou de buscar?".
+
+          A de cima e o relogio do JOGO: fica dias parada sem nada estar errado,
+          porque so anda quando sai GAME_MASTER novo. Esta e o relogio do BUILD,
+          e o rebuild e diario — se ela envelhecer, o problema e do app.
+
+          Sem as duas separadas, uma base congelada num aparelho e uma semana
+          sem novidade no jogo se leem exatamente igual na tela. Foi o que
+          aconteceu.
+        */}
+        {buildLabel && (
+          <div className="tk-row">
+            <span className="tk-row-label">{t("data.build")}</span>
+            <span className="tk-row-value">
+              {buildLabel}
+              {idadeBuild && <span className="tk-caption"> · {idadeBuild}</span>}
+            </span>
+          </div>
+        )}
 
         {/*
           O aviso so aparece quando ha o que avisar.

@@ -592,6 +592,7 @@ export const IT: Dict = {
   "rank.notTierList": "Ordina per stat product al tetto della lega — quanto le statistiche rendono sotto il limite di PL. È cieca a tipo, mosse e meta, dove il PvP si decide.",
   "rank.raidNote": "Danno e resistenza contro un bersaglio neutro, livello 40 con IV perfetti. Per un boss specifico usa i counter nella sua pagina.",
   "rank.pvpNote": "Il punteggio è relativo al primo.",
+  "data.build": "Ultima ricostruzione",
   "data.source": "Fonte dei dati",
   "data.builtin": "Dall'app",
   "data.custom": "Da altrove",

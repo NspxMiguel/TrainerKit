@@ -592,6 +592,7 @@ export const FR: Dict = {
   "rank.notTierList": "Classe par stat product au plafond de la ligue — combien de stats l'espèce tire sous la limite de PC. Aveugle au type, aux attaques et au méta, où le PvP se décide.",
   "rank.raidNote": "Dégâts et résistance contre une cible neutre, niveau 40 avec IV parfaits. Pour un boss précis, utilise les contres sur sa page.",
   "rank.pvpNote": "La note est relative au premier.",
+  "data.build": "Dernière reconstruction",
   "data.source": "Source des données",
   "data.builtin": "De l'app",
   "data.custom": "D'ailleurs",

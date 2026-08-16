@@ -135,13 +135,72 @@ export type DatasetState =
   | { status: "ready"; data: Dataset }
   | { status: "error"; message: string };
 
+/** Busca e valida um dataset. `null` quando nao deu — offline, 404, JSON torto. */
+async function carregar(url: string): Promise<Dataset | null> {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const data = (await res.json()) as Dataset;
+    return looksLikeDataset(data) ? null : data;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * O mesmo endereco, com um carimbo do DIA colado.
+ *
+ * ⚠️ ISTO E O QUE FURA O PRECACHE, e e o ponto inteiro da revalidacao.
+ *
+ * `gamedata.json` entra no precache do service worker (de proposito: sem ele o
+ * app abre offline e nao calcula nada). So que rota de precache atende pela URL
+ * EXATA — entao um `fetch` normal nunca chega no servidor, e a base fica
+ * congelada na versao do service worker instalado. O Workbox so ignora
+ * `utm_*` e `fbclid` ao casar; qualquer outro parametro nao casa e a busca
+ * segue pra rede.
+ *
+ * O carimbo e o DIA, e nao o relogio: com `Date.now()` toda abertura seria um
+ * endereco novo, o cache HTTP nunca acertaria e o app baixaria ~1,6 MB a cada
+ * vez que fosse aberto. Com o dia, a primeira abertura baixa e as outras
+ * respondem do cache do navegador — que e exatamente a cadencia que o rebuild
+ * tem.
+ */
+function urlDoDia(url: string): string {
+  const dia = new Date().toISOString().slice(0, 10);
+  return `${url}${url.includes("?") ? "&" : "?"}d=${dia}`;
+}
+
+/** Qual dos dois e mais novo, pelo relogio do proprio jogo. */
+function maisNovo(a: Dataset, b: Dataset): boolean {
+  return Number(a.version.uploadTime) > Number(b.version.uploadTime);
+}
+
 /**
  * Carrega o dataset do jogo.
  *
- * O embarcado e servido como asset estatico e fica no precache do service
- * worker — depois da primeira visita o app calcula offline. E de proposito que
- * nao ha fallback de rede: se o dataset nao carrega, o app nao tem como decidir
- * nada, e e melhor dizer isso do que exibir numeros errados.
+ * ⚠️ DUAS BUSCAS, E A ORDEM IMPORTA.
+ *
+ * A primeira e a do precache: responde na hora, funciona offline, e e com ela
+ * que a tela abre. A segunda vai a rede furando o precache e so troca o que
+ * esta em uso se vier coisa MAIS NOVA — pelo `uploadTime`, o relogio do jogo,
+ * entao nunca anda pra tras.
+ *
+ * A segunda existe porque sem ela o dado tinha a cadencia do CODIGO. O dataset
+ * mora no precache; o precache pertence a um service worker; e o service worker
+ * novo instala e fica PARADO esperando o botao de atualizar (`registerType:
+ * "prompt"`). Quem adiasse esse aviso ficava com a base do dia da instalacao —
+ * medido em aparelho de verdade: nove dias, com a propria tela de Ajustes
+ * prometendo que a base "se refaz todo dia". Base e DADO, e dado nao devia
+ * depender de alguem aceitar uma versao nova do app.
+ *
+ * Falha em silencio de propósito: sem rede, a primeira busca ja resolveu, e um
+ * aviso de "nao consegui conferir se ha base nova" seria ruido sobre um app que
+ * esta funcionando.
+ *
+ * Fonte de terceiro NAO leva o carimbo do dia: ela nao esta no precache (o
+ * Workbox so pre-cacheia o que sai no build), entao ja chega pela rede — e
+ * inventar parametro na URL de outra pessoa e pedir pra esbarrar em servidor
+ * que responde 400 pro que nao conhece.
  *
  * Quando o usuario aponta pra outra fonte, o formato e CONFERIDO antes de
  * entrar. Sem isso, um JSON qualquer daria tela branca ou — pior — numeros
@@ -158,23 +217,23 @@ export function useDataset(): DatasetState {
 
     void (async () => {
       const url = resolvedDatasetUrl();
-      try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`dataset respondeu ${res.status}`);
-        const data = (await res.json()) as Dataset;
+      const embarcado = await carregar(url);
+      if (cancelled) return;
 
-        const problem = looksLikeDataset(data);
-        if (problem) throw new Error(problem);
-
-        if (!cancelled) setState({ status: "ready", data });
-      } catch (err) {
-        if (!cancelled) {
-          setState({
-            status: "error",
-            message: err instanceof Error ? err.message : String(err),
-          });
-        }
+      if (!embarcado) {
+        setState({
+          status: "error",
+          message: `dataset nao carregou de ${url}`,
+        });
+        return;
       }
+      setState({ status: "ready", data: embarcado });
+
+      // A partir daqui o app ja funciona. O resto e melhoria silenciosa.
+      if (source !== null) return;
+      const fresco = await carregar(urlDoDia(url));
+      if (cancelled || !fresco) return;
+      if (maisNovo(fresco, embarcado)) setState({ status: "ready", data: fresco });
     })();
 
     return () => {
@@ -234,6 +293,33 @@ export function datasetLabel(version: Dataset["version"]): string {
   if (!Number.isFinite(ms)) return "desconhecido";
   const d = new Date(ms);
   return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+/**
+ * Quando o APP montou esta base, e nao quando o jogo publicou o dado.
+ *
+ * ⚠️ SAO DOIS RELOGIOS, e a tela precisa dos dois.
+ *
+ * `uploadTime` e do jogo: muda quando a Niantic publica GAME_MASTER novo, e
+ * pode ficar dias parado sem nada estar errado. `generatedAt` e do build: muda
+ * todo dia, porque o rebuild e diario.
+ *
+ * Com so o primeiro na tela nao da pra distinguir "o jogo nao mudou" de "o meu
+ * app parou de buscar" — e foi exatamente essa confusao que apareceu num
+ * aparelho com a base congelada ha nove dias. Duas linhas respondem separado:
+ * a de cima diz a idade do DADO, esta diz a do BUILD.
+ */
+export function datasetBuildLabel(version: Dataset["version"]): string | null {
+  const d = new Date(version.generatedAt);
+  if (Number.isNaN(d.getTime())) return null;
+  return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+/** Quantos dias faz que o app montou esta base. `null` se nao der pra saber. */
+export function buildIdadeDias(version: Dataset["version"]): number | null {
+  const d = new Date(version.generatedAt);
+  if (Number.isNaN(d.getTime())) return null;
+  return Math.max(0, Math.floor((Date.now() - d.getTime()) / 86_400_000));
 }
 
 /**

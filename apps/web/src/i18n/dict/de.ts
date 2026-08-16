@@ -588,6 +588,7 @@ export const DE: Dict = {
   "rank.notTierList": "Sortiert nach Stat Product an der Liga-Grenze — wie viel Werte eine Art unter dem WP-Limit herausholt. Blind für Typ, Attacken und Meta, wo PvP entschieden wird.",
   "rank.raidNote": "Schaden und Aushalten gegen ein neutrales Ziel, Level 40 mit perfekten IV. Für einen bestimmten Boss die Konter auf seiner Seite nutzen.",
   "rank.pvpNote": "Die Note ist relativ zum Ersten.",
+  "data.build": "Letzter Neuaufbau",
   "data.source": "Datenquelle",
   "data.builtin": "Aus der App",
   "data.custom": "Von woanders",

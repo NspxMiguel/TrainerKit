@@ -592,6 +592,7 @@ export const KO: Dict = {
   "rank.notTierList": "리그 상한에서의 스탯 곱으로 정렬합니다. CP 제한 아래에서 능력치를 얼마나 짜내는지를 볼 뿐, 타입·기술·메타는 전혀 보지 않습니다. PvP는 거기서 갈립니다.",
   "rank.raidNote": "중립 상대 기준 화력과 내구, 레벨 40·개체값 만점. 특정 보스는 그 페이지의 카운터를 쓰세요.",
   "rank.pvpNote": "점수는 1위 대비 상대값입니다.",
+  "data.build": "마지막 재구성",
   "data.source": "데이터 출처",
   "data.builtin": "앱의 것",
   "data.custom": "다른 곳에서",

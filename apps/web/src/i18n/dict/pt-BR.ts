@@ -619,6 +619,7 @@ export const PT_BR: Dict = {
   "rank.notTierList": "Ranqueia stat product no teto da liga — quanto de atributo a espécie espreme sob o limite de PC. É cego a tipo, ataque e meta, que é onde PvP se decide.",
   "rank.raidNote": "Dano e aguente contra um alvo neutro, no nível 40 com IV perfeito. Pra um chefe específico, use os counters na página dele.",
   "rank.pvpNote": "A nota é relativa ao primeiro colocado.",
+  "data.build": "Última reconstrução",
   "data.source": "Fonte dos dados",
   "data.builtin": "Do app",
   "data.custom": "De outro lugar",

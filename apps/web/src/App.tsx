@@ -1,6 +1,8 @@
 import { useEffect, useState, type CSSProperties } from "react";
 
 import {
+  buildIdadeDias,
+  datasetBuildLabel,
   datasetIdadeDias,
   datasetLabel,
   useDataset,
@@ -220,6 +222,15 @@ export function App() {
                  se leem na mesma linha e tem que sair do mesmo relogio. */
               datasetIdade={
                 dataset.status === "ready" ? datasetIdadeDias(dataset.data.version) : null
+              }
+              /* O relogio do BUILD, que anda todo dia — enquanto o de cima anda
+                 so quando o jogo publica. Sao duas linhas porque respondem a
+                 perguntas diferentes. */
+              buildLabel={
+                dataset.status === "ready" ? datasetBuildLabel(dataset.data.version) : null
+              }
+              buildIdade={
+                dataset.status === "ready" ? buildIdadeDias(dataset.data.version) : null
               }
               persist={persist}
               species={species}

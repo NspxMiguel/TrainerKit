@@ -41,6 +41,9 @@ import { usePrefetch } from "../sprites/prefetch.ts";
 
 interface Props {
   datasetLabel: string | null;
+  /** Quando o app montou a base. Outro relogio — ver `datasetBuildLabel`. */
+  buildLabel: string | null;
+  buildIdade: number | null;
   /** Idade da base em dias, ou `null` se ela nao carimba. Ver `datasetIdadeDias`. */
   datasetIdade: number | null;
   persist: PersistState | null;
@@ -178,7 +181,15 @@ function Linha({
  * pra ver a configuracao inteira de relance, e cada assunto ganha a tela toda
  * quando e a vez dele.
  */
-export function SettingsScreen({ datasetLabel, datasetIdade, persist, species, sources }: Props) {
+export function SettingsScreen({
+  datasetLabel,
+  datasetIdade,
+  buildLabel,
+  buildIdade,
+  persist,
+  species,
+  sources,
+}: Props) {
   const update = useUpdate();
   const [updateMsg, setUpdateMsg] = useState<string | null>(null);
   const [wipeOpen, setWipeOpen] = useState(false);
@@ -462,6 +473,8 @@ export function SettingsScreen({ datasetLabel, datasetIdade, persist, species, s
           <DataSourceSettings
             datasetLabel={datasetLabel}
             datasetIdade={datasetIdade}
+            buildLabel={buildLabel}
+            buildIdade={buildIdade}
             sources={sources}
           />
         </SettingsSheet>
