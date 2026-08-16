@@ -905,3 +905,19 @@ digita o PC. O que sai:
    está quebrado, é isso: está certo, e a tela explica por quê.
 
 **Apagar quando ele testar num encontro de verdade.**
+
+---
+
+## [ABERTO] TrainerKit — a base do jogo não atualiza sozinha
+
+**Pedido em:** 15/08/2026
+
+**Palavras dele:** *"esse 9 days old n atualiza automatico"*
+
+Print dos Ajustes → Dados do jogo: **"07/08 · 9 days old"**, e logo acima o texto
+da própria tela promete *"merges the sources below and rebuilds every day"*.
+
+A tela promete diário e a base tem 9 dias. Ou o rebuild não está rodando, ou o
+app não está buscando o rebuild.
+
+**Apagar quando ele vir a data mudando sozinha.**
