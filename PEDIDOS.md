@@ -920,4 +920,29 @@ da própria tela promete *"merges the sources below and rebuilds every day"*.
 A tela promete diário e a base tem 9 dias. Ou o rebuild não está rodando, ou o
 app não está buscando o rebuild.
 
+**Consertado em 15/08/2026** (`b2f76b8`).
+
+**O rebuild nunca foi o problema.** O cron das 06:00 roda todo dia e o GitHub
+Pages serve base gerada hoje. Quem não andava era o aparelho dele.
+
+O `gamedata.json` está no precache do service worker (de propósito — sem ele o
+app abre offline e não calcula nada). Rota de precache atende pela URL exata,
+então o `fetch` nunca chegava no servidor: a base passou a ter a cadência do
+service worker. E o service worker novo instala e fica **parado** esperando o
+botão de atualizar. Quem adiou esse aviso ficou com a base do dia da instalação.
+
+Agora são duas buscas: a do precache (instantânea, offline) e uma segunda com
+carimbo do dia na URL, que fura o precache e vai à rede. Troca só quando o
+`uploadTime` é maior, e falha em silêncio se não houver rede.
+
+A tela também ganhou a linha **"Última reconstrução"** — `generatedAt`, o
+relógio do build. A de cima é o relógio do jogo e fica dias parada sem nada
+estar errado; com só ela na tela, "o jogo não mudou" e "meu app parou de
+buscar" se liam igual.
+
+⚠️ **O app instalado no celular dele continua 9 dias atrás** — não só a base. Ele
+está sem o conserto do ícone e sem o IV pelo PC. Pra pegar tudo: Ajustes →
+procurar atualização, ou reinstalar. Vale perguntar se ele marcou "não avisar
+mais" em algum momento.
+
 **Apagar quando ele vir a data mudando sozinha.**
