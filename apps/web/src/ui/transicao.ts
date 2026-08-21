@@ -48,10 +48,25 @@ export function comElementoCompartilhado(origem: HTMLElement | null, mudar: () =
     return;
   }
 
+  /*
+   * ⚠️ A MARCA NO `<html>` E O QUE IMPEDE A ANIMACAO DUPLA.
+   *
+   * A folha cheia tem entrada propria (`tk-tela-sobe`). Quando a ficha abre por
+   * elemento compartilhado, o mesmo gesto ja tem duas animacoes rodando — o
+   * tile virando cabecalho e a troca da raiz. A terceira nao soma nada e
+   * atrapalha: a tela desliza por dentro de um retrato que ja esta sendo
+   * apresentado.
+   *
+   * O CSS nao tem como perguntar se ha uma view transition em curso, entao o
+   * aviso vem daqui. `[data-vt] .tk-sheet-full { animation: none }` em App.css.
+   */
+  const raiz = document.documentElement;
   origem.style.viewTransitionName = NOME_ESPECIE;
+  raiz.dataset.vt = "1";
   const t = doc.startViewTransition(mudar);
   void t.finished.finally(() => {
     origem.style.viewTransitionName = "";
+    delete raiz.dataset.vt;
   });
 }
 

@@ -1093,7 +1093,71 @@
     calc(var(--tk-s8) + max(var(--tk-s5), env(safe-area-inset-bottom)));
   margin: 0 auto;
   max-width: var(--tk-container);
-  animation: tk-rise 0.2s var(--tk-ease) both;
+  /*
+   * ⚠️ A TELA CHEGA DESLIZANDO, E NAO APARECENDO. Tres coisas mudaram aqui, e
+   * as tres eram o que denunciava a interface.
+   *
+   * 1. SEM OPACIDADE. Isto e uma superficie opaca que cobre a tela inteira —
+   *    ficha de especie, calculadora, cada menu dos Ajustes. Nenhum sistema
+   *    operacional apresenta uma tela cheia por transparencia: ele empurra uma
+   *    por cima da outra. Um `opacity` aqui e o que faz o app parecer uma
+   *    `<div>` que apareceu, e nao uma tela que entrou.
+   *
+   * 2. O PERCURSO E INTEIRO. Eram 14px de subida — longe demais pra passar por
+   *    nada, perto demais pra ler como movimento. Ou a peca vem de fora da
+   *    tela, ou nao se move.
+   *
+   * 3. `backwards`, E NUNCA `both`. E o mesmo defeito que ja esta documentado
+   *    em `.tk-fax-bar`: `both` deixa o transform aplicado PRA SEMPRE, e
+   *    qualquer transform — inclusive a identidade — faz o elemento virar bloco
+   *    contentor de todo `position: fixed` que mora dentro. Era a causa da
+   *    barra da Faxina aparecer no topo com `top: -30`, contornada la com
+   *    `sticky`. A causa continuava de pe pra toda folha do app.
+   */
+  animation: tk-tela-sobe var(--tk-dur-tela) var(--tk-ease-out) backwards;
+}
+
+@keyframes tk-tela-sobe {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+/*
+ * ⚠️ EM TELA LARGA ELA NAO E UMA TELA: e um dialogo centrado (ver o
+ * `inset`/`border-radius` em design.css). Deslizar um cartao centrado de baixo
+ * pra cima e gramatica de celular aplicada onde nao vale — no computador
+ * dialogo aparece onde vai ficar. Ali, e so ali, a opacidade e o certo.
+ */
+@media (min-width: 900px) {
+  .tk-sheet-full {
+    animation-name: tk-dialogo-entra;
+    animation-duration: var(--tk-dur-base);
+  }
+}
+
+@keyframes tk-dialogo-entra {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+/*
+ * ⚠️ DURANTE UMA VIEW TRANSITION ESTA ANIMACAO NAO PODE RODAR.
+ *
+ * Abrir a ficha de uma especie ja e uma transicao de elemento compartilhado: o
+ * tile da lista cresce e vira o cabecalho (440ms), enquanto o navegador faz a
+ * troca da raiz (300ms). Com a folha animando por conta propria por cima
+ * disso, o mesmo gesto rodava TRES animacoes em tres duracoes ao mesmo tempo —
+ * e a folha aparecia por transparencia dentro de um retrato que ja estava
+ * sendo apresentado por outro caminho.
+ *
+ * Nao ha como o CSS perguntar "estou numa view transition?", entao quem avisa e
+ * o `ui/transicao.ts`, marcando o `<html>` enquanto ela dura.
+ */
+[data-vt] .tk-sheet-full {
+  animation: none;
 }
 
 /*
@@ -4665,11 +4729,22 @@ button.tk-chip,
   animation: tk-bump 0.34s var(--tk-ease-glass);
 }
 
-/* A folha cheia entra subindo; o fundo dela nao anima (repintar a tela inteira
-   a cada frame e o que fazia o app parecer travado antes). */
-.tk-sheet-full,
+/*
+ * ⚠️ SEGUNDA REGRA PRA `.tk-sheet-full`, E ELA GANHAVA DA PRIMEIRA.
+ *
+ * A entrada da folha esta declarada la em cima, junto do resto da peca. Esta
+ * aqui, quatro mil linhas depois, tinha a mesma especificidade e vinha DEPOIS —
+ * entao era ela que valia, e a de cima nunca rodou. Duas declaracoes da mesma
+ * animacao, com duracoes diferentes (0,2s e 0,28s) e curvas diferentes, e
+ * ninguem podia saber qual estava na tela sem medir. Foi o que aconteceu: eu
+ * consertei a de cima e a tela continuou igual.
+ *
+ * A folha sai daqui. O que fica e a `.tk-dex`, que e quem esta regra sempre
+ * quis animar — a carcaca da Pokedex nao e uma tela cheia, e uma placa dentro
+ * da tela, entao a entrada dela e de PECA e nao de superficie.
+ */
 .tk-dex {
-  animation: tk-in-up 0.28s var(--tk-ease-glass) both;
+  animation: tk-in-up var(--tk-dur-base) var(--tk-ease-out) backwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -5265,7 +5340,7 @@ button.tk-chip,
  * a tela caiu.
  */
 [data-saindo] {
-  animation: tk-sair 0.18s var(--tk-ease) both;
+  animation: tk-sair var(--tk-dur-exit) var(--tk-ease-in) both;
   /* Nada de clique durante a saida — a tela ainda esta no DOM e um segundo
      toque no botao de voltar chegaria numa folha que ja foi embora. */
   pointer-events: none;
@@ -5279,6 +5354,34 @@ button.tk-chip,
   to {
     opacity: 0;
     transform: translateY(8px);
+  }
+}
+
+/*
+ * A folha cheia sai pelo caminho que entrou.
+ *
+ * A regra generica acima serve pra popover e balao — peca pequena, sobre a
+ * tela, que some. Uma tela inteira nao some: ela sai de cima da outra. Sair
+ * por transparencia enquanto se entra deslizando seria uma peca com duas
+ * gramaticas, e e o tipo de incoerencia que se sente sem conseguir apontar.
+ *
+ * `--tk-dur-exit` e o MESMO numero do `DURACAO` em `ui/folha.ts`, que e quem
+ * segura o no no DOM durante a saida. Os dois tem que casar: menor no JS corta
+ * a animacao no meio, maior deixa uma tela morta na frente.
+ */
+.tk-sheet-full[data-saindo] {
+  animation: tk-tela-desce var(--tk-dur-exit) var(--tk-ease-in) both;
+}
+
+@keyframes tk-tela-desce {
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@media (min-width: 900px) {
+  .tk-sheet-full[data-saindo] {
+    animation-name: tk-sair;
   }
 }
 

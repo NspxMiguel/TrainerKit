@@ -180,14 +180,47 @@
   --tk-tipo-fighting: #9a3412, #f97316, #fdba74;
   --tk-tipo-normal: #374151, #6b7280, #9ca3af;
 
-  /* ── movimento do redesenho ──────────────────────────────────────────────
-     Saida SEMPRE mais rapida que a entrada: ninguem espera pra sair de algo. */
+  /* ── movimento ────────────────────────────────────────────────────────────
+   *
+   * UMA curva de entrada e QUATRO tempos, e essa escassez e o ponto.
+   *
+   * Antes havia tres curvas (`--tk-ease`, `--tk-ease-out`, `--tk-ease-glass`)
+   * e catorze duracoes espalhadas — 60ms, 80ms, 120ms, 140ms, 160ms, 200ms,
+   * 220ms, 240ms, 260ms, 300ms, 340ms, 420ms, 440ms, 550ms. O `tk-rise`
+   * sozinho rodava em cinco velocidades diferentes em cinco lugares.
+   *
+   * Nada disso e visivel um por um. Junto, e o que faz a interface parecer
+   * costurada: duas pecas vizinhas atravessam a mesma distancia em tempos
+   * diferentes, e o olho le "cada parte foi feita num dia".
+   *
+   * `--tk-ease` (base.css) e `--tk-ease-glass` apontam pra `--tk-ease-out`.
+   * Sao apelidos, mantidos porque desfazer 40 usos de uma vez seria mexer em
+   * quarenta lugares pra provar um ponto que um alias ja prova.
+   *
+   * Saida SEMPRE mais rapida que a entrada: ninguem espera pra sair de algo.
+   */
   --tk-ease-out: cubic-bezier(0.32, 0.72, 0, 1);
   --tk-ease-inout: cubic-bezier(0.4, 0, 0.2, 1);
+  /** A curva de SAIDA: acelera e vai embora. Espelho da de entrada. */
+  --tk-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  /** Toque, cor, estado — coisas que confirmam, nao que apresentam. */
   --tk-dur-micro: 200ms;
+  /** Peca dentro de uma tela que ja esta na frente. */
   --tk-dur-base: 300ms;
+  /** Tela INTEIRA chegando. E o unico tempo longo que o app tem. */
+  --tk-dur-tela: 340ms;
   --tk-dur-sheet: 440ms;
-  --tk-dur-exit: 180ms;
+  /*
+   * ⚠️ ESTE NUMERO ESTA REPETIDO NO `DURACAO` de `ui/folha.ts`, e a repeticao e
+   * inevitavel: quem segura a folha no DOM durante a saida e um `setTimeout`, e
+   * `setTimeout` nao le CSS. Menor no JS corta a animacao no meio; maior deixa
+   * uma tela morta na frente. Mexeu num, mexe no outro.
+   *
+   * Subiu de 180 pra 220 quando a folha cheia passou a SAIR deslizando em vez
+   * de sumir: 180ms bastam pra apagar um popover, nao pra uma tela atravessar a
+   * propria altura.
+   */
+  --tk-dur-exit: 220ms;
 
   --tk-bg: #0a0c10;
   /*
@@ -614,7 +647,9 @@
    * peca com massa — que e o que a Apple quer dizer com "fluidity". Curva
    * simetrica (`ease-in-out`) da aquela sensacao de slide de apresentacao.
    */
-  --tk-ease-glass: cubic-bezier(0.32, 0.72, 0, 1);
+  /* Apelido: era a mesma curva escrita de novo. Ver a nota do bloco de
+     movimento la em cima — uma curva de entrada pro app inteiro. */
+  --tk-ease-glass: var(--tk-ease-out);
 
   --tk-font: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
   --tk-mono: "IBM Plex Mono", ui-monospace, "SF Mono", monospace;

@@ -5238,7 +5238,7 @@
   background: rgba(6, 8, 12, var(--tk-pop-veu, 0.45));
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
-  animation: tk-pop-veu-entra 0.2s var(--tk-ease-out) both;
+  animation: tk-pop-veu-entra var(--tk-dur-micro) var(--tk-ease-out) both;
 }
 
 /* No claro o véu preto a 45% é uma cortina; a folha já se separa pela sombra e
@@ -5275,8 +5275,34 @@
   border-bottom: 0;
   border-radius: 26px 26px 0 0;
   box-shadow: 0 -18px 44px -14px rgba(0, 0, 0, 0.5);
-  animation: tk-rise 0.22s var(--tk-ease-glass) both;
+  /*
+   * ⚠️ ELA DESLIZA DE BAIXO. Nao aparece, nao cresce, nao pisca.
+   *
+   * Aqui rodava `tk-rise`: opacidade de 0 a 1 mais 14px de subida. E o menu dos
+   * Ajustes — o de "Dados do jogo", o de idioma, o de voz — entao e o gesto mais
+   * repetido do app depois de trocar de aba.
+   *
+   * Os 14px eram o problema inteiro. Uma peca ancorada NO RODAPE que sobe 14px
+   * nao esta vindo de lugar nenhum: ela ja estava la e ficou visivel. Isso le
+   * como elemento que apareceu, e nao como folha que foi puxada — e a
+   * transparencia confirma a leitura, porque superficie opaca com sombra
+   * propria nao e feita de vidro.
+   *
+   * O percurso agora e o proprio corpo dela. Sem opacidade: quem separa a folha
+   * do fundo e o veu, que ja escurece em 200ms, e a sombra de cima.
+   *
+   * `backwards`, e nunca `both` — mesmo motivo de `.tk-sheet-full` e de
+   * `.tk-fax-bar`: transform que fica aplicado depois do fim faz a folha virar
+   * bloco contentor de todo `position: fixed` que mora dentro dela.
+   */
+  animation: tk-pop-sobe var(--tk-dur-tela) var(--tk-ease-out) backwards;
   padding-bottom: max(var(--tk-s4), env(safe-area-inset-bottom));
+}
+
+@keyframes tk-pop-sobe {
+  from {
+    transform: translateY(100%);
+  }
 }
 
 /* Em tela larga ela deixa de ser folha de rodapé e vira caixa centrada: numa
@@ -5289,7 +5315,10 @@
     width: min(440px, calc(100vw - 48px));
     border-radius: 26px;
     border-bottom: 1px solid var(--tk-line);
-    animation: tk-pop-cresce 0.22s var(--tk-ease-glass) both;
+    /* Centrada, ela nao tem borda de onde vir: dialogo no computador aparece
+       onde vai ficar. Aqui a opacidade e o certo, e o `--tk-dur-base` e o tempo
+       de peca dentro da tela — nao de tela inteira. */
+    animation: tk-pop-cresce var(--tk-dur-base) var(--tk-ease-out) backwards;
   }
 }
 
@@ -5300,9 +5329,55 @@
   }
 }
 
-.tk-pop[data-saindo],
+/*
+ * A saida do VEU e por transparencia — ele e uma cortina, e cortina apaga.
+ *
+ * A da FOLHA e o caminho de volta: ela desce por onde subiu. Entrar deslizando
+ * e sair desaparecendo sao duas gramaticas na mesma peca, e e o tipo de
+ * incoerencia que se sente sem conseguir apontar o motivo.
+ */
 .tk-pop-fundo[data-saindo] {
-  animation: tk-pop-sai 0.18s var(--tk-ease-out) both;
+  animation: tk-pop-sai var(--tk-dur-exit) var(--tk-ease-in) both;
+}
+
+.tk-pop[data-saindo] {
+  animation: tk-pop-desce var(--tk-dur-exit) var(--tk-ease-in) both;
+}
+
+@keyframes tk-pop-desce {
+  to {
+    transform: translateY(100%);
+  }
+}
+
+/* Centrada, ela volta a apagar: nao ha rodape pra onde descer. */
+@media (min-width: 700px) {
+  .tk-pop[data-saindo] {
+    animation-name: tk-pop-sai;
+  }
+}
+
+/*
+ * ⚠️ QUEM PEDIU MENOS MOVIMENTO NAO PODE RECEBER UMA TELA ATRAVESSANDO A
+ * PROPRIA ALTURA.
+ *
+ * Enquanto a folha subia 14px isso nao era um problema — e por isso nao havia
+ * regra aqui. Agora ela percorre 100% do proprio corpo, que e exatamente o tipo
+ * de movimento grande que o ajuste do sistema existe pra cortar.
+ *
+ * Fica a opacidade, e nao `none`: sem sinal nenhum a folha teleporta pra cima
+ * do conteudo, e teleporte le como falha de renderizacao. Um passo curto de
+ * transparencia diz "isto chegou agora" sem mover nada.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .tk-pop,
+  .tk-pop[data-saindo] {
+    animation: tk-fade var(--tk-dur-micro) both;
+  }
+
+  .tk-pop[data-saindo] {
+    animation-direction: reverse;
+  }
 }
 
 @keyframes tk-pop-sai {

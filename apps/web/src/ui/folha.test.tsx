@@ -2,7 +2,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { useFolha } from "./folha.ts";
+import { DURACAO, useFolha } from "./folha.ts";
 
 /**
  * A saida da folha, medida no relogio.
@@ -73,8 +73,16 @@ describe("useFolha", () => {
     expect(onClose).not.toHaveBeenCalled();
     expect(folha()?.getAttribute("data-saindo")).toBe("true");
 
+    /*
+     * Contra a CONSTANTE, e nao contra um numero digitado.
+     *
+     * Estava `179` e depois `1`, e quando a saida passou de 180 pra 220ms
+     * (a folha passou a descer em vez de sumir) o teste quebrou por estar
+     * desatualizado, e nao por o comportamento estar errado. O que importa e o
+     * formato: nada antes do fim, e fechado exatamente no fim.
+     */
     act(() => {
-      vi.advanceTimersByTime(179);
+      vi.advanceTimersByTime(DURACAO - 1);
     });
     expect(onClose).not.toHaveBeenCalled();
 
@@ -133,7 +141,7 @@ describe("useFolha", () => {
       const onClose = vi.fn();
       montar(onClose);
       voltar();
-      // Sem avancar o relogio: pra quem pediu menos movimento, esperar 180ms
+      // Sem avancar o relogio: pra quem pediu menos movimento, esperar a saida
       // nao e delicadeza, e lentidao.
       expect(onClose).toHaveBeenCalledTimes(1);
     } finally {

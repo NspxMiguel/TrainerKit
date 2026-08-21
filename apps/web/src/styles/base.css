@@ -184,7 +184,18 @@
    */
 
   :root {
-    --tk-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    /*
+     * ⚠️ ISTO E UM APELIDO, e nao uma curva. Ver `--tk-ease-out` em tokens.css.
+     *
+     * Aqui morava `cubic-bezier(0.2, 0.8, 0.2, 1)`, e o app inteiro tinha DUAS
+     * curvas de entrada convivendo: esta e a do redesenho. Nenhuma das duas
+     * estava errada sozinha; juntas faziam peca vizinha desacelerar em ritmo
+     * diferente na mesma tela, e e disso que sai a sensacao de interface
+     * montada de pedacos.
+     *
+     * O apelido resolve os ~40 usos de uma vez, sem reescrever cada um.
+     */
+    --tk-ease: var(--tk-ease-out);
   }
 
   @keyframes tk-fade {

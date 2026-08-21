@@ -27,7 +27,14 @@ import { useGestoVoltar } from "./gestoVoltar.ts";
  */
 
 /** Precisa bater com a duracao de `[data-saindo]` no CSS. */
-const DURACAO = 180;
+/**
+ * O mesmo numero do `--tk-dur-exit` em `styles/tokens.css`.
+ *
+ * `setTimeout` nao le CSS, entao a repeticao nao tem como sumir — o que da pra
+ * fazer e deixar escrito nos dois lados que eles andam juntos. Menor aqui corta
+ * a animacao no meio; maior deixa uma tela morta na frente do app.
+ */
+export const DURACAO = 220;
 
 export function useFolha(
   onClose: () => void,
