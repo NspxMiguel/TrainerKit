@@ -960,6 +960,22 @@ configuracoes e etc."*
 Os dois lugares que ele nomeou: **entrar na ficha de um Pokémon** e **abrir um
 menu dos Ajustes**.
 
+**Consertado em 15/08/2026** (`a17783a`).
+
+A causa não era gosto, era falta de sistema: **três curvas de entrada** e
+**catorze durações** para o mesmo tipo de gesto. O `tk-rise` sozinho rodava em
+cinco velocidades diferentes em cinco lugares.
+
+- as três curvas viraram uma (`cubic-bezier(0.32, 0.72, 0, 1)`, a do redesenho);
+- a ficha e os menus dos Ajustes **deslizam** em vez de aparecer: o percurso é o
+  próprio corpo da peça, sem opacidade. Superfície opaca não é feita de vidro;
+- a saída passou a ser o caminho de volta, em vez de sumir.
+
+⚠️ Três defeitos apareceram medindo: `.tk-sheet-full` tinha **duas** declarações
+de entrada (a de baixo ganhava — consertei a de cima e a tela não mudou); abrir
+uma espécie rodava **três** animações ao mesmo tempo; e o `both` que já estava
+documentado como causa do bug da barra da Faxina continuava em toda folha.
+
 **Apagar quando ele disser que ficou com cara de app nativo.**
 
 ---
@@ -976,5 +992,17 @@ O app usa dado do Pokémon GO (GAME_MASTER), arte do PokeAPI, e a palavra
 
 ⚠️ **Eu não sou advogado e isso não é parecer jurídico.** O que dá pra entregar
 é o levantamento do que está no app e onde ele encosta em marca/direito autoral.
+
+**Levantado em 15/08/2026** — está em [`REVISAO-LEGAL.md`](REVISAO-LEGAL.md).
+
+Resumo: o app já está bem posicionado. Não redistribui arte nenhuma (e há um
+teste no caminho do deploy que derruba o build se alguma entrar), a carcaça de
+Pokédex está desligada, o texto de Pokédex do jogo ficou de fora, não toca no
+servidor do jogo, e a doação está estruturada para não ser venda.
+
+**Um item acionável:** o dataset publicado carrega `categoryNames` ("Pokémon
+Semente") nos dez idiomas oficiais — *flavor text*, a mesma categoria das
+descrições que ele deliberadamente excluiu, e que nenhum cálculo usa. Desliga em
+`INCLUIR_CATEGORIA` no ETL. Risco baixo, custo de uma linha.
 
 **Apagar quando ele ler o levantamento e decidir o que fazer.**
