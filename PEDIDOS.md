@@ -946,3 +946,35 @@ procurar atualização, ou reinstalar. Vale perguntar se ele marcou "não avisar
 mais" em algum momento.
 
 **Apagar quando ele vir a data mudando sozinha.**
+
+---
+
+## [ABERTO] TrainerKit — as animações denunciam que é vibecodado
+
+**Pedido em:** 15/08/2026
+
+**Palavras dele:** *"as animaçÕes do app fica mt na cara q é vibecodade, arruma
+ai as animaçoes, tipo ao entrar em pokemons, ao entrar em menus das
+configuracoes e etc."*
+
+Os dois lugares que ele nomeou: **entrar na ficha de um Pokémon** e **abrir um
+menu dos Ajustes**.
+
+**Apagar quando ele disser que ficou com cara de app nativo.**
+
+---
+
+## [ABERTO] TrainerKit — conferir se o app está dentro da lei
+
+**Pedido em:** 15/08/2026
+
+**Palavras dele:** *"e outra, checa se o site ta dentro da lei, pra eu nter
+problema judicial"*
+
+O app usa dado do Pokémon GO (GAME_MASTER), arte do PokeAPI, e a palavra
+"Pokédex" na interface. Levantar o risco real e o que dá pra reduzir.
+
+⚠️ **Eu não sou advogado e isso não é parecer jurídico.** O que dá pra entregar
+é o levantamento do que está no app e onde ele encosta em marca/direito autoral.
+
+**Apagar quando ele ler o levantamento e decidir o que fazer.**
