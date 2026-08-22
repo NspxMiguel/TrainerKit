@@ -69,3 +69,10 @@ package-lock.json
 # Mockup do handoff servido localmente pra comparar lado a lado. Nao vai pro repo.
 apps/web/public/_handoff/
 .env*
+
+# Notas de trabalho: são minhas e do Claude, não do repositório.
+PEDIDOS.md
+CONTRATO.md
+IDEIAS.md
+NOTAS.md
+PROMPT-*.md
