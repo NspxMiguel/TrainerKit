@@ -1119,7 +1119,7 @@
    */
   background: var(--tk-hero-texto);
   border: 0;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--tk-e2);
   font: 700 15px var(--tk-font);
   color: var(--tk-hero-ink);
   display: flex;
@@ -1863,7 +1863,7 @@
    * tipo — "Planta" saia com 2,21. A tinta agora e escolhida por luminancia,
    * por tipo, e o `contraste.test.ts` cobra as 19.
    */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--tk-e1);
 }
 
 /* ────────────────────────────────── a faixa de saudacao da home ────────── */
@@ -3753,7 +3753,7 @@
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-top: 1px solid var(--tk-glass-border);
-  box-shadow: 0 -8px 24px rgb(0 0 0 / 22%);
+  box-shadow: var(--tk-e-folha);
 }
 
 /*
@@ -3970,7 +3970,7 @@
   border-radius: 28px 28px 0 0;
   border-top: 1px solid var(--tk-line);
   padding: 8px var(--tk-gutter) calc(16px + env(safe-area-inset-bottom));
-  box-shadow: 0 -18px 48px rgb(0 0 0 / 38%);
+  box-shadow: var(--tk-e-folha);
   animation: tk-sobe 0.24s var(--tk-ease-out) both;
 }
 
@@ -4485,7 +4485,7 @@
   justify-content: center;
   /* O selo é o único lugar do app com sombra colorida própria: ele precisa
      ler como objeto pousado, e não como um quadrado pintado. */
-  box-shadow: 0 1px 3px rgb(0 0 0 / 24%);
+  box-shadow: var(--tk-e1);
 }
 
 .tk-row-label {
@@ -5279,7 +5279,7 @@
   border: 1px solid var(--tk-line);
   border-bottom: 0;
   border-radius: 26px 26px 0 0;
-  box-shadow: 0 -18px 44px -14px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--tk-e-folha);
   /*
    * ⚠️ ELA DESLIZA DE BAIXO. Nao aparece, nao cresce, nao pisca.
    *
@@ -5755,7 +5755,7 @@
      * p1, p2 55%, p3)"); o hero de tela cheia usa 180.
      */
     background: linear-gradient(135deg, var(--tk-hero-grad));
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--tk-e2);
     display: grid;
     place-items: center;
     margin: 0;

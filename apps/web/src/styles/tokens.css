@@ -594,6 +594,20 @@
   --tk-e1: 0 1px 2px var(--tk-shadow);
   --tk-e2: 0 6px 18px -6px var(--tk-shadow);
   --tk-e3: 0 18px 40px -14px var(--tk-shadow);
+  /*
+   * A quarta elevacao: peca que sobe DO RODAPE — folha de menu, barra de acao.
+   *
+   * ⚠️ ELA FALTAVA, e por isso existiam TRES versoes dela escritas a mao, com
+   * valores diferentes pro mesmo gesto: `0 -18px 48px rgb(0 0 0 / 38%)`,
+   * `0 -18px 44px -14px rgba(0,0,0,.6)` e `... .5`. Ninguem consegue apontar a
+   * diferenca olhando; junto, e o que faz a interface parecer montada de
+   * pedacos.
+   *
+   * E as escritas a mao tinham preto FIXO — entao nao viravam com o tema. No
+   * claro, onde `--tk-shadow` cai de 0,75 pra 0,16, elas continuavam pesadas
+   * como se o fundo fosse escuro.
+   */
+  --tk-e-folha: 0 -18px 44px -14px var(--tk-shadow);
 
   /*
    * Largura do container.
