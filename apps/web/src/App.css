@@ -2862,7 +2862,7 @@ button.tk-chip,
 .tk-segment[data-n="4"] .tk-segment-btn,
 .tk-segment[data-n="5"] .tk-segment-btn {
   padding: 0 3px;
-  font-size: 11.5px;
+  font-size: 12px;
   letter-spacing: -0.01em;
 }
 
@@ -3030,7 +3030,7 @@ button.tk-chip,
  */
 .tk-tip-text {
   display: block;
-  font: 400 12.5px/1.45 var(--tk-font);
+  font: 400 12px/1.45 var(--tk-font);
   color: var(--tk-txt2);
 }
 
@@ -4134,7 +4134,7 @@ button.tk-chip,
 
 .tk-dex[data-skin="device"] .tk-dexdev-entry p {
   margin: 0;
-  font: 400 12.5px/1.55 var(--tk-mono);
+  font: 400 12px/1.55 var(--tk-mono);
   color: var(--tk-visor-ink);
 }
 
@@ -4274,7 +4274,7 @@ button.tk-chip,
   border-radius: 10px;
   background: rgb(0 0 0 / 0.28);
   border: 1px solid rgb(255 255 255 / 0.22);
-  font: 400 12.5px/1.5 var(--tk-mono);
+  font: 400 12px/1.5 var(--tk-mono);
   color: #ffd7d7;
 }
 
@@ -4286,7 +4286,7 @@ button.tk-chip,
   border-radius: 12px;
   border-left: 3px solid var(--tk-visor-ink);
   background: var(--tk-visor);
-  font: 400 12.5px/1.6 var(--tk-mono);
+  font: 400 12px/1.6 var(--tk-mono);
   color: var(--tk-visor-ink);
 }
 
@@ -4553,7 +4553,7 @@ button.tk-chip,
   border-radius: var(--tk-r-input);
   background: var(--tk-dang-soft);
   border: 1px solid var(--tk-dang-line);
-  font: 400 12.5px/1.5 var(--tk-mono);
+  font: 400 12px/1.5 var(--tk-mono);
   color: var(--tk-dang-fg);
 }
 
