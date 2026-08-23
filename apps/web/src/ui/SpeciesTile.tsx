@@ -33,6 +33,14 @@ interface Props {
  * tile nunca fica vazio nem "pula" de tamanho — o gradiente do tipo ja ocupa o
  * espaco final desde o primeiro frame.
  */
+/**
+ * As URLs de arte que ja pintaram nesta sessao.
+ *
+ * Modulo, e nao contexto: nao ha nada pra configurar nem pra invalidar, e um
+ * provider so pra isto seria cerimonia. Ver a nota no `useState` abaixo.
+ */
+const JA_PINTADAS = new Set<string>();
+
 export function SpeciesTile({
   spriteId,
   dex,
@@ -51,7 +59,28 @@ export function SpeciesTile({
   // recem-gravado — o sprite ficava invisivel para sempre. Sprites pequenos
   // (Game Boy, ~700 B) caiam nisso quase sempre; a arte oficial, quase nunca.
   // Comparar url dispensa o reset: trocar de fonte ja invalida sozinho.
-  const [loadedUrl, setLoadedUrl] = useState<string | null>(null);
+  /*
+   * ⚠️ O ESTADO INICIAL PERGUNTA SE ESTA URL JA APARECEU NESTA SESSAO.
+   *
+   * Sem isso havia um QUADRO de monograma mesmo com a arte em cache, e ele era
+   * visivel: abrir a ficha de uma especie que acabou de ser tocada na lista
+   * mostrava "BU" por um instante antes do Bulbasaur.
+   *
+   * A causa nao e a rede — a lista ja baixou a mesma URL (o endereco depende da
+   * FONTE escolhida, nao do tamanho, entao lista e ficha pedem o mesmo arquivo).
+   * E o ciclo do React: o `<img>` nasce em `opacity: 0`, o `ref` so confirma o
+   * carregamento durante o commit, e o `setState` dele agenda uma SEGUNDA
+   * renderizacao. Entre a primeira pintura e a segunda existe pelo menos um
+   * quadro com a imagem invisivel e o monograma a mostra.
+   *
+   * O conjunto e consultado de forma SINCRONA no inicializador do `useState`,
+   * entao a arte ja nasce visivel e nao ha quadro nenhum. Ele so cresce — uma
+   * URL que carregou uma vez nao volta a falhar dentro da mesma sessao — e some
+   * junto com a aba.
+   */
+  const [loadedUrl, setLoadedUrl] = useState<string | null>(() =>
+    url !== null && JA_PINTADAS.has(url) ? url : null,
+  );
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
 
   const loaded = url !== null && loadedUrl === url;
@@ -92,9 +121,15 @@ export function SpeciesTile({
           // Imagem vinda do cache pode terminar antes de o React ligar o
           // onLoad. O ref roda na montagem e pega justamente esse caso.
           ref={(el) => {
-            if (el?.complete && el.naturalWidth > 0) setLoadedUrl(url);
+            if (el?.complete && el.naturalWidth > 0) {
+              if (url) JA_PINTADAS.add(url);
+              setLoadedUrl(url);
+            }
           }}
-          onLoad={() => setLoadedUrl(url)}
+          onLoad={() => {
+            if (url) JA_PINTADAS.add(url);
+            setLoadedUrl(url);
+          }}
           onError={() => setFailedUrl(url)}
           style={{
             position: "absolute",
