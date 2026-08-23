@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 import { useGestoVoltar } from "./gestoVoltar.ts";
 
@@ -160,6 +167,37 @@ export function useFolha(
 
   const ref = useRef<HTMLDivElement>(null);
   useGestoVoltar(ref, fechar);
+
+  /*
+   * ⚠️ FOLHA QUE NASCE DENTRO DE UMA VIEW TRANSITION NAO ANIMA SOZINHA — E A
+   * MARCA TEM QUE SER PERMANENTE.
+   *
+   * Abrir a ficha pela Pokedex ja e uma transicao de elemento compartilhado: o
+   * tile cresce e vira o cabecalho. A folha animando por cima disso da duas
+   * entradas pro mesmo toque.
+   *
+   * A primeira tentativa foi `[data-vt] .tk-sheet-full { animation: none }`,
+   * com `data-vt` no `<html>` durante a transicao. Isso INTRODUZIU o defeito em
+   * vez de resolver: quando a transicao acaba e o atributo sai, a propriedade
+   * `animation` volta de `none` pro nome do keyframe — e trocar o nome de
+   * `none` pra um nome E o gatilho que faz o navegador comecar a animacao. A
+   * folha deslizava DEPOIS da transicao ja ter terminado.
+   *
+   * Foi o que ele descreveu no celular, na ordem exata: *"ele abre primeiro
+   * rapidao com a animação antiga, ai dps aparece a nova"* — a primeira e o
+   * cross-fade da view transition, a segunda e a folha reanimando.
+   *
+   * A marca agora vai NO NO da folha e nunca sai. Ela e lida uma vez, no
+   * commit, enquanto `data-vt` ainda esta no `<html>`; dali em diante o valor
+   * de `animation` daquele elemento nunca muda, entao nao ha o que disparar.
+   *
+   * `useLayoutEffect` e nao `useEffect`: precisa acontecer ANTES de o navegador
+   * pintar, senao a folha pisca um quadro deslizando antes de ser calada.
+   */
+  useLayoutEffect(() => {
+    const no = ref.current;
+    if (no && document.documentElement.dataset.vt) no.dataset.semEntrada = "1";
+  }, []);
 
   return { saindo, ref, fechar, sair };
 }

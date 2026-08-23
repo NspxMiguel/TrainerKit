@@ -1144,19 +1144,23 @@
 }
 
 /*
- * ⚠️ DURANTE UMA VIEW TRANSITION ESTA ANIMACAO NAO PODE RODAR.
+ * ⚠️ A FOLHA QUE NASCEU DENTRO DE UMA VIEW TRANSITION NAO ANIMA.
  *
- * Abrir a ficha de uma especie ja e uma transicao de elemento compartilhado: o
- * tile da lista cresce e vira o cabecalho (440ms), enquanto o navegador faz a
- * troca da raiz (300ms). Com a folha animando por conta propria por cima
- * disso, o mesmo gesto rodava TRES animacoes em tres duracoes ao mesmo tempo —
- * e a folha aparecia por transparencia dentro de um retrato que ja estava
- * sendo apresentado por outro caminho.
+ * Abrir a ficha pela Pokedex ja e uma transicao de elemento compartilhado: o
+ * tile cresce e vira o cabecalho (440ms) enquanto a raiz troca (300ms). A folha
+ * animando por cima disso da duas entradas pro mesmo toque.
  *
- * Nao ha como o CSS perguntar "estou numa view transition?", entao quem avisa e
- * o `ui/transicao.ts`, marcando o `<html>` enquanto ela dura.
+ * ⚠️ O SELETOR E NO PROPRIO NO, e nao `[data-vt] .tk-sheet-full` com a marca no
+ * `<html>`. Aquela versao criou o defeito que ela devia evitar: quando a
+ * transicao terminava e o atributo saia do `<html>`, o `animation` desta regra
+ * voltava de `none` pro nome do keyframe — e essa troca E o gatilho de inicio
+ * de animacao. A folha deslizava DEPOIS da transicao acabar.
+ *
+ * `data-sem-entrada` e escrito uma vez pelo `useFolha`, no commit, e nunca sai.
+ * O valor de `animation` daquele elemento nunca muda, entao nao ha o que
+ * disparar. Ver a nota longa la.
  */
-[data-vt] .tk-sheet-full {
+.tk-sheet-full[data-sem-entrada] {
   animation: none;
 }
 

@@ -105,7 +105,9 @@ export function SpeciesTile({
             height: bare ? "100%" : "84%",
             objectFit: "contain",
             opacity: loaded ? 1 : 0,
-            transition: "opacity .18s ease",
+            // A curva do app, e nao o `ease` do navegador: e a mesma
+            // desaceleracao de todo o resto desde a unificacao do movimento.
+            transition: "opacity .18s var(--tk-ease-out)",
             filter: bare
               ? "drop-shadow(0 3px 10px rgba(0,0,0,.55))"
               : "drop-shadow(0 2px 6px rgba(0,0,0,.35))",
