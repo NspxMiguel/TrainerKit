@@ -12,7 +12,7 @@ import { effectiveness, stab, type TypeChart, type TypeOrder } from "./types-cha
  *   ER   nota unica que combina os dois
  *
  * Um glass cannon tem DPS alto e TDO baixo; um tanque, o contrario. Ranquear so
- * por DPS elege Pokemon que morrem antes de entregar o dano, e ranquear so por
+ * por DPS elege especie que morrem antes de entregar o dano, e ranquear so por
  * TDO elege parede que nao mata ninguem. Por isso o ranking usa ER.
  */
 

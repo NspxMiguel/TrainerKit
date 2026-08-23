@@ -57,7 +57,7 @@ export function isObtainable(speciesId: string): boolean {
  * formas que existem no GAME_MASTER mas ainda nao sairam. Scream Tail hoje esta
  * assim: `splash_fast` + `struggle`, e como o ranking de liga mede so atributo
  * ela aparecia entre as melhores da Great. O app entao mandava a pessoa caçar um
- * Pokemon que literalmente nao consegue atacar.
+ * especie que literalmente nao consegue atacar.
  *
  * Nao e filtro de "moveset ruim", e filtro de "nao luta". Quem tem qualquer
  * outro carregado passa.

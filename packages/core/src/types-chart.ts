@@ -3,7 +3,7 @@
  *
  * O GAME_MASTER entrega, para cada tipo atacante, um array de 18 multiplicadores
  * indexado pelo tipo defensor. Os valores nao sao 2/0.5/0 como na serie
- * principal — o Pokemon GO usa:
+ * principal — o o jogo usa:
  *
  *   1.6        super efetivo
  *   1.0        neutro
@@ -47,7 +47,7 @@ export function effectivenessAgainstType(
 }
 
 /**
- * Multiplicador contra um Pokemon, que pode ter dois tipos.
+ * Multiplicador contra uma especie, que pode ter dois tipos.
  *
  * Os multiplicadores se MULTIPLICAM entre si: um golpe super efetivo contra os
  * dois tipos da 1.6 x 1.6 = 2.56, e um resistido pelos dois da 0.390625.

@@ -15,7 +15,7 @@ import { useSyncExternalStore } from "react";
  * ESTRUTURAL, nao visual: no celular ela e uma folha renderizada por
  * `createPortal` direto no `<body>`, com `useFolha` segurando o no durante a
  * animacao de saida, gesto de voltar, Escape e escurecimento. Na tela larga ela
- * e uma COLUNA dentro da propria Pokedex — sem portal, sem escurecimento e sem
+ * e uma COLUNA dentro da propria Especies — sem portal, sem escurecimento e sem
  * nada pra fechar, porque ela nao esta por cima de coisa nenhuma.
  *
  * Portal ou nao-portal e uma escolha de arvore. Nenhuma media query muda onde um
@@ -37,7 +37,7 @@ const CONSULTA = "(min-width: 900px)";
  *
  * O `change` e o sinal certo e e o barato — dispara uma vez, na virada. Mas ele
  * NAO chegou numa das medicoes: redimensionei de 1440 pra 390 com o app aberto,
- * `matchMedia(...).matches` ja respondia `false`, e a Pokedex continuou em duas
+ * `matchMedia(...).matches` ja respondia `false`, e a Especies continuou em duas
  * colunas porque o React nunca foi avisado. Em carga limpa o mesmo tamanho
  * renderiza certo, entao nao e erro de conta — e o evento que nao veio.
  *

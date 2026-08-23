@@ -13,7 +13,7 @@
  *   chave é uma só, então esses 100.000 tokens por dia são o balde de TODO
  *   MUNDO junto — não de cada pessoa.
  *
- * Uma pergunta da Pokédex custa, MEDIDO (não estimado): ~1.050 tokens de
+ * Uma pergunta da Especies custa, MEDIDO (não estimado): ~1.050 tokens de
  * entrada (dossiê 1.500 chars + regras 2.065 chars) e ~250 de saída. Uns 1.300.
  *
  *   100.000 ÷ 1.300 = **77 perguntas por dia, no mundo inteiro somado.**

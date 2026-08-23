@@ -4,7 +4,7 @@ import { effectiveness, stab, type TypeChart, type TypeOrder } from "./types-cha
 /**
  * Melhor moveset por contexto.
  *
- * O mesmo Pokemon tem movesets diferentes conforme o objetivo, e a razao nao e
+ * O mesmo especie tem movesets diferentes conforme o objetivo, e a razao nao e
  * gosto — sao contas diferentes:
  *
  *   raide   dano por segundo contra UM alvo conhecido, sem trocas. Golpe
@@ -39,7 +39,7 @@ export interface Moveset {
    * preenche; `null` quando a isca e o proprio finalizador ou nao se aplica.
    */
   bait?: MoveWithPvp | null;
-  /** Nota do conjunto no contexto pedido. So compara com outros do mesmo Pokemon. */
+  /** Nota do conjunto no contexto pedido. So compara com outros do mesmo especie. */
   score: number;
   /** `true` quando algum dos golpes exige TM Elite. */
   needsElite: boolean;
@@ -237,7 +237,7 @@ export function rankMovesets(
  *
  * O segundo golpe carregado custa doce e poeira, entao a recomendacao precisa
  * dizer qual e a isca e nao so "use estes dois". Quando os dois campos vem
- * iguais, e porque o Pokemon so tem um carregado — e ai a isca e ele mesmo.
+ * iguais, e porque a especie so tem um carregado — e ai a isca e ele mesmo.
  */
 function rankForRocket(
   fastMoves: readonly MoveWithPvp[],
@@ -292,8 +292,8 @@ function rankForRocket(
  *
  * Nao vem no moveset da especie no GAME_MASTER — o jogo o adiciona em tempo de
  * execucao a qualquer sombroso —, entao a lista de golpes precisa injeta-lo
- * quando o jogador diz que o Pokemon dele e sombroso. Sem isso o app mostraria
- * o moveset ideal de um Pokemon que nao pode usa-lo.
+ * quando o jogador diz que a especie dele e sombroso. Sem isso o app mostraria
+ * o moveset ideal de uma especie que nao pode usa-lo.
  *
  * `null` quando o dataset nao traz a Frustracao, para nao inventar um golpe.
  */
@@ -341,7 +341,7 @@ export const CONTEXT_KEYS: Record<Context, { title: string; detail: string }> = 
  * Ele descreveu uma questao de interface, mas a decisao e de DADO: so o core
  * sabe se dois contextos coincidem, e isso muda de especie pra especie. O
  * Eternatus tem um golpe carregado que domina em qualquer criterio, entao
- * "raide", "PvP" e "tudo" devolvem a mesma lista; um Pokemon com um carregado
+ * "raide", "PvP" e "tudo" devolvem a mesma lista; uma especie com um carregado
  * barato e um caro devolve listas diferentes e precisa dos tres botoes.
  *
  * Quatro botoes que respondem a mesma coisa nao sao quatro opcoes — sao quatro

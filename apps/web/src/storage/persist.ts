@@ -4,7 +4,7 @@
  * Isto NAO e polimento. O Safari faz eviction proativa: se uma origem fica
  * **7 dias sem interacao do usuario**, ele apaga IndexedDB, Cache API,
  * localStorage e Service Worker — tudo de uma vez, sem aviso. Sete dias sem
- * abrir um app de colecao de Pokemon e completamente normal, entao sem isto a
+ * abrir um app de colecao de especie e completamente normal, entao sem isto a
  * colecao do usuario simplesmente evapora.
  *
  * A unica isencao documentada e estar em "persistent mode", e o WebKit cita

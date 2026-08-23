@@ -17,7 +17,7 @@ import {
 import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
 import { moveLabel, useLanguage } from "../i18n/language.ts";
 import { formatNumber, useT, type Key } from "../i18n/t.ts";
-import type { PokedexIntent } from "../App.tsx";
+import type { EspeciesIntent } from "../App.tsx";
 import { tetoDePowerUp, useSetup } from "../onboarding/setup.ts";
 import { typeColor, typeKey } from "../sprites/provider.ts";
 import { useSpriteSettings } from "../sprites/settings.ts";
@@ -50,13 +50,13 @@ interface Props {
   persist: PersistState | null;
   /** A home leva pras outras abas — atalho e atalho, nao decoracao. */
   /*
-   * So "pokedex": a Colecao virou um modo dentro dela.
+   * So "especies": a Colecao virou um modo dentro dela.
    *
    * O tipo mudou de propósito em vez de eu aceitar `"colecao"` e traduzir aqui —
    * assim o compilador aponta quem ainda navega pra uma aba que nao existe, que
    * foi exatamente como estes dois usos apareceram.
    */
-  onGo: (tab: "pokedex", intent?: PokedexIntent) => void;
+  onGo: (tab: "especies", intent?: EspeciesIntent) => void;
 }
 
 /**
@@ -88,7 +88,7 @@ const ACTION_GLYPHS: Record<Action, string> = {
  * O que a home mostra da colecao.
  *
  * Nao e a colecao inteira — para isso existe a aba. Aqui aparece so o que PEDE
- * ACAO: evoluir e transferir mudam o Pokemon, investir gasta recurso. "Guardar"
+ * ACAO: evoluir e transferir mudam a especie, investir gasta recurso. "Guardar"
  * e o veredito de quem nao precisa fazer nada, e portanto nao merece espaco na
  * primeira tela.
  *
@@ -103,7 +103,7 @@ const ACTION_GLYPHS: Record<Action, string> = {
  */
 
 /**
- * Quantos Pokemon aparecem na fila. O quinto lugar e sempre o "VER MAIS".
+ * Quantos especie aparecem na fila. O quinto lugar e sempre o "VER MAIS".
  *
  * "ao invez de uma faixa com scroll pro lado, coloca tipo, no lugar do 5 um ver
  * mais."
@@ -130,10 +130,10 @@ function greetingKey(): Key {
  * O destaque da home.
  *
  * A home tinha duas acoes cinzas, um cartao cinza e uma dica cinza: nenhum
- * elemento dominante, tudo com o mesmo peso, e nenhuma cara de Pokemon. Assim
- * a tela lia como lista de Ajustes, e num app de Pokemon isso e um erro de identidade, nao de layout.
+ * elemento dominante, tudo com o mesmo peso, e nenhuma cara de especie. Assim
+ * a tela lia como lista de Ajustes, e num app de especie isso e um erro de identidade, nao de layout.
  *
- * Entao a primeira coisa da tela e UM Pokemon, grande, com a cor do tipo dele
+ * Entao a primeira coisa da tela e UM especie, grande, com a cor do tipo dele
  * atras. E sempre o mais relevante que o app sabe apontar, nunca um enfeite
  * sorteado:
  *
@@ -284,7 +284,7 @@ function Hero({
 
         "tem q testar pokemon por pokemon, pra sempre dar certo." A caixa justa
         de cada sprite foi medida no gerador; aqui ela vira escala e
-        deslocamento, e o efeito e que todo Pokemon ocupa o MESMO retangulo —
+        deslocamento, e o efeito e que todo especie ocupa o MESMO retangulo —
         que e o que faz um unico layout servir pros 1.142. Ver `enquadrar()`.
       */}
       <span
@@ -327,7 +327,7 @@ function Hero({
             me pegou nesta tela — a primeira foi na tira da colecao.
             
             Os 74px sao a medida do hero compacto do documento de desktop; os
-            220 sao o retrato que o celular pede, pra a tela ter cara de Pokemon.
+            220 sao o retrato que o celular pede, pra a tela ter cara de especie.
           */
           size={telaLarga ? 74 : 220}
           bare
@@ -349,7 +349,7 @@ function Hero({
           tbm. legal deixar ele grande pra chamar atenção."
           
           Concordo, e ha um argumento alem do espaco: o chip dizia o OBVIO. Um
-          Pokemon sozinho, gigante, no topo da tela inicial ja e visivelmente o
+          especie sozinho, gigante, no topo da tela inicial ja e visivelmente o
           destaque — o rotulo so ocupava 30px pra repetir o que a composicao ja
           diz. O que ele NAO dizia, e o unico que importa, e por que este bicho
           esta ali; isso continua na frase logo abaixo do nome.
@@ -368,7 +368,7 @@ function Hero({
             confirmar.
 
             ⚠️ EM "EVOLUIR" ELE NAO E UM CHECK, e o rotulo e o desenho tem que
-            dizer isso: ele TRANSFORMA o Pokemon na proxima forma. Um check
+            dizer isso: ele TRANSFORMA a especie na proxima forma. Um check
             significaria "anotei", e o que acontece e outra coisa — a especie
             muda na colecao. Rotulo que descreve mal uma acao irreversivel e
             pior que rotulo nenhum.
@@ -433,11 +433,11 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
   const [teamOpen, setTeamOpen] = useState(false);
   const [gymOpen, setGymOpen] = useState(false);
   /*
-   * O detalhe carrega a ESPECIE e, quando houver, O SEU Pokemon.
+   * O detalhe carrega a ESPECIE e, quando houver, O SEU especie.
    *
    * Era so a especie, e por isso a ficha nunca via o veredito de quem estava na
    * colecao. Guardar os dois juntos e o que permite a mesma tela responder as
-   * duas perguntas — "esse Pokemon presta?" e "o que eu faco com o MEU?".
+   * duas perguntas — "essa especie presta?" e "o que eu faco com o MEU?".
    */
   const [contasAberto, setContasAberto] = useState(false);
   const [detail, setDetail] = useState<
@@ -456,7 +456,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
    *
    * Era cinco mais o cartao "VER MAIS", pra fechar as seis colunas. O documento
    * de desktop nao faz assim: ele poe SEIS bichos na grade e manda o destino
-   * pro cabecalho, como link ("Ver tudo na Pokédex →", a direita de "SUA
+   * pro cabecalho, como link ("Ver tudo na Especies →", a direita de "SUA
    * COLEÇÃO"). Fecha a linha do mesmo jeito e devolve uma coluna a colecao —
    * era um sexto do espaco gasto com um botao.
    *
@@ -467,7 +467,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
    */
   const telaLarga = useTelaLarga();
   const naFila = telaLarga ? 6 : NA_FILA;
-  /* Só as canônicas, como a contagem do seletor da Pokédex — `cosmeticOf`
+  /* Só as canônicas, como a contagem do seletor da Especies — `cosmeticOf`
      marca variações de fantasia, que têm stats idênticos e ficam fora da
      busca. Contá-las daria um total que não bate com a lista. */
   const totalEspecies =
@@ -533,7 +533,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
           owned,
           species: s,
           verdict,
-          // `-1` marca "não tem IV" pra ordenação: sem isto, o Pokémon sem IV
+          // `-1` marca "não tem IV" pra ordenação: sem isto, a especie sem IV
           // medido entraria na fila como se fosse 0/45, ou seja, como o pior de
           // todos — que é justamente a leitura que este app não faz.
           iv: verdict.action === "descobrir" ? -1 : ivTotalOf(owned.ivs),
@@ -599,7 +599,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
     verdict?: Verdict;
     /** Id na colecao, presente so quando o destaque cobra uma acao. */
     ownedId?: string;
-    /** O Pokemon salvo, pra ficha poder mostrar o veredito DELE. */
+    /** A especie salvo, pra ficha poder mostrar o veredito DELE. */
     owned?: OwnedPokemon;
     feito?: boolean;
   } | null => {
@@ -677,7 +677,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
 
       Em coluna, o hero fica com `flex: 1` e o resto declara o que precisa.
       "Nao rola" deixa de ser um numero que eu acertei e passa a ser uma
-      propriedade do layout: sobrou espaco, vai pro Pokemon; faltou, o Pokemon
+      propriedade do layout: sobrou espaco, vai pro especie; faltou, a especie
       cede primeiro. Vale em qualquer tela, inclusive nas que eu nao tenho.
     */
     <div className="tk-home">
@@ -736,19 +736,19 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
           destaque, uma fila de seis e uns numeros. Um campo que filtrasse
           "aqui" nao teria o que filtrar.
 
-          Entao ele e uma PORTA. Digitou a primeira letra, a Pokedex abre ja com
+          Entao ele e uma PORTA. Digitou a primeira letra, a Especies abre ja com
           o termo e com o cursor no campo de la — o resto do que a pessoa esta
           digitando cai no lugar certo, sem ela perceber a troca. E a mesma
-          ideia do `PokedexIntent`: o atalho chega onde o texto dele promete.
+          ideia do `EspeciesIntent`: o atalho chega onde o texto dele promete.
 
           ⚠️ O DESTINO SEGUE O QUE EXISTE, e por isso o rotulo tambem muda.
           Sem colecao (modo consulta, ou colecao vazia) nao ha "coleção" pra
           buscar; mandar pra "Meus" entregaria uma lista vazia e um campo
           preenchido, que e a falha que o comentario do `mine` descreve. Nesse
-          caso o campo diz "Buscar Pokémon" e vai pra "Todos".
+          caso o campo diz "Buscar especie" e vai pra "Todos".
 
           ⚠️ QUEM ESCONDE NO CELULAR E O CSS — ver `.tk-home-busca`. La embaixo
-          a aba Pokedex fica a um toque de distancia na barra, e o campo so
+          a aba Especies fica a um toque de distancia na barra, e o campo so
           roubaria altura da primeira dobra ("favor sem scroll na tela de
           inicio").
         */}
@@ -767,7 +767,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
             onChange={(e) => {
               const termo = e.target.value;
               if (termo) {
-                onGo("pokedex", {
+                onGo("especies", {
                   view: temColecao ? "mine" : "browse",
                   busca: termo,
                 });
@@ -989,9 +989,9 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
           {/*
             DUAS acoes, nao tres.
 
-            A terceira era "Pokédex" — do lado de uma ABA chamada Pokédex: duas
+            A terceira era "Especies" — do lado de uma ABA chamada Especies: duas
             funcoes com o mesmo nome, na mesma tela. O aparelho
-            mudou pra dentro da aba Pokedex, que e onde ele pertence, e aqui
+            mudou pra dentro da aba Especies, que e onde ele pertence, e aqui
             sobraram as duas coisas que NAO existem em aba nenhuma: montar time
             e escolher quem fica no ginasio.
 
@@ -1051,19 +1051,19 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
                 {/*
                   O DESTINO VIRA LINK NO CABECALHO — so na tela larga.
 
-                  "Ver tudo na Pokédex →", a direita do titulo, e o que o
+                  "Ver tudo na Especies →", a direita do titulo, e o que o
                   documento de desktop desenha; no celular ele continua sendo o
                   cartao no fim da fila (ver a nota do `naFila`). Reaproveita a
                   chave `home.seeAll` que o cartao ja usava, entao os dez
                   idiomas vem juntos sem chave nova — a unica diferenca pro
-                  documento e nao repetir "na Pokédex", que a seta e o contexto
+                  documento e nao repetir "na Especies", que a seta e o contexto
                   ja dizem.
                 */}
                 {telaLarga && meus.porIv.length > naFila && (
                   <button
                     type="button"
                     className="tk-overline-verdex"
-                    onClick={() => onGo("pokedex", { view: "mine" })}
+                    onClick={() => onGo("especies", { view: "mine" })}
                   >
                     {t("home.seeAll")} →
                   </button>
@@ -1176,7 +1176,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
                 {/*
                   "VER MAIS" fecha a fila — tambem do handoff ("Último item da
                   tira é VER MAIS, anel neutro com chevron, e leva para a
-                  Pokédex").
+                  Especies").
 
                   Substitui o "+3" que existia antes e so aparecia quando havia
                   mais de 12 bichos. Com poucos, a tira simplesmente terminava
@@ -1186,7 +1186,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
                   "VER MAIS" so quando HA mais.
 
                   "tira o botao ver mais se nao tem mais pokemon ne." Com tres
-                  Pokemon na colecao ele aparecia mesmo assim, prometendo uma
+                  especie na colecao ele aparecia mesmo assim, prometendo uma
                   lista que era a mesma que ja estava na tela.
                 */}
                 {/* `!telaLarga`: na tela larga o destino subiu pro cabecalho da
@@ -1196,7 +1196,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
                 <button
                   type="button"
                   className="tk-strip-cell tk-strip-cell--mais"
-                  onClick={() => onGo("pokedex", { view: "mine" })}
+                  onClick={() => onGo("especies", { view: "mine" })}
                   style={{ ["--tk-i" as string]: naFila }}
                 >
                   <span className="tk-strip-mais-anel" aria-hidden="true">
@@ -1264,7 +1264,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
                   <button
                     type="button"
                     className="tk-overline-verdex"
-                    onClick={() => onGo("pokedex", { view: "best", mode: "raid" })}
+                    onClick={() => onGo("especies", { view: "best", mode: "raid" })}
                   >
                     {t("home.seeAll")} →
                   </button>
@@ -1317,7 +1317,7 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
                   <button
                     type="button"
                     className="tk-strip-cell tk-strip-cell--mais"
-                    onClick={() => onGo("pokedex", { view: "best", mode: "raid" })}
+                    onClick={() => onGo("especies", { view: "best", mode: "raid" })}
                     style={{ ["--tk-i" as string]: naFila }}
                   >
                     <span className="tk-strip-mais-anel" aria-hidden="true">
@@ -1338,8 +1338,8 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
             Os atalhos de "Melhores" sairam.
 
             Eram os dois ultimos sobreviventes daquela grade, e o argumento pra
-            manter era que o ranking por tipo vivia escondido dentro da Pokedex.
-            Isso deixou de ser verdade nesta versao: a aba Pokedex abre com
+            manter era que o ranking por tipo vivia escondido dentro da Especies.
+            Isso deixou de ser verdade nesta versao: a aba Especies abre com
             "Buscar | Melhores" em cima, entao a lista esta a dois toques de
             qualquer tela — e a regra que tirou os atalhos anteriores vale aqui
             igual: nao se duplica um botao que ja existe.

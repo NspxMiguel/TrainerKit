@@ -12,7 +12,7 @@
  * especificidade 21.
  *
  * O resultado: 36 regras que pintam botão no App.css pararam de pintar. Os
- * botões do Modo Pokédex apareciam como texto solto com uma sombra embaixo, e
+ * botões do Modo lente apareciam como texto solto com uma sombra embaixo, e
  * era esse o "refinamento" que faltava — não era desenho, era cascata.
  *
  * Declarar `reset` antes de `legado` põe cada coisa no lugar certo: reset é o

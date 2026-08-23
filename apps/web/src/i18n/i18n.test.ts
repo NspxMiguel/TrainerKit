@@ -55,7 +55,7 @@ describe("dicionarios", () => {
   });
 
   it("os idiomas realmente traduzem, nao copiam o ingles", () => {
-    // Alguns valores IGUAIS ao ingles sao legitimos: "PvP", "Pokédex", "BETA",
+    // Alguns valores IGUAIS ao ingles sao legitimos: "PvP", "Especies", "BETA",
     // uma URL de exemplo. O que nao pode e um idioma inteiro ser copia.
     for (const [code, dict] of Object.entries(DICTS)) {
       if (code === "en") continue;

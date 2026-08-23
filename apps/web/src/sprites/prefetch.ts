@@ -5,7 +5,7 @@ import { useSyncExternalStore } from "react";
  *
  * O comportamento padrao e sob demanda: cada tile busca a propria imagem quando
  * aparece na tela, e o service worker guarda. Isso e certo pra quem so quer
- * consultar um Pokemon — ninguem devia baixar 900 imagens pra ver uma.
+ * consultar uma especie — ninguem devia baixar 900 imagens pra ver uma.
  *
  * Mas quem vai FICAR usando paga o preco em cada tela nova: os sprites chegam
  * devagar, um por um, e a grade pisca monograma antes de cada imagem. Pra esse caso o certo e o oposto — baixa tudo uma vez, aceita

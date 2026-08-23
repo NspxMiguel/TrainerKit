@@ -74,7 +74,7 @@ export function GymPicks({ data, onClose, onPickSpecies }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [fechar]);
 
-  const especiePor = useMemo(() => {
+  const PokemonPor = useMemo(() => {
     const m = new Map<string, DatasetSpecies>();
     for (const s of data.species) m.set(s.id, s);
     return m;
@@ -93,7 +93,7 @@ export function GymPicks({ data, onClose, onPickSpecies }: Props) {
   const candidatos = useMemo((): DefenderInput[] => {
     if (temColecao) {
       return (items ?? []).flatMap((o) => {
-        const sp = especiePor.get(o.speciesId);
+        const sp = PokemonPor.get(o.speciesId);
         if (!sp) return [];
         return [
           {
@@ -123,7 +123,7 @@ export function GymPicks({ data, onClose, onPickSpecies }: Props) {
         ivs: { atk: 15, def: 15, hp: 15 },
         level: NIVEL_PADRAO,
       }));
-  }, [temColecao, items, especiePor, data.species]);
+  }, [temColecao, items, PokemonPor, data.species]);
 
   const escolhidos = useMemo(() => {
     const ranked = rankDefenders(candidatos, data.cpm, data.typeChart, data.typeOrder);
@@ -192,7 +192,7 @@ export function GymPicks({ data, onClose, onPickSpecies }: Props) {
       </section>
 
       {/* O aviso contraintuitivo. E a razao de a tela existir: sem ele, a pessoa
-          poe o melhor Pokemon dela no ginasio e perde o melhor atacante dela. */}
+          poe o melhor especie dela no ginasio e perde o melhor atacante dela. */}
       <div className="tk-banner tk-banner--info" style={{ marginTop: 16 }}>
         <div className="tk-banner-text">
           <div className="tk-banner-title">{t("gym.attackTitle")}</div>
@@ -211,7 +211,7 @@ export function GymPicks({ data, onClose, onPickSpecies }: Props) {
       ) : (
         <div style={{ display: "grid", gap: 8, marginTop: 10 }}>
           {escolhidos.map((d, i) => {
-            const sp = especiePor.get(d.speciesId);
+            const sp = PokemonPor.get(d.speciesId);
             if (!sp) return null;
 
             return (

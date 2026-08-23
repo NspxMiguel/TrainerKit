@@ -28,7 +28,7 @@ interface Props<T extends string> {
  * entre as opcoes em vez de acender e apagar — o mesmo `matchedGeometry` da
  * barra de abas, pelo mesmo motivo (a forma nunca some, ela muda de lugar).
  *
- * Nao serve pra lista longa: dez tipos de Pokemon continuam sendo `tk-chips`,
+ * Nao serve pra lista longa: dez tipos de especie continuam sendo `tk-chips`,
  * que rola na horizontal. Segmento e pra duas ou tres opcoes que cabem juntas.
  */
 export function Segmented<T extends string>({

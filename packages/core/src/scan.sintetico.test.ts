@@ -141,7 +141,7 @@ describe("print sintetico", () => {
    * ancora em pixel PINTADO, e um print 0/0/0 nao tem nenhum. Deduzir exigiria
    * ancorar so no cinza do trilho vazio, o que casaria com qualquer retangulo
    * cinza da tela e traria falso positivo — troca pior, porque IV errado com
-   * cara de certo faz o jogador transferir o Pokemon bom.
+   * cara de certo faz o jogador transferir a especie bom.
    *
    * Fica registrado para que a recusa seja uma decisao visivel e nao uma
    * surpresa. Um 0/0/0 e ~1 em 4096.

@@ -2,10 +2,10 @@ import { getGroqKey } from "./groq.ts";
 import { AI_PROXY, getProvider } from "./provider.ts";
 
 /**
- * "Que Pokemon e esse?" a partir de uma imagem.
+ * "Que especie e esse?" a partir de uma imagem.
  *
- * Esta e a parte da Pokedex que EXIGE um modelo que enxergue: apontar a camera
- * pra um Pokemon, ou mandar um print. Duas limitacoes reais, e as
+ * Esta e a parte da Especies que EXIGE um modelo que enxergue: apontar a camera
+ * pra uma especie, ou mandar um print. Duas limitacoes reais, e as
  * duas ficam visiveis na tela em vez de escondidas:
  *
  * 1. So funciona com a Groq. Os modelos que rodam no aparelho (WebLLM) sao de
@@ -38,12 +38,12 @@ import { AI_PROXY, getProvider } from "./provider.ts";
  */
 const VISION_MODEL = "qwen/qwen3.6-27b";
 
-const SYSTEM = `Você identifica Pokémon em imagens.
+const SYSTEM = `Você identifica especie em imagens.
 
-Responda APENAS com o nome do Pokémon em inglês, sem pontuação, sem explicação,
+Responda APENAS com o nome da especie em inglês, sem pontuação, sem explicação,
 sem frase. Exemplos de resposta válida: Pikachu / Charizard / Mr. Mime.
 
-Se a imagem não tiver um Pokémon, ou você não tiver certeza de qual é, responda
+Se a imagem não tiver uma especie, ou você não tiver certeza de qual é, responda
 exatamente: UNKNOWN
 
 Nunca invente um nome. UNKNOWN é uma resposta correta e esperada.`;
@@ -118,7 +118,7 @@ export async function identifySpecies(
        *
        * O Qwen 3.6 e modelo de raciocinio: sem isto ele gasta a resposta inteira
        * dentro de um bloco `<think>` e o nome nunca sai. Testado: com 30 tokens
-       * a resposta era "\n<think>\nThe user wants me to identify the Pokémon…" e
+       * a resposta era "\n<think>\nThe user wants me to identify the especie…" e
        * nada mais; com `none`, veio "Charizard" e ponto.
        */
       reasoning_effort: "none",
@@ -137,7 +137,7 @@ export async function identifySpecies(
         {
           role: "user",
           content: [
-            { type: "text", text: "Que Pokémon é este?" },
+            { type: "text", text: "Que especie é este?" },
             { type: "image_url", image_url: { url: dataUrl } },
           ],
         },

@@ -56,7 +56,7 @@ export function useFolha(
      * O documento de desenho diz "some quando uma folha de tela cheia esta
      * aberta", e o motivo escrito aqui embaixo (o vidro passaria a borrar a
      * folha, sem funcao) continua verdadeiro. So que ele pesou outra coisa: da
-     * ficha de um Pokemon nao ha atalho pra Inicio — e preciso voltar, e as
+     * ficha de uma especie nao ha atalho pra Inicio — e preciso voltar, e as
      * vezes voltar duas vezes, porque ficha abre de dentro de ficha.
      *
      * Fica por folha, e nao global, porque nem toda folha pode: as que tem
@@ -92,8 +92,8 @@ export function useFolha(
    * Nem toda saida e um "voltar". Quando a folha entrega um resultado, quem a
    * desmonta e o componente de cima, que nao sabe que ha animacao em curso:
    *
-   *   · Modo Pokedex     tocar num resultado abre a ficha da especie
-   *   · Modo Pokedex     tocar em CAPTURADOS abre a colecao
+   *   · Modo lente     tocar num resultado abre a ficha da especie
+   *   · Modo lente     tocar em CAPTURADOS abre a colecao
    *   · Monta um time    tocar num membro abre a ficha dele
    *   · Ginasio          idem
    *   · Escolher especie escolher e o proprio objetivo da folha
@@ -172,7 +172,7 @@ export function useFolha(
    * ⚠️ FOLHA QUE NASCE DENTRO DE UMA VIEW TRANSITION NAO ANIMA SOZINHA — E A
    * MARCA TEM QUE SER PERMANENTE.
    *
-   * Abrir a ficha pela Pokedex ja e uma transicao de elemento compartilhado: o
+   * Abrir a ficha pela Especies ja e uma transicao de elemento compartilhado: o
    * tile cresce e vira o cabecalho. A folha animando por cima disso da duas
    * entradas pro mesmo toque.
    *
@@ -264,7 +264,7 @@ export function useBarraTapada(): boolean {
  * de procurar a seta. No celular o veu nem e desenhado, entao isto nunca roda.
  *
  * "De cima" e o fim da pilha porque folha abre folha: a ficha de uma especie sai
- * de dentro do Monta um Time, que saiu da Pokedex. Fechar a de baixo deixaria a
+ * de dentro do Monta um Time, que saiu da Especies. Fechar a de baixo deixaria a
  * de cima orfa por cima de um veu que ja nao existe.
  */
 export function fecharFolhaDeCima(): void {

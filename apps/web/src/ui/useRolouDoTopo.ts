@@ -22,7 +22,7 @@ import { useTemFolha } from "./folha.ts";
  *
  * ── Qual rolagem conta ───────────────────────────────────────────────────────
  *
- * Duas coisas rolam neste app: a JANELA (home, Pokedex, Ajustes) e cada
+ * Duas coisas rolam neste app: a JANELA (home, Especies, Ajustes) e cada
  * `.tk-sheet-full`, que tem `overflow-y` proprio. `scroll` nao borbulha, entao o
  * ouvinte e de CAPTURA — mesmo jeito que o `BetaBadge` ja usa pra se reposicionar.
  *

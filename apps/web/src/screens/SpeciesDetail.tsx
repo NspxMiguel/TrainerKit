@@ -62,7 +62,7 @@ import { RaidCounters } from "./RaidCounters.tsx";
  * numero fica junto porque "Dos melhores" sem o "#7 de 812" atras e opiniao.
  *
  * A ausencia tambem e resposta, e por isso o caso vazio nao esconde o bloco:
- * "Não briga em nada. Só Pokédex." fecha a pergunta. Sumir com a secao deixaria
+ * "Não briga em nada. Só Especies." fecha a pergunta. Sumir com a secao deixaria
  * a pessoa procurando a informacao em outra tela.
  */
 const NIVEL_KEY = { topo: "usos.topo", bom: "usos.bom", serve: "usos.serve" } as const;
@@ -119,10 +119,10 @@ interface Props {
   onClose: () => void;
   /** Abrir outra especie a partir daqui — a linha de evolucao usa isto. */
   onPickSpecies?: (s: DatasetSpecies) => void;
-  /** O Pokemon salvo, quando a tela vem da Colecao. */
+  /** A especie salvo, quando a tela vem da Colecao. */
   owned?: OwnedPokemon | undefined;
   /**
-   * Renderizada como COLUNA da Pokedex, e nao como folha por cima dela.
+   * Renderizada como COLUNA da Especies, e nao como folha por cima dela.
    *
    * Mesmo nome que `CollectionScreen` ja usa pra mesma ideia. Ver a nota longa
    * em `ui/telaLarga.ts`: e a unica diferenca de layout do app que CSS nao
@@ -185,7 +185,7 @@ function StatBar({ label, value }: { label: string; value: number }) {
 }
 
 export function SpeciesDetail({
-  species: especieAberta,
+  species: PokemonAberta,
   data,
   onClose,
   onPickSpecies,
@@ -210,17 +210,17 @@ export function SpeciesDetail({
    */
   const { items } = useCollection();
   /*
-   * ⚠️ Acha o Pokemon salvo MESMO quando a tela nao recebeu `owned`.
+   * ⚠️ Acha a especie salvo MESMO quando a tela nao recebeu `owned`.
    *
    * A mesma especie entrava duas vezes na colecao.
    *
-   * Abrindo a especie pela Pokedex, `owned` vem indefinido — e ai o app agia
+   * Abrindo a especie pela Especies, `owned` vem indefinido — e ai o app agia
    * como se voce nao tivesse aquele bicho: a calculadora oferecia "Salvar na
    * coleção" e criava uma SEGUNDA linha da mesma especie. Duplicar era o
    * comportamento programado, nao um acidente.
    *
    * Procurando por id primeiro (quando veio) e por especie depois, a mesma tela
-   * responde as duas perguntas com o mesmo Pokemon, venha de onde vier.
+   * responde as duas perguntas com o mesmo especie, venha de onde vier.
    */
   /*
    * ⚠️ A BUSCA POR ESPÉCIE PASSA PELO CANÔNICO.
@@ -228,10 +228,10 @@ export function SpeciesDetail({
    * A duplicação já tinha sido "consertada" uma vez, procurando por espécie
    * quando `owned` não vinha. Mas a comparação era de id CRU, e o
    * id da coleção pode ser uma forma cosmética: o Venusaur dele está salvo
-   * como `venusaur_normal`, e a Pokédex abre `venusaur` (a lista só mostra as
-   * formas canônicas). Os dois são o mesmo Pokémon com duas escritas.
+   * como `venusaur_normal`, e a Especies abre `venusaur` (a lista só mostra as
+   * formas canônicas). Os dois são o mesmo especie com duas escritas.
    *
-   * Sem isto, abrir Venusaur pela Pokédex mostrava a ficha como se ele não
+   * Sem isto, abrir Venusaur pela Especies mostrava a ficha como se ele não
    * tivesse nenhum: sem veredito, sem "Ver o IV do meu", e com "Eu tenho esse"
    * oferecido — que criaria exatamente o segundo Venusaur de novo.
    */
@@ -239,9 +239,9 @@ export function SpeciesDetail({
   const salvo =
     items?.find((x) => x.id === owned?.id) ??
     owned ??
-    items?.find((x) => canon(x.speciesId) === canon(especieAberta.id));
+    items?.find((x) => canon(x.speciesId) === canon(PokemonAberta.id));
   const species =
-    (salvo ? data.species.find((s) => s.id === salvo.speciesId) : undefined) ?? especieAberta;
+    (salvo ? data.species.find((s) => s.id === salvo.speciesId) : undefined) ?? PokemonAberta;
   /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
      caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
      escape volta a piscar, e so aquele. */
@@ -266,7 +266,7 @@ export function SpeciesDetail({
    *
    * Travar o rolar do `<body>` existe pra folha nao deixar a pagina de tras
    * rolando junto. Como coluna, a ficha E a pagina: travar aqui congelaria a
-   * propria Pokedex, e o Escape fecharia uma tela que nao esta por cima de
+   * propria Especies, e o Escape fecharia uma tela que nao esta por cima de
    * nada — sumindo com a ficha por um atalho que ninguem pediu.
    */
   useEffect(() => {
@@ -492,14 +492,14 @@ export function SpeciesDetail({
 
         "o app parece tres apps diferentes dependendo da tela" — era a queixa
         dele no briefing, e esta tela era o exemplo mais caro, porque e a mais
-        visitada: a home ganhou um Pokemon gigante com a cor da especie, e a
+        visitada: a home ganhou uma especie gigante com a cor da especie, e a
         ficha continuava um tile de 116px ao lado de um titulo.
 
         As classes sao literalmente as do hero da home, com um modificador. Nao
         e economia de CSS: e o que impede as duas de divergirem de novo na
         proxima mudanca. Se o hero mudar, muda nos dois.
 
-        Sem titulo no cabecalho, como antes: ele dizia "Pokédex" e mentia quando
+        Sem titulo no cabecalho, como antes: ele dizia "Especies" e mentia quando
         a tela era aberta pela Colecao. Fica so a seta, e quem nomeia a tela e o
         nome gigante do bicho.
       */}
@@ -595,10 +595,10 @@ export function SpeciesDetail({
         O `VerdictCard` ja estava escrito, com barra de confianca e rastro
         auditavel, e era usado SO na calculadora de IV. A ficha — a tela mais
         visitada, e a que o handoff detalha mais — nunca o mostrava. Quem tocava
-        num Pokemon da propria colecao via "Calcular IV do meu" num bicho cujo
+        num especie da propria colecao via "Calcular IV do meu" num bicho cujo
         IV o app ja sabia.
 
-        Duas falhas somadas: a navegacao nao levava o Pokemon salvo (ver a nota
+        Duas falhas somadas: a navegacao nao levava a especie salvo (ver a nota
         no `HomeScreen`), e a tela nao pedia o cartao nem quando tinha. O motor
         decidia, a barra de confianca era calculada, o rastro existia — e nada
         disso chegava aos olhos. E a tese do produto inteiro: "decide, e aceita
@@ -652,11 +652,11 @@ export function SpeciesDetail({
         a pessoa n qr escanear iv?"
 
         Ele achou um funil fechado: quem nao quer (ou nao pode) escanear
-        simplesmente nao conseguia registrar um Pokemon. Escanear e o melhor
+        simplesmente nao conseguia registrar uma especie. Escanear e o melhor
         caminho, e nao pode ser o UNICO — a pessoa acabou de pegar o bicho, quer
         marcar que tem, e resolve o IV depois.
 
-        ⚠️ Sem IV o app NAO inventa veredito. O Pokemon entra marcado como "sem
+        ⚠️ Sem IV o app NAO inventa veredito. A especie entra marcado como "sem
         IV" e o veredito dele passa a ser "falta o IV pra eu decidir", que e
         literalmente o proximo passo. Ver a nota em `HomeScreen`: decidir em
         cima dos zeros daria "Transferir" com confianca cheia pra um possivel
@@ -692,7 +692,7 @@ export function SpeciesDetail({
         Dois defeitos no mesmo botão: ele encostava no cartão de veredito (o
         cartão tem borda na cor do veredito, então "colado" virava uma faixa de
         duas cores grudadas) e era violeta numa tela inteira
-        pintada com a cor do Pokémon.
+        pintada com a cor da especie.
       */}
       <button
         type="button"
@@ -710,12 +710,12 @@ export function SpeciesDetail({
 
         Antes era um "✕" na linha da lista: um toque, sem confirmar, permanente,
         e sem servidor nenhum pra desfazer. A mesma tela que pede dois toques
-        pra apagar uma COLECAO apagava um Pokemon no primeiro — e num alvo de
+        pra apagar uma COLECAO apagava uma especie no primeiro — e num alvo de
         32px encostado no chip de veredito, que e onde o dedo passa.
 
         Mudar de lugar resolve tres coisas de uma vez: a acao destrutiva ganha o
         segundo toque, a linha da lista devolve 44px (o "Dragonite" truncava em
-        "Dragoni…" por 1 pixel), e ela passa a viver na tela DAQUELE Pokemon —
+        "Dragoni…" por 1 pixel), e ela passa a viver na tela DAQUELE especie —
         que e onde a pessoa ja esta olhando pra ele, e nao numa fila onde a
         linha de cima e igual a de baixo.
       */}
@@ -768,13 +768,13 @@ export function SpeciesDetail({
         <AiBubble
           titulo={species.name}
           sistema={dexSystem(language)}
-          // `owned` aqui e UM Pokemon (o da tela), nao a colecao — vira lista de um.
+          // `owned` aqui e UM especie (o da tela), nao a colecao — vira lista de um.
           contexto={speciesDossier(species, data, salvo ? [salvo] : [], language)}
           /*
             ⚠️ FLUTUANDO, e nao na linha — e isto e um retorno.
 
             A entrada da IA na ficha e uma bolha flutuante, e nao uma linha
-            "perguntar para a Pokedex" no meio do conteudo.
+            "perguntar para a Especies" no meio do conteudo.
 
             A bolha ja tinha existido e virou botao de linha uma vez, porque
             incomodava — mas o que incomodava nao era ela flutuar: era ela
@@ -800,8 +800,8 @@ export function SpeciesDetail({
         justamente o que se faz EM VEZ de transferir. Ler a etiqueta antes do
         veredito inverteria a conversa.
 
-        So aparece quando ha UM Pokemon concreto: "vale trocar?" nao existe pra
-        uma especie, e sim pro IV deste exemplar. Na Pokedex sem colecao o bloco
+        So aparece quando ha UM especie concreto: "vale trocar?" nao existe pra
+        uma especie, e sim pro IV deste exemplar. Na Especies sem colecao o bloco
         some inteiro em vez de mostrar numeros genericos.
 
         O caso bloqueado (sombroso, sortudo) tambem aparece, com o motivo — nao
@@ -882,7 +882,7 @@ export function SpeciesDetail({
         Está tudo no GAME_MASTER; o que escondia era o nome — lá a mecânica se
         chama BREAD, e Gigantamax é SOURDOUGH. Ver `dynamax.ts`.
 
-        ⚠️ O QUE ESTE BLOCO NÃO DIZ: que este Pokémon "pode Dynamax". Isso é
+        ⚠️ O QUE ESTE BLOCO NÃO DIZ: que esta especie "pode Dynamax". Isso é
         propriedade do indivíduo (vem de ter sido pego numa Batalha Max) e não
         existe no dado. Dizer que pode seria inventar a premissa, e um app que
         decide não pode fazer isso. Ele fala do que é fato por espécie: quem faz
@@ -1209,7 +1209,7 @@ export function SpeciesDetail({
         A bolha, com o dossie DESTA especie.
 
         E a conversa com a IA a partir de uma especie. O contexto e o mesmo
-        `speciesDossier` que a Pokedex ja usa — nao ha segundo caminho de dados,
+        `speciesDossier` que a Especies ja usa — nao ha segundo caminho de dados,
         entao as duas telas nunca podem discordar sobre o mesmo bicho.
 
         Fica fora dos dois modais acima de propósito: com o calculador de IV ou
@@ -1232,7 +1232,7 @@ export function SpeciesDetail({
  *
  * A chance de a troca SAIR sortuda nao aparece em lugar nenhum, de proposito:
  * ela depende de tempo de amizade, de Lucky Friends e da data de captura dos
- * dois Pokemon. Chutar uma porcentagem ali seria inventar precisao — o que se
+ * dois especie. Chutar uma porcentagem ali seria inventar precisao — o que se
  * mostra e o cenario, "se sair sortudo, e isto".
  */
 function BlocoTroca({

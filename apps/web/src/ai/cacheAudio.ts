@@ -27,7 +27,7 @@ const CACHE = "tk-voz-v1";
  * Quantos áudios guardar.
  *
  * Uma ficha dá ~50 KB. 120 é uns 6 MB — nada perto da cota de armazenamento
- * (~60% do disco desde o iOS 17), e cobre navegar pela Pokédex a tarde inteira
+ * (~60% do disco desde o iOS 17), e cobre navegar pela Especies a tarde inteira
  * sem repetir uma geração.
  */
 const MAX_ITENS = 120;
@@ -41,7 +41,7 @@ function disponivel(): boolean {
  * A chave: hash do motor + voz + texto.
  *
  * SHA-256 e não o texto cru porque a chave do Cache API é uma URL, e ficha de
- * Pokédex tem acento, quebra de linha e 400 caracteres. Hash dá uma chave curta,
+ * Especies tem acento, quebra de linha e 400 caracteres. Hash dá uma chave curta,
  * estável e sem caractere problemático.
  *
  * O motor entra na chave: a mesma frase na Thalita e na Sarah são dois áudios, e

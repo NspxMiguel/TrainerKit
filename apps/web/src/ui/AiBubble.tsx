@@ -11,12 +11,12 @@ import { useT } from "../i18n/t.ts";
  *
  * Item #42 do handoff: bolinha flutuante da IA, no molde da do WhatsApp. O que
  * ela resolve, alem do visual: hoje a IA vive escondida em
- * duas telas diferentes (a caixa de perguntas da Coleção e a da Pokédex), e quem
+ * duas telas diferentes (a caixa de perguntas da Coleção e a da Especies), e quem
  * nao entra nelas nunca descobre que o app responde pergunta.
  *
  * ⚠️ O QUE ELA **NAO** E: um chatbot geral. Ela so aparece onde ha CONTEXTO —
- * uma especie aberta, a colecao, a Pokedex. "IA só na Pokédex + Você sabia +
- * chatbot ao clicar num Pokémon", nas palavras dele.
+ * uma especie aberta, a colecao, a Especies. "IA só na Especies + Você sabia +
+ * chatbot ao clicar num especie", nas palavras dele.
  *
  * Isso nao e limitacao de escopo, e o que faz a resposta prestar: sem contexto,
  * o modelo so tem a pergunta, e a pergunta sozinha ("ele é bom?") nao tem
@@ -46,7 +46,7 @@ interface Props {
  *
  * Ela nasceu de "essa estrela ali de baixo tira", quando a bolha pousava sobre a
  * tabela de stats da ficha. Eu li aquilo como "não quero bolha" e transformei o
- * gatilho num botão no fluxo, "Perguntar à Pokédex".
+ * gatilho num botão no fluxo, "Perguntar à Especies".
  *
  * Era a leitura errada, e ele corrigiu duas vezes: "o perguntar a pokedex
  * poderia ser q nem no whatsapp, uma bolinha ali em baixo, igual ideia

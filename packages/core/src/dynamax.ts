@@ -31,7 +31,7 @@ import type { BaseStats } from "./types.js";
  *   3. Papel numa Batalha Max: derivado dos stats base, do mesmo jeito que o
  *      app ja deriva papel de raide. E leitura, e a tela diz que e.
  *
- * O que ele nao faz e afirmar que um Pokemon da colecao "pode Dynamax". Ele nao
+ * O que ele nao faz e afirmar que uma especie da colecao "pode Dynamax". Ele nao
  * tem como saber, e um app que decide nao pode inventar a premissa.
  */
 

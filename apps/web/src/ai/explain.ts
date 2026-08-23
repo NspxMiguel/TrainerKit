@@ -3,7 +3,7 @@ import { chat } from "./provider.ts";
 /**
  * A IA explicando um veredito que o app ja calculou.
  *
- * DESENHO CENTRAL, e ele nao muda com o provedor: o modelo NAO analisa Pokemon.
+ * DESENHO CENTRAL, e ele nao muda com o provedor: o modelo NAO analisa especie.
  * Ele recebe o veredito pronto com o rastro de regras e so escolhe as palavras.
  * Um modelo que recebesse so "Machamp 96%" inventaria a analise, e inventar e
  * exatamente o que este app nao faz.
@@ -13,9 +13,9 @@ import { chat } from "./provider.ts";
  * serve os dois.
  */
 
-const SYSTEM = `Você é o assistente do TrainerKit, um app de Pokémon GO.
+const SYSTEM = `Você é o assistente do TrainerKit, um app de o jogo.
 
-Você NÃO analisa Pokémon. O app já calculou tudo e vai te entregar o veredito
+Você NÃO analisa especie. O app já calculou tudo e vai te entregar o veredito
 pronto com as regras que levaram a ele. Seu único trabalho é transformar esses
 dados em duas ou três frases naturais, no idioma pedido.
 
@@ -55,7 +55,7 @@ export async function explainVerdict(
         role: "user",
         content: [
           `Idioma da resposta: ${input.language}`,
-          `Pokémon: ${input.species}`,
+          `especie: ${input.species}`,
           `IV: ${input.ivTotal} de 45${input.cp === null ? "" : ` · PC ${input.cp}`}`,
           `Veredito: ${input.action} (confiança ${Math.round(input.confidence * 100)}%)`,
           `Motivo principal: ${input.reason}`,

@@ -4,7 +4,7 @@ import { useSyncExternalStore } from "react";
  * Como a pessoa quer usar o app.
  *
  * A escolha existe porque as duas formas sao legitimas e exigem telas
- * diferentes. Quem so quer saber se um Pokemon presta nao deveria ser obrigado
+ * diferentes. Quem so quer saber se uma especie presta nao deveria ser obrigado
  * a cadastrar colecao — e quem quer o veredito precisa cadastrar. Empurrar todo
  * mundo pro mesmo fluxo faria o app parecer burocratico pra metade das pessoas.
  */
@@ -19,7 +19,7 @@ export interface Setup {
   /** `false` ate a pessoa concluir a primeira configuracao. */
   done: boolean;
   mode: UsageMode;
-  /** Liga o assistente que opina sobre os Pokemon. */
+  /** Liga o assistente que opina sobre os especie. */
   assistant: boolean;
   /**
    * Como a pessoa quer ser chamada. Vazio e valido — quem nao quiser dizer o
@@ -27,7 +27,7 @@ export interface Setup {
    */
   name: string;
   /**
-   * Nivel do TREINADOR, e nao do Pokemon.
+   * Nivel do TREINADOR, e nao da especie.
    *
    * Ele existe porque o teto de power-up do jogo e `nivel do treinador + 2`.
    * Ver `tetoDePowerUp`, que e onde isso vira consequencia.
@@ -36,7 +36,7 @@ export interface Setup {
 }
 
 /**
- * Ate que nivel ESTE jogador consegue subir um Pokemon.
+ * Ate que nivel ESTE jogador consegue subir uma especie.
  *
  * ⚠️ ISTO NAO E UMA REGRA NOVA — e um dado de entrada que estava fixo no melhor
  * caso.
@@ -45,15 +45,15 @@ export interface Setup {
  * (`verdict.ts`). O que todos os chamadores passavam era `version.levelCap`, o
  * `maxNormalUpgradeLevel` do jogo — o teto de QUEM JA ESTA NO FIM. Para um
  * treinador de nivel 20 o app respondia "até 1.260 de PC no nível 50" sobre um
- * Pokemon que aquela pessoa so consegue levar ao nivel 22.
+ * especie que aquela pessoa so consegue levar ao nivel 22.
  *
  * As regras do veredito nao mudaram uma linha, e `packages/core` nao foi
  * tocado. Mudou o numero que entra nelas: de "o teto do jogo" para "o teto
  * desta pessoa". Onde a pergunta e sobre a ESPECIE e nao sobre o jogador — o
- * "PC máximo com IV perfeito" da ficha, a ordenacao da Pokedex — continua sendo
+ * "PC máximo com IV perfeito" da ficha, a ordenacao da Especies — continua sendo
  * o teto do jogo, porque ali o numero e um fato da especie e nao uma promessa.
  *
- * O `+2` e do jogo: sobe-se um Pokemon ate dois niveis acima do proprio, e o
+ * O `+2` e do jogo: sobe-se uma especie ate dois niveis acima do proprio, e o
  * `min` impede que um treinador de 50 passe do teto da temporada.
  */
 export function tetoDePowerUp(nivelDoTreinador: number, tetoDoJogo: number): number {
@@ -73,7 +73,7 @@ export const DEFAULT_SETUP: Setup = {
    * Quem instalou antes desta versao nao tem `level` gravado, e o `??` abaixo
    * decide o que o app passa a achar dessas pessoas. Cair em 20 mudaria o
    * veredito de toda a colecao ja cadastrada, de uma atualizacao pra outra, sem
-   * ninguem ter pedido — Pokemon que diziam "Investir" passariam a dizer
+   * ninguem ter pedido — especie que diziam "Investir" passariam a dizer
    * "Guardar" porque o app resolveu sozinho que o dono e iniciante.
    *
    * 50 e exatamente o que o app assumia antes de este campo existir. Quem

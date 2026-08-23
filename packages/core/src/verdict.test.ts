@@ -131,7 +131,7 @@ describe("motor de veredito", () => {
     }
   });
 
-  it("o mesmo Pokemon sem IV da a MESMA resposta em qualquer chamada", () => {
+  it("o mesmo especie sem IV da a MESMA resposta em qualquer chamada", () => {
     // A contradicao entre telas so foi possivel porque cada uma resolvia o caso
     // do seu jeito. Com o guarda no motor, "chamar de outro lugar" deixou de
     // ser uma variavel.
@@ -204,7 +204,7 @@ describe("cumpriu", () => {
    * ⚠️ O CASO QUE CURA DADO VELHO.
    *
    * Enquanto o app deixava marcar "Guardar" como feito, ele gravou
-   * `doneAction: "guardar"` em Pokemon reais. Se `cumpriu` respeitasse essa
+   * `doneAction: "guardar"` em especie reais. Se `cumpriu` respeitasse essa
    * marca, essas linhas mostrariam "✓ FEITO" pra sempre — sem nenhum botao pra
    * desmarcar, porque o botao saiu. Trocar UI morta por estado sem saida seria
    * pior que o defeito original.

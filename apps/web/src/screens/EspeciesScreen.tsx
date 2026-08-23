@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import type { PokedexIntent } from "../App.tsx";
+import type { EspeciesIntent } from "../App.tsx";
 import type { DatasetSpecies, DatasetState } from "../data/useDataset.ts";
 import { useLanguage } from "../i18n/language.ts";
 import { useT } from "../i18n/t.ts";
@@ -20,22 +20,22 @@ import { useTelaLarga } from "../ui/telaLarga.ts";
 interface Props {
   dataset: DatasetState;
   /** De onde a pessoa veio, quando veio por um atalho da home. */
-  intent?: PokedexIntent | null;
+  intent?: EspeciesIntent | null;
 }
 
 /**
  * Modo consulta.
  *
  * Existe porque nem todo mundo quer cadastrar colecao: as vezes a pergunta e so
- * "esse Pokemon presta?". Aqui a resposta sai sem cadastro nenhum, sem conta e
+ * "essa especie presta?". Aqui a resposta sai sem cadastro nenhum, sem conta e
  * sem passo intermediario.
  */
-export function PokedexScreen({ dataset, intent }: Props) {
+export function EspeciesScreen({ dataset, intent }: Props) {
   const [selected, setSelected] = useState<DatasetSpecies | null>(null);
   /*
    * ⚠️ A FICHA MUDA DE NATUREZA, e nao so de tamanho.
    *
-   * "Pokédex em lista + ficha lado a lado (como um cliente de e-mail)", do
+   * "Especies em lista + ficha lado a lado (como um cliente de e-mail)", do
    * documento de desktop. Na tela larga a ficha deixa de ser uma folha por cima
    * e vira a segunda coluna: ela nao tampa a lista, nao escurece nada e nao tem
    * o que fechar. No celular continua exatamente a folha de sempre.
@@ -88,7 +88,7 @@ export function PokedexScreen({ dataset, intent }: Props) {
    * "o colection n seria mais legal, se ele fizesse parte do pokedex mode?
    * faria muito mais sentido nao acha??" — faria, e ele estava certo sobre o
    * problema: o app separava em duas abas o que e UMA pergunta ("qual
-   * Pokémon?"), e a Pokédex do jogo mostra visto e capturado no mesmo lugar.
+   * especie?"), e a Especies do jogo mostra visto e capturado no mesmo lugar.
    *
    * ⚠️ O QUE EU **NAO** FIZ, e por que: nao dava pra simplesmente usar o filtro
    * "Só os meus" que ja existia. Ele filtra ESPECIES; a colecao lista
@@ -129,7 +129,7 @@ export function PokedexScreen({ dataset, intent }: Props) {
   if (dataset.status === "loading") {
     return (
       <>
-        <h1 className="tk-h1">{t("pokedex.title")}</h1>
+        <h1 className="tk-h1">{t("especies.title")}</h1>
         {/* Esqueleto com a geometria da lista real, e nao uma frase: sem isso
             a tela saltava quando os dados chegavam. Ver `ui/Estados.tsx`. */}
         <Esqueleto linhas={6} />
@@ -140,7 +140,7 @@ export function PokedexScreen({ dataset, intent }: Props) {
   if (dataset.status === "error") {
     return (
       <>
-        <h1 className="tk-h1">{t("pokedex.title")}</h1>
+        <h1 className="tk-h1">{t("especies.title")}</h1>
         {/* Cartao ambar que diz que os vereditos CONTINUAM VALENDO: sem rede o
             app funciona, porque o dataset esta no aparelho. Ver `ui/Estados.tsx`. */}
         <Offline detalhe={dataset.message} />
@@ -161,7 +161,7 @@ export function PokedexScreen({ dataset, intent }: Props) {
    */
   const cabecalho = (
     <>
-      <h1 className="tk-h1">{t("pokedex.title")}</h1>
+      <h1 className="tk-h1">{t("especies.title")}</h1>
 
       {podeColecao && (
         /*
@@ -176,7 +176,7 @@ export function PokedexScreen({ dataset, intent }: Props) {
         <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "0 0 12px" }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <Segmented
-              ariaLabel={t("pokedex.title")}
+              ariaLabel={t("especies.title")}
               value={aba}
               onChange={setAba}
               size="compact"
@@ -192,11 +192,11 @@ export function PokedexScreen({ dataset, intent }: Props) {
               options={[
                 {
                   value: "todos" as const,
-                  label: `${t("pokedex.all")} · ${totalEspecies.toLocaleString(language)}`,
+                  label: `${t("especies.all")} · ${totalEspecies.toLocaleString(language)}`,
                 },
                 {
                   value: "meus" as const,
-                  label: `${t("pokedex.mine")} · ${totalMeus.toLocaleString(language)}`,
+                  label: `${t("especies.mine")} · ${totalMeus.toLocaleString(language)}`,
                 },
               ]}
             />
@@ -215,7 +215,7 @@ export function PokedexScreen({ dataset, intent }: Props) {
              *
              * Com o rótulo, o botão promete antes de agir — e a promessa é
              * conferível sem rolar. Tirar seria jogar fora uma vista que ele
-             * mesmo pediu ("#43 coleção com cara de Pokédex de verdade").
+             * mesmo pediu ("#43 coleção com cara de Especies de verdade").
              */
             <button
               type="button"
@@ -231,24 +231,24 @@ export function PokedexScreen({ dataset, intent }: Props) {
       )}
 
       {/*
-        O modo Pokedex mora AQUI, e nao na home.
+        O modo lente mora AQUI, e nao na home.
         
         Ele estava como um dos tres botoes de acao da tela inicial, chamado
-        "Pokédex" — do lado de uma ABA chamada Pokédex: duas funcoes com o mesmo
+        "Especies" — do lado de uma ABA chamada Especies: duas funcoes com o mesmo
         nome. Era a mesma redundancia ja removida dos atalhos, recriada aqui.
 
-        Aqui nao ha duas: a aba e a Pokedex, e este botao abre o APARELHO — que e
+        Aqui nao ha duas: a aba e a Especies, e este botao abre o APARELHO — que e
         outra coisa que a mesma aba faz, no lugar onde a pessoa ja esta olhando
-        Pokemon.
+        especie.
       */}
       {/*
-        O cartao do Modo Pokedex, na receita do handoff: "tile vermelho 48px
+        O cartao do Modo lente, na receita do handoff: "tile vermelho 48px
         (raio 16, gradiente #F87171→#DC2626) com a lente desenhada em SVG,
         título 16/700, subtítulo 12,5px, chevron".
 
         ⚠️ O VERMELHO E DO APARELHO, e nao do app. E o unico lugar da interface
         que nao segue a cor da especie em destaque — de propósito: este cartao
-        anuncia um OBJETO, e um objeto que muda de cor com o Pokemon da vez
+        anuncia um OBJETO, e um objeto que muda de cor com a especie da vez
         deixa de parecer um objeto.
       */}
       {/*
@@ -305,7 +305,7 @@ export function PokedexScreen({ dataset, intent }: Props) {
         Eram duas atras de "Buscar | Melhores", e "Melhores" escondia quatro
         rankings atras de mais dois seletores. Um filtro resolve melhor que uma
         aba chamada "Melhores": e a mesma pergunta ("qual
-        Pokemon?") com a resposta ordenada pelo que importa naquele momento.
+        especie?") com a resposta ordenada pelo que importa naquele momento.
       */}
     </>
   );
@@ -359,7 +359,7 @@ export function PokedexScreen({ dataset, intent }: Props) {
   );
 
   /*
-   * Na tela larga a Pokedex vira duas colunas: a lista a esquerda e a ficha a
+   * Na tela larga a Especies vira duas colunas: a lista a esquerda e a ficha a
    * direita, na proporcao `1.3fr 1fr` do documento.
    *
    * ⚠️ SEM ESPECIE ESCOLHIDA A COLUNA NAO NASCE VAZIA — a lista ocupa tudo.
@@ -402,10 +402,10 @@ export function PokedexScreen({ dataset, intent }: Props) {
             /* Chegou com termo da home: o cursor continua de onde a pessoa
                parou de digitar, em vez de ela ter que clicar aqui. */
             autoFocus={semente !== ""}
-            placeholder={t("pokedex.searchPlaceholder")}
+            placeholder={t("especies.searchPlaceholder")}
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            aria-label={t("pokedex.search")}
+            aria-label={t("especies.search")}
           />
         </div>
       </div>

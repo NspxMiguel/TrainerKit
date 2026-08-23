@@ -30,7 +30,7 @@ interface Props {
  * A faxina.
  *
  * A terceira situação em que alguém abre um app auxiliar — mochila cheia — e a
- * única que não se resolve um Pokémon por vez. Ninguém abre 300 fichas.
+ * única que não se resolve uma especie por vez. Ninguém abre 300 fichas.
  *
  * ── O que esta tela promete, e o que ela NÃO promete ─────────────────────────
  *
@@ -40,7 +40,7 @@ interface Props {
  * coleção DAQUI.
  *
  * Isso não é letra miúda jurídica — é a diferença entre a pessoa entender o
- * botão e a pessoa achar que o app apagou um Pokémon dela. Por isso o texto do
+ * botão e a pessoa achar que o app apagou uma especie dela. Por isso o texto do
  * botão diz "tirar da lista" e não "transferir", e a confirmação explica a
  * ordem das coisas: primeiro no jogo, depois aqui.
  *
@@ -63,7 +63,7 @@ export function Faxina({ data, onClose }: Props) {
    * O desfazer mora AQUI, na memória da tela.
    *
    * Guardar em IndexedDB uma "lixeira" seria mais durável e seria pior: viraria
-   * um segundo lugar onde Pokémon existem, com todas as perguntas que isso traz
+   * um segundo lugar onde especie existem, com todas as perguntas que isso traz
    * (aparece na contagem? entra no backup? vale pra counters?). A remoção é
    * anunciada, cabe numa barra, e a barra fica até a pessoa sair da tela.
    */
@@ -86,7 +86,7 @@ export function Faxina({ data, onClose }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [fechar]);
 
-  const especiePor = useMemo(() => {
+  const PokemonPor = useMemo(() => {
     const m = new Map<string, DatasetSpecies>();
     for (const s of data.species) m.set(s.id, s);
     return m;
@@ -109,7 +109,7 @@ export function Faxina({ data, onClose }: Props) {
     const especies = new Map<string, EspecieFaxina>();
     for (const o of items) {
       if (especies.has(o.speciesId)) continue;
-      const s = especiePor.get(o.speciesId);
+      const s = PokemonPor.get(o.speciesId);
       if (!s) continue;
       especies.set(o.speciesId, {
         id: s.id,
@@ -137,7 +137,7 @@ export function Faxina({ data, onClose }: Props) {
       cpm: data.cpm,
       levelCap: tetoDePowerUp(setup.level, data.version.levelCap),
     });
-  }, [items, especiePor, data.cpm, data.version.levelCap, setup.level]);
+  }, [items, PokemonPor, data.cpm, data.version.levelCap, setup.level]);
 
   /*
    * ⚠️ SÓ OS "SEM DÚVIDA" NASCEM MARCADOS.
@@ -153,7 +153,7 @@ export function Faxina({ data, onClose }: Props) {
    * corrida real — medida, não hipotética. Ao DESFAZER, a ordem é: `restaurar`
    * grava e avisa (o recarregamento da coleção é assíncrono), o React
    * re-renderiza com a lista ANTIGA, a semeadura roda em cima dela e grava um
-   * conjunto vazio; só então os 8 Pokémon voltam. Como o marcador já não era
+   * conjunto vazio; só então os 8 especie voltam. Como o marcador já não era
    * nulo, a semeadura não rodava de novo — os 8 reapareciam todos DESMARCADOS,
    * e a barra de ação sumia junto.
    *
@@ -202,7 +202,7 @@ export function Faxina({ data, onClose }: Props) {
     setDesfazivel(null);
   };
 
-  const nome = (speciesId: string) => especiePor.get(speciesId)?.name ?? speciesId;
+  const nome = (speciesId: string) => PokemonPor.get(speciesId)?.name ?? speciesId;
 
   /**
    * Agrupa por espécie, na ordem de quem tem mais sobra.
@@ -229,7 +229,7 @@ export function Faxina({ data, onClose }: Props) {
 
   const linha = (s: Solto) => {
     const owned = donoPor.get(s.id);
-    const sp = especiePor.get(s.speciesId);
+    const sp = PokemonPor.get(s.speciesId);
     if (!owned || !sp) return null;
     const marcado = escolhidos.has(s.id);
 
@@ -378,7 +378,7 @@ export function Faxina({ data, onClose }: Props) {
           {abrirGuardados && (
             <div className="tk-card tk-fax-card" style={{ marginTop: 10 }}>
               {plano.guardados.map((g) => {
-                const sp = especiePor.get(g.speciesId);
+                const sp = PokemonPor.get(g.speciesId);
                 const owned = donoPor.get(g.id);
                 if (!sp || !owned) return null;
                 return (

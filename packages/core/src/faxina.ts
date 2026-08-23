@@ -12,7 +12,7 @@ import { decide } from "./verdict.js";
  * abre um app auxiliar em três situações, e a terceira é **estar com a mochila
  * cheia**. As outras duas o app já atende (acabei de pegar → escaneia; vou
  * entrar num raide → counters). Pra terceira não havia nada, e ela é a única
- * que não se resolve um Pokémon por vez: ninguém abre 2.000 fichas.
+ * que não se resolve uma especie por vez: ninguém abre 2.000 fichas.
  *
  * ── O que este arquivo NÃO faz ───────────────────────────────────────────────
  *
@@ -28,7 +28,7 @@ import { decide } from "./verdict.js";
  * ⚠️ TRANSFERIR É IRREVERSÍVEL NO JOGO. Não há servidor, não há lixeira, não há
  * suporte pra desfazer. Então o critério de projeto aqui não é "achar o máximo
  * de candidatos", é **nunca sugerir algo que a pessoa vá lamentar**. Um falso
- * negativo custa um espaço de mochila; um falso positivo custa um Pokémon.
+ * negativo custa um espaço de mochila; um falso positivo custa uma especie.
  *
  * É por isso que a saída tem duas classes e não uma:
  *
@@ -49,7 +49,7 @@ import { decide } from "./verdict.js";
  * consegue auditar o que ficou de fora é um app que ela usa uma vez.
  */
 
-/** Um Pokémon da coleção, no mínimo que a faxina precisa saber. */
+/** Uma especie da coleção, no mínimo que a faxina precisa saber. */
 export interface BichoFaxina {
   id: string;
   speciesId: string;
@@ -66,7 +66,7 @@ export interface BichoFaxina {
    * continua dizendo "transferir" por baixo, e uma lista em lote que só lê o
    * veredito devolveria o bicho pré-marcado numa tela onde 20 outros também
    * estão. É o único lugar do app em que ignorar esta marca custaria um
-   * Pokémon.
+   * especie.
    */
   meuMotivo?: boolean;
 }
@@ -89,7 +89,7 @@ export interface FaxinaInput {
 }
 
 /**
- * O que faz um Pokémon ser o melhor da espécie na sua coleção.
+ * O que faz uma especie ser o melhor da espécie na sua coleção.
  *
  * São quatro porque são quatro usos diferentes, e o mesmo bicho quase nunca
  * serve a todos: o melhor de Great costuma ter ataque BAIXO (ataque infla o PC
@@ -133,7 +133,7 @@ const LIGAS: ReadonlyArray<{ coroa: Coroa; liga: League }> = [
  * Desempate estável, e não "o primeiro que aparecer".
  *
  * A coleção chega ordenada por data, e a ordem muda quando alguém escaneia
- * qualquer coisa. Sem um critério fixo, dois Pokémon com o mesmo stat product
+ * qualquer coisa. Sem um critério fixo, dois especie com o mesmo stat product
  * trocariam de coroa entre uma abertura da tela e a seguinte — e o que ontem
  * era "guardado" apareceria hoje pré-marcado pra transferência.
  */
@@ -160,7 +160,7 @@ function melhorEntre<T>(
  *
  * ⚠️ A comparação é por IV, com cada um levado ao teto da liga — NÃO pelo nível
  * em que estão hoje. Nível se compra com poeira; IV não se compra com nada. Um
- * bicho no nível 40 e um irmão idêntico no nível 15 são o mesmo Pokémon, e
+ * bicho no nível 40 e um irmão idêntico no nível 15 são o mesmo especie, e
  * comparar pelo estado atual sugeriria transferir o de IV melhor só porque o
  * outro já recebeu investimento.
  */
@@ -190,7 +190,7 @@ function coroas(
    * Raide é ataque, e o desempate é o IV total.
    *
    * Não uso `rankOf` aqui de propósito: stat product é a métrica de PvP, onde
-   * sobreviver vale tanto quanto bater. Em raide o Pokémon morre e volta —
+   * sobreviver vale tanto quanto bater. Em raide a especie morre e volta —
    * defesa e PS decidem quantas revidas você gasta, não quanto dano você deu.
    */
   const raide = melhorEntre(
@@ -236,7 +236,7 @@ export function planejarFaxina(input: FaxinaInput): Faxina {
      *
      * Acontece de verdade — dataset customizado do usuário, base antiga, forma
      * regional que saiu do índice. Sem os stats base não há veredito nem stat
-     * product, e a única saída honesta é a que não custa um Pokémon.
+     * product, e a única saída honesta é a que não custa uma especie.
      */
     if (!especie) {
       for (const b of membros) {
@@ -364,7 +364,7 @@ function motivoIntocavel(b: BichoFaxina, especie: EspecieFaxina): Message | null
    *
    * Quem entrou pelo "eu tenho esse" tem `ivs` zerado porque o tipo exige três
    * números, não porque alguém mediu zero. Ler esses zeros aqui produziria uma
-   * lista de transferência "sem dúvida" cheia de Pokémon que podem ser 100% —
+   * lista de transferência "sem dúvida" cheia de especie que podem ser 100% —
    * e pré-marcada. É o pior defeito que este arquivo poderia ter.
    */
   /*

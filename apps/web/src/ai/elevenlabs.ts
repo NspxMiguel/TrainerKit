@@ -6,7 +6,7 @@
  * 10.000 creditos por mes, sem cartao, e o `eleven_multilingual_v2` fala
  * portugues de verdade — nao ingles pronunciando portugues.
  *
- * Dez mil creditos sao uns 10.000 caracteres. Uma ficha da Pokedex tem ~400,
+ * Dez mil creditos sao uns 10.000 caracteres. Uma ficha da Especies tem ~400,
  * entao da umas 25 fichas por mes. Pouco pra usar sempre, suficiente pra ouvir
  * como e — e a tela diz esse numero em vez de deixar a pessoa descobrir quando
  * acabar.

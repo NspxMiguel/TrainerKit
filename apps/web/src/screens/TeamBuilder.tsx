@@ -112,7 +112,7 @@ export function TeamBuilder({ data, onClose, onPickSpecies }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [fechar]);
 
-  const especiePor = useMemo(() => {
+  const PokemonPor = useMemo(() => {
     const m = new Map<string, DatasetSpecies>();
     for (const s of data.species) m.set(s.id, s);
     return m;
@@ -162,7 +162,7 @@ export function TeamBuilder({ data, onClose, onPickSpecies }: Props) {
       const lista = data.rankings?.statProductByLeague[league] ?? [];
       const cands: Candidate[] = [];
       for (const r of lista) {
-        const sp = especiePor.get(r.speciesId);
+        const sp = PokemonPor.get(r.speciesId);
         if (!sp) continue;
         cands.push({ speciesId: r.speciesId, name: r.name, score: r.score, types: sp.types });
       }
@@ -186,7 +186,7 @@ export function TeamBuilder({ data, onClose, onPickSpecies }: Props) {
     const melhor = new Map<string, Candidate>();
     for (const linhas of listas) {
       for (const r of linhas) {
-        const sp = especiePor.get(r.speciesId);
+        const sp = PokemonPor.get(r.speciesId);
         if (!sp) continue;
         const anterior = melhor.get(r.speciesId);
         if (anterior !== undefined && anterior.score >= r.score) continue;
@@ -213,7 +213,7 @@ export function TeamBuilder({ data, onClose, onPickSpecies }: Props) {
     const cands = [...melhor.values()].sort((a, b) => b.score - a.score);
     return { candidatos: cands, movesets, tiposDeGolpe: tipos };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [goal, league, alvos.join(","), data, especiePor, language]);
+  }, [goal, league, alvos.join(","), data, PokemonPor, language]);
 
   const time = useMemo(() => pickTeam(candidatos, TEAM_SIZE), [candidatos]);
 
@@ -233,7 +233,7 @@ export function TeamBuilder({ data, onClose, onPickSpecies }: Props) {
 
     const out = new Map<string, string>();
     for (const p of time) {
-      const sp = especiePor.get(p.speciesId);
+      const sp = PokemonPor.get(p.speciesId);
       if (!sp) continue;
       const fast = [...sp.fastMoves, ...sp.eliteFastMoves]
         .map((id) => porId.get(id))
@@ -257,7 +257,7 @@ export function TeamBuilder({ data, onClose, onPickSpecies }: Props) {
       out.set(p.speciesId, `${nome(best.fast)} + ${nome(best.charged)}${elite}`);
     }
     return out;
-  }, [goal, time, especiePor, data, language]);
+  }, [goal, time, PokemonPor, data, language]);
 
   /** Ja tenho este? A comparacao e por ESPECIE — o time pede um bicho, nao um IV. */
   const tenho = useMemo(() => {
@@ -505,7 +505,7 @@ export function TeamBuilder({ data, onClose, onPickSpecies }: Props) {
 
           <div style={{ display: "grid", gap: 8, marginTop: 10 }}>
             {time.map((p, i) => {
-              const sp = especiePor.get(p.speciesId);
+              const sp = PokemonPor.get(p.speciesId);
               if (!sp) return null;
               const moves = goal === "pvp" ? movesetsPvp.get(p.speciesId) : movesets.get(p.speciesId);
               const jaTenho = tenho.has(p.speciesId);

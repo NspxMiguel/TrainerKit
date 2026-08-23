@@ -74,7 +74,7 @@ describe("contextos que dao a mesma resposta viram um só", () => {
     expect(doRocket.contexts).toEqual(["rocket"]);
   });
 
-  it("todo Pokémon devolve pelo menos um grupo", () => {
+  it("todo especie devolve pelo menos um grupo", () => {
     // Inclusive os que não têm golpe nenhum no dataset: a tela não pode receber
     // uma lista vazia e ficar sem nada pra desenhar.
     for (const id of ["eternatus", "machamp", "blissey", "pidgey", "shedinja"]) {
@@ -166,7 +166,7 @@ describe("a unificação tem que ACONTECER de verdade, e não só existir", () =
   });
 
   it("Venusaur — o que ele abriu — deixa de ter quatro botões", () => {
-    // Não é um caso especial: é o Pokémon da captura, e o que provava que a
+    // Não é um caso especial: é a especie da captura, e o que provava que a
     // regra não estava fazendo nada.
     expect(gruposDe("venusaur").length).toBeLessThan(4);
   });

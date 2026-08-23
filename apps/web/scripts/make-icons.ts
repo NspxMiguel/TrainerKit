@@ -215,7 +215,7 @@ function roundedRectSdf(
  * Opcao 8a do documento de exploracao, e a razao dela existir esta escrita la:
  * "A Poké Ball está fora — a forma (esfera com faixa equatorial e botão
  * central) é marca registrada da Nintendo/Niantic". O ovo diz "aqui nasce um
- * Pokemon" sem tomar emprestada forma de ninguem.
+ * especie" sem tomar emprestada forma de ninguem.
  *
  * ── Por que redesenhado em SDF, e nao rasterizado do SVG ───────────────────
  *

@@ -43,7 +43,7 @@ describe("peneira do PS", () => {
     expect(lerPs("96/96 PS")).toEqual({ atual: 96, max: 96 });
   });
 
-  it("le o Pokemon desmaiado", () => {
+  it("le a especie desmaiado", () => {
     // "0 / 172 PS": o atual pode ser zero, e e justamente quem acabou de sair de
     // uma raide que a pessoa vai escanear.
     expect(lerPs("0 / 172 PS")).toEqual({ atual: 0, max: 172 });

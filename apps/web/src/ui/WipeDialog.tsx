@@ -32,9 +32,9 @@ export function WipeDialog({ onClose }: { onClose: () => void }) {
    * Quem nao guarda colecao nao perde colecao.
    *
    * A lista dizia "a sua coleção inteira" pra quem escolheu modo so consulta e
-   * nunca salvou um Pokemon. Alem de errado, enfraquece o aviso: uma lista com
+   * nunca salvou uma especie. Alem de errado, enfraquece o aviso: uma lista com
    * um item falso ensina a nao ler a lista. Mesma coisa com o botao de backup —
-   * baixar um arquivo com zero Pokemon dentro nao e rede de seguranca nenhuma.
+   * baixar um arquivo com zero especie dentro nao e rede de seguranca nenhuma.
    *
    * ⚠️ CONTA TODAS AS CONTAS, e nao so a aberta.
    *

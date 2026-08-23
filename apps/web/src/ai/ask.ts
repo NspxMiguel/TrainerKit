@@ -39,7 +39,7 @@ export interface CollectionFact {
    *
    * ⚠️ `ivTotal` é 0 nesses casos porque os `ivs` são zeros de preenchimento.
    * Quem monta o texto tem que checar ISTO antes de escrever o número — foi
-   * assim que a Pokédex respondeu "O IV do Bulbasaur do jogador é 0" pra um
+   * assim que a Especies respondeu "O IV do Bulbasaur do jogador é 0" pra um
    * bicho que ninguém mediu.
    */
   semIv: boolean;
@@ -56,7 +56,7 @@ export interface CollectionFact {
 /**
  * A colecao virada em fatos, pronta pra virar contexto.
  *
- * Limitada a 60 Pokemon por chamada: uma colecao de 500 estouraria o contexto e
+ * Limitada a 60 especie por chamada: uma colecao de 500 estouraria o contexto e
  * a conta de quem paga.
  *
  * ⚠️ COMO EU ESCOLHIA ERRADO: eu mandava os 60 de MAIOR IV, com a justificativa
@@ -130,7 +130,7 @@ export function collectionFacts(
   return [...porIv.slice(0, topo), ...porIv.slice(-(limit - topo))];
 }
 
-const SYSTEM = `Você é o assistente do TrainerKit, um app de Pokémon GO.
+const SYSTEM = `Você é o assistente do TrainerKit, um app de o jogo.
 
 Você recebe a coleção do jogador já avaliada pelo app: IV, nível, PC, veredito
 (investir/evoluir/guardar/transferir) e a posição de cada um nas três ligas de
@@ -139,17 +139,17 @@ PvP entre as 4.096 combinações possíveis de IV — posição 1 é a melhor.
 Responda a pergunta usando SÓ esses dados.
 
 Regras rígidas:
-- Nunca invente números, Pokémon, movesets ou mecânicas. Se a resposta não está
+- Nunca invente números, especie, movesets ou mecânicas. Se a resposta não está
   nos dados, diga que não sabe.
 - Posição menor é melhor. Um #12 na Great é excelente; um #3000 é ruim.
 - Se o cabeçalho disser que você está vendo só parte da coleção, responda pelo
   que viu e avise numa frase curta que olhou só os extremos. Nunca diga "o
   melhor que você tem" ou "o pior que você tem" como se tivesse visto todos.
 - Não chame um IV de bom ou ruim pelo número solto: 100% é perfeito, 0% é o
-  pior possível, e a média de um Pokémon selvagem é perto de 49%.
+  pior possível, e a média de uma especie selvagem é perto de 49%.
 - Quando perguntarem "qual o IV", responda em PORCENTAGEM, que é o que a tela
   mostra em letra grande. A fração de 45 vem depois, entre parênteses.
-- "IV NÃO informado" quer dizer que o jogador nunca mediu aquele Pokémon.
+- "IV NÃO informado" quer dizer que o jogador nunca mediu aquele especie.
   NUNCA diga que o IV dele é 0 — diga que falta escanear.
 - Não gere, descreva nem ofereça imagens.
 - Responda SEMPRE no idioma pedido no cabeçalho, nunca no idioma que você achou
@@ -158,13 +158,13 @@ Regras rígidas:
   resposta, sem virar tabela.
 - Nada de saudação nem de "espero ter ajudado".`;
 
-/** Monta o contexto compacto. Uma linha por Pokemon, sem JSON — gasta menos. */
+/** Monta o contexto compacto. Uma linha por especie, sem JSON — gasta menos. */
 function asContext(facts: readonly CollectionFact[], total: number): string {
   const cabecalho =
     facts.length < total
-      ? `O jogador tem ${total} Pokémon. Você está vendo ${facts.length}: os de maior ` +
+      ? `O jogador tem ${total} especie. Você está vendo ${facts.length}: os de maior ` +
         `e os de menor IV. O meio da coleção não chegou até você.\n`
-      : `Coleção completa do jogador, ${total} Pokémon:\n`;
+      : `Coleção completa do jogador, ${total} especie:\n`;
 
   return (
     cabecalho +
@@ -222,7 +222,7 @@ export interface AskOptions {
  *
  * ⚠️ "Responda no idioma da pergunta" parecia bastar e nao basta. Perguntei
  * "vale purificar" — portugues — e a resposta veio em espanhol: ""Purificar" se
- * refiere a la funcion de purificar un Pokemon...". Duas palavras que existem
+ * refiere a la funcion de purificar un especie...". Duas palavras que existem
  * identicas nos dois idiomas nao carregam informacao suficiente pro modelo
  * decidir, e ele chutou.
  *

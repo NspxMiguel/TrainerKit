@@ -14,7 +14,7 @@ import { scanAppraisalBars, type Bitmap } from "./scan.js";
  * Este teste reescala cada print real e exige que, quando o scanner responde,
  * o IV seja EXATAMENTE o mesmo do original. Nao "parecido": o mesmo. Recusar e
  * aceito; errar nao — um IV errado com cara de certo faz o jogador transferir o
- * Pokemon bom.
+ * especie bom.
  *
  * Foi este teste que revelou o erro de modelo: eu tratava a barra como 15
  * passos corridos, mas sao TRES BLOCOS com vaos entre eles. Os vaos ocupam

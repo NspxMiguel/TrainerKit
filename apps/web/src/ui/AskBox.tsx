@@ -19,7 +19,7 @@ interface Props {
  * A caixa de perguntas sobre a colecao.
  *
  * Fica na aba Colecao porque e sobre a colecao — perguntar "qual o meu melhor"
- * numa tela que nao e a dos seus Pokemon seria estranho.
+ * numa tela que nao e a dos seus especie seria estranho.
  *
  * So aparece com chave configurada. Um campo morto dizendo "configure a IA nos
  * ajustes" seria propaganda ocupando espaco de quem nao pediu.

@@ -35,7 +35,7 @@ const TIERS: readonly RaidTier[] = [1, 3, 5, "mega"];
 /**
  * "Com os MEUS, eu derrubo esse chefe?"
  *
- * Todo site de Pokemon lista os melhores counters do jogo. Isso e util uma vez
+ * Todo site de especie lista os melhores counters do jogo. Isso e util uma vez
  * e inutil sempre depois, porque a resposta nunca muda e quase nunca e sobre
  * voce — de nada adianta saber que o melhor counter e um Mega Rayquaza se voce
  * nao tem um.
@@ -101,7 +101,7 @@ export function RaidCounters({ boss, data, onClose }: Props) {
   );
 
   /**
-   * Cada Pokemon entra com o melhor moveset DELE contra este chefe.
+   * Cada especie entra com o melhor moveset DELE contra este chefe.
    *
    * O app nao sabe quais golpes o jogador tem equipado — a tela de avaliacao
    * nao mostra isso. Entao a conta e "o melhor que ele pode ter", e a tela diz

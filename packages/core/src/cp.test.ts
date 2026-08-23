@@ -173,7 +173,7 @@ describe("integridade do dataset", () => {
 
   // Verificacao INDEPENDENTE dos stats base. Tudo o mais neste arquivo confere
   // o dataset contra o mesmo codigo que o consome; isto confere contra uma
-  // formula externa. O Pokemon GO deriva a stamina do HP da serie principal por
+  // formula externa. O o jogo deriva a stamina do HP da serie principal por
   //     baseStamina = floor(1.75 * HP + 50)
   // Se o ETL um dia ler o campo errado do GAME_MASTER, este teste pega — os
   // outros nao pegariam, porque continuariam internamente consistentes.

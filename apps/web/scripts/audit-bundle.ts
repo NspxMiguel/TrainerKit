@@ -24,7 +24,7 @@ const DIST = join(HERE, "..", "dist");
  *
  * Todas sao arte propria, geradas por `scripts/make-icons.ts` a partir dos
  * tokens do app: quadrado arredondado com o gradiente da marca e as tres barras.
- * Nao ha nenhuma imagem de Pokemon aqui, e nao pode haver.
+ * Nao ha nenhuma imagem de especie aqui, e nao pode haver.
  */
 const ALLOWED_IMAGES = new Set([
   "icon-192.png",
@@ -44,7 +44,7 @@ const ALLOWED_IMAGES = new Set([
 
 const IMAGE_EXT = new Set([".png", ".jpg", ".jpeg", ".webp", ".gif", ".avif", ".bmp"]);
 
-/** Nomes que denunciam sprite de Pokemon, mesmo com extensao inocente. */
+/** Nomes que denunciam sprite de especie, mesmo com extensao inocente. */
 const SUSPECT = /pokemon|sprite|pokeapi|pogo_assets|artwork|serebii|pokemondb/i;
 
 async function walk(dir: string): Promise<string[]> {

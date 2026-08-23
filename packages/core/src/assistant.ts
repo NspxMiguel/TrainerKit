@@ -9,7 +9,7 @@ import type { BaseStats, IVs } from "./types.js";
  *
  * Ele NAO e um modelo de linguagem e nao inventa nada: cada frase sai de um
  * numero que o app ja calculou. Isso e escolha, nao limitacao — uma opiniao
- * sobre um Pokemon precisa ser verificavel, senao vira palpite bonito. Toda
+ * sobre uma especie precisa ser verificavel, senao vira palpite bonito. Toda
  * observacao carrega o dado que a sustenta, e a interface mostra os dois juntos.
  *
  * O que ele faz e o que um amigo que manja faria: olhar os numeros e dizer o que
@@ -83,7 +83,7 @@ export function opine(input: AssistantInput): Opinion {
   //
   // Antes as duas regras disparavam juntas e se contradiziam — o Bulbasaur
   // recebia "Equilibrado, serve pros dois" E "Fraco nos dois" na mesma tela.
-  // Dizer que um Pokemon fraco e "equilibrado" e tecnicamente verdade e
+  // Dizer que uma especie fraco e "equilibrado" e tecnicamente verdade e
   // praticamente inutil.
   const weak = baseStats.atk < 150 && bulk(baseStats) < 300;
 

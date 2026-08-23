@@ -13,11 +13,11 @@ import { tetoDePowerUp, useSetup } from "../onboarding/setup.ts";
 import { useCollection } from "./collection.ts";
 
 /**
- * Quantos Pokemon pedem uma decisao hoje.
+ * Quantos especie pedem uma decisao hoje.
  *
  * ── Por que isto virou modulo, em vez de mais um calculo na barra ───────────
  *
- * O documento de desktop poe um selo com esse numero ao lado de "Pokédex" na
+ * O documento de desktop poe um selo com esse numero ao lado de "Especies" na
  * barra lateral. O numero ja existia — a Home calcula ele — mas dentro de um
  * `useMemo` que devolve muito mais coisa (a fila ordenada, o melhor, os
  * perfeitos), e a barra nao tem como alcancar aquilo.
@@ -45,7 +45,7 @@ import { useCollection } from "./collection.ts";
  * O que conta como "pede decisao".
  *
  * ⚠️ `descobrir` VEM PRIMEIRO e a ordem e a da fila. Enquanto o IV nao for
- * medido, nenhum dos outros vereditos daquele Pokemon vale — e escanear um
+ * medido, nenhum dos outros vereditos daquele especie vale — e escanear um
  * print custa menos que qualquer uma das outras tres acoes.
  */
 export const PEDEM_ACAO: readonly Action[] = [

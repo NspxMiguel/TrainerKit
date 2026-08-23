@@ -91,8 +91,8 @@ export interface Dataset {
   /** Nome oficial do golpe por idioma: `moveNames["pt-BR"]["counter_fast"]`. */
   moveNames?: Record<string, Record<string, string>>;
   /**
-   * A categoria da Pokédex por idioma e número: `categoryNames["pt-BR"]["1"]`
-   * é "Pokémon Semente". Vem dos textos do próprio jogo.
+   * A categoria do catalogo por idioma e número: `categoryNames["pt-BR"]["1"]`
+   * é "especie Semente". Vem dos textos do próprio jogo.
    *
    * ⚠️ Ausente numa build publicável — ver `INCLUIR_CATEGORIA` no ETL. Quem lê
    * tem que tratar a ausência, não assumir que sempre há categoria.
@@ -245,7 +245,7 @@ export function useDataset(): DatasetState {
 }
 
 /**
- * O maior nível que um Pokémon pode APARENTAR — e não o maior que se compra.
+ * O maior nível que uma especie pode APARENTAR — e não o maior que se compra.
  *
  * ⚠️ Existem dois tetos e confundi-los é o defeito que este acessor evita:
  *
@@ -254,7 +254,7 @@ export function useDataset(): DatasetState {
  *
  *   Este aqui (51) é até onde dá pra OBSERVAR. O Melhor Amigo soma um nível na
  *   hora da batalha e o jogo mostra o PC já com o bônus. Um solver de nível que
- *   parasse em 50 não acharia solução nenhuma pro Pokémon mais investido da
+ *   parasse em 50 não acharia solução nenhuma pro especie mais investido da
  *   coleção — e a tela diria "esses números não existem juntos" pra um print
  *   perfeitamente correto.
  *
@@ -274,9 +274,9 @@ export function tetoObservavel(version: Dataset["version"]): number {
  * marca essas entradas com `cosmeticOf`, apontando para a forma canônica —
  * ninguém estava lendo.
  *
- * O sintoma apareceu no contador da Pokédex: "Vistos: 9" com oito espécies. O
- * Venusaur entrava duas vezes, como `venusaur` (aberto no Modo Pokédex) e como
- * `venusaur_normal` (o da coleção). Numa Pokédex o contador de vistos é metade
+ * O sintoma apareceu no contador da Especies: "Vistos: 9" com oito espécies. O
+ * Venusaur entrava duas vezes, como `venusaur` (aberto no Modo lente) e como
+ * `venusaur_normal` (o da coleção). Numa Especies o contador de vistos é metade
  * da razão de ela existir — errar nele é errar no que a tela promete.
  *
  * Devolve uma função e não um Map porque quem conta faz isso dentro de um laço:

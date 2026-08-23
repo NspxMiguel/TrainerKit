@@ -151,7 +151,7 @@ export default defineConfig({
            *
            * O `tesseract.js` em si sao ~63 kB, mas ele arrasta 5,9 MB de wasm e
            * modelo de `public/ocr/` na primeira vez que alguem anexa um print.
-           * Em pedaco proprio e com import dinamico, quem so consulta a Pokedex
+           * Em pedaco proprio e com import dinamico, quem so consulta a Especies
            * nunca chega perto disso.
            */
           tesseract: ["tesseract.js"],
@@ -265,7 +265,7 @@ export default defineConfig({
         name: "TrainerKit",
         short_name: "TrainerKit",
         description:
-          "Decide o que fazer com cada Pokemon: investir, evoluir, guardar ou transferir.",
+          "Decide o que fazer com cada especie: investir, evoluir, guardar ou transferir.",
         lang: "pt-BR",
         /*
          * `#0A0C10`, do handoff — e nao `#07080B`, que estava aqui sem

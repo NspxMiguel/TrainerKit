@@ -16,7 +16,7 @@ import { TYPE_NAMES, typeColor, typeInk } from "../sprites/provider.ts";
  * apareceram porque eu parei pra CALCULAR:
  *
  *   --tk-succ  #0b8a5f  3.76   o "POWER UP" do cartao da home, 10px
- *   --tk-pri   #2e6be6  4.15   "Pokédex" na barra de abas, 11px
+ *   --tk-pri   #2e6be6  4.15   "Especies" na barra de abas, 11px
  *   --tk-txt3  0.56     4.08   o cinza de TODA legenda do app
  *
  * Os tres no tema claro, que e o que se usa na rua com sol na tela. E o

@@ -130,7 +130,7 @@ export function setProvider(next: AiProvider): void {
   store.set(PROVIDER_KEY, next);
 
   // Saindo do local: solta a GPU. Um modelo de 1 GB parado na memoria de video
-  // deixa o resto do telefone lento, e ninguem liga isso a um app de Pokemon.
+  // deixa o resto do telefone lento, e ninguem liga isso a um app de especie.
   if (anterior === "local" && next !== "local") void unloadEngine();
 
   emit();
@@ -257,7 +257,7 @@ export async function chat(
    * O porteiro vem ANTES de tudo, inclusive antes da IA local.
    *
    * Na local nao ha cota nem chave pra proteger, mas ha o proposito do app: um
-   * assistente de Pokemon que escreve codigo Python nao e um recurso, e um
+   * assistente de especie que escreve codigo Python nao e um recurso, e um
    * vazamento de escopo. E se o filtro so valesse na compartilhada, bastaria
    * trocar o provedor pra furar — e ai ele nao seria um filtro, seria um enfeite.
    */

@@ -25,13 +25,13 @@ import { beep, setVoiceOn, speak, speechSupported, stopSpeaking, voiceOn } from 
 interface Props {
   data: Dataset;
   onClose: () => void;
-  /** Abrir a ficha completa da especie — a Pokedex e a porta, nao o destino. */
+  /** Abrir a ficha completa da especie — a Especies e a porta, nao o destino. */
   onOpenSpecies: (s: DatasetSpecies) => void;
   /**
    * Abrir a lista dos capturados.
    *
    * "kd a colection ai na pokedex?" — o aparelho contava "CAPTURADOS: 6" e o
-   * numero nao levava a lugar nenhum. Uma Pokedex de verdade e uma LISTA que
+   * numero nao levava a lugar nenhum. Uma Especies de verdade e uma LISTA que
    * voce percorre; o contador sozinho e a capa de um livro que nao abre.
    */
   onOpenMine?: (() => void) | undefined;
@@ -40,7 +40,7 @@ interface Props {
 const LIGAS = ["great", "ultra", "master"] as const;
 
 /**
- * Modo Pokedex.
+ * Modo lente.
  *
  * "quero q pareça muito com uma pokedex, até em aparencia, em funcionalidades e
  * etc". Duas frentes, e as duas estao aqui:
@@ -54,7 +54,7 @@ const LIGAS = ["great", "ultra", "master"] as const;
  *   publicar. Trocar `data-skin="device"` por `"plain"` devolve o visual autoral
  *   e nada mais quebra. Fica um atributo, nao uma refatoracao.
  *
- * FUNCIONALIDADE — o que uma Pokedex de verdade faz:
+ * FUNCIONALIDADE — o que uma Especies de verdade faz:
  *   · registra VISTOS separado de CAPTURADOS, e mostra os dois contadores
  *   · navega POR NUMERO, com anterior e proximo
  *   · le a ficha em voz alta
@@ -111,7 +111,7 @@ export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
   /**
    * A lista navegavel, em ordem de numero.
    *
-   * E o que permite anterior/proximo: uma Pokedex e uma lista ordenada, e pular
+   * E o que permite anterior/proximo: uma Especies e uma lista ordenada, e pular
    * de bicho em bicho e metade do prazer de ter uma. Formas cosmeticas ficam
    * fora — dezoito Unown com a mesma ficha nao e navegacao, e ruido.
    */
@@ -123,7 +123,7 @@ export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
     [data.species],
   );
 
-  /** Registra como visto ao abrir a ficha. E o que a Pokedex do jogo faz. */
+  /** Registra como visto ao abrir a ficha. E o que a Especies do jogo faz. */
   useEffect(() => {
     if (alvo) markSeen(alvo.id);
   }, [alvo]);
@@ -132,7 +132,7 @@ export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
    * ⚠️ CONTA ESPÉCIE, e não linha da coleção.
    *
    * Era `new Set(items.map(o => o.speciesId))`, e o `speciesId` pode ser uma
-   * forma COSMÉTICA: `venusaur` e `venusaur_normal` são o mesmo Pokémon com
+   * forma COSMÉTICA: `venusaur` e `venusaur_normal` são o mesmo especie com
    * dois ids. Quem tivesse os dois via "Capturados" contar 2. Ver `canonico`.
    */
   const canon = useMemo(() => canonico(data.species), [data.species]);
@@ -146,12 +146,12 @@ export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
    * VISTOS inclui os CAPTURADOS, porque nao existe capturar sem ter visto.
    *
    * O aparelho mostrava "VISTOS: 0 · CAPTURADOS: 6", que e impossivel em
-   * qualquer Pokedex. O registro de vistos so era escrito ao identificar
+   * qualquer Especies. O registro de vistos so era escrito ao identificar
    * alguem AQUI dentro, e a colecao mora noutro lugar (IndexedDB) — dois
    * numeros verdadeiros cada um por si, mentindo juntos.
    *
    * A uniao e calculada na hora em vez de gravar os capturados no registro de
-   * vistos: transferir um Pokemon nao deveria "desver" a especie, e gravar
+   * vistos: transferir uma especie nao deveria "desver" a especie, e gravar
    * tornaria isso irreversivel. Aqui o numero se corrige sozinho.
    */
   const vistosTotal = useMemo(() => {
@@ -225,10 +225,10 @@ export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
     /*
      * ⚠️ A CATEGORIA ABRE A LOCUÇÃO — é a assinatura do aparelho da série.
      *
-     * "Bulbasaur, o Pokémon Semente." Qualquer pessoa reconhece essa frase de
-     * ouvido, e sem ela a locução soa como relatório em vez de Pokédex. Era a
+     * "Bulbasaur, a especie Semente." Qualquer pessoa reconhece essa frase de
+     * ouvido, e sem ela a locução soa como relatório em vez de Especies. Era a
      * única peça que faltava, e ela ficou pendente por meses porque é texto da
-     * Pokémon Company, então é decisão de quem assume o risco. Foi decidido.
+     * especie Company, então é decisão de quem assume o risco. Foi decidido.
      *
      * Vem dos textos do PRÓPRIO JOGO, nos dez idiomas (`pokemon_category_0001`),
      * e não da PokeAPI — o CSV de lá não tem português nem russo. Ver
@@ -324,7 +324,7 @@ export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
     setResposta(null);
   };
 
-  /** Anterior e proximo por numero — navegacao de Pokedex de verdade. */
+  /** Anterior e proximo por numero — navegacao de Especies de verdade. */
   const pular = (passo: number) => {
     if (!alvo) return;
     const i = ordenadas.findIndex((s) => s.id === alvo.id);
@@ -470,7 +470,7 @@ export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
        * peca que precisava de uma build separada — e a decisao "publicar ou nao"
        * volta a ser dele, a qualquer momento, sem refatoracao.
        *
-       * O que NAO se perde: continua sendo um aparelho de Pokedex em
+       * O que NAO se perde: continua sendo um aparelho de Especies em
        * funcionalidade — visor, contadores de vistos e capturados, navegacao por
        * numero, leitura em voz alta, camera. O que muda e a casca.
        *
@@ -508,11 +508,11 @@ export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
         </button>
       </div>
 
-      {/* O contador de vistos e capturados: a razao de existir uma Pokedex. */}
+      {/* O contador de vistos e capturados: a razao de existir uma Especies. */}
       {/*
         BETA junto dos contadores.
         
-        O modo Pokedex e a tela com mais coisa nova e menos rodagem: camera,
+        O modo lente e a tela com mais coisa nova e menos rodagem: camera,
         identificacao por foto, voz neural e conversa com a IA — cada uma com um
         jeito proprio de falhar em aparelho que eu nao tenho. Marcar isso e mais
         honesto que deixar a pessoa descobrir sozinha que a camera nao abriu.
@@ -721,13 +721,13 @@ export function DexMode({ data, onClose, onOpenSpecies, onOpenMine }: Props) {
             "tem q ter como ver os pokemon no modo pokedex ... igual pokemon
             original."
 
-            Dava pra chegar num Pokemon so por busca ou por foto. Faltava a
+            Dava pra chegar num especie so por busca ou por foto. Faltava a
             porta mais obvia: ABRIR o aparelho e começar a passar. Este botao
             entra no primeiro e dali e anterior/proximo, que ja existiam no
             codigo e nao tinham botao.
 
             Vem antes da camera de propósito: apontar exige ter o bicho na
-            frente, e folhear e o que se faz sentado — que e quando a Pokedex
+            frente, e folhear e o que se faz sentado — que e quando a Especies
             de verdade e usada.
           */}
           {ordenadas[0] && (

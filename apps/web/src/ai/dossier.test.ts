@@ -57,7 +57,7 @@ describe("escala dos atributos", () => {
 
   it("a faixa concorda com o genero do atributo", () => {
     /*
-     * "Sua defesa é mediano" — resposta real da Pokedex, na tela, depois de eu
+     * "Sua defesa é mediano" — resposta real da Especies, na tela, depois de eu
      * ter consertado o resto. O modelo nao errou portugues: ele copiou a palavra
      * do meu texto, que vinha sempre no masculino. Concordancia e do texto que
      * eu escrevo, nao do modelo que o le.
@@ -158,8 +158,8 @@ describe("aguento de ginasio no texto", () => {
 
 describe("o dossie responde as perguntas que ja falharam", () => {
   it("traz os melhores do jogo, pra pergunta 'qual o melhor?'", () => {
-    // "O dossiê não fornece informações sobre outros Pokémon" foi a resposta
-    // real da Pokedex antes desta lista existir.
+    // "O dossiê não fornece informações sobre outros especie" foi a resposta
+    // real da Especies antes desta lista existir.
     expect(dossie("dragonite")).toContain("Melhores defensores de ginásio do jogo");
   });
 

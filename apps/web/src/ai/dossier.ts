@@ -13,7 +13,7 @@ import type { OwnedPokemon } from "../storage/collection.ts";
 /**
  * Tudo que o app sabe sobre uma especie, em texto, pra IA ler.
  *
- * Nasceu de um defeito claro: perguntar a Pokedex "e bom pra segurar ginasio?"
+ * Nasceu de um defeito claro: perguntar a Especies "e bom pra segurar ginasio?"
  * devolvia "Nao tem esse dado" — sendo que o app CALCULA exatamente isso, no
  * `rankDefenders`. A resposta estava a uma funcao de distancia e o modelo nao
  * tinha como saber, porque o que chegava a ele era so a locucao de oito linhas,
@@ -25,7 +25,7 @@ import type { OwnedPokemon } from "../storage/collection.ts";
  * (deixar o modelo inventar), e AUMENTAR o que ele recebe.
  *
  * A regra de ouro do app continua de pe, e e o que separa isto de um chatbot de
- * Pokemon: TODO numero daqui foi calculado por `packages/core`. O modelo escolhe
+ * especie: TODO numero daqui foi calculado por `packages/core`. O modelo escolhe
  * o que dizer, nunca de onde tirar.
  *
  * O texto e cru e sem traducao de propósito: o modelo le qualquer idioma, e
@@ -318,7 +318,7 @@ export function speciesDossier(
      * A pergunta e justa, e ela se responde sozinha: 58.633 nao e pontos de vida, nem segundos, nem golpes. E um
      * INDICE: defesa x vida dividido pelo dano medio que a tabela de tipos
      * deixa ele sofrer. Sozinho nao quer dizer nada; so serve pra comparar um
-     * Pokemon com outro.
+     * especie com outro.
      *
      * Eu escrevia "aguento 58.633" como se fosse medida, e o modelo repetiu do
      * jeito que chegou. Mesmo erro de classe do "ataque 129" sem escala: numero
@@ -371,14 +371,14 @@ export function speciesDossier(
       pt
         ? `Como defensor de ginásio: índice de aguento ${num(meu)}. ` +
             `ESTE NÚMERO NÃO TEM UNIDADE — não é vida, não é tempo, não é dano. É uma escala de ` +
-            `comparação entre Pokémon: defesa x vida (${num(comoDefensor.bulk)}) ` +
+            `comparação entre especie: defesa x vida (${num(comoDefensor.bulk)}) ` +
             `dividido pelo dano que a tabela de tipos deixa ele sofrer, no nível ${NIVEL_REF} com IV perfeito.` +
             `${emPercentual} ` +
             `Dano médio que recebe pela tabela de tipos: ${comoDefensor.incomingAverage.toFixed(2)}x. ` +
             `Lembre: num defensor o ATAQUE não conta — ele não escolhe golpe nem mira fraqueza.`
         : `As a gym defender: bulk index ${num(meu)}. ` +
             `THIS NUMBER HAS NO UNIT — it is not HP, not time, not damage. It is a comparison scale ` +
-            `between Pokemon: defense x stamina (${num(comoDefensor.bulk)}) divided by the damage the ` +
+            `between especie: defense x stamina (${num(comoDefensor.bulk)}) divided by the damage the ` +
             `type chart lets it take, at level ${NIVEL_REF} with perfect IVs.` +
             `${emPercentual} ` +
             `Average damage taken from the type chart: ${comoDefensor.incomingAverage.toFixed(2)}x. ` +
@@ -391,10 +391,10 @@ export function speciesDossier(
   /*
    * O TOPO do jogo entra junto.
    *
-   * "O dossiê não fornece informações sobre outros Pokémon, então não é possível
+   * "O dossiê não fornece informações sobre outros especie, então não é possível
    * comparar" — foi a resposta que ele levou ao perguntar "o melhor pokemon para
    * segurar ginasio?". E o modelo estava certo: eu mandava a especie sozinha.
-   * Perguntar "qual o melhor" e a pergunta mais natural que existe numa Pokedex,
+   * Perguntar "qual o melhor" e a pergunta mais natural que existe numa Especies,
    * e ela precisa de uma lista pra ser respondida.
    *
    * Cinco nomes de cada, calculados aqui — nao uma opiniao minha sobre quem e
@@ -550,7 +550,7 @@ export function speciesDossier(
    * ⚠️ PELO CANÔNICO, senão a IA jura que ele não tem o bicho.
    *
    * A comparação era de id cru, e a coleção guarda o id da FORMA: o Venusaur
-   * dele está salvo como `venusaur_normal` e a ficha aberta pela Pokédex é
+   * dele está salvo como `venusaur_normal` e a ficha aberta pela Especies é
    * `venusaur`. O dossiê saía sem a linha "o jogador tem 1", e o modelo então
    * responde com toda a confiança que ele não tem nenhum — a mesma família do
    * defeito de tratar IV ausente como IV zero.
@@ -565,7 +565,7 @@ export function speciesDossier(
             /*
              * ⚠️ IV NÃO INFORMADO NÃO É IV ZERO.
              *
-             * A Pokédex respondia "O IV do Bulbasaur do jogador é 0" sobre um
+             * A Especies respondia "O IV do Bulbasaur do jogador é 0" sobre um
              * bicho que só tinha sido marcado como "eu tenho esse" — IV não
              * informado virava IV zero.
              *
@@ -588,7 +588,7 @@ export function speciesDossier(
              * ⚠️ OS DOIS NÚMEROS, e a porcentagem primeiro.
              *
              * A tela mostrava 39/45 e 87%, o dossiê mandava só o 39, e a
-             * Pokédex respondeu "39". Não
+             * Especies respondeu "39". Não
              * estava errada; estava falando outra língua. Quem joga fala em
              * porcentagem, e é isso que a própria tela do app mostra em letra
              * grande.
@@ -615,7 +615,7 @@ export function speciesDossier(
      *   "Não há Bulbasaur na coleção do jogador, então não há o que evoluir."
      *
      * Tecnicamente verdadeiro e completamente inutil. Quem esta lendo a ficha de
-     * uma especie na Pokedex esta perguntando sobre A ESPECIE — se vale a pena
+     * uma especie na Especies esta perguntando sobre A ESPECIE — se vale a pena
      * evoluir um Bulbasaur, em geral. A ausencia na colecao e contexto, nao
      * impedimento.
      *
@@ -636,9 +636,9 @@ export function speciesDossier(
 }
 
 /**
- * O que a Pokedex pode e nao pode fazer com o dossie.
+ * O que a Especies pode e nao pode fazer com o dossie.
  *
- * A referencia e a Pokedex da serie: la o aparelho responde qualquer pergunta
+ * A referencia e a Especies da serie: la o aparelho responde qualquer pergunta
  * sobre o bicho, no tom de quem esta lendo um registro. Entao o tom aqui e esse
  * — direto, informativo, sem "olá" e sem "espero ter ajudado".
  *
@@ -647,9 +647,9 @@ export function speciesDossier(
  * torna a resposta util, mas nao pode inventar um numero que nao esta ali. E a
  * mesma linha que o app inteiro respeita.
  */
-export const DEX_SYSTEM = `Você é a Pokédex do TrainerKit, um app de Pokémon GO.
+export const DEX_SYSTEM = `Você é a Especies do TrainerKit, um app de o jogo.
 
-Sua memória sobre este Pokémon inclui: atributos, tabela de tipos, aguento como
+Sua memória sobre esta especie inclui: atributos, tabela de tipos, aguento como
 defensor de ginásio, posição nos rankings de raide e das três ligas, melhores
 golpes, linha evolutiva, o que o jogador tem dele, e os melhores do jogo em
 defesa e em ataque de raide para comparação.
@@ -658,11 +658,11 @@ Responda a pergunta a partir dele.
 
 Regras rígidas:
 - NUNCA cite o dossiê, "os dados fornecidos", "as informações que recebi" ou
-  qualquer coisa parecida. Você É a Pokédex: esses números são a SUA memória, não
+  qualquer coisa parecida. Você É a Especies: esses números são a SUA memória, não
   um documento que alguém te passou. Diga "Dragonite segura bem", nunca "de
   acordo com o dossiê, Dragonite segura bem".
 - O ÍNDICE DE AGUENTO não tem unidade. Não é vida, não é tempo, não é dano — é
-  só uma escala pra comparar Pokémon entre si. Então NUNCA escreva "aguenta
+  só uma escala pra comparar especie entre si. Então NUNCA escreva "aguenta
   58.633" e pare aí: quem lê pergunta "58.633 o quê?", e está certo em
   perguntar. Diga sempre a comparação, que é o que significa alguma coisa: "é a
   melhor parede do jogo", "aguenta metade do que um Blissey aguenta", "51% do
@@ -679,13 +679,13 @@ Regras rígidas:
   mediana, alta). Ao falar daquele atributo, use ESSA palavra, como ela está
   escrita. Usar outra é tão errado quanto inventar o número — e vale também no
   meio de uma frase elogiosa: se a defesa está marcada "mediana", ela não vira
-  "alta" só porque o resto do Pokémon é bom, e não vira "alta" por estar na mesma
+  "alta" só porque o resto da especie é bom, e não vira "alta" por estar na mesma
   frase que outro atributo que é alto. Cite atributos medianos separadamente ou não os
   cite.
 - Não invente adjetivo pra número nenhum. Se a memória não deu a palavra, dê o
   número e siga.
 - Comparações só valem contra o que está na sua memória (o Blissey de
-  referência, os melhores do jogo). Não compare com um Pokémon que você não
+  referência, os melhores do jogo). Não compare com uma especie que você não
   recebeu.
 - Não gere, descreva nem ofereça imagens.
 - Tom de aparelho: direto, informativo, sem saudação e sem se despedir.
@@ -760,7 +760,7 @@ export function dexSystem(language: string): string {
     `"mediano/mediana" = average, "alto/alta" = high, "muito alto/alta" = very high, ` +
     `"índice de aguento" = bulk index.\n` +
     `Keep each band's meaning exactly — never promote a low or average stat to a high one ` +
-    `while translating, and never call a Pokemon strong in a stat the notes marked as ` +
+    `while translating, and never call a especie strong in a stat the notes marked as ` +
     `average.\n\n${DEX_SYSTEM}`
   );
 }

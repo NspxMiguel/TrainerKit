@@ -7,13 +7,13 @@ import { planejarFaxina, type BichoFaxina, type EspecieFaxina } from "./faxina.j
 import type { BaseStats, IVs } from "./types.js";
 
 /**
- * ⚠️ Estes testes protegem Pokémon, não código.
+ * ⚠️ Estes testes protegem especie, não código.
  *
  * A faxina é a única tela do app cujo erro é IRREVERSÍVEL do lado do jogo: uma
  * sugestão errada que a pessoa siga não tem desfazer, não tem suporte e não tem
  * backup. Então o que está travado aqui não é comportamento "esperado" no
  * sentido usual — é a lista do que o motor **nunca** pode fazer, e cada caso
- * abaixo custaria um Pokémon de verdade se regredisse.
+ * abaixo custaria uma especie de verdade se regredisse.
  */
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -80,7 +80,7 @@ describe("planejarFaxina — o que ela nunca pode sugerir", () => {
      *
      * Quem entrou pelo "eu tenho esse" tem `ivs` zerado porque o tipo exige três
      * números — não porque alguém mediu zero. Se o motor ler esses zeros, ele
-     * produz uma lista PRÉ-MARCADA de transferência cheia de Pokémon que podem
+     * produz uma lista PRÉ-MARCADA de transferência cheia de especie que podem
      * ser 100%. É o único defeito aqui capaz de fazer alguém perder um shiny
      * seguindo o conselho do app.
      */
@@ -122,7 +122,7 @@ describe("planejarFaxina — o que ela nunca pode sugerir", () => {
      * este teste existe. Uma lista em lote que so lesse o veredito devolveria o
      * bicho PRE-MARCADO numa tela com outros vinte, e a pessoa perderia por
      * distracao exatamente o que ela tinha decidido guardar. E o unico lugar do
-     * app em que ignorar esta marca custa um Pokemon.
+     * app em que ignorar esta marca custa uma especie.
      */
     const meu = bicho("rattata", LIXO, { meuMotivo: true });
     const outro = bicho("rattata", LIXO);
@@ -144,7 +144,7 @@ describe("planejarFaxina — o que ela nunca pode sugerir", () => {
   it("NUNCA sugere espécie que o dataset não conhece", () => {
     // Base customizada, forma regional fora do índice, export antigo. Sem stats
     // base não há veredito nem stat product — e a saída honesta é a que não
-    // custa um Pokémon.
+    // custa uma especie.
     const orfao = bicho("especie_que_nao_existe", LIXO);
     const r = planejar([orfao], []);
 
@@ -195,7 +195,7 @@ describe("planejarFaxina — as quatro coroas", () => {
      * Em Great o 100% costuma ser PIOR: ataque alto infla o PC e obriga a parar
      * num nível mais baixo, perdendo defesa e PS. Um motor que guardasse "o de
      * maior IV" transferiria com toda a confiança do mundo o melhor Azumarill
-     * de liga da pessoa — que é o Pokémon mais caro de repor da coleção dela,
+     * de liga da pessoa — que é a especie mais caro de repor da coleção dela,
      * porque depende de sorteio.
      */
     const cemPorCento = bicho("azumarill", PERFEITO);
@@ -251,10 +251,10 @@ describe("planejarFaxina — as quatro coroas", () => {
 });
 
 describe("planejarFaxina — invariantes", () => {
-  it("todo Pokémon sai em exatamente uma das duas listas", () => {
+  it("todo especie sai em exatamente uma das duas listas", () => {
     /*
      * A partição total é o que deixa a tela dizer "não vou sugerir estes 12" com
-     * um número que fecha. Sem ela, um Pokémon podia sumir das duas listas — e
+     * um número que fecha. Sem ela, uma especie podia sumir das duas listas — e
      * o sintoma seria a soma não bater com a coleção, que é exatamente o tipo de
      * coisa que ninguém confere numa lista de 300.
      */

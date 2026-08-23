@@ -26,7 +26,7 @@ export function BetaBadge() {
    *
    * A versao anterior deixava isso no CSS, com `right: 0`, e o comentario de la
    * dizia por que: o selo vivia no canto direito do cabecalho da tela de IV.
-   * Quando ele passou a existir tambem no Modo Pokedex — canto ESQUERDO — a
+   * Quando ele passou a existir tambem no Modo lente — canto ESQUERDO — a
    * mesma regra jogou um balao de 277px pra 204px fora da tela.
    *
    * Escolher o outro lado so inverteria qual tela quebra. Entao ninguem escolhe:
@@ -107,7 +107,7 @@ export function BetaBadge() {
         O balao sai do `body`, nao daqui.
 
         Ele ja era `position: fixed`, o que basta pra posicao mas NAO pra
-        pintura: no Modo Pokedex o selo mora dentro de `.tk-dexdev-counters`,
+        pintura: no Modo lente o selo mora dentro de `.tk-dexdev-counters`,
         que tem `z-index: 1` e portanto abre um contexto de empilhamento — o
         `z-index: 30` do balao passava a valer so DENTRO daquela caixinha, e a
         tela verde do aparelho, que e irma dela, cobria o balao inteiro.

@@ -37,7 +37,7 @@ interface Props {
   data: Dataset;
   onClose: () => void;
   /**
-   * O Pokemon salvo, quando a tela e aberta pela Colecao.
+   * A especie salvo, quando a tela e aberta pela Colecao.
    *
    * Sem isto o app pedia pra escanear DE NOVO um bicho que ja estava salvo com
    * IV, PC e nivel — o dado estava no IndexedDB e a tela abria em branco.
@@ -274,7 +274,7 @@ export function IVCalculator({ species, data, onClose, owned }: Props) {
         O caminho de quem ainda NAO capturou.
 
         Aqui a folha de avaliacao nao existe: as tres barras so aparecem depois
-        que o Pokemon esta na mochila, e a decisao de gastar a bola dourada e
+        que a especie esta na mochila, e a decisao de gastar a bola dourada e
         tomada na tela de encontro, com o PC. Sem isto, a unica saida da tela
         era anexar um print que ainda nao da pra tirar.
 

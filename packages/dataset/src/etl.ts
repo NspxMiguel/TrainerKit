@@ -62,7 +62,7 @@ interface TetoDeNivel {
   cap: number;
   /** `defaultCpBoostAdditionalLevel` — o bonus de Melhor Amigo. */
   bonusMelhorAmigo: number;
-  /** `cap + bonusMelhorAmigo`. O maior nivel que um Pokemon pode APARENTAR. */
+  /** `cap + bonusMelhorAmigo`. O maior nivel que uma especie pode APARENTAR. */
   capObservavel: number;
 }
 
@@ -157,7 +157,7 @@ function extractCpm(templates: Template[], teto: TetoDeNivel): number[] {
    * O array vem longo (hoje 80 entradas, acompanhando o teto de treinador) e
    * com plato no fim. Cortar em 50 pareceria mais "correto", mas quebraria o
    * solver de nivel: um Melhor Amigo esta em 51 e o `cpmForLevel` levantaria
-   * RangeError justamente no Pokemon mais investido da colecao.
+   * RangeError justamente no especie mais investido da colecao.
    */
   const trimmed = (raw as number[]).slice(0, teto.capObservavel);
   const noCap = trimmed[teto.cap - 1];
@@ -237,7 +237,7 @@ interface OutSpecies {
    * Altura em decimetros e peso em hectogramas, como o jogo guarda.
    *
    * Sao MEDIDAS, nao texto: 16 decimetros e "1,6 m" na tela. Entraram porque a
-   * ficha da Pokedex sem altura e peso nao parece ficha de Pokedex, e porque
+   * ficha da Especies sem altura e peso nao parece ficha de Especies, e porque
    * medida e fato — diferente das descricoes do jogo, que sao obra escrita e por
    * isso ficam de fora deste app.
    *
@@ -298,7 +298,7 @@ async function resolveSizes(species: OutSpecies[]): Promise<number> {
        *
        * Achado auditando: `eternatus_eternamax` vem com peso 0 no CSV — a forma
        * de chefe de Dynamax nao tem peso publicado. Guardar isso faria a ficha
-       * da Pokedex anunciar "0 quilos", que e pior que nao dizer nada. Sem o
+       * da Especies anunciar "0 quilos", que e pior que nao dizer nada. Sem o
        * valor, a linha inteira simplesmente nao aparece.
        */
       if (h <= 0 || w <= 0) continue;
@@ -308,7 +308,7 @@ async function resolveSizes(species: OutSpecies[]): Promise<number> {
     console.warn(
       `AVISO: nao consegui buscar altura/peso (${
         err instanceof Error ? err.message : String(err)
-      }). A ficha da Pokedex vai sem essas linhas.`,
+      }). A ficha da Especies vai sem essas linhas.`,
     );
     return 0;
   }
@@ -366,7 +366,7 @@ async function resolveSpriteIds(species: OutSpecies[]): Promise<number> {
     [/-male$/, "-m"],
   ];
 
-  // Indice sem separadores: os Pokemon Paradoxo vem colados no GAME_MASTER
+  // Indice sem separadores: os especie Paradoxo vem colados no GAME_MASTER
   // ("GREAT_TUSK" vira "greattusk" porque o proprio pokemonId e "GREATTUSK")
   // enquanto o PokeAPI hifeniza ("great-tusk"). Comparar sem separador casa os
   // dois sem precisar de lista.
@@ -456,11 +456,11 @@ async function fetchMoveNames(
 }
 
 /**
- * A CATEGORIA da Pokedex — "o Pokemon Semente".
+ * A CATEGORIA da Especies — "a especie Semente".
  *
  * ⚠️ ISTO E UM INTERRUPTOR DE BUILD, e ele e a razao de existir deste bloco.
  *
- * `dex.ts` tem um compromisso escrito de nao embarcar texto da Pokemon Company,
+ * `dex.ts` tem um compromisso escrito de nao embarcar texto da especie Company,
  * e a categoria E texto deles. A decisao de incluir foi do dono desta build, que
  * a mantem pessoal e nao publicada — a mesma decisao que ja vale pros sprites
  * oficiais, e registrada no plano ("build pessoal, com sprites").
@@ -491,7 +491,7 @@ async function fetchCategories(
   if (!INCLUIR_CATEGORIA) return {};
 
   // Uma categoria por DEX, nao por forma: Charizard e Charizard Mega X sao o
-  // mesmo "Pokemon Chamas", e o jogo so publica a chave por numero.
+  // mesmo "especie Chamas", e o jogo so publica a chave por numero.
   const dexes = Array.from(new Set(species.map((s) => s.dex))).sort((a, b) => a - b);
   const out: Record<string, Record<string, string>> = {};
 
@@ -560,8 +560,8 @@ function markCosmeticForms(species: OutSpecies[]): void {
    *
    * E daqui que saiam os ids cosmeticos na colecao de quem usa o app. Evoluir
    * grava `evolvesInto[0]`, entao quem evoluiu um Ivysaur ficou com um
-   * `venusaur_normal` guardado — e ai a ficha aberta pela Pokedex (que navega
-   * `venusaur`) nao reconhecia o proprio Pokemon da pessoa. Era esse o caminho
+   * `venusaur_normal` guardado — e ai a ficha aberta pela Especies (que navega
+   * `venusaur`) nao reconhecia o proprio especie da pessoa. Era esse o caminho
    * que fazia a mesma especie aparecer duas vezes na colecao.
    *
    * As telas ja canonizam na leitura, e continuam — dado velho existe. Isto
@@ -765,7 +765,7 @@ function extractMoves(templates: Template[]): { fast: OutMove[]; charged: OutMov
  * Dynamax**. No jogo isso e propriedade do INDIVIDUO (vem de ter sido pego numa
  * Batalha Max), nao da especie — 2.450 das 2.466 especies tem `breadTierGroup`,
  * o que so diz "se um dia esta especie aparecer, o custo dela e este". Um app
- * que transformasse isso em "este Pokemon pode Dynamax" estaria inventando.
+ * que transformasse isso em "esta especie pode Dynamax" estaria inventando.
  */
 interface DadosDynamax {
   ligado: boolean;
@@ -886,7 +886,7 @@ async function main(): Promise<void> {
    * 40 por tipo, nao 15.
    *
    * Quinze cobria a tela de rankings, onde ninguem le a 16a linha. Mas a ficha
-   * da Pokedex diz "entre os atacantes de Lutador, é o número N" — e com limite
+   * da Especies diz "entre os atacantes de Lutador, é o número N" — e com limite
    * 15 essa frase nunca aparecia pra Machamp, Conkeldurr, Hariyama: as quinze
    * primeiras vagas sao todas de lendario e Mega. O jogador comum nao tem
    * nenhum dos quinze, e a linha mais util da ficha sumia justamente pra quem
@@ -934,7 +934,7 @@ async function main(): Promise<void> {
     /** Nome oficial do golpe por idioma. O `name` em ingles fica no proprio golpe. */
     moveNames,
     /**
-     * "o Pokemon Semente", por idioma e por numero da Pokedex.
+     * "a especie Semente", por idioma e por numero da Especies.
      *
      * Vazio quando `INCLUIR_CATEGORIA` esta desligada — ver a nota la. O app
      * so fala da categoria quando ela existe aqui.

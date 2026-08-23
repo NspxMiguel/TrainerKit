@@ -165,7 +165,7 @@ describe("ranking de PvP", () => {
 
   it("a busca binaria da o mesmo nivel que a varredura linear", () => {
     // `maxLevelForCap` foi de varredura linear para busca binaria por causa do
-    // custo (4.096 chamadas por liga, uma vez por Pokemon da colecao). A troca
+    // custo (4.096 chamadas por liga, uma vez por especie da colecao). A troca
     // so e valida porque o PC cresce junto com o nivel; se algum dia a formula
     // deixar de ser monotona, e este teste que avisa.
     const linear = (b: BaseStats, ivs: IVs, cap: number): number | null => {

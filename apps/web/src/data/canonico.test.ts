@@ -11,20 +11,20 @@ import { canonico, type DatasetSpecies } from "./useDataset.ts";
  * ⚠️ O DEFEITO QUE ISTO FECHA, e ele já tinha sido "consertado" uma vez.
  *
  * A mesma espécie entrava duas vezes na coleção. Naquela vez o conserto foi a
- * ficha procurar o Pokémon salvo POR ESPÉCIE quando não recebia o registro
+ * ficha procurar a especie salvo POR ESPÉCIE quando não recebia o registro
  * pronto.
  * Só que a comparação era `owned.speciesId === species.id`, de id cru — e o
  * GAME_MASTER escreve a mesma espécie de dois jeitos: a coleção guarda
- * `venusaur_normal` (que foi o que o scanner gravou) e a Pokédex navega
+ * `venusaur_normal` (que foi o que o scanner gravou) e a Especies navega
  * `venusaur` (a lista só mostra formas canônicas).
  *
- * Resultado: abrir Venusaur pela Pokédex mostrava a ficha como se ele não
+ * Resultado: abrir Venusaur pela Especies mostrava a ficha como se ele não
  * tivesse nenhum — sem veredito, sem "Ver o IV do meu", e oferecendo "Eu tenho
  * esse", que criaria o segundo Venusaur outra vez. O conserto anterior só
  * funcionava quando as duas escritas coincidiam.
  *
  * Os mesmos ids apareciam em mais dois lugares: o contador de VISTOS da
- * Pokédex (dizia 9 para oito espécies) e o dossiê que alimenta a IA (saía sem
+ * Especies (dizia 9 para oito espécies) e o dossiê que alimenta a IA (saía sem
  * a linha "o jogador tem 1", e aí o modelo afirma que ele não tem).
  */
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -49,11 +49,11 @@ describe("canonico", () => {
 
   /*
    * ⚠️ Alola, Galar e Hisui NÃO podem colapsar: têm stats e tipos próprios, e
-   * juntá-las com a original faria o app decidir sobre o Pokémon errado. O ETL
+   * juntá-las com a original faria o app decidir sobre a especie errado. O ETL
    * separa por DADO (mesma dex + mesmos stats + mesmos tipos = cosmética), não
    * por lista de sufixos — este teste é quem garante que a régua não afrouxou.
    */
-  it("NÃO colapsa forma regional, que é outro Pokémon", () => {
+  it("NÃO colapsa forma regional, que é outro especie", () => {
     for (const id of ["rattata_alola", "vulpix_alola", "ninetales_alola"]) {
       const existe = data.species.some((s) => s.id === id);
       if (!existe) continue;

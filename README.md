@@ -1,6 +1,6 @@
 # TrainerKit
 
-**A Pokémon GO companion that decides, instead of just showing numbers.**
+**A companion app for Pokémon GO that decides, instead of just showing numbers.**
 
 There are enough calculators already. You attach the appraisal screenshot, "96.4%" shows up, and the real question is still unanswered: *so what?* Worth powering up? Worth evolving? Can I transfer it without regretting it?
 
@@ -34,13 +34,13 @@ Follows the system's light/dark theme automatically.
 | **Raids** | DPS, TDO and an efficiency rating per moveset, plus the best counters **from your own collection**. If it says you need three people, you need three people. |
 | **PvP** | Stat product under each league's CP cap, and best movesets per league. Labelled as what it is: stat product, not a tier list. |
 | **Gyms** | Who actually holds one: defense × stamina, divided by what the type chart lets it take. |
-| **Pokédex mode** | The device. Point the camera, hear the entry read out loud, ask questions about what's on screen. |
-| **10 languages** | pt-BR, English, Spanish (Spain and LatAm), French, German, Italian, Japanese, Korean, Russian — interface, Pokémon names and move names. |
+| **Lens mode** | The device. Point the camera, hear the entry read out loud, ask questions about what's on screen. |
+| **10 languages** | pt-BR, English, Spanish (Spain and LatAm), French, German, Italian, Japanese, Korean, Russian — interface, species names and move names. |
 
 ## The math is checked against the game, not against itself
 
 - Max CP at level 40 with perfect IVs, for species whose value is public (Machamp 3056, Dragonite 3792, Tyranitar 3834, Rhydon 3179).
-- Base stats are validated through an **independent** path — the conversion Pokémon GO makes from the main series (`baseStamina = floor(1.75 × HP + 50)`). Without it, an ETL bug would go unnoticed by staying internally consistent.
+- Base stats are validated through an **independent** path — the conversion the game makes from the main series (`baseStamina = floor(1.75 × HP + 50)`). Without it, an ETL bug would go unnoticed by staying internally consistent.
 - Level cap is **55**, not 50. The CPM table has 55 entries and ends at `0.8653`; half levels come from a quadratic mean, not an arithmetic one.
 - Raid boss CP reproduces the game's: tier 5 Mewtwo gives 54,148.
 
@@ -58,7 +58,7 @@ Your collection lives in your browser (IndexedDB). It is never uploaded. No anal
 
 Something only leaves the device when you use the AI or the voice — and the in-app privacy screen names every service and exactly what it receives. Both can be turned off, and both have an on-device option that needs no internet at all.
 
-The app also **ships no Pokémon artwork**. By default each species shows a badge in its type colour with two initials; images are an optional source you point at yourself.
+The app also **ships no creature artwork**. By default each species shows a badge in its type colour with two initials; images are an optional source you point at yourself.
 
 ## Requirements
 
@@ -118,7 +118,7 @@ It works exclusively from screenshots you provide, and **does not access, modify
 
 ## License
 
-MIT — see [LICENSE](LICENSE). The license covers this repository's code; game data and Pokémon names belong to their respective owners.
+MIT — see [LICENSE](LICENSE). The license covers this repository's code; game data and the game's names belong to their respective owners.
 
 ---
 

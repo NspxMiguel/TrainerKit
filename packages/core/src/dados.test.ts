@@ -94,7 +94,7 @@ describe("PC maximo, contra valores publicados", () => {
 });
 
 describe("tabela de tipos", () => {
-  it("usa as constantes do Pokemon GO, nao as da serie principal", () => {
+  it("usa as constantes do o jogo, nao as da serie principal", () => {
     // 1.6 e 0.625, nao 2 e 0.5. Errar isto mudaria TODO ranking de raide, todo
     // counter e a tela de ginasio inteira, sem quebrar nada visivelmente.
     expect(SUPER_EFFECTIVE).toBeCloseTo(1.6, 6);
@@ -109,7 +109,7 @@ describe("tabela de tipos", () => {
     expect(effectiveness(chart, order, "fighting", ["normal"])).toBeCloseTo(SUPER_EFFECTIVE, 6);
 
     /*
-     * NAO EXISTE IMUNIDADE no Pokemon GO.
+     * NAO EXISTE IMUNIDADE no o jogo.
      *
      * Eu escrevi este teste esperando zero em Eletrico contra Terrestre, do jeito
      * que funciona na serie principal, e o dataset me corrigiu com 0.390625. Esta
@@ -144,7 +144,7 @@ describe("tabela de tipos", () => {
 
 describe("altura e peso", () => {
   /*
-   * Da ficha oficial, e sao os numeros que a Pokedex fala.
+   * Da ficha oficial, e sao os numeros que a Especies fala.
    *
    * O ETL guarda em decimetros e hectogramas (como o jogo), e a tela divide por
    * dez. Errar a unidade daria "17 metros de altura" sem quebrar nada.
@@ -237,7 +237,7 @@ describe("aguento de ginasio", () => {
   });
 
   it("Dragonite fica entre 40% e 60% do Blissey", () => {
-    // A frase que a Pokedex fala hoje: "51% do aguento do Blissey". Se a conta
+    // A frase que a Especies fala hoje: "51% do aguento do Blissey". Se a conta
     // mudar, esta faixa denuncia antes de a tela mentir.
     const razao = aguento("dragonite") / aguento("blissey");
     expect(razao).toBeGreaterThan(0.4);
@@ -266,7 +266,7 @@ describe("integridade do dataset", () => {
     }
   });
 
-  it("nao ha numero de Pokedex negativo nem duplicidade de id", () => {
+  it("nao ha numero de Especies negativo nem duplicidade de id", () => {
     const ids = new Set<string>();
     for (const s of data.species) {
       expect(s.dex, s.id).toBeGreaterThan(0);
@@ -291,8 +291,8 @@ describe("integridade do dataset", () => {
  * `ivysaur.evolvesInto` sai como `["venusaur_normal"]`. E dai que saiam os ids
  * cosmeticos na colecao de quem usa o app — evoluir grava `evolvesInto[0]`,
  * entao quem evoluiu um Ivysaur ficava com um `venusaur_normal` guardado, e a
- * ficha aberta pela Pokedex (que navega `venusaur`) nao reconhecia o proprio
- * Pokemon da pessoa.
+ * ficha aberta pela Especies (que navega `venusaur`) nao reconhecia o proprio
+ * especie da pessoa.
  *
  * O ETL reescreve isso pro canonico. Este teste e a torneira: se alguem mexer
  * ali e a reescrita sumir, o defeito volta em silencio, uma evolucao por vez.

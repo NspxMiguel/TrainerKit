@@ -70,7 +70,7 @@ export interface VerdictInput {
   level: number;
   cpm: CpmTable;
   levelCap: number;
-  /** Espécies para as quais este Pokemon evolui. Vazio = e o estagio final. */
+  /** Espécies para as quais esta especie evolui. Vazio = e o estagio final. */
   evolvesInto: readonly string[];
   /** Doces que o jogador tem. `null` quando nao informado. */
   candy?: number | null;
@@ -156,7 +156,7 @@ export function pedeMotivo(action: Action): boolean {
  *
  * ⚠️ A segunda condicao tambem CURA dado velho, e essa e a razao de ela viver
  * aqui e nao na tela. Enquanto o app deixava marcar "Guardar" como feito, ele
- * gravou `doneAction: "guardar"` em Pokemon reais. Tirar so o botao deixaria
+ * gravou `doneAction: "guardar"` em especie reais. Tirar so o botao deixaria
  * essas linhas exibindo "✓ FEITO" pra sempre, sem nenhum lugar pra desmarcar —
  * trocar um botao que nao faz nada por um estado do qual nao se sai.
  *
@@ -310,7 +310,7 @@ export function decide(input: VerdictInput): Verdict {
    * soltar um bicho especifico.
    *
    * Peso 0.7, e nao mais: Gigantamax e da ESPECIE, nao deste individuo. Nao
-   * transforma um 20% em bom Pokemon — o `iv.fraco` continua com 0.8 e continua
+   * transforma um 20% em bom especie — o `iv.fraco` continua com 0.8 e continua
    * vencendo, que e o certo. O que ele impede e um caso especifico: um
    * Snorlax medio ser mandado embora sem ninguem mencionar que ele e uma das 31
    * especies que fazem Gigantamax, e que o jogo cobra caro pra repor.
@@ -360,7 +360,7 @@ export function decide(input: VerdictInput): Verdict {
   // Um teste pegou isto: um Machoke 100% recebia "investir", porque o sinal de
   // PvP pesava mais que o de evolucao. Mas recomendar investir numa
   // pre-evolucao e recomendar a acao errada — o que decide o futuro daquele
-  // Pokemon e o Machamp que ele vira, e toda analise feita sobre a forma atual
+  // especie e o Machamp que ele vira, e toda analise feita sobre a forma atual
   // fica obsoleta no instante em que ele evolui.
   //
   // Os outros sinais continuam no rastro: eles explicam POR QUE vale a pena

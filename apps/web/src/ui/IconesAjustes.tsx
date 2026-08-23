@@ -10,7 +10,7 @@
  *
  * ── Por que a cor é fixa por assunto, e não a cor da espécie ─────────────────
  *
- * Este é o único canto do app onde a cor NÃO segue o Pokémon, e é de propósito.
+ * Este é o único canto do app onde a cor NÃO segue a especie, e é de propósito.
  * A cor aqui é um índice: o violeta é sempre Aparência, o azul é sempre Idioma.
  * É assim que se acha uma linha em Ajustes sem ler — pela posição e pela cor. Se
  * a paleta mudasse com o bicho em destaque, a única coisa que os selos fazem de

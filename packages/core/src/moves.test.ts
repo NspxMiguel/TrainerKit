@@ -110,7 +110,7 @@ describe("contexto Rocket", () => {
     expect(melhor.bait?.id).toBe("cross_chop");
   });
 
-  it("nota 1 e do melhor do proprio Pokemon, nao do jogo", () => {
+  it("nota 1 e do melhor do proprio especie, nao do jogo", () => {
     const machamp = data.species.find((s) => s.name === "Machamp")!;
     const ranked = rankMovesets(
       machamp.fastMoves.map(move),

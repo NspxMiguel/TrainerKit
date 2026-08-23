@@ -92,7 +92,7 @@
    * O handoff desenhou numa moldura de 874px de altura, onde 58px sao 6,6% da
    * tela. Num iPhone de 812 sao 7,1%, e com o transbordo de 4px do item ativo
    * mais a sombra a barra ocupa uns 74px de fato. Numa home que ele quer sem
-   * rolagem, cada pixel aqui sai do Pokemon.
+   * rolagem, cada pixel aqui sai da especie.
    *
    * O que NAO encolheu: o alvo de toque continua com 50px de altura por 100+ de
    * largura, bem acima dos 44px minimos.
@@ -242,7 +242,7 @@
    *
    * "botao ainda bugado", com a captura da barra: o ícone e o rótulo de
    * "Ajustes" saem oliva claro sobre a pílula amarela, enquanto "Início" e
-   * "Pokédex" saem quase pretos sobre a barra. Medido: **12,4:1 nas inativas
+   * "Especies" saem quase pretos sobre a barra. Medido: **12,4:1 nas inativas
    * contra 5,15:1 na ativa**. Selecionar uma aba a fazia DESBOTAR.
    *
    * A causa é a mesma dos dois erros anteriores desta pílula, um nível acima: eu
@@ -281,7 +281,7 @@
  * colorido; com ele, vira um objeto.
  *
  * ⚠️ O violeta e reservado pra ACAO DO APP. Conteudo usa a cor do TIPO do
- * Pokemon — misturar os dois foi o que fez a interface antiga parecer tres apps.
+ * especie — misturar os dois foi o que fez a interface antiga parecer tres apps.
  */
 .tk-btn--primary {
   height: 54px;
@@ -425,7 +425,7 @@
  * FULL-BLEED, 474px, com a saudacao DENTRO dele.
  *
  * A versao antiga era um cartao de 160px com a saudacao acima. A diferenca nao
- * e de tamanho: no desenho novo a primeira coisa que a tela mostra e o Pokemon
+ * e de tamanho: no desenho novo a primeira coisa que a tela mostra e a especie
  * que pede decisao hoje, ocupando meia tela, e o nome do treinador flutua sobre
  * ele. A pergunta "o que eu faco agora?" passa a ser respondida antes de
  * qualquer rolagem.
@@ -508,7 +508,7 @@
    * O hero herdava `gap: 16px` de uma regra antiga de cartao. Como flex com UM
    * filho no fluxo, esse gap nunca aparecia — nao ha entre o que separar. Virar
    * grade de duas faixas fez ele existir: 16px de faixa branca entre a arte e o
-   * bloco de decisao, tirados justamente do espaco do Pokemon.
+   * bloco de decisao, tirados justamente do espaco da especie.
    *
    * Mesma familia do `align-items` logo abaixo, e da regra de cascata que ja
    * mordeu tres vezes neste arquivo: trocar `display` sem revisar o que o bloco
@@ -935,7 +935,7 @@
    * filhos no fluxo e a conta fechava. A ficha da especie tem TRES: esta barra
    * com a seta de voltar entra antes. Com a arte fixada em `grid-row: 1`, o
    * posicionamento automatico empurrou a barra pra linha 2 e o bloco do nome
-   * pra uma linha 3 implicita — a seta foi parar EMBAIXO do Pokemon, e a faixa
+   * pra uma linha 3 implicita — a seta foi parar EMBAIXO da especie, e a faixa
    * da arte caiu de ~185px pra 89. O Venusaur saiu com 159px de lado onde
    * cabiam 326.
    *
@@ -986,7 +986,7 @@
  * ⚠️ 22px, e nao os 34px do handoff.
  *
  * La a saudacao ficava ACIMA do hero, sozinha, e era legitimamente o maior
- * tipo da tela. Aqui ela vive DENTRO dele, a 40px do nome do Pokemon — e duas
+ * tipo da tela. Aqui ela vive DENTRO dele, a 40px do nome da especie — e duas
  * manchetes empilhadas nao formam hierarquia, formam empate. Sendo que o
  * assunto da tela nao e o cumprimento; e o bicho.
  */
@@ -1081,11 +1081,11 @@
    *
    * O bloco de decisao ja e um flex com `gap: 8px`; as margens do paragrafo
    * somavam 28px POR CIMA disso. Num hero de 288px, 28px e um quinto do que
-   * sobra pro Pokemon — e o bloco media 178px onde a soma das partes dava 146.
+   * sobra pro especie — e o bloco media 178px onde a soma das partes dava 146.
    *
    * Nao aparecia enquanto a arte passava por baixo do texto: o espaco extra era
    * preenchido pelo proprio bicho. Com a arte terminando onde o texto comeca,
-   * cada pixel de margem esquecida virou pixel de Pokemon a menos.
+   * cada pixel de margem esquecida virou pixel de especie a menos.
    */
   margin: 0;
 }
@@ -1228,7 +1228,7 @@
    *
    * A saturacao continua aqui porque e material, nao cor: 130% em cima dos 180%
    * da barra ja e o teto — mais que isso e a cor de tras vaza acesa pela lente e
-   * a pilula muda de cor a cada Pokemon.
+   * a pilula muda de cor a cada especie.
    */
   backdrop-filter: blur(8px) saturate(130%);
   -webkit-backdrop-filter: blur(8px) saturate(130%);
@@ -1343,7 +1343,7 @@
    * podem se encaixar ali corretamente."
    *
    * Ele previu o defeito antes de eu ver. Como o fundo do hero e derivado da
-   * PROPRIA especie, todo Pokemon aparece sobre a sua propria cor: o Bulbasaur
+   * PROPRIA especie, todo especie aparece sobre a sua propria cor: o Bulbasaur
    * saia verde sobre verde e simplesmente sumia. O Dragonite escondia isso
    * porque a asa e verde-agua e destoa do corpo laranja — eu testei justamente
    * a especie que nao tinha o problema.
@@ -1592,7 +1592,7 @@
    * A FAIXA DA SAUDACAO: do alto da tela ate o fim da linha "Boa noite, ...".
    *
    * Um token so, lido em tres lugares (piso do hero, recuo da arte e, por
-   * consequencia, onde o nome do Pokemon pode chegar). Sao o respiro do topo
+   * consequencia, onde o nome da especie pode chegar). Sao o respiro do topo
    * mais a linha da saudacao (26px) mais 8 de folga. Escrever nos tres seria
    * pedir pra eles se separarem no dia em que o respiro mudar — foi o que
    * aconteceu com o `--tk-safe-top` da ficha.
@@ -1683,7 +1683,7 @@
  * ⚠️ UM PISO, SIM — mas medido pela SAUDACAO, nao pelo tamanho do bicho.
  *
  * O zero acima continua certo pelo motivo que ele diz: piso escolhido pra o
- * Pokemon ficar bonito e palpite sobre o que os outros blocos ocupam. Este aqui
+ * especie ficar bonito e palpite sobre o que os outros blocos ocupam. Este aqui
  * e outra coisa — e a condicao pra saudacao flutuante nao colidir.
  *
  * Com a saudacao fora do fluxo (ver `.tk-home-topo`), ela ocupa a faixa
@@ -1701,7 +1701,7 @@
  * baixas. A 402x660 (classe iPhone SE) ha ~427px de blocos fixos abaixo do hero
  * (CTA, os dois botoes, a fileira de raide, a barra); sem esta parcela o hero
  * ficava com 233px, o bloco levava 146 e o recuo da arte comia os 87 que
- * sobravam — a arte ficava com ZERO e o Pokemon sumia da home. Com ela a home
+ * sobravam — a arte ficava com ZERO e a especie sumia da home. Com ela a home
  * rola ~100px NESSAS telas, e so nelas: a 402x740 o hero elastico ja passa do
  * piso, entao nada muda e nada rola.
  */
@@ -1730,7 +1730,7 @@
    * secundárias lado a lado (48px)"). Estavam em 62 e 68.
    *
    * Nao e detalhe: os 26px a mais saiam direto do hero, que e o unico bloco
-   * elastico da coluna. O Pokemon estava menor porque dois botoes estavam
+   * elastico da coluna. A especie estava menor porque dois botoes estavam
    * maiores que o desenho.
    *
    * 58 e nao 54 na acao principal porque ela tem DUAS linhas (titulo e
@@ -1749,7 +1749,7 @@
  * A ficha usa O MESMO hero da home, com um modificador.
  *
  * "o app parece tres apps diferentes dependendo da tela." As duas telas mais
- * vistas mostram a mesma coisa — um Pokemon e o que fazer com ele — e mostravam
+ * vistas mostram a mesma coisa — uma especie e o que fazer com ele — e mostravam
  * de dois jeitos: a home com arte gigante e cor da especie, a ficha com um tile
  * de 116px ao lado de um titulo.
  *
@@ -1795,7 +1795,7 @@
  * continua comecando na borda, a silhueta comeca abaixo do entalhe.
  *
  * ⚠️ E por isso que a altura do hero soma o mesmo token. Se so a arte descesse,
- * a faixa dela perderia os ~63px do entalhe e o Pokemon encolheria de novo —
+ * a faixa dela perderia os ~63px do entalhe e a especie encolheria de novo —
  * "pokemon muito pequeno" ja foi reclamacao dele uma vez. Somando os dois, os
  * 38svh do handoff passam a valer pro hero VISIVEL e a arte fica do tamanho
  * desenhado; o que cresce e so o pedaco escondido debaixo da barra de status.
@@ -1999,7 +1999,7 @@
  * de 252px, que existe pra cobrir o topo quando o hero NAO sobe (caso do aviso
  * de instalacao) — sobe junto dentro desse contexto. O `z-index: -1` dele
  * passa a valer so contra os irmaos de dentro, e a faixa cobria os primeiros
- * 245px do Pokemon.
+ * 245px da especie.
  *
  * Nos filhos, o contexto continua sendo a raiz: o texto sobe acima do hero
  * (que e `position: relative` sem z-index) e a faixa continua embaixo de tudo,
@@ -2049,8 +2049,8 @@
  *
  * "favor sem scroll na tela de inicio": a coluna reparte a altura entre a
  * saudacao, o hero e a fila, e o hero e o unico elastico — cada pixel que um
- * campo de 48px ocupasse aqui sairia direto do Pokemon. E a troca seria ruim
- * duas vezes, porque no celular a aba Pokedex esta a UM toque na barra de
+ * campo de 48px ocupasse aqui sairia direto da especie. E a troca seria ruim
+ * duas vezes, porque no celular a aba Especies esta a UM toque na barra de
  * baixo, com a busca dela ja no lugar.
  *
  * Na tela larga a sobra e horizontal e nao vertical: o campo ocupa o vazio a
@@ -2066,7 +2066,7 @@
   /*
    * ⚠️ UMA LINHA, com o corpo se ajustando a largura da tela.
    *
-   * Duas linhas custavam ~30px, e cada pixel aqui sai do Pokemon — o hero e o
+   * Duas linhas custavam ~30px, e cada pixel aqui sai da especie — o hero e o
    * unico bloco elastico da coluna. `clamp` com `vw` resolve sem cortar nome
    * nenhum: em tela estreita a letra encolhe ate caber, em tela larga ela para
    * de crescer. Continua duas linhas se nem assim couber (alemao, russo).
@@ -2075,7 +2075,7 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   /* 26 e nao 34: o handoff reservava a escala 34 pra saudacao porque ela era o
-     maior tipo da tela. Hoje o nome do Pokemon no hero tem 38 e e o assunto —
+     maior tipo da tela. Hoje o nome da especie no hero tem 38 e e o assunto —
      duas manchetes do mesmo tamanho nao formam hierarquia, formam empate. */
   font: 700 clamp(19px, 5.7vw, 26px)/1.15 var(--tk-font);
   letter-spacing: -0.5px;
@@ -2086,7 +2086,7 @@
    * bosta. tanto com foto tanto com boa madrugada."
    *
    * Com a faixa colorida atras, `--tk-text` deixou de ser seguro: ele e definido
-   * contra o FUNDO DO APP, e o fundo ali agora e o Pokemon. `--tk-accent-topo-ink`
+   * contra o FUNDO DO APP, e o fundo ali agora e a especie. `--tk-accent-topo-ink`
    * e escolhido por luminancia contra essa cor exata, espécie a espécie.
    */
   color: var(--tk-accent-topo-ink, var(--tk-text));
@@ -2099,7 +2099,7 @@
 /*
  * O avatar, com a receita de vidro do handoff — e com a COR DA ESPECIE dentro.
  *
- * E o primeiro elemento fora do hero a mudar de cor com o Pokemon em destaque,
+ * E o primeiro elemento fora do hero a mudar de cor com a especie em destaque,
  * e fica no canto superior direito, que e onde o olho passa primeiro.
  */
 .tk-avatar {
@@ -2215,7 +2215,7 @@
  *
  * O que continua FORA, e por quê:
  *   · o violeta Ultra da acao principal e da aba ativa — e a marca de "aqui se
- *     toca", e tem que ser a mesma em qualquer Pokemon.
+ *     toca", e tem que ser a mesma em qualquer especie.
  *   · as cores de veredito — elas sao o significado, nao o tema.
  */
 .tk-act,
@@ -2260,7 +2260,7 @@
 }
 
 /* Os icones das acoes secundarias na cor legivel da especie, em vez de branco.
-   E o detalhe pequeno que faz a troca de Pokemon ser percebida como TEMA, e nao
+   E o detalhe pequeno que faz a troca de especie ser percebida como TEMA, e nao
    como "aquele cartao ali mudou". */
 .tk-act svg {
   color: var(--tk-accent-fg);
@@ -2319,7 +2319,7 @@
  * "VER MAIS": anel NEUTRO com chevron.
  *
  * Neutro de propósito — ele nao e um veredito, e se pegasse cor de veredito
- * entraria na mesma leitura dos outros seis e viraria "um Pokemon a mais".
+ * entraria na mesma leitura dos outros seis e viraria "uma especie a mais".
  */
 .tk-strip-cell--mais .tk-strip-verdito {
   color: var(--tk-text-3);
@@ -2343,7 +2343,7 @@
  *
  * ⚠️ Eu tinha ligado ele ao acento achando que era "a paleta alcancando o app".
  * Errado: este numero conta VEREDITOS PENDENTES, e veredito e a familia de cor
- * que nunca muda com o tema. Deixa-lo mudar de cor a cada Pokemon em destaque
+ * que nunca muda com o tema. Deixa-lo mudar de cor a cada especie em destaque
  * desfazia a associacao "violeta = coisa que pede decisao".
  *
  * A paleta alcanca o app pelas SUPERFICIES, que e area, e nao pelos rotulos,
@@ -2370,7 +2370,7 @@
    * ⚠️ CINCO COLUNAS FIXAS, e nao `auto-fit`.
    *
    * Tentei `auto-fit` pra fila nao ficar com buracos quando ha menos de cinco
-   * Pokemon, e foi pior: com tres, as tres colunas se esticaram pra ocupar a
+   * especie, e foi pior: com tres, as tres colunas se esticaram pra ocupar a
    * largura toda e os seloes viraram cartoes gordos e espalhados. Coluna vazia
    * e invisivel; coluna esticada nao.
    */
@@ -2551,7 +2551,7 @@
   font: 400 12.5px var(--tk-font);
   color: var(--tk-text-3);
   margin-top: 1px;
-  /* Sem quebrar: "3 Pokémon · em uso" em duas linhas empurrava o botao de
+  /* Sem quebrar: "3 especie · em uso" em duas linhas empurrava o botao de
      renomear pra fora e desalinhava a linha inteira. */
   white-space: nowrap;
   overflow: hidden;
@@ -2569,13 +2569,13 @@
   color: var(--tk-accent-fg);
 }
 
-/* Vermelho só aqui: apagar uma conta leva os Pokémon dela junto, e sem
+/* Vermelho só aqui: apagar uma conta leva os especie dela junto, e sem
    servidor não existe desfazer. */
 .tk-row-acao--perigo {
   color: var(--tk-dang);
 }
 
-/* ─────────────────────────────── o cartao do Modo Pokedex (handoff §3) ─── */
+/* ─────────────────────────────── o cartao do Modo lente (handoff §3) ─── */
 
 /*
  * "tile vermelho 48px (raio 16, gradiente #F87171→#DC2626) com a lente
@@ -2583,7 +2583,7 @@
  *
  * ⚠️ O VERMELHO NAO SEGUE A PALETA DA ESPECIE, e e o unico elemento do app
  * assim. Este cartao anuncia um OBJETO — um aparelho vermelho — e objeto que
- * muda de cor conforme o Pokemon da vez deixa de parecer objeto. A superficie
+ * muda de cor conforme a especie da vez deixa de parecer objeto. A superficie
  * do cartao, essa sim, acompanha o resto do app.
  */
 .tk-dexopen {
@@ -2924,7 +2924,7 @@
 }
 
 /* Vazio sem acao e mais compacto: sem botao ele nao precisa do respiro que
-   separa a frase do alvo de toque, e na home cada pixel sai do Pokemon. */
+   separa a frase do alvo de toque, e na home cada pixel sai da especie. */
 .tk-vazio[data-sem-acao] {
   padding: 18px 16px 8px;
 }
@@ -2968,11 +2968,11 @@
  *
  * O tom neutro vem do React (`--tk-cell-tone`); aqui fica o que e so aparencia:
  * o selo recua e o rotulo sai da cor de veredito, que a 0.11 de alfa seria
- * texto invisivel. Recuar, e nao apagar: o Pokemon continua na colecao e
+ * texto invisivel. Recuar, e nao apagar: a especie continua na colecao e
  * continua clicavel — o que acabou foi a pendencia, nao ele.
  */
 /*
- * ⚠️ 0,86 e nao 0,55 — e o Pokemon deixa de PARECER DEFEITO.
+ * ⚠️ 0,86 e nao 0,55 — e a especie deixa de PARECER DEFEITO.
  *
  * "os bixo fico apagado do nada."
  *
@@ -3003,17 +3003,17 @@
  * alinhamento da placa do nome.
  *
  * O que faltava de verdade era a porta de ENTRADA: nao havia como começar a
- * folhear sem antes achar um Pokemon por busca ou por foto. Isso virou o botao
- * "Folhear a Pokédex" no estado ocioso, e so isso.
+ * folhear sem antes achar uma especie por busca ou por foto. Isso virou o botao
+ * "Folhear a Especies" no estado ocioso, e so isso.
  */
 
 /* ─────────────────────────────────────────────── "Meus" em cartão único ── */
 
 /*
- * ⚠️ UM cartão para a lista inteira, e não um cartão por Pokémon.
+ * ⚠️ UM cartão para a lista inteira, e não um cartão por especie.
  *
  * É o §3 do handoff ("Meus: lista em cartão único, raio 28"), e a razão é de
- * leitura, não de estilo: com um cartão por linha cada Pokémon ganhava borda
+ * leitura, não de estilo: com um cartão por linha cada especie ganhava borda
  * própria, e a tela virava uma pilha de caixas iguais onde o olho conta caixas
  * em vez de ler nomes. Num cartão só, com um fio entre as linhas, a coleção lê
  * como UMA lista — que é o que ela é.
@@ -3098,7 +3098,7 @@
  *
  * Fica na primeira linha, alinhado ao topo junto com o nome — e não no meio
  * vertical do cartão, que é onde ele cairia sozinho quando a terceira linha
- * aparece. Um chip que muda de altura conforme o Pokémon ter ou não ganho de
+ * aparece. Um chip que muda de altura conforme a especie ter ou não ganho de
  * troca faria a coluna da direita dançar de linha em linha.
  */
 .tk-meus .tk-owned-act {
@@ -3144,7 +3144,7 @@
    * ⚠️ O CHIP QUEBRA EM DUAS LINHAS EM VEZ DE COMER O NOME.
    *
    * "Эволюционировать" em versalete mede 169px numa linha de 297 — sobravam 14
-   * para o nome do Pokemon, e 1.422 dos 2.466 nomes truncavam. Em russo a lista
+   * para o nome da especie, e 1.422 dos 2.466 nomes truncavam. Em russo a lista
    * inteira virava reticências.
    *
    * Mesma família do defeito que eu já tinha achado na fila da home
@@ -3238,7 +3238,7 @@
  * A cor da espécie pintava o hero (o topo) e tingia as superfícies dos cartões
  * a 19% — mas entre o fim do gradiente do hero e o primeiro cartão sobrava uma
  * faixa de preto puro, e era ela que ele estava vendo. O app dizia "este
- * Pokémon é verde-água" no topo e esquecia disso no resto da tela.
+ * especie é verde-água" no topo e esquecia disso no resto da tela.
  *
  * ⚠️ A tinta usa `--tk-accent-topo`, e essa escolha é a que torna isto seguro.
  *
@@ -3340,7 +3340,7 @@
 }
 
 /*
- * O `.tk-perguntar` saiu junto com o botão "Perguntar à Pokédex".
+ * O `.tk-perguntar` saiu junto com o botão "Perguntar à Especies".
  *
  * "o perguntar para pokedex, tira isso. deixa uma bolinha voando pela tela
  * inteira do pokemon." O gatilho da IA voltou a ser a bolha flutuante — ver a
@@ -3352,7 +3352,7 @@
  * As ações da linha de coleção viram ÍCONE — e o alvo de toque não encolhe.
  *
  * Escritas por extenso, "Renomear" e "Apagar" comiam a largura da linha: em
- * português "4 Pokémon · em uso" já truncava, e em alemão ("Umbenennen") e
+ * português "4 especie · em uso" já truncava, e em alemão ("Umbenennen") e
  * russo ("Переименовать") o próprio nome da coleção ia junto. Achado varrendo
  * os dez idiomas e medindo truncamento, não olhando.
  */
@@ -3896,7 +3896,7 @@
 
    Quebrar em linhas resolve sem tirar nada — são três sugestões curtas, e duas
    linhas cabem de sobra. A rolagem lateral existe pra fila LONGA e de item
-   igual (a tira de Pokémon da home); aqui os itens são frases, e frase cortada
+   igual (a tira de especie da home); aqui os itens são frases, e frase cortada
    ninguém reconhece pela metade.
 */
 .tk-ask .tk-chips {
@@ -3921,7 +3921,7 @@
   border-radius: 28px;
 }
 
-/* O alternador de vista com a palavra do lado. Ver a nota no `PokedexScreen`. */
+/* O alternador de vista com a palavra do lado. Ver a nota no `EspeciesScreen`. */
 .tk-filter-btn--rotulo {
   width: auto;
   min-width: 44px;
@@ -4190,27 +4190,27 @@
    ═══════════════════════════════════════════════════════════════════════════
 
    Medido em 360×640, que é um Android comum e barato: o hero ficou com **150px**
-   e o Pokémon sumiu — sobraram o nome e o botão sobre um retângulo verde.
+   e a especie sumiu — sobraram o nome e o botão sobre um retângulo verde.
 
    A causa é o desenho da home, e ele está certo pro aparelho que ele mira: o
    hero é o único `flex: 1` da coluna, com piso ZERO, justamente pra ela nunca
    rolar. Numa tela de 812 a sobra é generosa; numa de 640 a sobra é o que
    restou depois da saudação, do botão de escanear, das duas ações, da fila e
-   da barra — e o que restou não cabe um Pokémon.
+   da barra — e o que restou não cabe uma especie.
 
    "sem scroll na tela de inicio" foi um pedido sobre o telefone dele. Levado ao
    pé da letra num aparelho menor, ele produz o oposto do que motivou o pedido:
-   o Pokémon, que é o assunto, é justamente o que desaparece.
+   a especie, que é o assunto, é justamente o que desaparece.
 
    Abaixo de 700px de altura o piso volta: 200px de hero, e a home rola se
-   precisar. Rolagem é um custo pequeno; um hero sem Pokémon não é um hero.
+   precisar. Rolagem é um custo pequeno; um hero sem especie não é um hero.
 */
 @media (max-height: 700px) {
   .tk-home > .tk-hero {
     /*
      * ⚠️ O PISO É DA FAIXA DA ARTE, e não do hero — e essa é a correção.
      *
-     * Eram 200px de hero, escolhidos pra "o Pokémon não sumir". Medido em
+     * Eram 200px de hero, escolhidos pra "a especie não sumir". Medido em
      * 360×640, com o piso valendo: hero 200, bloco de decisão 147, faixa da arte
      * **53px**, e o Hoopa saiu com 77 de lado. Um selo, não um retrato.
      *
@@ -4225,7 +4225,7 @@
      * já dessincronizou três vezes neste arquivo.
      *
      * A home rola, e isso continua sendo o custo aceito aqui: "rolagem é um
-     * custo pequeno; um hero sem Pokémon não é um hero".
+     * custo pequeno; um hero sem especie não é um hero".
      */
     min-height: calc(var(--tk-hero-bloco, 146px) + 150px);
   }
@@ -4382,9 +4382,9 @@
    * Terceira versão desta pílula, e as duas anteriores erraram pelo mesmo
    * motivo, com sinais opostos:
    *
-   *  1. `--tk-accent` cru a 30%: a cor CHEIA do bicho. Num Pokémon amarelo some
+   *  1. `--tk-accent` cru a 30%: a cor CHEIA do bicho. Num especie amarelo some
    *     na barra clara, num escuro vira um borrão. O contraste do indicador
-   *     passava a depender de qual Pokémon estava em destaque.
+   *     passava a depender de qual especie estava em destaque.
    *  2. `--tk-accent-fg` a 28%: a cor legível do tema, que no CLARO é escura de
    *     propósito (luminância ≤ 0,146, pra servir de texto). Uma cor escura a
    *     28% sobre uma barra creme dá cáqui lavado — cor de sujeira, não de
@@ -4406,7 +4406,7 @@
    * Misturar a cor na superfície resolve a matiz, mas não garante o degrau de
    * claridade: amarelo tem luminância altíssima, então 42% de amarelo no branco
    * continua quase branco — medido no Hoopa, 1,04 de razão contra a barra. Num
-   * Pokémon azul ou roxo o mesmo 42% escurece bastante. O indicador voltaria a
+   * especie azul ou roxo o mesmo 42% escurece bastante. O indicador voltaria a
    * ter contraste diferente a cada bicho, que é o defeito que já apareceu duas
    * vezes aqui.
    *
@@ -4869,7 +4869,7 @@
    * Os 26% acima existem por causa da lente e continuam: no claro a peca
    * selecionada é branca, e o suporte tem que ceder. O que estava errado era o
    * QUE se mistura. 26% de um acento cru sobre vidro branco entrega o acento
-   * quase puro em versao pastel — na Pokedex do Weedle a barra saiu bege, cor de
+   * quase puro em versao pastel — na Especies do Weedle a barra saiu bege, cor de
    * areia, e nao uma barra de suporte.
    *
    * Misturando o acento com a tinta da pagina antes, a barra continua
@@ -4922,7 +4922,7 @@
    *
    * `--tk-accent` é a cor cheia da espécie, presa entre claridade 0,38 e 0,62.
    * Sobre a página preta isso é um botão que brilha; sobre a página branca, num
-   * Pokémon amarelo, é um marca-texto — e pior, um botão claro sobre fundo claro
+   * especie amarelo, é um marca-texto — e pior, um botão claro sobre fundo claro
    * perde a própria forma.
    *
    * `--tk-accent-fg-claro` é a mesma cor empurrada até passar 4,7:1 contra o
@@ -5584,7 +5584,7 @@
    * Dizia: "uma linha de texto de 896px e ilegivel, o olho perde o comeco da
    * linha seguinte". Verdade, e por isso quem tem texto corrido (a ficha, os
    * cartoes) limita a PROPRIA largura. Limitar a coluna inteira pra proteger o
-   * texto tambem estreitava a lista, a grade e a Pokedex, que nao tem esse
+   * texto tambem estreitava a lista, a grade e a Especies, que nao tem esse
    * problema — e era isso que deixava vazio dos dois lados.
    *
    * `28px 36px 40px` sao os recuos do documento de desktop.
@@ -5689,8 +5689,8 @@
      ⚠️ ISTO DESFAZ, NO PC, UMA DECISÃO ANTERIOR — de propósito.
 
      O hero grande nasceu porque a home sem ele não tinha hierarquia: tudo com
-     o mesmo peso, sem cara de Pokémon — ver a nota do componente `Hero`. Ele continua valendo no
-     CELULAR, onde a primeira tela e uma coluna so e o Pokemon precisa dominar.
+     o mesmo peso, sem cara de especie — ver a nota do componente `Hero`. Ele continua valendo no
+     CELULAR, onde a primeira tela e uma coluna so e a especie precisa dominar.
      Na tela larga o destaque divide a linha com o cartao de numeros, e um
      retrato de 320px ao lado de tres linhas de texto desequilibra a linha
      inteira — que e o que o documento resolve encolhendo o bicho.
@@ -6020,11 +6020,11 @@
   /*
    * O DESTINO SOBE PRO CABECALHO — so na tela larga.
    *
-   * O documento de desktop poe "Ver tudo na Pokédex →" a direita do titulo da
-   * secao, e usa as seis colunas da grade pra seis Pokemon. No celular ele
+   * O documento de desktop poe "Ver tudo na Especies →" a direita do titulo da
+   * secao, e usa as seis colunas da grade pra seis especie. No celular ele
    * continua sendo o cartao no fim da fila, que foi decisao dele ("ao invez de
    * uma faixa com scroll pro lado, coloca tipo, no lugar do 5 um ver mais") — e
-   * la ele e o unico jeito de chegar na Pokedex sem gastar uma das quatro
+   * la ele e o unico jeito de chegar na Especies sem gastar uma das quatro
    * colunas com um botao.
    *
    * `baseline` e nao `center`: os dois textos tem tamanhos diferentes (11px do
@@ -6061,7 +6061,7 @@
   /*
    * A coleção como GRADE de seis, e não fila apertada.
    *
-   * Seis colunas com seis Pokemon: o "VER MAIS" saiu daqui (subiu pro
+   * Seis colunas com seis especie: o "VER MAIS" saiu daqui (subiu pro
    * cabecalho, nota acima), entao a linha fecha exata com bicho em toda coluna.
    */
   .tk-strip-row {
@@ -6176,11 +6176,11 @@
   }
 
   /* ── POKEDEX: LISTA FIXA + FICHA NO RESTO ────────────────────────────────
-     "Pokédex em lista + ficha lado a lado (como um cliente de e-mail)".
+     "Especies em lista + ficha lado a lado (como um cliente de e-mail)".
 
      ⚠️ A LISTA E 340px FIXOS, e nao uma fracao. Era `1.3fr 1fr`, que eu tinha
      tirado do documento — so que aquela proporcao e do INICIO (hero + cartao de
-     numeros). Na Pokedex o documento diz `width:340px` na coluna da lista, e a
+     numeros). Na Especies o documento diz `width:340px` na coluna da lista, e a
      diferenca importa: em fracao a lista cresce junto com a janela, e uma
      linha de "Bulbasaur · IV 96 · PC 2.874" com 600px de largura e quase toda
      espaco vazio entre o nome e o chip.
@@ -6269,7 +6269,7 @@
   /*
    * ⚠️ A FICHA ROLA SOZINHA, e nao junto com a lista.
    *
-   * Numa Pokedex de 1.182 linhas, rolar pra procurar o proximo Pokemon levaria
+   * Numa Especies de 1.182 linhas, rolar pra procurar o proximo especie levaria
    * a ficha do atual pra fora da tela — que e exatamente o que um cliente de
    * e-mail nao faz. Duas colunas, duas rolagens.
    */
@@ -6361,7 +6361,7 @@
    * certo.
    *
    * `--tk-borda-direita` e a borda direita da shell — a mesma que a coluna da
-   * ficha encosta. Quem liga isto e o `data-tk-ficha` que a `PokedexScreen`
+   * ficha encosta. Quem liga isto e o `data-tk-ficha` que a `EspeciesScreen`
    * escreve na raiz.
    */
   [data-tk-ficha="coluna"] .tk-bubble,
@@ -6717,7 +6717,7 @@
    * ⚠️ A FOLHA SO VIRA DIALOGO SE HOUVER ALGO ATRAS DELA. Nao havia.
    *
    * "app pra pc bem bugado ainda" — e o print era este: a ficha do Bulbasaur
-   * como uma coluna de 620px no meio da tela, e a lista da Pokedex aparecendo
+   * como uma coluna de 620px no meio da tela, e a lista da Especies aparecendo
    * inteira do lado direito dela, viva, rolavel e clicavel. Nao parecia um
    * dialogo aberto sobre a lista; parecia a lista ter escorregado pra fora do
    * lugar.
@@ -6796,7 +6796,7 @@
     padding-top: var(--tk-s5);
   }
 
-  /* Mesma historia, mesma correcao: o aparelho da Pokedex e `inset: 0` de 448px
+  /* Mesma historia, mesma correcao: o aparelho da Especies e `inset: 0` de 448px
      e nao tinha uma linha de desktop em lugar nenhum do arquivo. */
   .tk-dex {
     inset: var(--tk-s6) 0;
@@ -6868,7 +6868,7 @@
    Em 1024×768 o hero fica com 740 de largura e 323 de altura. A faixa da arte
    herda 740×175, e o sprite sai com **256px** — porque quem o limita é a regra
    da cara livre (`95cqh / cara`), que é uma conta VERTICAL. Sobravam 484px de
-   largura sem uso, e o Pokémon aparecia pequeno no meio de uma faixa vazia.
+   largura sem uso, e a especie aparecia pequeno no meio de uma faixa vazia.
 
    A causa é a pilha: `grid-template-rows: 1fr auto` põe a decisão EMBAIXO da
    arte, então as duas disputam a altura — que é justamente o que falta numa tela
@@ -7143,7 +7143,7 @@
    *
    * Metade destes elementos carrega degrade, imagem de sprite ou `background-
    * clip` na propria regra. `background: var(--tk-surf2)` e a forma curta e
-   * apaga TODAS as camadas de uma vez — o cartao do aparelho da Pokedex
+   * apaga TODAS as camadas de uma vez — o cartao do aparelho da Especies
    * (`.tk-dexopen`, que e um degrade vermelho) perderia o degrade ao passar o
    * mouse e voltaria ao passar de novo. Piscar assim le como falha de
    * renderizacao, nao como realce.
@@ -7486,7 +7486,7 @@
    de entrada rodam de novo sozinhas. Sem o `key` seria preciso um estado de
    "entrando" em JS, com limpeza e tudo que vem junto.
 
-   ⚠️ E ELA NÃO RODA DURANTE O USO DA TELA, só na troca. Filtrar a Pokédex não
+   ⚠️ E ELA NÃO RODA DURANTE O USO DA TELA, só na troca. Filtrar a Especies não
    remonta o `<main>` — remonta a lista lá dentro. Se a cascata morasse nos
    ITENS da grade, cada tecla digitada na busca reanimaria 1.182 células.
 */
@@ -7528,7 +7528,7 @@
  * 24ms por filho, teto de 6 — os dois números são do handoff ("stagger 24–40ms,
  * máx. 6 itens").
  *
- * ⚠️ O TETO É O PONTO. Sem ele, a décima seção da Pokédex entraria 240ms depois
+ * ⚠️ O TETO É O PONTO. Sem ele, a décima seção da Especies entraria 240ms depois
  * da primeira, e a vigésima em meio segundo — a cascata deixa de ser ritmo e
  * vira espera. Seis é onde o olho ainda lê "um depois do outro"; além disso ele
  * já leu a tela inteira.

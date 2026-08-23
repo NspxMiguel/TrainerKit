@@ -44,7 +44,7 @@ export interface Species {
   evolvesInto: string[];
 }
 
-/** Um Pokemon concreto da colecao do usuario. */
+/** Uma especie concreto da colecao do usuario. */
 export interface OwnedPokemon {
   id: string;
   speciesId: string;
@@ -86,11 +86,11 @@ export const MAX_POWERUP_LEVEL = 50;
 export const BEST_BUDDY_LEVELS = 1;
 
 /**
- * O maior nivel que um Pokemon pode APARENTAR.
+ * O maior nivel que uma especie pode APARENTAR.
  *
  * Diferente do de cima e a diferenca importa: o Melhor Amigo mostra o PC ja com
  * o bonus, entao o solver de nivel PRECISA chegar aqui. Um solver que parasse
- * em 50 nao acharia solucao nenhuma justamente pro Pokemon mais investido da
+ * em 50 nao acharia solucao nenhuma justamente pro especie mais investido da
  * colecao — e a tela diria "esses numeros nao existem juntos".
  *
  * Continua sendo o limite de `cpmForLevel` e de `isValidLevel`.

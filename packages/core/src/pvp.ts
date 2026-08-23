@@ -6,7 +6,7 @@ import { MAX_IV, MAX_LEVEL, MIN_IV, MIN_LEVEL } from "./types.js";
  * Ranking de IV para PvP.
  *
  * Em PvP o que manda nao e o PC, e o **stat product**: ataque x defesa x PS,
- * com o Pokemon subido ate o teto de PC da liga. Isso inverte a intuicao — o
+ * com a especie subido ate o teto de PC da liga. Isso inverte a intuicao — o
  * 100% costuma ser PIOR que um IV baixo de ataque, porque ataque alto infla o
  * PC e obriga a parar num nivel mais baixo, perdendo defesa e PS.
  *
@@ -53,11 +53,11 @@ export interface RankedSpread extends IVSpread {
  * 109 niveis viram 7 comparacoes em vez de ate 109.
  *
  * Isso importa porque esta funcao roda 4.096 vezes por liga em cada ranking, e
- * o ranking roda uma vez por Pokemon da colecao. A versao linear custava ~8ms
- * por Pokemon; numa colecao de cem, a tela travava quase um segundo.
+ * o ranking roda uma vez por especie da colecao. A versao linear custava ~8ms
+ * por especie; numa colecao de cem, a tela travava quase um segundo.
  *
  * O resultado continua sendo o maior nivel VALIDO, nao uma aproximacao — meio
- * nivel a mais estoura o limite e o Pokemon nem entra na liga.
+ * nivel a mais estoura o limite e a especie nem entra na liga.
  */
 export function maxLevelForCap(
   cpm: CpmTable,
@@ -92,7 +92,7 @@ export function maxLevelForCap(
  * Forca bruta mesmo: 16^3 combinacoes x ~109 niveis e trabalho de
  * milissegundos, e qualquer atalho aqui viraria erro sutil de ordenacao.
  *
- * `floorIV` existe porque o jogo garante piso em algumas origens — Pokemon de
+ * `floorIV` existe porque o jogo garante piso em algumas origens — especie de
  * raide, ovo e pesquisa nunca vem abaixo de 10, e lendario capturado nao vem
  * abaixo de 1. Ranquear contra combinacoes impossiveis daria uma posicao
  * enganosa.
@@ -243,7 +243,7 @@ export function topSpreads(
 
 /**
  * Posicao de um IV especifico, sem materializar o ranking inteiro para quem so
- * quer saber do proprio Pokemon.
+ * quer saber do proprio especie.
  *
  * A posicao e "quantos sao estritamente melhores, mais um" — empate divide a
  * mesma posicao, que e o que a palavra significa. A versao anterior ordenava o

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
- * A camera ao vivo da Pokedex.
+ * A camera ao vivo da Especies.
  *
- * O modo ao vivo da Pokedex nao funcionava: so havia a opcao de mandar foto.
+ * O modo ao vivo da Especies nao funcionava: so havia a opcao de mandar foto.
  * A razao e simples: `<input type="file" capture>` NAO e camera
  * ao vivo. Ele abre o app de camera do sistema, tira uma foto, fecha e devolve o
  * arquivo. Funciona, mas nao e apontar — e fotografar.
@@ -71,7 +71,7 @@ export function useCamera(): Camera {
     navigator.mediaDevices
       .getUserMedia({
         // `environment` e a de tras — a de frente serviria pra selfie, nao pra
-        // apontar pra um Pokemon na tela do jogo ou numa carta.
+        // apontar pra uma especie na tela do jogo ou numa carta.
         video: { facingMode: { ideal: "environment" } },
         audio: false,
       })

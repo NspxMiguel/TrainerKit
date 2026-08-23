@@ -68,7 +68,7 @@ describe("attackTypesAgainst", () => {
     // Fogo e o Voador respectivamente. Uma conta feita so no primeiro tipo
     // deixaria os tres empatados e o time sairia pior.
     //
-    // O fator do Pokemon GO e 1.6, nao 2 como na serie principal: 1.6² = 2.56.
+    // O fator do o jogo e 1.6, nao 2 como na serie principal: 1.6² = 2.56.
     const tipos = attackTypesAgainst(["fire", "flying"], chart, order);
     expect(tipos[0]).toBe("rock");
     expect(effectiveness(chart, order, "rock", ["fire", "flying"])).toBeCloseTo(

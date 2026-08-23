@@ -59,7 +59,7 @@ export function RankingsScreen({ data, onPick, initialMode = "raid" }: Props) {
           resolve sem esconder a escolha. */}
       <div style={{ marginBottom: 10 }}>
         <Segmented
-          ariaLabel={t("pokedex.best")}
+          ariaLabel={t("especies.best")}
           value={mode}
           onChange={setMode}
           size="compact"

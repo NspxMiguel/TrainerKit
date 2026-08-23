@@ -52,7 +52,7 @@ async function obterLeitor(): Promise<TesseractWorker> {
      * ⚠️ IMPORT DINAMICO, e o `manualChunks` do Vite separa este pedaco.
      *
      * Estatico, o tesseract entraria no bundle principal e TODO mundo baixaria
-     * o leitor — inclusive quem so quer consultar a Pokedex. Assim ele so chega
+     * o leitor — inclusive quem so quer consultar a Especies. Assim ele so chega
      * no aparelho de quem anexa um print, e a partir dai fica no cache.
      */
     const { createWorker, PSM } = await import("tesseract.js");

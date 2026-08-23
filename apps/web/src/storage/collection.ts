@@ -16,7 +16,7 @@ import type { IVs } from "@trainerkit/core";
  */
 
 /**
- * Por que a pessoa fica com um Pokémon que o app mandaria soltar.
+ * Por que a pessoa fica com uma especie que o app mandaria soltar.
  *
  * São três porque foram três os exemplos que ele deu, e eles cobrem categorias
  * diferentes de razão — não é uma lista de gostos:
@@ -69,7 +69,7 @@ export interface OwnedPokemon {
    * de ser aviso e vira ruido — e pior, ensina a ignorar os outros.
    *
    * Guardamos QUAL acao foi feita, nao um booleano: o veredito muda quando o
-   * Pokemon sobe de nivel ou evolui, e "ja evolui" nao responde a um
+   * especie sobe de nivel ou evolui, e "ja evolui" nao responde a um
    * "transferir" que apareca depois. Marcado e cumprido so quando o veredito
    * atual e o mesmo que foi marcado.
    */
@@ -80,7 +80,7 @@ export interface OwnedPokemon {
    * ⚠️ Isto NÃO é um IV zerado. Os campos de `ivs` ficam em 0 porque o tipo os
    * exige, e ler esses zeros como se fossem medidos seria o pior erro possível
    * neste app: o veredito sairia "Transferir" com toda a confiança do mundo
-   * para um Pokémon que pode ser 100%.
+   * para uma especie que pode ser 100%.
    *
    * Quem lê a coleção tem que checar esta marca ANTES de decidir. Sem IV o app
    * não decide — ele pede o IV, que é a resposta honesta.
@@ -107,7 +107,7 @@ export interface OwnedPokemon {
    */
   meuMotivo?: MeuMotivo | null;
   /**
-   * A qual coleção este Pokémon pertence.
+   * A qual coleção esta especie pertence.
    *
    * Opcional no tipo por causa das linhas gravadas antes do campo existir — a
    * migração da versão 2 preenche todas, mas um export antigo importado depois
@@ -123,7 +123,7 @@ export interface OwnedPokemon {
  * varias coleçÕes. pra pessoas q tem varias contas."
  *
  * Não é multiusuário: é a MESMA pessoa com mais de uma conta no jogo, que é
- * comum entre quem joga a sério. Cada coleção tem os seus Pokémon e os seus
+ * comum entre quem joga a sério. Cada coleção tem os seus especie e os seus
  * vereditos; tudo continua no aparelho, sem servidor e sem login.
  */
 export interface Colecao {
@@ -147,7 +147,7 @@ class CollectionDb extends Dexie {
      * ⚠️ VERSÃO 2: as coleções entram, e ninguém perde nada.
      *
      * O `upgrade` roda uma vez por aparelho e faz duas coisas: cria a coleção
-     * "Principal" e carimba nela TODOS os Pokémon que já existiam. Sem isso,
+     * "Principal" e carimba nela TODOS os especie que já existiam. Sem isso,
      * quem já usa o app abriria a versão nova com a coleção aparentemente
      * vazia — os dados continuariam lá, invisíveis, porque o filtro por
      * coleção não casaria com nada.
@@ -216,7 +216,7 @@ export async function listarColecoes(): Promise<Colecao[]> {
 }
 
 /**
- * Quantos Pokémon há em CADA coleção, sem trocar a ativa.
+ * Quantos especie há em CADA coleção, sem trocar a ativa.
  *
  * ⚠️ Existe porque a primeira versão contava trocando a coleção ativa num laço
  * e voltando no fim — e eu escrevi no comentário que era "feio de propósito".
@@ -224,7 +224,7 @@ export async function listarColecoes(): Promise<Colecao[]> {
  *
  * O `useEffect` do React roda duas vezes em desenvolvimento, então dois laços
  * concorriam trocando a MESMA variável global; cada `listPokemon` lia o que o
- * outro tinha acabado de escrever, e a tela mostrava "0 Pokémon" numa coleção
+ * outro tinha acabado de escrever, e a tela mostrava "0 especie" numa coleção
  * com três. De quebra, cada troca disparava `emit()`, fazendo todas as outras
  * telas recarregarem sem motivo.
  *
@@ -258,14 +258,14 @@ export async function renomearColecao(id: string, nome: string): Promise<void> {
 }
 
 /**
- * Apaga a coleção E os Pokémon dela.
+ * Apaga a coleção E os especie dela.
  *
- * ⚠️ Numa transação só. Apagar a coleção e deixar os Pokémon produziria linhas
+ * ⚠️ Numa transação só. Apagar a coleção e deixar os especie produziria linhas
  * órfãs — invisíveis na tela, contando no espaço em disco, e ressuscitando se
  * alguém recriasse uma coleção com o mesmo id.
  *
  * A última coleção não pode ser apagada: sem nenhuma, o app não teria onde
- * gravar o próximo Pokémon escaneado.
+ * gravar o próximo especie escaneado.
  */
 export async function apagarColecao(id: string): Promise<void> {
   const todas = await db.colecoes.toArray();
@@ -293,7 +293,7 @@ export async function addPokemon(
     ...entry,
     id: crypto.randomUUID(),
     addedAt: new Date().toISOString(),
-    // O Pokémon nasce na coleção que está aberta. Sem isto, escanear com uma
+    // A especie nasce na coleção que está aberta. Sem isto, escanear com uma
     // segunda conta ativa gravaria na primeira.
     colecaoId: colecaoAtiva(),
   };
@@ -353,7 +353,7 @@ export async function restaurar(linhas: readonly OwnedPokemon[]): Promise<void> 
  * o texto da tela não fala mais, porque discordar de "Guardar" ou de "Evoluir"
  * não é ficar com nada. O efeito é sempre o mesmo: o app para de cobrar.
  *
- * `null` devolve o Pokémon à fila normal. Não apaga nada mais: o veredito
+ * `null` devolve a especie à fila normal. Não apaga nada mais: o veredito
  * continua sendo calculado o tempo todo, e é isso que faz o botão ser
  * reversível de graça.
  */
@@ -369,7 +369,7 @@ export async function setDoneAction(id: string, action: string | null): Promise<
 }
 
 /**
- * Evolui o Pokémon de verdade: ele VIRA a próxima espécie.
+ * Evolui a especie de verdade: ele VIRA a próxima espécie.
  *
  * "ao evoluir um pokemon q pede pra evoluir (bulbasauro) ao invez de so dar um
  * check, porque nao transformarlo em sua evolução? continua o trajeto garai"
@@ -418,10 +418,10 @@ export async function listPokemon(): Promise<OwnedPokemon[]> {
       /*
        * ⚠️ O FILTRO POR COLEÇÃO MORA AQUI, e não em cada tela.
        *
-       * Toda tela que lê a coleção passa por esta função — home, Pokédex,
+       * Toda tela que lê a coleção passa por esta função — home, Especies,
        * counters de raide, montar time, o dossiê da IA. Filtrar em cada uma
        * seria seis lugares pra esquecer um, e o sintoma de esquecer é o pior
-       * possível: os Pokémon de uma conta aparecendo na análise da outra.
+       * possível: os especie de uma conta aparecendo na análise da outra.
        */
       .filter((row) => row.colecaoId === ativa)
       // Mais recente primeiro: o que voce acabou de escanear e o que voce quer ver.
@@ -462,7 +462,7 @@ export function useCollection(): { items: OwnedPokemon[] | null; reload: () => v
  * apareceria no dia do desastre, que é o único dia em que já não dá pra
  * consertar.
  *
- * As coleções vão junto com os Pokémon: sem elas, restaurar num aparelho novo
+ * As coleções vão junto com os especie: sem elas, restaurar num aparelho novo
  * recriaria bichos apontando para contas que não existem, e eles não
  * apareceriam em lugar nenhum (o filtro de `listPokemon` não casaria com nada).
  */

@@ -163,7 +163,7 @@ export function bossDpsAgainst(
 }
 
 export interface CounterInput {
-  /** Identificador do Pokemon salvo, para a tela reencontrar. */
+  /** Identificador da especie salvo, para a tela reencontrar. */
   id: string;
   name: string;
   speciesId: string;
@@ -190,9 +190,9 @@ export interface Counter {
 }
 
 /**
- * Ordena os Pokemon do jogador contra um chefe.
+ * Ordena os especie do jogador contra um chefe.
  *
- * Cada Pokemon entra com o MELHOR moveset dele contra este chefe — nao com o
+ * Cada especie entra com o MELHOR moveset dele contra este chefe — nao com o
  * que ele tem equipado, que o app nao sabe. A tela diz qual e, porque "seu
  * Machamp e o melhor" sem dizer com qual golpe e conselho pela metade.
  */
@@ -270,7 +270,7 @@ export interface RaidEstimate {
   frail: boolean;
 }
 
-/** Quantos Pokemon entram numa raide. */
+/** Quantos especie entram numa raide. */
 export const TEAM_SIZE = 6;
 
 /**
@@ -337,7 +337,7 @@ export function estimateRaid(counters: readonly Counter[], boss: RaidBossInput):
   };
 }
 
-/** PC que o chefe teria como Pokemon capturavel, util pra conferir a especie. */
+/** PC que o chefe teria como especie capturavel, util pra conferir a especie. */
 export function bossCatchCP(boss: RaidBossInput, cpm: CpmTable, level = 20): number {
   return computeCP(boss.baseStats, { atk: 10, def: 10, hp: 10 }, cpmForLevel(cpm, level));
 }

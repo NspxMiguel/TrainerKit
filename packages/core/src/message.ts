@@ -41,7 +41,7 @@ export type MessageKey =
   | "assistant.profile.attacker"
   | "assistant.profile.wall"
   | "assistant.profile.balanced"
-  // ---- assistente: o Pokemon do dono
+  // ---- assistente: a especie do dono
   | "assistant.iv.greatForLeague"
   | "assistant.iv.maxAttack"
   | "assistant.iv.attackHurtsCapped"

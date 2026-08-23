@@ -80,7 +80,7 @@ type Painel =
    * A tela explicava por que usar a sua própria chave já é a ajuda que o projeto
    * precisa, e dava os links pra criar as chaves da Groq e da ElevenLabs. As
    * duas coisas continuam existindo onde importam — o campo da chave da Groq
-   * mora em "Assistente com IA" e o da ElevenLabs em "Voz da Pokédex", cada um
+   * mora em "Assistente com IA" e o da ElevenLabs em "Voz da Especies", cada um
    * com o seu link. O que se perdeu foi uma terceira porta pra chegar neles.
    */;
 
@@ -264,7 +264,7 @@ export function SettingsScreen({
           onOpen={() => setPainel("images")}
         />
         {/* A voz fica junto do resto da aparencia: e como o app se apresenta,
-            nao um detalhe da Pokedex. */}
+            nao um detalhe da Especies. */}
         <Linha
           selo="voz"
           label={t("voice.title")}

@@ -13,7 +13,7 @@ import type { BaseStats, IVs } from "./types.js";
  *
  *   ATAQUE NAO CONTA. Um defensor de ginasio nao escolhe golpe, nao ataca no seu
  *   ritmo e nao mira fraqueza. O ataque dele quase nao muda quanto tempo ele
- *   sobrevive. Ou seja: aquele Pokemon de 100% que voce guardou pra raide e um
+ *   sobrevive. Ou seja: aquele especie de 100% que voce guardou pra raide e um
  *   desperdicio no ginasio, e o de 60% com muita vida aguenta mais.
  *
  *   AGUENTAR E TUDO. O que estica o tempo e defesa vezes vida — as duas
@@ -155,7 +155,7 @@ export function rankDefenders(
  *
  * Mesma regra do montador de time, e pelo mesmo motivo com uma consequencia
  * pior: seis defensores do mesmo tipo caem todos pro mesmo atacante. No ginasio
- * isso significa uma pessoa so limpando os seis com um Pokemon.
+ * isso significa uma pessoa so limpando os seis com uma especie.
  */
 export function pickDefenders(
   ranked: readonly DefenderScore[],

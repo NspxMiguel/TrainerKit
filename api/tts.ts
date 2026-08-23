@@ -273,7 +273,7 @@ export default async function handler(req: Req, res: Res): Promise<void> {
    * URL = o CDN da Vercel serve sem nem acordar a funcao.
    *
    * ⚠️ SO PARA TEXTO DO APP. Quem chama decide, e o cliente so usa este caminho
-   * pra ficha da Pokedex — texto que o proprio app escreveu sobre uma especie.
+   * pra ficha da Especies — texto que o proprio app escreveu sobre uma especie.
    * Resposta de IA nunca vem por aqui: ela pode citar a colecao de quem
    * perguntou, e dado de usuario em URL fica em log de CDN, em historico e em
    * qualquer proxy no caminho. Aquilo continua no POST, sem cache.

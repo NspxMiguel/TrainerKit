@@ -108,7 +108,7 @@ export async function medirOffline(totalEspecies: number): Promise<OfflineItem[]
     {
       id: "imagens",
       /*
-       * "guardado" so quando cobre a Pokedex inteira. Meio caminho e
+       * "guardado" so quando cobre a Especies inteira. Meio caminho e
        * `pendente` de proposito: o cartao responde "da pra ficar sem rede?", e
        * com metade das imagens a resposta e nao.
        */

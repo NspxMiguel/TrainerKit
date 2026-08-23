@@ -24,7 +24,7 @@ import { useT } from "../i18n/t.ts";
  * de privacidade que descreve um app que não existe mais é pior que nenhuma:
  * deixa de ser transparência e vira declaração falsa.
  *
- * ⚠️ A FOTO. Quase passou batido: identificar Pokémon por foto MANDA A IMAGEM
+ * ⚠️ A FOTO. Quase passou batido: identificar especie por foto MANDA A IMAGEM
  * pra Groq. É o único caminho do app em que um arquivo do usuário sai do
  * aparelho, e por isso está dito com todas as letras em vez de coberto por um
  * "dados de uso" genérico.

@@ -20,7 +20,7 @@ const DIR = process.env.TK_PRINTS ?? "";
 
 /**
  * Os tres primeiros tem gabarito: o proprio dono escreveu o IV no apelido do
- * Pokemon ("Gyardeos100", "Mewtwo93", "Dragonitlv86"). Os demais nao tem numero
+ * especie ("Gyardeos100", "Mewtwo93", "Dragonitlv86"). Os demais nao tem numero
  * conhecido e servem para garantir que a leitura ao menos NAO FALHA — foi assim
  * que apareceram os casos de barra quase vazia e de barra encoberta.
  */
@@ -42,7 +42,7 @@ const CASOS = [
   // Prints NATIVOS de iPhone (1206x2622) — os mais representativos do uso real.
   // O c2 e o Slaking cujo apelido diz 64%: o scanner le 8/6/15 = 29/45 = 64,4%,
   // com PS vermelho e os outros dois laranja. E a prova de que a cor vermelha e
-  // por STAT, nao por Pokemon.
+  // por STAT, nao por especie.
   { file: "cel/c2", nome: "iPhone — Slaking (só o PS vermelho)", esperado: 64.4 },
   { file: "cel/c3", nome: "iPhone 3", esperado: null },
   { file: "cel/c4", nome: "iPhone 4", esperado: null },

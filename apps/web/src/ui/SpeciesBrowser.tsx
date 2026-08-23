@@ -107,7 +107,7 @@ const SORT_WHY: Record<SortId, Key> = {
  *
  * Antes eram duas listas atras de um seletor "Buscar | Melhores", e "melhores"
  * escondia quatro rankings diferentes atras de mais dois seletores. Agora e uma
- * lista que se reordena: a mesma pergunta ("qual Pokemon?") com a resposta
+ * lista que se reordena: a mesma pergunta ("qual especie?") com a resposta
  * ordenada pelo que importa naquele momento.
  */
 export function SpeciesBrowser({
@@ -275,7 +275,7 @@ export function SpeciesBrowser({
         Antes eram dois blocos de chips sempre abertos — ordem e tipo — ocupando
         meia tela acima da grade. Filtro é coisa que se usa de vez em quando e se
         lê o tempo todo: aberto por padrão, ele cobra espaço de quem só quer ver
-        os Pokémon, que é o caso comum.
+        os especie, que é o caso comum.
 
         O ponto no botão acende quando há filtro ativo. Sem isso, esconder o
         painel esconderia também o fato de a lista estar filtrada — e "cadê o
@@ -293,13 +293,13 @@ export function SpeciesBrowser({
             type="search"
             inputMode="search"
             autoComplete="off"
-            placeholder={t("pokedex.searchPlaceholder")}
+            placeholder={t("especies.searchPlaceholder")}
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
               setLimit(PAGE);
             }}
-            aria-label={t("pokedex.search")}
+            aria-label={t("especies.search")}
           />
         </div>
 
@@ -401,13 +401,13 @@ export function SpeciesBrowser({
 
       <p className="tk-caption" style={{ margin: "12px 2px 14px" }}>
         {results.length === 1
-          ? t("pokedex.count.one")
-          : t("pokedex.count.many", { count: results.length.toLocaleString(language) })}
+          ? t("especies.count.one")
+          : t("especies.count.many", { count: results.length.toLocaleString(language) })}
       </p>
 
       {results.length === 0 ? (
         <div className="tk-empty">
-          <div className="tk-empty-title">{t("pokedex.noResults", { query })}</div>
+          <div className="tk-empty-title">{t("especies.noResults", { query })}</div>
         </div>
       ) : (
         <>
@@ -433,7 +433,7 @@ export function SpeciesBrowser({
                   {/*
                     O numero da linha muda com a ordem.
 
-                    Em ordem de Pokedex o util e o numero da especie; ordenado por
+                    Em ordem de Especies o util e o numero da especie; ordenado por
                     PC ou por ranking, o util e a POSICAO — sem isso a pessoa nao
                     sabe se esta olhando o 3o ou o 300o.
                   */}
@@ -454,7 +454,7 @@ export function SpeciesBrowser({
               style={{ marginTop: 18 }}
               onClick={() => setLimit((n) => n + PAGE * 2)}
             >
-              {t("pokedex.showMore", {
+              {t("especies.showMore", {
                 count: (results.length - limit).toLocaleString(language),
               })}
             </button>

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { BADGE_TIERS, badgeFor } from "./appraisal.js";
 
 /**
- * Os limiares de estrela, conferidos contra Pokemon REAIS de uma conta de jogo.
+ * Os limiares de estrela, conferidos contra especie REAIS de uma conta de jogo.
  *
  * ⚠️ POR QUE ISTO PRECISAVA EXISTIR ─────────────────────────────────────────
  *

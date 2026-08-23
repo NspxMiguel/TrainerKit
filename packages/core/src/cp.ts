@@ -57,7 +57,7 @@ export function effectiveDefense(base: BaseStats, ivs: IVs, cpm: number): number
 /**
  * PS efetivo (stamina).
  *
- * O piso de 10 e do jogo, nao nosso: Pokemon de nivel baixo com IV de PS zero
+ * O piso de 10 e do jogo, nao nosso: especie de nivel baixo com IV de PS zero
  * ainda tem 10 de PS.
  */
 export function effectiveStamina(base: BaseStats, ivs: IVs, cpm: number): number {

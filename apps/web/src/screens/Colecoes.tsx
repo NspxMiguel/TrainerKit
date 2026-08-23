@@ -23,7 +23,7 @@ import { useFolha } from "../ui/folha.ts";
  *
  * Não é multiusuário e não tem login: é a MESMA pessoa com mais de uma conta no
  * jogo, o que é comum entre quem joga a sério. Cada coleção guarda os seus
- * Pokémon e os seus vereditos, tudo no aparelho.
+ * especie e os seus vereditos, tudo no aparelho.
  */
 export function Colecoes({ onClose }: { onClose: () => void }) {
   const { t } = useT();
@@ -53,7 +53,7 @@ export function Colecoes({ onClose }: { onClose: () => void }) {
      *
      * A primeira versão contava trocando a ativa num laço e voltando no fim.
      * Em desenvolvimento o efeito roda duas vezes, os dois laços concorriam
-     * pela mesma variável global, e a tela mostrava "0 Pokémon" numa coleção
+     * pela mesma variável global, e a tela mostrava "0 especie" numa coleção
      * com três — foi o que apareceu no teste.
      */
     const [lista, contas] = await Promise.all([listarColecoes(), contarPorColecao()]);
@@ -160,7 +160,7 @@ export function Colecoes({ onClose }: { onClose: () => void }) {
                 ⚠️ ICONE, e nao a palavra "Renomear".
                 
                 Duas acoes escritas por extenso comiam a largura da linha: em
-                portugues "4 Pokémon · em uso" ja truncava, e em alemao
+                portugues "4 especie · em uso" ja truncava, e em alemao
                 ("Umbenennen") e russo ("Переименовать") o nome da colecao ia
                 junto. Achado varrendo os dez idiomas, medindo truncamento.
                 
@@ -185,7 +185,7 @@ export function Colecoes({ onClose }: { onClose: () => void }) {
             {/*
               Apagar só aparece quando há mais de uma, e nunca sem confirmar.
 
-              Apagar uma coleção leva os Pokémon dela junto — é a única ação
+              Apagar uma coleção leva os especie dela junto — é a única ação
               destrutiva desta tela, e sem servidor não existe desfazer. O
               segundo toque é o que separa "quis apagar" de "encostou no botão".
             */}

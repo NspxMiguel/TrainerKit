@@ -4,7 +4,7 @@ import tabela from "../dados/paleta.json";
 import { enquadrar, gradienteDaEspecie, paletaDaEspecie } from "./paleta.ts";
 
 /**
- * A paleta muda com o Pokémon — então o contraste tem que valer para TODOS.
+ * A paleta muda com a especie — então o contraste tem que valer para TODOS.
  *
  * ⚠️ Este arquivo existe por causa de um defeito real, e não por precaução.
  *
@@ -324,7 +324,7 @@ describe("paleta por espécie", () => {
      * ⚠️ O que isto protege é o TETO. Ele existe pra não ampliar uma silhueta
      * pequena até mostrar o pixel; se alguém subir esse número achando que
      * "deixa o bicho maior", espécies largas passam a vazar pela lateral. Aqui
-     * isso vira teste vermelho em vez de um Pokémon cortado que só aparece
+     * isso vira teste vermelho em vez de uma especie cortado que só aparece
      * quando alguém abre justamente aquele.
      */
     const ruins: string[] = [];
@@ -344,13 +344,13 @@ describe("paleta por espécie", () => {
     /*
      * ⚠️ ESTE TESTE É O REQUISITO, ESCRITO COMO CÓDIGO.
      *
-     * A regra é: nada tapa a cara do Pokémon, e isso vale espécie por espécie —
+     * A regra é: nada tapa a cara da especie, e isso vale espécie por espécie —
      * não por amostragem. A cara é a parte da barriga pra
      * cima."
      *
      * "Testa um por um" não é força de expressão neste app — foi assim que
      * apareceram as 527 espécies desenhadas pequenas demais e as 823 com
-     * contraste reprovado, nenhuma delas visível nos oito Pokémon que eu tinha
+     * contraste reprovado, nenhuma delas visível nos oito especie que eu tinha
      * aberto. O nome cruzava a boca do Venusaur, o peito do Machamp e o rosto
      * inteiro do Hoopa, e cada um exigiria um ajuste diferente.
      *
@@ -461,7 +461,7 @@ describe("paleta por espécie", () => {
   it("a tinta de fundo não derruba o texto, em nenhuma espécie", () => {
     /*
      * ⚠️ O fundo do app passou a ter a COR DA ESPÉCIE ("sem cor no meio"), e um
-     * fundo que muda por Pokémon é exatamente o tipo de coisa que quebra o
+     * fundo que muda por especie é exatamente o tipo de coisa que quebra o
      * contraste sem ninguém ver — foi assim que nasceram as 823 reprovações de
      * luminância desta mesma tabela.
      *
@@ -689,7 +689,7 @@ describe("paleta por espécie", () => {
 
   it("mantém a matiz: Dragonite laranja, Mewtwo lavanda pálido", () => {
     // A regressão que isto trava é a inversa da de contraste: uma cor que passa
-    // no contraste mas perdeu o Pokémon de vista. Ver `dataset/src/paleta.ts`.
+    // no contraste mas perdeu a especie de vista. Ver `dataset/src/paleta.ts`.
     const dragonite = paletaDaEspecie(149);
     expect(dragonite.cruas[0]).toMatch(/^#f/i); // laranja claro dominante
 

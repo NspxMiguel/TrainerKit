@@ -3,13 +3,13 @@ import { useSyncExternalStore } from "react";
 /**
  * O registro de VISTOS.
  *
- * E a funcao mais caracteristica de uma Pokedex e o app nao tinha nenhuma: nos
+ * E a funcao mais caracteristica de uma Especies e o app nao tinha nenhuma: nos
  * jogos ela registra automaticamente quem voce ENCONTROU, e separado disso quem
  * voce CAPTUROU. O contador "152 vistos / 87 capturados" e metade da razao de
- * alguem abrir uma Pokedex.
+ * alguem abrir uma Especies.
  *
  * Aqui:
- *   VISTO      voce abriu a ficha dele no modo Pokedex. E o mais perto de
+ *   VISTO      voce abriu a ficha dele no modo lente. E o mais perto de
  *              "encontrei" que um app fora do jogo pode saber honestamente.
  *   CAPTURADO  esta na sua colecao. Ja existia, so nao estava sendo contado.
  *
@@ -70,7 +70,7 @@ export function seenCount(): number {
  * Os ids vistos, pra quem precisa CRUZAR com outra fonte.
  *
  * O aparelho mostrava "VISTOS: 0 · CAPTURADOS: 6": este registro so sabe de
- * quem foi identificado no Modo Pokedex, e a colecao mora em IndexedDB. Contar
+ * quem foi identificado no Modo lente, e a colecao mora em IndexedDB. Contar
  * os dois separados nao junta — e por isso `seenCount()` sozinho nao serve la.
  *
  * Devolve uma copia: entregar o `Set` interno deixaria qualquer chamador mexer

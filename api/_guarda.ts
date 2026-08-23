@@ -1,7 +1,7 @@
 /**
  * O porteiro: o que pode virar pergunta pra IA.
  *
- * O assistente so pode falar de Pokemon GO. Sem isso, a chave compartilhada
+ * O assistente so pode falar de o jogo. Sem isso, a chave compartilhada
  * vira um modelo de uso geral de graca: dava pra usar a rota pra programar com
  * free kkkkkk. (…) tbm cuidado com injeção de codigo, tem varias formas q podem
  * fazer isso, como codigo morse e etc".
@@ -23,7 +23,7 @@
  * ⚠️ E O QUE ELE NÃO PODE FAZER: recusar pergunta legítima. Um app que responde
  * "não posso falar sobre isso" pra "vale a pena evoluir meu Dratini?" é pior que
  * um app sem filtro. Por isso a regra é RECUSAR O QUE É CLARAMENTE OUTRO
- * ASSUNTO, e não "aceitar só o que eu reconheço como Pokémon" — na dúvida,
+ * ASSUNTO, e não "aceitar só o que eu reconheço como especie" — na dúvida,
  * passa. Falso negativo custa uma pergunta da cota; falso positivo custa o
  * usuário.
  *
@@ -62,7 +62,7 @@ function normalizar(s: string): string {
  * Tentativa de reescrever as regras.
  *
  * A lista é curta de propósito: cada padrão aqui é uma frase que NÃO aparece numa
- * pergunta honesta sobre Pokémon. "Ignore o que falei antes" sobre um Pokémon
+ * pergunta honesta sobre especie. "Ignore o que falei antes" sobre uma especie
  * seria escrito de outro jeito.
  */
 const INJECAO = [
@@ -104,7 +104,7 @@ const ARTEFATO =
   "(codigo|code|script|funcao|function|classe|class|programa|app|site|api|regex|algoritmo|algorithm)";
 
 /**
- * Assuntos que claramente não são Pokémon GO.
+ * Assuntos que claramente não são o jogo.
  *
  * Programação em primeiro lugar porque foi o exemplo dele, e porque é o desvio
  * de uso mais provável numa chave gratuita.
@@ -139,7 +139,7 @@ const FORA = [
  * morrer porque alguém pôs "go" numa regex.
  *
  * Não inclui nomes de espécie: são 1.181 e a lista viveria desatualizada. Quem
- * pergunta o nome de um Pokémon sem nenhuma destas palavras cai no caso geral —
+ * pergunta o nome de uma especie sem nenhuma destas palavras cai no caso geral —
  * que é PASSAR, porque nenhum padrão de "fora" vai bater também.
  */
 const DO_JOGO =
@@ -166,7 +166,7 @@ export function filtrar(bruta: string): Veredito {
  * todo sentido pra uma PERGUNTA, rejeitava o contexto do app.
  *
  * Na tela: "vale a pena evoluir ele?" voltou "fora do assunto: este endpoint so
- * responde sobre Pokemon GO". Uma pergunta perfeitamente valida, barrada pelo
+ * responde sobre o jogo". Uma pergunta perfeitamente valida, barrada pelo
  * meu proprio filtro, com a mensagem errada ainda por cima.
  *
  * A causa e de desenho: `filtrar` fazia dois trabalhos diferentes. Validar uma
@@ -187,7 +187,7 @@ export function filtrarConteudo(texto: string): Veredito {
    *
    * Ele citou morse. O ponto geral é mais amplo: qualquer codificação serve pra
    * esconder instrução de um filtro que lê texto claro — morse, base64, hex,
-   * binário. Nenhuma delas aparece numa pergunta honesta sobre Pokémon, então a
+   * binário. Nenhuma delas aparece numa pergunta honesta sobre especie, então a
    * regra não precisa DECODIFICAR pra decidir: basta reconhecer que a mensagem
    * é predominantemente código e recusar.
    *
@@ -213,8 +213,8 @@ export function filtrarConteudo(texto: string): Veredito {
    *   "qual o melhor moveset do dragonite"   → 29 letras → acusada de INJECAO
    *   "what is the best attack for dragonite" → 31 letras → acusada de INJECAO
    *
-   * E o app respondia "fora do assunto: este endpoint so responde sobre Pokemon
-   * GO" pra pergunta mais comum que existe sobre Pokemon GO. Escapavam so as
+   * E o app respondia "fora do assunto: este endpoint so responde sobre especie
+   * GO" pra pergunta mais comum que existe sobre o jogo. Escapavam so as
    * frases curtas ou com acento/interrogacao — "esse blissey presta?" passava,
    * o que fazia o bug parecer aleatorio em vez de sistematico.
    *

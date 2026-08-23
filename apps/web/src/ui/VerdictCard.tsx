@@ -32,7 +32,7 @@ import { TOM_VEREDITO as TONE } from "./tomVeredito.ts";
  * diferenca entre um app que manda voce confiar e um que aceita ser conferido.
  */
 /**
- * O Pokemon salvo, quando o veredito e sobre um bicho da colecao.
+ * A especie salvo, quando o veredito e sobre um bicho da colecao.
  *
  * Sem isto o cartao anunciava "INVESTIR" em verde de 26px e nao oferecia nada —
  * um veredito de investir sem jeito visivel de dar como cumprido. Um aviso que
@@ -114,7 +114,7 @@ export function VerdictCard({ owned, ...props }: Props) {
    *
    * As duas condicoes importam: uma especie de estagio final pode receber
    * "evoluir" por engano de dados, e evoluir pra lugar nenhum apagaria o
-   * Pokemon da colecao ao gravar um `speciesId` vazio.
+   * especie da colecao ao gravar um `speciesId` vazio.
    */
   const vaiEvoluir = verdict.action === "evoluir" && props.evolvesInto.length > 0;
   const color = TONE[verdict.action] ?? "var(--tk-txt)";
@@ -151,7 +151,7 @@ export function VerdictCard({ owned, ...props }: Props) {
         movimento."
         
         A `key` remonta o no quando o veredito MUDA — sem ela, evoluir um
-        Pokemon trocaria a palavra sem nenhum movimento, e a assinatura so
+        especie trocaria a palavra sem nenhum movimento, e a assinatura so
         tocaria uma vez por sessao.
       */}
       <div
@@ -211,7 +211,7 @@ export function VerdictCard({ owned, ...props }: Props) {
         e onde a pessoa esta olhando quando decide que ja fez.
 
         Marca QUAL acao foi feita, nao um sim/nao: o veredito muda quando o
-        Pokemon sobe de nivel ou evolui, e "ja evolui" nao responde a um
+        especie sobe de nivel ou evolui, e "ja evolui" nao responde a um
         "transferir" que apareca depois.
       */}
       {/*

@@ -85,7 +85,7 @@ const TOLERANCE = 46;
  *
  * Com 6 px de folga o scanner RECUSA a imagem em vez de devolver um numero
  * errado. Essa e a troca certa: IV errado com cara de certo faz o jogador
- * transferir o Pokemon bom.
+ * transferir a especie bom.
  */
 const MIN_STEP_PX = 6;
 
@@ -116,7 +116,7 @@ interface Run {
  *
  * Ancorar no trilho inteiro — preenchimento MAIS vazio — e nao so na parte
  * pintada. A diferenca importa muito: a parte pintada muda de tamanho conforme
- * o IV, entao um Pokemon de ataque 2 dava uma ancora minuscula e a geometria
+ * o IV, entao uma especie de ataque 2 dava uma ancora minuscula e a geometria
  * saia errada. O trilho tem sempre a mesma largura, seja o IV 0 ou 15.
  *
  * Foi isso que fez a leitura variar com a resolucao: em print reduzido a ancora
@@ -180,7 +180,7 @@ function longestFilledRuns(bmp: Bitmap): Run[] {
     // Filtrar aqui pelo tamanho do preenchimento apagaria justamente as barras
     // que mais importam: um IV 1 pinta ~1/15 do trilho, o que num print de 688
     // px de largura da uns 14 px. Com o corte antigo de 4% da largura, todo
-    // Pokemon de ataque baixo era lido errado — e sao exatamente os que o
+    // especie de ataque baixo era lido errado — e sao exatamente os que o
     // jogador quer achar pra transferir.
     //
     // A separacao entre barra e enfeite fica para o filtro de LARGURA DE
@@ -411,7 +411,7 @@ function inferMissingBar(
 
   // Nas pontas sao DUAS posicoes possiveis, e as duas precisam ser tentadas.
   // Tentar so a de cima torna impossivel deduzir a de baixo, e a de baixo e o
-  // HP: um Pokemon com HP 0 nao tem pixel pintado naquela barra, ela nao e
+  // HP: uma especie com HP 0 nao tem pixel pintado naquela barra, ela nao e
   // detectada, e o print inteiro era recusado com "barras-insuficientes".
   const candidatas: { y: number; index: number }[] = doubled
     ? [{ y: Math.round((first.rect.y + second.rect.y) / 2), index: 1 }]

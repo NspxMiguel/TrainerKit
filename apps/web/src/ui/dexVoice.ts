@@ -15,15 +15,15 @@ import {
 import { synthesize, ttsAvailable } from "../ai/tts.ts";
 
 /**
- * A voz da Pokedex.
+ * A voz da lente.
  *
- * O alvo e imitar a voz da Pokedex original. Duas coisas sobre isso, e
+ * O alvo e imitar a voz da lente original. Duas coisas sobre isso, e
  * vale dizer as duas antes do codigo:
  *
  * 1. Nao da pra CLONAR a voz. A da serie e a performance de um dublador real, e
  *    reproduzi-la exigiria clonagem de voz de uma pessoa identificavel — que e
  *    outra classe de problema, tecnica e legal, e nao e a que estamos resolvendo.
- * 2. O que da, e chega perto do efeito, e a ENTREGA: a Pokedex nao soa robotica
+ * 2. O que da, e chega perto do efeito, e a ENTREGA: a Especies nao soa robotica
  *    por timbre, soa por ritmo. Ela anuncia. Fala devagar, sem entonacao de
  *    conversa, com pausa depois do nome, e sempre na mesma cadencia.
  *
@@ -314,7 +314,7 @@ export interface VoiceOption {
  * As vozes que valem a pena oferecer, na ordem em que valem.
  *
  * As caricatas ficam de FORA da lista, nao no fim: oferecer "Grandpa" pra ler
- * uma ficha de Pokemon nao e opcao, e ninguem que escolhesse ela ficaria
+ * uma ficha de especie nao e opcao, e ninguem que escolhesse ela ficaria
  * satisfeito. Se a pessoa quiser mesmo, o sistema dela tem esse ajuste.
  */
 export function listVoices(language: string): VoiceOption[] {
@@ -471,7 +471,7 @@ export async function speak(
   text: string,
   language: string,
   /**
-   * `true` só para texto que o APP escreveu — a ficha da Pokédex.
+   * `true` só para texto que o APP escreveu — a ficha da Especies.
    *
    * Liga o caminho cacheável no CDN (ver `edgeTts`), o que faz a mesma ficha
    * custar zero a partir da segunda pessoa que a ouvir. Resposta de IA nunca

@@ -44,7 +44,7 @@ export interface Uso {
    * ⚠️ O ETL corta: `raidOverall` sai com 30 e cada liga com 60. Entao `total`
    * e "quantos entraram no ranking", nao "quantas especies existem" — a tela
    * tem que dizer *"#9 entre os 30 melhores"*, nunca *"#9 de 30"*, que leria
-   * como se o jogo tivesse trinta Pokemon.
+   * como se o jogo tivesse trinta especie.
    */
   total: number;
 }
@@ -98,7 +98,7 @@ function achar(
  * Onde vale a pena usar esta especie, do melhor uso pro pior.
  *
  * Devolve vazio quando ela nao passa de 60 em lista nenhuma — e a resposta
- * honesta pra maioria do dex, e a tela mostra "so pra Pokedex" em vez de
+ * honesta pra maioria do dex, e a tela mostra "so pra Especies" em vez de
  * inventar uma serventia.
  *
  * ⚠️ As tres ligas podem sair juntas, e isso e de proposito. Um bicho que joga

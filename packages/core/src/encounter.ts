@@ -7,7 +7,7 @@ import { MAX_IV } from "./types.js";
  * IV a partir do PC, ANTES de capturar.
  *
  * A calculadora de IV do app pede as tres barras da avaliacao, e elas so
- * existem depois que o Pokemon esta na mochila. Na tela de encontro o jogo
+ * existem depois que a especie esta na mochila. Na tela de encontro o jogo
  * mostra UM numero — o PC — e e com ele que a decisao de gastar bola tem que
  * ser tomada.
  *
@@ -33,7 +33,7 @@ import { MAX_IV } from "./types.js";
  * quantas combinacoes sobraram.
  */
 
-/** De onde o Pokemon esta vindo. E o que decide nivel e piso de IV. */
+/** De onde a especie esta vindo. E o que decide nivel e piso de IV. */
 export type OrigemDeEncontro = "selvagem" | "raide" | "ovo" | "pesquisa";
 
 interface RegraDeOrigem {

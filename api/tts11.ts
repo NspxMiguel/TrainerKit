@@ -8,7 +8,7 @@
  * ⚠️ A CONTA, ANTES DO CÓDIGO — ela é quem desenha esta função inteira:
  *
  *   Plano gratuito: 10.000 créditos por mês. Com `eleven_flash_v2_5` (metade do
- *   custo por caractere) isso dá ~20.000 caracteres. Uma ficha da Pokédex tem
+ *   custo por caractere) isso dá ~20.000 caracteres. Uma ficha da Especies tem
  *   ~400. Ou seja: **~50 leituras por MÊS, pra todos os usuários somados.**
  *
  * Cinquenta. No mês. Isso não é uma voz de uso diário — é uma degustação. E o

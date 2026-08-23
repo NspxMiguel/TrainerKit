@@ -32,7 +32,7 @@ import type { BaseStats, IVs } from "./types.js";
  *
  * Nao existe aqui nenhuma probabilidade de a troca SAIR sortuda. Ela depende de
  * quanto tempo os dois sao amigos, de serem Lucky Friends e de quando cada
- * Pokemon foi capturado — nada disso o app sabe, e chutar um numero seria
+ * especie foi capturado — nada disso o app sabe, e chutar um numero seria
  * inventar precisao. O que se mostra e o CENARIO: se sair sortudo, e isto.
  */
 
@@ -122,9 +122,9 @@ function chance(piso: Piso, atual: number): ChanceTroca {
  *
  * Mesmo criterio da regra `especie.fraca` do veredito, e de proposito: se as
  * duas telas discordarem sobre o que e um bicho ruim, o app fica dizendo
- * "transferir" de um lado e "vale trocar" do outro sobre o mesmo Pokemon.
+ * "transferir" de um lado e "vale trocar" do outro sobre o mesmo especie.
  */
-function especieBoa(base: BaseStats): boolean {
+function PokemonBoa(base: BaseStats): boolean {
   return !(base.atk < 150 && base.def + base.hp < 300);
 }
 
@@ -145,7 +145,7 @@ export function avaliarTroca(input: TradeInput): TradeAdvice {
   if (input.lucky) {
     return { ...base, vale: false, motivo: msg("trade.no.traded") };
   }
-  if (!especieBoa(input.baseStats)) {
+  if (!PokemonBoa(input.baseStats)) {
     return { ...base, vale: false, motivo: msg("trade.no.species") };
   }
   // Ja e bom: trocar aqui e apostar contra si mesmo. A media do piso 1 e 24/45,

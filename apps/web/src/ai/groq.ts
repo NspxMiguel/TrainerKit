@@ -5,7 +5,7 @@ import type { ChatMessage } from "./provider.ts";
 /**
  * O assistente com modelo de linguagem.
  *
- * DESENHO CENTRAL: ele nao analisa Pokemon. Ele EXPLICA um veredito que o app
+ * DESENHO CENTRAL: ele nao analisa especie. Ele EXPLICA um veredito que o app
  * ja calculou, com o rastro de regras na mao. Isso nao e limitacao tecnica, e o
  * que torna o recurso barato e confiavel ao mesmo tempo — um modelo que
  * recebesse so "Machamp 96%" inventaria a analise, e inventar e exatamente o

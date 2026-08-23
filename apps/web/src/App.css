@@ -116,7 +116,7 @@
  * ficou parado.
  *
  * Na Inicio quem come a sobra e o hero, que e o unico `flex: 1` da coluna — o
- * Pokemon cresce sozinho ao devolver esses 38pt, e hero grande e o que esta
+ * especie cresce sozinho ao devolver esses 38pt, e hero grande e o que esta
  * desenhado pra essa tela.
  *
  * Os 12px sao a folga entre o topo da barra e o que vem antes; a area segura ja
@@ -359,7 +359,7 @@
    * O atalho reseta tudo que ele nao menciona e define o que menciona: os 10px
    * morriam ali, silenciosamente, e o rotulo continuava em 11px.
    *
-   * 10px e o valor do redesenho — e o que faz caber "Pokédex" na aba estreita.
+   * 10px e o valor do redesenho — e o que faz caber "Especies" na aba estreita.
    */
   font: 500 10px/1.1 var(--tk-font);
 }
@@ -1023,7 +1023,7 @@
  * Sem selo: so a arte.
  *
  * A borda e a sombra interna do `.tk-mono` desenhavam um quadrado fantasma em
- * volta do bicho dentro do visor da Pokedex — dava pra ver o contorno em cima da
+ * volta do bicho dentro do visor da Especies — dava pra ver o contorno em cima da
  * tela verde. `bare` tira as duas; o monograma continua servindo de espera
  * enquanto a imagem carrega.
  */
@@ -1146,7 +1146,7 @@
 /*
  * ⚠️ A FOLHA QUE NASCEU DENTRO DE UMA VIEW TRANSITION NAO ANIMA.
  *
- * Abrir a ficha pela Pokedex ja e uma transicao de elemento compartilhado: o
+ * Abrir a ficha pela Especies ja e uma transicao de elemento compartilhado: o
  * tile cresce e vira o cabecalho (440ms) enquanto a raiz troca (300ms). A folha
  * animando por cima disso da duas entradas pro mesmo toque.
  *
@@ -1555,7 +1555,7 @@
  * ⚠️ Isto era `position: absolute; right: 0`, e o comentario que estava neste
  * lugar explicava por que: "o selo vive no canto direito do cabecalho, ancorado
  * a esquerda ele sairia da tela". Era verdade quando o selo so existia no
- * cabecalho da tela de IV. Ai ele foi pro Modo Pokedex, onde vive no canto
+ * cabecalho da tela de IV. Ai ele foi pro Modo lente, onde vive no canto
  * ESQUERDO — e `right: 0` mandou um balao de 277px pra 204px FORA da tela.
  *
  * A regra estava certa sobre o caso dela e nao tinha como saber do outro. Por
@@ -1568,7 +1568,7 @@
   /*
    * Acima do `.tk-topo-edge` (45), e nao no 30 de antes.
    *
-   * O balao se cola LOGO ABAIXO do selo (`r.bottom + 8`). Com o Modo Pokedex
+   * O balao se cola LOGO ABAIXO do selo (`r.bottom + 8`). Com o Modo lente
    * rolado, o selo sobe pro alto da tela e o balao nasce por volta dos 48pt —
    * dentro da parte opaca do vidro. Por baixo dele o aviso sairia borrado e
    * lavado, e um balao que a pessoa ACABOU de abrir nao e conteudo rolando:
@@ -2023,7 +2023,7 @@
  * a mesma altura do item — apagar competia visualmente com abrir, e apagar e a
  * coisa que menos se faz aqui. Agora ele e um alvo pequeno DENTRO da linha,
  * ainda com os 44px de area de toque que a acessibilidade exige, mas sem peso
- * visual. A linha inteira continua abrindo o Pokemon.
+ * visual. A linha inteira continua abrindo a especie.
  */
 .tk-owned {
   position: relative;
@@ -2050,7 +2050,7 @@
  * O `z-index: 1` nao e detalhe. O sprite dentro do selo e um `<img>`
  * posicionado, e elementos posicionados sem z-index pintam por ORDEM DE DOM —
  * como o selo vem depois desta camada, o sprite ficava POR CIMA dela e engolia
- * o toque. Resultado: clicar no nome abria o Pokemon, clicar na foto nao fazia
+ * o toque. Resultado: clicar no nome abria a especie, clicar na foto nao fazia
  * nada. Com z-index explicito a camada sobe acima de tudo que e conteudo, e os
  * dois botoes de acao sobem acima dela.
  */
@@ -2417,7 +2417,7 @@ button.tk-owned-act:active {
 /* ------------------------------------------------- as tres acoes do app */
 
 /*
- * Montar time, Pokedex e Ginasio, numa fileira.
+ * Montar time, Especies e Ginasio, numa fileira.
  *
  * Empilhadas custavam 46px cada, e a terceira fazia a home voltar a rolar, o
  * que e proibido nesta tela. Em fileira somam 76px em vez
@@ -2427,7 +2427,7 @@ button.tk-owned-act:active {
 /*
  * Duas colunas, nao tres.
  *
- * Eram tres, e a do meio era "Pokédex" — do lado de uma ABA chamada Pokédex. O
+ * Eram tres, e a do meio era "Especies" — do lado de uma ABA chamada Especies. O
  * aparelho foi pra dentro da aba, e com duas colunas o rotulo tambem para de
  * quebrar: "Monta um time pra mim" numa coluna de 110px virava tres linhas.
  */
@@ -2827,7 +2827,7 @@ button.tk-chip,
 /*
  * ⚠️ ALVO DE 44px EM TODO SEGMENTO — 32px no compacto, 38 no normal.
  *
- * Achado varrendo o app: "Todos · 1.182" e "Meus · 4" saíam 426×32 na Pokédex, e
+ * Achado varrendo o app: "Todos · 1.182" e "Meus · 4" saíam 426×32 na Especies, e
  * "Raide"/"PvP" saíam 284×38 no "Monta um time". O app tem compromisso escrito
  * de 44px em qualquer coisa tocável.
  *
@@ -2902,7 +2902,7 @@ button.tk-chip,
  * A cor nao e enfeite: cada bloco herda o tom da coisa pra onde leva — verde
  * pra raide, azul pra PvP —, e depois de duas semanas de uso a pessoa acerta
  * o toque sem ler. Foi por isso que o app ganhou isto: o ranking e os counters
- * existiam ha dias escondidos dentro da Pokedex, e ninguem ia achar.
+ * existiam ha dias escondidos dentro da Especies, e ninguem ia achar.
  */
 .tk-quickgrid {
   display: grid;
@@ -3708,10 +3708,10 @@ button.tk-chip,
   color: var(--tk-succ);
 }
 
-/* ================================================================ Pokedex */
+/* ================================================================ Especies */
 
 /*
- * A Pokedex como APARELHO.
+ * A Especies como APARELHO.
  *
  * "quero q pareça muito com uma pokedex, até em aparencia". Uma pagina com um
  * sprite grande nao parece; um objeto com carcaça, lente, luzes, visor afundado
@@ -3755,7 +3755,7 @@ button.tk-chip,
    * ⚠️ O FUNDO DA TELA CONTINUA SENDO O DO APP. O vermelho e do APARELHO.
    *
    * Duas exigencias que pareciam brigar: o fundo nao pode trocar de cor ao
-   * mudar de tela, e a Pokedex e a unica que PODE ser diferente das outras. As
+   * mudar de tela, e a Especies e a unica que PODE ser diferente das outras. As
    * duas sao verdade ao mesmo tempo, e a
    * contradicao so existia porque a carcaça pintava a tela inteira de borda a
    * borda: ai ela deixa de parecer um objeto e passa a parecer outro app.
@@ -3928,7 +3928,7 @@ button.tk-chip,
   background: rgb(0 0 0 / 0.38);
 }
 
-/* Vistos e capturados: a razao de existir uma Pokedex. */
+/* Vistos e capturados: a razao de existir uma Especies. */
 .tk-dex[data-skin="device"] .tk-dexdev-counters {
   display: flex;
   /*
@@ -4309,7 +4309,7 @@ button.tk-chip,
   opacity: 0.85;
 }
 
-/* ------------------------------------------------- Pokedex sem a carcaça */
+/* ------------------------------------------------- Especies sem a carcaça */
 
 /*
  * `data-skin="plain"`: o mesmo ecra, com o visual autoral do app.
@@ -4567,10 +4567,10 @@ button.tk-chip,
   color: var(--tk-txt2);
 }
 
-/* -------------------------------------------- abrir o aparelho na Pokedex */
+/* -------------------------------------------- abrir o aparelho na Especies */
 
 /*
- * A porta de entrada do modo Pokedex, dentro da aba Pokedex.
+ * A porta de entrada do modo lente, dentro da aba Especies.
  *
  * Traz a lente do aparelho em miniatura de propósito: e a assinatura visual
  * dele, e quem ja abriu uma vez reconhece o botao pela bolinha azul antes de ler
@@ -4744,7 +4744,7 @@ button.tk-chip,
  * consertei a de cima e a tela continuou igual.
  *
  * A folha sai daqui. O que fica e a `.tk-dex`, que e quem esta regra sempre
- * quis animar — a carcaca da Pokedex nao e uma tela cheia, e uma placa dentro
+ * quis animar — a carcaca da Especies nao e uma tela cheia, e uma placa dentro
  * da tela, entao a entrada dela e de PECA e nao de superficie.
  */
 .tk-dex {
@@ -4928,7 +4928,7 @@ button.tk-chip,
  * verde vira um bloco pesado, e a grade inteira fica com cara de adesivo colado.
  *
  * Conserto em CSS, e nao no `typeGradient`, por um motivo: o gradiente e estilo
- * INLINE (vem do tipo do Pokemon, calculado em JS), entao trocar a cor exigiria
+ * INLINE (vem do tipo da especie, calculado em JS), entao trocar a cor exigiria
  * o JS conhecer o tema — e passar tema pra dentro de uma funcao de dados e o
  * comeco de um emaranhado. Um veu por cima resolve no lugar certo.
  *
@@ -4962,7 +4962,7 @@ button.tk-chip,
  * `drop-shadow`, e `drop-shadow` segue o ALFA DO ELEMENTO INTEIRO. Com um
  * retangulo branco opaco de 34% cobrindo a caixa, a sombra deixava de acompanhar
  * a silhueta e passava a desenhar a CAIXA — uma placa retangular escura de
- * 366x187 atras do Pokemon, so no tema claro.
+ * 366x187 atras da especie, so no tema claro.
  *
  * A licao e a de sempre neste arquivo: exclusao escrita como regra separada e
  * uma aposta na ordem de especificidade. Escrita dentro do seletor, e um fato.
@@ -5006,7 +5006,7 @@ button.tk-chip,
   }
 }
 
-/* Dentro do visor da Pokedex nao ha veu: la o fundo e a tela verde do aparelho,
+/* Dentro do visor da Especies nao ha veu: la o fundo e a tela verde do aparelho,
    e o `bare` ja tirou o selo. */
 .tk-mono--bare::after {
   display: none;
@@ -5228,11 +5228,11 @@ button.tk-chip,
 /* ────────────────────────────────── coleção em grade (#43) */
 
 /*
- * A ficha da colecao na grade: e a mesma `.tk-species-cell` da aba Pokedex,
+ * A ficha da colecao na grade: e a mesma `.tk-species-cell` da aba Especies,
  * mais duas coisas que so a colecao sabe — o IV e a cor do veredito.
  *
  * Reusar a classe em vez de escrever outra e o ponto do exercicio: as duas telas
- * mostram Pokemon, entao tem que mostrar igual. A colecao era a unica em lista, e
+ * mostram especie, entao tem que mostrar igual. A colecao era a unica em lista, e
  * essa divergencia sozinha ja fazia parecerem apps diferentes.
  */
 .tk-owned-cell {

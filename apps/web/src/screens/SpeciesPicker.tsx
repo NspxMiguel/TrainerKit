@@ -12,7 +12,7 @@ interface Props {
   onClose: () => void;
 }
 
-/** Primeiro passo do cadastro: qual especie. Reusa a mesma busca da Pokedex. */
+/** Primeiro passo do cadastro: qual especie. Reusa a mesma busca da Especies. */
 export function SpeciesPicker({ data, onPick, onClose }: Props) {
   /* A folha sai animada: quem segura o no durante a saida e o `useFolha`. Todo
      caminho de fechamento passa por `fechar`, nunca pelo `onClose` cru — um que
@@ -42,18 +42,18 @@ export function SpeciesPicker({ data, onPick, onClose }: Props) {
   // da barra de abas por mais z-index que levasse.
   return createPortal(
     <div ref={refFolha}
-      className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={t("pokedex.whichPokemon")} data-saindo={saindo || undefined}>
+      className="tk-sheet-full" role="dialog" aria-modal="true" aria-label={t("especies.qual")} data-saindo={saindo || undefined}>
       <header className="tk-sheet-head">
         <button type="button" className="tk-sheet-close" onClick={fechar} aria-label={t("common.close")}>
           ‹
         </button>
       </header>
-      <h1 className="tk-h1">{t("pokedex.whichPokemon")}</h1>
+      <h1 className="tk-h1">{t("especies.qual")}</h1>
 
       {/* Escolher tambem e SAIR desta folha — quem a desmonta e o componente de
           cima, que nao sabe da animacao. Sem `sair`, escolher uma especie
           fazia a folha piscar enquanto voltar deslizava. Mesma armadilha do
-          Modo Pokedex, e a terceira vez que ela aparece: toda saida que passa
+          Modo lente, e a terceira vez que ela aparece: toda saida que passa
           por callback do pai precisa disto. */}
       <SpeciesBrowser data={data} onPick={(s) => sair(() => onPick(s))} simple />
     </div>,

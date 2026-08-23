@@ -12,7 +12,7 @@ import { Onboarding } from "./onboarding/Onboarding.tsx";
 import { useSetup } from "./onboarding/setup.ts";
 import { CollectionScreen } from "./screens/CollectionScreen.tsx";
 import { HomeScreen } from "./screens/HomeScreen.tsx";
-import { PokedexScreen } from "./screens/PokedexScreen.tsx";
+import { EspeciesScreen } from "./screens/EspeciesScreen.tsx";
 import { SettingsScreen } from "./screens/SettingsScreen.tsx";
 import { useLanguage } from "./i18n/language.ts";
 import { useT, type Key } from "./i18n/t.ts";
@@ -47,29 +47,29 @@ import { useTabBarMinimize } from "./ui/useTabBarMinimize.ts";
 /*
  * Tres abas, nao quatro.
  *
- * A Colecao virou um modo DENTRO da Pokedex ("Todos" / "Meus"). Ver a nota em
- * `PokedexScreen`: as duas abas respondiam a mesma pergunta, e a Pokedex do jogo
+ * A Colecao virou um modo DENTRO da Especies ("Todos" / "Meus"). Ver a nota em
+ * `EspeciesScreen`: as duas abas respondiam a mesma pergunta, e a Especies do jogo
  * mostra visto e capturado no mesmo lugar.
  *
  * `"colecao"` sai do tipo de propósito: assim o compilador aponta qualquer lugar
  * que ainda tente navegar pra ela, em vez de a navegacao falhar calada.
  */
-export type Tab = "inicio" | "pokedex" | "ajustes";
+export type Tab = "inicio" | "especies" | "ajustes";
 
 /**
- * Com que pergunta a pessoa chegou na Pokedex.
+ * Com que pergunta a pessoa chegou na Especies.
  *
  * Os atalhos da home diziam "Raide · Melhores atacantes por tipo" e abriam a
  * BUSCA — a lista de espécies em ordem de número, que não é o que o atalho
  * prometeu. Levar junto a intenção é o que faz o atalho chegar onde diz.
  */
-export type PokedexIntent =
+export type EspeciesIntent =
   | { view: "browse"; busca?: string }
   | { view: "best"; mode: "raid" | "pvp" }
   /**
    * "os MEUS", nao a especie.
    *
-   * O `+3` no fim da fila da home dizia "mais tres SEUS" e abria a Pokedex em
+   * O `+3` no fim da fila da home dizia "mais tres SEUS" e abria a Especies em
    * "Todos" — a lista das 1.000 especies do jogo, onde os seus tres nao estao
    * em lugar nenhum. Era a mesma falha dos atalhos antigos: o botao prometia um
    * destino e a navegacao entregava outro, porque so o nome da aba viajava.
@@ -83,16 +83,16 @@ const TABS: ReadonlyArray<{
 }> = [
   { id: "inicio", labelKey: "nav.home", Icon: IconHomeFill },
   // Consulta pura, sem cadastro: nem todo mundo quer catalogar a colecao, as
-  // vezes a pergunta e so "esse Pokemon presta?".
-  { id: "pokedex", labelKey: "nav.pokedex", Icon: IconGridFill },
+  // vezes a pergunta e so "essa especie presta?".
+  { id: "especies", labelKey: "nav.especies", Icon: IconGridFill },
   { id: "ajustes", labelKey: "nav.settings", Icon: IconGearFill },
 ];
 
 export function App() {
   const [tab, setTab] = useState<Tab>("inicio");
-  const [intent, setIntent] = useState<PokedexIntent | null>(null);
+  const [intent, setIntent] = useState<EspeciesIntent | null>(null);
 
-  const go = (next: Tab, withIntent?: PokedexIntent) => {
+  const go = (next: Tab, withIntent?: EspeciesIntent) => {
     /*
      * ⚠️ TROCAR DE ABA FECHA AS FOLHAS ABERTAS.
      *
@@ -100,7 +100,7 @@ export function App() {
      * `go` so era chamado com a tela livre. A ficha agora deixa a barra a mostra
      * ("ate mais simples de ir pra tela inicial"), e sem esta linha o toque em
      * "Inicio" trocaria a aba POR BAIXO da ficha — a pessoa continuaria vendo o
-     * Pokemon e concluiria que o botao nao funciona.
+     * especie e concluiria que o botao nao funciona.
      *
      * Cada folha sai animada, e a Inicio ja esta montada por tras: o efeito e o
      * da ficha deslizando pra fora e revelando a aba nova.
@@ -114,7 +114,7 @@ export function App() {
   const setup = useSetup();
   const dataset = useDataset();
   const [persist, setPersist] = useState<PersistState | null>(null);
-  /* O selo do documento de desktop: "Pokédex 4". A regra de "pede decisão" mora
+  /* O selo do documento de desktop: "Especies 4". A regra de "pede decisão" mora
      em `storage/pendencias.ts` — a mesma que a fila da Home lê. */
   const pendencias = usePendencias(dataset);
   const offline = useOffline(
@@ -157,7 +157,7 @@ export function App() {
   /*
    * As FERRAMENTAS da barra lateral — só existem na tela larga.
    *
-   * "sidebar fixa (Início/Pokédex/Ajustes + acesso direto a Calculadora de
+   * "sidebar fixa (Início/Especies/Ajustes + acesso direto a Calculadora de
    * IV/Raide/Montar time)", do `TrainerKit Desktop.dc.html`.
    *
    * ⚠️ QUEM ESCONDE NO CELULAR É O CSS, e não um `if` aqui. O handoff é
@@ -169,7 +169,7 @@ export function App() {
    * ⚠️ DUAS DELAS PRECISAM DE UMA ESPÉCIE, e é por isso que existe o `pedindo`.
    * `RaidCounters` recebe `boss` e `IVCalculator` recebe `species` — abrir
    * qualquer uma das duas "no vazio" não é possível nem faria sentido: a
-   * pergunta delas é sempre sobre um Pokémon. Então a ferramenta abre o
+   * pergunta delas é sempre sobre uma especie. Então a ferramenta abre o
    * `SpeciesPicker` que a coleção já usa, e só então a tela. "Montar time" não
    * pede nada porque a pergunta dela é sobre a coleção inteira.
    */
@@ -195,7 +195,7 @@ export function App() {
    *
    * Antes a aba Colecao era escondida no modo consulta (`setup.mode !==
    * "colecao"`). Ela nao existe mais como aba — virou o modo "Meus" DENTRO da
-   * Pokedex — e quem esconde esse modo agora e a propria `PokedexScreen`, que e
+   * Especies — e quem esconde esse modo agora e a propria `EspeciesScreen`, que e
    * quem sabe se ha colecao pra mostrar.
    */
   const visibleTabs = TABS;
@@ -211,7 +211,7 @@ export function App() {
           {tab === "inicio" && (
             <HomeScreen dataset={dataset} persist={persist} onGo={go} />
           )}
-          {tab === "pokedex" && <PokedexScreen dataset={dataset} intent={intent} />}
+          {tab === "especies" && <EspeciesScreen dataset={dataset} intent={intent} />}
           {tab === "ajustes" && (
             <SettingsScreen
               datasetLabel={
@@ -328,16 +328,16 @@ export function App() {
               {/* Rotulo sempre visivel: o prototipo proibe icone sem rotulo na navegacao. */}
               <span className="tk-tab-label">{t(labelKey)}</span>
               {/*
-                O selo so existe na Pokedex, so quando ha o que decidir, e so na
+                O selo so existe na Especies, so quando ha o que decidir, e so na
                 barra lateral (o CSS o esconde no celular, onde a aba tem 50px
                 de altura e nao ha onde por um numero sem apertar o rotulo).
 
                 `aria-hidden`: o numero ja e dito pelo proprio destino — quem
-                entra na Pokedex ve "1 pede uma decisão" escrito. Anuncia-lo na
-                aba faria o leitor de tela ler "Pokédex 4", que soa como o nome
+                entra na Especies ve "1 pede uma decisão" escrito. Anuncia-lo na
+                aba faria o leitor de tela ler "Especies 4", que soa como o nome
                 da aba.
               */}
-              {id === "pokedex" && pendencias > 0 && (
+              {id === "especies" && pendencias > 0 && (
                 <span className="tk-tab-selo" aria-hidden="true">
                   {pendencias.toLocaleString(language)}
                 </span>
@@ -408,7 +408,7 @@ export function App() {
         As ferramentas da barra lateral, montadas aqui e nao dentro da aba.
 
         Elas precisam sobreviver a troca de aba — abrir a calculadora e depois
-        clicar em "Pokedex" nao pode fechar a calculadora, e se ela morasse
+        clicar em "Especies" nao pode fechar a calculadora, e se ela morasse
         dentro de `<HomeScreen>` morreria junto com a aba.
       */}
       {pedindo !== null && dataset.status === "ready" && (
@@ -438,9 +438,9 @@ export function App() {
           onPickSpecies={() => {
             /* Abrir a ficha a partir do time fecharia a folha do time por baixo
                dela. Na barra lateral a ferramenta e um destino, nao um passo de
-               um fluxo — quem quer a ficha tem a Pokedex do lado. */
+               um fluxo — quem quer a ficha tem a Especies do lado. */
             fecharFerramenta();
-            go("pokedex");
+            go("especies");
           }}
         />
       )}

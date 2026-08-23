@@ -98,7 +98,7 @@ describe("o veredito deixou de ignorar a mecanica", () => {
    * continua vencendo, e o Gigantamax continua aparecendo no rastro pra pessoa
    * saber o que esta soltando.
    */
-  it("nao transforma um IV ruim em Pokemon bom", () => {
+  it("nao transforma um IV ruim em especie bom", () => {
     const ruim = decide({ ...base, ivs: { atk: 2, def: 3, hp: 4 }, gigantamax: true });
     expect(ruim.action).toBe("transferir");
     expect(ruim.signals.map((s) => s.rule)).toContain("dynamax.gigantamax");

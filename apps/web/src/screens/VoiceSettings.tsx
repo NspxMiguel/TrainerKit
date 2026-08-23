@@ -133,7 +133,7 @@ export function VoiceSettings() {
     setEscolha(v.chave);
     setVozEscolhida(v.chave);
     // Toca com o motor de verdade: a prévia tem que soar como vai soar na
-    // Pokédex, não como a voz do sistema.
+    // Especies, não como a voz do sistema.
     void speak(t("voice.sample"), language);
   };
 

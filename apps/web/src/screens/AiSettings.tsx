@@ -43,7 +43,7 @@ export function AiSettings() {
   const [progress, setProgress] = useState<LoadProgress | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const webgpu = hasWebGPU();
-  // Reassina a cota: gastar uma pergunta na Pokedex tem que mexer neste numero
+  // Reassina a cota: gastar uma pergunta na Especies tem que mexer neste numero
   // sem precisar reabrir a tela.
   const sobram = useSyncExternalStore(onQuotaChange, restantes, () => LIMITE_DIARIO);
 

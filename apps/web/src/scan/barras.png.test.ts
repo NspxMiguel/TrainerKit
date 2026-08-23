@@ -16,7 +16,7 @@ import { lerPng } from "../../scripts/ler-prints.ts";
  *
  * ⚠️ POR QUE ISTO PRECISAVA EXISTIR, tendo `appraisal.selo.test.ts` ──────────
  *
- * Aquele teste travou os limiares de estrela usando treze Pokémon reais do
+ * Aquele teste travou os limiares de estrela usando treze especie reais do
  * dono. Mas ele guarda o RESULTADO da medição — a tabela de totais que o
  * scanner devolveu naquele dia — e não roda o scanner. Se o leitor de barras
  * regredir amanhã, ele continua passando, verdinho, sobre números que já não
@@ -46,7 +46,7 @@ const DIR = process.env.TK_PRINTS_PNG ?? "";
  * O que cada print tem que ler. Medido, não estimado.
  *
  * Os dois com `apelido` são os que têm gabarito de verdade: o próprio dono
- * escreveu o IV no nome do Pokémon dentro do jogo, então a resposta certa está
+ * escreveu o IV no nome da especie dentro do jogo, então a resposta certa está
  * impressa na própria imagem. Os outros onze travam a regressão — não provam
  * que o número está certo, provam que ele não MUDOU.
  */
@@ -76,7 +76,7 @@ const ESPERADO: ReadonlyArray<{
  *
  * ⚠️ Recusar não é falhar — é o comportamento certo, e ele precisa de teste
  * tanto quanto o acerto. O perigo de um leitor de IV não é dizer "não sei": é
- * dizer um número errado com cara de certo, e o jogador transferir o Pokémon
+ * dizer um número errado com cara de certo, e o jogador transferir a especie
  * bom por causa dele.
  *
  * Sete destes são prints do Duolingo que estavam na mesma pasta. Se um dia o
@@ -120,7 +120,7 @@ describe.skipIf(!temTudo)("leitor de barras nos PNGs reais", () => {
    * juntos: os onze provam que a leitura não mudou; estes provam que ela está
    * CERTA, contra um número que o dono escreveu no jogo antes de eu existir.
    */
-  it("bate com o IV que o dono escreveu no apelido do Pokémon", () => {
+  it("bate com o IV que o dono escreveu no apelido da especie", () => {
     for (const caso of ESPERADO.filter((c) => c.apelido)) {
       const bmp = lerPng(readFileSync(join(DIR, caso.arquivo)));
       const r = scanAppraisalBars(bmp);

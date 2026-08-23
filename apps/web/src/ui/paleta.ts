@@ -57,7 +57,7 @@ const CORES = tabela as unknown as Record<string, Entrada>;
 /**
  * O enquadramento do sprite, calculado a partir da caixa justa.
  *
- * ⚠️ Isto existe porque a arte oficial NÃO enquadra os Pokémon de forma
+ * ⚠️ Isto existe porque a arte oficial NÃO enquadra os especie de forma
  * consistente — o Charizard e o exemplo claro. Nao da pra acertar por regra
  * geral: tem que valer especie por especie.
  *
@@ -126,7 +126,7 @@ export function enquadrar(
   spriteId: number | null,
   /**
    * A fonte muda o enquadramento: a arte oficial é ilustração com margem
-   * variável, os renders 3D do Pokémon HOME são capturas mais cheias no quadro.
+   * variável, os renders 3D da especie HOME são capturas mais cheias no quadro.
    * Medido, Bulbasaur ocupa 85% da altura numa e 71% na outra.
    */
   fonte: "artwork" | "3d" = "artwork",
@@ -303,7 +303,7 @@ const ALVO = 4.7;
  *
  * ⚠️ LUMINÂNCIA, e não claridade — e essa distinção é o defeito inteiro.
  *
- * O nome do Pokémon é branco e fica sobre o gradiente. Eu limitava as paradas
+ * O nome da especie é branco e fica sobre o gradiente. Eu limitava as paradas
  * por claridade HSL (0,45 e 0,56), o que parece uniforme e não é: amarelo em
  * `l = 0.56` tem quase o triplo da luminância de azul na mesma claridade,
  * porque o olho (e a fórmula da WCAG) pesa verde e vermelho muito mais que
@@ -499,7 +499,7 @@ export function paletaDaEspecie(spriteId: number | null): Paleta {
    *
    * Sozinho eu teria dado por resolvido no Dragonite. Meia dúzia de espécies
    * com o botão principal reprovando em contraste é justamente o tipo de coisa
-   * que só aparece quando alguém abre AQUELE Pokémon — ou seja, nunca em teste
+   * que só aparece quando alguém abre AQUELE especie — ou seja, nunca em teste
    * manual, e sempre em uso real.
    *
    * A saída é empurrar a claridade da cor cheia na direção contrária à tinta até
@@ -542,7 +542,7 @@ export function paletaDaEspecie(spriteId: number | null): Paleta {
      * CLARO EM CIMA, ESCURO EMBAIXO — e essa ordem é uma correção.
      *
      * A primeira versão descia do escuro pro claro, seguindo o mockup. Só que
-     * no mockup o nome do Pokémon fica no TOPO do cartão; aqui ele fica na
+     * no mockup o nome da especie fica no TOPO do cartão; aqui ele fica na
      * base, junto dos botões, e é branco. Gradiente clareando pra baixo põe
      * texto branco exatamente onde o fundo é mais claro.
      *
@@ -556,7 +556,7 @@ export function paletaDaEspecie(spriteId: number | null): Paleta {
      * "nao gostei desse novo degrade, o do claude desing ta melhor ainda."
      *
      * Eu tinha INVERTIDO o desenho dele por um motivo que parecia bom: o nome
-     * do Pokémon é branco e fica na base, então clarear pra baixo põe texto
+     * da especie é branco e fica na base, então clarear pra baixo põe texto
      * branco onde o fundo é mais claro.
      *
      * O erro foi tratar o gradiente como se ele trabalhasse sozinho. No handoff
@@ -672,8 +672,8 @@ const VARIAVEIS = [
 /**
  * ⚠️ UMA PILHA, e não cada tela escrevendo por cima da outra.
  *
- * O `<html>` é um recurso compartilhado: a home pinta o app com o Pokémon em
- * destaque, e a ficha da espécie, aberta por cima, pinta com o Pokémon aberto.
+ * O `<html>` é um recurso compartilhado: a home pinta o app com a especie em
+ * destaque, e a ficha da espécie, aberta por cima, pinta com a especie aberto.
  * Com dois `useEffect` independentes isso quebra na SAÍDA, não na entrada — a
  * ficha fecha, sua limpeza apaga as variáveis, e o efeito da home não roda de
  * novo porque as dependências dela não mudaram. O app voltaria pra home sem
@@ -693,7 +693,7 @@ function aplicarTopo() {
    * "o pokemon destaque, sempre altera a palheta de cores do app."
    *
    * O hero vive na home, e a `App` remonta a tela a cada troca de aba
-   * (`key={tab}`). Entao ao ir pra Pokedex ou Ajustes a pilha esvaziava, as
+   * (`key={tab}`). Entao ao ir pra Especies ou Ajustes a pilha esvaziava, as
    * variaveis eram removidas e o app voltava pro amarelo de reserva — a aba
    * ativa aparecia LARANJA no meio de um app azul-esverdeado do Ivysaur.
    *

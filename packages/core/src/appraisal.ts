@@ -59,13 +59,13 @@ export const BADGE_TIERS: readonly AppraisalBadge[] = [
  *
  * O jogo publica so o rotulo de busca ("3*,4*"); onde cada tier corta e
  * client-side. Ate hoje eles eram o que a comunidade repete. Foram conferidos
- * contra 13 Pokemon reais do dono, com as quatro bordas batendo exatamente —
+ * contra 13 especie reais do dono, com as quatro bordas batendo exatamente —
  * ver `appraisal.selo.test.ts`, que tem a tabela e o metodo.
  *
  * ⚠️ E POR ISSO QUE O APP LE A BARRA, E NUNCA A ESTRELA.
  *
  * A medicao achou de graca uma coisa que vale registrar: num dos prints a
- * roseta mostrava DUAS estrelas para um Pokemon de 42 (que sao tres), e o
+ * roseta mostrava DUAS estrelas para uma especie de 42 (que sao tres), e o
  * apelido escrito pelo dono confirmava os 93%. As estrelas acendem uma a uma, e
  * um print tirado no meio da animacao pega menos do que o bicho tem.
  *
@@ -95,7 +95,7 @@ export const BAR_COLOR_FILLED = "#EE9219";
 export const BAR_COLOR_PERFECT = "#E18079";
 
 /**
- * A cor vermelha e por STAT, nao por Pokemon: um 12/15/9 tem UMA barra vermelha
+ * A cor vermelha e por STAT, nao por especie: um 12/15/9 tem UMA barra vermelha
  * (a defesa) e duas laranjas. As tres so ficam vermelhas quando as tres sao 15.
  */
 export function isBarPerfect(value: number): boolean {

@@ -25,7 +25,7 @@ interface Props {
  * O IV antes da captura, a partir do PC.
  *
  * A calculadora ao lado desta secao pede as tres barras da avaliacao, e elas so
- * existem depois que o Pokemon esta na mochila. Na tela de encontro ha UM
+ * existem depois que a especie esta na mochila. Na tela de encontro ha UM
  * numero, e a decisao de gastar bola dourada e tomada ali.
  *
  * ⚠️ A TELA SO RESPONDE QUANDO A CONTA RESPONDE, e essa e a regra que sustenta

@@ -160,7 +160,7 @@ export function setEdgeVoice(id: string | null): void {
  * ⚠️ A regra e estreita de propósito. GET vira cache compartilhado, e cache
  * compartilhado significa que a URL fica em log de CDN, em historico e em
  * qualquer proxy no caminho. Entao so entra aqui texto que o PROPRIO APP
- * escreveu sobre uma especie — a ficha da Pokedex, que e identica pra todo mundo
+ * escreveu sobre uma especie — a ficha da Especies, que e identica pra todo mundo
  * que abrir o mesmo bicho no mesmo idioma.
  *
  * Resposta de IA NUNCA: ela pode citar a colecao de quem perguntou ("o seu
@@ -178,7 +178,7 @@ export async function edgeSynthesize(
   /** A escolhida na tela. Ignorada se não for deste idioma — ver `getEdgeVoice`. */
   preferida?: string,
   /**
-   * `true` = o texto veio do app (ficha da Pokédex) e pode ser cacheado no CDN
+   * `true` = o texto veio do app (ficha da Especies) e pode ser cacheado no CDN
    * pra todos os usuários. Quem chama decide, e o padrão é o caminho privado.
    */
   compartilhavel = false,

@@ -35,7 +35,7 @@ export function mensagemDeErro(
      *
      * Cada motivo tem frase propria porque sao situacoes diferentes pra quem
      * esta do outro lado: quem pediu codigo Python precisa saber que o app so
-     * fala de Pokemon; quem escreveu uma pergunta de 700 caracteres precisa
+     * fala de especie; quem escreveu uma pergunta de 700 caracteres precisa
      * saber que e pra encurtar. Uma mensagem generica faria os dois acharem que
      * o app quebrou.
      */

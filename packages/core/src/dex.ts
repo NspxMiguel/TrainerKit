@@ -3,15 +3,15 @@ import type { CpmTable } from "./cp.js";
 import type { BaseStats } from "./types.js";
 
 /**
- * A locucao da Pokedex.
+ * A locucao da Especies.
  *
- * A referencia e a Pokedex da serie: apontar pro Pokemon, ou mandar um print.
+ * A referencia e a Especies da serie: apontar pro especie, ou mandar um print.
  * La o aparelho identifica e ANUNCIA —
  * nome, classificacao, e um fato — numa voz plana de maquina.
  *
- * ⚠️ DECISAO IMPORTANTE, e ela e de projeto e nao de gosto: o texto da Pokedex
+ * ⚠️ DECISAO IMPORTANTE, e ela e de projeto e nao de gosto: o texto da Especies
  * do JOGO nao entra aqui. Aquelas descricoes ("Machamp tem quatro bracos que se
- * movem tao rapido...") sao obra criativa da Pokemon Company. Stats e formulas
+ * movem tao rapido...") sao obra criativa da especie Company. Stats e formulas
  * dao pra defender como fato; um paragrafo escrito por um roteirista, nao — e o
  * projeto inteiro foi desenhado pra ficar do lado defensavel dessa linha.
  *
@@ -31,7 +31,7 @@ import type { BaseStats } from "./types.js";
  *  · Nos JOGOS a ficha e categoria + altura + peso + grito + o texto. Altura e
  *    peso ja entram (`DexMode` monta com `heightDm`/`weightHg`); o texto e a
  *    obra escrita que este arquivo decidiu nao copiar.
- *  · Na SERIE o aparelho abre SEMPRE pela categoria: "Bulbasaur, o Pokemon
+ *  · Na SERIE o aparelho abre SEMPRE pela categoria: "Bulbasaur, a especie
  *    Semente." E a assinatura da locucao — a frase que qualquer pessoa reconhece
  *    de ouvido. Depois vem o resto, na ordem que a `locucao` do `DexMode` ja usa.
  *  · O ROTOM Dex conversa e tem personalidade propria. Isso o app ja faz, e pela
@@ -79,7 +79,7 @@ export interface DexEntryInput {
  * Como o bicho se comporta, em uma palavra.
  *
  * Mesmos limiares do `assistant.ts` de propósito: dois modulos que descrevem o
- * mesmo Pokemon com criterios diferentes acabam se contradizendo na tela, e o
+ * mesmo especie com criterios diferentes acabam se contradizendo na tela, e o
  * app ja passou por isso uma vez (o Eternatus dizia que batia forte e caia
  * rapido em linhas seguidas).
  */
@@ -91,7 +91,7 @@ export type DexBuild = "glassCannon" | "wall" | "balanced" | "frail" | "monster"
 
 export interface DexEntry {
   name: string;
-  /** Numero com tres digitos, do jeito que a Pokedex fala. */
+  /** Numero com tres digitos, do jeito que a Especies fala. */
   dexNumber: string;
   types: readonly string[];
   baseStats: BaseStats;

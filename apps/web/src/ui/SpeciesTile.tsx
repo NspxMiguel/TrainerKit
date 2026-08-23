@@ -16,7 +16,7 @@ interface Props {
   /**
    * Sem o selo em volta: so a arte, solta.
    *
-   * Existe pro visor da Pokedex. Lá o tile com gradiente do tipo e cantos
+   * Existe pro visor da Especies. Lá o tile com gradiente do tipo e cantos
    * arredondados brigava com o desenho — o bicho aparecia dentro de um quadrado
    * colorido em cima da tela verde, em vez de estar NA tela. O monograma
    * continua sendo o que aparece enquanto a imagem carrega; ele so perde a

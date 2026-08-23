@@ -390,7 +390,7 @@ function extrairPaleta(bmp: Bitmap): string[] {
 /**
  * A CAIXA JUSTA do bicho dentro da arte — onde o alfa deixa de ser zero.
  *
- * ⚠️ Isto existe porque a arte oficial NÃO enquadra os Pokémon de forma
+ * ⚠️ Isto existe porque a arte oficial NÃO enquadra os especie de forma
  * consistente. Cada PNG tem 512×512, mas o quanto o bicho ocupa dentro desse
  * quadrado varia muito: uns encostam nas bordas, outros flutuam no meio com
  * margem enorme. Charizard e Bulbasaur, lado a lado no mesmo quadro, aparecem
@@ -442,7 +442,7 @@ function caixaJusta(bmp: Bitmap): [number, number, number, number] {
  *
  * "deixa sempre a cara livre, sem nada. a cara e a parte da barriga pra cima."
  *
- * O nome do Pokémon passa por cima da silhueta no hero, e o que não pode ser
+ * O nome da especie passa por cima da silhueta no hero, e o que não pode ser
  * coberto é da barriga pra cima. Eu tentei 62% da altura — servia a bípedes e
  * encostava no queixo do Venusaur. Tentei 75% — servia ao Venusaur na home e
  * ainda cruzava a boca dele na ficha, porque lá o bicho fica maior. O erro não
@@ -516,7 +516,7 @@ const RAIZ = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/p
  *
  * ⚠️ A caixa justa precisa ser medida NAS DUAS, e isso nao e zelo: as mesmas
  * espécies vêm enquadradas de formas diferentes em cada uma. A arte oficial é
- * ilustração, com margem generosa e variável; os renders 3D do Pokémon HOME são
+ * ilustração, com margem generosa e variável; os renders 3D da especie HOME são
  * capturas de modelo, quase sempre mais cheias no quadro.
  *
  * O enquadramento tem que ser conferido nas DUAS fontes de imagem, e tambem no

@@ -43,7 +43,7 @@ export interface Componente {
 /**
  * ⚠️ O PC e texto CLARO sobre foto — limiar global nao serve.
  *
- * O fundo da tela do Pokemon e a camera desfocada, e num print de dia ele fica
+ * O fundo da tela da especie e a camera desfocada, e num print de dia ele fica
  * mais claro que a propria letra. Medi: com "perto do branco" (distancia
  * euclidiana < 70, que e o que o GoIV usa nos campos dele) o print do Slaking
  * devolve UM componente de 197px de altura — o bokeh inteiro virou uma mancha
@@ -248,14 +248,14 @@ function mediana(v: number[]): number {
 }
 
 /**
- * O topo do cartao branco — a divisa entre a foto e a ficha do Pokemon.
+ * O topo do cartao branco — a divisa entre a foto e a ficha da especie.
  *
  * E a unica ancora horizontal confiavel da tela: a foto acima varia com o mapa,
- * a hora e o Pokemon, e o cartao abaixo e sempre branco de ponta a ponta.
+ * a hora e a especie, e o cartao abaixo e sempre branco de ponta a ponta.
  *
  * ⚠️ A barra de PS NAO serve de ancora, embora fosse a escolha obvia. Ela e uma
  * barra de PREENCHIMENTO: o Dragonite do teste esta desmaiado (0/172 PS) e a
- * barra inteira e cinza. Ancorar no verde perderia justamente o Pokemon que
+ * barra inteira e cinza. Ancorar no verde perderia justamente a especie que
  * acabou de sair de uma raide, que e quando se escaneia.
  */
 export function topoDoCartao(bmp: Bitmap): number | null {
@@ -363,7 +363,7 @@ export function acharLinhaPc(bmp: Bitmap): RegiaoTexto | null {
          * ⚠️ A REGRA E "DIGITOS PARELHOS E CENTRALIZADOS", e nao "o maior texto".
          *
          * Eu ordenava por altura de glifo, achando que o PC e a maior tipografia
-         * da tela. Nao e: a arte do Pokemon e o arco passam pela faixa do topo e
+         * da tela. Nao e: a arte da especie e o arco passam pela faixa do topo e
          * produzem componentes bem mais altos que os digitos. No print c9 o PC
          * estava ali, perfeito — quatro glifos de 72px em 50,0% da tela — e
          * perdeu pra um pedaco de silhueta de 100px.
@@ -377,7 +377,7 @@ export function acharLinhaPc(bmp: Bitmap): RegiaoTexto | null {
         c.desvio <= 1.18 &&
         Math.abs(c.centro - 0.5) < 0.15,
     )
-    // Entre as que sobram, a mais ALTA na tela: o PC fica acima do Pokemon, e a
+    // Entre as que sobram, a mais ALTA na tela: o PC fica acima da especie, e a
     // barra de status ja ficou de fora pelo recorte.
     .sort((a, b) => a.linha.y0 - b.linha.y0);
 

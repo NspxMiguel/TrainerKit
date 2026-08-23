@@ -34,14 +34,14 @@ import { SpeciesDetail } from "./SpeciesDetail.tsx";
 import { SpeciesPicker } from "./SpeciesPicker.tsx";
 
 interface Props {
-  /** Dentro da aba Pokédex: sem título próprio, pra não repetir o de cima. */
+  /** Dentro da aba Especies: sem título próprio, pra não repetir o de cima. */
   embutida?: boolean;
   dataset: DatasetState;
   /**
    * O termo do campo de busca, que mora FORA desta tela.
    *
    * Mesmo arranjo da prop `busca` do `SpeciesBrowser`, e pelo mesmo motivo: na
-   * tela larga o campo fica no cabeçalho da Pokédex, uma coluna acima desta
+   * tela larga o campo fica no cabeçalho da Especies, uma coluna acima desta
    * lista, e serve as duas abas. Aqui só chega o texto.
    *
    * ⚠️ NENHUM CAMPO NASCE AQUI DENTRO quando isto vem vazio — no celular a
@@ -109,7 +109,7 @@ export function CollectionScreen({ dataset, embutida = false, busca = "" }: Prop
    * filtrado, buscar "gar" faria a faxina dizer "1 pode sair" quando há 23, e o
    * alternador sumiria em qualquer busca sem resultado.
    *
-   * `fold` é o mesmo normalizador da busca da Pokédex — sem ele "Nidoran♀" não
+   * `fold` é o mesmo normalizador da busca da Especies — sem ele "Nidoran♀" não
    * responde a "nidoran" e nenhum nome com acento responde ao termo sem acento.
    * Casa o `id` também, que é o que faz "mr-mime" achar "Mr. Mime".
    */
@@ -200,15 +200,15 @@ export function CollectionScreen({ dataset, embutida = false, busca = "" }: Prop
       {/*
         Titulo e o alternador de vista na MESMA linha.
 
-        "#43 Coleção com cara de Pokédex de verdade". A cara de Pokedex e a
-        GRADE — e a aba Pokedex ja tem uma, com o mesmo desenho de ficha. A
-        colecao era a unica tela do app que mostrava Pokemon em lista, e essa
+        "#43 Coleção com cara de Especies de verdade". A cara de Especies e a
+        GRADE — e a aba Especies ja tem uma, com o mesmo desenho de ficha. A
+        colecao era a unica tela do app que mostrava especie em lista, e essa
         divergencia sozinha ja fazia as duas parecerem apps diferentes.
       */}
       {/*
         Sem titulo quando embutida.
 
-        Dentro da aba Pokedex ela aparece debaixo de um `<h1>Pokédex</h1>`, e um
+        Dentro da aba Especies ela aparece debaixo de um `<h1>Especies</h1>`, e um
         segundo titulo logo abaixo ("Coleção") e a redundancia que ele vem
         cobrando o app inteiro — dois nomes pra um lugar so. O seletor
         "Todos/Meus" ja diz onde a pessoa esta.
@@ -222,8 +222,8 @@ export function CollectionScreen({ dataset, embutida = false, busca = "" }: Prop
         escondido o titulo e deixado a linha inteira de pe, com um espacador no
         lugar dele.
 
-        Dentro da Pokedex o alternador vai pra linha do seletor "Todos/Meus", que
-        e onde as escolhas de vista daquela tela ja moram. Ver `PokedexScreen`.
+        Dentro da Especies o alternador vai pra linha do seletor "Todos/Meus", que
+        e onde as escolhas de vista daquela tela ja moram. Ver `EspeciesScreen`.
       */}
       <div
         style={{ display: embutida ? "none" : "flex", alignItems: "center", gap: 10 }}
@@ -324,7 +324,7 @@ export function CollectionScreen({ dataset, embutida = false, busca = "" }: Prop
             });
 
             /*
-              GRADE: a mesma ficha da aba Pokedex, mais o que so a colecao sabe
+              GRADE: a mesma ficha da aba Especies, mais o que so a colecao sabe
               — o IV e a cor do veredito. O nome vira o IV porque numa grade da
               colecao a pergunta nao e "qual bicho e esse" (a arte responde), e
               sim "esse aqui presta?".
@@ -503,14 +503,14 @@ export function CollectionScreen({ dataset, embutida = false, busca = "" }: Prop
                 )}
 
                 {/*
-                  O "✕" SAIU daqui, e foi pra ficha do Pokemon com confirmacao.
+                  O "✕" SAIU daqui, e foi pra ficha da especie com confirmacao.
 
                   Era um toque so, sem confirmar, permanente — e nao ha servidor
                   pra desfazer. Num alvo de 32px encostado no chip de veredito,
                   que e justamente onde o dedo passa pra marcar "ja fiz".
 
                   A mesma tela pedia dois toques pra apagar uma COLECAO inteira e
-                  um so pra apagar um Pokemon. Agora as duas pedem dois, e a
+                  um so pra apagar uma especie. Agora as duas pedem dois, e a
                   linha devolveu 44px de largura — que era exatamente o que
                   faltava pro "Dragonite" parar de truncar em "Dragoni…".
                 */}
