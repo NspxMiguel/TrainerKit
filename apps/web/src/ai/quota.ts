@@ -6,7 +6,7 @@
  *
  * ANALISADO. É grátis, sim — mas não é ilimitado, e o teto não é o que parece:
  *
- *   `llama-3.3-70b-versatile`, plano gratuito, medido na página de limites:
+ *   `openai/gpt-oss-120b`, plano gratuito, medido na página de limites:
  *     30 RPM · 1.000 RPD · 12.000 TPM · **100.000 TPD**
  *
  *   E o mais importante: os limites são POR ORGANIZAÇÃO, não por usuário. A

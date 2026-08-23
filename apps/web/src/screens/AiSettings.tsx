@@ -182,7 +182,7 @@ export function AiSettings() {
             escolher errado piora o app sem ela entender por que. O app sabe, e
             escolher e trabalho do app.
 
-            O escolhido e o `llama-3.3-70b-versatile`: a tarefa aqui e reescrever
+            O escolhido e o `openai/gpt-oss-120b`: a tarefa aqui e reescrever
             texto curto a partir de dados ja calculados, e o 70B erra menos que o
             8B nisso sem custo perceptivel de tempo no plano gratuito.
           */}

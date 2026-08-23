@@ -32,7 +32,25 @@ const KEY = "tk:groq";
  * escolhido e o 70B — a tarefa e reescrever texto curto a partir de dados que o
  * app ja calculou, e ele erra menos nisso sem custo perceptivel de tempo.
  */
-const MODEL = "llama-3.3-70b-versatile";
+/*
+ * ⚠️ A GROQ APOSENTA MODELO, E ISSO JA QUEBROU O APP UMA VEZ.
+ *
+ * Aqui estava `llama-3.3-70b-versatile`, e ele simplesmente DEIXOU de existir
+ * no catalogo. O sintoma em producao era total e silencioso pra quem so olha a
+ * tela: toda pergunta a IA voltava erro, e o erro so dizia a verdade pra quem
+ * lia a resposta crua da API — `model_not_found`, num 404 que parecia problema
+ * de rota.
+ *
+ * Conferido contra `/v1/models` da Groq antes de trocar: dos 13 modelos
+ * disponiveis, os de conversa sao `openai/gpt-oss-120b`, `openai/gpt-oss-20b` e
+ * `qwen/qwen3.6-27b` (este ultimo e o que a visao ja usa). O 120b foi testado
+ * com uma pergunta real e respondeu em portugues.
+ *
+ * ⚠️ ISTO VAI ACONTECER DE NOVO. Nao ha como fixar um modelo de terceiro e
+ * assumir que ele fica; o que da pra fazer e conferir o catalogo quando a IA
+ * parar de responder, em vez de procurar o defeito no proxy.
+ */
+const MODEL = "openai/gpt-oss-120b";
 
 const store = {
   get(k: string): string | null {

@@ -56,7 +56,7 @@ import { filtrarConteudo } from "./_guarda";
 
 /** Modelos que esta funcao aceita. Fora desta lista, 400. */
 const PERMITIDOS = new Set([
-  "llama-3.3-70b-versatile",
+  "openai/gpt-oss-120b",
   "llama-3.1-8b-instant",
   /*
    * Modelos que ENXERGAM, pra a identificacao por foto da Especies funcionar na
@@ -366,7 +366,7 @@ export default async function handler(req: Request): Promise<Response> {
     return json({ error: `fora do assunto: este endpoint so responde sobre o jogo` }, 422);
   }
 
-  const modelo = corpo.model ?? "llama-3.3-70b-versatile";
+  const modelo = corpo.model ?? "openai/gpt-oss-120b";
   if (!PERMITIDOS.has(modelo)) return json({ error: "modelo nao permitido" }, 400);
 
   const resposta = await fetch("https://api.groq.com/openai/v1/chat/completions", {
