@@ -362,7 +362,26 @@ const HERO_CLARO = [
    * 0% — A COR. É aqui que a saudação vive, e é a cor que a faixa acima do hero
    * repete pra as duas se encontrarem sem fio.
    */
-  { l: 0.62, sat: 1.5, piso: 0.3, teto: 0.46 },
+  /*
+   * ⚠️ O PISO SUBIU DE 0,30 PRA 0,42, e o teto de 0,46 pra 0,56.
+   *
+   * Medido na home com o Eternatus: a faixa do topo saia em (110,121,182) no
+   * tema CLARO e (94,102,152) no ESCURO — praticamente a mesma cor. Num app
+   * cuja pagina clara e quase branca, isso e uma laje escura que parece ter
+   * vindo do outro tema, e era o que dava a impressao de cor errada no topo.
+   *
+   * O que NAO mudou, e e o motivo de mexer no piso em vez de clarear a faixa
+   * direto no CSS: a rampa continua monotona. As tres paradas do claro sobem
+   * 0,42–0,56, depois 0,55–0,68, depois 0,80–0,88 — sempre pra cima, ate o
+   * branco da pagina. Foi isso que quebrou na tentativa anterior de clarear
+   * (clara em cima, cor no meio, branca embaixo: duas subidas e uma descida), e
+   * e por isso que a emenda entre a saudacao e o hero voltou a aparecer la.
+   *
+   * O teto de 0,56 encosta no piso 0,55 da parada seguinte de proposito: e o
+   * ponto onde as duas se encontram sem degrau. Passar disso inverteria a
+   * ordem, e ai o degrade desce antes de subir.
+   */
+  { l: 0.62, sat: 1.5, piso: 0.42, teto: 0.56 },
   /* 48% — a passagem. */
   { l: 0.8, sat: 1.15, piso: 0.55, teto: 0.68 },
   /*

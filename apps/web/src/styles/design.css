@@ -3545,8 +3545,13 @@
     180deg,
     color-mix(
         in srgb,
-        var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent)) 78%,
-        var(--tk-accent-fg-claro, var(--tk-accent-topo, transparent)) 22%
+        /* ⚠️ ERA 78/22, e os 22% de cor escura deixavam a faixa do tema CLARO
+           tao pesada quanto a do escuro — medido, (110,121,182) contra
+           (94,102,152). A rampa PRECISA nascer um pouco mais funda que o
+           hero, senao a emenda entre a saudacao e o hero volta a aparecer;
+           12% ja dao essa direcao sem trazer o peso do tema errado junto. */
+        var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent)) 88%,
+        var(--tk-accent-fg-claro, var(--tk-accent-topo, transparent)) 12%
       )
       0,
     var(--tk-accent-topo-claro, var(--tk-accent-topo, transparent))
