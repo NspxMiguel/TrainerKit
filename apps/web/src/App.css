@@ -123,7 +123,9 @@
  * esta dentro de `--tk-barra-teto` e somar de novo era o mesmo erro.
  */
 [data-platform="iphone"] .tk-main {
-  padding-bottom: calc(var(--tk-barra-teto) + 12px);
+  /* O desbote, e nao a barra: ele e mais alto, e e ele quem apaga. Ver
+     `--tk-desbote-h`. */
+  padding-bottom: calc(var(--tk-desbote-h) + var(--tk-s3));
 }
 
 /* Mesmo pouso da bolha da IA (`.tk-bubble`): logo acima da barra, pela mesma
@@ -664,7 +666,7 @@
    */
   left: 0;
   right: 0;
-  height: calc(84px + env(safe-area-inset-bottom));
+  height: var(--tk-desbote-h);
   background: linear-gradient(to top, var(--tk-bg) 42%, transparent);
   pointer-events: none;
   z-index: 8;
@@ -711,12 +713,40 @@
   /* Largura da TELA, nao da coluna do app — mesmo motivo do `.tk-scroll-edge`. */
   left: 0;
   right: 0;
-  height: calc(env(safe-area-inset-top) * 1.7);
+  /*
+   * ⚠️ A ALTURA E ONDE A SAUDACAO COMECA, e nao um multiplo do recorte.
+   *
+   * Era `env(safe-area-inset-top) * 1.7`. Num iPhone com ilha isso da 100px,
+   * e a saudacao nasce em `--tk-respiro-topo` = 71px — ou seja, o texto nascia
+   * DENTRO do vidro e saia borrado. Foi o que ele circulou.
+   *
+   * A conta certa nao tem multiplicador nenhum: a peca existe pra manter a
+   * barra de status legivel sobre o hero, entao ela termina exatamente onde o
+   * conteudo do app comeca. `--tk-respiro-topo` E esse ponto, e ele ja e
+   * `max(52px, recorte + 12)` — vale com ilha, sem ilha e no navegador.
+   */
+  height: var(--tk-respiro-topo);
   background: var(--tk-glass-bg);
   backdrop-filter: blur(18px) saturate(180%);
   -webkit-backdrop-filter: blur(18px) saturate(180%);
-  mask-image: linear-gradient(to bottom, #000 0 58%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, #000 0 58%, transparent 100%);
+  /*
+   * ⚠️ A PARADA E EM PX, e nao em porcentagem.
+   *
+   * O vidro tem que valer CHEIO sobre a barra de status e ter desaparecido
+   * quando o texto chega. Com `58%` isso dependia da altura, que muda por
+   * aparelho: no mesmo iPhone o solido acabava em 41px, antes dos 59px da
+   * barra de status. Com `env(...)` a parada acompanha o recorte de verdade.
+   */
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0 env(safe-area-inset-top),
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0 env(safe-area-inset-top),
+    transparent 100%
+  );
   pointer-events: none;
   /*
    * Acima da folha cheia (20) e da barra de acao dela (40), abaixo da barra de

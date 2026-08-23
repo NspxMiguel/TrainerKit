@@ -45,6 +45,22 @@
   --tk-barra-baixo: max(10px, calc(env(safe-area-inset-bottom) - 16px));
   /* Onde termina a barra, medido do rodape da tela pra cima. */
   --tk-barra-teto: calc(var(--tk-barra-baixo) + var(--tk-barra-h));
+  /*
+   * ⚠️ A ALTURA DO DESBOTE DO RODAPE, e ela e MAIOR que a da barra.
+   *
+   * O `.tk-scroll-edge` apaga o conteudo antes da barra flutuante pra ela nao
+   * ficar sobre texto legivel. Ele tem 84px + area segura; a barra tem 76px +
+   * area segura. Ou seja: o desbote comeca ACIMA da barra, e quem reservava
+   * espaco so pela barra deixava a ultima linha do conteudo dentro dele.
+   *
+   * Foi o que apagou os rotulos da fileira de raide. Medido no navegador: os
+   * "#2 #3 #4" ocupavam 788–798px e o desbote comecava em 790 — oito dos dez
+   * pixels de cada rotulo estavam sendo apagados de proposito.
+   *
+   * Num token porque sao DOIS moradores da mesma medida: a peca que desbota e
+   * o espaco que o conteudo reserva. Separados, um muda e o outro nao percebe.
+   */
+  --tk-desbote-h: calc(84px + env(safe-area-inset-bottom));
 }
 
 /*
@@ -2311,7 +2327,20 @@
   font: 800 9.5px/1 var(--tk-font);
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--tk-cell-tone, var(--tk-text-3));
+  /*
+   * ⚠️ A COR DA ESPECIE COM PISO DE LEITURA.
+   *
+   * Era `--tk-cell-tone` cru, e em 9,5px isso some: na fileira de raide o
+   * rotulo e a POSICAO (#2, #3), e o tom vinha do bicho — o cinza do Kyurem
+   * e o marrom do Regirock ficavam ilegiveis sobre o fundo escuro. "n da pra
+   * ler o #1 #2 #3".
+   *
+   * A mistura mantem o MATIZ (a fileira continua colorida, que e o que liga
+   * cada rotulo ao seu bicho) e puxa a luminancia pra cor de texto do tema.
+   * Nenhum tom de especie consegue mais ficar abaixo do legivel, porque o piso
+   * nao depende dele.
+   */
+  color: color-mix(in srgb, var(--tk-cell-tone, var(--tk-text-3)) 45%, var(--tk-text));
   white-space: nowrap;
 }
 
