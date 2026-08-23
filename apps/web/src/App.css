@@ -547,7 +547,7 @@
  */
 
 [data-platform="iphone"] .tk-tab {
-  padding: 9px 0 10px;
+  padding: 8px 0 10px;
   position: relative;
   /* Acima do anel de borda (::after) e da pilula, senao o vidro passa por cima
      do proprio rotulo. */
@@ -1319,7 +1319,7 @@
 .tk-caption code {
   font: 500 11px var(--tk-mono);
   background: var(--tk-code);
-  padding: 1px 5px;
+  padding: 1px 4px;
   border-radius: 5px;
 }
 
@@ -1542,7 +1542,7 @@
   display: block;
   font: 700 10px var(--tk-mono);
   letter-spacing: 0.12em;
-  padding: 3px 7px;
+  padding: 3px 8px;
   border-radius: 6px;
   background: var(--tk-warn-soft);
   border: 1px solid var(--tk-warn-line);
@@ -1580,7 +1580,7 @@
   left: 0;
   width: max-content;
   max-width: min(74vw, 300px);
-  padding: 11px 13px;
+  padding: 12px 12px;
   border-radius: 14px;
   background: var(--tk-elev);
   border: 1px solid var(--tk-line);
@@ -2130,7 +2130,7 @@
   z-index: 2;
   grid-column: 3;
   grid-row: 1;
-  padding: 5px 9px;
+  padding: 4px 8px;
   border-radius: 9px;
   font: 700 12px var(--tk-font);
   white-space: nowrap;
@@ -2341,7 +2341,7 @@ button.tk-owned-act:active {
  */
 .tk-done-mark {
   display: inline-block;
-  margin-right: 5px;
+  margin-right: 4px;
   font: 700 12px/1 var(--tk-mono);
   opacity: 0.85;
 }
@@ -2443,7 +2443,7 @@ button.tk-owned-act:active {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 7px;
+  gap: 8px;
   height: 76px;
   padding: 0 6px;
   border-radius: var(--tk-r-card);
@@ -2542,10 +2542,10 @@ button.tk-owned-act:active {
    * nao aparecia olhando o layout — o espacamento estava certo, o que estava
    * errado era o contentor comer a sombra.
    *
-   * 5px, e nao 4: o `box-shadow` cai num pixel fracionario em telas 3x.
+   * 4px, e nao 4: o `box-shadow` cai num pixel fracionario em telas 3x.
    */
-  padding-top: 5px;
-  padding-bottom: 5px;
+  padding-top: 4px;
+  padding-bottom: 4px;
   /* Sangra pelas margens: a fila encosta na borda da tela, sinalizando que
      continua. Cortada no gutter pareceria uma lista que simplesmente acabou. */
   margin: 0 calc(-1 * var(--tk-gutter));
@@ -2628,7 +2628,7 @@ button.tk-owned-act:active {
 
 .tk-spread {
   font: 500 13px var(--tk-mono);
-  padding: 9px 0;
+  padding: 8px 0;
   border-bottom: 1px solid var(--tk-line);
 }
 
@@ -3892,7 +3892,7 @@ button.tk-chip,
 /* As tres luzes ao lado da lente. */
 .tk-dex[data-skin="device"] .tk-dexdev-leds {
   display: flex;
-  gap: 7px;
+  gap: 8px;
 }
 
 .tk-dex[data-skin="device"] .tk-dexdev-leds i {
@@ -4101,7 +4101,7 @@ button.tk-chip,
 
 .tk-dex[data-skin="device"] .tk-dexdev-tipos {
   display: flex;
-  gap: 5px;
+  gap: 4px;
   margin-left: auto;
 }
 
@@ -4123,7 +4123,7 @@ button.tk-chip,
  */
 .tk-dex[data-skin="device"] .tk-dexdev-entry {
   display: grid;
-  gap: 7px;
+  gap: 8px;
   margin-top: var(--tk-s3);
   padding: 14px;
   border-radius: 12px;
@@ -4228,7 +4228,7 @@ button.tk-chip,
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 7px 10px;
+  padding: 8px 10px;
   border-radius: 10px;
   border: 0;
   background: rgb(0 0 0 / 0.18);
@@ -4270,7 +4270,7 @@ button.tk-chip,
 
 .tk-dex[data-skin="device"] .tk-dexdev-nodata {
   margin-top: 12px;
-  padding: 11px 13px;
+  padding: 12px 12px;
   border-radius: 10px;
   background: rgb(0 0 0 / 0.28);
   border: 1px solid rgb(255 255 255 / 0.22);
@@ -4424,12 +4424,12 @@ button.tk-chip,
 
 .tk-dex[data-skin="plain"] .tk-dexdev-tipos {
   display: flex;
-  gap: 5px;
+  gap: 4px;
   margin-left: auto;
 }
 
 .tk-dex[data-skin="plain"] .tk-dexdev-tipo {
-  padding: 4px 9px;
+  padding: 4px 8px;
   border-radius: var(--tk-r-chip);
   font: 700 10px var(--tk-font);
   color: #fff;
@@ -5175,7 +5175,7 @@ button.tk-chip,
 
 .tk-chat-fala {
   max-width: 84%;
-  padding: 10px 13px;
+  padding: 10px 12px;
   border-radius: 16px;
   font: 400 14px var(--tk-font);
   line-height: 1.5;
@@ -5277,7 +5277,7 @@ button.tk-chip,
 .tk-tag-trade {
   display: inline-block;
   margin-left: 8px;
-  padding: 2px 7px;
+  padding: 2px 8px;
   border-radius: var(--tk-r-chip);
   background: var(--tk-pri-soft);
   border: 1px solid var(--tk-pri-line);

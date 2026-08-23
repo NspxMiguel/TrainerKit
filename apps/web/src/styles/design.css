@@ -296,7 +296,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 9px;
+  gap: 8px;
 }
 
 .tk-btn--primary:active {
@@ -327,7 +327,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 9px;
+  gap: 8px;
 }
 
 .tk-btn--secondary:active {
@@ -1038,7 +1038,7 @@
 
 /* "DESTAQUE DE HOJE" — vidro escuro sobre o gradiente. */
 .tk-hero-chip {
-  padding: 5px 14px;
+  padding: 4px 14px;
   border-radius: 999px;
   font: 700 11px var(--tk-font);
   letter-spacing: 0.09em;
@@ -1106,7 +1106,7 @@
  */
 .tk-hero-cta {
   height: 48px;
-  padding: 0 26px;
+  padding: 0 24px;
   border-radius: 999px;
   /*
    * ⚠️ A pilula INVERTE com o tema, e o motivo e o mesmo de sempre: ela precisa
@@ -1854,7 +1854,7 @@
  */
 .tk-hero-tipo {
   font: 700 11px var(--tk-font);
-  padding: 5px 11px;
+  padding: 4px 12px;
   border-radius: 999px;
   /*
    * ⚠️ A COR VEM DO REACT (`typeInk`), e nao daqui.
@@ -2644,7 +2644,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 34px 16px;
+  padding: 32px 16px;
 }
 
 .tk-vazio-tile {
@@ -2733,7 +2733,7 @@
 .tk-esq-meta {
   width: 38%;
   height: 11px;
-  margin-top: 7px;
+  margin-top: 8px;
   background: rgba(255, 255, 255, 0.05);
 }
 
@@ -3103,7 +3103,7 @@
  */
 .tk-meus .tk-owned-act {
   align-self: start;
-  padding: 6px 9px;
+  padding: 6px 8px;
   border-radius: 14px;
   font: 800 11.5px/1.25 var(--tk-font);
   /* Sem espacamento entre letras: os 0,02em custavam ~4px na palavra mais
@@ -3933,7 +3933,7 @@
   padding: 0 12px;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   font: 600 12.5px/1 var(--tk-font);
   color: var(--tk-txt2);
   white-space: nowrap;
@@ -5707,7 +5707,7 @@
     flex-direction: row;
     align-items: center;
     gap: 18px;
-    padding: 26px;
+    padding: 24px;
     min-height: 0;
     background: var(--tk-surf);
     border: 1px solid var(--tk-line);
@@ -6420,7 +6420,7 @@
   /* O selo de contagem da aba, do documento: 11/700 violeta em pilula. */
   .tk-tab-selo {
     margin-left: auto;
-    padding: 2px 7px;
+    padding: 2px 8px;
     border-radius: 999px;
     font: 700 11px/1.3 var(--tk-font);
     font-variant-numeric: tabular-nums;
