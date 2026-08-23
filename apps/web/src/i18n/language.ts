@@ -132,6 +132,21 @@ export function getLanguage(): string {
   return current;
 }
 
+/*
+ * ⚠️ O `lang` DO `<html>` VALE DESDE A PRIMEIRA PINTURA, e nao so depois de
+ * alguem trocar de idioma nos Ajustes.
+ *
+ * O `index.html` nasce com `lang="pt-BR"` fixo, e o `setLanguage` abaixo so
+ * corrige quando a pessoa TROCA. Quem abre o app em alemao — porque o aparelho
+ * esta em alemao — ficava com a pagina inteira anunciada como portuguesa: o
+ * leitor de tela le em portugues, o navegador oferece traduzir uma pagina que
+ * ja esta no idioma certo, e a hifenizacao usa as regras erradas.
+ *
+ * Roda na importacao do modulo, que acontece antes do primeiro render porque o
+ * `main.tsx` importa o i18n pra decidir o idioma.
+ */
+if (typeof document !== "undefined") document.documentElement.lang = current;
+
 export function setLanguage(code: string): void {
   current = code;
   store.set(KEY, code);

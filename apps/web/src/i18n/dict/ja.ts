@@ -298,6 +298,8 @@ export const JA: Dict = {
   "estados.retry": "再試行",
   "colecoes.title": "アカウント",
   "colecoes.body": "アカウントごとに種と判定が分かれます。すべて端末内に保存されます。",
+  "colecoes.principal": "メイン",
+  "colecoes.nova": "新しいコレクション",
   "colecoes.count": "{n}匹",
   "colecoes.active": "使用中",
   "colecoes.rename": "名前を変更",

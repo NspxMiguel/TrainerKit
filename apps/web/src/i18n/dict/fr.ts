@@ -298,6 +298,8 @@ export const FR: Dict = {
   "estados.retry": "Réessayer",
   "colecoes.title": "Vos comptes",
   "colecoes.body": "Chaque compte garde ses propres espèce et verdicts. Tout reste sur l'appareil.",
+  "colecoes.principal": "Principale",
+  "colecoes.nova": "Nouvelle collection",
   "colecoes.count": "{n} espèce",
   "colecoes.active": "utilisé",
   "colecoes.rename": "Renommer",

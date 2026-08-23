@@ -298,6 +298,8 @@ export const KO: Dict = {
   "estados.retry": "다시 시도",
   "colecoes.title": "내 계정",
   "colecoes.body": "계정마다 종과 판정이 따로 저장됩니다. 모두 기기에만 남습니다.",
+  "colecoes.principal": "기본",
+  "colecoes.nova": "새 컬렉션",
   "colecoes.count": "{n}마리",
   "colecoes.active": "사용 중",
   "colecoes.rename": "이름 변경",

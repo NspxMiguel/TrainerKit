@@ -1,5 +1,7 @@
 import Dexie, { type Table } from "dexie";
 import { useEffect, useState } from "react";
+import { getLanguage } from "../i18n/language.ts";
+import { translate } from "../i18n/t.ts";
 
 import type { IVs } from "@trainerkit/core";
 
@@ -47,6 +49,26 @@ import type { IVs } from "@trainerkit/core";
  * só o repete de volta. Perguntar sem usar a resposta é atrito.
  */
 export type MeuMotivo = "gosto" | "uso" | "desafio" | "outro";
+
+/*
+ * ⚠️ O NOME NASCE NO IDIOMA DE QUEM INSTALA, e nao em portugues pra todo mundo.
+ *
+ * "Principal" e "Nova coleção" estavam escritos direto aqui, entao um alemao
+ * abria o app e encontrava uma colecao com nome portugues — a unica string do
+ * app que o i18n nao alcancava, porque ela nao e TEXTO DE TELA: e um dado
+ * gravado no IndexedDB no momento da criacao.
+ *
+ * Traduzido na CRIACAO, e nao na leitura, de proposito: o nome e do usuario a
+ * partir dali. Quem renomeia manda; quem troca o idioma do app depois nao ve a
+ * propria colecao ser rebatizada nas costas.
+ */
+function nomePadrao(): string {
+  return translate(getLanguage(), "colecoes.principal");
+}
+
+function nomeNova(): string {
+  return translate(getLanguage(), "colecoes.nova");
+}
 
 export interface OwnedPokemon {
   id: string;
@@ -159,7 +181,7 @@ class CollectionDb extends Dexie {
       .upgrade(async (tx) => {
         await tx.table("colecoes").put({
           id: COLECAO_PADRAO,
-          nome: "Principal",
+          nome: nomePadrao(),
           criadaEm: new Date().toISOString(),
         });
         await tx
@@ -206,7 +228,7 @@ export async function listarColecoes(): Promise<Colecao[]> {
     // Aparelho novo: a migração não roda porque não havia versão 1 pra migrar.
     const padrao: Colecao = {
       id: COLECAO_PADRAO,
-      nome: "Principal",
+      nome: nomePadrao(),
       criadaEm: new Date().toISOString(),
     };
     await db.colecoes.put(padrao);
@@ -244,7 +266,7 @@ export async function contarPorColecao(): Promise<Record<string, number>> {
 export async function criarColecao(nome: string): Promise<Colecao> {
   const nova: Colecao = {
     id: crypto.randomUUID(),
-    nome: nome.trim() || "Nova coleção",
+    nome: nome.trim() || nomeNova(),
     criadaEm: new Date().toISOString(),
   };
   await db.colecoes.put(nova);

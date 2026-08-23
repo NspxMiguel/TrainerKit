@@ -298,6 +298,8 @@ export const DE: Dict = {
   "estados.retry": "Erneut versuchen",
   "colecoes.title": "Deine Konten",
   "colecoes.body": "Jedes Konto hat eigene Spezies und eigene Urteile. Alles bleibt auf dem Gerät.",
+  "colecoes.principal": "Haupt",
+  "colecoes.nova": "Neue Sammlung",
   "colecoes.count": "{n} Spezies",
   "colecoes.active": "aktiv",
   "colecoes.rename": "Umbenennen",

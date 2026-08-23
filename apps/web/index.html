@@ -13,6 +13,26 @@
     />
 
     <!-- A cor da barra do sistema segue o tema, senao fica uma faixa clara no topo do app escuro. -->
+    <!--
+      Como o link aparece quando alguem cola o endereco num chat.
+
+      Sem estas linhas o WhatsApp, o Discord e o Twitter mostram so a URL crua —
+      um app que se apresenta assim parece um link suspeito, e o primeiro
+      contato de quase todo mundo com o TrainerKit e alguem mandando o link.
+
+      A imagem e o icone de 512 do proprio app: arte propria, gerada por
+      `scripts/make-icons.ts`. Nenhuma arte de terceiro entra aqui, pelo mesmo
+      motivo de nenhuma entrar no bundle.
+    -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="TrainerKit" />
+    <meta
+      property="og:description"
+      content="Decide o que fazer com cada espécie: investir, evoluir, guardar ou transferir."
+    />
+    <meta property="og:image" content="./icon-512.png" />
+    <meta name="twitter:card" content="summary" />
+
     <meta name="theme-color" content="#07080B" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#ECEEF3" media="(prefers-color-scheme: light)" />
 

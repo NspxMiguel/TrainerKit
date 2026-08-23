@@ -298,6 +298,8 @@ export const RU: Dict = {
   "estados.retry": "Повторить",
   "colecoes.title": "Ваши аккаунты",
   "colecoes.body": "У каждого аккаунта свои виды и свои вердикты. Всё хранится на устройстве.",
+  "colecoes.principal": "Основная",
+  "colecoes.nova": "Новая коллекция",
   "colecoes.count": "{n} видов",
   "colecoes.active": "используется",
   "colecoes.rename": "Переименовать",

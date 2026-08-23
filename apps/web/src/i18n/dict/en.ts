@@ -334,6 +334,8 @@ const EN = {
   "estados.retry": "Try again",
   "colecoes.title": "Your accounts",
   "colecoes.body": "Each account keeps its own species and its own verdicts. Everything stays on this device.",
+  "colecoes.principal": "Main",
+  "colecoes.nova": "New collection",
   "colecoes.count": "{n} species",
   "colecoes.active": "in use",
   "colecoes.rename": "Rename",
