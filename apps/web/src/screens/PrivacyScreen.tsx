@@ -43,7 +43,7 @@ const ATUALIZADA = "2026-07-30";
  * em `git log` pra qualquer um. O histórico foi reescrito e a
  * config local do repo aponta pro novo.
  */
-const CONTATO = "spxmiguel@icloud.com";
+const CONTATO = "miguel@nspx.dev";
 
 export function PrivacyScreen() {
   const { t } = useT();

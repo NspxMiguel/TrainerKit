@@ -20,7 +20,7 @@ import { useT } from "../i18n/t.ts";
  * mantém a promessa inteira.
  */
 
-const EMAIL = "spxmiguel@icloud.com";
+const EMAIL = "miguel@nspx.dev";
 
 export function FeedbackScreen() {
   const { t } = useT();
