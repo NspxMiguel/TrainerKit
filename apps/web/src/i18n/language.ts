@@ -16,20 +16,40 @@ import { useSyncExternalStore } from "react";
 export interface LanguageSpec {
   code: string;
   label: string;
-  flag: string;
+  /**
+   * A etiqueta curta que aparece na lista.
+   *
+   * ⚠️ ERA UMA BANDEIRA EM EMOJI, e as bandeiras estavam erradas em tres
+   * niveis ao mesmo tempo:
+   *
+   *   · IDIOMA NAO E PAIS. Espanhol nao e a Espanha — a propria lista tem duas
+   *     entradas de espanhol, e a de LatAm carregava a bandeira do Mexico, um
+   *     de vinte paises. Portugues levava o Brasil e ingles os EUA pelo mesmo
+   *     atalho. Nenhuma pessoa argentina se ve num `🇲🇽`;
+   *   · NAO RENDERIZA EM TODO LUGAR. Emoji de bandeira e um par de letras
+   *     regionais que o Windows nao desenha: la a lista mostra "US", "BR", "ES"
+   *     em letra solta, que e o resultado acidental que agora e o proposital;
+   *   · EMOJI NA INTERFACE e um dos sinais de tela gerada por IA — e este app
+   *     nao usa emoji em mais lugar nenhum.
+   *
+   * O codigo BCP-47 resolve os tres: e o que o idioma REALMENTE e, distingue
+   * `es` de `es-419` (coisa que duas bandeiras nunca fariam bem), e desenha
+   * igual em qualquer sistema.
+   */
+  tag: string;
 }
 
 export const LANGUAGES: readonly LanguageSpec[] = [
-  { code: "en", label: "English", flag: "🇺🇸" },
-  { code: "pt-BR", label: "Português", flag: "🇧🇷" },
-  { code: "es", label: "Español", flag: "🇪🇸" },
-  { code: "es-419", label: "Español (LatAm)", flag: "🇲🇽" },
-  { code: "de", label: "Deutsch", flag: "🇩🇪" },
-  { code: "fr", label: "Français", flag: "🇫🇷" },
-  { code: "it", label: "Italiano", flag: "🇮🇹" },
-  { code: "ja", label: "日本語", flag: "🇯🇵" },
-  { code: "ko", label: "한국어", flag: "🇰🇷" },
-  { code: "ru", label: "Русский", flag: "🇷🇺" },
+  { code: "en", label: "English", tag: "EN" },
+  { code: "pt-BR", label: "Português", tag: "PT-BR" },
+  { code: "es", label: "Español", tag: "ES" },
+  { code: "es-419", label: "Español (LatAm)", tag: "ES-419" },
+  { code: "de", label: "Deutsch", tag: "DE" },
+  { code: "fr", label: "Français", tag: "FR" },
+  { code: "it", label: "Italiano", tag: "IT" },
+  { code: "ja", label: "日本語", tag: "JA" },
+  { code: "ko", label: "한국어", tag: "KO" },
+  { code: "ru", label: "Русский", tag: "RU" },
 ];
 
 const KEY = "tk:idioma";

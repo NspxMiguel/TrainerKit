@@ -3312,7 +3312,23 @@
  * ver "a tinta de fundo não derruba o texto" em `paleta.test.ts`.
  */
 :root {
-  --tk-screen-base: radial-gradient(120vw 80vh at 50% -10%, #141a2a 0%, #0a0c11 55%, #07080b 100%);
+  /*
+   * ⚠️ AQUI ESTAVA O AZUL QUE NAO SAIA, e ele durou tres rodadas de conserto.
+   *
+   * O gradiente do fundo foi trocado por preto neutro no `tokens.css`. So que
+   * `--tk-screen` e REMONTADO logo abaixo a partir desta base, e `design.css`
+   * nao esta em `@layer` — sem camada vence layered sempre, entao o valor
+   * daqui e o que a tela usava. O `#141a2a` e azul-marinho: medido no canto da
+   * tela, o fundo saia `rgb(12,15,22)`, dez pontos mais azul que vermelho, num
+   * fundo que era pra ser `#000000`.
+   *
+   * "e ainda ta meio azulado" — estava mesmo, e a troca anterior nunca chegou a
+   * valer.
+   *
+   * A base agora APONTA pro token em vez de repetir o gradiente. O mesmo valor
+   * escrito em dois arquivos foi o defeito; um `var()` nao pode divergir.
+   */
+  --tk-screen-base: var(--tk-screen-neutro);
   /*
    * ⚠️ 10%, e ANTES ERA 30% — o número caiu porque a camada passou a existir.
    *
@@ -7738,4 +7754,54 @@
   :root:not([data-tk="dark"]) .tk-mono:not(.tk-mono--bare) > span:first-child {
     color: var(--tk-selo-ink-claro);
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   O ONBOARDING NÃO TEM ESPÉCIE, ENTÃO NÃO TEM COR
+   ═══════════════════════════════════════════════════════════════════════════
+
+   "o pokemon destaque sempre altera a palheta de cores do app" — e a palheta
+   continua fazendo isso. Só que durante o onboarding não existe espécie
+   escolhida: a `HomeScreen` já está montada atrás do diálogo e aplica a paleta
+   de um bicho que a pessoa nunca viu. Medido, isso pintava a lista de idiomas
+   de azul-marinho sobre preto absoluto — dez linhas, meia tela, na primeira
+   coisa que qualquer pessoa vê.
+
+   Cor sem dono é o que faz uma interface parecer gerada: ela está ali porque
+   alguma variável tinha um valor, não porque significa alguma coisa. Zerar as
+   duas tintas aqui deixa as telas de entrada em neutro puro, e a primeira cor
+   do app passa a ser a do primeiro bicho — que é quando ela quer dizer algo. */
+.tk-onb {
+  --tk-tinta-fundo: 0%;
+  --tk-cartao-tinta: 0%;
+  --tk-cartao-borda-tinta: 0%;
+}
+
+/* A etiqueta do idioma, no lugar da bandeira.
+   Largura FIXA: `PT-BR` e `ES-419` são mais largos que `EN`, e sem largura fixa
+   a coluna dos nomes começaria num lugar diferente por linha — a lista dançaria
+   e é exatamente esse tipo de desalinho que faz uma tela parecer montada às
+   pressas. Tabular porque são caracteres de largura igual num alfabeto só. */
+.tk-lista-radio-tag {
+  flex: none;
+  width: 58px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+  color: var(--tk-text-3, var(--tk-text-2));
+}
+
+/* O progresso do onboarding em NEUTRO, não em azul.
+   `--tk-pri` é um azul que não pertence a nada: não é a cor da espécie (não há
+   espécie ainda) nem a cor de ação (a ação é o botão branco). Cor sem dono numa
+   tela onde tudo o mais é neutro chama atenção pro lugar errado — o traço vira
+   o elemento mais colorido da primeira tela do app.
+   O traço já cresce em LARGURA no passo atual, então o avanço continua legível
+   sem depender de matiz. */
+.tk-onb-dots > span[data-on] {
+  background: var(--tk-text-2);
+}
+.tk-onb-dots > span[data-now] {
+  background: var(--tk-text);
 }
