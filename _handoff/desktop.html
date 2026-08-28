@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;background:#05060A;font-family:-apple-system,BlinkMacSystemFont,"SF Pro",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#9F8BFF;text-decoration:none}a:hover{color:#B9A8FF}
+@keyframes tkin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+::-webkit-scrollbar{width:8px}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:99px}
+</style>
+</helmet>
+
+<x-import component-from-global-scope="ChromeWindow" from="./browser-window.jsx" width="{{ 1440 }}" height="{{ 900 }}" url="app.trainerkit.gg" hint-size="1440px,900px">
+<div style="height:100%;display:flex;background:#0A0C10;color:#F4F6FA;overflow:hidden">
+
+  <div style="flex:none;width:248px;height:100%;display:flex;flex-direction:column;padding:18px 14px;box-sizing:border-box;border-right:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.02)">
+    <div style="display:flex;align-items:center;gap:10px;padding:6px 8px 20px">
+      <div style="width:34px;height:34px;border-radius:11px;background:linear-gradient(160deg,#33394A,#14171E 70%);border:.5px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">
+        <svg width="24" height="24" viewBox="0 0 48 48" fill="none"><ellipse cx="24" cy="23" rx="15" ry="7" fill="url(#eg1)"></ellipse><path d="M9.6 22.5C10.6 11.5 16.4 4 24 4s13.4 7.5 14.4 18.5L34 20l-4.5 3.5L24 19.5l-5.5 4L14 20z" fill="#F4F6FA" transform="translate(0,-3.6)"></path><path d="M9.4 24 14 21.5l4.5 3.5L24 21l5.5 4L34 21.5 38.6 24c.3 1 .4 1.8.4 2.5C39 37.5 31.5 44 24 44S9 37.5 9 26.5c0-.7.1-1.5.4-2.5z" fill="#F4F6FA"></path><path d="M20.5 22.5l-2.5 5M27.5 22.5l2.5 5M24 21.5v6" stroke="#6E4BFF" stroke-width="2" stroke-linecap="round"></path><defs><radialGradient id="eg1" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#C4B5FF"></stop><stop offset="1" stop-color="#6E4BFF" stop-opacity="0"></stop></radialGradient></defs></svg>
+      </div>
+      <span style="font-size:16px;font-weight:800;letter-spacing:-.3px;color:#F4F6FA">TrainerKit</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="3">
+        <div onClick="{{ n.go }}" style="height:40px;border-radius:11px;padding:0 12px;display:flex;align-items:center;gap:11px;cursor:pointer;background:{{ n.bg }}" style-hover="background:rgba(255,255,255,.05)">
+          <span dangerouslySetInnerHTML="{{ n.icon }}" style="width:18px;height:18px;display:flex;color:{{ n.fg }}"></span>
+          <span style="font-size:14.5px;font-weight:{{ n.weight }};color:{{ n.fg }}">{{ n.label }}</span>
+          <sc-if value="{{ n.badge }}"><span style="margin-left:auto;font-size:11px;font-weight:700;color:#9F8BFF;background:rgba(159,139,255,.16);border-radius:999px;padding:2px 7px">{{ n.badge }}</span></sc-if>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="margin-top:22px;padding:0 4px 8px;font-size:11px;font-weight:700;letter-spacing:.08em;color:rgba(235,238,245,.35)">FERRAMENTAS</div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <sc-for list="{{ toolItems }}" as="t" hint-placeholder-count="3">
+        <div onClick="{{ t.go }}" style="height:38px;border-radius:11px;padding:0 12px;display:flex;align-items:center;gap:11px;cursor:pointer;background:{{ t.bg }}" style-hover="background:rgba(255,255,255,.05)">
+          <span dangerouslySetInnerHTML="{{ t.icon }}" style="width:16px;height:16px;display:flex;color:{{ t.fg }}"></span>
+          <span style="font-size:13.5px;font-weight:{{ t.weight }};color:{{ t.fg }}">{{ t.label }}</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="flex:1"></div>
+
+    <div style="border-radius:16px;padding:12px;background:rgba(61,220,151,.07);border:1px solid rgba(61,220,151,.18);display:flex;flex-direction:column;gap:6px">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.06em;color:#3DDC97">MODO OFFLINE</span>
+      <span style="font-size:12px;line-height:1.4;color:rgba(235,238,245,.55)">Tudo baixado. O app funciona sem internet.</span>
+    </div>
+  </div>
+
+  <div style="flex:1;height:100%;display:flex;flex-direction:column;overflow:hidden">
+
+    <sc-if value="{{ isInicio }}">
+      <div style="flex:1;overflow-y:auto;padding:28px 36px 40px;box-sizing:border-box;animation:tkin .28s ease-out">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:22px">
+          <div>
+            <div style="font-size:30px;font-weight:700;letter-spacing:-.5px">Boa noite, Miguel.</div>
+            <div style="font-size:13.5px;color:rgba(235,238,245,.5);margin-top:4px">Quarta, 30 de julho · 4 decisões esperam você</div>
+          </div>
+          <div style="height:42px;padding:0 16px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:8px;width:280px">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(235,238,245,.45)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+            <span style="font-size:14px;color:rgba(235,238,245,.4)">Buscar na coleção</span>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:20px;margin-bottom:24px">
+          <div style="position:relative;border-radius:28px;padding:26px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 8px 24px rgba(0,0,0,.35);overflow:hidden;display:flex;flex-direction:column;gap:16px">
+            <div style="position:absolute;top:-40px;right:-40px;width:280px;height:220px;background:radial-gradient(closest-side,rgba(124,92,255,.2),transparent)"></div>
+            <div style="display:flex;gap:18px;align-items:center;position:relative">
+              <div style="width:74px;height:74px;border-radius:22px;background:linear-gradient(135deg,#4F46E5,#7C3AED);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;box-shadow:0 8px 20px rgba(79,70,229,.4)">GA</div>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:rgba(235,238,245,.45)">DESTAQUE DE HOJE</span>
+                <span style="font-size:24px;font-weight:700">Garchomp</span>
+                <span style="align-self:flex-start;display:inline-flex;gap:5px;padding:4px 11px;border-radius:999px;font-size:11.5px;font-weight:800;letter-spacing:.06em;color:#9F8BFF;background:rgba(159,139,255,.16);border:1px solid rgba(159,139,255,.3)">✦ EVOLUIR</span>
+              </div>
+            </div>
+            <div style="font-size:15px;line-height:1.5;color:rgba(235,238,245,.7);max-width:560px;position:relative">Ele ainda evolui — e evoluir muda tudo. Custa 100 doces e destrava o melhor ataque dele.</div>
+            <div style="display:flex;gap:10px;position:relative">
+              <div onClick="{{ openGarchomp }}" style="height:42px;padding:0 20px;border-radius:999px;background:linear-gradient(180deg,#8A6BFF,#6E4BFF);box-shadow:0 8px 20px rgba(110,75,255,.4);display:flex;align-items:center;justify-content:center;font-size:14.5px;font-weight:600;cursor:pointer">Ver a conta</div>
+              <div style="height:42px;padding:0 20px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;font-size:14.5px;font-weight:600;color:rgba(235,238,245,.75);cursor:pointer">Já fiz isso</div>
+            </div>
+          </div>
+
+          <div style="border-radius:28px;padding:20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:14px;justify-content:center">
+            <div style="display:flex;justify-content:space-between"><span style="font-size:13px;color:rgba(235,238,245,.5)">Coleção</span><span style="font-size:13px;font-weight:700">247 / 1.182</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="font-size:13px;color:rgba(235,238,245,.5)">Pedem decisão</span><span style="font-size:13px;font-weight:700;color:#9F8BFF">4</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="font-size:13px;color:rgba(235,238,245,.5)">Poeira estelar</span><span style="font-size:13px;font-weight:700">125.400</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="font-size:13px;color:rgba(235,238,245,.5)">Armazenamento offline</span><span style="font-size:13px;font-weight:700;color:#3DDC97">1,2 GB</span></div>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+          <span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:rgba(235,238,245,.45)">SUA COLEÇÃO</span>
+          <span onClick="{{ goDex }}" style="font-size:12.5px;font-weight:700;color:#9F8BFF;cursor:pointer">Ver tudo na Pokédex →</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px">
+          <sc-for list="{{ collection }}" as="p" hint-placeholder-count="6">
+            <div onClick="{{ p.open }}" style="cursor:pointer;border-radius:20px;padding:14px 10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;align-items:center;gap:8px" style-hover="background:rgba(255,255,255,.07)">
+              <div style="width:100%;aspect-ratio:1;border-radius:16px;background:{{ p.grad }};display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:800">{{ p.mono }}</div>
+              <span style="font-size:12.5px;font-weight:600">{{ p.name }}</span>
+              <span style="display:inline-flex;gap:4px;padding:3px 8px;border-radius:999px;font-size:9.5px;font-weight:800;letter-spacing:.05em;color:{{ p.vc }};background:{{ p.vbg }};border:1px solid {{ p.vbd }}">{{ p.vlabel }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isDex }}">
+      <div style="flex:none;height:64px;display:flex;align-items:center;gap:14px;padding:0 28px;border-bottom:1px solid rgba(255,255,255,.07)">
+        <span style="font-size:20px;font-weight:700">Pokédex</span>
+        <div style="height:36px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);padding:3px;display:flex;gap:3px">
+          <div onClick="{{ setAll }}" style="height:30px;padding:0 14px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;background:{{ allBg }};color:{{ allFg }}">Todos · 1.182</div>
+          <div onClick="{{ setMeus }}" style="height:30px;padding:0 14px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;background:{{ meusBg }};color:{{ meusFg }}">Meus · 247</div>
+        </div>
+        <div style="flex:1;max-width:320px;height:36px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:7px;padding:0 13px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(235,238,245,.4)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+          <span style="font-size:13.5px;color:rgba(235,238,245,.4)">Buscar espécie</span>
+        </div>
+      </div>
+
+      <div style="flex:1;display:flex;overflow:hidden">
+        <div style="flex:none;width:340px;height:100%;overflow-y:auto;border-right:1px solid rgba(255,255,255,.07)">
+          <sc-for list="{{ dexList }}" as="d" hint-placeholder-count="8">
+            <div onClick="{{ d.select }}" style="display:flex;align-items:center;gap:12px;padding:11px 18px;cursor:pointer;background:{{ d.rowBg }};border-left:2px solid {{ d.rowBorder }}" style-hover="background:rgba(255,255,255,.04)">
+              <div style="width:42px;height:42px;flex:none;border-radius:13px;background:{{ d.grad }};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800">{{ d.mono }}</div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0">
+                <span style="font-size:14.5px;font-weight:600">{{ d.name }}</span>
+                <span style="font-size:12px;color:rgba(235,238,245,.45)">{{ d.meta }}</span>
+              </div>
+              <span style="flex:none;display:inline-flex;padding:3px 8px;border-radius:999px;font-size:9.5px;font-weight:800;letter-spacing:.04em;color:{{ d.vc }};background:{{ d.vbg }};border:1px solid {{ d.vbd }}">{{ d.vlabel }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="flex:1;height:100%;overflow-y:auto;position:relative">
+          <sc-if value="{{ isFicha }}">
+            <div style="animation:tkin .24s ease-out">
+              <div style="position:relative;height:230px;background:{{ selGrad }};overflow:hidden">
+                <div style="position:absolute;right:-10px;bottom:-40px;font-size:170px;font-weight:800;color:rgba(255,255,255,.1);letter-spacing:-8px">{{ selMono }}</div>
+                <div style="position:absolute;left:32px;bottom:22px;display:flex;flex-direction:column;gap:8px">
+                  <div style="font-size:30px;font-weight:700;color:#fff">{{ selName }}</div>
+                  <div style="display:flex;gap:8px">
+                    <sc-for list="{{ selTypes }}" as="ty" hint-placeholder-count="2">
+                      <span style="padding:4px 13px;border-radius:999px;font-size:12px;font-weight:600;color:#fff;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(8px)">{{ ty }}</span>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+              <div style="padding:24px 32px 48px;display:grid;grid-template-columns:1.3fr 1fr;gap:20px;max-width:980px">
+                <div style="display:flex;flex-direction:column;gap:16px">
+                  <div style="border-radius:26px;padding:20px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)">
+                    <span style="font-size:23px;font-weight:800;letter-spacing:.03em;color:{{ selVc }}">{{ selVerdict }}</span>
+                    <div style="font-size:14.5px;line-height:1.5;color:rgba(235,238,245,.7);margin-top:10px">{{ selReason }}</div>
+                    <div style="display:flex;flex-direction:column;gap:6px;margin-top:14px">
+                      <div style="display:flex;justify-content:space-between;font-size:12px"><span style="font-weight:700;letter-spacing:.06em;color:rgba(235,238,245,.45)">AS REGRAS CONCORDAM</span><span style="font-weight:800;color:{{ selVc }}">86%</span></div>
+                      <div style="height:6px;border-radius:999px;background:rgba(255,255,255,.08)"><div style="width:86%;height:100%;border-radius:999px;background:linear-gradient(90deg,#6E4BFF,#9F8BFF)"></div></div>
+                    </div>
+                  </div>
+                  <div style="border-radius:26px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);overflow:hidden">
+                    <div style="padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.07);font-size:11px;font-weight:700;letter-spacing:.08em;color:rgba(235,238,245,.45)">POR QUÊ · 3 REGRAS</div>
+                    <sc-for list="{{ selWhy }}" as="w" hint-placeholder-count="3">
+                      <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.06)">
+                        <span style="font-size:13.5px;color:rgba(235,238,245,.8)">{{ w.t }}</span>
+                        <span style="font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:700;color:{{ w.c }}">{{ w.v }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="display:flex;gap:10px">
+                    <div style="flex:1.3;height:46px;border-radius:999px;background:linear-gradient(180deg,#8A6BFF,#6E4BFF);box-shadow:0 8px 20px rgba(110,75,255,.4);display:flex;align-items:center;justify-content:center;font-size:14.5px;font-weight:600;cursor:pointer">Evoluir agora</div>
+                    <div style="flex:1;height:46px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);display:flex;align-items:center;justify-content:center;gap:7px;font-size:14.5px;font-weight:600;cursor:pointer"><svg width="10" height="13" viewBox="0 0 12 15"><path d="M1.5 1.5h9V14L6 10.9 1.5 14V1.5z" fill="#F4F6FA"></path></svg>Guardar</div>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <div style="border-radius:20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);padding:16px;display:flex;flex-direction:column;gap:10px">
+                    <span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:rgba(235,238,245,.4)">DETALHES</span>
+                    <div style="display:flex;justify-content:space-between;font-size:13.5px"><span style="color:rgba(235,238,245,.5)">PC</span><span style="font-weight:600">2.874</span></div>
+                    <div style="display:flex;justify-content:space-between;font-size:13.5px"><span style="color:rgba(235,238,245,.5)">IV</span><span style="font-weight:600">96%</span></div>
+                    <div style="display:flex;justify-content:space-between;font-size:13.5px"><span style="color:rgba(235,238,245,.5)">Nível</span><span style="font-weight:600">31</span></div>
+                    <div style="display:flex;justify-content:space-between;font-size:13.5px"><span style="color:rgba(235,238,245,.5)">Doces</span><span style="font-weight:600">87</span></div>
+                  </div>
+                  <div onClick="{{ openIv }}" style="border-radius:16px;padding:13px 15px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;cursor:pointer" style-hover="background:rgba(255,255,255,.07)">
+                    <span style="font-size:13.5px;font-weight:600">Recalcular por print</span><span style="color:#9F8BFF">→</span>
+                  </div>
+                  <div onClick="{{ openTeam }}" style="border-radius:16px;padding:13px 15px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;cursor:pointer" style-hover="background:rgba(255,255,255,.07)">
+                    <span style="font-size:13.5px;font-weight:600">Usar num time</span><span style="color:#9F8BFF">→</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isIv }}">
+            <div style="padding:28px 32px;max-width:640px;animation:tkin .24s ease-out">
+              <div onClick="{{ backFicha }}" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#9F8BFF;cursor:pointer;margin-bottom:16px">← Voltar pra ficha</div>
+              <div style="font-size:24px;font-weight:700;margin-bottom:16px">Calculadora de IV</div>
+              <div style="border-radius:20px;padding:12px 14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:12px;margin-bottom:14px">
+                <div style="width:52px;height:52px;border-radius:13px;background:linear-gradient(135deg,#232833,#3A4150);display:flex;align-items:center;justify-content:center">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(235,238,245,.6)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><circle cx="8.5" cy="10" r="1.5"></circle><path d="M21 16l-5-5-9 8"></path></svg>
+                </div>
+                <div style="flex:1"><div style="font-size:14px;font-weight:600">print_garchomp.png</div><div style="font-size:11.5px;color:rgba(235,238,245,.45)">Lido em 0,8 s</div></div>
+                <span style="font-size:12.5px;font-weight:600;color:#9F8BFF;cursor:pointer">Trocar</span>
+              </div>
+              <div style="border-radius:26px;padding:24px 18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;align-items:center;gap:10px">
+                <div style="font-size:48px;font-weight:800;letter-spacing:-2px">IV 96<span style="font-size:24px;color:rgba(235,238,245,.5)">%</span></div>
+                <div style="width:100%;height:8px;border-radius:999px;background:rgba(255,255,255,.08)"><div style="width:96%;height:100%;border-radius:999px;background:linear-gradient(90deg,#6E4BFF,#9F8BFF)"></div></div>
+                <span style="display:inline-flex;padding:5px 12px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.06em;color:#9F8BFF;background:rgba(159,139,255,.16);border:1px solid rgba(159,139,255,.3)">✦ EVOLUIR</span>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isTeam }}">
+            <div style="padding:28px 32px;max-width:760px;animation:tkin .24s ease-out">
+              <div onClick="{{ backFicha }}" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#9F8BFF;cursor:pointer;margin-bottom:16px">← Voltar pra ficha</div>
+              <div style="font-size:24px;font-weight:700;margin-bottom:6px">Monta um time</div>
+              <div style="font-size:14px;color:rgba(235,238,245,.6);margin-bottom:16px">Contra o ginásio da Rua Augusta — 3 defensores, maioria Água.</div>
+              <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px">
+                <sc-for list="{{ teamMembers }}" as="m" hint-placeholder-count="6">
+                  <div style="border-radius:18px;padding:10px 6px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);display:flex;flex-direction:column;align-items:center;gap:5px">
+                    <div style="width:48px;height:48px;border-radius:14px;background:{{ m.grad }};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800">{{ m.mono }}</div>
+                    <span style="font-size:11px;font-weight:600">{{ m.name }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isAjustes }}">
+      <div style="flex:1;overflow-y:auto;padding:28px 0 40px;animation:tkin .28s ease-out;display:flex;justify-content:center">
+        <div style="width:100%;max-width:620px;padding:0 32px;display:flex;flex-direction:column;gap:18px">
+          <div style="font-size:28px;font-weight:700">Ajustes</div>
+
+          <div style="border-radius:22px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);overflow:hidden">
+            <sc-for list="{{ setA }}" as="i" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:12px;min-height:50px;padding:0 16px;border-bottom:1px solid rgba(255,255,255,.06)">
+                <div style="width:28px;height:28px;border-radius:8px;background:{{ i.grad }};display:flex;align-items:center;justify-content:center" dangerouslySetInnerHTML="{{ i.icon }}"></div>
+                <span style="flex:1;font-size:15px">{{ i.label }}</span>
+                <span style="font-size:14px;color:rgba(235,238,245,.5)">{{ i.val }}</span>
+                <svg width="7" height="12" viewBox="0 0 8 14"><path d="M1 1l6 6-6 6" stroke="rgba(235,238,245,.3)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="border-radius:26px;padding:16px;background:{{ cacheBg }};border:1px solid {{ cacheBd }};display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:36px;height:36px;border-radius:11px;background:{{ cacheIconBg }};display:flex;align-items:center;justify-content:center">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"></path><path d="M8 10.5l4 4 4-4"></path><path d="M4 17v2.5h16V17"></path></svg>
+              </div>
+              <div style="flex:1"><div style="font-size:15px;font-weight:700">Dump offline completo</div><div style="font-size:12px;color:rgba(235,238,245,.5)">{{ cacheSub }}</div></div>
+            </div>
+            <div style="height:8px;border-radius:999px;background:rgba(255,255,255,.08)"><div style="width:{{ cacheW }};height:100%;border-radius:999px;background:{{ cacheFill }};transition:width .5s ease-out"></div></div>
+            <div onClick="{{ toggleCache }}" style="height:44px;border-radius:999px;background:{{ cacheBtnBg }};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;cursor:pointer">{{ cacheBtn }}</div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</x-import>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const TYPE_GRAD = {
+  Fogo:'linear-gradient(135deg,#7C2D12,#EA580C 55%,#F97316)', Água:'linear-gradient(135deg,#1E3A8A,#2563EB 55%,#38BDF8)',
+  Planta:'linear-gradient(135deg,#14532D,#16A34A 55%,#84CC16)', Elétrico:'linear-gradient(135deg,#92400E,#F59E0B 55%,#FBBF24)',
+  Dragão:'linear-gradient(135deg,#2E2A78,#5B3DF5 55%,#7C5CFF)', Fantasma:'linear-gradient(135deg,#312E81,#7C3AED 55%,#A78BFA)',
+  Fada:'linear-gradient(135deg,#9D174D,#EC4899 55%,#F9A8D4)', Normal:'linear-gradient(135deg,#374151,#6B7280 55%,#9CA3AF)',
+  Lutador:'linear-gradient(135deg,#9A3412,#F97316 55%,#FDBA74)', Terra:'linear-gradient(135deg,#92400E,#D97706 55%,#F59E0B)',
+};
+const VERD = {
+  investir:{label:'↑ INVESTIR',c:'#3DDC97',bg:'rgba(61,220,151,.14)',bd:'rgba(61,220,151,.3)'},
+  evoluir:{label:'✦ EVOLUIR',c:'#9F8BFF',bg:'rgba(159,139,255,.16)',bd:'rgba(159,139,255,.3)'},
+  guardar:{label:'◆ GUARDAR',c:'#FFC55C',bg:'rgba(255,197,92,.14)',bd:'rgba(255,197,92,.3)'},
+  transferir:{label:'→ TRANSFERIR',c:'#9AA6B8',bg:'rgba(154,166,184,.14)',bd:'rgba(154,166,184,.3)'},
+};
+const DEX = [
+  {id:'ga',name:'Garchomp',mono:'GA',types:['Dragão','Terra'],meta:'IV 96 · PC 2.874 · nv 31',v:'evoluir',reason:'Ele ainda evolui — e evoluir muda tudo. Custa 100 doces e destrava o melhor ataque dele.',
+    why:[{t:'IV 96 — entre os 5% melhores',v:'+42',c:'#3DDC97'},{t:'Evolução destrava ataque de elite',v:'+31',c:'#3DDC97'},{t:'Poeira em falta na sua conta',v:'−8',c:'#9AA6B8'}]},
+  {id:'ma',name:'Magnezone',mono:'MA',types:['Elétrico'],meta:'IV 91 · PC 2.340 · nv 28',v:'investir',reason:'IV alto e ataque relevante — vale o investimento de poeira agora.',
+    why:[{t:'IV 91 — acima da média',v:'+28',c:'#3DDC97'},{t:'Ainda sem ataque de elite',v:'+12',c:'#3DDC97'},{t:'Custo de poeira moderado',v:'−4',c:'#9AA6B8'}]},
+  {id:'gy',name:'Gyarados',mono:'GY',types:['Água'],meta:'IV 44 · PC 1.203',v:'transferir',reason:'IV baixo e você já tem exemplares melhores — transferir libera espaço.',
+    why:[{t:'IV 44 — abaixo do seu limiar',v:'−30',c:'#9AA6B8'},{t:'3 exemplares melhores na conta',v:'−18',c:'#9AA6B8'},{t:'Doce ainda é útil',v:'+6',c:'#3DDC97'}]},
+  {id:'sy',name:'Sylveon',mono:'SY',types:['Fada'],meta:'IV 98 · PC 2.110 · nv 26',v:'guardar',reason:'IV excelente, mas sem uso claro na sua rotação agora — guarde para quando fizer sentido.',
+    why:[{t:'IV 98 — quase perfeito',v:'+38',c:'#3DDC97'},{t:'Sem raide ou liga que peça agora',v:'0',c:'#9AA6B8'},{t:'Vale manter para o futuro',v:'+5',c:'#3DDC97'}]},
+  {id:'ve',name:'Venusaur',mono:'VE',types:['Planta'],meta:'IV 89 · PC 2.560 · nv 30',v:'investir',reason:'Cobre bem contra Água e Terra — bom uso imediato do seu estoque de poeira.',
+    why:[{t:'IV 89 — sólido',v:'+24',c:'#3DDC97'},{t:'Cobertura de tipo útil agora',v:'+20',c:'#3DDC97'},{t:'Custo de poeira alto',v:'−10',c:'#9AA6B8'}]},
+  {id:'lu',name:'Lucario',mono:'LU',types:['Lutador'],meta:'IV 93 · PC 2.703 · nv 29',v:'investir',reason:'Ataque forte contra tipos comuns em raide — o próximo a receber poeira.',
+    why:[{t:'IV 93 — muito bom',v:'+30',c:'#3DDC97'},{t:'Meta relevante em raides',v:'+16',c:'#3DDC97'},{t:'Custo de poeira alto',v:'−9',c:'#9AA6B8'}]},
+];
+const TEAM = [
+  {name:'Venusaur',mono:'VE',grad:TYPE_GRAD.Planta},{name:'Magnezone',mono:'MA',grad:TYPE_GRAD.Elétrico},
+  {name:'Garchomp',mono:'GA',grad:TYPE_GRAD.Dragão},{name:'Lucario',mono:'LU',grad:TYPE_GRAD.Lutador},
+  {name:'Raichu',mono:'PI',grad:TYPE_GRAD.Elétrico},{name:'Roserade',mono:'RO',grad:TYPE_GRAD.Planta},
+];
+const CACHE_STAGES=[{t:'Espécies e evoluções',at:18},{t:'Tabela de tipos',at:38},{t:'Regras de veredito',at:56},{t:'Seus prints',at:78},{t:'Voz neural',at:94}];
+
+class Component extends DCLogic {
+  state = { tab:'inicio', dexTab:'meus', selId:'ga', dexPane:'ficha', cache:'done', cachePct:100 };
+  set = (p) => this.setState(p);
+  go = (tab) => () => this.setState({ tab, dexPane:'ficha' });
+  select = (id) => () => this.setState({ selId:id, dexPane:'ficha' });
+  runCache = () => {
+    if (this.state.cache==='done'){ this.set({cache:'idle',cachePct:0}); return; }
+    if (this.state.cache==='running') return;
+    this.set({cache:'running',cachePct:0});
+    clearInterval(this._t);
+    this._t = setInterval(()=>{ const p=this.state.cachePct+5; if(p>=100){clearInterval(this._t); this.set({cache:'done',cachePct:100});} else this.set({cachePct:p}); },70);
+  };
+  componentWillUnmount(){ clearInterval(this._t); }
+
+  renderVals() {
+    const s = this.state;
+    const sel = DEX.find(d=>d.id===s.selId) || DEX[0];
+    const vv = VERD[sel.v];
+    const dexList = DEX.map(d=>{
+      const dv = VERD[d.v];
+      const active = d.id===s.selId;
+      return { id:d.id, name:d.name, mono:d.mono, meta:d.meta, grad:TYPE_GRAD[d.types[0]],
+        vlabel:dv.label, vc:dv.c, vbg:dv.bg, vbd:dv.bd,
+        rowBg: active ? 'rgba(159,139,255,.1)' : 'transparent', rowBorder: active ? '#9F8BFF' : 'transparent',
+        select: this.select(d.id) };
+    });
+    const navDef = [
+      {k:'inicio', label:'Início', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>'},
+      {k:'dex', label:'Pokédex', badge:'4', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg>'},
+      {k:'ajustes', label:'Ajustes', icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10"/><circle cx="17.5" cy="7" r="2.5"/><path d="M20 16.5h-10"/><circle cx="6.5" cy="16.5" r="2.5"/></svg>'},
+    ];
+    const navItems = navDef.map(n=>({ label:n.label, icon:{__html:n.icon}, badge:n.badge, go:this.go(n.k),
+      bg: s.tab===n.k ? 'rgba(159,139,255,.14)' : 'transparent', fg: s.tab===n.k ? '#B9A8FF' : 'rgba(235,238,245,.7)', weight: s.tab===n.k ? 700 : 500 }));
+    const toolDef = [
+      {k:'iv', label:'Calculadora de IV', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M21 16l-5-5-9 8"/></svg>'},
+      {k:'raid', label:'Raide de hoje', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.4 9.3-8 11-4.6-1.7-8-6-8-11V5l8-3z"/></svg>'},
+      {k:'team', label:'Montar time', icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>'},
+    ];
+    const toolItems = toolDef.map(t=>({ label:t.label, icon:{__html:t.icon}, go: t.k==='team' ? () => this.set({tab:'dex',dexPane:'time'}) : t.k==='iv' ? () => this.set({tab:'dex',dexPane:'iv'}) : () => this.set({tab:'dex'}),
+      bg:'transparent', fg:'rgba(235,238,245,.6)', weight:500 }));
+
+    return {
+      navItems, toolItems,
+      isInicio: s.tab==='inicio', isDex: s.tab==='dex', isAjustes: s.tab==='ajustes',
+      isFicha: s.dexPane==='ficha', isIv: s.dexPane==='iv', isTeam: s.dexPane==='time',
+      openIv: () => this.set({dexPane:'iv'}), openTeam: () => this.set({dexPane:'time'}), backFicha: () => this.set({dexPane:'ficha'}),
+      openGarchomp: () => this.set({tab:'dex', selId:'ga', dexPane:'ficha'}), goDex: () => this.set({tab:'dex'}),
+
+      allBg: s.dexTab==='all' ? 'rgba(159,139,255,.2)' : 'transparent', allFg: s.dexTab==='all' ? '#B9A8FF' : 'rgba(235,238,245,.6)',
+      meusBg: s.dexTab==='meus' ? 'rgba(159,139,255,.2)' : 'transparent', meusFg: s.dexTab==='meus' ? '#B9A8FF' : 'rgba(235,238,245,.6)',
+      setAll: () => this.set({dexTab:'all'}), setMeus: () => this.set({dexTab:'meus'}),
+
+      dexList,
+      selName: sel.name, selMono: sel.mono, selTypes: sel.types, selGrad: TYPE_GRAD[sel.types[0]],
+      selVerdict: vv.label, selVc: vv.c, selReason: sel.reason, selWhy: sel.why,
+
+      collection: DEX.map(d=>({ name:d.name, mono:d.mono, grad:TYPE_GRAD[d.types[0]], vlabel:VERD[d.v].label, vc:VERD[d.v].c, vbg:VERD[d.v].bg, vbd:VERD[d.v].bd, open:this.select(d.id) })),
+      teamMembers: TEAM,
+
+      setA: [
+        {label:'Tema', val:'Escuro', grad:'linear-gradient(180deg,#8A6BFF,#6E4BFF)', icon:{__html:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>'}},
+        {label:'Idioma', val:'Português (BR)', grad:'linear-gradient(180deg,#38BDF8,#2563EB)', icon:{__html:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/></svg>'}},
+        {label:'Voz', val:'Camila · Neural', grad:'linear-gradient(180deg,#FB923C,#EA580C)', icon:{__html:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M4 10v4"/><path d="M8 7v10"/><path d="M12 4v16"/><path d="M16 7v10"/><path d="M20 10v4"/></svg>'}},
+        {label:'Privacidade', val:'Zero rastreio', grad:'linear-gradient(180deg,#60A5FA,#2563EB)', icon:{__html:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.4 9.3-8 11-4.6-1.7-8-6-8-11V5l8-3z"/></svg>'}},
+      ],
+
+      cacheW: (s.cache==='idle'?0:s.cachePct)+'%',
+      cacheSub: s.cache==='done' ? '1.182 espécies · 247 prints · 1,2 GB no aparelho' : s.cache==='running' ? 'Baixando tudo — pode fechar o app' : 'Baixe tudo agora e nunca mais dependa de sinal',
+      cacheBtn: s.cache==='done' ? 'Apagar e baixar de novo' : s.cache==='running' ? 'Baixando… '+s.cachePct+'%' : 'Baixar tudo para offline',
+      cacheBg: s.cache==='done' ? 'rgba(61,220,151,.07)' : 'rgba(255,255,255,.06)', cacheBd: s.cache==='done' ? 'rgba(61,220,151,.22)' : 'rgba(255,255,255,.09)',
+      cacheIconBg: s.cache==='done' ? 'linear-gradient(180deg,#3DDC97,#059669)' : 'linear-gradient(180deg,#8A6BFF,#6E4BFF)',
+      cacheFill: s.cache==='done' ? 'linear-gradient(90deg,#059669,#3DDC97)' : 'linear-gradient(90deg,#6E4BFF,#9F8BFF)',
+      cacheBtnBg: s.cache==='done' ? 'rgba(255,255,255,.07)' : 'linear-gradient(180deg,#8A6BFF,#6E4BFF)',
+      toggleCache: this.runCache,
+    };
+  }
+}
+</script>
+</body>
+</html>
