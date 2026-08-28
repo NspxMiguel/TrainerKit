@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { resolvedDatasetUrl } from "../data/source.ts";
+import { carregarIndice, quantasNoArmazem } from "../sprites/armazem.ts";
 
 /**
  * O que ja esta no aparelho, medido — e nao prometido.
@@ -66,13 +67,39 @@ async function temAlgo(cache: string): Promise<EstadoOffline> {
   }
 }
 
+/**
+ * Quantas imagens estao no aparelho.
+ *
+ * ⚠️ DOIS DEPOSITOS, e o maior deles nao existe no celular em teste. O Cache
+ * Storage so existe em contexto seguro, e o app e aberto no celular por
+ * `http://10.0.0.21:5273` — origem HTTP com IP, que NAO e contexto seguro.
+ * Medido: ali `caches` nem esta no objeto `window`. Contar so por ele fazia o
+ * cartao dizer "pendente" para sempre naquele endereco.
+ *
+ * O armazem em IndexedDB (`sprites/armazem.ts`) funciona nos dois. O maior dos
+ * dois vence em vez da soma: onde ha service worker as mesmas imagens estao nos
+ * dois lugares, e somar contaria cada uma duas vezes — o cartao diria "1.024 de
+ * 1.024" com metade baixada.
+ */
 async function quantosSprites(): Promise<number> {
+  let noCache = 0;
   try {
-    if (!("caches" in globalThis) || !(await caches.has(CACHE_SPRITES))) return 0;
-    return (await caches.open(CACHE_SPRITES)).keys().then((k) => k.length);
+    if ("caches" in globalThis && (await caches.has(CACHE_SPRITES))) {
+      noCache = (await (await caches.open(CACHE_SPRITES)).keys()).length;
+    }
   } catch {
-    return 0;
+    noCache = 0;
   }
+
+  let noArmazem = 0;
+  try {
+    await carregarIndice();
+    noArmazem = quantasNoArmazem();
+  } catch {
+    noArmazem = 0;
+  }
+
+  return Math.max(noCache, noArmazem);
 }
 
 /**
@@ -112,12 +139,13 @@ export async function medirOffline(totalEspecies: number): Promise<OfflineItem[]
        * `pendente` de proposito: o cartao responde "da pra ficar sem rede?", e
        * com metade das imagens a resposta e nao.
        */
-      estado:
-        totalEspecies > 0 && sprites >= totalEspecies
-          ? "guardado"
-          : sprites > 0
-            ? "pendente"
-            : "pendente",
+      /*
+       * Duas respostas, nao tres. Aqui havia um ternario cujos dois ramos
+       * devolviam `"pendente"` — meio caminho e zero davam no mesmo, e o
+       * segundo teste so parecia dizer alguma coisa. A contagem logo abaixo e
+       * quem conta a diferenca entre "nada" e "quase tudo".
+       */
+      estado: totalEspecies > 0 && sprites >= totalEspecies ? "guardado" : "pendente",
       contagem: { feito: sprites, total: totalEspecies },
     },
   ];

@@ -136,10 +136,6 @@ export function setProvider(next: AiProvider): void {
   emit();
 }
 
-export function getLocalModel(): string {
-  return localModel;
-}
-
 export function setLocalModel(id: string): void {
   localModel = id;
   store.set(LOCAL_MODEL_KEY, id);

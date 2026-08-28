@@ -121,10 +121,6 @@ export const ELEVEN_VOICES: Record<
   ru: [],
 };
 
-
-/** Compatibilidade: o allowlist da funcao aceita qualquer id que apareca acima. */
-export const ELEVEN_SHARED_VOICES = ELEVEN_VOICES.en!;
-
 /** Teto da funcao. Cortar aqui evita um 413 previsivel. */
 export const ELEVEN_MAX_CHARS = 400;
 
@@ -148,10 +144,6 @@ const store = {
 /** Desligada por padrao — ver a decisao 1 no topo. */
 export function elevenSharedOn(): boolean {
   return store.get(LIGADA_KEY) === "1";
-}
-
-export function setElevenSharedOn(on: boolean): void {
-  store.set(LIGADA_KEY, on ? "1" : "0");
 }
 
 /**
@@ -196,10 +188,6 @@ export function getSharedVoice(idioma = "en"): string {
   // exatamente como uma voz acaba falando o idioma errado.
   if (salva && lista.some((v) => v.id === salva)) return salva;
   return lista[0]?.id ?? "";
-}
-
-export function setSharedVoice(id: string): void {
-  store.set(VOZ_KEY, id);
 }
 
 /**

@@ -65,10 +65,3 @@ export const DECLARED_SOURCES: readonly DeclaredSource[] = [
   },
 ];
 
-/**
- * Campos com prefixo `ob` sao nomes OFUSCADOS pela Niantic/Scopely: a
- * comunidade nao determinou o significado deles e eles mudam de nome sem aviso.
- * Nunca dependa de um campo `ob*` — o ETL deve falhar alto se um campo que
- * importa sumir, em vez de silenciosamente produzir dado errado.
- */
-export const OBFUSCATED_FIELD_PREFIX = "ob";

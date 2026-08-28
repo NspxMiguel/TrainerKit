@@ -1,4 +1,5 @@
 import { computeCPAtLevel } from "./cp.js";
+import { ATK_ALTO, DEF_ALTO, HP_ALTO } from "./limiares.js";
 import type { CpmTable } from "./cp.js";
 import type { BaseStats } from "./types.js";
 
@@ -78,14 +79,13 @@ export interface DexEntryInput {
 /**
  * Como o bicho se comporta, em uma palavra.
  *
- * Mesmos limiares do `assistant.ts` de propósito: dois modulos que descrevem o
- * mesmo especie com criterios diferentes acabam se contradizendo na tela, e o
- * app ja passou por isso uma vez (o Eternatus dizia que batia forte e caia
- * rapido em linhas seguidas).
+ * Os limiares moram em `limiares.ts`, importados — nao copiados. A copia ja
+ * divergiu uma vez e produziu exatamente a contradicao que o comentario antigo
+ * dizia estar evitando.
  */
-const HIGH_ATK = 240;
-const HIGH_DEF = 220;
-const HIGH_HP = 200;
+const HIGH_ATK = ATK_ALTO;
+const HIGH_DEF = DEF_ALTO;
+const HIGH_HP = HP_ALTO;
 
 export type DexBuild = "glassCannon" | "wall" | "balanced" | "frail" | "monster";
 

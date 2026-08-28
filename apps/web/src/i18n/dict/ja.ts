@@ -502,6 +502,8 @@ export const JA: Dict = {
   "prefetch.stop": "停止",
   "prefetch.strip": "画像をダウンロード中 · {pct}%",
   "prefetch.finished": "{count} 枚を保存しました（{size}）。次からは再取得しません。",
+  "prefetch.stored": "{count} 枚がこの端末にあります。通信なしですぐ表示されます。",
+  "prefetch.clear": "ダウンロードした画像を削除",
   "verdict.evolution.ready": "アメ {candy} 個はもう持っています",
   "verdict.evolution.pending": "まだ進化する。進化はすべてを変える",
   "verdict.pvp.top": "{league} で上位 {rank} 位",

@@ -103,12 +103,3 @@ export async function guardarAudio(
   }
 }
 
-/** Esvazia. Usado pelo "apagar todos os dados do app". */
-export async function limparCacheAudio(): Promise<void> {
-  if (typeof caches === "undefined") return;
-  try {
-    await caches.delete(CACHE);
-  } catch {
-    /* idem */
-  }
-}

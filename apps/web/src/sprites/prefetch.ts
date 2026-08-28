@@ -1,5 +1,7 @@
 import { useSyncExternalStore } from "react";
 
+import { carregarIndice, guardarArte, quantasDestas } from "./armazem.ts";
+
 /**
  * Baixar as imagens de uma vez, em vez de uma a uma enquanto se navega.
  *
@@ -11,11 +13,23 @@ import { useSyncExternalStore } from "react";
  * devagar, um por um, e a grade pisca monograma antes de cada imagem. Pra esse caso o certo e o oposto — baixa tudo uma vez, aceita
  * esperar, e depois nunca mais.
  *
- * Por que `fetch` puro e nao `cache.put`: o service worker ja intercepta estas
- * requisicoes com a regra `CacheFirst` do `tk-sprites`. Um `fetch` normal passa
- * por ela e enche exatamente o mesmo cache que o `<img>` usaria depois. Gravar
- * no cache na mao exigiria adivinhar a chave que o Workbox monta — e errar isso
- * daria um cache cheio que nunca acerta.
+ * ⚠️ AQUI SE DIZIA QUE GRAVAR ERA DESNECESSARIO, e isso custava o download
+ * inteiro no caso mais comum de teste.
+ *
+ * O argumento era: o service worker intercepta com a regra `CacheFirst` do
+ * `tk-sprites`, entao um `fetch` normal enche o mesmo cache que o `<img>` usaria
+ * depois. Verdadeiro — QUANDO EXISTE service worker. Medido:
+ *
+ *   http://localhost:5273    isSecureContext=true    caches=true   sw=true
+ *   http://10.0.0.21:5273    isSecureContext=FALSE   caches=FALSE  sw=FALSE
+ *
+ * Origem HTTP com IP nao e contexto seguro, e o app e testado no celular
+ * exatamente por ali. Naquele endereco o download buscava ~150 MB e guardava
+ * ZERO — o painel enchia ate 100%, dizia o tamanho, e nada tinha sido guardado.
+ *
+ * Agora o blob que ja era lido pra medir o tamanho tambem e GRAVADO
+ * (`armazem.ts`, IndexedDB, que existe em origem insegura). Onde ha service
+ * worker as duas coisas acontecem e uma nao atrapalha a outra.
  */
 
 export interface PrefetchState {
@@ -91,7 +105,7 @@ async function fetchOnce(
   url: string,
   signal: AbortSignal,
   attempts: number,
-): Promise<number | null> {
+): Promise<Blob | null> {
   for (let attempt = 0; attempt < attempts; attempt++) {
     if (signal.aborted) return null;
     try {
@@ -100,8 +114,9 @@ async function fetchOnce(
       if (res.status === 404) return null;
       if (!res.ok) throw new Error(String(res.status));
       // O corpo precisa ser consumido pro service worker concluir a gravacao.
-      // De quebra, e daqui que sai o tamanho real.
-      return (await res.blob()).size;
+      // De quebra, e daqui que sai o tamanho real — e agora tambem o que fica
+      // guardado no aparelho.
+      return await res.blob();
     } catch {
       if (signal.aborted) return null;
       if (attempt + 1 < attempts) {
@@ -128,15 +143,17 @@ export async function startPrefetch(urls: readonly string[]): Promise<void> {
       const i = next++;
       if (i >= urls.length) return;
 
-      const size = await fetchOnce(urls[i]!, signal, 2);
+      const url = urls[i]!;
+      const blob = await fetchOnce(url, signal, 2);
       if (signal.aborted) return;
 
-      if (size === null) {
+      if (blob === null) {
         // Uma imagem que falta nao estraga o resto: o tile cai no monograma,
         // que e um estado previsto e nao um erro.
         set({ done: state.done + 1, failed: state.failed + 1 });
       } else {
-        set({ done: state.done + 1, bytes: state.bytes + size });
+        await guardarArte(url, blob);
+        set({ done: state.done + 1, bytes: state.bytes + blob.size });
       }
     }
   };
@@ -170,4 +187,26 @@ export function dismissPrefetch(): void {
 /** "12,4 MB" no idioma de quem esta lendo. */
 export function formatMb(bytes: number, language: string): string {
   return `${(bytes / 1_048_576).toLocaleString(language, { maximumFractionDigits: 1 })} MB`;
+}
+
+/**
+ * Quantas destas imagens ja estao no aparelho.
+ *
+ * ⚠️ E ISTO QUE FAZ O BOTAO PARAR DE REAPARECER. O estado acima e de memoria:
+ * ele nasce `idle` a cada abertura, entao depois de recarregar o app voltava a
+ * oferecer um download de 1.024 imagens que ja estavam guardadas — "msm dps de
+ * baixado, aparece pra baixar".
+ *
+ * Persistir um sinalizador de "ja baixou" resolveria a tela e mentiria: o
+ * usuario pode ter limpado o armazenamento, ou a cota pode ter estourado no
+ * meio. Contar o que existe responde a mesma pergunta sem poder divergir do
+ * aparelho.
+ */
+export async function jaGuardadas(urls: readonly string[]): Promise<number> {
+  return quantasDestas(urls);
+}
+
+/** Deixa o indice pronto antes de a primeira grade montar. */
+export function aquecerArmazem(): Promise<unknown> {
+  return carregarIndice();
 }

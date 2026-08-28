@@ -21,3 +21,4 @@ export * from "./gym.js";
 export * from "./team.js";
 export * from "./trade.js";
 export * from "./faxina.js";
+export * from "./limiares.js";

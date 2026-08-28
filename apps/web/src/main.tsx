@@ -12,6 +12,7 @@ import { detectPlatform } from "./storage/install.ts";
  * escolhia "Claro" e reabria o app via o tema do SISTEMA ate tocar em Ajustes.
  */
 import "./ui/tema.ts";
+import { aquecerArmazem } from "./sprites/prefetch.ts";
 import { registerServiceWorker } from "./storage/updates.ts";
 import "./styles/base.css";
 import "./App.css";
@@ -32,6 +33,19 @@ registerServiceWorker();
 
 const root = document.getElementById("root");
 if (!root) throw new Error("#root nao existe no index.html");
+
+/*
+ * O indice das imagens guardadas, lido antes da primeira grade montar.
+ *
+ * ⚠️ SEM ISTO A PRIMEIRA TELA VAI TODA PRA REDE. Ler o indice toca o disco e
+ * demora alguns milissegundos; a grade da Especies monta antes disso e cada um
+ * dos ~60 tiles perguntaria "esta guardada?" ouvindo "ainda nao sei" — e
+ * pediria a imagem pro GitHub. `useSpriteUrl` reconsidera quando o indice
+ * chega, mas o pedido de rede ja teria saido.
+ *
+ * Comeca aqui, no import, e nao num efeito: e o ponto mais cedo que existe.
+ */
+void aquecerArmazem();
 
 createRoot(root).render(
   <StrictMode>

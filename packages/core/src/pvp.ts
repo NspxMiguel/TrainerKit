@@ -25,7 +25,6 @@ export interface League {
 export const GREAT_LEAGUE: League = { id: "great", name: "Great League", cpCap: 1500 };
 export const ULTRA_LEAGUE: League = { id: "ultra", name: "Ultra League", cpCap: 2500 };
 export const MASTER_LEAGUE: League = { id: "master", name: "Master League", cpCap: null };
-export const LITTLE_CUP: League = { id: "little", name: "Little Cup", cpCap: 500 };
 
 export const LEAGUES = [GREAT_LEAGUE, ULTRA_LEAGUE, MASTER_LEAGUE] as const;
 

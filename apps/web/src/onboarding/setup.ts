@@ -110,7 +110,21 @@ export function getSetup(): Setup {
 
 export function updateSetup(next: Partial<Setup>): void {
   current = { ...current, ...next };
-  localStorage.setItem(KEY, JSON.stringify(current));
+  /*
+   * ⚠️ `setItem` LANCA no Safari privado e com a cota cheia, e este e o
+   * onboarding: a excecao subia na primeira tela do app, ao escolher idioma ou
+   * modo, e derrubava tudo antes de qualquer coisa aparecer.
+   *
+   * O `read()` logo acima ja tratava — so a gravacao estava descoberta. A
+   * preferencia nao persistida vale mais que app quebrado: `current` continua
+   * certo em memoria e a sessao inteira funciona, so nao sobrevive ao
+   * fechamento.
+   */
+  try {
+    localStorage.setItem(KEY, JSON.stringify(current));
+  } catch {
+    /* ver acima */
+  }
   for (const fn of listeners) fn();
 }
 

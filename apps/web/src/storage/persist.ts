@@ -51,17 +51,6 @@ export function isInstalled(): boolean {
 }
 
 /**
- * A familia inteira: iPhone, iPad, iPod.
- *
- * Serve pro que importa NESTE arquivo — o WebKit despeja dados de origens
- * paradas ha 7 dias em todos eles igual. Quem precisa distinguir aparelho usa
- * `isIpad`.
- */
-export function isIos(): boolean {
-  return /iPhone|iPod/.test(navigator.userAgent) || isIpad();
-}
-
-/**
  * iPad, inclusive o que mente sobre si.
  *
  * Desde o iPadOS 13 o Safari do iPad se apresenta como Mac por padrao: a UA diz

@@ -78,6 +78,16 @@ export interface EspecieFaxina {
   evolvesInto: readonly string[];
   candyToEvolve: number | null;
   legendary: boolean;
+  /**
+   * Faz Gigantamax.
+   *
+   * ⚠️ SEM ISTO AS DUAS TELAS SE CONTRADIZIAM. `decide` ja tratava o caso
+   * (`dynamax.gigantamax`) e mandava guardar, mas a faxina chamava `decide`
+   * sem informar o campo — entao a mesma especie recebia "guardar" na ficha e
+   * podia receber "transferir" na lista. Quem le as duas conclui que o app nao
+   * sabe o que esta dizendo, e tem razao.
+   */
+  gigantamax: boolean;
 }
 
 export interface FaxinaInput {
@@ -314,6 +324,7 @@ export function planejarFaxina(input: FaxinaInput): Faxina {
         candyToEvolve: especie.candyToEvolve,
         lucky: b.lucky,
         shadow: b.shadow,
+        gigantamax: especie.gigantamax,
       });
 
       /*

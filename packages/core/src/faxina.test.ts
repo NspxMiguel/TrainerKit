@@ -42,6 +42,7 @@ function especie(id: string, extra: Partial<EspecieFaxina> = {}): EspecieFaxina 
     evolvesInto: [],
     candyToEvolve: null,
     legendary: false,
+    gigantamax: false,
     ...extra,
   };
 }
@@ -332,5 +333,52 @@ describe("planejarFaxina — invariantes", () => {
 
     expect(r.soltos.length + r.guardados.length).toBe(600);
     expect(ms).toBeLessThan(2000);
+  });
+});
+
+/**
+ * A faxina e a ficha nao podem discordar sobre a mesma especie.
+ *
+ * `decide` sempre soube guardar um Gigantamax (`dynamax.gigantamax`); a faxina
+ * e que chamava sem informar o campo. O sintoma era o pior tipo: duas telas do
+ * mesmo app dando conselhos opostos sobre o mesmo bicho.
+ */
+describe("Gigantamax nao entra na lista de transferir", () => {
+  it("um IV baixo que sairia da lista fica quando faz Gigantamax", () => {
+    const comum = planejarFaxina({
+      bichos: [
+        {
+          id: "a",
+          speciesId: "charizard",
+          ivs: { atk: 1, def: 1, hp: 1 },
+          level: 15,
+          lucky: false,
+          shadow: false,
+          ivDesconhecido: false,
+        },
+      ],
+      especies: new Map([["charizard", especie("charizard")]]),
+      cpm: data.cpm,
+      levelCap: CAP,
+    });
+    const gmax = planejarFaxina({
+      bichos: [
+        {
+          id: "a",
+          speciesId: "charizard",
+          ivs: { atk: 1, def: 1, hp: 1 },
+          level: 15,
+          lucky: false,
+          shadow: false,
+          ivDesconhecido: false,
+        },
+      ],
+      especies: new Map([["charizard", especie("charizard", { gigantamax: true })]]),
+      cpm: data.cpm,
+      levelCap: CAP,
+    });
+    // O que muda e SO o Gigantamax; entao a diferenca de veredito e dele.
+    expect(gmax.soltos.length).toBeLessThanOrEqual(comum.soltos.length);
+    expect(gmax.soltos.some((s) => s.id === "a" && s.classe === "semDuvida")).toBe(false);
   });
 });

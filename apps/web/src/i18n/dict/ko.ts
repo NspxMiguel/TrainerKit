@@ -502,6 +502,8 @@ export const KO: Dict = {
   "prefetch.stop": "중지",
   "prefetch.strip": "이미지 내려받는 중 · {pct}%",
   "prefetch.finished": "{count}장 저장했습니다（{size}）. 다시 내려받지 않습니다.",
+  "prefetch.stored": "{count}장이 이 기기에 있습니다. 네트워크 없이 바로 열립니다.",
+  "prefetch.clear": "내려받은 이미지 삭제",
   "verdict.evolution.ready": "사탕 {candy}개를 이미 가지고 있습니다",
   "verdict.evolution.pending": "아직 진화합니다. 진화는 모든 것을 바꿉니다",
   "verdict.pvp.top": "{league} 상위 {rank}위",

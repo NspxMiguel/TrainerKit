@@ -88,6 +88,36 @@ function raidScore(fast: MoveWithPvp, charged: MoveWithPvp, input: ScoreInput): 
 }
 
 /**
+ * Quantos turnos o golpe rapido OCUPA de verdade.
+ *
+ * ⚠️ `durationTurns` DO GAME_MASTER E ZERO-BASED: ele conta os turnos ALEM do
+ * primeiro. Aqui se lia `Math.max(1, turns)`, que acerta so os golpes de um
+ * turno e subestima todos os outros.
+ *
+ * Isso NAO foi deduzido do nome do campo — foi medido no dataset publicado:
+ *
+ *   golpes CARREGADOS com bloco pvp   257
+ *   com `turns: 0`                    256
+ *
+ * Em PvP todo golpe carregado ocupa exatamente um turno. Se o campo fosse
+ * 1-based, os 257 viriam com `1`. Vieram com `0`. O mesmo aparece nos rapidos:
+ * doze deles trazem `0`, e golpe nenhum dura zero turno.
+ *
+ * O tamanho do estrago: dos 80 rapidos com bloco de PvP, 68 tinham DPT e EPT
+ * calculados com o divisor errado — e o erro e MAIOR nos golpes mais rapidos
+ * (`turns: 1` virava 1 em vez de 2, 100% a mais de dano por turno). Como DPT e
+ * EPT decidem o ranking de moveset, a lista de melhores golpes de PvP saia
+ * torta, com viés a favor dos golpes de dois turnos.
+ *
+ * A correcao mora AQUI e nao no ETL de proposito: o app le o `gamedata.json`
+ * ja publicado, e consertar so na geracao deixaria todo mundo errado ate a
+ * proxima publicacao. `Math.max` continua como piso contra dado corrompido.
+ */
+function turnosDoRapido(pvp: { turns: number }): number {
+  return Math.max(1, pvp.turns + 1);
+}
+
+/**
  * Dano por turno em PvP.
  *
  * O tempo em PvP e contado em TURNOS, nao em segundos, e a energia e o recurso
@@ -103,7 +133,7 @@ function pvpScore(fast: MoveWithPvp, charged: MoveWithPvp, input: ScoreInput): n
       ? effectiveness(input.chart, input.order, type, input.defenderTypes)
       : 1);
 
-  const turns = Math.max(1, fast.pvp.turns);
+  const turns = turnosDoRapido(fast.pvp);
   const fastDpt = (fast.pvp.power * multiplier(fast.type)) / turns;
   const fastEpt = fast.pvp.energyDelta / turns;
 
@@ -159,7 +189,7 @@ function rocketScore(
       ? effectiveness(input.chart, input.order, type, input.defenderTypes)
       : 1);
 
-  const turns = Math.max(1, fast.pvp.turns);
+  const turns = turnosDoRapido(fast.pvp);
   const fastDpt = (fast.pvp.power * multiplier(fast.type)) / turns;
   const fastEpt = fast.pvp.energyDelta / turns;
 

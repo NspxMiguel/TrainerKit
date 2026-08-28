@@ -51,14 +51,6 @@ export function getTtsVoice(): string {
   }
 }
 
-export function setTtsVoice(voice: string): void {
-  try {
-    globalThis.localStorage?.setItem(VOICE_KEY, voice);
-  } catch {
-    /* preferencia nao persistida vale mais que app quebrado */
-  }
-}
-
 /**
  * O TTS bom vale pra este idioma?
  *

@@ -150,6 +150,7 @@ export function CollectionScreen({ dataset, embutida = false, busca = "" }: Prop
         evolvesInto: s.evolvesInto,
         candyToEvolve: s.evolvesInto[0] ? (s.candyToEvolve[s.evolvesInto[0]] ?? null) : null,
         legendary: s.legendary ?? false,
+        gigantamax: fazGigantamax(s.id, dataset.data.dynamax),
       });
     }
 

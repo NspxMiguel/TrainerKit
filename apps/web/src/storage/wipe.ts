@@ -26,7 +26,14 @@
  * lanca — melhor tentar do que deixar a colecao pra tras.
  */
 async function apagarIndexedDb(): Promise<void> {
-  const nomes = new Set<string>(["trainerkit-collection", "trainerkit-sprites"]);
+  const nomes = new Set<string>([
+    "trainerkit-collection",
+    "trainerkit-sprites",
+    // As imagens baixadas. Sao o maior volume de todos (~150 MB com a Especies
+    // inteira), e ficavam para tras porque `databases()` nao existe no Firefox
+    // nem no Safari antigo — a lista escrita a mao e a unica garantia.
+    "trainerkit-arte",
+  ]);
 
   try {
     const listar = (indexedDB as { databases?: () => Promise<{ name?: string }[]> }).databases;

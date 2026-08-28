@@ -524,6 +524,8 @@ export const PT_BR: Dict = {
   "prefetch.stop": "Parar",
   "prefetch.strip": "Baixando imagens · {pct}%",
   "prefetch.finished": "{count} imagens guardadas, {size}. Não baixa de novo.",
+  "prefetch.stored": "As {count} imagens estão neste aparelho. Abrem na hora, sem rede.",
+  "prefetch.clear": "Apagar as imagens baixadas",
 
   "verdict.evolution.ready": "Você já tem os {candy} doces",
   "verdict.evolution.pending": "Ele ainda evolui, e evoluir muda tudo",

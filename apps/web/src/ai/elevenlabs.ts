@@ -79,10 +79,6 @@ export function getElevenVoice(): string {
   return store.get(VOICE_KEY) ?? ELEVEN_VOICES[0].id;
 }
 
-export function setElevenVoice(id: string): void {
-  store.set(VOICE_KEY, id);
-}
-
 export function elevenAvailable(): boolean {
   return getElevenKey() !== null;
 }

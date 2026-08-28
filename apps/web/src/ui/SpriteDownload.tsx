@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { useT } from "../i18n/t.ts";
@@ -8,12 +8,14 @@ import { useSpriteSettings } from "../sprites/settings.ts";
 import {
   dismissPrefetch,
   formatMb,
+  jaGuardadas,
   restorePrefetchPanel,
   sendPrefetchToBackground,
   startPrefetch,
   stopPrefetch,
   usePrefetch,
 } from "../sprites/prefetch.ts";
+import { limparArmazem, tamanhoDoArmazem } from "../sprites/armazem.ts";
 import { IconDownload } from "./Icons.tsx";
 
 /**
@@ -35,13 +37,107 @@ function useUrls(species: readonly DatasetSpecies[]): string[] {
   }, [species, settings]);
 }
 
+/**
+ * Quantas destas imagens ja estao no aparelho.
+ *
+ * ⚠️ ESTA PERGUNTA E A CORRECAO DE "msm dps de baixado, aparece pra baixar".
+ * O estado do download vive em memoria e nasce `idle` a cada abertura, entao
+ * depois de recarregar o app o botao voltava a oferecer as 1.024 imagens que ja
+ * estavam guardadas.
+ *
+ * Guardar um sinalizador de "ja baixou" arrumaria a tela e mentiria — o
+ * armazenamento pode ter sido limpo, a cota pode ter estourado no meio. Contar
+ * o que existe de verdade nao tem como divergir do aparelho.
+ *
+ * Remede quando o download termina: `pre.done` muda e a contagem reflete.
+ */
+function useGuardadas(urls: readonly string[]): number | null {
+  const pre = usePrefetch();
+  const [n, setN] = useState<number | null>(null);
+  const terminou = pre.status === "done";
+
+  useEffect(() => {
+    let vivo = true;
+    void jaGuardadas(urls).then((r) => {
+      if (vivo) setN(r);
+    });
+    return () => {
+      vivo = false;
+    };
+  }, [urls, terminou]);
+
+  return n;
+}
+
+/**
+ * O acervo baixado, e como se livrar dele.
+ *
+ * ⚠️ SEM ESTE BOTAO O DOWNLOAD ERA DE MAO UNICA. Sao ~150 MB no aparelho e o
+ * unico jeito de recuperar o espaco era "apagar tudo", que leva a colecao
+ * junto. Um app que sabe ocupar e nao sabe devolver esta pedindo pra ser
+ * desinstalado.
+ *
+ * O tamanho aparece porque a pergunta que se faz aqui e "quanto isso esta me
+ * custando?" — e ela nao se responde com "as imagens estao guardadas".
+ */
+function JaGuardado({ count }: { count: number }) {
+  const { t, language } = useT();
+  const [bytes, setBytes] = useState<number | null>(null);
+  const [apagando, setApagando] = useState(false);
+
+  useEffect(() => {
+    let vivo = true;
+    void tamanhoDoArmazem().then((n) => {
+      if (vivo) setBytes(n);
+    });
+    return () => {
+      vivo = false;
+    };
+  }, [count]);
+
+  return (
+    <>
+      <p className="tk-caption" style={{ margin: "10px 2px 0" }}>
+        {t("prefetch.stored", { count: count.toLocaleString(language) })}
+        {bytes !== null && bytes > 0 ? ` · ${formatMb(bytes, language)}` : ""}
+      </p>
+      <button
+        type="button"
+        className="tk-btn tk-btn--ghost tk-btn--block"
+        style={{ marginTop: 10 }}
+        disabled={apagando}
+        onClick={() => {
+          setApagando(true);
+          void limparArmazem().then(() => {
+            // O painel de progresso guarda o resultado do ultimo download; sem
+            // zerar, apagar deixaria "1.024 imagens guardadas" na tela.
+            dismissPrefetch();
+            setApagando(false);
+          });
+        }}
+      >
+        {t("prefetch.clear")}
+      </button>
+    </>
+  );
+}
+
 /** O botao que oferece o download. Fica nos Ajustes, junto da escolha da fonte. */
 export function SpriteDownloadButton({ species }: { species: readonly DatasetSpecies[] }) {
   const { t, language } = useT();
   const urls = useUrls(species);
   const pre = usePrefetch();
+  const guardadas = useGuardadas(urls);
 
   if (urls.length === 0) return null;
+
+  /*
+   * Ja esta tudo no aparelho: o lugar do botao e ocupado pelo fato, e nao por
+   * uma oferta que baixaria de novo o que ja existe.
+   */
+  if (guardadas !== null && guardadas >= urls.length && pre.status !== "running") {
+    return <JaGuardado count={guardadas} />;
+  }
 
   if (pre.status === "done") {
     return (
@@ -64,7 +160,12 @@ export function SpriteDownloadButton({ species }: { species: readonly DatasetSpe
         onClick={() => void startPrefetch(urls)}
       >
         <IconDownload size={16} />
-        {t("prefetch.start", { count: urls.length.toLocaleString(language) })}
+        {t("prefetch.start", {
+          count: (guardadas === null
+            ? urls.length
+            : urls.length - guardadas
+          ).toLocaleString(language),
+        })}
       </button>
       {/* O tamanho vem ANTES de comecar. Um app que so mostra o quanto gastou
           depois de gastar esta avisando tarde demais. */}

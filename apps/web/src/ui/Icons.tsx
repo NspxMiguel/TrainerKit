@@ -30,16 +30,6 @@ function Svg({ size = 24, className, children }: IconProps & { children: React.R
   );
 }
 
-export function IconHome(props: IconProps) {
-  return (
-    <Svg {...props}>
-      <path d="M3 10.5 12 3l9 7.5" />
-      <path d="M5 9.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5" />
-      <path d="M9.5 21v-6h5v6" />
-    </Svg>
-  );
-}
-
 export function IconGrid(props: IconProps) {
   return (
     <Svg {...props}>
@@ -47,17 +37,6 @@ export function IconGrid(props: IconProps) {
       <rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5" />
       <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5" />
       <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5" />
-    </Svg>
-  );
-}
-
-export function IconSliders(props: IconProps) {
-  return (
-    <Svg {...props}>
-      <path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h10M18 18h2" />
-      <circle cx="16" cy="6" r="2" />
-      <circle cx="10" cy="12" r="2" />
-      <circle cx="16" cy="18" r="2" />
     </Svg>
   );
 }
@@ -122,18 +101,6 @@ export function IconSwords(props: IconProps) {
       <path d="M4 3h3l10.5 10.5-3.5 3.5L3 6.5V3Z" />
       <path d="M9.5 15.5 4 21" />
       <path d="M20 3h-3L6.5 13.5l3.5 3.5L21 6.5V3Z" />
-    </Svg>
-  );
-}
-
-export function IconTrophy(props: IconProps) {
-  return (
-    <Svg {...props}>
-      <path d="M7 4h10v5a5 5 0 0 1-10 0Z" />
-      <path d="M7 6H4v1a3 3 0 0 0 3 3" />
-      <path d="M17 6h3v1a3 3 0 0 1-3 3" />
-      <path d="M9 20h6" />
-      <path d="M12 14v6" />
     </Svg>
   );
 }

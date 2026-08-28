@@ -84,13 +84,6 @@ export function badgeFor(total: number): AppraisalBadge {
   return BADGE_TIERS[0]!;
 }
 
-/**
- * Cores das barras no jogo.
- *
- * Batem hex a hex entre duas fontes independentes: as constantes do GoIV e a
- * amostragem de pixel das imagens oficiais.
- */
-export const BAR_COLOR_EMPTY = "#E2E2E2";
 export const BAR_COLOR_FILLED = "#EE9219";
 export const BAR_COLOR_PERFECT = "#E18079";
 

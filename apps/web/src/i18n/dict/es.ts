@@ -502,6 +502,8 @@ export const ES: Dict = {
   "prefetch.stop": "Parar",
   "prefetch.strip": "Descargando imágenes · {pct}%",
   "prefetch.finished": "{count} imágenes guardadas, {size}. No se vuelven a descargar.",
+  "prefetch.stored": "Las {count} imágenes están en este dispositivo. Se abren al instante, sin red.",
+  "prefetch.clear": "Borrar las imágenes descargadas",
   "verdict.evolution.ready": "Ya tienes los {candy} caramelos",
   "verdict.evolution.pending": "Todavía evoluciona, y evolucionar lo cambia todo",
   "verdict.pvp.top": "Es top {rank} en la {league}",

@@ -1,4 +1,5 @@
 import type { BaseStats } from "./types.js";
+import { ATK_ALTO, DEF_ALTO, HP_ALTO } from "./limiares.js";
 
 /**
  * Dynamax, Gigantamax e as Batalhas Max.
@@ -135,10 +136,6 @@ export function fazGigantamax(
  */
 export type PapelMax = "atacante" | "guarda" | "espirito" | "equilibrado";
 
-/** Mesmos limiares do `dex.ts` e do `assistant.ts`, pelo mesmo motivo. */
-const ATK_ALTO = 240;
-const DEF_ALTO = 220;
-const HP_ALTO = 200;
 
 export function papelNaBatalhaMax(base: BaseStats): PapelMax {
   const couro = base.def + base.hp;

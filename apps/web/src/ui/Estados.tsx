@@ -123,45 +123,6 @@ export function Offline({
   );
 }
 
-/**
- * Os pontinhos de paginação do hero (handoff §2: "dots de paginação, ativo
- * 22×7px").
- *
- * Eles existem porque o destaque da home é ADAPTATIVO: o app escolhe entre
- * vários candidatos (o que pede decisão, o seu melhor, o melhor atacante da
- * base). Sem os pontos, quem vê o hero não tem como saber que há mais de um —
- * e a informação de que "há outros" é o que transforma um cartão fixo numa
- * fila que se pode percorrer.
- */
-export function Dots({
-  total,
-  atual,
-  onIr,
-  rotulo,
-}: {
-  total: number;
-  atual: number;
-  onIr: (i: number) => void;
-  rotulo: (i: number) => string;
-}) {
-  if (total < 2) return null;
-  return (
-    <div className="tk-dots" role="tablist">
-      {Array.from({ length: total }, (_, i) => (
-        <button
-          key={i}
-          type="button"
-          role="tab"
-          className="tk-dot"
-          aria-selected={i === atual}
-          aria-label={rotulo(i)}
-          onClick={() => onIr(i)}
-        />
-      ))}
-    </div>
-  );
-}
-
 /** Envelope só pra dar nome ao grupo quando alguma tela quiser os três juntos. */
 export function Estados({ children }: { children: ReactNode }) {
   return <>{children}</>;

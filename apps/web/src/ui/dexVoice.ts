@@ -99,32 +99,15 @@ export function vozEscolhida(): string | null {
   }
 }
 
-export function setVozEscolhida(chave: string | null): void {
-  try {
-    if (chave === null) globalThis.localStorage?.removeItem(ESCOLHA_KEY);
-    else globalThis.localStorage?.setItem(ESCOLHA_KEY, chave);
-  } catch {
-    /* preferencia nao persistida vale mais que app quebrado */
-  }
-}
-
-export function neuralOn(): boolean {
-  try {
-    return globalThis.localStorage?.getItem(NEURAL_KEY) !== "0";
-  } catch {
-    return true;
-  }
-}
-
-export function setNeuralOn(on: boolean): void {
-  try {
-    globalThis.localStorage?.setItem(NEURAL_KEY, on ? "1" : "0");
-  } catch {
-    /* preferencia nao persistida vale mais que app quebrado */
-  }
-}
-
-export function getKokoroVoice(): string | null {
+/*
+ * Leituras internas de duas chaves antigas.
+ *
+ * Sem `export`: nenhuma tela le por aqui desde que a escolha de voz foi
+ * unificada em `vozEscolhida`. Elas continuam existindo porque `speak` ainda
+ * respeita quem tinha escolhido voz antes da unificacao — apagar significaria
+ * a voz de quem ja usava o app trocar sozinha na proxima abertura.
+ */
+function getKokoroVoice(): string | null {
   try {
     return globalThis.localStorage?.getItem(KOKORO_PICK_KEY) ?? null;
   } catch {
@@ -132,16 +115,7 @@ export function getKokoroVoice(): string | null {
   }
 }
 
-export function setKokoroVoice(id: string | null): void {
-  try {
-    if (id === null) globalThis.localStorage?.removeItem(KOKORO_PICK_KEY);
-    else globalThis.localStorage?.setItem(KOKORO_PICK_KEY, id);
-  } catch {
-    /* preferencia nao persistida vale mais que app quebrado */
-  }
-}
-
-export function getPickedVoiceUri(): string | null {
+function getPickedVoiceUri(): string | null {
   try {
     return globalThis.localStorage?.getItem(VOICE_PICK_KEY) ?? null;
   } catch {
@@ -149,10 +123,10 @@ export function getPickedVoiceUri(): string | null {
   }
 }
 
-export function setPickedVoiceUri(uri: string | null): void {
+export function setVozEscolhida(chave: string | null): void {
   try {
-    if (uri === null) globalThis.localStorage?.removeItem(VOICE_PICK_KEY);
-    else globalThis.localStorage?.setItem(VOICE_PICK_KEY, uri);
+    if (chave === null) globalThis.localStorage?.removeItem(ESCOLHA_KEY);
+    else globalThis.localStorage?.setItem(ESCOLHA_KEY, chave);
   } catch {
     /* preferencia nao persistida vale mais que app quebrado */
   }
@@ -346,28 +320,6 @@ function pickVoiceAuto(language: string): SpeechSynthesisVoice | null {
     }
   }
   return melhorNota <= -1000 ? null : melhor;
-}
-
-/**
- * Toca uma frase curta com UMA voz especifica, pra pessoa ouvir antes de decidir.
- *
- * "reproduzindo previas ao clicar em cima de um" — sem isso a escolha e as
- * cegas: nomes como "Luciana" e "Joana" nao dizem nada sobre como soam.
- */
-export function previewVoice(uri: string, texto: string): void {
-  const synth = globalThis.speechSynthesis;
-  if (!synth) return;
-  synth.cancel();
-
-  const voz = synth.getVoices().find((v) => v.voiceURI === uri);
-  const u = new SpeechSynthesisUtterance(texto);
-  if (voz) {
-    u.voice = voz;
-    u.lang = voz.lang;
-  }
-  u.rate = 0.88;
-  u.pitch = 0.85;
-  synth.speak(u);
 }
 
 export function stopSpeaking(): void {

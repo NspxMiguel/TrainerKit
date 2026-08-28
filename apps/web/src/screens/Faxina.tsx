@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import {
+  fazGigantamax,
   ivTotalOf,
   planejarFaxina,
   type BichoFaxina,
@@ -117,6 +118,7 @@ export function Faxina({ data, onClose }: Props) {
         evolvesInto: s.evolvesInto,
         candyToEvolve: s.evolvesInto[0] ? (s.candyToEvolve[s.evolvesInto[0]] ?? null) : null,
         legendary: s.legendary ?? false,
+        gigantamax: fazGigantamax(s.id, data.dynamax),
       });
     }
 

@@ -80,10 +80,6 @@ export function kokoroSupports(language: string): boolean {
   return (KOKORO_VOICES[language]?.length ?? 0) > 0;
 }
 
-export function kokoroVoicesFor(language: string): ReadonlyArray<{ id: string; label: string }> {
-  return KOKORO_VOICES[language] ?? [];
-}
-
 export interface KokoroProgress {
   fraction: number | null;
   text: string;

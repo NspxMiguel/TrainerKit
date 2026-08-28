@@ -1,4 +1,5 @@
 import { MAX_BAR, ivTotalOf } from "./appraisal.js";
+import { ATK_ALTO, DEF_ALTO, HP_ALTO } from "./limiares.js";
 import { msg, type Message } from "./message.js";
 import { computeCPAtLevel, type CpmTable } from "./cp.js";
 import { rankOf, GREAT_LEAGUE, MASTER_LEAGUE, ULTRA_LEAGUE, type League } from "./pvp.js";
@@ -43,10 +44,10 @@ export interface AssistantInput {
   ivs?: IVs;
 }
 
-/** Referencias para dizer se um stat base e alto ou baixo, medidas no dataset. */
-const HIGH_ATK = 250;
-const HIGH_DEF = 220;
-const HIGH_HP = 220;
+/** Referencias para dizer se um stat base e alto ou baixo. Ver `limiares.ts`. */
+const HIGH_ATK = ATK_ALTO;
+const HIGH_DEF = DEF_ALTO;
+const HIGH_HP = HP_ALTO;
 
 function bulk(base: BaseStats): number {
   return base.def + base.hp;

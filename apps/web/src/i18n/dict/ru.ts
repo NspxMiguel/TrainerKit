@@ -502,6 +502,8 @@ export const RU: Dict = {
   "prefetch.stop": "Остановить",
   "prefetch.strip": "Скачиваем изображения · {pct}%",
   "prefetch.finished": "Сохранено {count} изображений, {size}. Повторно не скачаются.",
+  "prefetch.stored": "{count} изображений на этом устройстве. Открываются мгновенно, без сети.",
+  "prefetch.clear": "Удалить скачанные изображения",
   "verdict.evolution.ready": "У тебя уже есть {candy} конфет",
   "verdict.evolution.pending": "Он ещё эволюционирует, а эволюция меняет всё",
   "verdict.pvp.top": "Он в топ-{rank} в {league}",

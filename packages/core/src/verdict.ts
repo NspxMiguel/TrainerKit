@@ -432,7 +432,3 @@ export function formatTrace(name: string, verdict: Verdict): string {
   return lines.join("\n");
 }
 
-/** PC que ele alcanca no teto atual, util para mostrar o potencial. */
-export function potentialCP(input: VerdictInput): number {
-  return computeCPAtLevel(input.cpm, input.baseStats, input.ivs, input.levelCap);
-}

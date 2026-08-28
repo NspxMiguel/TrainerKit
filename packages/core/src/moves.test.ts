@@ -160,3 +160,41 @@ describe("sombroso", () => {
     expect(shadowDamageMultiplier(data.settings.battle)).toBeCloseTo(1.2, 6);
   });
 });
+
+/**
+ * O campo `durationTurns` do GAME_MASTER conta os turnos ALEM do primeiro.
+ *
+ * Este teste nao le a implementacao: ele cobra do DATASET a propriedade que
+ * prova o formato do campo, e cobra do ranking que ele use o divisor certo.
+ * Se um dia a fonte mudar para 1-based, o primeiro caso quebra primeiro e diz
+ * exatamente o que mudou — em vez de o app so passar a ranquear torto.
+ */
+describe("turnos de PvP sao zero-based na fonte", () => {
+  it("todo golpe carregado ocupa um turno, e o dataset registra isso como 0", () => {
+    const carregados = data.chargedMoves.filter((m) => m.pvp);
+    const zerados = carregados.filter((m) => m.pvp!.turns === 0);
+    // 1-based faria os 257 virem com 1. Vem com 0 — logo, zero-based.
+    expect(carregados.length).toBeGreaterThan(200);
+    expect(zerados.length / carregados.length).toBeGreaterThan(0.99);
+  });
+
+  it("golpe rapido nenhum poderia durar zero turno, e ha doze marcados assim", () => {
+    const rapidos = data.fastMoves.filter((m) => m.pvp);
+    expect(rapidos.some((m) => m.pvp!.turns === 0)).toBe(true);
+  });
+
+  it("Counter (turns 1) rende metade do DPT que renderia se fosse 1 turno", () => {
+    /*
+     * Counter dura 2 turnos de verdade. Com o divisor errado (1) o DPT sairia
+     * o dobro. O teste compara o ranking de dois golpes com o MESMO poder e
+     * turnos diferentes: quem ocupa menos turno tem que pontuar mais.
+     */
+    const counter = move("counter_fast"); // turns 1 -> 2 turnos
+    const lockOn = move("lock_on_fast"); // turns 0 -> 1 turno
+    expect(counter.pvp!.turns).toBe(1);
+    expect(lockOn.pvp!.turns).toBe(0);
+
+    const dptPorTurnoReal = (m: MoveWithPvp) => m.pvp!.power / (m.pvp!.turns + 1);
+    expect(dptPorTurnoReal(counter)).toBeCloseTo(8 / 2, 5);
+  });
+});

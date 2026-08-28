@@ -559,6 +559,8 @@ const EN = {
   "prefetch.stop": "Stop",
   "prefetch.strip": "Downloading images · {pct}%",
   "prefetch.finished": "{count} images saved, {size}. They won’t download again.",
+  "prefetch.stored": "{count} images are on this device. They open instantly, with no network.",
+  "prefetch.clear": "Delete the downloaded images",
 
   // ------------------------------------------------- mensagens vindas do core
   //

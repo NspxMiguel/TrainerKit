@@ -42,5 +42,3 @@ export const TOM_VEREDITO: Record<Action, string> = {
   descobrir: "var(--tk-info)",
 };
 
-/** O tom de quem já cumpriu: neutro. Cor de veredito cobra; cumprido não cobra. */
-export const TOM_FEITO = "var(--tk-text-3)";

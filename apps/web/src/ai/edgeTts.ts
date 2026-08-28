@@ -139,15 +139,6 @@ export function getEdgeVoice(language: string, preferida?: string): string {
   return lista[0]?.id ?? "";
 }
 
-export function setEdgeVoice(id: string | null): void {
-  try {
-    if (id === null) globalThis.localStorage?.removeItem(ESCOLHA_KEY);
-    else globalThis.localStorage?.setItem(ESCOLHA_KEY, id);
-  } catch {
-    /* preferencia nao persistida vale mais que app quebrado */
-  }
-}
-
 /**
  * Gera o audio e devolve o MP3.
  *
