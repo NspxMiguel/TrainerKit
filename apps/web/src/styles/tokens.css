@@ -153,8 +153,13 @@
    * dizia que gradiente ficava de fora. Agora ele abre as paradas: para o texto
    * de um botao, todas ficam atras do rotulo, e a pior delas e a resposta.
    */
-  --tk-ultra: linear-gradient(180deg, #7657ff, #6e4bff);
-  --tk-ultra-solid: #6e4bff;
+  /* ⚠️ Era o violeta da marca. Ver a nota do `--tk-cta-cor` em design.css: o
+     acabamento sobre preto absoluto e o branco, e a cor colorida do app passou
+     a ser a da especie. */
+  --tk-ultra: linear-gradient(180deg, #ffffff, #eeeef1);
+  --tk-ultra-solid: #f2f2f4;
+  /* Tinta ESCURA: o `--tk-ultra` do tema escuro agora e branco. */
+  --tk-ultra-ink: #0b0b0c;
   --tk-ultra-fg: #9f8bff;
   --tk-ultra-fg-strong: #b9a8ff;
 
@@ -222,7 +227,15 @@
    */
   --tk-dur-exit: 220ms;
 
-  --tk-bg: #0a0c10;
+  /*
+   * ⚠️ PRETO DE VERDADE, e nao um quase-preto azulado.
+   *
+   * Era `#0a0c10` — dez de vermelho, doze de verde, DEZESSEIS de azul. Um viés
+   * azul de seis pontos nao se ve como cor; se ve como uma tela que nunca
+   * apaga. Em OLED, `#000` desliga o pixel: o preto e ausencia, e nao um
+   * cinza-marinho muito escuro.
+   */
+  --tk-bg: #000000;
   /*
    * O TAMANHO do gradiente e em `vw`/`vh`, e nao em `%`. Nao e detalhe.
    *
@@ -239,7 +252,16 @@
    * ⚠️ Nao troque de volta pra `%` "porque e equivalente". So e equivalente
    * quando quem pinta ocupa a tela inteira, e tres dos cinco nao ocupam.
    */
-  --tk-screen: radial-gradient(120vw 80vh at 50% -10%, #141a2a 0%, #0a0c11 55%, #07080b 100%);
+  /*
+   * ⚠️ ERA AQUI QUE MORAVA O ROXO DO FUNDO: a primeira parada era `#141a2a`,
+   * azul-marinho com viés violeta, cobrindo 120vw x 80vh a partir do topo. Era
+   * ela que dava o "back meio azul roxo" na tela inteira.
+   *
+   * As tres paradas agora sao NEUTRAS e terminam em preto absoluto. O relevo
+   * continua existindo — o topo e levemente mais claro que o pe, que e o que
+   * impede a tela de parecer um retangulo chapado — mas sem matiz nenhum.
+   */
+  --tk-screen: radial-gradient(120vw 80vh at 50% -10%, #0d0d0d 0%, #050505 55%, #000000 100%);
 
   --tk-surf: rgba(255, 255, 255, 0.05);
   --tk-surf2: rgba(255, 255, 255, 0.085);
@@ -278,7 +300,9 @@
   --tk-glass-active: rgba(255, 255, 255, 0.16);
   /* Ao ser tocado, o vidro "acende" — a reacao em tempo real que a Apple cita. */
   --tk-glass-press: rgba(255, 255, 255, 0.26);
-  --tk-elev: #181b23;
+  /* Cartao neutro. Era `#181b23`, com o mesmo viés azul do fundo antigo — e
+     cartao azulado sobre fundo preto le como cartao AZUL, nao como elevacao. */
+  --tk-elev: #131313;
   --tk-code: #05070c;
   --tk-scrim: rgba(4, 5, 10, 0.6);
   --tk-shadow: rgba(0, 0, 0, 0.75);
@@ -364,6 +388,8 @@
 
   --tk-ultra: linear-gradient(180deg, #6b4bff, #5b3df5);
   --tk-ultra-solid: #5b3df5;
+  /* O tema claro manteve o violeta, entao aqui a tinta continua branca. */
+  --tk-ultra-ink: #ffffff;
   --tk-ultra-fg: #4a2fd0;
   --tk-ultra-fg-strong: #4a2fd0;
 
@@ -514,6 +540,8 @@
 
     --tk-ultra: linear-gradient(180deg, #6b4bff, #5b3df5);
     --tk-ultra-solid: #5b3df5;
+    /* O tema claro manteve o violeta, entao aqui a tinta continua branca. */
+    --tk-ultra-ink: #ffffff;
     --tk-ultra-fg: #4a2fd0;
     --tk-ultra-fg-strong: #4a2fd0;
 

@@ -307,8 +307,24 @@ describe("contraste dos tokens", () => {
       const m = /--tk-ultra\s*:\s*linear-gradient\(([^)]+)\)/.exec(tema.css);
       expect(m, `--tk-ultra sumiu do tema ${tema.nome}`).not.toBeNull();
       for (const parada of m![1]!.match(/#[0-9a-fA-F]{6}/g) ?? []) {
-        const r = contraste(doHex("#ffffff"), doHex(parada));
-        if (r < MINIMO) ruins.push(`${tema.nome}: branco sobre ${parada} = ${r.toFixed(2)}`);
+        /*
+         * ⚠️ A MELHOR DAS DUAS TINTAS, e nao o branco fixo.
+         *
+         * O teste media `#ffffff` porque o botao era violeta e a tinta dele era
+         * branca por construcao. Isso deixou de valer quando `--tk-ultra` virou
+         * branco: o que o app usa e `--tk-accent-ink`, ESCOLHIDA POR
+         * LUMINANCIA — branca sobre cor escura, escura sobre cor clara. Cravar
+         * branco aqui testaria uma regra que o app nao segue mais, e reprovaria
+         * um botao perfeitamente legivel.
+         *
+         * A garantia que importa continua inteira e fica mais forte: nao pode
+         * existir parada do gradiente onde NENHUMA das duas tintas passe.
+         */
+        const r = Math.max(
+          contraste(doHex("#ffffff"), doHex(parada)),
+          contraste(doHex("#0b0b0c"), doHex(parada)),
+        );
+        if (r < MINIMO) ruins.push(`${tema.nome}: nenhuma tinta passa sobre ${parada} = ${r.toFixed(2)}`);
       }
     }
     expect(ruins).toEqual([]);

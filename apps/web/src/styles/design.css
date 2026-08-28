@@ -304,10 +304,20 @@
   border-radius: 999px;
   background: var(--tk-ultra);
   border: 0;
+  /* ⚠️ O BRILHO TAMBEM ERA VIOLETA: `rgba(110,75,255,.4)`, o mesmo roxo da
+     marca vazando como halo em volta do botao. Sobre preto absoluto ele pintava
+     um circulo lilas na tela inteira. Virou sombra neutra. */
   box-shadow:
-    0 8px 24px rgba(110, 75, 255, 0.4),
+    var(--tk-e2),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  color: #fff;
+  /*
+   * ⚠️ A TINTA E TOKEN, e nao branco cravado.
+   *
+   * Era `#fff` fixo, porque o fundo era o violeta da marca. Quando `--tk-ultra`
+   * virou branco, o rotulo sumiu — branco sobre branco. O token acompanha o
+   * fundo: se ele voltar a escurecer um dia, a tinta clareia sozinha.
+   */
+  color: var(--tk-ultra-ink, #0b0b0c);
   font: 600 17px var(--tk-font);
   display: flex;
   align-items: center;
@@ -3306,7 +3316,11 @@
    * cor, e a página vai escurecendo até o preto — "ai vai descendo até ficar
    * fundo totalmente preto. degrade po".
    */
-  --tk-tinta-fundo: 10%;
+  /* ⚠️ CAIU DE 10% PRA 4%. A tinta da especie sobre o fundo continua existindo
+     — "o pokemon destaque sempre altera a palheta" — mas 10% sobre um preto
+     absoluto pinta a TELA INTEIRA de um tom, e volta a ser o fundo colorido que
+     acabou de sair. A 4% ela e um respiro, e nao uma camada. */
+  --tk-tinta-fundo: 4%;
   --tk-screen:
     /* A tinta da espécie, mais forte no MEIO da tela — que é justamente onde
        ele apontou o vazio, e onde o gradiente do hero já não alcança. */
@@ -4848,9 +4862,22 @@
   --tk-cartao-relevo: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 
   /* A ação principal. */
-  --tk-cta-cor: var(--tk-accent, #5b3df5);
-  --tk-cta-topo: color-mix(in srgb, var(--tk-accent, #6b4bff) 82%, #fff 6%);
-  --tk-cta-ink: var(--tk-accent-ink, #fff);
+  /*
+   * ⚠️ O FALLBACK DEIXOU DE SER VIOLETA.
+   *
+   * A acao principal usa a cor da ESPECIE — decisao dele, e ela continua. O
+   * violeta so aparecia onde nao ha especie: o onboarding, os Ajustes, toda
+   * tela antes de o app ter um bicho em destaque. Ou seja, era exatamente a
+   * primeira coisa que qualquer pessoa via.
+   *
+   * Sobre preto absoluto, branco e o que le como acabamento. E ele nao compete
+   * com a cor da especie quando ela chega: um e ausencia de matiz, o outro e
+   * matiz puro.
+   */
+  --tk-cta-cor: var(--tk-accent, #f2f2f4);
+  --tk-cta-topo: color-mix(in srgb, var(--tk-accent, #ffffff) 82%, #fff 6%);
+  /* Tinta ESCURA no fallback: sobre o branco acima, branco seria invisivel. */
+  --tk-cta-ink: var(--tk-accent-ink, #0b0b0c);
   --tk-cta-sombra:
     0 8px 24px color-mix(in srgb, var(--tk-accent, #6e4bff) 42%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
