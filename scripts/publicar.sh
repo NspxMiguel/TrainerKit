@@ -101,7 +101,66 @@ echo "→ app  → $APP"
 echo "→ API  → $API"
 (cd "$RAIZ" && vercel link --project trainerkit-ia --yes >/dev/null && vercel deploy --prod --yes)
 
+# ─────────────────────────────────────────────────────────────────────────────
+# O GITHUB PAGES, que e de onde o DOMINIO le.
+#
+# ⚠️ SEM ESTE PASSO, PUBLICAR NAO MUDA NADA NO ENDERECO QUE ELE USA.
+#
+# `www.nspx.dev/TrainerKit/` nao aponta pra Vercel: quem serve e o `api/pages.js`
+# do nspx-hub, que ESPELHA o GitHub Pages. E o Pages estava configurado como
+# `build_type: "workflow"` — alimentado pelo Actions, que nesta conta nunca
+# rodou (`status: null`). Resultado medido em 28/08/2026:
+#
+#   trainerkit-zeta.vercel.app       --tk-bg: #000000   (o build novo)
+#   nspxmiguel.github.io/TrainerKit  index-BmKutS7l.css (build de semanas antes)
+#   www.nspx.dev/TrainerKit          o mesmo build velho, porque espelha o Pages
+#
+# Os deploys acima sempre funcionaram; o que nao existia era a ponte pro Pages.
+# Publicar dizia "no ar" e o endereco que ele abre continuava parado.
+#
+# ⚠️ O BASE E OUTRO. A Vercel serve na raiz (`TK_BASE=/`); no Pages o site vive
+# em `/TrainerKit/`. Um base errado nao quebra o HTML — quebra os assets e o
+# dataset, e a tela abre em branco. Por isso e um SEGUNDO build, e nao uma copia
+# do `$PALCO`.
+echo "→ Pages (o dominio espelha daqui)"
+PAGES="${TMPDIR:-/tmp}/trainerkit-pages"
+TK_BASE=/TrainerKit/ VITE_TK_AI_PROXY="$PROXY" pnpm --filter ./apps/web build >/dev/null
+
+rm -rf "$PAGES"
+# Worktree, e nao um clone novo: mantem o historico da branch em vez de exigir
+# `push --force` a cada publicacao.
+if git show-ref --verify --quiet refs/remotes/origin/gh-pages; then
+  git worktree add -f "$PAGES" gh-pages >/dev/null 2>&1 ||
+    git worktree add -f -B gh-pages "$PAGES" origin/gh-pages >/dev/null
+else
+  git worktree add -f --orphan -B gh-pages "$PAGES" >/dev/null 2>&1 ||
+    git worktree add -f --detach "$PAGES" >/dev/null
+fi
+
+# Limpa tudo menos o `.git`: arquivo de build antigo que nao existe mais no novo
+# ficaria servido pra sempre.
+find "$PAGES" -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+cp -R "$RAIZ/apps/web/dist/." "$PAGES/"
+# O Pages roda Jekyll por padrao e ESCONDE tudo que comeca com `_`. O `assets/`
+# do Vite nao comeca, mas o `_handoff/` comeca — e um `.nojekyll` custa nada e
+# tira a classe inteira de surpresa.
+touch "$PAGES/.nojekyll"
+
+(
+  cd "$PAGES"
+  git add -A
+  if git diff --cached --quiet; then
+    echo "   nada mudou no Pages"
+  else
+    git commit -q -m "Publish $(date -u +%Y-%m-%dT%H:%MZ)"
+    git push -q origin gh-pages
+    echo "   Pages atualizado"
+  fi
+)
+git worktree remove --force "$PAGES" >/dev/null 2>&1 || true
+
 echo
 echo "no ar:"
 echo "  app  $APP"
 echo "  api  $PROXY"
+echo "  site https://www.nspx.dev/TrainerKit/"

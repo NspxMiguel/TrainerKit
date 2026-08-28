@@ -160,8 +160,24 @@
   --tk-ultra-solid: #f2f2f4;
   /* Tinta ESCURA: o `--tk-ultra` do tema escuro agora e branco. */
   --tk-ultra-ink: #0b0b0c;
-  --tk-ultra-fg: #9f8bff;
-  --tk-ultra-fg-strong: #b9a8ff;
+  /*
+   * ⚠️ O ACENTO DE SELECAO ERA VIOLETA, e era o roxo que sobrava depois de o
+   * botao primario virar branco.
+   *
+   * "tira esse tanto de roxo pelo amor" — e o violeta estava em tres camadas,
+   * nao numa. O fundo e o botao sairam antes; este e o que ainda pintava o
+   * idioma escolhido e o ✓ na primeira tela que qualquer pessoa ve.
+   *
+   * Branco pelo mesmo motivo do `--tk-ultra`: sobre preto absoluto o
+   * acabamento e o branco, e a cor colorida do app passou a ser a da ESPECIE.
+   * Um acento roxo fixo competia com ela — duas cores de marca ao mesmo tempo,
+   * e nenhuma delas do bicho em destaque.
+   *
+   * `-strong` continua existindo e continua sendo o mais forte dos dois: e ele
+   * que separa o item escolhido do rotulo comum quando os dois sao claros.
+   */
+  --tk-ultra-fg: #d6d8de;
+  --tk-ultra-fg-strong: #ffffff;
 
   /* Vereditos: palavra + cor + glifo, sempre. O glifo faz parte do token. */
   --tk-v-investir: #3ddc97;
@@ -386,12 +402,15 @@
   --tk-marca-borda: rgba(20, 24, 33, 0.1);
   --tk-marca-brilho: rgba(255, 255, 255, 0.9);
 
-  --tk-ultra: linear-gradient(180deg, #6b4bff, #5b3df5);
-  --tk-ultra-solid: #5b3df5;
+  /* O par do tema escuro, invertido: la o acabamento e branco sobre preto, aqui
+     e quase-preto sobre branco. Ficou violeta ate 28/08/2026 porque so o bloco
+     escuro tinha sido trocado — quem usasse o app no claro via a marca antiga. */
+  --tk-ultra: linear-gradient(180deg, #23252c, #16181d);
+  --tk-ultra-solid: #1b1d23;
   /* O tema claro manteve o violeta, entao aqui a tinta continua branca. */
   --tk-ultra-ink: #ffffff;
-  --tk-ultra-fg: #4a2fd0;
-  --tk-ultra-fg-strong: #4a2fd0;
+  --tk-ultra-fg: #3a3d47;
+  --tk-ultra-fg-strong: #14161b;
 
   --tk-v-investir: #067a56;
   --tk-v-evoluir: #5b3df5;
@@ -538,12 +557,13 @@
     --tk-marca-borda: rgba(20, 24, 33, 0.1);
     --tk-marca-brilho: rgba(255, 255, 255, 0.9);
 
-    --tk-ultra: linear-gradient(180deg, #6b4bff, #5b3df5);
-    --tk-ultra-solid: #5b3df5;
+    /* Ver a nota do bloco `[data-tk="light"]` acima. */
+    --tk-ultra: linear-gradient(180deg, #23252c, #16181d);
+    --tk-ultra-solid: #1b1d23;
     /* O tema claro manteve o violeta, entao aqui a tinta continua branca. */
     --tk-ultra-ink: #ffffff;
-    --tk-ultra-fg: #4a2fd0;
-    --tk-ultra-fg-strong: #4a2fd0;
+    --tk-ultra-fg: #3a3d47;
+    --tk-ultra-fg-strong: #14161b;
 
     --tk-v-investir: #067a56;
     --tk-v-evoluir: #5b3df5;

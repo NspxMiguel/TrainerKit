@@ -123,6 +123,44 @@ function titleCase(raw: string): string {
  * enquanto `form` e "NIDORAN_NORMAL". Por isso o corte e por segmentos comuns,
  * nao por `slice(pokemonId.length)` — que produziria lixo como "(Al)".
  */
+/**
+ * O nome da forma, mesmo quando o GAME_MASTER manda um NUMERO.
+ *
+ * ⚠️ QUEBROU A PUBLICACAO INTEIRA, com `form.split is not a function`.
+ *
+ * O campo `form` e um enum de protobuf. Quando o valor nao tem nome no esquema
+ * que o cliente conhece, ele sai como o ORDINAL cru — e isso passou a
+ * acontecer no batch 1787902550208, em quatro Pikachu de aniversario:
+ *
+ *   V0025_POKEMON_PIKACHU_ANNIVERSARY_2026_MALAYSIA_01    form=3358
+ *   V0025_POKEMON_PIKACHU_ANNIVERSARY_2026_PHILIPPINE_01  form=3375
+ *   V0025_POKEMON_PIKACHU_ANNIVERSARY_2026_SINGAPORE_01   form=3359
+ *   V0025_POKEMON_PIKACHU_ANNIVERSARY_2026_TAIWAN_01      form=3360
+ *
+ * Nao da pra devolver "" e seguir: os quatro colapsariam no id `pikachu` e
+ * virariam quatro copias da especie base.
+ *
+ * O nome esta no `templateId`, e isso NAO e chute — foi conferido contra as
+ * 1.444 formas que vieram com texto neste mesmo arquivo: em 1.444 de 1.444,
+ * `templateId` sem o prefixo `V####_POKEMON_` e EXATAMENTE o `form`. Zero
+ * divergencias.
+ *
+ * A nota do chamador avisa pra nao derivar IDENTIDADE do sufixo do templateId
+ * (`V0029_POKEMON_NIDORAN` e `V0032_POKEMON_NIDORAN` colidem), e ela continua
+ * valendo: aqui o `pokemonId` ja veio do proprio registro, e o templateId so
+ * repoe o NOME DA FORMA que o enum nao soube escrever.
+ */
+const PREFIXO_TEMPLATE = /^V\d+_POKEMON_/;
+
+function nomeDaForma(templateId: string, form: unknown): string | undefined {
+  if (typeof form === "string") return form;
+  if (form === undefined || form === null) return undefined;
+  const derivado = PREFIXO_TEMPLATE.exec(templateId)
+    ? templateId.replace(PREFIXO_TEMPLATE, "")
+    : "";
+  return derivado || undefined;
+}
+
 function formSuffix(pokemonId: string, form: string | undefined): string {
   if (!form) return "";
 
@@ -602,7 +640,7 @@ function extractSpecies(templates: Template[]): OutSpecies[] {
     const pokemonId = required(s.pokemonId, `${t.templateId}.pokemonId`) as string;
     const stats = required(s.stats, `${t.templateId}.stats`);
 
-    const suffix = formSuffix(pokemonId, s.form);
+    const suffix = formSuffix(pokemonId, nomeDaForma(t.templateId, s.form));
     const id = normalizeId(suffix ? `${pokemonId}_${suffix}` : pokemonId);
     const name = suffix && suffix !== "NORMAL"
       ? `${titleCase(pokemonId)} (${titleCase(suffix)})`

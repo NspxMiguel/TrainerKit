@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 
 import { monogram, typeGradient } from "../sprites/provider.ts";
 import { useSpriteUrl } from "../sprites/useSpriteUrl.ts";
-import { gradienteDaEspecie } from "./paleta.ts";
+import { gradienteDaEspecie, tintasDoSelo } from "./paleta.ts";
 
 interface Props {
   spriteId: number | null;
@@ -51,6 +51,7 @@ export function SpeciesTile({
   bare = false,
 }: Props) {
   const url = useSpriteUrl({ spriteId, dex, speciesId });
+  const tintas = tintasDoSelo(spriteId, typeGradient(types));
 
   // Guardamos QUAL url carregou, nao um booleano.
   //
@@ -107,7 +108,48 @@ export function SpeciesTile({
       }}
       aria-hidden="true"
     >
-      <span style={{ opacity: loaded ? 0 : 1, transition: "opacity .18s ease" }}>
+      {/*
+        A tinta do monograma NAO e sempre branca.
+
+        Com paleta propria, `gradienteDaEspecie` ja escureceu o gradiente ate o
+        branco dar 4,5:1 — la a garantia existe. Sem paleta ele devolve o
+        gradiente do TIPO, que nunca passou por isso: medido, "AR" e "ZY"
+        ficavam em 3,65:1. `typeInk` escolhe por luminancia, como as etiquetas
+        de tipo ja fazem.
+
+        Com `bare` nao ha selo nenhum atras: quem manda e o CSS do hero, que
+        segue a tinta do tema.
+      */}
+      <span
+        style={
+          {
+            opacity: loaded ? 0 : 1,
+            transition: "opacity .18s ease",
+            /*
+              DUAS tintas escritas, e o CSS escolhe — o mesmo arranjo de
+              `--tk-accent-fg-escuro`/`-claro`, e pelo mesmo motivo: so o JS
+              sabe fazer a conta de contraste contra o gradiente da especie, e
+              so o CSS sabe qual tema esta valendo.
+
+              Com `bare` nao ha selo: quem manda e a tinta do hero.
+            */
+            ...(bare
+              ? null
+              : {
+                  "--tk-selo-ink-escuro": tintas.escura,
+                  "--tk-selo-ink-claro": tintas.clara,
+                  /*
+                    ⚠️ SEM `color` AQUI. Estilo inline ganha de qualquer classe,
+                    entao pintar aqui tornaria a regra do tema claro
+                    inalcancavel — e a medicao continuaria acusando os mesmos
+                    3,65:1, agora com o conserto no lugar e sem efeito. Terceira
+                    vez que estilo inline deste componente morde: ver a nota do
+                    `size` no hero.
+                  */
+                }),
+          } as CSSProperties
+        }
+      >
         {monogram(name)}
       </span>
 

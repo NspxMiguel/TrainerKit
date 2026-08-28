@@ -392,16 +392,25 @@
  * O que NAO muda continua sendo veredito: verde/violeta/ambar/cinza sao
  * significado, e ele nao pediu pra mexer neles.
  */
+/*
+ * ⚠️ AS RESERVAS DEIXARAM DE SER VIOLETA, e elas nao sao caso raro: sao
+ * EXATAMENTE o que aparece antes de existir especie em destaque — a primeira
+ * tela do app, o onboarding, os Ajustes. Ou seja, a cor de reserva era a
+ * primeira cor que qualquer pessoa via, e era a marca antiga.
+ *
+ * O acabamento sobre preto e o branco (ver `--tk-ultra` em tokens.css); com
+ * especie escolhida, `--tk-accent` assume e a cor volta a ser a do bicho.
+ */
 .tk-cta {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--tk-accent, #6b4bff) 82%, #fff 6%),
-    var(--tk-accent, #5b3df5)
+    color-mix(in srgb, var(--tk-accent, #f2f2f4) 82%, #fff 6%),
+    var(--tk-accent, #e8e9ee)
   );
   border: 0;
   border-radius: 999px;
   box-shadow:
-    0 8px 24px color-mix(in srgb, var(--tk-accent, #6e4bff) 42%, transparent),
+    0 8px 24px color-mix(in srgb, var(--tk-accent, #ffffff) 26%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
   /* Ver `tinta` em `ui/paleta.ts`: branco fixo dava 1,9:1 sobre o laranja do
      Dragonite. A tinta e escolhida por luminancia, espécie a espécie. */
@@ -2509,8 +2518,14 @@
      letra encolhia. */
   letter-spacing: -0.045em;
   /* Opaco de verdade: a 10% de branco, como o handoff pede pro monograma DE
-     FUNDO, ele sumiria — aqui ele nao e fundo, e o assunto. */
-  color: rgba(255, 255, 255, 0.86);
+     FUNDO, ele sumiria — aqui ele nao e fundo, e o assunto.
+
+     ⚠️ A OPACIDADE ficou; o BRANCO saiu, e por medicao. Sem moldura nao ha
+     gradiente do tipo atras da letra: o que fica atras e o hero, que e claro no
+     tema claro. O "ET" de 150px saia a 1,42:1 sobre lavanda — o maior elemento
+     da tela inicial, ilegivel. `--tk-hero-texto` e a mesma tinta do nome da
+     especie e da saudacao logo acima, e inverte com o tema. Depois: 12,7:1. */
+  color: color-mix(in srgb, var(--tk-hero-texto, #ffffff) 86%, transparent);
 }
 
 /* Sem arte nao ha silhueta, entao o contorno nao tem o que contornar: fica so a
@@ -3855,7 +3870,7 @@
   color: var(--tk-accent-ink, #fff);
   border: 0;
   box-shadow:
-    0 8px 24px color-mix(in srgb, var(--tk-accent, #6e4bff) 40%, transparent),
+    0 8px 24px color-mix(in srgb, var(--tk-accent, #ffffff) 26%, transparent),
     inset 0 1px 0 rgb(255 255 255 / 22%);
 }
 
@@ -4855,9 +4870,23 @@
    */
   --tk-aba-ativa: color-mix(in srgb, var(--tk-accent-fg, var(--tk-ultra-solid)) 45%, var(--tk-text));
 
-  /* Cartões e botões secundários: base, quanto de espécie entra, e o relevo. */
+  /*
+   * Cartões e botões secundários: base, quanto de espécie entra, e o relevo.
+   *
+   * ⚠️ O PREENCHIMENTO CAIU DE 14% PRA 5%, e e o que sobrava do "back meio azul
+   * roxo" depois de o fundo virar preto.
+   *
+   * 14% da cor da especie em CADA cartao nao le como acento: le como o app
+   * inteiro tingido. Com `--tk-accent` num azul-marinho, a lista de idiomas do
+   * onboarding — dez linhas, meia tela — saia azul sobre preto absoluto, e o
+   * contraste entre o cartao e o fundo virava a cor, nao a elevacao.
+   *
+   * A ESPECIE NAO SAIU: ela continua na BORDA, a 26%, que e onde ela funciona
+   * como acento em vez de banho. Trocar 14 por 5 mantem o cartao acima do preto
+   * (ele ainda se distingue do fundo) e devolve a tela pro preto que ele pediu.
+   */
   --tk-cartao-base: var(--tk-surface-2);
-  --tk-cartao-tinta: 14%;
+  --tk-cartao-tinta: 5%;
   --tk-cartao-borda-tinta: 26%;
   --tk-cartao-relevo: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 
@@ -4879,7 +4908,7 @@
   /* Tinta ESCURA no fallback: sobre o branco acima, branco seria invisivel. */
   --tk-cta-ink: var(--tk-accent-ink, #0b0b0c);
   --tk-cta-sombra:
-    0 8px 24px color-mix(in srgb, var(--tk-accent, #6e4bff) 42%, transparent),
+    0 8px 24px color-mix(in srgb, var(--tk-accent, #ffffff) 26%, transparent),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 
   /* O banho de cor no app inteiro (`.tk-app::before`). */
@@ -7665,5 +7694,48 @@
   .tk-dex-split > *,
   .tk-home > * {
     animation: tk-fade var(--tk-dur-micro) both;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   O MONOGRAMA SEM MOLDURA SEGUE A TINTA DO HERO
+   ═══════════════════════════════════════════════════════════════════════════
+
+   ⚠️ MEDIDO, e nao suposto: 1,42:1 no tema claro.
+
+   Sem moldura o monograma nao tem mais o gradiente do tipo atras dele — o que
+   fica atras e o hero. Ele continuava herdando branco, o que so funciona
+   enquanto o hero for escuro. No tema claro o "ET" de 150px ficava branco sobre
+   lavanda clara: ocupa metade da tela inicial e nao da pra ler.
+
+   A tinta certa ja existia e ja e usada pelo titulo da especie e pela saudacao
+   logo acima — `--tk-hero-texto`, que inverte com o tema (#ffffff no escuro,
+   #141920 no claro). O monograma era o unico texto do hero que nao a usava.
+
+   O `bare` tambem serve ao visor da Especies, onde essa variavel pode nao
+   existir; a reserva branca preserva o que aquela tela ja fazia.
+
+   Medido com o texto escondido e o fundo fotografado, ignorando o que estiver
+   coberto — ver `scratchpad/pw/contraste_real.py`. Depois: 12,7:1. */
+.tk-mono--bare {
+  color: var(--tk-hero-texto, #ffffff);
+}
+
+/* A tinta do monograma vem do JS, uma por tema, e o CSS escolhe.
+   Base = tema escuro; o bloco abaixo troca no claro. */
+.tk-mono:not(.tk-mono--bare) > span:first-child {
+  color: var(--tk-selo-ink-escuro, #ffffff);
+}
+
+/* O tema claro usa a OUTRA tinta do selo — a que conta com o véu.
+   `.tk-mono::after` pinta 20% de branco por cima no claro, e a garantia de
+   4,5:1 do gradiente foi calculada SEM esse véu. `SpeciesTile` escreve as duas
+   tintas; aqui só se escolhe. Ver `tintasDoSelo` em `ui/paleta.ts`. */
+[data-tk="light"] .tk-mono:not(.tk-mono--bare) > span:first-child {
+  color: var(--tk-selo-ink-claro);
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-tk="dark"]) .tk-mono:not(.tk-mono--bare) > span:first-child {
+    color: var(--tk-selo-ink-claro);
   }
 }

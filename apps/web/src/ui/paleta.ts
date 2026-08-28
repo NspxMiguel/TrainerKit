@@ -636,6 +636,103 @@ export function paletaDaEspecie(spriteId: number | null): Paleta {
  * as 5 entradas sem arte na tabela, mais qualquer dataset customizado cujo
  * `spriteId` não exista no índice do PokeAPI.
  */
+/**
+ * A especie tem paleta propria?
+ *
+ * ⚠️ E A PERGUNTA QUE DECIDE SE O MONOGRAMA PODE SER BRANCO.
+ *
+ * `gradienteDaEspecie` escurece a parada clara ate o branco alcancar 4,5:1 — a
+ * garantia esta escrita logo abaixo, e foi ela que consertou 671 das 1.142.
+ * Mas ela so vale no caminho da paleta: sem entrada na tabela a funcao devolve
+ * a RESERVA, que e o gradiente do TIPO, e esse nunca passou por escurecimento
+ * nenhum. `sprites/provider.ts` ja media que 18 das 19 cores de tipo reprovam
+ * com texto branco.
+ *
+ * Medido nas telas: "AR", "ZY" e "LU" saiam entre 3,65:1 e 4,17:1 no selo do
+ * Ginasio — todas especies sem paleta. Quem tem paleta continua em branco,
+ * porque ali a garantia existe.
+ */
+/**
+ * A tinta do monograma, uma por tema.
+ *
+ * ⚠️ A GARANTIA DE `gradienteDaEspecie` VALE SO NO TEMA ESCURO, e isso foi
+ * medido nas telas, nao deduzido: "AR" e "ZY" saiam em 3,65:1 no tema claro.
+ *
+ * A causa e a soma de duas decisoes certas que ninguem tinha somado. O
+ * gradiente e escurecido ate a parada clara bater EXATAMENTE 0,183 de
+ * luminancia, que e o ponto em que o branco alcanca 4,5:1 — sem folga nenhuma.
+ * E o tema claro pinta um veu branco de 20% por cima do selo
+ * (`.tk-mono::after`), pra a grade nao pesar sobre o cartao branco. O veu
+ * clareia o fundo e come a margem inteira.
+ *
+ * Nenhuma das duas esta errada sozinha. O que faltava era a tinta saber do veu.
+ *
+ * Duas saidas em vez de uma porque so o JS sabe fazer a conta de contraste e so
+ * o CSS sabe qual tema esta valendo — o mesmo arranjo de
+ * `--tk-accent-fg-escuro`/`-claro`, e pelo mesmo motivo: um ouvinte de
+ * `prefers-color-scheme` em JS dessincroniza.
+ *
+ * ── O QUE ISTO **NAO** RESOLVE, medido ──────────────────────────────────────
+ *
+ * No tema claro sobram quatro selos entre 3,27:1 e 4,15:1 (o minimo e 4,5). Nao
+ * e descuido: com o veu de 20% o fundo cai numa luminancia MEDIA, onde nenhuma
+ * das duas tintas alcanca. Calculado, a tinta escura so passaria com o veu em
+ * ~31% — perto dos 34% que este arquivo ja teve e que foram reduzidos de
+ * proposito, porque a 34% a grade inteira ficava cinza e a cor parava de
+ * informar o tipo (a nota do `.tk-mono::after` em design.css conta).
+ *
+ * Entao o residual e uma troca conhecida, e nao um defeito por achar: 12px de
+ * monograma DECORATIVO (`aria-hidden`, e o nome da especie esta escrito ao lado
+ * em toda lista), que some assim que a imagem carrega, contra a legibilidade do
+ * tipo na grade inteira. A tinta dupla melhora o pior caso de 3,65 pra 4,15 sem
+ * custar nada; fechar os 0,35 que faltam custaria a grade.
+ */
+export function tintasDoSelo(
+  spriteId: number | null,
+  tipoDeReserva: string,
+): { escura: string; clara: string } {
+  const cruas = spriteId == null ? undefined : CORES[String(spriteId)]?.c;
+
+  let foco: string;
+  if (cruas && cruas.length > 0) {
+    const [h, sat, l] = paraHsl(cruas[0] ?? "#888888");
+    const sv = Math.min(0.95, sat * 1.15);
+    foco = escurecerAte(h, sv, Math.min(0.68, Math.max(0.5, l)), 0.183);
+  } else {
+    // Sem paleta o fundo e o gradiente do TIPO, que nunca passou por
+    // escurecimento nenhum — `sprites/provider.ts` ja media que 18 das 19
+    // cores de tipo reprovam com texto branco.
+    foco = tipoDeReserva;
+  }
+
+  return { escura: melhorTinta(foco), clara: melhorTinta(veuBranco(foco, 0.2)) };
+}
+
+/** A cor depois do veu branco do tema claro. */
+function veuBranco(hex: string, quanto: number): string {
+  const n = parseInt(hex.slice(1), 16);
+  const mist = (v: number): number => Math.round(v * (1 - quanto) + 255 * quanto);
+  return paraHexRgb(mist((n >> 16) & 255), mist((n >> 8) & 255), mist(n & 255));
+}
+
+function paraHexRgb(r: number, g: number, b: number): string {
+  return `#${[r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
+}
+
+/** Branco ou quase-preto, o que contrastar mais. Mesma regra de `typeInk`. */
+function melhorTinta(fundo: string): string {
+  const lf = luminancia(fundo);
+  const claro = (1.05) / (lf + 0.05);
+  const escuro = (lf + 0.05) / (luminancia("#141920") + 0.05);
+  return claro >= escuro ? "#ffffff" : "#141920";
+}
+
+export function temPaleta(spriteId: number | null): boolean {
+  if (spriteId == null) return false;
+  const c = CORES[String(spriteId)]?.c;
+  return Array.isArray(c) && c.length > 0;
+}
+
 export function gradienteDaEspecie(
   spriteId: number | null,
   reserva: string,
