@@ -37,7 +37,41 @@ export const NOME_ESPECIE = "tk-especie";
  * acontece, silenciosamente. O sintoma seria "a animacao funciona uma vez e
  * depois nunca mais", que e o tipo de bug que se atribui a sorte.
  */
+/*
+ * ⚠️ A TRANSICAO DE ELEMENTO COMPARTILHADO FOI DESLIGADA. A funcao continua
+ * aqui, e a nota tambem, porque o motivo importa mais que o codigo.
+ *
+ * A ideia era boa e esta no documento de desenho: o tile da lista cresce e vira
+ * o cabecalho da ficha. Ela custou tres defeitos, todos relatados no aparelho:
+ *
+ *   1. TRES ANIMACOES no mesmo toque — o tile viajando (440ms), a raiz trocando
+ *      (300ms) e a folha entrando por conta propria (340ms);
+ *   2. a folha REANIMANDO depois, quando a supressao saiu do `<html>` e o
+ *      `animation` voltou de `none` pro nome do keyframe;
+ *   3. e o que sobrou: *"ao clicar num pokemon, por uma fracao de segundos o
+ *      pokemon clicado fica na tela grande aberta"* — o tile renderizado no
+ *      tamanho do hero antes de a arte de verdade assumir.
+ *
+ * ⚠️ A CAUSA DE FUNDO E ESTRUTURAL, e nao ajustavel: `startViewTransition`
+ * exige que o callback mude o DOM DE FORMA SINCRONA, e `mudar()` aqui e um
+ * `setState` do React, que e agendado. O navegador captura o "depois" antes de
+ * o React ter pintado, entao o que ele interpola nao e o estado final — e o
+ * intermediario. Consertar de verdade exigiria `flushSync` no caminho de
+ * navegacao inteiro, o que troca um enfeite por um risco de travada.
+ *
+ * Sem ela sobra UMA animacao: a folha desliza de baixo, em 340ms, com a mesma
+ * curva do resto do app. Deterministica, sem quadro solto.
+ *
+ * Pra religar: devolver o corpo comentado abaixo e conferir os tres sintomas
+ * acima, nesta ordem — eles voltam nessa ordem.
+ */
 export function comElementoCompartilhado(origem: HTMLElement | null, mudar: () => void): void {
+  void origem;
+  mudar();
+}
+
+/* eslint-disable @typescript-eslint/no-unused-vars */
+function comElementoCompartilhadoDesligado(origem: HTMLElement | null, mudar: () => void): void {
   interface ComTransicao {
     startViewTransition?: (cb: () => void) => { finished: Promise<void> };
   }
@@ -80,3 +114,5 @@ export function comElementoCompartilhado(origem: HTMLElement | null, mudar: () =
 export function tileDe(e: { currentTarget: HTMLElement }): HTMLElement | null {
   return e.currentTarget.querySelector(".tk-mono, img");
 }
+
+/* eslint-enable @typescript-eslint/no-unused-vars */
