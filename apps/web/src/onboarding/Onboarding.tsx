@@ -6,6 +6,7 @@ import { MAX_POWERUP_LEVEL } from "@trainerkit/core";
 import { setGroqKey } from "../ai/groq.ts";
 import { hasWebGPU } from "../ai/local.ts";
 import { setProvider, sharedAvailable, type AiProvider } from "../ai/provider.ts";
+import { bandeirasDesenham } from "../i18n/bandeiras.ts";
 import { LANGUAGES, setLanguage, useLanguage } from "../i18n/language.ts";
 import { useT } from "../i18n/t.ts";
 import { InstallGuide } from "../screens/InstallGuide.tsx";
@@ -53,6 +54,8 @@ import {
 type StepId = "idioma" | "boas-vindas" | "modo" | "ia" | "instalar";
 
 export function Onboarding() {
+  /* Medido uma vez por sessao e guardado; ver `bandeiras.ts`. */
+  const temBandeira = bandeirasDesenham();
   const [step, setStep] = useState(0);
   /**
    * Pra onde a tela esta indo. Sem isto, voltar tem a mesma animacao de
@@ -178,9 +181,15 @@ export function Onboarding() {
                   aria-pressed={l.code === language}
                   onClick={() => setLanguage(l.code)}
                 >
-                  <span className="tk-lista-radio-glifo" aria-hidden="true">
-                    {l.flag}
-                  </span>
+                  {/* A bandeira so entra onde ela DESENHA. Onde nao desenha (Windows sem a
+                      ligadura de indicador regional), ela viraria "BR", "US" em letra
+                      solta — que parece defeito e nao diz nada que o nome ao lado ja nao
+                      diga. Ver `i18n/bandeiras.ts`: e medido, nao farejado do user-agent. */}
+                  {temBandeira && (
+                    <span className="tk-lista-radio-glifo" aria-hidden="true">
+                      {l.flag}
+                    </span>
+                  )}
                   <span className="tk-lista-radio-nome">{l.label}</span>
                   <span className="tk-lista-radio-check" aria-hidden="true">
                     ✓

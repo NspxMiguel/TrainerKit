@@ -9,6 +9,7 @@ import {
   useLanguage,
   useShowTranslation,
 } from "../i18n/language.ts";
+import { bandeirasDesenham } from "../i18n/bandeiras.ts";
 import { useT, type Key } from "../i18n/t.ts";
 import { IconeAjuste, type SeloAjustes } from "../ui/IconesAjustes.tsx";
 import { Segmented } from "../ui/Segmented.tsx";
@@ -190,6 +191,8 @@ export function SettingsScreen({
   species,
   sources,
 }: Props) {
+  /* Medido uma vez por sessao e guardado; ver `bandeiras.ts`. */
+  const temBandeira = bandeirasDesenham();
   const update = useUpdate();
   const [updateMsg, setUpdateMsg] = useState<string | null>(null);
   const [wipeOpen, setWipeOpen] = useState(false);
@@ -422,9 +425,15 @@ export function SettingsScreen({
                 aria-pressed={l.code === language}
                 onClick={() => setLanguage(l.code)}
               >
-                <span className="tk-lista-radio-glifo" aria-hidden="true">
-                  {l.flag}
-                </span>
+                {/* A bandeira so entra onde ela DESENHA. Onde nao desenha (Windows sem a
+                    ligadura de indicador regional), ela viraria "BR", "US" em letra
+                    solta — que parece defeito e nao diz nada que o nome ao lado ja nao
+                    diga. Ver `i18n/bandeiras.ts`: e medido, nao farejado do user-agent. */}
+                {temBandeira && (
+                  <span className="tk-lista-radio-glifo" aria-hidden="true">
+                    {l.flag}
+                  </span>
+                )}
                 <span className="tk-lista-radio-nome">{l.label}</span>
                 {/* O ✓ à direita, e não um radinho à esquerda: o alinhamento do
                     sistema, e o que deixa a coluna dos nomes começar toda no
