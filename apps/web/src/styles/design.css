@@ -7782,19 +7782,6 @@
    a coluna dos nomes começaria num lugar diferente por linha — a lista dançaria
    e é exatamente esse tipo de desalinho que faz uma tela parecer montada às
    pressas. Tabular porque são caracteres de largura igual num alfabeto só. */
-/* Com a bandeira de volta, a etiqueta encolhe: ela deixou de ser o glifo da
-   linha e virou anotação ao lado dele. 46px cabe o mais largo (`ES-419`) sem
-   empurrar a coluna dos nomes — largura fixa porque `EN` e `ES-419` têm
-   tamanhos muito diferentes e sem ela a lista dançaria linha a linha. */
-.tk-lista-radio-tag {
-  flex: none;
-  width: 46px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  font-variant-numeric: tabular-nums;
-  color: var(--tk-text-3, var(--tk-text-2));
-}
 
 /* O progresso do onboarding em NEUTRO, não em azul.
    `--tk-pri` é um azul que não pertence a nada: não é a cor da espécie (não há
