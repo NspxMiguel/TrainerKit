@@ -5969,9 +5969,24 @@
     height: 42px;
     padding: 0 20px;
     background: var(--tk-ultra);
-    color: #fff;
+    /*
+     * ⚠️ ERA `#fff` CRAVADO, E O BOTAO FICOU BRANCO SOBRE BRANCO.
+     *
+     * A nota acima estava certa enquanto o violeta existia: `--tk-ultra` era o
+     * gradiente da marca, e branco em cima dele lia. Quando `--tk-ultra` virou
+     * branco (a marca saiu do app em 28/08/2026), esta linha passou a pintar
+     * texto branco sobre gradiente branco — e a acao principal da tela inicial
+     * ficou ILEGIVEL acima de 900px, largura que nao se testa num celular.
+     *
+     * Medido: `color: rgb(255,255,255)` sobre
+     * `linear-gradient(#ffffff, #eeeef1)`. Terceira vez que `#fff` cravado
+     * morde neste projeto — a tinta certa e a que acompanha o fundo.
+     */
+    color: var(--tk-ultra-ink, #0b0b0c);
     font: 600 14px var(--tk-font);
-    box-shadow: 0 8px 20px color-mix(in srgb, var(--tk-ultra-solid) 40%, transparent);
+    /* O halo era `--tk-ultra-solid` a 40% — um circulo violeta em volta do
+       botao. Com o token branco viraria neve sobre fundo escuro. */
+    box-shadow: var(--tk-e2);
   }
 
   /*
@@ -7919,4 +7934,89 @@
   font-size: 13px;
   color: var(--tk-v-guardar);
   line-height: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   O HERO COMPACTO PRECISA DE UMA CAIXA COMPACTA
+   ═══════════════════════════════════════════════════════════════════════════
+
+   Medido em 1440x900: `.tk-hero` saía 1120x332 segurando um selo de 74px, um
+   nome e uma pílula de 249px. O conteúdo ocupava uns 8% da caixa; o resto era
+   vazio — e é isso que faz a tela inicial de desktop parecer a de celular
+   esticada, que foi exatamente a queixa.
+
+   A altura vinha do `min-height` que serve ao hero DO CELULAR, onde o hero é a
+   arte inteira e o espaço vertical é o assunto. Na tela larga o hero não é a
+   arte: é uma faixa de identificação, e a altura dela é a do que tem dentro.
+
+   ⚠️ O `min-height` NÃO está errado — ele está certo no celular. O que faltava
+   era esta largura ter opinião própria sobre ele. */
+@media (min-width: 900px), (min-aspect-ratio: 3 / 2) and (max-height: 620px) {
+  /*
+   * ⚠️ TRES CLASSES, E NAO DUAS — e isso nao e preferencia de estilo.
+   *
+   * Quem impoe a altura e `.tk-home > .tk-home-linha1 > .tk-hero`, com
+   * `min-height: calc(--tk-saud-faixa + --tk-hero-bloco + --tk-hero-arte-min)`.
+   * Sao TRES classes. Ja existe neste arquivo uma tentativa de zerar isso com
+   * `.tk-home-linha1 > .tk-hero { min-height: 0 }` — duas classes — e ela perde
+   * a disputa em silencio: medido, o hero saia com `min-height: 332px` mesmo
+   * com a regra de zerar presente e a media query casando.
+   *
+   * Repetir o caminho inteiro empata a especificidade, e a ordem no arquivo
+   * (esta regra vem depois) desempata.
+   */
+  .tk-home > .tk-home-linha1 > .tk-hero {
+    min-height: 0;
+    height: auto;
+    padding: var(--tk-s4) var(--tk-s5);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   O QUE SOBRA DO HERO DE CELULAR NUMA FAIXA DE 194px
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (min-width: 900px), (min-aspect-ratio: 3 / 2) and (max-height: 620px) {
+  /*
+   * O BRILHO SAI.
+   *
+   * `.tk-hero-brilho` são dois radiais na cor da espécie, e no celular eles
+   * fazem sentido: o hero É a arte, ocupa meia tela, e o brilho é a atmosfera
+   * atrás do bicho. Na faixa compacta não há bicho grande — há um selo de 74px
+   * — e o que sobra é uma bolha de cor solta no canto direito, longe de tudo.
+   *
+   * Cor sem dono é o que faz uma tela parecer gerada: ela está ali porque uma
+   * variável tinha valor, não porque significa algo. A cor da espécie continua
+   * onde ela informa — no selo, que é o bicho.
+   */
+  .tk-home > .tk-home-linha1 > .tk-hero > .tk-hero-brilho {
+    display: none;
+  }
+
+  /*
+   * QUATRO COLUNAS, e não duas de 556px.
+   *
+   * `.tk-acts2` é `1fr 1fr` — certo num telefone de 390px, onde duas colunas
+   * dão 170px cada. A 1120px isso vira um botão de 556x76 com um ícone de 19px
+   * e um rótulo de 11px no meio: 97% do botão é vazio, e o dedo que ele foi
+   * desenhado para acertar não existe aqui.
+   *
+   * Quatro colunas dão ~270px cada — largura de botão de desktop de verdade —
+   * e as quatro ações passam a caber numa linha só, que é o que a densidade
+   * desta largura permite.
+   */
+  .tk-acts2 {
+    /*
+     * ⚠️ `auto-fit`, E NAO `repeat(4, 1fr)`.
+     *
+     * Quatro colunas fixas dao 274px num monitor de 1440 — largura de botao de
+     * verdade — e 170px num iPad deitado de 1024, onde "Monta um time pra mim"
+     * quebra em tres linhas. Um numero fixo de colunas so acerta na largura em
+     * que foi medido.
+     *
+     * Com `minmax(220px, 1fr)` o numero de colunas vira CONSEQUENCIA: quatro
+     * onde cabem quatro, duas onde cabem duas. 220px e a medida do rotulo mais
+     * longo dos quatro em uma linha.
+     */
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
 }
