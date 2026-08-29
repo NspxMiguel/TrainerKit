@@ -17,39 +17,35 @@ export interface LanguageSpec {
   code: string;
   label: string;
   /**
-   * A etiqueta curta que aparece na lista.
+   * A bandeira, pedida por ele: "la em idioma acho legal por as bandeiras".
    *
-   * ⚠️ ERA UMA BANDEIRA EM EMOJI, e as bandeiras estavam erradas em tres
-   * niveis ao mesmo tempo:
+   * ⚠️ ELA NAO DESENHA NO WINDOWS. Emoji de bandeira e um par de letras
+   * regionais, e o Windows nao tem os glifos: la o navegador mostra "US", "BR",
+   * "ES" em letra solta. Nao e hipotese, e como aquele sistema se comporta.
    *
-   *   · IDIOMA NAO E PAIS. Espanhol nao e a Espanha — a propria lista tem duas
-   *     entradas de espanhol, e a de LatAm carregava a bandeira do Mexico, um
-   *     de vinte paises. Portugues levava o Brasil e ingles os EUA pelo mesmo
-   *     atalho. Nenhuma pessoa argentina se ve num `🇲🇽`;
-   *   · NAO RENDERIZA EM TODO LUGAR. Emoji de bandeira e um par de letras
-   *     regionais que o Windows nao desenha: la a lista mostra "US", "BR", "ES"
-   *     em letra solta, que e o resultado acidental que agora e o proposital;
-   *   · EMOJI NA INTERFACE e um dos sinais de tela gerada por IA — e este app
-   *     nao usa emoji em mais lugar nenhum.
-   *
-   * O codigo BCP-47 resolve os tres: e o que o idioma REALMENTE e, distingue
-   * `es` de `es-419` (coisa que duas bandeiras nunca fariam bem), e desenha
-   * igual em qualquer sistema.
+   * Por isso a `tag` ao lado FICOU. Ela existia pra substituir a bandeira e
+   * agora existe pra acompanhar: quem tem o emoji ve os dois, e quem nao tem ve
+   * o codigo no lugar certo em vez de duas letras soltas onde deveria haver uma
+   * imagem. E ela resolve o que a bandeira nao resolve — `es` e `es-419` sao
+   * duas entradas de espanhol, e nenhuma bandeira distingue as duas (a de LatAm
+   * levava o Mexico, um de vinte paises).
    */
+  flag: string;
+  /** O codigo BCP-47. Ver a nota da bandeira: os dois aparecem juntos. */
   tag: string;
 }
 
 export const LANGUAGES: readonly LanguageSpec[] = [
-  { code: "en", label: "English", tag: "EN" },
-  { code: "pt-BR", label: "Português", tag: "PT-BR" },
-  { code: "es", label: "Español", tag: "ES" },
-  { code: "es-419", label: "Español (LatAm)", tag: "ES-419" },
-  { code: "de", label: "Deutsch", tag: "DE" },
-  { code: "fr", label: "Français", tag: "FR" },
-  { code: "it", label: "Italiano", tag: "IT" },
-  { code: "ja", label: "日本語", tag: "JA" },
-  { code: "ko", label: "한국어", tag: "KO" },
-  { code: "ru", label: "Русский", tag: "RU" },
+  { code: "en", label: "English", flag: "🇺🇸", tag: "EN" },
+  { code: "pt-BR", label: "Português", flag: "🇧🇷", tag: "PT-BR" },
+  { code: "es", label: "Español", flag: "🇪🇸", tag: "ES" },
+  { code: "es-419", label: "Español (LatAm)", flag: "🇲🇽", tag: "ES-419" },
+  { code: "de", label: "Deutsch", flag: "🇩🇪", tag: "DE" },
+  { code: "fr", label: "Français", flag: "🇫🇷", tag: "FR" },
+  { code: "it", label: "Italiano", flag: "🇮🇹", tag: "IT" },
+  { code: "ja", label: "日本語", flag: "🇯🇵", tag: "JA" },
+  { code: "ko", label: "한국어", flag: "🇰🇷", tag: "KO" },
+  { code: "ru", label: "Русский", flag: "🇷🇺", tag: "RU" },
 ];
 
 const KEY = "tk:idioma";

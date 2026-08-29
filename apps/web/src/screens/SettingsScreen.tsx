@@ -422,6 +422,9 @@ export function SettingsScreen({
                 aria-pressed={l.code === language}
                 onClick={() => setLanguage(l.code)}
               >
+                <span className="tk-lista-radio-glifo" aria-hidden="true">
+                  {l.flag}
+                </span>
                 <span className="tk-lista-radio-tag" aria-hidden="true">
                   {l.tag}
                 </span>

@@ -72,7 +72,20 @@ describe("escala dos atributos", () => {
     expect(linha).toContain("ataque 129 (baixo:");
   });
 
-  it("nenhum atributo de nenhuma especie afirma ser maior que 100%", () => {
+  /*
+   * ⚠️ TIMEOUT PROPRIO, e nao porque o teste esteja lento demais.
+   *
+   * Sao 200 dossies completos, ~21 ms cada: 4,3 s numa maquina ociosa. O limite
+   * padrao do vitest e 5 s, entao este teste vivia a setecentos milissegundos de
+   * falhar — e passou a falhar quando o dataset cresceu e a maquina estava
+   * rodando o resto da suite junto. A mensagem era "Test timed out in 5000ms",
+   * que nao diz nada sobre atributo nenhum: um teste que falha por carga da
+   * maquina nao esta medindo o que promete.
+   *
+   * 30 s da folga de sete vezes. Se um dia ele estourar ISSO, ai sim e sinal de
+   * que `speciesDossier` ficou lento de verdade, e a falha vai querer dizer algo.
+   */
+  it("nenhum atributo de nenhuma especie afirma ser maior que 100%", { timeout: 30_000 }, () => {
     for (const s of data.species.slice(0, 200)) {
       expect(speciesDossier(s, data), s.id).not.toContain("maior que 100%");
     }

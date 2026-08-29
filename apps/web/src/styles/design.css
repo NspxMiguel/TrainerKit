@@ -7782,10 +7782,14 @@
    a coluna dos nomes começaria num lugar diferente por linha — a lista dançaria
    e é exatamente esse tipo de desalinho que faz uma tela parecer montada às
    pressas. Tabular porque são caracteres de largura igual num alfabeto só. */
+/* Com a bandeira de volta, a etiqueta encolhe: ela deixou de ser o glifo da
+   linha e virou anotação ao lado dele. 46px cabe o mais largo (`ES-419`) sem
+   empurrar a coluna dos nomes — largura fixa porque `EN` e `ES-419` têm
+   tamanhos muito diferentes e sem ela a lista dançaria linha a linha. */
 .tk-lista-radio-tag {
   flex: none;
-  width: 58px;
-  font-size: 11px;
+  width: 46px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.06em;
   font-variant-numeric: tabular-nums;
@@ -7804,4 +7808,128 @@
 }
 .tk-onb-dots > span[data-now] {
   background: var(--tk-text);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   AGENDA E CHOCADEIRA — as duas listas que vieram de fora
+   ═══════════════════════════════════════════════════════════════════════════
+
+   As duas telas leem de uma fonte de terceiro e mostram lista longa. O desenho
+   segue o que o resto do app faz e evita o que denuncia tela gerada:
+
+   · SEM MOLDURA POR LINHA. O cartão é um só, e o que separa as linhas é um fio
+     de 0,5px — não dez caixas empilhadas com sombra cada uma;
+   · COR SÓ ONDE SIGNIFICA. A única cor destas telas é o selo da espécie (que é
+     a cor dela) e o traço do "agora". O resto é neutro: um evento não fica mais
+     importante por ser roxo;
+   · O RAIO ACOMPANHA O TAMANHO. O cartão usa o raio grande do app; o selo da
+     espécie usa 1/3 do lado, como todo selo. Um raio único em tudo é um dos
+     sinais mais citados de interface montada por padrão. */
+
+.tk-ovo,
+.tk-evento {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: 0;
+  text-align: left;
+  color: inherit;
+  text-decoration: none;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* O fio entre linhas nasce no `::before` da linha SEGUINTE, e não como borda
+   inferior: assim a última linha não fica com um fio solto no fim do cartão. */
+.tk-ovo + .tk-ovo::before,
+.tk-evento + .tk-evento::before {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 0;
+  height: 0.5px;
+  background: var(--tk-linha, rgba(255, 255, 255, 0.08));
+  transform: translateY(-10px);
+}
+
+.tk-ovo,
+.tk-evento {
+  position: relative;
+}
+
+.tk-ovo:disabled {
+  /* Espécie que a base não conhece: a linha continua legível e só perde o
+     toque. Esconder a linha seria mentir sobre o que sai do ovo. */
+  cursor: default;
+  opacity: 0.72;
+}
+
+.tk-ovo-txt,
+.tk-evento-txt {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.tk-ovo-nome,
+.tk-evento-nome {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--tk-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tk-ovo-meta,
+.tk-evento-tipo {
+  font-size: 12px;
+  color: var(--tk-text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A categoria vem ANTES do nome e menor: ela se repete linha a linha, e o que
+   se repete não pode ter o peso do que muda. */
+.tk-evento-tipo {
+  order: -1;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--tk-text-3, var(--tk-text-2));
+}
+
+.tk-evento-quando {
+  flex: none;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--tk-text-2);
+  text-align: right;
+}
+
+/* "Agora" é a única coisa nestas telas que muda o que fazer nos próximos
+   minutos, então é a única que ganha destaque — e ele é de PESO e de um traço à
+   esquerda, não de cor de fundo. Fundo colorido numa lista faz a linha parecer
+   selecionada, que é outra coisa. */
+.tk-evento[data-agora] {
+  padding-left: 11px;
+  border-left: 3px solid var(--tk-text);
+}
+
+.tk-evento[data-agora] .tk-evento-quando {
+  color: var(--tk-text);
+  font-weight: 600;
+}
+
+.tk-ovo-shiny {
+  flex: none;
+  font-size: 13px;
+  color: var(--tk-v-guardar);
+  line-height: 1;
 }

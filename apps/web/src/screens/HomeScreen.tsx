@@ -32,12 +32,22 @@ import type { PersistState } from "../storage/persist.ts";
 import { formatBytes } from "../storage/tamanho.ts";
 import { DidYouKnow } from "../ui/DidYouKnow.tsx";
 import { Esqueleto, Offline, Vazio } from "../ui/Estados.tsx";
-import { IconAlert, IconCamera, IconSearch, IconShield, IconSwords } from "../ui/Icons.tsx";
+import {
+  IconAlert,
+  IconCalendar,
+  IconCamera,
+  IconEgg,
+  IconSearch,
+  IconShield,
+  IconSwords,
+} from "../ui/Icons.tsx";
 import { InstallBanner } from "../ui/InstallBanner.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 import { enquadrar, usarPaleta } from "../ui/paleta.ts";
 import { TOM_VEREDITO as TONE } from "../ui/tomVeredito.ts";
 import { Colecoes } from "./Colecoes.tsx";
+import { Agenda } from "./Agenda.tsx";
+import { Chocadeira } from "./Chocadeira.tsx";
 import { GymPicks } from "./GymPicks.tsx";
 import { InstallGuide } from "./InstallGuide.tsx";
 import { IVCalculator } from "./IVCalculator.tsx";
@@ -432,6 +442,8 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
   const [picked, setPicked] = useState<DatasetSpecies | null>(null);
   const [teamOpen, setTeamOpen] = useState(false);
   const [gymOpen, setGymOpen] = useState(false);
+  const [agendaOpen, setAgendaOpen] = useState(false);
+  const [ovosOpen, setOvosOpen] = useState(false);
   /*
    * O detalhe carrega a ESPECIE e, quando houver, O SEU especie.
    *
@@ -1007,6 +1019,22 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
               <IconShield size={19} />
               <span className="tk-act-t">{t("gym.title")}</span>
             </button>
+            {/*
+              As duas que responder sobre TEMPO, e nao sobre um bicho.
+
+              Elas entram aqui e nao numa aba porque a pergunta e ocasional —
+              "o que ta rolando?" se faz uma vez por dia, nao a cada tela. A
+              grade ja era de duas colunas, entao viram a segunda fileira sem
+              mexer no layout.
+            */}
+            <button type="button" className="tk-act" onClick={() => setAgendaOpen(true)}>
+              <IconCalendar size={19} />
+              <span className="tk-act-t">{t("agenda.title")}</span>
+            </button>
+            <button type="button" className="tk-act" onClick={() => setOvosOpen(true)}>
+              <IconEgg size={19} />
+              <span className="tk-act-t">{t("eggs.title")}</span>
+            </button>
           </div>
 
           {/* A colecao como FILA de sprites, nao como cartao de texto.
@@ -1393,6 +1421,22 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
 
       {picked && data && (
         <IVCalculator species={picked} data={data} onClose={() => setPicked(null)} />
+      )}
+
+      {agendaOpen && <Agenda onClose={() => setAgendaOpen(false)} />}
+
+      {ovosOpen && data && (
+        <Chocadeira
+          data={data}
+          onClose={() => setOvosOpen(false)}
+          onPickSpecies={(s) => {
+            /* Fecha a chocadeira ANTES de abrir a ficha. Duas folhas de tela
+               cheia empilhadas deixam a de baixo presa atras — e o gesto de
+               voltar fecharia a errada. Mesmo caminho do TeamBuilder. */
+            setOvosOpen(false);
+            abrirEspecie(s);
+          }}
+        />
       )}
 
       {teamOpen && data && (

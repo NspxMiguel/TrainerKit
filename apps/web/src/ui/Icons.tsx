@@ -113,6 +113,33 @@ export function IconShield(props: IconProps) {
   );
 }
 
+/**
+ * Calendario. Desenhado, e nao emprestado de biblioteca.
+ *
+ * Os traços internos são DOIS, e não uma grade de seis quadradinhos: o ícone
+ * aparece a 19px, e a grade vira ruído nesse tamanho. Um calendário se
+ * reconhece pelas duas argolas em cima e pela linha do cabeçalho.
+ */
+export function IconCalendar(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <rect x="3" y="5" width="18" height="16" rx="3" />
+      <path d="M3 10h18" />
+      <path d="M8 3v4" />
+      <path d="M16 3v4" />
+    </Svg>
+  );
+}
+
+/** Ovo: uma forma só, porque a silhueta do ovo já é o significado inteiro. */
+export function IconEgg(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M12 3c3.6 0 6.5 5 6.5 9.2A6.5 6.5 0 0 1 12 21a6.5 6.5 0 0 1-6.5-8.8C5.5 8 8.4 3 12 3Z" />
+    </Svg>
+  );
+}
+
 export function IconSpark(props: IconProps) {
   return (
     <Svg {...props}>

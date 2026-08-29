@@ -561,6 +561,22 @@ const EN = {
   "prefetch.finished": "{count} images saved, {size}. They won’t download again.",
   "prefetch.stored": "{count} images are on this device. They open instantly, with no network.",
   "prefetch.clear": "Delete the downloaded images",
+  "agenda.title": "What's on",
+  "agenda.agora": "Right now",
+  "agenda.agoraCurto": "Live",
+  "agenda.ate": "until {quando}",
+  "agenda.hoje": "Today",
+  "agenda.semana": "This week",
+  "agenda.depois": "Later",
+  "agenda.fonte": "Event data from {fonte} ·",
+  "agenda.guardado": "saved copy",
+  "agenda.semRede": "No events saved yet, and the source is unreachable. Open this once with a connection and it works offline after that.",
+  "eggs.title": "Egg hatches",
+  "eggs.sync": "Adventure Sync",
+  "eggs.pcPerfeito": "{cp} CP is a perfect one",
+  "eggs.regional": "regional",
+  "eggs.shiny": "can be shiny",
+  "eggs.semRede": "No hatch list saved yet, and the source is unreachable. Open this once with a connection and it works offline after that.",
 
   // ------------------------------------------------- mensagens vindas do core
   //
