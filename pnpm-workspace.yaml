@@ -18,3 +18,44 @@ allowBuilds:
   # pedido de doacao impresso no terminal. Nao compila nada, nao baixa nada e
   # nao e necessario pra biblioteca funcionar.
   tesseract.js: false
+
+# ── O QUE PRECISA FICAR APLANADO ────────────────────────────────────────────
+#
+# ⚠️ ISTO MOROU NO `.npmrc` E NUNCA VALEU NADA.
+#
+# O pnpm 11 nao le mais configuracao propria de `.npmrc` — ela vem daqui. O
+# arquivo estava la, com um comentario longo explicando as quatro rodadas de
+# build que custaram pra descobrir cada padrao, e `node_modules/.modules.yaml`
+# respondia `"publicHoistPattern": []`. Ou seja: a explicacao existia, a
+# correcao nao. Config morta e pior que config ausente, porque quem le acredita.
+#
+# ── Por que aplanar, e so isto ──────────────────────────────────────────────
+#
+# O AUTOLINKING DO RN NAO ENTENDE OS LINKS DO PNPM. Ele varre `node_modules`
+# procurando pacote com codigo nativo; o que esta dentro do `.pnpm` nunca
+# aparece. O sintoma foi "Cannot find native module 'ExpoCrypto'", depois
+# NitroModules, depois MMKVFactory — dependencia de dependencia que o app nunca
+# declarou porque nao usa direto.
+#
+# O Babel tem a mesma doenca por outro caminho: a fase "Bundle React Native code
+# and images" do Xcode nao chama o `expo` do `node_modules/.bin`, chama o binario
+# dentro de `.pnpm/@expo+cli@.../` direto, com `cd` em `apps/mobile/ios`. Dali a
+# resolucao nao enxerga a arvore do app e o build morre em cascata:
+#
+#     Cannot find module 'babel-preset-expo'
+#     Cannot find module '@babel/plugin-transform-react-jsx'
+#
+# E o sintoma engana: `npx expo export:embed` monta os 1.611 modulos pelo
+# terminal, com cache quente E com `--reset-cache`, e so o Xcode falha. Nao e
+# cache — e de onde o processo resolve.
+#
+# `publicHoistPattern` em vez de `nodeLinker: hoisted`: aplana SO o que a cadeia
+# do RN precisa enxergar, e o resto do monorepo continua estrito — que e o que
+# impede uma dependencia fantasma de passar despercebida no `apps/web`.
+publicHoistPattern:
+  - "*react-native*"
+  - "expo-*"
+  - "@expo/*"
+  - "nativewind"
+  - "@babel/*"
+  - "babel-preset-*"
