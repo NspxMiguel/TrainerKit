@@ -39,7 +39,20 @@ function colecao(n: number): OwnedPokemon[] {
   }));
 }
 
-describe("o recorte que vai pro modelo", () => {
+/*
+ * ⚠️ TIMEOUT PROPRIO, pelo mesmo motivo do `dossier.test.ts`.
+ *
+ * Cada caso monta o recorte de uma colecao grande sobre o dataset inteiro. Roda
+ * em ~1s isolado e cruza os 5s padrao do vitest quando a suite inteira disputa
+ * a maquina — e ai a falha diz "Test timed out in 5000ms", que nao fala nada
+ * sobre recorte nenhum. Ja aconteceu: dois destes reprovaram no lote e passaram
+ * sozinhos no minuto seguinte.
+ *
+ * Teste que reprova por carga da maquina e pior que teste que nao existe: ele
+ * ensina a ignorar vermelho. 30s da folga suficiente pra a falha voltar a
+ * significar defeito.
+ */
+describe("o recorte que vai pro modelo", { timeout: 30_000 }, () => {
   it("colecao pequena vai inteira", () => {
     expect(collectionFacts(colecao(10), data)).toHaveLength(10);
   });
