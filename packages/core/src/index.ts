@@ -38,3 +38,6 @@ export * from "./dict/index.js";
 export { EN } from "./dict/en.js";
 export type { Dict, Key } from "./dict/tipos.js";
 export * from "./cores.js";
+export * from "./support.js";
+export * from "./setup.js";
+export * from "./languages.js";

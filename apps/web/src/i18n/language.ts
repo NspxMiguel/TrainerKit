@@ -13,25 +13,22 @@ import { useSyncExternalStore } from "react";
  * acha nada, e procurar "Flame Charge" no jogo em portugues tambem nao. Mostrar
  * os dois deixa a pessoa transitar entre o jogo e a comunidade.
  */
-export interface LanguageSpec {
-  code: string;
-  label: string;
-  /** A bandeira do idioma. */
-  flag: string;
-}
+/*
+ * A LISTA MUDOU PRA `packages/core`, e daqui so sai re-exportada.
+ *
+ * O app nativo tinha uma copia parcial dela em dois arquivos — so os nomes, sem
+ * bandeira, porque quem copiou copiou o que precisava naquele dia. Tres listas
+ * do mesmo dado e como um idioma novo entra numa tela e falta nas outras duas.
+ *
+ * Continua saindo por este caminho porque as telas do web importam daqui, e
+ * mover import em oito arquivos pra nao ganhar nada e so risco.
+ */
+import { LANGUAGES } from "@trainerkit/core";
 
-export const LANGUAGES: readonly LanguageSpec[] = [
-  { code: "en", label: "English", flag: "🇺🇸" },
-  { code: "pt-BR", label: "Português", flag: "🇧🇷" },
-  { code: "es", label: "Español", flag: "🇪🇸" },
-  { code: "es-419", label: "Español (LatAm)", flag: "🇲🇽" },
-  { code: "de", label: "Deutsch", flag: "🇩🇪" },
-  { code: "fr", label: "Français", flag: "🇫🇷" },
-  { code: "it", label: "Italiano", flag: "🇮🇹" },
-  { code: "ja", label: "日本語", flag: "🇯🇵" },
-  { code: "ko", label: "한국어", flag: "🇰🇷" },
-  { code: "ru", label: "Русский", flag: "🇷🇺" },
-];
+export type { LanguageSpec } from "@trainerkit/core";
+/* `import` mais `export` e nao um `export ... from` direto: o arquivo tambem USA
+   `LANGUAGES` mais abaixo, e re-exportar nao traz o nome pro escopo local. */
+export { LANGUAGES };
 
 const KEY = "tk:idioma";
 const SHOW_KEY = "tk:traducao";

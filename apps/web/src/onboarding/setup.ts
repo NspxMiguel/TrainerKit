@@ -1,19 +1,23 @@
 import { useSyncExternalStore } from "react";
 
-/**
- * Como a pessoa quer usar o app.
+import {
+  TRAINER_LEVELS,
+  nivelValido,
+  tetoDePowerUp,
+  type TrainerLevel,
+  type UsageMode,
+} from "@trainerkit/core";
+
+/*
+ * RE-EXPORTED, not re-declared.
  *
- * A escolha existe porque as duas formas sao legitimas e exigem telas
- * diferentes. Quem so quer saber se uma especie presta nao deveria ser obrigado
- * a cadastrar colecao — e quem quer o veredito precisa cadastrar. Empurrar todo
- * mundo pro mesmo fluxo faria o app parecer burocratico pra metade das pessoas.
+ * `TRAINER_LEVELS` and `tetoDePowerUp` moved to `packages/core` when the native
+ * app grew its own first run — see the note there. They keep being reachable
+ * from this path because nine screens import them from here, and a move that
+ * touches nine files to gain nothing is a move that only adds risk.
  */
-export type UsageMode = "consulta" | "colecao";
-
-/** As quatro faixas que o setup oferece. */
-export type TrainerLevel = 20 | 30 | 40 | 50;
-
-export const TRAINER_LEVELS: readonly TrainerLevel[] = [20, 30, 40, 50];
+export { TRAINER_LEVELS, tetoDePowerUp };
+export type { TrainerLevel, UsageMode };
 
 export interface Setup {
   /** `false` ate a pessoa concluir a primeira configuracao. */
@@ -33,31 +37,6 @@ export interface Setup {
    * Ver `tetoDePowerUp`, que e onde isso vira consequencia.
    */
   level: TrainerLevel;
-}
-
-/**
- * Ate que nivel ESTE jogador consegue subir uma especie.
- *
- * ⚠️ ISTO NAO E UMA REGRA NOVA — e um dado de entrada que estava fixo no melhor
- * caso.
- *
- * `VerdictInput.levelCap` sempre existiu e sempre alimentou o calculo de PC
- * (`verdict.ts`). O que todos os chamadores passavam era `version.levelCap`, o
- * `maxNormalUpgradeLevel` do jogo — o teto de QUEM JA ESTA NO FIM. Para um
- * treinador de nivel 20 o app respondia "até 1.260 de PC no nível 50" sobre um
- * especie que aquela pessoa so consegue levar ao nivel 22.
- *
- * As regras do veredito nao mudaram uma linha, e `packages/core` nao foi
- * tocado. Mudou o numero que entra nelas: de "o teto do jogo" para "o teto
- * desta pessoa". Onde a pergunta e sobre a ESPECIE e nao sobre o jogador — o
- * "PC máximo com IV perfeito" da ficha, a ordenacao da Especies — continua sendo
- * o teto do jogo, porque ali o numero e um fato da especie e nao uma promessa.
- *
- * O `+2` e do jogo: sobe-se uma especie ate dois niveis acima do proprio, e o
- * `min` impede que um treinador de 50 passe do teto da temporada.
- */
-export function tetoDePowerUp(nivelDoTreinador: number, tetoDoJogo: number): number {
-  return Math.min(nivelDoTreinador + 2, tetoDoJogo);
 }
 
 const KEY = "tk:setup";
@@ -92,9 +71,7 @@ function read(): Setup {
       mode: parsed.mode === "colecao" ? "colecao" : "consulta",
       assistant: parsed.assistant ?? true,
       name: typeof parsed.name === "string" ? parsed.name : "",
-      level: TRAINER_LEVELS.includes(parsed.level as TrainerLevel)
-        ? (parsed.level as TrainerLevel)
-        : DEFAULT_SETUP.level,
+      level: nivelValido(parsed.level, DEFAULT_SETUP.level),
     };
   } catch {
     return DEFAULT_SETUP;
