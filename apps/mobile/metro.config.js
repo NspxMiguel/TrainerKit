@@ -14,6 +14,24 @@ config.resolver.nodeModulesPaths = [
 config.resolver.sourceExts = [...config.resolver.sourceExts, "mjs", "cjs"];
 
 /*
+ * ⚠️ O DATASET E `.tkdata`, E NAO `.json`. A extensao esquisita tem motivo.
+ *
+ * Pro Metro, `.json` e CODIGO-FONTE: `require("x.json")` devolve o objeto ja
+ * analisado, embutido no bundle. Era exatamente o que eu queria evitar — sao
+ * 2 MB que o Hermes teria que ler no arranque — e por isso o codigo usa
+ * `Asset.fromModule`. So que, recebendo um objeto em vez de um id de modulo,
+ * o `Asset` reclamava: `Module "[object Object]" is missing from the asset
+ * registry`, e o app abria com a base vazia.
+ *
+ * Registrar `json` como asset consertaria isto e quebraria todo o resto —
+ * `package.json`, `app.json` e os dicionarios deixariam de ser importaveis.
+ * Uma extensao SO PRA ESTE ARQUIVO resolve sem tocar em nada mais: o conteudo
+ * continua sendo JSON (`JSON.parse` do outro lado), o que muda e quem o Metro
+ * acha que deve empacotar.
+ */
+config.resolver.assetExts = [...config.resolver.assetExts, "tkdata"];
+
+/*
  * ⚠️ `./types.js` -> `./types.ts`, e sem isto o `core` inteiro nao entra.
  *
  * `packages/core` e ESM de verdade: os imports carregam o sufixo `.js` porque

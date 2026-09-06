@@ -1,5 +1,5 @@
 import { Asset } from "expo-asset";
-import * as FileSystem from "expo-file-system";
+import { File } from "expo-file-system";
 import { useEffect, useState } from "react";
 
 /**
@@ -44,10 +44,18 @@ export function useDados(): EstadoDados {
     let vivo = true;
     void (async () => {
       try {
-        const asset = Asset.fromModule(require("../assets/dataset/gamedata.json"));
+        const asset = Asset.fromModule(require("../assets/dataset/gamedata.tkdata"));
         await asset.downloadAsync();
         const caminho = asset.localUri ?? asset.uri;
-        const texto = await FileSystem.readAsStringAsync(caminho);
+        /*
+         * ⚠️ `new File(...).text()`, e nao `readAsStringAsync`.
+         *
+         * O `expo-file-system` 57 aposentou a API antiga: chamar
+         * `readAsStringAsync` nao avisa em tempo de compilacao, LANCA em tempo
+         * de execucao ("Method readAsStringAsync ... is deprecated"). Numa build
+         * Release isso aparece so quando o app abre — foi assim que apareceu.
+         */
+        const texto = await new File(caminho).text();
         if (vivo) setEstado({ pronto: true, erro: null, dados: JSON.parse(texto) as Base });
       } catch (e) {
         if (vivo) setEstado({ pronto: false, erro: String(e).slice(0, 200), dados: null });
