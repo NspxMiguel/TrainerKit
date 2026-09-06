@@ -53,6 +53,11 @@ export default function Ajustes() {
       <Text className="text-texto3 text-[11px] tracking-widest mt-7 mb-2">
         {t("faxina.title").toUpperCase()}
       </Text>
+      <Link href="/time" asChild>
+        <Pressable className="bg-superficie rounded-3xl px-4 py-4 mb-2">
+          <Text className="text-texto text-[15px]">{t("team.open")}</Text>
+        </Pressable>
+      </Link>
       <Link href="/faxina" asChild>
         <Pressable className="bg-superficie rounded-3xl px-4 py-4">
           <Text className="text-texto text-[15px]">{t("faxina.open")}</Text>
