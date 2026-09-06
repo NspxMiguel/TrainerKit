@@ -30,6 +30,7 @@ export default function Layout() {
         <Stack.Screen name="raide/[id]" options={{ title: "" }} />
         <Stack.Screen name="chocadeira/index" options={{ title: "" }} />
         <Stack.Screen name="agenda/index" options={{ title: "" }} />
+        <Stack.Screen name="colecao/index" options={{ title: "" }} />
       </Stack>
     </Idioma>
   );

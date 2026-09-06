@@ -1,8 +1,9 @@
 import { useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
-import { ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 import { badgeFor, ivPercentOf, ivTotalOf, solveIVs, type IVCandidate } from "@trainerkit/core";
+import { guardar } from "../../src/colecao";
 import { useDados } from "../../src/dados";
 import { useT } from "../../src/i18n";
 import { Selo } from "../../src/Selo";
@@ -162,6 +163,24 @@ export default function Calculadora() {
             <Text className="text-texto2 text-sm mt-3">
               {unico.ivs.atk} / {unico.ivs.def} / {unico.ivs.hp} · {t("iv.level")} {unico.level}
             </Text>
+
+            {/* Guardar so aparece quando a conta FECHOU numa combinacao. Salvar
+                uma faixa seria guardar uma duvida, e a colecao existe pra
+                responder depois — nao pra repetir a pergunta. */}
+            <TouchableOpacity
+              onPress={() => {
+                void guardar({
+                  speciesId: especie.id,
+                  ivs: unico.ivs,
+                  level: unico.level,
+                  shadow: false,
+                  lucky: false,
+                }).then(() => Alert.alert(t("iv.savedToCollection")));
+              }}
+              className="bg-texto rounded-full py-4 items-center mt-5"
+            >
+              <Text className="text-fundo font-bold">{t("iv.saveToCollection")}</Text>
+            </TouchableOpacity>
           </>
         ) : candidatos.length === 0 ? (
           <Text className="text-texto2 text-sm">{t("iv.noMatch")}</Text>
