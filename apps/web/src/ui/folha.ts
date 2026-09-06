@@ -64,6 +64,25 @@ export function useFolha(
      * teriam duas barras empilhadas no mesmo canto.
      */
     mantemBarra?: boolean;
+    /**
+     * Isto e uma folha DE VERDADE, ou uma coluna do layout largo?
+     *
+     * ⚠️ QUANDO E COLUNA, REGISTRAR AQUI CEGA O APP INTEIRO.
+     *
+     * O que le esta pilha e o veu de tela larga (`.tk-folha-scrim` no
+     * `App.tsx`), e o trabalho dele e escurecer o que fica ATRAS de uma folha
+     * flutuante. A ficha da especie em tela larga nao flutua: ela e a coluna
+     * direita da Especies, dentro do fluxo. Nao ha "atras".
+     *
+     * Registrando, o veu subia por cima de tudo — inclusive por cima da propria
+     * ficha, que nao esta acima do z-index 15 dele. Medido no site no ar em
+     * 1440px: `elementFromPoint` no meio da tela devolvia `tk-folha-scrim`, e
+     * clique nenhum passava. Na pratica nao dava pra abrir especie no desktop.
+     *
+     * O resto do `useFolha` continua valendo mesmo assim: a animacao de saida,
+     * o `Escape` e o gesto de voltar sao da folha, nao do veu.
+     */
+    naPilha?: boolean;
   },
 ): {
   saindo: boolean;
@@ -153,8 +172,10 @@ export function useFolha(
   // meio da vida, e reagir a isso exigiria refazer o efeito — que e exatamente
   // o que a nota acima explica que nao pode acontecer.
   const mantemBarra = opcoes?.mantemBarra ?? false;
+  const naPilha = opcoes?.naPilha ?? true;
 
   useEffect(() => {
+    if (!naPilha) return;
     const entrada: Folha = { fechar: () => fecharRef.current(), mantemBarra };
     pilha.push(entrada);
     mudou();
@@ -163,7 +184,7 @@ export function useFolha(
       if (i !== -1) pilha.splice(i, 1);
       mudou();
     };
-  }, [mantemBarra]);
+  }, [mantemBarra, naPilha]);
 
   const ref = useRef<HTMLDivElement>(null);
   useGestoVoltar(ref, fechar);

@@ -247,7 +247,19 @@ export function SpeciesDetail({
      escape volta a piscar, e so aquele. */
   /* `mantemBarra`: a ficha e a unica folha que deixa a barra de abas visivel —
      "ate mais simples de ir pra tela inicial". Ver a nota em `useFolha`. */
-  const { saindo, ref: refFolha, fechar } = useFolha(onClose, { mantemBarra: true });
+  /*
+   * ⚠️ `naPilha: !embutida` — e a diferenca entre folha e COLUNA.
+   *
+   * Embutida, esta tela e a coluna direita da Especies, dentro do fluxo. O veu
+   * de tela larga existe pra escurecer o que fica atras de uma folha
+   * FLUTUANTE, e aqui nao ha atras: registrando, ele subia sobre o app inteiro
+   * — inclusive sobre esta ficha — e interceptava todo clique. Medido no site
+   * publicado em 1440px: nao dava pra abrir especie nenhuma no desktop.
+   */
+  const { saindo, ref: refFolha, fechar } = useFolha(onClose, {
+    mantemBarra: true,
+    naPilha: !embutida,
+  });
   /* Tirar da colecao pede dois toques — ver o botao la embaixo. */
   const [confirmandoTirar, setConfirmandoTirar] = useState(false);
 
