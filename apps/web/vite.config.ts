@@ -155,17 +155,31 @@ export default defineConfig({
            * nunca chega perto disso.
            */
           tesseract: ["tesseract.js"],
+          /*
+           * ⚠️ OS DICIONARIOS MUDARAM DE CASA e este bloco ficou pra tras.
+           *
+           * Eles moravam em `./src/i18n/dict/` e foram pra `packages/core`
+           * quando o app nativo nasceu — os dois apps leem os mesmos dez
+           * arquivos. Este `manualChunks` continuou apontando pro caminho
+           * antigo, e o Rollup respondia
+           * "Could not resolve entry module ./src/i18n/dict/en.ts".
+           *
+           * O `tsc --noEmit` e o `vitest` passavam: nenhum dos dois olha o
+           * `manualChunks`. Quem quebrava era so o `vite build`, ou seja, so o
+           * deploy — o site parou de atualizar e as duas coisas que provam o
+           * codigo continuaram verdes.
+           */
           i18n: [
-            "./src/i18n/dict/en.ts",
-            "./src/i18n/dict/pt-BR.ts",
-            "./src/i18n/dict/es.ts",
-            "./src/i18n/dict/es-419.ts",
-            "./src/i18n/dict/de.ts",
-            "./src/i18n/dict/fr.ts",
-            "./src/i18n/dict/it.ts",
-            "./src/i18n/dict/ja.ts",
-            "./src/i18n/dict/ko.ts",
-            "./src/i18n/dict/ru.ts",
+            "../../packages/core/src/dict/en.ts",
+            "../../packages/core/src/dict/pt-BR.ts",
+            "../../packages/core/src/dict/es.ts",
+            "../../packages/core/src/dict/es-419.ts",
+            "../../packages/core/src/dict/de.ts",
+            "../../packages/core/src/dict/fr.ts",
+            "../../packages/core/src/dict/it.ts",
+            "../../packages/core/src/dict/ja.ts",
+            "../../packages/core/src/dict/ko.ts",
+            "../../packages/core/src/dict/ru.ts",
           ],
         },
       },
