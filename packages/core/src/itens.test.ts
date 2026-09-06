@@ -20,6 +20,26 @@ import { EVOLUCOES_POR_ITEM } from "./itens.js";
 const CRU = join(process.cwd(), "..", "dataset", "raw", "GAME_MASTER.json");
 
 /**
+ * ⚠️ O DATASET COMPILADO NAO ESTA NO REPOSITORIO — e por isso este teste
+ * derrubou o CI uma vez.
+ *
+ * `GAME_MASTER.json` e commitado; `gamedata.tkdata` e gerado pelo ETL e fica de
+ * fora. Na maquina de quem desenvolve os dois existem e os dois casos rodam; no
+ * runner so o primeiro. Guardar so um dos dois foi o erro: o teste passava aqui
+ * e explodia la, que e o pior lugar pra descobrir.
+ */
+const TKDATA = join(
+  process.cwd(),
+  "..",
+  "..",
+  "apps",
+  "mobile",
+  "assets",
+  "dataset",
+  "gamedata.tkdata",
+);
+
+/**
  * ⚠️ COLAPSA FORMA COSMÉTICA, como o resto do app faz.
  *
  * O GAME_MASTER traz o mesmo ramo de evolução em mais de um template (a forma
@@ -28,12 +48,9 @@ const CRU = join(process.cwd(), "..", "dataset", "raw", "GAME_MASTER.json");
  * quem sabe qual é a espécie de verdade — 60 pares viram 42.
  */
 function canonico(): Map<string, string> {
-  const ds = JSON.parse(
-    readFileSync(
-      join(process.cwd(), "..", "..", "apps", "mobile", "assets", "dataset", "gamedata.tkdata"),
-      "utf8",
-    ),
-  ) as { species: { id: string; cosmeticOf?: string | null }[] };
+  const ds = JSON.parse(readFileSync(TKDATA, "utf8")) as {
+    species: { id: string; cosmeticOf?: string | null }[];
+  };
   return new Map(ds.species.map((s) => [s.id, s.cosmeticOf ?? s.id]));
 }
 
@@ -68,7 +85,8 @@ function derivar(): Record<string, [string, string][]> {
 }
 
 describe("mapa de itens de evolução", () => {
-  const temArquivo = existsSync(CRU);
+  /* Os DOIS: o mapa colapsa forma cosmetica, e quem sabe disso e o dataset. */
+  const temArquivo = existsSync(CRU) && existsSync(TKDATA);
 
   it.runIf(temArquivo)("bate com o GAME_MASTER, item por item", () => {
     const esperado = derivar();
