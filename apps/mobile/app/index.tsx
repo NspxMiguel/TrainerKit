@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, Text, TextInput, View } from "react-native";
 
 import { useDados, type Especie } from "../src/dados";
+import type { Key } from "@trainerkit/core";
 import { useT } from "../src/i18n";
 import { useTema } from "../src/tema";
 import { Selo } from "../src/Selo";
@@ -14,11 +15,48 @@ import { Selo } from "../src/Selo";
  * trava o arranque. A lista virtualizada desenha o que cabe na tela e recicla o
  * resto — e o equivalente nativo do que o navegador fazia de graca com scroll.
  */
+/**
+ * A SAUDACAO, pela hora do aparelho.
+ *
+ * ⚠️ Os quatro nomes sao os mesmos do app web, e a "madrugada" nao e enfeite:
+ * em portugues "boa noite" as 3 da manha soa errado, e o dicionario ja tinha a
+ * chave separada pra isso nos dez idiomas.
+ */
+function saudacao(hora: number): Key {
+  if (hora < 5) return "home.greeting.lateNight";
+  if (hora < 12) return "home.greeting.morning";
+  if (hora < 18) return "home.greeting.afternoon";
+  return "home.greeting.night";
+}
+
 export default function Lista() {
   const { t } = useT();
   const { cores } = useTema();
   const { pronto, erro, dados } = useDados();
   const [busca, setBusca] = useState("");
+  /* Calculada uma vez por montagem: a saudacao nao precisa acompanhar o relogio
+     segundo a segundo, e um `setInterval` aqui so gastaria bateria. */
+  const [agora] = useState(() => new Date().getHours());
+
+  /**
+   * OS MELHORES ATACANTES DE RAIDE — o conteudo do Inicio do web que faltava.
+   *
+   * O ranking ja vem pronto no dataset; aqui e so a tira. Oito cabem numa
+   * rolagem horizontal sem competir com a grade de baixo, e cada um leva direto
+   * pra ficha — que e onde a pergunta "e esse, presta?" se responde.
+   */
+  const melhores = useMemo(() => {
+    if (!dados?.rankings?.raidOverall) return [];
+    return dados.rankings.raidOverall
+      .slice(0, 8)
+      .map((r) => {
+        const sp = dados.species.find((x) => x.id === r.speciesId);
+        return sp
+          ? { sp, golpes: [r.fast?.name, r.charged?.name].filter(Boolean).join(" + ") }
+          : null;
+      })
+      .filter((x): x is { sp: Especie; golpes: string } => x !== null);
+  }, [dados]);
 
   const visiveis = useMemo(() => {
     if (!dados) return [];
@@ -47,6 +85,7 @@ export default function Lista() {
   return (
     <View className="flex-1 bg-fundo">
       <View className="px-4 pt-3 pb-2">
+        <Text className="text-texto text-[22px] font-extrabold mb-3">{t(saudacao(agora))}</Text>
         <TextInput
           value={busca}
           onChangeText={setBusca}
@@ -79,7 +118,41 @@ export default function Lista() {
           </Link>
         </View>
 
-        <Text className="text-texto3 text-xs mt-3">
+        {/* A tira so aparece quando ninguem esta buscando: durante a busca o
+            assunto e o que foi digitado, e uma recomendacao fixa no meio do
+            caminho e ruido. */}
+        {busca.trim() === "" && melhores.length > 0 && (
+          <>
+            <Text className="text-texto3 text-[11px] tracking-widest mt-4 mb-2">
+              {t("usos.tira").toUpperCase()}
+            </Text>
+            <FlatList
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              data={melhores}
+              keyExtractor={(m) => m.sp.id}
+              renderItem={({ item, index }) => (
+                <Link href={{ pathname: "/especie/[id]", params: { id: item.sp.id } }} asChild>
+                  <Pressable
+                    className="bg-superficie rounded-2xl p-3 mr-2 items-center"
+                    style={{ width: 108 }}
+                  >
+                    <Selo especie={item.sp} tamanho={40} />
+                    <Text
+                      className="text-texto text-[12px] font-semibold mt-2 text-center"
+                      numberOfLines={1}
+                    >
+                      {item.sp.name}
+                    </Text>
+                    <Text className="text-texto3 text-[10px] mt-0.5">#{index + 1}</Text>
+                  </Pressable>
+                </Link>
+              )}
+            />
+          </>
+        )}
+
+        <Text className="text-texto3 text-xs mt-4">
           {t("especies.count", { n: visiveis.length.toLocaleString() })}
         </Text>
       </View>
@@ -109,9 +182,7 @@ export default function Lista() {
               >
                 {item.name}
               </Text>
-              <Text className="text-texto3 text-[10px]">
-                #{String(item.dex).padStart(3, "0")}
-              </Text>
+              <Text className="text-texto3 text-[10px]">#{String(item.dex).padStart(3, "0")}</Text>
             </Pressable>
           </Link>
         )}

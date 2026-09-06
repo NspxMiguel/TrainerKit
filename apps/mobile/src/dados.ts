@@ -108,8 +108,17 @@ export interface Base {
      */
     battle: Record<string, number> & { shadowPokemonAttackBonusMultiplier: number };
   };
+  /*
+   * Os rankings ja vem calculados no arquivo — o ETL faz a conta uma vez, e nao
+   * o aparelho a cada abertura. `fast`/`charged` sao o conjunto que rendeu
+   * aquela posicao, e sem eles a tira diria "o melhor" sem dizer com o que.
+   */
   rankings?: {
-    raidOverall: { speciesId: string }[];
+    raidOverall: {
+      speciesId: string;
+      fast?: { name: string };
+      charged?: { name: string };
+    }[];
     raidByType: Record<string, { speciesId: string }[]>;
   };
 }
