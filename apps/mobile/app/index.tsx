@@ -52,7 +52,22 @@ export default function Lista() {
           placeholderTextColor="#767c8c"
           className="bg-superficie text-texto rounded-2xl px-4 py-3 text-base"
         />
-        <Text className="text-texto3 text-xs mt-2">
+        {/* Os atalhos que nao sao sobre UM bicho. Ficam no topo da Especies
+            enquanto nao ha aba de Inicio — e o unico lugar que existe hoje. */}
+        <View className="flex-row gap-2 mt-3">
+          <Link href="/chocadeira" asChild>
+            <Pressable className="flex-1 bg-superficie rounded-2xl py-3 items-center">
+              <Text className="text-texto text-xs font-semibold">{t("eggs.title")}</Text>
+            </Pressable>
+          </Link>
+          <Link href="/agenda" asChild>
+            <Pressable className="flex-1 bg-superficie rounded-2xl py-3 items-center">
+              <Text className="text-texto text-xs font-semibold">{t("agenda.title")}</Text>
+            </Pressable>
+          </Link>
+        </View>
+
+        <Text className="text-texto3 text-xs mt-3">
           {t("especies.count", { n: visiveis.length.toLocaleString() })}
         </Text>
       </View>

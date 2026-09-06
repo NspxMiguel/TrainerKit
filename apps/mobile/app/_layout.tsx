@@ -28,6 +28,8 @@ export default function Layout() {
         <Stack.Screen name="iv/[id]" options={{ title: "" }} />
         <Stack.Screen name="encontro/[id]" options={{ title: "" }} />
         <Stack.Screen name="raide/[id]" options={{ title: "" }} />
+        <Stack.Screen name="chocadeira/index" options={{ title: "" }} />
+        <Stack.Screen name="agenda/index" options={{ title: "" }} />
       </Stack>
     </Idioma>
   );
