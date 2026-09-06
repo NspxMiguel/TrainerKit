@@ -11,12 +11,25 @@
  * ── Por que a cor é fixa por assunto, e não a cor da espécie ─────────────────
  *
  * Este é o único canto do app onde a cor NÃO segue a especie, e é de propósito.
- * A cor aqui é um índice: o violeta é sempre Aparência, o azul é sempre Idioma.
- * É assim que se acha uma linha em Ajustes sem ler — pela posição e pela cor. Se
- * a paleta mudasse com o bicho em destaque, a única coisa que os selos fazem de
- * útil desapareceria.
+ * A cor aqui é um índice: o cinza claro é sempre Aparência, o azul é sempre
+ * Idioma. É assim que se acha uma linha em Ajustes sem ler — pela posição e pela
+ * cor. Se a paleta mudasse com o bicho em destaque, a única coisa que os selos
+ * fazem de útil desapareceria.
  *
- * As dez cores vêm do handoff, sem retoque.
+ * ── APPEARANCE AND USAGE STOPPED BEING VIOLET ───────────────────────────────
+ *
+ * They were the handoff's #8A6BFF→#6E4BFF and #A78BFA→#7C3AED, and they were the
+ * last violet surface left in the app after the tokens, the mark and the AI star
+ * were done — "tirar o roxo de todo canto". They survived an earlier sweep for a
+ * dumb reason worth writing down: the sweep grepped lowercase hex and these are
+ * written uppercase.
+ *
+ * Appearance is now light slate, which is the one row whose subject IS light and
+ * dark, so a neutral seal says what the row does. Usage went to lime — the only
+ * free hue left that is not a neighbour of an existing seal (emerald is Images,
+ * orange is Voice, rose is Support).
+ *
+ * O resto das cores vem do handoff, sem retoque.
  */
 
 export type SeloAjustes =
@@ -37,15 +50,14 @@ export type SeloAjustes =
 /** Gradiente e desenho de cada assunto. O `d` é o miolo do SVG, em 24×24. */
 const SELOS: Record<SeloAjustes, { de: string; ate: string; svg: React.ReactNode }> = {
   aparencia: {
-    de: "#8A6BFF",
-    ate: "#6E4BFF",
+    de: "#CBD5E1",
+    ate: "#64748B",
     svg: <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z" />,
   },
   uso: {
-    // Fora do handoff (a tela dele não tinha "Como você usa"): mesma família de
-    // violeta da Aparência, porque as duas dizem "como o app se comporta".
-    de: "#A78BFA",
-    ate: "#7C3AED",
+    // Fora do handoff (a tela dele não tinha "Como você usa").
+    de: "#A3E635",
+    ate: "#4D7C0F",
     svg: (
       <>
         <path d="M4 7h16" />

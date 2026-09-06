@@ -147,24 +147,25 @@ export function AiBubble({ contexto, sistema, titulo }: Props) {
           onClick={() => setAberta((v) => !v)}
         >
           {/*
-            A estrela em gradiente violeta do handoff §5.
+            Flat star, one colour, no gradient.
 
-            O ícone anterior era o `IconSpark` monocromático, herdado de quando
-            esta bolha era só um botão azul. O gradiente é o que a liga
-            visualmente ao resto da IA no app — e é a única coisa violeta que
-            sobrevive sobre o vidro, que assume a cor do que está atrás.
+            It used to be the handoff's violet gradient, and the note here said
+            it was "the only violet thing that survives over the glass". That is
+            exactly why it had to go: "tira o roxo de todo canto". Two stops on
+            a 26px glyph is also the kind of decoration that reads as generated
+            rather than designed.
+
+            `--tk-v-investir` and not `--tk-marca-luz`: the bubble is glass, so
+            the glyph sits on whatever is behind it, and this token has the
+            right polarity for that (bright green on dark, deep green on light).
+            `--tk-marca-luz` is the inverse — it is drawn on the egg shell,
+            which is light in the dark theme.
           */}
           <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true">
             <path
               d="M12 3l1.9 4.9L19 9.8l-4.3 3 .6 5.2-3.3-2.5-3.3 2.5.6-5.2L5 9.8l5.1-1.9L12 3z"
-              fill="url(#tk-estrela)"
+              fill="var(--tk-v-investir)"
             />
-            <defs>
-              <linearGradient id="tk-estrela" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stopColor="#c4b5ff" />
-                <stop offset="1" stopColor="#6b4bff" />
-              </linearGradient>
-            </defs>
           </svg>
         </button>,
         document.body,

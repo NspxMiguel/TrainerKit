@@ -100,7 +100,7 @@ const PALETAS: Record<Tema, Paleta> = {
     tile0: [0x33, 0x39, 0x4a], // #33394A
     tile1: [0x14, 0x17, 0x1e], // #14171E
     casca: [0xf4, 0xf6, 0xfa], // #F4F6FA, do handoff
-    luz: [0x6e, 0x4b, 0xff], // #6E4BFF
+    luz: [0x0f, 0x73, 0x50], // #0F7350 — measured 5.41:1 on the light shell (the violet gave 4.72)
     quina: [0xff, 0xff, 0xff],
     quinaAlfa: 0.22, // rgba(255,255,255,.22), do handoff
     quinaLado: -1,
@@ -109,7 +109,7 @@ const PALETAS: Record<Tema, Paleta> = {
     tile0: [0xff, 0xff, 0xff], // #FFFFFF
     tile1: [0xe3, 0xe6, 0xec], // #E3E6EC
     casca: [0x22, 0x26, 0x2f], // #22262F, a versao de fundo claro
-    luz: [0x8a, 0x6b, 0xff], // #8A6BFF
+    luz: [0x3d, 0xdc, 0x97], // #3DDC97 — measured 8.57:1 on the dark shell (the violet gave 4.06)
     quina: [0x8f, 0x96, 0xa6],
     quinaAlfa: 0.45,
     quinaLado: 1,
@@ -210,7 +210,7 @@ function roundedRectSdf(
 
 /**
  * A marca: um OVO CHOCANDO — a metade de cima levantada, borda de quebra em
- * zigue-zague e luz violeta escapando de dentro.
+ * zigue-zague e a luz da marca escapando de dentro.
  *
  * Opcao 8a do documento de exploracao, e a razao dela existir esta escrita la:
  * "A Poké Ball está fora — a forma (esfera com faixa equatorial e botão
@@ -546,3 +546,47 @@ for (const [size, forma, marca, name] of [
     console.log(`${arquivo.padEnd(30)} ${size}x${size}  ${(png.length / 1024).toFixed(1)} KB`);
   }
 }
+
+/*
+ * THE NATIVE APP GETS THE SAME MARK.
+ *
+ * `apps/mobile/assets/icon.png` was still the Expo template icon — the blue
+ * chevron with the construction guides drawn on it. It is what the home screen
+ * of the simulator showed, so the native app looked like a scaffold next to the
+ * installed PWA, which has carried the egg since the icon round.
+ *
+ * Same generator, same palette, on purpose: the home-screen icon and the mark
+ * inside the app have to be one drawing. `cheio` at scale 1 is the iOS rule
+ * from the table above — the squircle eats the corners and never the middle.
+ *
+ * It is written twice: the Expo asset (so `prebuild` keeps it) and the asset
+ * catalog the current `ios/` project actually reads. Writing only the first
+ * would change nothing until someone ran prebuild, and prebuild wipes Pods.
+ */
+const MOBILE = join(HERE, "..", "..", "mobile");
+const icone1024 = encodePng(1024, 1024, renderIcon(1024, "cheio", 1, "dark"));
+for (const destino of [
+  join(MOBILE, "assets", "icon.png"),
+  join(MOBILE, "ios", "TrainerKit", "Images.xcassets", "AppIcon.appiconset", "App-Icon-1024x1024@1x.png"),
+]) {
+  await writeFile(destino, icone1024);
+  console.log(`${destino.split("/").slice(-2).join("/").padEnd(30)} 1024x1024  ${(icone1024.length / 1024).toFixed(1)} KB`);
+}
+
+/*
+ * A ABERTURA usa o `tile`, e nao o `cheio`.
+ *
+ * O `cheio` e desenhado pra ser recortado pelo squircle do iOS: sozinho ele e
+ * um quadrado de canto reto. Na tela de abertura, com `resizeMode: contain`
+ * sobre fundo preto, isso vira um retangulo cinza-escuro com quina — parece
+ * imagem que nao carregou. O `tile` ja traz o canto arredondado no desenho e
+ * flutua no preto como o icone da tela de inicio.
+ */
+const abertura = encodePng(1024, 1024, renderIcon(1024, "tile", 1, "dark"));
+await writeFile(join(MOBILE, "assets", "splash-icon.png"), abertura);
+console.log(`assets/splash-icon.png         1024x1024  ${(abertura.length / 1024).toFixed(1)} KB`);
+
+/* O favicon do Expo web e o mesmo 48px do tile. */
+const favMobile = encodePng(48, 48, renderIcon(48, "tile", 1, "dark"));
+await writeFile(join(MOBILE, "assets", "favicon.png"), favMobile);
+console.log(`assets/favicon.png             48x48  ${(favMobile.length / 1024).toFixed(1)} KB`);

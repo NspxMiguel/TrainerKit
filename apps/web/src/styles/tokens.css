@@ -130,8 +130,8 @@
   --tk-marca-tile0: #33394a;
   --tk-marca-tile1: #14171e;
   --tk-marca-casca: #f4f6fa;
-  --tk-marca-luz: #6e4bff;
-  --tk-marca-halo: #c4b5ff;
+  --tk-marca-luz: #0f7350;
+  --tk-marca-halo: #7de9b8;
   --tk-marca-borda: rgba(255, 255, 255, 0.14);
   --tk-marca-brilho: rgba(255, 255, 255, 0.22);
 
@@ -181,7 +181,7 @@
 
   /* Vereditos: palavra + cor + glifo, sempre. O glifo faz parte do token. */
   --tk-v-investir: #3ddc97;
-  --tk-v-evoluir: #9f8bff;
+  --tk-v-evoluir: #4db2ff;
   --tk-v-guardar: #ffc55c;
   --tk-v-transferir: #9aa6b8;
 
@@ -400,8 +400,8 @@
   --tk-marca-tile0: #ffffff;
   --tk-marca-tile1: #e3e6ec;
   --tk-marca-casca: #22262f;
-  --tk-marca-luz: #8a6bff;
-  --tk-marca-halo: #8a6bff;
+  --tk-marca-luz: #3ddc97;
+  --tk-marca-halo: #1f9e70;
   --tk-marca-borda: rgba(20, 24, 33, 0.1);
   --tk-marca-brilho: rgba(255, 255, 255, 0.9);
 
@@ -416,7 +416,7 @@
   --tk-ultra-fg-strong: #14161b;
 
   --tk-v-investir: #067a56;
-  --tk-v-evoluir: #5b3df5;
+  --tk-v-evoluir: #0b62c4;
   --tk-v-guardar: #8a5a00;
   --tk-v-transferir: #5b6472;
 
@@ -555,8 +555,8 @@
     --tk-marca-tile0: #ffffff;
     --tk-marca-tile1: #e3e6ec;
     --tk-marca-casca: #22262f;
-    --tk-marca-luz: #8a6bff;
-    --tk-marca-halo: #8a6bff;
+    --tk-marca-luz: #3ddc97;
+    --tk-marca-halo: #1f9e70;
     --tk-marca-borda: rgba(20, 24, 33, 0.1);
     --tk-marca-brilho: rgba(255, 255, 255, 0.9);
 
@@ -569,7 +569,7 @@
     --tk-ultra-fg-strong: #14161b;
 
     --tk-v-investir: #067a56;
-    --tk-v-evoluir: #5b3df5;
+    --tk-v-evoluir: #0b62c4;
     --tk-v-guardar: #8a5a00;
     --tk-v-transferir: #5b6472;
 
