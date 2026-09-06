@@ -838,7 +838,10 @@ export function SpeciesDetail({
           onClick={() => setRaidOpen(true)}
         >
           <IconSwords size={17} />
-          {t("raid.open")}
+          {/* No modo consulta a pergunta NAO e "eu consigo?" — nao ha colecao pra
+              responder isso. A tela passou a mostrar os recomendados sempre, e o
+              rotulo acompanha: "como derrubar". */}
+          {t(setup.mode === "colecao" ? "raid.open" : "raid.openBrowse")}
         </button>
       )}
 

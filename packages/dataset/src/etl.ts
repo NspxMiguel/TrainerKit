@@ -152,6 +152,30 @@ function titleCase(raw: string): string {
  */
 const PREFIXO_TEMPLATE = /^V\d+_POKEMON_/;
 
+/**
+ * Formas cujo codigo nao vira nome sozinho.
+ *
+ * ⚠️ A CHAVE E O FORM INTEIRO, e nao o sufixo — e essa e a parte que importa.
+ *
+ * `MEWTWO_A` e o Mewtwo com armadura, e virava "Mewtwo (A)" na tela: um nome
+ * que nao diz nada, e por isso ele nao aparecia pra quem procurava "armadura".
+ * Ele existe de verdade e e diferente de verdade — medido no GAME_MASTER,
+ * ataque 182 contra 300 da forma base, defesa 278 contra 182.
+ *
+ * Mapear pelo SUFIXO `_A` teria estragado o Unown, cujas 28 formas sao
+ * literalmente as letras: `UNOWN_A` E o Unown A, e "Unown (Armored)" seria
+ * pior que o problema original. Por id inteiro isso nao pode acontecer.
+ *
+ * ⚠️ O QUE NAO ENTROU AQUI, e de proposito: os `_S` (`ENTEI_S`, `LUGIA_S`,
+ * `LATIOS_S`...). Eles existem, mas medidos contra a forma base tem ataque,
+ * defesa, PS e numero de golpes IDENTICOS. Sem saber o que o `S` significa,
+ * batizar seria inventar — e um nome inventado e pior que um codigo, porque
+ * parece informacao. Ficam como estao ate alguem medir a diferenca.
+ */
+const NOMES_DE_FORMA: Record<string, string> = {
+  MEWTWO_A: "Armored",
+};
+
 function nomeDaForma(templateId: string, form: unknown): string | undefined {
   if (typeof form === "string") return form;
   if (form === undefined || form === null) return undefined;
@@ -640,7 +664,12 @@ function extractSpecies(templates: Template[]): OutSpecies[] {
     const pokemonId = required(s.pokemonId, `${t.templateId}.pokemonId`) as string;
     const stats = required(s.stats, `${t.templateId}.stats`);
 
-    const suffix = formSuffix(pokemonId, nomeDaForma(t.templateId, s.form));
+    const formaCrua = nomeDaForma(t.templateId, s.form);
+    // O nome legivel VENCE o sufixo cru quando existe. Ver `NOMES_DE_FORMA`.
+    const suffix =
+      formaCrua !== undefined && NOMES_DE_FORMA[formaCrua] !== undefined
+        ? NOMES_DE_FORMA[formaCrua]!
+        : formSuffix(pokemonId, formaCrua);
     const id = normalizeId(suffix ? `${pokemonId}_${suffix}` : pokemonId);
     const name = suffix && suffix !== "NORMAL"
       ? `${titleCase(pokemonId)} (${titleCase(suffix)})`

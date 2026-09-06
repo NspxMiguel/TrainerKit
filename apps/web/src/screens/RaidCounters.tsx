@@ -6,6 +6,7 @@ import {
   RAID_TIERS,
   bossCP,
   bossCatchRange,
+  effectiveness,
   estimateRaid,
   rankCounters,
   rankMovesets,
@@ -154,8 +155,101 @@ export function RaidCounters({ boss, data, onClose }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, bossInput, data, boss.types]);
 
+  /*
+   * OS RECOMENDADOS — e esta lista NAO depende da colecao.
+   *
+   * ⚠️ A TELA SO RESPONDIA "VOCE CONSEGUE?", e no modo consulta ela nao
+   * respondia nada: sem colecao, `counters` sai vazio e a tela inteira vira um
+   * estado vazio. "so fala se vc consegue com seus pokemons, modo consulta com
+   * isso n funciona, tinha q mostrar os recomendados".
+   *
+   * Sao duas perguntas diferentes e as duas sao legitimas: "o que eu uso" e "o
+   * que existe de melhor". A segunda e a que serve pra quem ainda nao cadastrou
+   * nada — e e a que responde "como eu mato isso".
+   *
+   * ── De onde saem os candidatos ─────────────────────────────────────────────
+   *
+   * Nao da pra ranquear as 1.182 especies contra o chefe a cada abertura: sao
+   * mil e duzentas buscas de melhor moveset, e a tela travaria. O dataset ja
+   * traz o recorte pronto — os 30 melhores gerais e 40 por tipo — e a conta de
+   * verdade roda so em cima desse pool.
+   *
+   * Os tipos escolhidos sao os que batem FORTE no chefe: um Lutador contra um
+   * Normal nao entra no pool geral e e a resposta certa ali.
+   *
+   * ── Por que nivel 40 e 15/15/15 ────────────────────────────────────────────
+   *
+   * A lista precisa de um bicho concreto pra calcular dano, e o app nao tem um:
+   * ela e sobre o que EXISTE, nao sobre o que voce tem. 40 e o teto sem doce XL
+   * — o que uma pessoa alcanca de verdade sem moer — e 15/15/15 e o topo. E o
+   * "melhor caso realista", e a tela diz isso em vez de fingir que e o seu.
+   */
+  const recomendados = useMemo(() => {
+    const forte = new Set<string>();
+    for (const tipo of data.typeOrder) {
+      const efic = effectiveness(data.typeChart, data.typeOrder, tipo, boss.types);
+      if (efic > 1) forte.add(tipo);
+    }
+
+    const vistos = new Set<string>();
+    const candidatos: string[] = [];
+    const juntar = (lista: readonly { speciesId: string }[] | undefined) => {
+      for (const r of lista ?? []) {
+        if (vistos.has(r.speciesId)) continue;
+        vistos.add(r.speciesId);
+        candidatos.push(r.speciesId);
+      }
+    };
+    juntar(data.rankings?.raidOverall);
+    for (const tipo of forte) juntar(data.rankings?.raidByType?.[tipo]);
+
+    const time: CounterInput[] = [];
+    for (const id of candidatos) {
+      const sp = data.species.find((x) => x.id === id);
+      if (!sp) continue;
+      const fast = sp.fastMoves.map(moveById).filter((m): m is Move => m !== null);
+      const charged = sp.chargedMoves.map(moveById).filter((m): m is Move => m !== null);
+      if (fast.length === 0 || charged.length === 0) continue;
+
+      const best = rankMovesets(fast as MoveWithPvp[], charged as MoveWithPvp[], "raid", {
+        attackerTypes: sp.types,
+        chart: data.typeChart,
+        order: data.typeOrder,
+        stabMultiplier: data.settings.battle.sameTypeAttackBonusMultiplier,
+        defenderTypes: boss.types,
+      })[0];
+      if (!best) continue;
+
+      time.push({
+        id: sp.id,
+        name: sp.name,
+        speciesId: sp.id,
+        types: sp.types,
+        baseStats: sp.baseStats,
+        ivs: { atk: 15, def: 15, hp: 15 },
+        level: 40,
+        shadow: false,
+        fast: best.fast,
+        charged: best.charged,
+      });
+    }
+
+    const ranked = rankCounters(
+      time,
+      bossInput,
+      data.cpm,
+      data.typeChart,
+      data.typeOrder,
+      data.settings.battle,
+    );
+    return { lista: ranked, estimativa: estimateRaid(ranked, bossInput) };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, bossInput, boss.types]);
+
   const spec = RAID_TIERS[tier];
   const speciesOf = (id: string) => data.species.find((s) => s.id === id);
+  /* O que as duas listas compartilham, num lugar so. */
+  const comuns = { data, language, t: t as never, speciesOf } as const;
 
   return createPortal(
     <div ref={refFolha}
@@ -295,57 +389,108 @@ export function RaidCounters({ boss, data, onClose }: Props) {
         </div>
       )}
 
+      {/*
+        OS SEUS primeiro, quando existem — e a tese do app: "o que EU faco".
+        Os recomendados vem sempre, porque a outra pergunta ("o que existe de
+        melhor") e legitima e era a unica que a tela nao respondia.
+      */}
       {counters.length > 0 && (
-        <>
-          <div className="tk-overline" style={{ display: "block", marginTop: 26 }}>
-            {t("raid.yourBest")}
-          </div>
-          <section className="tk-card" style={{ marginTop: 10 }}>
-            {counters.slice(0, 6).map((c, i) => {
-              const sp = speciesOf(c.speciesId);
-              const fast = moveLabel(c.fast.name, data.moveNames, c.fast.id, language);
-              const charged = moveLabel(c.charged.name, data.moveNames, c.charged.id, language);
-              return (
-                <div className="tk-row" key={c.id}>
-                  <span
-                    className="tk-caption"
-                    style={{ width: 16, flex: "none", fontWeight: i === 0 ? 700 : 400 }}
-                  >
-                    {i + 1}
-                  </span>
-                  {sp && (
-                    <SpeciesTile
-                      spriteId={sp.spriteId}
-                      dex={sp.dex}
-                      speciesId={sp.id}
-                      name={sp.name}
-                      types={sp.types}
-                      size={36}
-                    />
-                  )}
-                  <span className="tk-row-label" style={i === 0 ? { fontWeight: 700 } : undefined}>
-                    {c.name}
-                    <span className="tk-caption" style={{ display: "block" }}>
-                      {fast.primary} + {charged.primary}
-                    </span>
-                  </span>
-                  <span
-                    className="tk-row-value"
-                    style={i === 0 ? { color: "var(--tk-succ)", fontWeight: 700 } : undefined}
-                  >
-                    {Math.round(c.dps)}{" "}
-                    <span className="tk-caption">{t("raid.dps")}</span>
-                  </span>
-                </div>
-              );
-            })}
-          </section>
-          <p className="tk-caption" style={{ margin: "10px 2px 0", lineHeight: 1.5 }}>
-            {t("raid.movesetNote")}
-          </p>
-        </>
+        <Lista
+          titulo={t("raid.yourBest")}
+          itens={counters}
+          nota={t("raid.movesetNote")}
+          {...comuns}
+        />
       )}
+
+      <Lista
+        titulo={t("raid.recommended")}
+        itens={recomendados.lista}
+        nota={t("raid.recommendedNote")}
+        {...comuns}
+      />
+
     </div>,
     document.body,
+  );
+}
+
+interface LinhaCounter {
+  id: string;
+  speciesId: string;
+  name: string;
+  dps: number;
+  fast: { id: string; name: string };
+  charged: { id: string; name: string };
+}
+
+interface ListaProps {
+  titulo: string;
+  itens: readonly LinhaCounter[];
+  nota: string;
+  data: Dataset;
+  language: string;
+  t: (k: never) => string;
+  speciesOf: (id: string) => DatasetSpecies | undefined;
+}
+
+/**
+ * Uma lista de counters.
+ *
+ * Extraida porque agora ha DUAS — "os seus" e "os recomendados" — e o markup
+ * tinha quarenta linhas. Duas copias divergem: a primeira vez que alguem
+ * mexesse numa, a outra ficaria pra tras, e as duas estao na mesma tela, uma
+ * embaixo da outra, onde a diferenca salta.
+ */
+function Lista({ titulo, itens, nota, data, language, t, speciesOf }: ListaProps) {
+  if (itens.length === 0) return null;
+  return (
+    <>
+      <div className="tk-overline" style={{ display: "block", marginTop: 26 }}>
+        {titulo}
+      </div>
+      <section className="tk-card" style={{ marginTop: 10 }}>
+        {itens.slice(0, 6).map((c, i) => {
+          const sp = speciesOf(c.speciesId);
+          const fast = moveLabel(c.fast.name, data.moveNames, c.fast.id, language);
+          const charged = moveLabel(c.charged.name, data.moveNames, c.charged.id, language);
+          return (
+            <div className="tk-row" key={c.id}>
+              <span
+                className="tk-caption"
+                style={{ width: 16, flex: "none", fontWeight: i === 0 ? 700 : 400 }}
+              >
+                {i + 1}
+              </span>
+              {sp && (
+                <SpeciesTile
+                  spriteId={sp.spriteId}
+                  dex={sp.dex}
+                  speciesId={sp.id}
+                  name={sp.name}
+                  types={sp.types}
+                  size={36}
+                />
+              )}
+              <span className="tk-row-label" style={i === 0 ? { fontWeight: 700 } : undefined}>
+                {c.name}
+                <span className="tk-caption" style={{ display: "block" }}>
+                  {fast.primary} + {charged.primary}
+                </span>
+              </span>
+              <span
+                className="tk-row-value"
+                style={i === 0 ? { color: "var(--tk-succ)", fontWeight: 700 } : undefined}
+              >
+                {Math.round(c.dps)} <span className="tk-caption">{t("raid.dps" as never)}</span>
+              </span>
+            </div>
+          );
+        })}
+      </section>
+      <p className="tk-caption" style={{ margin: "10px 2px 0", lineHeight: 1.5 }}>
+        {nota}
+      </p>
+    </>
   );
 }
