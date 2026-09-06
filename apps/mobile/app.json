@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "TrainerKit",
+    "slug": "trainerkit",
+    "version": "0.5.0",
+    "orientation": "default",
+    "scheme": "trainerkit",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "bundleIdentifier": "com.trainerkit.app",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.trainerkit.app",
+      "edgeToEdgeEnabled": true
+    },
+    "plugins": ["expo-router", "expo-localization"],
+    "experiments": { "typedRoutes": true }
+  }
+}
