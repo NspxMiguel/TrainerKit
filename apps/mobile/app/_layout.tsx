@@ -34,6 +34,7 @@ export default function Layout() {
         <Stack.Screen name="faxina/index" options={{ title: "" }} />
         <Stack.Screen name="ajustes/index" options={{ title: "" }} />
         <Stack.Screen name="time/index" options={{ title: "" }} />
+        <Stack.Screen name="ginasio/index" options={{ title: "" }} />
       </Stack>
     </Idioma>
   );
