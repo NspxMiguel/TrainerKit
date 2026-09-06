@@ -168,6 +168,13 @@ export const PT_BR: Dict = {
   "context.rocket.detail": "Os líderes bloqueiam seus dois primeiros carregados.",
 
   "iv.title": "IV do meu {name}",
+  "iv.cp": "PC",
+  "iv.hp": "PS",
+  "iv.appraisalTitle": "Estrelas da avaliação",
+  "iv.bestStats": "Maior atributo",
+  "iv.level": "nível",
+  "iv.noMatch": "Nada bate com esses números. Confira o PC e o PS.",
+  "iv.candidates": "Ainda cabem {n} combinações — marque o atributo destacado pra estreitar.",
   "iv.whatItRead": "O que ele leu",
   "iv.enterByHand": "Coloque manualmente",
   "iv.findLevel": "Descobrir o nível",

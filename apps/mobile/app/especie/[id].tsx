@@ -1,6 +1,6 @@
-import { useLocalSearchParams } from "expo-router";
+import { Link, useLocalSearchParams } from "expo-router";
 import { useMemo } from "react";
-import { ActivityIndicator, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 
 import { ACTION_KEYS, decide } from "@trainerkit/core";
 import { useDados } from "../../src/dados";
@@ -79,6 +79,15 @@ export default function Ficha() {
           {especie.types.map((tp) => t(`type.${tp}` as never)).join(" / ")}
         </Text>
       </View>
+
+      {/* A acao principal da ficha: e o que o app faz de mais util. */}
+      <Link href={{ pathname: "/iv/[id]", params: { id: especie.id } }} asChild>
+        <Pressable className="bg-texto rounded-full py-4 items-center mt-7">
+          <Text className="text-fundo font-bold text-base">
+            {t("species.calcIV")}
+          </Text>
+        </Pressable>
+      </Link>
 
       {veredito && (
         <View className="bg-superficie rounded-3xl p-5 mt-7">

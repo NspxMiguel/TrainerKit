@@ -186,6 +186,13 @@ const EN = {
 
   // ---------------------------------------------------------------- calculadora
   "iv.title": "My {name}'s IVs",
+  "iv.cp": "CP",
+  "iv.hp": "HP",
+  "iv.appraisalTitle": "Appraisal stars",
+  "iv.bestStats": "Highest stat",
+  "iv.level": "level",
+  "iv.noMatch": "Nothing matches those numbers. Check the CP and HP.",
+  "iv.candidates": "{n} combinations still fit — pick the highlighted stat to narrow it.",
   "iv.whatItRead": "What it read",
   "iv.enterByHand": "Enter by hand",
   "iv.findLevel": "Find the level",
