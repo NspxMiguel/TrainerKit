@@ -5,6 +5,7 @@ import { StyleSheet, View } from "react-native";
 
 import { Idioma } from "../src/i18n";
 import { Onboarding } from "../src/Onboarding";
+import { Imagens } from "../src/imagens";
 import { ConfigInicial, useSetup } from "../src/setup";
 import { Tema, useTema } from "../src/tema";
 
@@ -76,7 +77,9 @@ export default function Layout() {
     <Tema>
       <Idioma>
         <ConfigInicial>
-          <Casca />
+          <Imagens>
+            <Casca />
+          </Imagens>
         </ConfigInicial>
       </Idioma>
     </Tema>

@@ -12,6 +12,7 @@ import {
   type Key,
 } from "@trainerkit/core";
 import { useT } from "../../src/i18n";
+import { FONTES, SPRITE_SOURCE_KEYS, useImagens } from "../../src/imagens";
 import { useSetup } from "../../src/setup";
 import { useTema, type Escolha } from "../../src/tema";
 
@@ -42,6 +43,7 @@ export default function Ajustes() {
   const { t, idioma, trocar } = useT();
   const { cores, escolha, definir } = useTema();
   const { setup, definir: definirSetup } = useSetup();
+  const { fonte, definir: definirFonte } = useImagens();
   const [copiado, setCopiado] = useState(false);
 
   return (
@@ -98,6 +100,37 @@ export default function Ajustes() {
         roda uma vez não pode ser o único lugar de um valor que muda com o
         tempo.
       */}
+      {/*
+        IMAGENS — desligado por padrão, e a tela de Privacidade depende disso.
+        Ligar acrescenta um segundo host que recebe pedido do app, e é por isso
+        que a política declara esse host condicionado a esta escolha.
+      */}
+      <Text className="text-texto3 text-[11px] tracking-widest mt-7 mb-2">
+        {t("sprites.title").toUpperCase()}
+      </Text>
+      <View className="bg-superficie rounded-3xl overflow-hidden">
+        {FONTES.map((f, i) => (
+          <Pressable
+            key={f}
+            onPress={() => definirFonte(f)}
+            className="px-4 py-3.5"
+            style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: cores.linha } : undefined}
+          >
+            <View className="flex-row items-center">
+              <Text
+                className={`flex-1 text-[15px] ${f === fonte ? "text-texto font-bold" : "text-texto2"}`}
+              >
+                {t(SPRITE_SOURCE_KEYS[f].title as Key)}
+              </Text>
+              {f === fonte && <Text className="text-texto text-base">✓</Text>}
+            </View>
+            <Text className="text-texto3 text-[12px] leading-4 mt-1">
+              {t(SPRITE_SOURCE_KEYS[f].detail as Key)}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+
       <Text className="text-texto3 text-[11px] tracking-widest mt-7 mb-2">
         {t("onb.level.title").toUpperCase()}
       </Text>

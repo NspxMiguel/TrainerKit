@@ -1,6 +1,7 @@
 import { ScrollView, Text, View } from "react-native";
 
 import { useT } from "../../src/i18n";
+import { useImagens } from "../../src/imagens";
 import { useTema } from "../../src/tema";
 
 /**
@@ -41,6 +42,7 @@ const CONTATO = "miguel@nspx.dev";
 export default function Legal() {
   const { t } = useT();
   const { cores } = useTema();
+  const { fonte } = useImagens();
 
   const bloco = (titulo: string, corpo: string[]) => (
     <View key={titulo} className="bg-superficie rounded-3xl p-5 mb-3">
@@ -61,7 +63,18 @@ export default function Legal() {
 
       {bloco(t("privacy.summary.title"), [t("privacy.summary.body")])}
       {bloco(t("privacy.local.title"), [t("privacy.native.local")])}
-      {bloco(t("privacy.third.title"), [t("privacy.native.network"), t("privacy.third.none")])}
+      {/*
+        ⚠️ A LINHA DAS IMAGENS É CONDICIONAL, e tem que ser.
+        Com a fonte desligada — o padrão — o app fala com UM host. Declarar o
+        segundo assim mesmo faria a política descrever tráfego que não existe; e
+        omiti-lo com a fonte ligada faria o contrário, que é pior. A política
+        descreve o app configurado como ele está.
+      */}
+      {bloco(t("privacy.third.title"), [
+        t("privacy.native.network"),
+        ...(fonte === "off" ? [] : [t("privacy.native.images")]),
+        t("privacy.third.none"),
+      ])}
       {bloco(t("privacy.transfer.title"), [t("privacy.native.transfer")])}
       {bloco(t("privacy.rights.title"), [t("privacy.native.rights")])}
       {bloco(t("privacy.minors.title"), [t("privacy.native.minors")])}

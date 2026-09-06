@@ -490,6 +490,7 @@ export const ES: Dict = {
   /* ── Privacidade do app NATIVO: ele nao tem IA, voz nem imagens. ────── */
   "privacy.native.local": "Tu colección y tus preferencias se guardan en este dispositivo, en el almacenamiento de la propia app. Nada de eso se envía a ningún lado.",
   "privacy.native.network": "• GitHub (EE. UU.) — la app busca allí la lista de eventos y la de huevos mientras miras Qué hay o la Incubadora. Solo salen la dirección del archivo y tu IP. Nada tuyo viaja con eso.",
+  "privacy.native.images": "• GitHub (EE. UU.) — con una fuente activada en Ajustes › Imágenes, la ilustración de las especies se busca allí mientras navegas. Solo salen la dirección de la imagen y tu IP. Eligiendo «Sin imágenes», eso se detiene.",
   "privacy.native.transfer": "El único servicio citado arriba está fuera de Brasil, en Estados Unidos, y no recibe nada sobre ti — solo la petición de un archivo público.",
   "privacy.native.rights": "La LGPD brasileña (art. 18) garantiza acceso, corrección y eliminación de tus datos. Como todo queda en este dispositivo, borrar la app lo borra todo. No tenemos copia.",
   "privacy.native.minors": "La app no pide ni recopila ningún dato personal, de nadie, de ninguna edad. No tiene cuenta, ni registro, ni medición de uso.",
