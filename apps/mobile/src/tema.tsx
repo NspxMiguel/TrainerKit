@@ -43,7 +43,7 @@ const CLARO: Paleta = {
   investir: "#12805a",
   guardar: "#8a5a00",
   transferir: "#5c6675",
-  evoluir: "#5b3df5",
+  evoluir: "#0b62c4",
   descobrir: "#5c6675",
 };
 
@@ -53,11 +53,13 @@ const ESCURO: Paleta = {
   linha: "rgba(255,255,255,0.08)",
   texto: "#f4f6fa",
   texto2: "#a8adba",
-  texto3: "#767c8c",
+  /* #767c8c media 4,45:1 sobre o cartao (#131313) — reprovava por pouco, e por
+     pouco e reprovado do mesmo jeito. #7d8494 da 4,95:1 e 5,60:1 sobre o preto. */
+  texto3: "#7d8494",
   investir: "#3ddc97",
   guardar: "#ffc55c",
   transferir: "#9aa6b8",
-  evoluir: "#9f8bff",
+  evoluir: "#4db2ff",
   descobrir: "#a8adba",
 };
 

@@ -4,18 +4,30 @@
     "slug": "trainerkit",
     "version": "0.5.0",
     "orientation": "default",
+    "icon": "./assets/icon.png",
     "scheme": "trainerkit",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
     "ios": {
       "bundleIdentifier": "com.trainerkit.app",
-      "supportsTablet": true
+      "supportsTablet": true,
+      "icon": "./assets/icon.png"
     },
     "android": {
       "package": "com.trainerkit.app",
       "edgeToEdgeEnabled": true
     },
-    "plugins": ["expo-router", "expo-localization"],
-    "experiments": { "typedRoutes": true }
+    "plugins": [
+      "expo-router",
+      "expo-localization"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
   }
 }

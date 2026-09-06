@@ -2,9 +2,10 @@ import { Link, useLocalSearchParams } from "expo-router";
 import { useMemo } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 
-import { ACTION_KEYS, decide } from "@trainerkit/core";
+import { ACTION_KEYS, decide, tetoDePowerUp } from "@trainerkit/core";
 import { useDados } from "../../src/dados";
 import { useT } from "../../src/i18n";
+import { useSetup } from "../../src/setup";
 import { useTema, type Paleta } from "../../src/tema";
 import { Selo } from "../../src/Selo";
 
@@ -30,6 +31,7 @@ const COR_ACAO: Record<string, keyof Paleta> = {
 export default function Ficha() {
   const { t } = useT();
   const { cores } = useTema();
+  const { setup } = useSetup();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { pronto, dados } = useDados();
 
@@ -50,7 +52,15 @@ export default function Ficha() {
       ivs: { atk: 15, def: 15, hp: 15 },
       level: 20,
       cpm: dados.cpm,
-      levelCap: dados.version.levelCap,
+      /*
+       * O teto de QUEM ESTA JOGANDO, e nao o do jogo.
+       *
+       * `version.levelCap` e o teto de quem ja terminou. Para um treinador de
+       * nivel 20 o app respondia sobre uma especie que aquela pessoa so
+       * consegue levar ao nivel 22 — a mesma correcao que o web ja tinha, e que
+       * so pode existir aqui depois de o setup nativo perguntar o nivel.
+       */
+      levelCap: tetoDePowerUp(setup.level, dados.version.levelCap),
       evolvesInto: [],
     });
   }, [dados, especie]);

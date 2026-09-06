@@ -1,5 +1,13 @@
 import { getLocales } from "expo-localization";
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import AsyncStorage from "expo-sqlite/kv-store";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 
 import { DICTS, EN, type Key } from "@trainerkit/core";
 
@@ -40,11 +48,33 @@ const Contexto = createContext<Ctx | null>(null);
 export function Idioma({ children }: { children: ReactNode }) {
   const [idioma, setIdioma] = useState(doSistema);
 
+  /*
+   * A ESCOLHA FICA SALVA — regra do projeto, e ela estava quebrada aqui.
+   *
+   * A `CHAVE` já existia e já era exportada; o que faltava era alguém ler e
+   * gravar. Trocar de idioma funcionava perfeitamente e voltava pro idioma do
+   * sistema no próximo boot — o pior formato de defeito, porque na sessão em
+   * que se testa ele não aparece.
+   *
+   * A leitura é assíncrona, então o app abre no idioma do sistema e corrige em
+   * seguida. É um quadro, e é o mesmo compromisso do tema.
+   */
+  useEffect(() => {
+    AsyncStorage.getItem(CHAVE)
+      .then((v) => {
+        if (v && DICTS[v]) setIdioma(v);
+      })
+      .catch(() => {});
+  }, []);
+
   const valor = useMemo<Ctx>(() => {
     const dict = DICTS[idioma] ?? EN;
     return {
       idioma,
-      trocar: setIdioma,
+      trocar: (i) => {
+        setIdioma(i);
+        AsyncStorage.setItem(CHAVE, i).catch(() => {});
+      },
       t: (k, vars) => {
         /* Cai no ingles por chave, e nao no dicionario inteiro: um idioma com
            uma chave faltando mostra so aquela linha em ingles. */

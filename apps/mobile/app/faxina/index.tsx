@@ -4,12 +4,14 @@ import { ScrollView, Text, View } from "react-native";
 import {
   fazGigantamax,
   planejarFaxina,
+  tetoDePowerUp,
   type BichoFaxina,
   type EspecieFaxina,
 } from "@trainerkit/core";
 import { useColecao } from "../../src/colecao";
 import { useDados } from "../../src/dados";
 import { useT } from "../../src/i18n";
+import { useSetup } from "../../src/setup";
 import { useTema } from "../../src/tema";
 import { Selo } from "../../src/Selo";
 
@@ -26,6 +28,7 @@ import { Selo } from "../../src/Selo";
 export default function Faxina() {
   const { t } = useT();
   const { cores } = useTema();
+  const { setup } = useSetup();
   const { itens } = useColecao();
   const { dados } = useDados();
 
@@ -58,7 +61,15 @@ export default function Faxina() {
       bichos,
       especies,
       cpm: dados.cpm,
-      levelCap: dados.version.levelCap,
+      /*
+       * O teto de QUEM ESTA JOGANDO, e nao o do jogo.
+       *
+       * `version.levelCap` e o teto de quem ja terminou. Para um treinador de
+       * nivel 20 o app respondia sobre uma especie que aquela pessoa so
+       * consegue levar ao nivel 22 — a mesma correcao que o web ja tinha, e que
+       * so pode existir aqui depois de o setup nativo perguntar o nivel.
+       */
+      levelCap: tetoDePowerUp(setup.level, dados.version.levelCap),
     });
   }, [dados, itens]);
 

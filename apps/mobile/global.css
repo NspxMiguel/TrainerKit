@@ -27,7 +27,7 @@
     --tk-investir: 18 128 90;
     --tk-guardar: 138 90 0;
     --tk-transferir: 92 102 117;
-    --tk-evoluir: 91 61 245;
+    --tk-evoluir: 11 98 196;
     --tk-descobrir: 92 102 117;
   }
 
@@ -38,11 +38,11 @@
     --tk-linha-alfa: 0.08;
     --tk-texto: 244 246 250;
     --tk-texto2: 168 173 186;
-    --tk-texto3: 118 124 140;
+    --tk-texto3: 125 132 148;
     --tk-investir: 61 220 151;
     --tk-guardar: 255 197 92;
     --tk-transferir: 154 166 184;
-    --tk-evoluir: 159 139 255;
+    --tk-evoluir: 77 178 255;
     --tk-descobrir: 168 173 186;
   }
 }
