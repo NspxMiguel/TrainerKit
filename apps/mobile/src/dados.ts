@@ -1,3 +1,4 @@
+import type { DadosDynamax } from "@trainerkit/core";
 import { Asset } from "expo-asset";
 import { File } from "expo-file-system";
 import { useEffect, useState } from "react";
@@ -59,6 +60,8 @@ export interface Especie {
   /** Golpes que so entram por TM Elite — nao aparecem em captura normal. */
   eliteFastMoves: string[];
   eliteChargedMoves: string[];
+  /** Grupo de custo dos Max Ataques. `null` na especie que nao entra em Batalha Max. */
+  maxGrupo: string | null;
 }
 
 interface Golpe {
@@ -83,6 +86,15 @@ export interface Base {
   typeOrder: string[];
   fastMoves: Golpe[];
   chargedMoves: Golpe[];
+  /*
+   * A Batalha Max, que tambem ja vinha no arquivo sem tipo.
+   *
+   * `ligado` e a chave que decide se a mecanica existe na temporada — quando o
+   * jogo desligar, a tela some sozinha em vez de mostrar custo de uma coisa que
+   * nao da pra fazer. O tipo vem do core (`DadosDynamax`), pra nao existirem
+   * duas descricoes do mesmo objeto.
+   */
+  dynamax?: DadosDynamax;
   settings: {
     /*
      * ⚠️ `shadowPokemonAttackBonusMultiplier` DECLARADO, e nao so um

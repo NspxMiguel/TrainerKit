@@ -80,18 +80,13 @@ export default function Raide() {
       const rapidos = sp.fastMoves.map(golpe).filter((m): m is Move => m !== null);
       const carregados = sp.chargedMoves.map(golpe).filter((m): m is Move => m !== null);
       if (rapidos.length === 0 || carregados.length === 0) continue;
-      const melhor = rankMovesets(
-        rapidos as MoveWithPvp[],
-        carregados as MoveWithPvp[],
-        "raid",
-        {
-          attackerTypes: sp.types,
-          chart: dados.typeChart,
-          order: dados.typeOrder,
-          stabMultiplier: dados.settings.battle.sameTypeAttackBonusMultiplier ?? 1.2,
-          defenderTypes: chefe.types,
-        },
-      )[0];
+      const melhor = rankMovesets(rapidos as MoveWithPvp[], carregados as MoveWithPvp[], "raid", {
+        attackerTypes: sp.types,
+        chart: dados.typeChart,
+        order: dados.typeOrder,
+        stabMultiplier: dados.settings.battle.sameTypeAttackBonusMultiplier ?? 1.2,
+        defenderTypes: chefe.types,
+      })[0];
       if (!melhor) continue;
       /* Nivel 40 e 15/15/15: a lista e sobre o que EXISTE, nao sobre um bicho
          seu. 40 e o teto sem doce XL — o que se alcanca sem moer. */
@@ -128,8 +123,12 @@ export default function Raide() {
         <Text className="text-texto text-lg font-bold">{chefe.name}</Text>
       </View>
 
+      {/* ⚠️ `raid.tier` e "Tier {n}", nao um titulo — chamar sem o `n` imprimia
+          "TIER {N}" na tela. O cabecalho nomeia a escolha atual, entao ele tem
+          o numero de verdade; e o "Mega" tem chave propria, porque la o numero
+          nao existe. */}
       <Text className="text-texto3 text-[11px] tracking-widest mt-6 mb-2">
-        {t("raid.tier").toUpperCase()}
+        {(tier === "mega" ? t("raid.tierMega") : t("raid.tier", { n: tier })).toUpperCase()}
       </Text>
       <View className="flex-row gap-2">
         {TIERS.map((tr) => (
@@ -170,8 +169,7 @@ export default function Raide() {
                 </Text>
               </View>
               <Text className="text-texto text-sm font-semibold">
-                {Math.round(c.dps)}{" "}
-                <Text className="text-texto3 text-[11px]">{t("raid.dps")}</Text>
+                {Math.round(c.dps)} <Text className="text-texto3 text-[11px]">{t("raid.dps")}</Text>
               </Text>
             </View>
           );

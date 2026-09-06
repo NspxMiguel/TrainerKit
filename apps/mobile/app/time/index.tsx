@@ -62,7 +62,10 @@ export default function Time() {
         })}
       </View>
       <Text className="text-texto3 text-xs mt-3 leading-5">
-        {`${countDistinctTypes(time)} · ${t("team.variety")}`}
+        {/* ⚠️ A frase JA diz o numero: "{n} tipos diferentes entre os {total}".
+            Concatenar a contagem na frente e chamar `t` sem os dois argumentos
+            imprimia "6 · {n} tipos diferentes entre os {total}". */}
+        {t("team.variety", { n: countDistinctTypes(time), total: time.length })}
       </Text>
     </ScrollView>
   );

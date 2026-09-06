@@ -7,11 +7,15 @@ import {
   CONTEXT_KEYS,
   computeCPAtLevel,
   decide,
+  custoDosMaxAtaques,
+  fazGigantamax,
   groupIdenticalContexts,
+  papelNaBatalhaMax,
   rankMovesets,
   shadowDamageMultiplier,
   tetoDePowerUp,
   withFrustration,
+  type Key,
   type MoveWithPvp,
 } from "@trainerkit/core";
 import { useDados } from "../../src/dados";
@@ -31,6 +35,14 @@ import { Selo } from "../../src/Selo";
 /* O veredito e a unica cor com significado nesta tela, e por isso ela troca
    com o tema: `#3ddc97` da 10,5:1 sobre o cartao preto e 1,8:1 sobre o branco.
    O nome da acao e que e estavel — o tom, nao. */
+/* Os quatro papeis da Batalha Max, e a chave que diz cada um nos dez idiomas. */
+const PAPEL_MAX: Record<string, Key> = {
+  atacante: "species.maxRole.atacante",
+  guarda: "species.maxRole.guarda",
+  espirito: "species.maxRole.espirito",
+  equilibrado: "species.maxRole.equilibrado",
+};
+
 const COR_ACAO: Record<string, keyof Paleta> = {
   investir: "investir",
   evoluir: "evoluir",
@@ -167,6 +179,23 @@ export default function Ficha() {
     if (!livre || !presa) return null;
     return Math.round((1 - presa.score / livre.score) * 100);
   }, [dados, especie, sombroso]);
+
+  /**
+   * A BATALHA MAX — a mecanica que o app nativo ignorava.
+   *
+   * ⚠️ O bloco NAO afirma que a especie "pode Dynamax". Isso e propriedade do
+   * jogo e nao do dataset; o que da pra afirmar e o custo dos Max Ataques do
+   * grupo dela e o papel que os stats base sugerem. `ligado` some a tela
+   * inteira quando o jogo desliga a mecanica na temporada.
+   */
+  const max = useMemo(() => {
+    if (!dados?.dynamax?.ligado || !especie) return null;
+    return {
+      gigantamax: fazGigantamax(especie.id, dados.dynamax),
+      papel: papelNaBatalhaMax(especie.baseStats),
+      custo: custoDosMaxAtaques(especie.maxGrupo, dados.dynamax),
+    };
+  }, [dados, especie]);
 
   /*
    * Os tres tetos de PC, e o terceiro NAO e um teto a mais: e o Melhor Amigo.
@@ -379,6 +408,44 @@ export default function Ficha() {
               </Link>
             );
           })}
+        </View>
+      )}
+
+      {/* ── BATALHA MAX ────────────────────────────────────────────────────── */}
+      {max && (
+        <View className="bg-superficie rounded-3xl p-5 mt-3">
+          <Text className="text-texto3 text-[11px] tracking-widest">
+            {t("species.maxBattle").toUpperCase()}
+          </Text>
+
+          {max.gigantamax && (
+            <View className="flex-row items-center justify-between mt-3">
+              <Text className="text-texto2 text-sm">{t("species.gigantamax")}</Text>
+              <Text className="text-texto text-sm font-semibold">{t("common.yes")}</Text>
+            </View>
+          )}
+
+          <View className="flex-row items-center justify-between mt-3">
+            <Text className="text-texto2 text-sm">{t("species.maxRole")}</Text>
+            <Text className="text-texto text-sm font-semibold">{t(PAPEL_MAX[max.papel]!)}</Text>
+          </View>
+
+          {max.custo && (
+            <View className="flex-row items-center justify-between mt-3">
+              <Text className="text-texto2 text-sm flex-1">{t("species.maxCost")}</Text>
+              <Text className="text-texto text-sm font-semibold ml-3">
+                {/* A soma dos TRES caminhos (ataque, guarda, espirito): e o que
+                    custa subir a especie inteira, que e a pergunta real. */}
+                {t("species.maxCostValue", {
+                  candy: max.custo.ataque.doces + max.custo.guarda.doces + max.custo.espirito.doces,
+                  xl:
+                    max.custo.ataque.docesXL +
+                    max.custo.guarda.docesXL +
+                    max.custo.espirito.docesXL,
+                })}
+              </Text>
+            </View>
+          )}
         </View>
       )}
 
