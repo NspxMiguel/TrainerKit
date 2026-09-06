@@ -31,12 +31,46 @@ const STATS = ["atk", "def", "hp"] as const;
 export default function Calculadora() {
   const { t } = useT();
   const { cores } = useTema();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  /*
+   * `atk/def/hp` chegam do leitor de print, e sao opcionais.
+   *
+   * ⚠️ Eles NAO viram o resultado direto: o que as barras dizem e a faixa de
+   * estrelas e quais atributos estao destacados, e e isso que eles
+   * pre-selecionam aqui. O PC e o PS continuam sendo digitados, porque sao eles
+   * que dao o NIVEL — e nivel nenhuma barra mostra.
+   */
+  const {
+    id,
+    atk,
+    def,
+    hp: hpIv,
+  } = useLocalSearchParams<{
+    id: string;
+    atk?: string;
+    def?: string;
+    hp?: string;
+  }>();
+  const doPrint =
+    atk !== undefined && def !== undefined && hpIv !== undefined
+      ? { atk: Number(atk), def: Number(def), hp: Number(hpIv) }
+      : null;
   const { dados } = useDados();
   const [cp, setCp] = useState("");
   const [hp, setHp] = useState("");
-  const [faixa, setFaixa] = useState(3);
-  const [melhores, setMelhores] = useState<Set<"atk" | "def" | "hp">>(new Set());
+  const [faixa, setFaixa] = useState(() => {
+    if (!doPrint) return 3;
+    const total = doPrint.atk + doPrint.def + doPrint.hp;
+    return total <= 22 ? 0 : total <= 29 ? 1 : total <= 36 ? 2 : 3;
+  });
+  const [melhores, setMelhores] = useState<Set<"atk" | "def" | "hp">>(() => {
+    if (!doPrint) return new Set();
+    const teto = Math.max(doPrint.atk, doPrint.def, doPrint.hp);
+    const s = new Set<"atk" | "def" | "hp">();
+    if (doPrint.atk === teto) s.add("atk");
+    if (doPrint.def === teto) s.add("def");
+    if (doPrint.hp === teto) s.add("hp");
+    return s;
+  });
 
   const especie = dados?.species.find((s) => s.id === id) ?? null;
 
@@ -116,9 +150,7 @@ export default function Calculadora() {
               i === faixa ? "bg-texto" : "bg-superficie"
             }`}
           >
-            <Text className={i === faixa ? "text-fundo font-bold" : "text-texto2"}>
-              {f.rotulo}
-            </Text>
+            <Text className={i === faixa ? "text-fundo font-bold" : "text-texto2"}>{f.rotulo}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -143,7 +175,13 @@ export default function Calculadora() {
               className={`flex-1 rounded-2xl py-3 items-center ${on ? "bg-texto" : "bg-superficie"}`}
             >
               <Text className={on ? "text-fundo font-bold" : "text-texto2"}>
-                {t(st === "atk" ? "common.attack" : st === "def" ? "common.defense" : "common.stamina")}
+                {t(
+                  st === "atk"
+                    ? "common.attack"
+                    : st === "def"
+                      ? "common.defense"
+                      : "common.stamina",
+                )}
               </Text>
             </TouchableOpacity>
           );

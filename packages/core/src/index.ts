@@ -41,3 +41,4 @@ export * from "./cores.js";
 export * from "./support.js";
 export * from "./setup.js";
 export * from "./languages.js";
+export * from "./png.js";

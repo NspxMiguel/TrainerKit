@@ -118,6 +118,19 @@ export default function Lista() {
           </Link>
         </View>
 
+        {/* O leitor de print ganha largura inteira: e a acao que o web poe como
+            faixa no Inicio, e a unica aqui que resolve o problema em um passo. */}
+        <Link href="/print" asChild>
+          <Pressable
+            className="rounded-2xl py-3.5 items-center mt-2"
+            style={{ backgroundColor: cores.texto }}
+          >
+            <Text className="text-xs font-bold" style={{ color: cores.fundo }}>
+              {t("scan.pick")}
+            </Text>
+          </Pressable>
+        </Link>
+
         {/* A tira so aparece quando ninguem esta buscando: durante a busca o
             assunto e o que foi digitado, e uma recomendacao fixa no meio do
             caminho e ruido. */}
