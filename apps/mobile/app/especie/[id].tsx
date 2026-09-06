@@ -95,6 +95,12 @@ export default function Ficha() {
         </Pressable>
       </Link>
 
+      <Link href={{ pathname: "/raide/[id]", params: { id: especie.id } }} asChild>
+        <Pressable className="bg-superficie rounded-full py-4 items-center mt-3">
+          <Text className="text-texto font-bold text-base">{t("raid.openBrowse")}</Text>
+        </Pressable>
+      </Link>
+
       {veredito && (
         <View className="bg-superficie rounded-3xl p-5 mt-7">
           <Text className="text-texto3 text-[11px] tracking-widest">{t("assistant.title").toUpperCase()}</Text>

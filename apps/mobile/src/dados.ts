@@ -40,6 +40,20 @@ export interface Especie {
   types: string[];
   baseStats: { atk: number; def: number; hp: number };
   spriteId: number | null;
+  legendary?: boolean;
+  fastMoves: string[];
+  chargedMoves: string[];
+}
+
+interface Golpe {
+  id: string;
+  name: string;
+  type: string;
+  power: number;
+  energyDelta: number;
+  durationMs: number;
+  damageWindowStartMs: number;
+  pvp: { power: number; energyDelta: number; turns: number } | null;
 }
 
 export interface Base {
@@ -49,6 +63,15 @@ export interface Base {
   canonicas: Especie[];
   cpm: number[];
   version: { levelCap: number };
+  typeChart: Record<string, number[]>;
+  typeOrder: string[];
+  fastMoves: Golpe[];
+  chargedMoves: Golpe[];
+  settings: { battle: Record<string, number> };
+  rankings?: {
+    raidOverall: { speciesId: string }[];
+    raidByType: Record<string, { speciesId: string }[]>;
+  };
 }
 
 export function useDados(): EstadoDados {
