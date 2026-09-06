@@ -173,12 +173,7 @@ export function AiBubble({ contexto, sistema, titulo }: Props) {
 
       {aberta &&
         createPortal(
-          <div
-            className="tk-chat"
-            role="dialog"
-            aria-modal="true"
-            aria-label={t("bubble.open")}
-          >
+          <div className="tk-chat" role="dialog" aria-modal="true" aria-label={t("bubble.open")}>
             <div className="tk-chat-top">
               <span className="tk-chat-title">{titulo}</span>
               <span className="tk-chat-quota">

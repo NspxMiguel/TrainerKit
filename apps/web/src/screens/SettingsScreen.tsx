@@ -77,7 +77,7 @@ type Painel =
   | "about"
   | "privacy"
   | "feedback"
-  | "support"
+  | "support";
   /*
    * ⚠️ "help" SAIU: "tire o ajude o projeto".
    *
@@ -86,7 +86,7 @@ type Painel =
    * duas coisas continuam existindo onde importam — o campo da chave da Groq
    * mora em "Assistente com IA" e o da ElevenLabs em "Voz da Especies", cada um
    * com o seu link. O que se perdeu foi uma terceira porta pra chegar neles.
-   */;
+   */
 
 const THEME_KEYS: Record<Theme, Key> = {
   sistema: "settings.theme.system",
@@ -152,13 +152,7 @@ function Linha({
       {/* A seta como SVG, e não o caractere "›": o glifo muda de desenho e de
           peso conforme a fonte que o sistema resolve, e numa coluna de nove
           linhas essa variação aparece. O handoff desenha 8×14. */}
-      <svg
-        className="tk-row-seta"
-        width="8"
-        height="14"
-        viewBox="0 0 8 14"
-        aria-hidden="true"
-      >
+      <svg className="tk-row-seta" width="8" height="14" viewBox="0 0 8 14" aria-hidden="true">
         <path
           d="M1 1l6 6-6 6"
           stroke="currentColor"
@@ -263,7 +257,11 @@ export function SettingsScreen({
           onOpen={() => setPainel("usage")}
         />
         <Linha
-          selo="idioma" label={t("settings.language")} value={idioma} onOpen={() => setPainel("lang")} />
+          selo="idioma"
+          label={t("settings.language")}
+          value={idioma}
+          onOpen={() => setPainel("lang")}
+        />
         <Linha
           selo="imagens"
           label={t("sprites.title")}
@@ -326,14 +324,11 @@ export function SettingsScreen({
           value={t("settings.version", { version: __TK_VERSAO__ })}
           onOpen={() => setPainel("updates")}
         />
-        <Linha
-          selo="sobre" label={t("settings.about")} onOpen={() => setPainel("about")} />
+        <Linha selo="sobre" label={t("settings.about")} onOpen={() => setPainel("about")} />
         {/* Privacidade e Feedback ficam junto do Sobre: sao as tres coisas que
             falam do projeto em si, nao do que ele calcula. */}
-        <Linha
-          selo="privacidade" label={t("privacy.title")} onOpen={() => setPainel("privacy")} />
-        <Linha
-          selo="feedback" label={t("feedback.title")} onOpen={() => setPainel("feedback")} />
+        <Linha selo="privacidade" label={t("privacy.title")} onOpen={() => setPainel("privacy")} />
+        <Linha selo="feedback" label={t("feedback.title")} onOpen={() => setPainel("feedback")} />
         {/*
           ⚠️ THIS IS NOT THE "help" PANEL COMING BACK.
 
@@ -347,8 +342,7 @@ export function SettingsScreen({
           the setup because the setup runs once, and someone who decides the app
           was worth something decides that in month three, not in minute one.
         */}
-        <Linha
-          selo="apoiar" label={t("support.title")} onOpen={() => setPainel("support")} />
+        <Linha selo="apoiar" label={t("support.title")} onOpen={() => setPainel("support")} />
       </section>
 
       {/*
@@ -360,7 +354,11 @@ export function SettingsScreen({
       */}
       <section className="tk-card" style={{ marginTop: 14 }}>
         <Linha
-          selo="armazenamento" label={t("wipe.open")} onOpen={() => setWipeOpen(true)} tone="danger" />
+          selo="armazenamento"
+          label={t("wipe.open")}
+          onOpen={() => setWipeOpen(true)}
+          tone="danger"
+        />
       </section>
 
       {painel === "look" && (
@@ -583,9 +581,7 @@ export function SettingsScreen({
               <span
                 className="tk-row-value"
                 style={
-                  persist?.supported && !persist.persisted
-                    ? { color: "var(--tk-warn)" }
-                    : undefined
+                  persist?.supported && !persist.persisted ? { color: "var(--tk-warn)" } : undefined
                 }
               >
                 {protegido}

@@ -35,10 +35,7 @@ export default function Ficha() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { pronto, dados } = useDados();
 
-  const especie = useMemo(
-    () => dados?.species.find((s) => s.id === id) ?? null,
-    [dados, id],
-  );
+  const especie = useMemo(() => dados?.species.find((s) => s.id === id) ?? null, [dados, id]);
 
   const veredito = useMemo(() => {
     if (!dados || !especie) return null;
@@ -98,9 +95,7 @@ export default function Ficha() {
       {/* Duas acoes: o IV do que ele TEM, e o IV do que ele esta VENDO. */}
       <Link href={{ pathname: "/iv/[id]", params: { id: especie.id } }} asChild>
         <Pressable className="bg-texto rounded-full py-4 items-center mt-7">
-          <Text className="text-fundo font-bold text-base">
-            {t("species.calcIV")}
-          </Text>
+          <Text className="text-fundo font-bold text-base">{t("species.calcIV")}</Text>
         </Pressable>
       </Link>
 
@@ -118,7 +113,9 @@ export default function Ficha() {
 
       {veredito && (
         <View className="bg-superficie rounded-3xl p-5 mt-7">
-          <Text className="text-texto3 text-[11px] tracking-widest">{t("assistant.title").toUpperCase()}</Text>
+          <Text className="text-texto3 text-[11px] tracking-widest">
+            {t("assistant.title").toUpperCase()}
+          </Text>
           <Text
             className="text-xl font-bold mt-2"
             style={{ color: cores[COR_ACAO[veredito.action] ?? "texto"] }}
@@ -135,7 +132,9 @@ export default function Ficha() {
       )}
 
       <View className="bg-superficie rounded-3xl p-5 mt-3">
-        <Text className="text-texto3 text-[11px] tracking-widest">{t("species.baseStats").toUpperCase()}</Text>
+        <Text className="text-texto3 text-[11px] tracking-widest">
+          {t("species.baseStats").toUpperCase()}
+        </Text>
         {(
           [
             [t("common.attack"), especie.baseStats.atk],

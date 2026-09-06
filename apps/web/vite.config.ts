@@ -97,9 +97,7 @@ export default defineConfig({
    * `__TK_VERSAO__`, e subir a versao volta a ser mexer num numero so.
    */
   define: {
-    __TK_BUILD__: JSON.stringify(
-      new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC",
-    ),
+    __TK_BUILD__: JSON.stringify(new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC"),
     __TK_VERSAO__: JSON.stringify(versao),
   },
   resolve: {

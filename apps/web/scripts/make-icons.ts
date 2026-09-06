@@ -378,12 +378,7 @@ function ovoAt(
   return null;
 }
 
-function renderIcon(
-  size: number,
-  forma: Forma,
-  monoScale: number,
-  tema: Tema,
-): Uint8Array {
+function renderIcon(size: number, forma: Forma, monoScale: number, tema: Tema): Uint8Array {
   const paleta = PALETAS[tema];
   const rgba = new Uint8Array(size * size * 4);
   const cheio = forma === "cheio";
@@ -483,8 +478,7 @@ function renderIcon(
           radius,
         );
         const faixa = Math.max(escala, 0.5);
-        const quina =
-          Math.max(0, Math.min(1, (dQuina + 0.5 * escala) / faixa)) * coverage;
+        const quina = Math.max(0, Math.min(1, (dQuina + 0.5 * escala) / faixa)) * coverage;
 
         const a = Math.min(1, borda * 0.14 + quina * paleta.quinaAlfa);
         r = r * (1 - a) + paleta.quina[0] * a;
@@ -567,10 +561,19 @@ const MOBILE = join(HERE, "..", "..", "mobile");
 const icone1024 = encodePng(1024, 1024, renderIcon(1024, "cheio", 1, "dark"));
 for (const destino of [
   join(MOBILE, "assets", "icon.png"),
-  join(MOBILE, "ios", "TrainerKit", "Images.xcassets", "AppIcon.appiconset", "App-Icon-1024x1024@1x.png"),
+  join(
+    MOBILE,
+    "ios",
+    "TrainerKit",
+    "Images.xcassets",
+    "AppIcon.appiconset",
+    "App-Icon-1024x1024@1x.png",
+  ),
 ]) {
   await writeFile(destino, icone1024);
-  console.log(`${destino.split("/").slice(-2).join("/").padEnd(30)} 1024x1024  ${(icone1024.length / 1024).toFixed(1)} KB`);
+  console.log(
+    `${destino.split("/").slice(-2).join("/").padEnd(30)} 1024x1024  ${(icone1024.length / 1024).toFixed(1)} KB`,
+  );
 }
 
 /*

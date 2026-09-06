@@ -279,7 +279,12 @@
    */
   /* O fundo neutro, em UM lugar. `design.css` remonta `--tk-screen` por cima
      dele com a tinta da especie; os dois leem daqui pra nao poderem divergir. */
-  --tk-screen-neutro: radial-gradient(120vw 80vh at 50% -10%, #0d0d0d 0%, #050505 55%, #000000 100%);
+  --tk-screen-neutro: radial-gradient(
+    120vw 80vh at 50% -10%,
+    #0d0d0d 0%,
+    #050505 55%,
+    #000000 100%
+  );
   --tk-screen: var(--tk-screen-neutro);
 
   --tk-surf: rgba(255, 255, 255, 0.05);
@@ -326,7 +331,11 @@
   --tk-scrim: rgba(4, 5, 10, 0.6);
   --tk-shadow: rgba(0, 0, 0, 0.75);
 
-  --tk-ph: radial-gradient(70% 70% at 35% 25%, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.03));
+  --tk-ph: radial-gradient(
+    70% 70% at 35% 25%,
+    rgba(255, 255, 255, 0.16),
+    rgba(255, 255, 255, 0.03)
+  );
   --tk-avatar: linear-gradient(150deg, #2a3242, #161a22);
   --tk-brand: linear-gradient(150deg, #4f8cff, #b79cff);
 

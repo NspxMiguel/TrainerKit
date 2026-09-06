@@ -549,11 +549,7 @@ export function Onboarding() {
             {/* "Comecar" mora na tela do NOME, e nao mais no passo 0 — o passo 0
                 agora e o idioma, e "Comecar" antes de escolher a lingua prometia
                 que a proxima tela ja era o app. */}
-            {current === "boas-vindas"
-              ? t("onb.start")
-              : last
-                ? t("onb.open")
-                : t("onb.continue")}
+            {current === "boas-vindas" ? t("onb.start") : last ? t("onb.open") : t("onb.continue")}
           </button>
         ) : (
           <>

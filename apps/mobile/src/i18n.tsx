@@ -1,13 +1,6 @@
 import { getLocales } from "expo-localization";
 import AsyncStorage from "expo-sqlite/kv-store";
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { DICTS, EN, type Key } from "@trainerkit/core";
 

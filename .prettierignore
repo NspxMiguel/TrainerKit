@@ -1,0 +1,27 @@
+dist/
+node_modules/
+apps/mobile/ios/
+apps/web/public/
+packages/dataset/data/
+pnpm-lock.yaml
+
+# Os dez dicionarios sao DADO, nao codigo.
+#
+# Quase toda linha deles e uma chave e uma frase inteira, e com printWidth 100 o
+# Prettier quebra a frase pra linha de baixo. O arquivo continua correto e fica
+# pior de varrer: hoje da pra ler chave-e-valor de um golpe de olho, e depois
+# passa a ser um zigue-zague de 850 linhas. O ganho de formatar dado e zero, e o
+# custo e um diff de milhares de linhas que apaga o `git blame` das traducoes.
+packages/core/src/dict/
+
+# O App.css inteiro mora dentro de `@layer legado { ... }` SEM indentacao, e e
+# de proposito: envolver 5.500 linhas num layer sem reindentar foi o que evitou
+# um diff de arquivo inteiro na epoca.
+#
+# O Prettier quer indentar as 5.500. Nao seria neutro: ele move o `/*` de cada
+# bloco de comentario e NAO mexe nas linhas ` * ` de dentro, entao todo
+# comentario do maior stylesheet do app fica desalinhado. Piorar a leitura de
+# 5.500 linhas pra ganhar consistencia de indentacao e troca ruim.
+#
+# Se um dia for pra indentar, e commit proprio + `.git-blame-ignore-revs`.
+apps/web/src/App.css

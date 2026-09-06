@@ -68,7 +68,8 @@ function doCss(seletor: string): Record<string, string> {
   const corpo = fonte.slice(i, fonte.indexOf("}", i));
   const cores: Record<string, string> = {};
   for (const m of corpo.matchAll(/--tk-([a-z0-9]+): (\d+) (\d+) (\d+);/g)) {
-    cores[m[1]!] = `#${[m[2], m[3], m[4]].map((n) => Number(n).toString(16).padStart(2, "0")).join("")}`;
+    cores[m[1]!] =
+      `#${[m[2], m[3], m[4]].map((n) => Number(n).toString(16).padStart(2, "0")).join("")}`;
   }
   return cores;
 }
