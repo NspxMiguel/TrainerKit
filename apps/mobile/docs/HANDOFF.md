@@ -34,3 +34,18 @@ de volta.
 O handoff decide FORMA (pilula, raio, ritmo, tipografia) e o app decide COR,
 porque a cor mudou depois dele por pedido direto. Registrado aqui pra ninguem
 "corrigir" o app de volta pro violeta achando que esta seguindo o desenho.
+
+
+## 06/09/2026 — o zip é o mesmo pacote
+
+Ele mandou `~/Downloads/Liquid Glass Pokédex Design.zip` dizendo *"nao ta com a
+ultima versao do app, mas melhor doq recriar do 0"*. Ele descompacta para
+`design_handoff_trainerkit_redesign/`, e os **oito arquivos têm md5 idêntico** ao
+`design_handoff_trainerkit_redesign 2/` que já tinha sido lido — não há nada novo
+nele para analisar de novo.
+
+E a intuição dele estava certa pelo motivo exato: *"tirar o roxo de todo canto
+ainda falta"*. O roxo **é do pacote** — 204 usos de violeta, `#0A0C10` de fundo.
+Ou seja, o que este documento já dizia (a FORMA vale, a COR não) é a mesma coisa
+que ele percebeu olhando: usar o pacote inteiro devolveria o roxo que ele mandou
+tirar duas vezes.
