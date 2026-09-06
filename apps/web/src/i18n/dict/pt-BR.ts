@@ -423,7 +423,7 @@ export const PT_BR: Dict = {
     "Se você achar algum, me conta — é o único jeito de consertar. Um print e uma linha dizendo o que você estava fazendo já basta.",
   "about.toFeedback": "Relatar um problema",
   "settings.disclaimer":
-    "App independente feito por fãs, sem vínculo com Scopely Explore (ex-Niantic), The espécie Company ou Nintendo. Marcas pertencem aos seus titulares.",
+    "App independente feito por fãs, sem vínculo com Scopely Explore (ex-Niantic), The Pokémon Company ou Nintendo. Marcas pertencem aos seus titulares.",
   "settings.disclaimer2":
     "Funciona só por leitura de prints que você fornece. Não acessa os servidores do jogo, e nenhuma imagem sai do aparelho.",
   "settings.version": "Versão {version}",

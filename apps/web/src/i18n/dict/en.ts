@@ -457,7 +457,7 @@ const EN = {
     "If you find one, tell me — it is the only way it gets fixed. A screenshot and one line about what you were doing is enough.",
   "about.toFeedback": "Report a problem",
   "settings.disclaimer":
-    "Independent fan-made app, not affiliated with Scopely Explore (formerly Niantic), The species Company or Nintendo. Trademarks belong to their respective owners.",
+    "Independent fan-made app, not affiliated with Scopely Explore (formerly Niantic), The Pokémon Company or Nintendo. Trademarks belong to their respective owners.",
   "settings.disclaimer2":
     "Works only by reading screenshots you provide. It doesn't touch the game servers, and no image leaves your device.",
   "settings.version": "Version {version}",

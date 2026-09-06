@@ -1,0 +1,15 @@
+# Deploy — TrainerKit
+
+Configuração Vercel versionada:
+
+```json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "",
+  "installCommand": "npm install --omit=dev --ignore-scripts",
+  "outputDirectory": "public-vercel",
+  "framework": null
+}
+
+```
+

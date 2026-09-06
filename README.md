@@ -6,7 +6,7 @@ There are enough calculators already. You attach the appraisal screenshot, "96.4
 
 TrainerKit answers that — and shows its work.
 
-**[Open the app →](https://trainerkit.vercel.app/)**
+**[Open the app →](https://trainerkit-zeta.vercel.app/)**
 
 Installable PWA, offline-first. No account, no server, nothing leaving your device.
 
@@ -79,7 +79,7 @@ The dev server also listens on the local network, so you can open it on your pho
 
 | Command | What it does |
 | --- | --- |
-| `pnpm -r test` | 209 tests |
+| `pnpm -r test` | ~471 tests (core + web, Aug 2026) |
 | `pnpm -r typecheck` | TypeScript across all three packages |
 | `pnpm --filter ./apps/web build` | Production build + bundle audit |
 
@@ -123,3 +123,11 @@ MIT — see [LICENSE](LICENSE). The license covers this repository's code; game 
 ---
 
 Made by [@NspxMiguel](https://github.com/NspxMiguel)
+
+---
+
+## Documentação
+
+Índice completo em [`docs/INDEX.md`](docs/INDEX.md).
+
+_Hub multi-repo: `~/Documents/Documentacao-Repos/INDEX.md` (atualizado 2026-08-31)._

@@ -404,7 +404,7 @@ export const IT: Dict = {
   "about.tellMe":
     "Se ne trovi uno, dimmelo — è l'unico modo perché venga sistemato. Bastano uno screenshot e una riga su cosa stavi facendo.",
   "about.toFeedback": "Segnala un problema",
-  "settings.disclaimer": "App indipendente creata da fan, senza legami con Scopely Explore (ex Niantic), The especie Company o Nintendo. I marchi appartengono ai rispettivi titolari.",
+  "settings.disclaimer": "App indipendente creata da fan, senza legami con Scopely Explore (ex Niantic), The Pokémon Company o Nintendo. I marchi appartengono ai rispettivi titolari.",
   "settings.disclaimer2": "Funziona solo leggendo gli screenshot che fornisci tu. Non accede ai server del gioco, e nessuna immagine lascia il dispositivo.",
   "settings.version": "Versione {version}",
 
