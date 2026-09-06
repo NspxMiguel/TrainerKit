@@ -2,7 +2,15 @@ import { Link, useLocalSearchParams } from "expo-router";
 import { useMemo } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 
-import { ACTION_KEYS, decide, tetoDePowerUp } from "@trainerkit/core";
+import {
+  ACTION_KEYS,
+  CONTEXT_KEYS,
+  computeCPAtLevel,
+  decide,
+  groupIdenticalContexts,
+  tetoDePowerUp,
+  type MoveWithPvp,
+} from "@trainerkit/core";
 import { useDados } from "../../src/dados";
 import { useT } from "../../src/i18n";
 import { useSetup } from "../../src/setup";
@@ -58,8 +66,70 @@ export default function Ficha() {
        * so pode existir aqui depois de o setup nativo perguntar o nivel.
        */
       levelCap: tetoDePowerUp(setup.level, dados.version.levelCap),
-      evolvesInto: [],
+      /*
+       * ⚠️ ISTO ERA `[]` FIXO, e o veredito nunca dizia "Evoluir".
+       *
+       * A regra que produz esse veredito le exatamente este campo
+       * (`verdict.ts`: "if (input.evolvesInto.length > 0)"). Com a lista sempre
+       * vazia, um Bulbasaur — que tem `evolvesInto: ["ivysaur"]` no arquivo
+       * desde sempre — caia na regra de quem NAO evolui. O dado ja estava no
+       * `.tkdata`; o que faltava era o tipo declarar e alguem passar.
+       */
+      evolvesInto: especie.evolvesInto,
     });
+    /* `setup.level` na lista: sem ele, trocar o nivel em Ajustes nao recalcula a
+       ficha que ja esta aberta, e a tela passa a mostrar o teto de antes. */
+  }, [dados, especie, setup.level]);
+
+  /*
+   * OS GOLPES RECOMENDADOS, agrupados por contexto.
+   *
+   * `groupIdenticalContexts` junta os contextos que recomendam o MESMO conjunto:
+   * em muita especie, "tudo", raide e PvP dao a mesma resposta e so Rocket muda.
+   * Quatro abas identicas nao sao quatro opcoes, sao quatro chances de a pessoa
+   * achar que perdeu alguma coisa por nao tocar em todas.
+   */
+  const grupos = useMemo(() => {
+    if (!dados || !especie) return [];
+    const porId = new Map<string, MoveWithPvp>();
+    for (const g of [...dados.fastMoves, ...dados.chargedMoves]) porId.set(g.id, g);
+    const juntar = (ids: string[], elite: string[]): MoveWithPvp[] =>
+      [
+        ...ids.map((i) => porId.get(i)),
+        ...elite.map((i) => {
+          const m = porId.get(i);
+          return m ? { ...m, elite: true } : undefined;
+        }),
+      ].filter((m): m is MoveWithPvp => m !== undefined);
+
+    return groupIdenticalContexts(
+      juntar(especie.fastMoves, especie.eliteFastMoves),
+      juntar(especie.chargedMoves, especie.eliteChargedMoves),
+      {
+        attackerTypes: especie.types,
+        chart: dados.typeChart,
+        order: dados.typeOrder,
+        /* 1.2 e o bonus de mesmo tipo do jogo, o mesmo literal do app web. */
+        stabMultiplier: 1.2,
+      },
+    );
+  }, [dados, especie]);
+
+  /*
+   * Os tres tetos de PC, e o terceiro NAO e um teto a mais: e o Melhor Amigo.
+   *
+   * E a pergunta que se faz na hora de gastar 100.000 de poeira — ate onde eu
+   * compro, e o que o Melhor Amigo adiciona de graca por cima. O `Set` remove a
+   * coluna repetida quando 40 e o proprio teto da temporada.
+   */
+  const tetos = useMemo(() => {
+    if (!dados || !especie) return [];
+    const teto = dados.version.levelCap;
+    return [...new Set([40, teto, teto + 1])].map((nivel) => ({
+      nivel,
+      pc: computeCPAtLevel(dados.cpm, especie.baseStats, { atk: 15, def: 15, hp: 15 }, nivel),
+      melhorAmigo: nivel > teto,
+    }));
   }, [dados, especie]);
 
   if (!pronto) {
@@ -128,6 +198,118 @@ export default function Ficha() {
           <Text className="text-texto2 text-xs mt-2">
             {t("verdict.confidence", { percent: Math.round(veredito.confidence * 100) })}
           </Text>
+        </View>
+      )}
+
+      {/* ── GOLPES ─────────────────────────────────────────────────────────
+          Um bloco por grupo de contexto. Quando os quatro coincidem sai um
+          bloco so, e a legenda diz que os quatro coincidem — que informa mais
+          do que quatro abas com a mesma resposta. */}
+      {grupos.map((g) => (
+        <View key={g.contexts.join("+")} className="bg-superficie rounded-3xl p-5 mt-3">
+          <Text className="text-texto3 text-[11px] tracking-widest">
+            {g.contexts
+              .map((c) => t(CONTEXT_KEYS[c].title as never))
+              .join(" · ")
+              .toUpperCase()}
+          </Text>
+
+          {g.movesets.length === 0 ? (
+            <Text className="text-texto2 text-sm mt-3">{t("species.noMoves")}</Text>
+          ) : (
+            g.movesets.slice(0, 3).map((m, i) => (
+              <View
+                key={`${m.fast.id}-${m.charged.id}`}
+                className="mt-3"
+                style={
+                  i > 0
+                    ? { borderTopWidth: 0.5, borderTopColor: cores.linha, paddingTop: 12 }
+                    : undefined
+                }
+              >
+                <Text className={`text-[15px] ${i === 0 ? "text-texto font-bold" : "text-texto2"}`}>
+                  {m.fast.name} + {m.charged.name}
+                </Text>
+                {/* ✦ e a marca de TM Elite — um dos itens mais raros do jogo.
+                    Sem dizer isso, a recomendacao manda comprar o que nao se
+                    compra. */}
+                {m.needsElite && (
+                  <Text className="text-texto3 text-[12px] mt-1">✦ {t("species.needsElite")}</Text>
+                )}
+              </View>
+            ))
+          )}
+
+          {/* Quando os contextos concordam sobre o MELHOR e divergem embaixo, a
+              tela precisa dizer de quem e a ordem que esta mostrando — senao a
+              unificacao vira uma afirmacao falsa sobre os outros tres. */}
+          {g.contexts.length > 1 && (
+            <Text className="text-texto3 text-[12px] mt-3">
+              {/* ⚠️ As duas frases tem `{contexts}`, e a segunda tem `{principal}`
+                  tambem. Chamar `t` sem eles imprime a chave crua na tela — o
+                  placeholder nao some sozinho. */}
+              {g.mesmaLista
+                ? t("species.sameForAll", {
+                    contexts: g.contexts.map((c) => t(CONTEXT_KEYS[c].title as never)).join(", "),
+                  })
+                : t("species.sameBest", {
+                    contexts: g.contexts.map((c) => t(CONTEXT_KEYS[c].title as never)).join(", "),
+                    principal: t(CONTEXT_KEYS[g.contexts[0]!].title as never),
+                  })}
+            </Text>
+          )}
+        </View>
+      ))}
+
+      {/* ── EVOLUCAO ───────────────────────────────────────────────────────── */}
+      {especie.evolvesInto.length > 0 && (
+        <View className="bg-superficie rounded-3xl p-5 mt-3">
+          <Text className="text-texto3 text-[11px] tracking-widest">
+            {t("species.evolvesInto").toUpperCase()}
+          </Text>
+          {especie.evolvesInto.map((idEvo, i) => {
+            const alvoEvo = dados?.species.find((x) => x.id === idEvo) ?? null;
+            const doces = especie.candyToEvolve[idEvo] ?? null;
+            return (
+              <Link key={idEvo} href={{ pathname: "/especie/[id]", params: { id: idEvo } }} asChild>
+                <Pressable
+                  className="flex-row items-center justify-between mt-3"
+                  style={
+                    i > 0
+                      ? { borderTopWidth: 0.5, borderTopColor: cores.linha, paddingTop: 12 }
+                      : undefined
+                  }
+                >
+                  <Text className="text-texto text-[15px] flex-1">{alvoEvo?.name ?? idEvo}</Text>
+                  {doces !== null && (
+                    <Text className="text-texto2 text-sm">
+                      {t("species.candy", { count: doces })}
+                    </Text>
+                  )}
+                  <Text className="text-texto3 text-base ml-2">›</Text>
+                </Pressable>
+              </Link>
+            );
+          })}
+        </View>
+      )}
+
+      {/* ── TETOS DE PC ────────────────────────────────────────────────────── */}
+      {tetos.length > 0 && (
+        <View className="bg-superficie rounded-3xl p-5 mt-3">
+          <Text className="text-texto3 text-[11px] tracking-widest">
+            {t("species.maxCP").toUpperCase()}
+          </Text>
+          <View className="flex-row mt-3">
+            {tetos.map((x) => (
+              <View key={x.nivel} className="flex-1">
+                <Text className="text-texto text-[22px] font-extrabold">{x.pc}</Text>
+                <Text className="text-texto3 text-[12px] mt-0.5">
+                  {x.melhorAmigo ? t("species.bestBuddy") : `${t("common.level")} ${x.nivel}`}
+                </Text>
+              </View>
+            ))}
+          </View>
         </View>
       )}
 

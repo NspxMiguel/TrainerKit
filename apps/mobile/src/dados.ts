@@ -43,6 +43,22 @@ export interface Especie {
   legendary?: boolean;
   fastMoves: string[];
   chargedMoves: string[];
+  /*
+   * ⚠️ ESTES QUATRO JA VINHAM NO ARQUIVO e o tipo nao declarava.
+   *
+   * `gamedata.tkdata` traz `evolvesInto`, `candyToEvolve`, `eliteFastMoves` e
+   * `eliteChargedMoves` em toda especie — o app web le os quatro. Aqui o tipo
+   * era uma vista estreita do mesmo JSON, e a ficha passava `evolvesInto: []`
+   * fixo pro `decide`. Consequencia: o veredito NUNCA dizia "Evoluir" no app
+   * nativo, porque a regra que produz esse veredito depende justamente deste
+   * campo (`verdict.ts`, "if (input.evolvesInto.length > 0)").
+   */
+  evolvesInto: string[];
+  /** Quantos doces cada evolucao custa, por id do que ela vira. */
+  candyToEvolve: Record<string, number>;
+  /** Golpes que so entram por TM Elite — nao aparecem em captura normal. */
+  eliteFastMoves: string[];
+  eliteChargedMoves: string[];
 }
 
 interface Golpe {
