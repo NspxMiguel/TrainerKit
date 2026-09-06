@@ -1,4 +1,5 @@
-import { ScrollView, Text, View } from "react-native";
+import * as Application from "expo-constants";
+import { Linking, Platform, Pressable, ScrollView, Text, View } from "react-native";
 
 import { useT } from "../../src/i18n";
 import { useImagens } from "../../src/imagens";
@@ -39,8 +40,37 @@ const ATUALIZADA = "2026-09-06";
 /** Contato do controlador (LGPD art. 41). Trocar aqui troca nos dez idiomas. */
 const CONTATO = "miguel@nspx.dev";
 
+/**
+ * RELATAR PROBLEMA — `mailto:`, e não formulário.
+ *
+ * Formulário exigiria um servidor que recebesse e guardasse o que a pessoa
+ * escreve, e a política logo acima diz que não existe servidor nenhum. Um
+ * `mailto:` abre o app de e-mail dela: ela vê o que está mandando, e nada passa
+ * por aqui no meio.
+ *
+ * ⚠️ O corpo já vem com aparelho, versão e idioma. É o que decide metade dos
+ * defeitos deste app — o leitor de print muda de comportamento por aparelho — e
+ * pedir isso num segundo e-mail é como um relato morre.
+ */
+function abrirEmail(assunto: string, versao: string, idioma: string): void {
+  const corpo = [
+    "",
+    "",
+    "---",
+    `TrainerKit ${versao}`,
+    `${idioma}`,
+    `${Platform.OS} ${Platform.Version}`,
+  ].join("\n");
+  const url =
+    `mailto:${CONTATO}?subject=${encodeURIComponent(assunto)}` +
+    `&body=${encodeURIComponent(corpo)}`;
+  /* Um aparelho sem app de e-mail configurado recusa; falhar calado é melhor
+     que derrubar a tela de privacidade por causa de um botão secundário. */
+  Linking.openURL(url).catch(() => {});
+}
+
 export default function Legal() {
-  const { t } = useT();
+  const { t, idioma } = useT();
   const { cores } = useTema();
   const { fonte } = useImagens();
 
@@ -92,6 +122,20 @@ export default function Legal() {
         {t("settings.disclaimer")}
       </Text>
       <Text className="text-texto3 text-[12px] leading-5 mt-3 px-1">{t("about.solo")}</Text>
+
+      <Pressable
+        onPress={() =>
+          abrirEmail(
+            t("feedback.subject"),
+            String(Application.default.expoConfig?.version ?? ""),
+            idioma,
+          )
+        }
+        className="rounded-full py-3.5 items-center mt-5"
+        style={{ borderWidth: 1, borderColor: cores.linha }}
+      >
+        <Text className="text-texto text-[15px] font-semibold">{t("feedback.title")}</Text>
+      </Pressable>
     </ScrollView>
   );
 }
