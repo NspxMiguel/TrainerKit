@@ -1,4 +1,4 @@
-import type { Dict } from "../t.ts";
+import type { Dict } from "./tipos.js";
 
 /** Português do Brasil. Era o texto original do app, antes de virar chave. */
 export const PT_BR: Dict = {
@@ -86,6 +86,7 @@ export const PT_BR: Dict = {
   "install.now": "Instalar agora",
 
   "especies.title": "Espécies",
+  "especies.count": "{n} espécies",
   "especies.all": "Todos",
   "especies.mine": "Meus",
   "filter.sortBy": "Ordenar por",

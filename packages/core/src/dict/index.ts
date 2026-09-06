@@ -1,14 +1,14 @@
-import type { Dict } from "../t.ts";
-import { EN } from "./en.ts";
-import { PT_BR } from "./pt-BR.ts";
-import { ES } from "./es.ts";
-import { ES_419 } from "./es-419.ts";
-import { DE } from "./de.ts";
-import { FR } from "./fr.ts";
-import { IT } from "./it.ts";
-import { JA } from "./ja.ts";
-import { KO } from "./ko.ts";
-import { RU } from "./ru.ts";
+import type { Dict } from "./tipos.js";
+import { EN } from "./en.js";
+import { PT_BR } from "./pt-BR.js";
+import { ES } from "./es.js";
+import { ES_419 } from "./es-419.js";
+import { DE } from "./de.js";
+import { FR } from "./fr.js";
+import { IT } from "./it.js";
+import { JA } from "./ja.js";
+import { KO } from "./ko.js";
+import { RU } from "./ru.js";
 
 /**
  * Todos os idiomas, carregados juntos.

@@ -3,8 +3,8 @@ import { useSyncExternalStore } from "react";
 import type { Message } from "@trainerkit/core";
 
 import { getLanguage, subscribe } from "./language.ts";
-import { EN } from "./dict/en.ts";
-import { DICTS } from "./dict/index.ts";
+import { EN } from "@trainerkit/core";
+import { DICTS } from "@trainerkit/core";
 
 /**
  * Traducao da interface.

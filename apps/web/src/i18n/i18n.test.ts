@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { LANGUAGES } from "./language.ts";
-import { DICTS } from "./dict/index.ts";
-import { EN } from "./dict/en.ts";
+import { DICTS } from "@trainerkit/core";
+import { EN } from "@trainerkit/core";
 
 /**
  * O que estes testes protegem.

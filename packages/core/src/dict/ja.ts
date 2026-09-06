@@ -1,4 +1,4 @@
-import type { Dict } from "../t.ts";
+import type { Dict } from "./tipos.js";
 
 /** 日本語。 */
 export const JA: Dict = {
@@ -79,6 +79,7 @@ export const JA: Dict = {
   "install.desktop.step2": "「インストール」で確定。",
   "install.now": "今すぐインストール",
   "especies.title": "種図鑑",
+  "especies.count": "{n} 種",
   "especies.all": "すべて",
   "especies.mine": "手持ち",
   "filter.sortBy": "並び替え",

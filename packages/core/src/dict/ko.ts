@@ -1,4 +1,4 @@
-import type { Dict } from "../t.ts";
+import type { Dict } from "./tipos.js";
 
 /** 한국어. */
 export const KO: Dict = {
@@ -79,6 +79,7 @@ export const KO: Dict = {
   "install.desktop.step2": "“설치”로 확인하세요.",
   "install.now": "지금 설치",
   "especies.title": "포켓덱스",
+  "especies.count": "{n}종",
   "especies.all": "전체",
   "especies.mine": "내 것",
   "filter.sortBy": "정렬",

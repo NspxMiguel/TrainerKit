@@ -24,6 +24,17 @@ export interface EstadoDados {
 
 export interface Especie {
   id: string;
+  /**
+   * Aponta pra forma CANONICA quando esta e so um enfeite.
+   *
+   * ⚠️ 2.476 entradas viram 1.182. As outras 1.294 sao a mesma especie com
+   * chapeu de evento: "Bulbasaur (Fall 2019)", "Charmander (Goggles 2026)".
+   * Elas existem no jogo e por isso existem na base, mas numa LISTA elas sao
+   * ruido — Bulbasaur aparecia tres vezes seguidas.
+   *
+   * O mesmo filtro do app web (`SpeciesBrowser.tsx`): `cosmeticOf === null`.
+   */
+  cosmeticOf: string | null;
   dex: number;
   name: string;
   types: string[];
@@ -32,7 +43,10 @@ export interface Especie {
 }
 
 export interface Base {
+  /** TODAS, inclusive as cosmeticas — a busca por id precisa delas. */
   species: Especie[];
+  /** So as canonicas. E o que uma lista mostra. */
+  canonicas: Especie[];
   cpm: number[];
   version: { levelCap: number };
 }
@@ -56,7 +70,9 @@ export function useDados(): EstadoDados {
          * Release isso aparece so quando o app abre — foi assim que apareceu.
          */
         const texto = await new File(caminho).text();
-        if (vivo) setEstado({ pronto: true, erro: null, dados: JSON.parse(texto) as Base });
+        const base = JSON.parse(texto) as Base;
+        base.canonicas = base.species.filter((e) => !e.cosmeticOf);
+        if (vivo) setEstado({ pronto: true, erro: null, dados: base });
       } catch (e) {
         if (vivo) setEstado({ pronto: false, erro: String(e).slice(0, 200), dados: null });
       }

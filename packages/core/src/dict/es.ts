@@ -1,4 +1,4 @@
-import type { Dict } from "../t.ts";
+import type { Dict } from "./tipos.js";
 
 /** Español de España. */
 export const ES: Dict = {
@@ -79,6 +79,7 @@ export const ES: Dict = {
   "install.desktop.step2": "Confirma en “Instalar”.",
   "install.now": "Instalar ahora",
   "especies.title": "Especies",
+  "especies.count": "{n} especies",
   "especies.all": "Todos",
   "especies.mine": "Míos",
   "filter.sortBy": "Ordenar por",

@@ -1,5 +1,7 @@
 import { Text, View } from "react-native";
 
+import { seloDaEspecie } from "@trainerkit/core";
+
 import type { Especie } from "./dados";
 
 /**
@@ -45,8 +47,12 @@ function monograma(nome: string): string {
 }
 
 export function Selo({ especie, tamanho = 44 }: { especie: Especie; tamanho?: number }) {
-  const fundo = CORES[especie.types[0] ?? ""] ?? RESERVA;
-  const tinta = contraste("#ffffff", fundo) >= contraste(TINTA_ESCURA, fundo) ? "#ffffff" : TINTA_ESCURA;
+  /*
+   * A cor vem da ESPECIE, com o tipo de reserva — a mesma conta do web, agora
+   * em `packages/core`. O selo do Mewtwo saia rosa porque Psiquico e rosa;
+   * agora sai lavanda, que e a cor dele.
+   */
+  const { fundo, tinta } = seloDaEspecie(especie.spriteId, CORES[especie.types[0] ?? ""] ?? RESERVA);
   return (
     <View
       style={{

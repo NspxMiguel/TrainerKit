@@ -2,6 +2,8 @@ import "../global.css";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
+import { Idioma } from "../src/i18n";
+
 /**
  * A casca.
  *
@@ -11,7 +13,7 @@ import { StatusBar } from "expo-status-bar";
  */
 export default function Layout() {
   return (
-    <>
+    <Idioma>
       <StatusBar style="light" />
       <Stack
         screenOptions={{
@@ -24,6 +26,6 @@ export default function Layout() {
         <Stack.Screen name="index" options={{ title: "Espécies" }} />
         <Stack.Screen name="especie/[id]" options={{ title: "" }} />
       </Stack>
-    </>
+    </Idioma>
   );
 }

@@ -1,4 +1,4 @@
-import type { Dict } from "../t.ts";
+import type { Dict } from "./tipos.js";
 
 /** Русский. */
 export const RU: Dict = {
@@ -79,6 +79,7 @@ export const RU: Dict = {
   "install.desktop.step2": "Подтверди «Установить».",
   "install.now": "Установить сейчас",
   "especies.title": "Виды",
+  "especies.count": "{n} видов",
   "especies.all": "Все",
   "especies.mine": "Мои",
   "filter.sortBy": "Сортировка",

@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 
-import tabela from "../dados/paleta.json";
+import tabela from "../../../../packages/core/src/paleta.json";
 
 /**
  * A paleta do app vem da ESPÉCIE em destaque.

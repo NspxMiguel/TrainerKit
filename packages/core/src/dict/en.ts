@@ -101,6 +101,7 @@ const EN = {
 
   // -------------------------------------------------------------------- pokedex
   "especies.title": "Species",
+  "especies.count": "{n} species",
   "especies.all": "All",
   "especies.mine": "Mine",
   "filter.sortBy": "Sort by",

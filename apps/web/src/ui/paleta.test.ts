@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import tabela from "../dados/paleta.json";
+import tabela from "../../../../packages/core/src/paleta.json";
 import { enquadrar, gradienteDaEspecie, paletaDaEspecie } from "./paleta.ts";
 
 /**
