@@ -43,3 +43,4 @@ export * from "./setup.js";
 export * from "./languages.js";
 export * from "./png.js";
 export * from "./sprites.js";
+export * from "./itens.js";

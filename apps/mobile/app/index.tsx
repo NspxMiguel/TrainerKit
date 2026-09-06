@@ -111,6 +111,11 @@ export default function Lista() {
               <Text className="text-texto text-xs font-semibold">{t("especies.mine")}</Text>
             </Pressable>
           </Link>
+          <Link href="/itens" asChild>
+            <Pressable className="flex-1 bg-superficie rounded-2xl py-3 items-center">
+              <Text className="text-texto text-xs font-semibold">{t("items.short")}</Text>
+            </Pressable>
+          </Link>
           <Link href="/agenda" asChild>
             <Pressable className="flex-1 bg-superficie rounded-2xl py-3 items-center">
               <Text className="text-texto text-xs font-semibold">{t("agenda.title")}</Text>

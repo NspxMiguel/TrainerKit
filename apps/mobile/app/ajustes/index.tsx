@@ -6,7 +6,7 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import {
   LANGUAGES,
   MAX_POWERUP_LEVEL,
-  PIX_KEY,
+  BITCOIN_ADDRESS,
   TRAINER_LEVELS,
   tetoDePowerUp,
   type Key,
@@ -196,15 +196,15 @@ export default function Ajustes() {
       <View className="bg-superficie rounded-3xl px-4 py-4">
         <Text className="text-texto2 text-[13px] leading-5 mb-3">{t("support.body")}</Text>
         <Text className="text-texto3 text-[11px] tracking-widest mb-1.5">
-          {t("support.pixLabel").toUpperCase()}
+          {t("support.address").toUpperCase()}
         </Text>
         <Text selectable className="text-texto text-[13px] leading-5 font-mono">
-          {PIX_KEY}
+          {BITCOIN_ADDRESS}
         </Text>
       </View>
       <Pressable
         onPress={() => {
-          Clipboard.setStringAsync(PIX_KEY)
+          Clipboard.setStringAsync(BITCOIN_ADDRESS)
             .then(() => {
               setCopiado(true);
               setTimeout(() => setCopiado(false), 2000);
