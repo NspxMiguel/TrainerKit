@@ -1,3 +1,30 @@
+WHAT THIS LICENSE COVERS
+========================
+
+The MIT terms below apply to the SOURCE CODE of TrainerKit and nothing else.
+
+They do NOT apply to the game data this project reads or redistributes:
+
+  · `apps/web/public/dataset/gamedata.json` and everything derived from it.
+    It is built from Pokemon GO's GAME_MASTER, obtained through
+    github.com/alexelgt/game_masters, whose own notice reads: "This repo is
+    for educational use only. All content found within this repo is the
+    property of The Pokemon Company and Niantic."
+  · species names, move names, artwork, and any other material owned by
+    Nintendo, The Pokemon Company, Creatures Inc., Game Freak, or Scopely
+    Explore (formerly Niantic).
+  · event and egg data read at runtime from Leek Duck via ScrapedDuck.
+
+None of that is ours to license, and this file does not attempt to license
+it. Granting rights over someone else's work is not something a permissive
+licence can do, and claiming to is worse than saying nothing: it invites
+people to rely on a permission that was never anyone's to give.
+
+TrainerKit is an independent, free, fan-made tool. It is not affiliated with,
+endorsed by, or sponsored by any of the companies named above, it requires no
+game account, and it never communicates with the game's servers. Trademarks
+belong to their respective owners.
+
 MIT License
 
 Copyright (c) 2026 NspxMiguel (https://www.nspx.dev)
