@@ -2,8 +2,9 @@ import { useLocalSearchParams } from "expo-router";
 import { useMemo } from "react";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 
-import { decide } from "@trainerkit/core";
+import { ACTION_KEYS, decide } from "@trainerkit/core";
 import { useDados } from "../../src/dados";
+import { useT } from "../../src/i18n";
 import { Selo } from "../../src/Selo";
 
 /**
@@ -23,6 +24,7 @@ const COR_ACAO: Record<string, string> = {
 };
 
 export default function Ficha() {
+  const { t } = useT();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { pronto, dados } = useDados();
 
@@ -59,7 +61,7 @@ export default function Ficha() {
   if (!especie) {
     return (
       <View className="flex-1 items-center justify-center bg-fundo">
-        <Text className="text-texto">Espécie não encontrada.</Text>
+        <Text className="text-texto">{t("especies.noResults", { query: String(id) })}</Text>
       </View>
     );
   }
@@ -70,32 +72,39 @@ export default function Ficha() {
         <Selo especie={especie} tamanho={112} />
         <Text className="text-texto text-2xl font-extrabold mt-4">{especie.name}</Text>
         <Text className="text-texto3 text-xs mt-1">
-          #{String(especie.dex).padStart(3, "0")} · {especie.types.join(" / ")}
+          {/* Os tipos TRADUZIDOS: o dicionario tem `type.grass` etc. Mostrar
+              "grass / poison" seria o app falando o idioma do arquivo de dados
+              em vez do idioma da pessoa. */}
+          #{String(especie.dex).padStart(3, "0")} ·{" "}
+          {especie.types.map((tp) => t(`type.${tp}` as never)).join(" / ")}
         </Text>
       </View>
 
       {veredito && (
         <View className="bg-superficie rounded-3xl p-5 mt-7">
-          <Text className="text-texto3 text-[11px] tracking-widest">O QUE EU ACHO</Text>
+          <Text className="text-texto3 text-[11px] tracking-widest">{t("assistant.title").toUpperCase()}</Text>
           <Text
             className="text-xl font-bold mt-2"
             style={{ color: COR_ACAO[veredito.action] ?? "#f4f6fa" }}
           >
-            {veredito.action}
+            {/* A PALAVRA do veredito vem do dicionario, nao do enum: o `core`
+                devolve `investir`, e `ACTION_KEYS` diz qual chave le isso nos
+                dez idiomas. */}
+            {t(ACTION_KEYS[veredito.action] as never)}
           </Text>
           <Text className="text-texto2 text-xs mt-2">
-            confiança {Math.round(veredito.confidence * 100)}%
+            {t("verdict.confidence", { percent: Math.round(veredito.confidence * 100) })}
           </Text>
         </View>
       )}
 
       <View className="bg-superficie rounded-3xl p-5 mt-3">
-        <Text className="text-texto3 text-[11px] tracking-widest">STATS BASE</Text>
+        <Text className="text-texto3 text-[11px] tracking-widest">{t("species.baseStats").toUpperCase()}</Text>
         {(
           [
-            ["Ataque", especie.baseStats.atk],
-            ["Defesa", especie.baseStats.def],
-            ["PS", especie.baseStats.hp],
+            [t("common.attack"), especie.baseStats.atk],
+            [t("common.defense"), especie.baseStats.def],
+            [t("common.stamina"), especie.baseStats.hp],
           ] as const
         ).map(([rotulo, valor]) => (
           <View key={rotulo} className="flex-row items-center justify-between mt-3">
