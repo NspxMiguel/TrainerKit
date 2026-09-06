@@ -57,20 +57,34 @@ export default function Lista() {
         </Text>
       </View>
 
+      {/*
+        GRADE, e nao lista — e a mesma escolha do web.
+        
+        Mil e duzentas especies numa lista de uma coluna sao mil e duzentas
+        rolagens; em grade cabem quatro por linha e o olho varre por COR, que e
+        justamente o que o selo da especie oferece. `numColumns` num `FlatList`
+        mantem a virtualizacao: so o que cabe na tela e desenhado.
+      */}
       <FlatList
         data={visiveis}
+        key="grade-4"
+        numColumns={4}
         keyExtractor={(s: Especie) => s.id}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}
+        columnWrapperStyle={{ gap: 10 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32, gap: 10 }}
         renderItem={({ item }) => (
           <Link href={{ pathname: "/especie/[id]", params: { id: item.id } }} asChild>
-            <Pressable className="flex-row items-center gap-3 py-2.5">
-              <Selo especie={item} tamanho={44} />
-              <View className="flex-1">
-                <Text className="text-texto text-[15px] font-semibold">{item.name}</Text>
-                <Text className="text-texto3 text-xs">
-                  #{String(item.dex).padStart(3, "0")}
-                </Text>
-              </View>
+            <Pressable className="flex-1 items-center bg-superficie rounded-2xl py-3">
+              <Selo especie={item} tamanho={52} />
+              <Text
+                className="text-texto text-[11px] font-semibold mt-2 text-center px-1"
+                numberOfLines={1}
+              >
+                {item.name}
+              </Text>
+              <Text className="text-texto3 text-[10px]">
+                #{String(item.dex).padStart(3, "0")}
+              </Text>
             </Pressable>
           </Link>
         )}
