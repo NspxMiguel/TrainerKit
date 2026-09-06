@@ -535,6 +535,13 @@ const EN = {
   "onb.installOther": "Full screen, works offline, and your data stays saved.",
   "onb.seeHowToInstall": "See how to install",
   "onb.skipInstall": "Not now, open the app",
+  /* ── Support: voluntary, and it buys nothing. ─────────────────────────── */
+  "support.title": "Support",
+  "support.body": "TrainerKit is free, has no ads, and collects nothing about you. It stays that way. If it has been useful, a Pix helps keep it going.",
+  "support.note": "Voluntary. Nothing in the app changes if you send one.",
+  "support.pixLabel": "Pix key",
+  "support.copy": "Copy Pix key",
+  "support.copied": "Copied",
 
   // --------------------------------------------------------------------- sprites
   "sprites.title": "Images",

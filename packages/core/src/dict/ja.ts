@@ -479,6 +479,13 @@ export const JA: Dict = {
   "onb.installOther": "全画面で開き、オフラインでも動き、データが残ります。",
   "onb.seeHowToInstall": "追加のしかたを見る",
   "onb.skipInstall": "あとで、アプリを開く",
+  /* ── Support: voluntary, and it buys nothing. ─────────────────────────── */
+  "support.title": "支援する",
+  "support.body": "TrainerKit は無料で、広告はなく、あなたに関する情報を一切集めません。これからも同じです。役に立ったなら、Pix での支援が継続の助けになります。",
+  "support.note": "任意です。送ってもアプリの内容は変わりません。",
+  "support.pixLabel": "Pix キー",
+  "support.copy": "Pix キーをコピー",
+  "support.copied": "コピーしました",
   "sprites.title": "画像",
   "sprites.none": "画像なし",
   "sprites.noneDetail": "タイプの色とイニシャルのマークだけ。何もダウンロードしません。",

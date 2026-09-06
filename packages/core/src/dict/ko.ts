@@ -479,6 +479,13 @@ export const KO: Dict = {
   "onb.installOther": "전체 화면으로 열리고, 오프라인에서도 되고, 데이터가 남습니다.",
   "onb.seeHowToInstall": "추가 방법 보기",
   "onb.skipInstall": "나중에, 앱 열기",
+  /* ── Support: voluntary, and it buys nothing. ─────────────────────────── */
+  "support.title": "후원하기",
+  "support.body": "TrainerKit은 무료이고 광고가 없으며 사용자에 대한 어떤 것도 수집하지 않습니다. 앞으로도 그렇습니다. 도움이 되었다면 Pix 후원이 유지에 힘이 됩니다.",
+  "support.note": "자발적인 후원입니다. 보내도 앱에서 달라지는 것은 없습니다.",
+  "support.pixLabel": "Pix 키",
+  "support.copy": "Pix 키 복사",
+  "support.copied": "복사됨",
   "sprites.title": "이미지",
   "sprites.none": "이미지 없음",
   "sprites.noneDetail": "타입 색과 이니셜 마크만. 아무것도 내려받지 않습니다.",
