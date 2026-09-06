@@ -5,6 +5,7 @@ import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-nati
 import {
   ACTION_KEYS,
   CONTEXT_KEYS,
+  buildDexEntry,
   computeCPAtLevel,
   decide,
   custoDosMaxAtaques,
@@ -35,6 +36,18 @@ import { Selo } from "../../src/Selo";
 /* O veredito e a unica cor com significado nesta tela, e por isso ela troca
    com o tema: `#3ddc97` da 10,5:1 sobre o cartao preto e 1,8:1 sobre o branco.
    O nome da acao e que e estavel — o tom, nao. */
+/** As tres ligas, na ordem em que a melhor posicao e procurada. */
+const LIGAS = ["great", "ultra", "master"] as const;
+
+/** O arquetipo, em uma frase. As cinco chaves ja existem nos dez idiomas. */
+const ARQUETIPO: Record<string, Key> = {
+  monster: "dex.build.monster",
+  glassCannon: "dex.build.glassCannon",
+  wall: "dex.build.wall",
+  balanced: "dex.build.balanced",
+  frail: "dex.build.frail",
+};
+
 /* Os quatro papeis da Batalha Max, e a chave que diz cada um nos dez idiomas. */
 const PAPEL_MAX: Record<string, Key> = {
   atacante: "species.maxRole.atacante",
@@ -196,6 +209,47 @@ export default function Ficha() {
       custo: custoDosMaxAtaques(especie.maxGrupo, dados.dynamax),
     };
   }, [dados, especie]);
+
+  /**
+   * A LENTE — o que a ficha diz em NUMERO, dito em frase.
+   *
+   * ⚠️ Nao e repeticao do resto da tela. Tres coisas so aparecem aqui, e nenhuma
+   * delas esta nos numeros: o ARQUETIPO ("bate forte e cai rapido"), a POSICAO
+   * dele entre os atacantes do proprio tipo, e a melhor colocacao dele nas
+   * ligas. Sao as tres perguntas que um numero de ataque nao responde.
+   *
+   * O modo Lente do web tambem fala, fotografa e usa camera — nada disso existe
+   * aqui, e por isso o que veio foi o texto. Prometer a locucao sem ter voz
+   * seria pior que nao ter a tela.
+   */
+  const lente = useMemo(() => {
+    if (!dados || !especie) return null;
+    const tipoPrimario = especie.types[0] ?? "normal";
+    const listaRaide = dados.rankings?.raidByType[tipoPrimario] ?? [];
+    const posRaide = listaRaide.findIndex((r) => r.speciesId === especie.id);
+
+    let melhorLiga: { league: "great" | "ultra" | "master"; position: number } | null = null;
+    for (const liga of LIGAS) {
+      const pos = (dados.rankings?.statProductByLeague[liga] ?? []).findIndex(
+        (r) => r.speciesId === especie.id,
+      );
+      if (pos >= 0 && (melhorLiga === null || pos + 1 < melhorLiga.position)) {
+        melhorLiga = { league: liga, position: pos + 1 };
+      }
+    }
+
+    return buildDexEntry({
+      name: especie.name,
+      dex: especie.dex,
+      types: especie.types,
+      baseStats: especie.baseStats,
+      cpm: dados.cpm,
+      levelCap: tetoDePowerUp(setup.level, dados.version.levelCap),
+      evolvesInto: especie.evolvesInto,
+      raidRank: posRaide >= 0 ? { type: tipoPrimario, position: posRaide + 1 } : null,
+      leagueRank: melhorLiga,
+    });
+  }, [dados, especie, setup.level]);
 
   /*
    * Os tres tetos de PC, e o terceiro NAO e um teto a mais: e o Melhor Amigo.
@@ -408,6 +462,37 @@ export default function Ficha() {
               </Link>
             );
           })}
+        </View>
+      )}
+
+      {/* ── LENTE ──────────────────────────────────────────────────────────── */}
+      {lente && (
+        <View className="bg-superficie rounded-3xl p-5 mt-3">
+          <Text className="text-texto3 text-[11px] tracking-widest">
+            {t("dex.title").toUpperCase()}
+          </Text>
+          <Text className="text-texto2 text-[13px] leading-5 mt-3">
+            {t(ARQUETIPO[lente.build]!)}
+          </Text>
+          <Text className="text-texto2 text-[13px] leading-5 mt-2">
+            {t(lente.evolves ? "dex.line.evolves" : "dex.line.final")}
+          </Text>
+          {lente.raidRank && (
+            <Text className="text-texto2 text-[13px] leading-5 mt-2">
+              {t("dex.line.raid", {
+                type: t(`type.${lente.raidRank.type}` as never),
+                position: lente.raidRank.position,
+              })}
+            </Text>
+          )}
+          {lente.leagueRank && (
+            <Text className="text-texto2 text-[13px] leading-5 mt-2">
+              {t("dex.line.league", {
+                league: t(`rank.league.${lente.leagueRank.league}` as never),
+                position: lente.leagueRank.position,
+              })}
+            </Text>
+          )}
         </View>
       )}
 

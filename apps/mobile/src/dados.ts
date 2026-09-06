@@ -120,6 +120,7 @@ export interface Base {
       charged?: { name: string };
     }[];
     raidByType: Record<string, { speciesId: string }[]>;
+    statProductByLeague: Record<string, { speciesId: string }[]>;
   };
 }
 
