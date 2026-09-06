@@ -355,6 +355,7 @@ const EN = {
   "collection.markDone": "I already did this",
   "collection.undoDone": "Not done after all",
   "collection.export": "Export",
+  "collection.exportFailed": "Could not write the file. Free up some space and try again.",
   "collection.import": "Import",
   "collection.imported": "{count} species imported.",
 

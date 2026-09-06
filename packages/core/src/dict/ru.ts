@@ -319,6 +319,7 @@ export const RU: Dict = {
   "collection.markDone": "Уже сделал",
   "collection.undoDone": "Ещё не сделал",
   "collection.export": "Экспорт",
+  "collection.exportFailed": "Не удалось записать файл. Освободите место и попробуйте снова.",
   "collection.import": "Импорт",
   "collection.imported": "Импортировано видов: {count}.",
   "assistant.ask": "Спросить",

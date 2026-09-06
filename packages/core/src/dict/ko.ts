@@ -319,6 +319,7 @@ export const KO: Dict = {
   "collection.markDone": "이미 했어요",
   "collection.undoDone": "아직 안 했어요",
   "collection.export": "내보내기",
+  "collection.exportFailed": "파일을 저장하지 못했습니다. 공간을 확보한 뒤 다시 시도해 주세요.",
   "collection.import": "가져오기",
   "collection.imported": "{count}마리를 가져왔습니다.",
   "assistant.ask": "질문하기",

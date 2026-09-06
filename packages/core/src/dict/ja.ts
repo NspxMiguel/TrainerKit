@@ -319,6 +319,7 @@ export const JA: Dict = {
   "collection.markDone": "もうやった",
   "collection.undoDone": "やっぱりまだ",
   "collection.export": "書き出し",
+  "collection.exportFailed": "ファイルを書き込めませんでした。空き容量を作ってからもう一度お試しください。",
   "collection.import": "読み込み",
   "collection.imported": "{count}匹を読み込みました。",
   "assistant.ask": "質問",

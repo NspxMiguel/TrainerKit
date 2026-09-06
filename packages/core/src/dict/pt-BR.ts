@@ -334,8 +334,9 @@ export const PT_BR: Dict = {
   "collection.markDone": "Já fiz isso",
   "collection.undoDone": "Ainda não fiz",
   "collection.export": "Exportar",
+  "collection.exportFailed": "Não consegui escrever o arquivo. Libere espaço e tente de novo.",
   "collection.import": "Importar",
-  "collection.imported": "{count} espécie importados.",
+  "collection.imported": "{count} espécies importadas.",
 
   "assistant.ask": "Perguntar",
   "assistant.title": "O que eu acho",

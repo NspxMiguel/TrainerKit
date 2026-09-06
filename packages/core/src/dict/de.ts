@@ -319,6 +319,7 @@ export const DE: Dict = {
   "collection.markDone": "Habe ich schon gemacht",
   "collection.undoDone": "Doch noch nicht",
   "collection.export": "Exportieren",
+  "collection.exportFailed": "Die Datei konnte nicht geschrieben werden. Schaffe Platz und versuche es erneut.",
   "collection.import": "Importieren",
   "collection.imported": "{count} Spezies importiert.",
   "assistant.ask": "Fragen",
