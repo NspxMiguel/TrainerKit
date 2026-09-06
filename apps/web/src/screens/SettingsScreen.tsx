@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import { PIX_KEY } from "@trainerkit/core";
+
 import type { DatasetSource, DatasetSpecies } from "../data/useDataset.ts";
 import type { PersistState } from "../storage/persist.ts";
 import {
@@ -75,6 +77,7 @@ type Painel =
   | "about"
   | "privacy"
   | "feedback"
+  | "support"
   /*
    * ⚠️ "help" SAIU: "tire o ajude o projeto".
    *
@@ -197,6 +200,7 @@ export function SettingsScreen({
   const [updateMsg, setUpdateMsg] = useState<string | null>(null);
   const [wipeOpen, setWipeOpen] = useState(false);
   const [painel, setPainel] = useState<Painel | null>(null);
+  const [chaveCopiada, setChaveCopiada] = useState(false);
   const install = useInstallState();
   const language = useLanguage();
   const showTranslation = useShowTranslation();
@@ -330,6 +334,21 @@ export function SettingsScreen({
           selo="privacidade" label={t("privacy.title")} onOpen={() => setPainel("privacy")} />
         <Linha
           selo="feedback" label={t("feedback.title")} onOpen={() => setPainel("feedback")} />
+        {/*
+          ⚠️ THIS IS NOT THE "help" PANEL COMING BACK.
+
+          That one explained why bringing your own API key was the help the
+          project needed, and it was removed on request — "tire o ajude o
+          projeto" — because it was a third door to two key fields that already
+          had their own screens.
+
+          This is a Pix key and nothing else, asked for directly: "vamo colocar
+          um donate ali e dale, qm quiser doa doa". It lives here as well as in
+          the setup because the setup runs once, and someone who decides the app
+          was worth something decides that in month three, not in minute one.
+        */}
+        <Linha
+          selo="apoiar" label={t("support.title")} onOpen={() => setPainel("support")} />
       </section>
 
       {/*
@@ -671,6 +690,39 @@ export function SettingsScreen({
       {painel === "feedback" && (
         <SettingsSheet title={t("feedback.title")} onClose={fechar}>
           <FeedbackScreen />
+        </SettingsSheet>
+      )}
+
+      {painel === "support" && (
+        <SettingsSheet title={t("support.title")} onClose={fechar}>
+          <section className="tk-card" style={{ display: "grid", gap: 10 }}>
+            <p className="tk-caption" style={{ lineHeight: 1.6 }}>
+              {t("support.body")}
+            </p>
+          </section>
+
+          <div className="tk-card tk-apoio">
+            <span className="tk-apoio-rotulo">{t("support.pixLabel")}</span>
+            <code className="tk-apoio-chave">{PIX_KEY}</code>
+          </div>
+
+          <button
+            type="button"
+            className="tk-btn tk-btn--ghost tk-btn--block tk-apoio-copiar"
+            onClick={() => {
+              navigator.clipboard?.writeText(PIX_KEY).then(
+                () => {
+                  setChaveCopiada(true);
+                  window.setTimeout(() => setChaveCopiada(false), 2000);
+                },
+                () => {},
+              );
+            }}
+          >
+            {chaveCopiada ? t("support.copied") : t("support.copy")}
+          </button>
+
+          <p className="tk-apoio-nota">{t("support.note")}</p>
         </SettingsSheet>
       )}
 

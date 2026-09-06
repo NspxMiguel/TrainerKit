@@ -1733,7 +1733,21 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  /*
+   * `safe center`, e nao `flex-start`.
+   *
+   * Com o tile de 84px fora do passo de instalar, aquele passo virou titulo,
+   * uma linha e mais nada — encostados no topo, com dois tercos da tela vazios
+   * embaixo. Vazio nao e minimalismo: um bloco de texto colado no teto de uma
+   * tela preta le como pagina que nao terminou de carregar.
+   *
+   * ⚠️ O `safe` e o que salva a lista de dez idiomas. `justify-content: center`
+   * puro dentro de um container que rola corta o TOPO do conteudo quando ele
+   * nao cabe, e ai os primeiros idiomas ficam inalcancaveis — a rolagem nao
+   * sobe alem do inicio da caixa. Com `safe`, o navegador volta sozinho pro
+   * comportamento de `start` assim que o conteudo transborda.
+   */
+  justify-content: safe center;
   padding-top: 6vh;
   /*
    * ⚠️ ROLA QUANDO NAO COUBER — e o comentario do topo do arquivo diz o
@@ -1934,6 +1948,45 @@
   border: 1px solid color-mix(in srgb, var(--tk-ultra-fg) 24%, transparent);
   font: 400 14px/1.5 var(--tk-font);
   color: var(--tk-txt);
+}
+
+/* ── APOIAR: a chave Pix no setup ───────────────────────────────────────────
+   Two rules and a footnote. The card is the app's own `.tk-card`, so this adds
+   no new surface — a donation screen that invents its own box would be the one
+   place in the app that looks like it came from somewhere else. */
+.tk-apoio {
+  display: grid;
+  gap: 6px;
+  padding: var(--tk-s4);
+  margin-top: var(--tk-s5);
+}
+
+.tk-apoio-rotulo {
+  font: 600 11px/1 var(--tk-font);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tk-txt3);
+}
+
+.tk-apoio-chave {
+  /* `break-all` and not `break-word`: a Pix random key has no word boundary,
+     so `break-word` leaves it overflowing the card on a narrow phone. */
+  font: 400 13px/1.55 var(--tk-mono);
+  color: var(--tk-txt);
+  word-break: break-all;
+  /* One click selects the whole key on desktop, where there is no copy button
+     worth reaching for with a mouse. */
+  user-select: all;
+}
+
+.tk-apoio-copiar {
+  margin-top: var(--tk-s3);
+}
+
+.tk-apoio-nota {
+  margin: var(--tk-s4) 0 0;
+  font: 400 13px/1.5 var(--tk-font);
+  color: var(--tk-txt3);
 }
 
 /* ── FERRAMENTAS e MODO OFFLINE da barra lateral ────────────────────────────

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 
-import { MAX_POWERUP_LEVEL } from "@trainerkit/core";
+import { MAX_POWERUP_LEVEL, PIX_KEY } from "@trainerkit/core";
 
 import { setGroqKey } from "../ai/groq.ts";
 import { hasWebGPU } from "../ai/local.ts";
@@ -51,7 +51,7 @@ import {
  * "日本語" se identificam sozinhos, com bandeira. E isso resolve o ovo-e-galinha
  * de rotular a tela de escolher idioma num idioma que ainda nao foi escolhido.
  */
-type StepId = "idioma" | "boas-vindas" | "modo" | "ia" | "instalar";
+type StepId = "idioma" | "boas-vindas" | "modo" | "ia" | "apoiar" | "instalar";
 
 export function Onboarding() {
   /* Medido uma vez por sessao e guardado; ver `bandeiras.ts`. */
@@ -75,6 +75,7 @@ export function Onboarding() {
   const [iaEscolha, setIaEscolha] = useState<AiProvider>("off");
   const [chave, setChave] = useState("");
   const [guideOpen, setGuideOpen] = useState(false);
+  const [copiado, setCopiado] = useState(false);
   const install = useInstallState();
   const { t } = useT();
   /*
@@ -107,9 +108,20 @@ export function Onboarding() {
    * lugar honesto pra dizer o preco de cada opcao — chave propria, modelo no
    * aparelho, ou nada.
    */
+  /*
+   * "apoiar" comes BEFORE "instalar", and that ordering is the whole design.
+   *
+   * The install step owns its own footer (`Ver como instalar` / `Agora nao`),
+   * and both of its buttons end the setup. A support step placed after it would
+   * simply never be reached by anyone who installs.
+   *
+   * It also reads better: the last thing before the app opens should be the
+   * app, not a request for money. Asking one screen earlier, after every choice
+   * is already made, is a request — asking last is a toll gate.
+   */
   const steps: StepId[] = install.installed
-    ? ["idioma", "boas-vindas", "modo", "ia"]
-    : ["idioma", "boas-vindas", "modo", "ia", "instalar"];
+    ? ["idioma", "boas-vindas", "modo", "ia", "apoiar"]
+    : ["idioma", "boas-vindas", "modo", "ia", "apoiar", "instalar"];
 
   const current = steps[step]!;
   const last = step === steps.length - 1;
@@ -126,6 +138,22 @@ export function Onboarding() {
     if (iaEscolha === "groq" && limpa !== "") setGroqKey(limpa);
     setProvider(iaEscolha === "groq" && limpa === "" ? "off" : iaEscolha);
     updateSetup({ done: true, mode, assistant, name: name.trim(), level });
+  };
+
+  const copiarChave = () => {
+    /*
+     * `catch` and not `then`: on a page served over plain http the clipboard
+     * API does not exist, and an unhandled rejection here would take the whole
+     * setup down over a copy button. The key stays selectable on screen either
+     * way, so failing quietly still leaves a way through.
+     */
+    navigator.clipboard?.writeText(PIX_KEY).then(
+      () => {
+        setCopiado(true);
+        window.setTimeout(() => setCopiado(false), 2000);
+      },
+      () => {},
+    );
   };
 
   const go = (delta: 1 | -1) => {
@@ -449,11 +477,56 @@ export function Onboarding() {
           </>
         )}
 
+        {current === "apoiar" && (
+          <>
+            <h1 className="tk-onb-title">{t("support.title")}</h1>
+            <p className="tk-onb-sub">{t("support.body")}</p>
+
+            {/*
+              The key is shown, not hidden behind a button that opens a bank.
+
+              There is no deep link that works across every Brazilian bank, and
+              a link that opens the wrong app is worse than a string anyone can
+              paste. `user-select: all` makes one click select the whole key on
+              desktop; the button covers the phone, which is where this app
+              actually lives.
+            */}
+            <div className="tk-card tk-apoio">
+              <span className="tk-apoio-rotulo">{t("support.pixLabel")}</span>
+              <code className="tk-apoio-chave">{PIX_KEY}</code>
+            </div>
+
+            <button
+              type="button"
+              className="tk-btn tk-btn--ghost tk-btn--block tk-apoio-copiar"
+              onClick={copiarChave}
+            >
+              {copiado ? t("support.copied") : t("support.copy")}
+            </button>
+
+            {/*
+              This line is not decoration. It is what keeps the donation a
+              donation: nothing is sold, nothing is unlocked, and no part of the
+              app is behind it.
+            */}
+            <p className="tk-apoio-nota">{t("support.note")}</p>
+          </>
+        )}
+
         {current === "instalar" && (
           <>
-            <div className="tk-marca-ovo tk-onb-mark tk-onb-mark--small" aria-hidden="true">
-              <IconDownload size={30} />
-            </div>
+            {/*
+              THE 84px TILE LEFT THIS STEP — "tirar o icone gigantao no setup".
+
+              It is the same argument the welcome step already makes a few
+              blocks up, and it applies harder here: the tile was not even the
+              mark, it was a download glyph wearing the mark's shape, 84px of
+              it, above a title that says the same thing in words. The button
+              below already carries a download icon.
+
+              What is left is title, one line, and the two buttons — which is
+              the whole content this step ever had.
+            */}
             <h1 className="tk-onb-title">{t("onb.lastThing")}</h1>
             <p className="tk-onb-sub">
               {install.platform === "iphone" || install.platform === "ipad"
