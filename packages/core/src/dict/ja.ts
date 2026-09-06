@@ -486,6 +486,12 @@ export const JA: Dict = {
   "support.pixLabel": "Pix キー",
   "support.copy": "Pix キーをコピー",
   "support.copied": "コピーしました",
+  /* ── Privacidade do app NATIVO: ele nao tem IA, voz nem imagens. ────── */
+  "privacy.native.local": "あなたのコレクションと設定は、この端末内のアプリ自身の保存領域に置かれます。どこにも送信されません。",
+  "privacy.native.network": "• GitHub（米国）— 「開催中」やタマゴの画面を見ているあいだ、イベントとタマゴの一覧をそこから取得します。送信されるのはファイルのアドレスとあなたの IP だけで、あなたに関する情報は一切含まれません。",
+  "privacy.native.transfer": "上に挙げた唯一のサービスはブラジル国外（米国）にありますが、あなたに関する情報は受け取りません。公開ファイルの要求だけです。",
+  "privacy.native.rights": "ブラジルの LGPD（第18条）はデータへのアクセス・訂正・削除を保障します。すべてがこの端末に留まるため、アプリを削除すればすべて消えます。こちらに控えはありません。",
+  "privacy.native.minors": "このアプリは、誰の、どの年齢の個人データも要求も収集もしません。アカウントも、登録も、利用計測もありません。",
   "sprites.title": "画像",
   "sprites.none": "画像なし",
   "sprites.noneDetail": "タイプの色とイニシャルのマークだけ。何もダウンロードしません。",

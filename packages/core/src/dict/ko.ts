@@ -486,6 +486,12 @@ export const KO: Dict = {
   "support.pixLabel": "Pix 키",
   "support.copy": "Pix 키 복사",
   "support.copied": "복사됨",
+  /* ── Privacidade do app NATIVO: ele nao tem IA, voz nem imagens. ────── */
+  "privacy.native.local": "컬렉션과 설정은 이 기기 안, 앱 자체 저장소에 보관됩니다. 어디로도 전송되지 않습니다.",
+  "privacy.native.network": "• GitHub(미국) — 진행 중 이벤트나 부화 화면을 볼 때 이벤트와 알 목록을 그곳에서 받아옵니다. 나가는 것은 파일 주소와 IP뿐이며, 사용자에 대한 정보는 함께 가지 않습니다.",
+  "privacy.native.transfer": "위에 언급한 유일한 서비스는 브라질 밖 미국에 있지만, 사용자에 대한 어떤 정보도 받지 않습니다. 공개 파일 요청뿐입니다.",
+  "privacy.native.rights": "브라질 LGPD 제18조는 데이터 열람·정정·삭제를 보장합니다. 모든 것이 이 기기에 남아 있으므로 앱을 삭제하면 전부 사라집니다. 저희에게 사본은 없습니다.",
+  "privacy.native.minors": "이 앱은 누구의, 어떤 연령의 개인정보도 요구하거나 수집하지 않습니다. 계정도, 가입도, 사용 측정도 없습니다.",
   "sprites.title": "이미지",
   "sprites.none": "이미지 없음",
   "sprites.noneDetail": "타입 색과 이니셜 마크만. 아무것도 내려받지 않습니다.",

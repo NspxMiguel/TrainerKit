@@ -42,6 +42,7 @@ function Casca() {
         <Stack.Screen name="ajustes/index" options={{ title: "" }} />
         <Stack.Screen name="time/index" options={{ title: "" }} />
         <Stack.Screen name="ginasio/index" options={{ title: "" }} />
+        <Stack.Screen name="legal/index" options={{ title: "" }} />
       </Stack>
 
       {/*

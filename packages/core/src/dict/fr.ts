@@ -486,6 +486,12 @@ export const FR: Dict = {
   "support.pixLabel": "Clé Pix",
   "support.copy": "Copier la clé Pix",
   "support.copied": "Copié",
+  /* ── Privacidade do app NATIVO: ele nao tem IA, voz nem imagens. ────── */
+  "privacy.native.local": "Votre collection et vos préférences sont conservées sur cet appareil, dans le stockage de l'app elle-même. Rien de tout cela n'est envoyé où que ce soit.",
+  "privacy.native.network": "• GitHub (États-Unis) — l'app y récupère la liste des événements et celle des œufs pendant que vous consultez Ce qui se passe ou la Couveuse. Seules l'adresse du fichier et votre IP sortent. Rien vous concernant ne part avec.",
+  "privacy.native.transfer": "Le seul service cité ci-dessus est hors du Brésil, aux États-Unis, et il ne reçoit rien vous concernant — seulement la demande d'un fichier public.",
+  "privacy.native.rights": "La LGPD brésilienne (art. 18) garantit l'accès, la correction et la suppression de vos données. Comme tout reste sur cet appareil, supprimer l'app supprime tout. Nous n'en avons aucune copie.",
+  "privacy.native.minors": "L'app ne demande ni ne collecte aucune donnée personnelle, de personne, à aucun âge. Pas de compte, pas d'inscription, pas de mesure d'usage.",
   "sprites.title": "Images",
   "sprites.none": "Sans images",
   "sprites.noneDetail": "Juste la pastille à la couleur du type avec les initiales. Rien n'est téléchargé.",

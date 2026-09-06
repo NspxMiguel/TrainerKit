@@ -486,6 +486,12 @@ export const IT: Dict = {
   "support.pixLabel": "Chiave Pix",
   "support.copy": "Copia la chiave Pix",
   "support.copied": "Copiato",
+  /* ── Privacidade do app NATIVO: ele nao tem IA, voz nem imagens. ────── */
+  "privacy.native.local": "La tua collezione e le tue preferenze restano su questo dispositivo, nella memoria dell'app stessa. Niente di tutto ciò viene inviato da nessuna parte.",
+  "privacy.native.network": "• GitHub (USA) — l'app scarica lì l'elenco degli eventi e quello delle uova mentre guardi Cosa c'è o l'Incubatrice. Escono solo l'indirizzo del file e il tuo IP. Nulla che ti riguardi viaggia insieme.",
+  "privacy.native.transfer": "L'unico servizio citato sopra è fuori dal Brasile, negli Stati Uniti, e non riceve nulla su di te — solo la richiesta di un file pubblico.",
+  "privacy.native.rights": "La LGPD brasiliana (art. 18) garantisce accesso, correzione e cancellazione dei tuoi dati. Poiché tutto resta su questo dispositivo, disinstallare l'app cancella tutto. Noi non ne abbiamo copia.",
+  "privacy.native.minors": "L'app non chiede né raccoglie alcun dato personale, di nessuno, a nessuna età. Nessun account, nessuna registrazione, nessuna misurazione d'uso.",
   "sprites.title": "Immagini",
   "sprites.none": "Senza immagini",
   "sprites.noneDetail": "Solo il simbolo con il colore del tipo e le iniziali. Non viene scaricato niente.",

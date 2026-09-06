@@ -186,6 +186,15 @@ export default function Ajustes() {
         </Text>
       </Pressable>
       <Text className="text-texto3 text-[12px] leading-5 mt-3">{t("support.note")}</Text>
+
+      {/* Privacidade e aviso de marca. As lojas exigem que seja alcançável de
+          DENTRO do app, e o aviso de marca precisa chegar a quem instala — o
+          README não alcança essa pessoa. */}
+      <Link href="/legal" asChild>
+        <Pressable className="bg-superficie rounded-3xl px-4 py-4 mt-7">
+          <Text className="text-texto text-[15px]">{t("privacy.title")}</Text>
+        </Pressable>
+      </Link>
     </ScrollView>
   );
 }
