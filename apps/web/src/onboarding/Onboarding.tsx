@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 
-import { MAX_POWERUP_LEVEL, PIX_KEY } from "@trainerkit/core";
+import { MAX_POWERUP_LEVEL, BITCOIN_ADDRESS } from "@trainerkit/core";
 
 import { setGroqKey } from "../ai/groq.ts";
 import { hasWebGPU } from "../ai/local.ts";
@@ -147,7 +147,7 @@ export function Onboarding() {
      * setup down over a copy button. The key stays selectable on screen either
      * way, so failing quietly still leaves a way through.
      */
-    navigator.clipboard?.writeText(PIX_KEY).then(
+    navigator.clipboard?.writeText(BITCOIN_ADDRESS).then(
       () => {
         setCopiado(true);
         window.setTimeout(() => setCopiado(false), 2000);
@@ -492,8 +492,8 @@ export function Onboarding() {
               actually lives.
             */}
             <div className="tk-card tk-apoio">
-              <span className="tk-apoio-rotulo">{t("support.pixLabel")}</span>
-              <code className="tk-apoio-chave">{PIX_KEY}</code>
+              <span className="tk-apoio-rotulo">{t("support.address")}</span>
+              <code className="tk-apoio-chave">{BITCOIN_ADDRESS}</code>
             </div>
 
             <button

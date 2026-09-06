@@ -1,7 +1,7 @@
 import {
   LANGUAGES,
   MAX_POWERUP_LEVEL,
-  PIX_KEY,
+  BITCOIN_ADDRESS,
   TRAINER_LEVELS,
   tetoDePowerUp,
   type Key,
@@ -73,7 +73,7 @@ export function Onboarding() {
   const ultimo = passo === 2;
 
   const copiar = () => {
-    Clipboard.setStringAsync(PIX_KEY)
+    Clipboard.setStringAsync(BITCOIN_ADDRESS)
       .then(() => {
         setCopiado(true);
         setTimeout(() => setCopiado(false), 2000);
@@ -195,12 +195,12 @@ export function Onboarding() {
 
             <View className="bg-superficie rounded-3xl px-4 py-4">
               <Text className="text-texto3 text-[11px] tracking-widest mb-1.5">
-                {t("support.pixLabel").toUpperCase()}
+                {t("support.address").toUpperCase()}
               </Text>
               {/* `selectable`: mesmo se o botão de copiar falhar, dá pra
                   segurar e copiar do jeito do sistema. */}
               <Text selectable className="text-texto text-[13px] leading-5 font-mono">
-                {PIX_KEY}
+                {BITCOIN_ADDRESS}
               </Text>
             </View>
 

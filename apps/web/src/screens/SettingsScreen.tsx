@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { PIX_KEY } from "@trainerkit/core";
+import { BITCOIN_ADDRESS } from "@trainerkit/core";
 
 import type { DatasetSource, DatasetSpecies } from "../data/useDataset.ts";
 import type { PersistState } from "../storage/persist.ts";
@@ -698,15 +698,15 @@ export function SettingsScreen({
           </section>
 
           <div className="tk-card tk-apoio">
-            <span className="tk-apoio-rotulo">{t("support.pixLabel")}</span>
-            <code className="tk-apoio-chave">{PIX_KEY}</code>
+            <span className="tk-apoio-rotulo">{t("support.address")}</span>
+            <code className="tk-apoio-chave">{BITCOIN_ADDRESS}</code>
           </div>
 
           <button
             type="button"
             className="tk-btn tk-btn--ghost tk-btn--block tk-apoio-copiar"
             onClick={() => {
-              navigator.clipboard?.writeText(PIX_KEY).then(
+              navigator.clipboard?.writeText(BITCOIN_ADDRESS).then(
                 () => {
                   setChaveCopiada(true);
                   window.setTimeout(() => setChaveCopiada(false), 2000);

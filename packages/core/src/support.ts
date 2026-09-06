@@ -1,23 +1,40 @@
 /**
- * WHERE A DONATION GOES.
+ * PARA ONDE VAI UMA DOAÇÃO.
  *
- * One constant, shared by the web app and the native app, so the key can never
- * drift between the two — a donation screen showing a stale key is worse than
- * no donation screen, because it fails silently on the payer's side.
+ * Uma constante só, compartilhada pelos dois apps, pra o endereço nunca divergir
+ * entre eles — uma tela de doação com endereço velho é pior que nenhuma, porque
+ * falha calada do lado de quem paga.
  *
- * ⚠️ It is a RANDOM key (EVP / "chave aleatória"), and that is deliberate: a
- * CPF, phone or e-mail key would put a personal identifier in a public
- * repository. This UUID identifies an account to the payment network and
- * nothing else — it carries no name, no document and no contact.
+ * ── POR QUE BITCOIN E NÃO PIX ───────────────────────────────────────────────
  *
- * ⚠️ NO NAME IS STORED HERE, and none should be added. The payer's own bank
- * resolves and shows the account holder before confirming, which is where that
- * belongs; the repository does not need to publish it.
+ * O Pix esteve aqui e saiu. O motivo não é técnico: **o Pix mostra o nome civil
+ * completo do dono da chave** na tela de confirmação do banco de quem paga, e
+ * isso não tem como desligar — é do arranjo, não do app.
  *
- * Why the bare key and not a "Pix Copia e Cola" BR Code: the BR Code carries a
- * merchant name and city, and a payload that any bank silently rejects is a
- * defect that cannot be caught here — there is no way to test it against a real
- * bank from this side. Every Brazilian bank accepts a key pasted into
- * Pix → Transfer → Key, and that path is verifiable end to end.
+ * Num app derivado de propriedade de terceiro (o `LICENSE` deste repositório
+ * diz, com todas as letras, que o dado do jogo não é nosso), isso junta as duas
+ * coisas que convém manter separadas: um pedido de dinheiro e um nome próprio
+ * identificável. Um endereço Bitcoin não carrega nome nenhum.
+ *
+ * ⚠️ Isto NÃO é anonimato: a rede é pública e todo pagamento fica registrado
+ * pra sempre. O que muda é que o endereço não vem com um nome colado nele.
+ *
+ * **Pix volta no dia em que houver chave de CNPJ** — aí quem paga vê a razão
+ * social, não uma pessoa, e é exatamente o critério do `CLAUDE.md`: empresa
+ * onde há risco, pseudônimo no resto.
  */
-export const PIX_KEY = "6b58a96e-6387-4074-bbc8-9c2b7386f6b5";
+
+/**
+ * Endereço Bitcoin (bech32, SegWit v0, mainnet).
+ *
+ * ⚠️ CONFERIDO PELO CHECKSUM, e não copiado no olho. Ele foi lido de um print
+ * da carteira, e endereço lido errado é dinheiro que some — então o bech32 foi
+ * validado (BIP-173) antes de entrar aqui: 42 caracteres, HRP `bc`, versão 0,
+ * `polymod` fechando em 1. A chance de uma leitura errada produzir checksum
+ * válido é de cerca de 1 em 1 bilhão.
+ *
+ * Quem mexer nele: valide de novo. Carteira nenhuma aceita endereço com
+ * checksum quebrado, então o erro aparece como "endereço inválido" na mão de
+ * quem quis doar — e essa pessoa não volta pra avisar.
+ */
+export const BITCOIN_ADDRESS = "bc1qm64el0gp0kvk7zqhl89x0vkngu2skqxd26vpjg";
