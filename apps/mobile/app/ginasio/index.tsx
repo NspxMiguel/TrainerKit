@@ -4,6 +4,7 @@ import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { coinMath, pickDefenders, rankDefenders, type DefenderInput } from "@trainerkit/core";
 import { useDados } from "../../src/dados";
 import { useT } from "../../src/i18n";
+import { useTema } from "../../src/tema";
 import { Selo } from "../../src/Selo";
 
 /**
@@ -20,6 +21,7 @@ import { Selo } from "../../src/Selo";
  */
 export default function Ginasio() {
   const { t } = useT();
+  const { cores } = useTema();
   const { dados } = useDados();
   const [ginasios, setGinasios] = useState(3);
 
@@ -82,7 +84,7 @@ export default function Ginasio() {
             <View
               key={d.id}
               className="flex-row items-center gap-3 px-4 py-3"
-              style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: "rgba(255,255,255,0.08)" } : undefined}
+              style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: cores.linha } : undefined}
             >
               <Text className="text-texto3 text-xs w-4">{i + 1}</Text>
               {sp && <Selo especie={sp} tamanho={36} />}

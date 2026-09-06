@@ -10,6 +10,7 @@ import {
   type EventoAgenda,
 } from "../../src/agenda";
 import { useT } from "../../src/i18n";
+import { useTema } from "../../src/tema";
 
 /**
  * O que esta acontecendo.
@@ -24,6 +25,7 @@ import { useT } from "../../src/i18n";
  */
 export default function Agenda() {
   const { t, idioma } = useT();
+  const { cores } = useTema();
   const estado = useEventos();
 
   const grupos = useMemo(() => {
@@ -86,7 +88,7 @@ export default function Agenda() {
     return (
       <View className="flex-1 bg-fundo items-center justify-center px-8">
         {estado.em === null ? (
-          <ActivityIndicator color="#f4f6fa" />
+          <ActivityIndicator color={cores.texto} />
         ) : (
           <Text className="text-texto2 text-sm text-center leading-6">{t("agenda.semRede")}</Text>
         )}
@@ -109,10 +111,10 @@ export default function Agenda() {
                 className="px-4 py-3 flex-row items-center gap-3"
                 style={{
                   ...(i > 0
-                    ? { borderTopWidth: 0.5, borderTopColor: "rgba(255,255,255,0.08)" }
+                    ? { borderTopWidth: 0.5, borderTopColor: cores.linha }
                     : {}),
                   ...(g.chave === "agora"
-                    ? { borderLeftWidth: 3, borderLeftColor: "#f4f6fa" }
+                    ? { borderLeftWidth: 3, borderLeftColor: cores.texto }
                     : {}),
                 }}
               >

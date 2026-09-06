@@ -4,6 +4,7 @@ import { ActivityIndicator, FlatList, Pressable, Text, TextInput, View } from "r
 
 import { useDados, type Especie } from "../src/dados";
 import { useT } from "../src/i18n";
+import { useTema } from "../src/tema";
 import { Selo } from "../src/Selo";
 
 /**
@@ -15,6 +16,7 @@ import { Selo } from "../src/Selo";
  */
 export default function Lista() {
   const { t } = useT();
+  const { cores } = useTema();
   const { pronto, erro, dados } = useDados();
   const [busca, setBusca] = useState("");
 
@@ -37,7 +39,7 @@ export default function Lista() {
   if (!pronto) {
     return (
       <View className="flex-1 items-center justify-center">
-        <ActivityIndicator color="#f4f6fa" />
+        <ActivityIndicator color={cores.texto} />
       </View>
     );
   }
@@ -49,7 +51,7 @@ export default function Lista() {
           value={busca}
           onChangeText={setBusca}
           placeholder={t("especies.searchPlaceholder")}
-          placeholderTextColor="#767c8c"
+          placeholderTextColor={cores.texto3}
           className="bg-superficie text-texto rounded-2xl px-4 py-3 text-base"
         />
         {/* Os atalhos que nao sao sobre UM bicho. Ficam no topo da Especies

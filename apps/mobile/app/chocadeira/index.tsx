@@ -12,6 +12,7 @@ import {
 } from "../../src/agenda";
 import { useDados, type Especie } from "../../src/dados";
 import { useT } from "../../src/i18n";
+import { useTema } from "../../src/tema";
 import { Selo } from "../../src/Selo";
 
 /**
@@ -24,6 +25,7 @@ import { Selo } from "../../src/Selo";
  */
 export default function Chocadeira() {
   const { t, idioma } = useT();
+  const { cores } = useTema();
   const estado = useOvos();
   const { dados } = useDados();
 
@@ -55,7 +57,7 @@ export default function Chocadeira() {
     return (
       <View className="flex-1 bg-fundo items-center justify-center px-8">
         {estado.em === null ? (
-          <ActivityIndicator color="#f4f6fa" />
+          <ActivityIndicator color={cores.texto} />
         ) : (
           <Text className="text-texto2 text-sm text-center leading-6">{t("eggs.semRede")}</Text>
         )}
@@ -80,7 +82,7 @@ export default function Chocadeira() {
                   className="flex-row items-center gap-3 px-4 py-3"
                   style={
                     i > 0
-                      ? { borderTopWidth: 0.5, borderTopColor: "rgba(255,255,255,0.08)" }
+                      ? { borderTopWidth: 0.5, borderTopColor: cores.linha }
                       : undefined
                   }
                 >

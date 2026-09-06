@@ -6,6 +6,7 @@ import { badgeFor, ivPercentOf, ivTotalOf, solveIVs, type IVCandidate } from "@t
 import { guardar } from "../../src/colecao";
 import { useDados } from "../../src/dados";
 import { useT } from "../../src/i18n";
+import { useTema } from "../../src/tema";
 import { Selo } from "../../src/Selo";
 
 /**
@@ -29,6 +30,7 @@ const STATS = ["atk", "def", "hp"] as const;
 
 export default function Calculadora() {
   const { t } = useT();
+  const { cores } = useTema();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { dados } = useDados();
   const [cp, setCp] = useState("");
@@ -81,7 +83,7 @@ export default function Calculadora() {
             onChangeText={setCp}
             keyboardType="number-pad"
             placeholder="—"
-            placeholderTextColor="#767c8c"
+            placeholderTextColor={cores.texto3}
             className="bg-superficie text-texto rounded-2xl px-4 py-3 text-base"
           />
         </View>
@@ -94,7 +96,7 @@ export default function Calculadora() {
             onChangeText={setHp}
             keyboardType="number-pad"
             placeholder="—"
-            placeholderTextColor="#767c8c"
+            placeholderTextColor={cores.texto3}
             className="bg-superficie text-texto rounded-2xl px-4 py-3 text-base"
           />
         </View>

@@ -1,3 +1,48 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ * As duas peles do app.
+ *
+ * A escura e a mesma decisao do web — preto de verdade, superficie quase-preta
+ * NEUTRA, e a cor da especie como unico matiz. A clara nasceu dos cinzas do
+ * handoff de design (`docs/HANDOFF.md`): `#F4F6FA` era a tinta principal la, e
+ * aqui vira o papel.
+ *
+ * ⚠️ AS CORES DE VEREDITO NAO SAO AS MESMAS NOS DOIS TEMAS, e nao pode ser.
+ * `#3ddc97` da 10,5:1 sobre o cartao preto e 1,8:1 sobre o branco — o mesmo
+ * verde que grita no escuro some no claro. Cada pele tem o tom que passa dos
+ * 4,5:1 SOBRE O CARTAO DELA; medido, nao escolhido no olho.
+ */
+@layer base {
+  :root {
+    --tk-fundo: 244 246 250;
+    --tk-superficie: 255 255 255;
+    --tk-linha: 15 18 25;
+    --tk-linha-alfa: 0.1;
+    --tk-texto: 20 23 30;
+    --tk-texto2: 74 81 96;
+    --tk-texto3: 103 110 123;
+    --tk-investir: 18 128 90;
+    --tk-guardar: 138 90 0;
+    --tk-transferir: 92 102 117;
+    --tk-evoluir: 91 61 245;
+    --tk-descobrir: 92 102 117;
+  }
+
+  .dark:root {
+    --tk-fundo: 0 0 0;
+    --tk-superficie: 19 19 19;
+    --tk-linha: 255 255 255;
+    --tk-linha-alfa: 0.08;
+    --tk-texto: 244 246 250;
+    --tk-texto2: 168 173 186;
+    --tk-texto3: 118 124 140;
+    --tk-investir: 61 220 151;
+    --tk-guardar: 255 197 92;
+    --tk-transferir: 154 166 184;
+    --tk-evoluir: 159 139 255;
+    --tk-descobrir: 168 173 186;
+  }
+}

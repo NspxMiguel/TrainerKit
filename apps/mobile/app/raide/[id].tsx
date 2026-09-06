@@ -14,6 +14,7 @@ import {
 } from "@trainerkit/core";
 import { useDados, type Base, type Especie } from "../../src/dados";
 import { useT } from "../../src/i18n";
+import { useTema } from "../../src/tema";
 import { Selo } from "../../src/Selo";
 
 /**
@@ -50,6 +51,7 @@ function poolDeCandidatos(dados: Base, tiposDoChefe: readonly string[]): string[
 
 export default function Raide() {
   const { t, idioma } = useT();
+  const { cores } = useTema();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { dados } = useDados();
   const chefe = dados?.species.find((s) => s.id === id) ?? null;
@@ -155,7 +157,7 @@ export default function Raide() {
             <View
               key={c.id}
               className="flex-row items-center gap-3 px-4 py-3"
-              style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: "rgba(255,255,255,0.08)" } : undefined}
+              style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: cores.linha } : undefined}
             >
               <Text className="text-texto3 text-xs w-4">{i + 1}</Text>
               {sp && <Selo especie={sp} tamanho={36} />}

@@ -1,15 +1,18 @@
 import { Link } from "expo-router";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
-import { DICTS } from "@trainerkit/core";
+import { DICTS, type Key } from "@trainerkit/core";
 import { useT } from "../../src/i18n";
+import { useTema, type Escolha } from "../../src/tema";
 
 /**
  * Ajustes.
  *
- * Hoje: idioma e os atalhos que nao cabiam no topo da Especies. O tema segue o
- * sistema (`userInterfaceStyle: automatic` no `app.json`) — a escolha manual
- * entra quando houver tema claro pra escolher.
+ * Hoje: tema, idioma e os atalhos que nao cabiam no topo da Especies.
+ *
+ * O tema comeca em "sistema" — iPhone em claro nao significa que ele quer o app
+ * claro, mas e o palpite menos errado quando ninguem escolheu ainda. As tres
+ * opcoes ficam salvas; ver `src/tema.tsx`.
  */
 const NOMES: Record<string, string> = {
   en: "English",
@@ -24,11 +27,39 @@ const NOMES: Record<string, string> = {
   ru: "Русский",
 };
 
+const TEMAS: { valor: Escolha; chave: Key }[] = [
+  { valor: "sistema", chave: "settings.theme.system" },
+  { valor: "claro", chave: "settings.theme.light" },
+  { valor: "escuro", chave: "settings.theme.dark" },
+];
+
 export default function Ajustes() {
   const { t, idioma, trocar } = useT();
+  const { cores, escolha, definir } = useTema();
 
   return (
     <ScrollView className="flex-1 bg-fundo" contentContainerStyle={{ padding: 20 }}>
+      <Text className="text-texto3 text-[11px] tracking-widest mb-2">
+        {t("settings.appearance").toUpperCase()}
+      </Text>
+      <View className="bg-superficie rounded-3xl overflow-hidden mb-7">
+        {TEMAS.map((op, i) => (
+          <Pressable
+            key={op.valor}
+            onPress={() => definir(op.valor)}
+            className="flex-row items-center px-4 py-3.5"
+            style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: cores.linha } : undefined}
+          >
+            <Text
+              className={`flex-1 text-[15px] ${op.valor === escolha ? "text-texto font-bold" : "text-texto2"}`}
+            >
+              {t(op.chave)}
+            </Text>
+            {op.valor === escolha && <Text className="text-texto text-base">✓</Text>}
+          </Pressable>
+        ))}
+      </View>
+
       <Text className="text-texto3 text-[11px] tracking-widest mb-2">
         {t("settings.language").toUpperCase()}
       </Text>
@@ -38,7 +69,7 @@ export default function Ajustes() {
             key={cod}
             onPress={() => trocar(cod)}
             className="flex-row items-center px-4 py-3.5"
-            style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: "rgba(255,255,255,0.08)" } : undefined}
+            style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: cores.linha } : undefined}
           >
             <Text
               className={`flex-1 text-[15px] ${cod === idioma ? "text-texto font-bold" : "text-texto2"}`}

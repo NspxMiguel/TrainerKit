@@ -3,24 +3,27 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
 import { Idioma } from "../src/i18n";
+import { Tema, useTema } from "../src/tema";
 
 /**
  * A casca.
  *
- * Fundo preto de verdade desde a raiz — a mesma decisao do app web, e pelo
- * mesmo motivo: em OLED `#000` desliga o pixel, e a cor do app passa a ser a
- * da especie em vez de um azul-marinho sem dono.
+ * A barra e o fundo do `Stack` sao prop de JS, nao classe, entao vem da paleta
+ * do `useTema` — e por isso a `Casca` e um componente separado: ela precisa
+ * estar DENTRO do `<Tema>` pra ler o contexto.
  */
-export default function Layout() {
+function Casca() {
+  const { cores, escuro } = useTema();
+
   return (
-    <Idioma>
-      <StatusBar style="light" />
+    <>
+      <StatusBar style={escuro ? "light" : "dark"} />
       <Stack
         screenOptions={{
-          headerStyle: { backgroundColor: "#000000" },
-          headerTintColor: "#f4f6fa",
+          headerStyle: { backgroundColor: cores.fundo },
+          headerTintColor: cores.texto,
           headerTitleStyle: { fontWeight: "700" },
-          contentStyle: { backgroundColor: "#000000" },
+          contentStyle: { backgroundColor: cores.fundo },
         }}
       >
         <Stack.Screen name="index" options={{ title: "Espécies" }} />
@@ -36,6 +39,16 @@ export default function Layout() {
         <Stack.Screen name="time/index" options={{ title: "" }} />
         <Stack.Screen name="ginasio/index" options={{ title: "" }} />
       </Stack>
-    </Idioma>
+    </>
+  );
+}
+
+export default function Layout() {
+  return (
+    <Tema>
+      <Idioma>
+        <Casca />
+      </Idioma>
+    </Tema>
   );
 }

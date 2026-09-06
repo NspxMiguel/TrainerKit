@@ -15,6 +15,7 @@ import {
 } from "@trainerkit/core";
 import { useDados } from "../../src/dados";
 import { useT } from "../../src/i18n";
+import { useTema } from "../../src/tema";
 import { Selo } from "../../src/Selo";
 
 /**
@@ -28,6 +29,7 @@ import { Selo } from "../../src/Selo";
  */
 export default function Encontro() {
   const { t, idioma } = useT();
+  const { cores } = useTema();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { dados } = useDados();
   const [origem, setOrigem] = useState<OrigemDeEncontro>("raide");
@@ -119,7 +121,7 @@ export default function Encontro() {
         onChangeText={setCp}
         keyboardType="number-pad"
         placeholder={String(faixa.max)}
-        placeholderTextColor="#767c8c"
+        placeholderTextColor={cores.texto3}
         className="bg-superficie text-texto rounded-2xl px-4 py-3 text-base"
       />
 

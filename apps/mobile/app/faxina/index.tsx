@@ -10,6 +10,7 @@ import {
 import { useColecao } from "../../src/colecao";
 import { useDados } from "../../src/dados";
 import { useT } from "../../src/i18n";
+import { useTema } from "../../src/tema";
 import { Selo } from "../../src/Selo";
 
 /**
@@ -24,6 +25,7 @@ import { Selo } from "../../src/Selo";
  */
 export default function Faxina() {
   const { t } = useT();
+  const { cores } = useTema();
   const { itens } = useColecao();
   const { dados } = useDados();
 
@@ -84,7 +86,7 @@ export default function Faxina() {
             <View
               key={s.id}
               className="flex-row items-center gap-3 px-4 py-3"
-              style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: "rgba(255,255,255,0.08)" } : undefined}
+              style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: cores.linha } : undefined}
             >
               {sp && <Selo especie={sp} tamanho={36} />}
               <View className="flex-1">

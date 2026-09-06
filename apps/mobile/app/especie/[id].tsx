@@ -5,6 +5,7 @@ import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-nati
 import { ACTION_KEYS, decide } from "@trainerkit/core";
 import { useDados } from "../../src/dados";
 import { useT } from "../../src/i18n";
+import { useTema, type Paleta } from "../../src/tema";
 import { Selo } from "../../src/Selo";
 
 /**
@@ -15,16 +16,20 @@ import { Selo } from "../../src/Selo";
  * linhas de logica portaram — que era a aposta inteira de escolher React Native
  * em vez de Swift.
  */
-const COR_ACAO: Record<string, string> = {
-  investir: "#3ddc97",
-  evoluir: "#9f8bff",
-  guardar: "#ffc55c",
-  transferir: "#9aa6b8",
-  descobrir: "#a8adba",
+/* O veredito e a unica cor com significado nesta tela, e por isso ela troca
+   com o tema: `#3ddc97` da 10,5:1 sobre o cartao preto e 1,8:1 sobre o branco.
+   O nome da acao e que e estavel — o tom, nao. */
+const COR_ACAO: Record<string, keyof Paleta> = {
+  investir: "investir",
+  evoluir: "evoluir",
+  guardar: "guardar",
+  transferir: "transferir",
+  descobrir: "descobrir",
 };
 
 export default function Ficha() {
   const { t } = useT();
+  const { cores } = useTema();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { pronto, dados } = useDados();
 
@@ -53,7 +58,7 @@ export default function Ficha() {
   if (!pronto) {
     return (
       <View className="flex-1 items-center justify-center bg-fundo">
-        <ActivityIndicator color="#f4f6fa" />
+        <ActivityIndicator color={cores.texto} />
       </View>
     );
   }
@@ -106,7 +111,7 @@ export default function Ficha() {
           <Text className="text-texto3 text-[11px] tracking-widest">{t("assistant.title").toUpperCase()}</Text>
           <Text
             className="text-xl font-bold mt-2"
-            style={{ color: COR_ACAO[veredito.action] ?? "#f4f6fa" }}
+            style={{ color: cores[COR_ACAO[veredito.action] ?? "texto"] }}
           >
             {/* A PALAVRA do veredito vem do dicionario, nao do enum: o `core`
                 devolve `investir`, e `ACTION_KEYS` diz qual chave le isso nos
