@@ -83,7 +83,19 @@ export interface Base {
   typeOrder: string[];
   fastMoves: Golpe[];
   chargedMoves: Golpe[];
-  settings: { battle: Record<string, number> };
+  settings: {
+    /*
+     * ⚠️ `shadowPokemonAttackBonusMultiplier` DECLARADO, e nao so um
+     * `Record<string, number>`.
+     *
+     * O `Record` largo compila e mente: `shadowDamageMultiplier` do core pede
+     * essa chave por nome, e com o tipo largo o TypeScript recusa a chamada —
+     * o que empurra pra um `as any` que passaria a esconder o dia em que a
+     * chave sumir do ETL. O arquivo traz ela (1.2, medido); declarar e o que
+     * faz o compilador vigiar isso por nos.
+     */
+    battle: Record<string, number> & { shadowPokemonAttackBonusMultiplier: number };
+  };
   rankings?: {
     raidOverall: { speciesId: string }[];
     raidByType: Record<string, { speciesId: string }[]>;

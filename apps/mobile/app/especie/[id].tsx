@@ -1,5 +1,5 @@
 import { Link, useLocalSearchParams } from "expo-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 
 import {
@@ -8,7 +8,10 @@ import {
   computeCPAtLevel,
   decide,
   groupIdenticalContexts,
+  rankMovesets,
+  shadowDamageMultiplier,
   tetoDePowerUp,
+  withFrustration,
   type MoveWithPvp,
 } from "@trainerkit/core";
 import { useDados } from "../../src/dados";
@@ -42,6 +45,14 @@ export default function Ficha() {
   const { setup } = useSetup();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { pronto, dados } = useDados();
+  /*
+   * SOMBROSO e um FILTRO do que esta abaixo, nao um dado da especie.
+   *
+   * Sombroso nao aprende nada a mais — ele PERDE um slot para a Frustracao, que
+   * TM comum nao remove. Por isso ligar isto injeta o golpe no bolso de
+   * carregados e reordena tudo, em vez de so mostrar um aviso.
+   */
+  const [sombroso, setSombroso] = useState(false);
 
   const especie = useMemo(() => dados?.species.find((s) => s.id === id) ?? null, [dados, id]);
 
@@ -102,9 +113,11 @@ export default function Ficha() {
         }),
       ].filter((m): m is MoveWithPvp => m !== undefined);
 
+    const carregados = juntar(especie.chargedMoves, especie.eliteChargedMoves);
+    const frustracao = porId.get("frustration");
     return groupIdenticalContexts(
       juntar(especie.fastMoves, especie.eliteFastMoves),
-      juntar(especie.chargedMoves, especie.eliteChargedMoves),
+      sombroso && frustracao ? withFrustration(carregados, frustracao) : carregados,
       {
         attackerTypes: especie.types,
         chart: dados.typeChart,
@@ -113,7 +126,47 @@ export default function Ficha() {
         stabMultiplier: 1.2,
       },
     );
-  }, [dados, especie]);
+  }, [dados, especie, sombroso]);
+
+  /**
+   * QUANTO A FRUSTRACAO CUSTA, em porcento, contra o melhor conjunto livre.
+   *
+   * ⚠️ As duas notas saem da MESMA chamada de proposito: `rankMovesets`
+   * normaliza pela melhor de cada chamada, entao nota de listas diferentes nao
+   * se compara. Medido em PvP porque e onde a Frustracao doi mais e onde o
+   * numero e mais facil de ler.
+   */
+  const custoDaFrustracao = useMemo(() => {
+    if (!dados || !especie || !sombroso) return null;
+    const porId = new Map<string, MoveWithPvp>();
+    for (const g of [...dados.fastMoves, ...dados.chargedMoves]) porId.set(g.id, g);
+    const frustracao = porId.get("frustration");
+    if (!frustracao) return null;
+    const juntar = (ids: string[], elite: string[]): MoveWithPvp[] =>
+      [
+        ...ids.map((i) => porId.get(i)),
+        ...elite.map((i) => {
+          const m = porId.get(i);
+          return m ? { ...m, elite: true } : undefined;
+        }),
+      ].filter((m): m is MoveWithPvp => m !== undefined);
+
+    const juntos = rankMovesets(
+      juntar(especie.fastMoves, especie.eliteFastMoves),
+      withFrustration(juntar(especie.chargedMoves, especie.eliteChargedMoves), frustracao),
+      "pvp",
+      {
+        attackerTypes: especie.types,
+        chart: dados.typeChart,
+        order: dados.typeOrder,
+        stabMultiplier: 1.2,
+      },
+    );
+    const livre = juntos.find((m) => !m.isFrustration);
+    const presa = juntos.find((m) => m.isFrustration);
+    if (!livre || !presa) return null;
+    return Math.round((1 - presa.score / livre.score) * 100);
+  }, [dados, especie, sombroso]);
 
   /*
    * Os tres tetos de PC, e o terceiro NAO e um teto a mais: e o Melhor Amigo.
@@ -201,6 +254,36 @@ export default function Ficha() {
         </View>
       )}
 
+      {/* Pilula, e nao botao de bloco: sombroso filtra o que vem abaixo, entao
+          ele pertence visualmente aos golpes e nao a barra de acoes do topo. */}
+      <Pressable
+        onPress={() => setSombroso((v) => !v)}
+        className="self-start rounded-full px-4 py-2 mt-7"
+        style={{
+          backgroundColor: sombroso ? cores.texto : cores.superficie,
+          borderWidth: 1,
+          borderColor: sombroso ? cores.texto : cores.linha,
+        }}
+      >
+        <Text
+          className="text-[13px] font-semibold"
+          style={{ color: sombroso ? cores.fundo : cores.texto2 }}
+        >
+          {t(sombroso ? "species.shadowToggleOn" : "species.shadowToggle")}
+        </Text>
+      </Pressable>
+
+      {sombroso && dados && (
+        <Text className="text-texto3 text-[12px] leading-5 mt-2">
+          {t("species.shadowNote", {
+            percent: Math.round((shadowDamageMultiplier(dados.settings.battle) - 1) * 100),
+          })}
+          {custoDaFrustracao !== null
+            ? t("species.frustrationCost", { percent: custoDaFrustracao })
+            : ""}
+        </Text>
+      )}
+
       {/* ── GOLPES ─────────────────────────────────────────────────────────
           Um bloco por grupo de contexto. Quando os quatro coincidem sai um
           bloco so, e a legenda diz que os quatro coincidem — que informa mais
@@ -235,6 +318,11 @@ export default function Ficha() {
                     compra. */}
                 {m.needsElite && (
                   <Text className="text-texto3 text-[12px] mt-1">✦ {t("species.needsElite")}</Text>
+                )}
+                {m.isFrustration && (
+                  <Text className="text-texto3 text-[12px] mt-1">
+                    {t("species.stuckOnFrustration")}
+                  </Text>
                 )}
               </View>
             ))
