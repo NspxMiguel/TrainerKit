@@ -80,12 +80,18 @@ export default function Ficha() {
         </Text>
       </View>
 
-      {/* A acao principal da ficha: e o que o app faz de mais util. */}
+      {/* Duas acoes: o IV do que ele TEM, e o IV do que ele esta VENDO. */}
       <Link href={{ pathname: "/iv/[id]", params: { id: especie.id } }} asChild>
         <Pressable className="bg-texto rounded-full py-4 items-center mt-7">
           <Text className="text-fundo font-bold text-base">
             {t("species.calcIV")}
           </Text>
+        </Pressable>
+      </Link>
+
+      <Link href={{ pathname: "/encontro/[id]", params: { id: especie.id } }} asChild>
+        <Pressable className="bg-superficie rounded-full py-4 items-center mt-3">
+          <Text className="text-texto font-bold text-base">{t("pre.open")}</Text>
         </Pressable>
       </Link>
 
