@@ -60,6 +60,11 @@ export default function Lista() {
               <Text className="text-texto text-xs font-semibold">{t("eggs.title")}</Text>
             </Pressable>
           </Link>
+          <Link href="/ajustes" asChild>
+            <Pressable className="flex-1 bg-superficie rounded-2xl py-3 items-center">
+              <Text className="text-texto text-xs font-semibold">{t("settings.title")}</Text>
+            </Pressable>
+          </Link>
           <Link href="/colecao" asChild>
             <Pressable className="flex-1 bg-superficie rounded-2xl py-3 items-center">
               <Text className="text-texto text-xs font-semibold">{t("especies.mine")}</Text>
