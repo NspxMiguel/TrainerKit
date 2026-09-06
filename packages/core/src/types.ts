@@ -4,9 +4,24 @@
  */
 
 export type PokemonType =
-  | "normal" | "fighting" | "flying" | "poison" | "ground" | "rock"
-  | "bug" | "ghost" | "steel" | "fire" | "water" | "grass"
-  | "electric" | "psychic" | "ice" | "dragon" | "dark" | "fairy";
+  | "normal"
+  | "fighting"
+  | "flying"
+  | "poison"
+  | "ground"
+  | "rock"
+  | "bug"
+  | "ghost"
+  | "steel"
+  | "fire"
+  | "water"
+  | "grass"
+  | "electric"
+  | "psychic"
+  | "ice"
+  | "dragon"
+  | "dark"
+  | "fairy";
 
 /** Stats base da especie, como vem do GAME_MASTER. */
 export interface BaseStats {
@@ -86,6 +101,30 @@ export const MAX_POWERUP_LEVEL = 50;
 export const BEST_BUDDY_LEVELS = 1;
 
 /**
+ * O teto do TREINADOR — e ele NAO e o mesmo `MAX_POWERUP_LEVEL` acima.
+ *
+ * ⚠️ Os dois numeros existem e sao diferentes, e confundi-los ja fez o app
+ * mentir: a tela do setup chamava a faixa de 50 de "MAX" quando o teto de
+ * treinador subiu pra 80 em outubro/2025. Quem joga hoje passa dos 50 e via o
+ * app se anunciar desatualizado.
+ *
+ *   `MAX_POWERUP_LEVEL` (50) — ate onde da pra PAGAR power-up numa especie.
+ *                              Vem de `POKEMON_UPGRADE_SETTINGS`.
+ *   `MAX_TRAINER_LEVEL` (80) — ate onde a PESSOA sobe.
+ *                              Vem do tamanho de `PLAYER_LEVEL_SETTINGS
+ *                              .playerLevel.requiredExperience`.
+ *
+ * O teto do treinador NAO entra em conta nenhuma de PC: `tetoDePowerUp` e
+ * `min(nivel + 2, 50)`, entao do nivel 48 pra cima a resposta e sempre 50. Ele
+ * entra em COMO A TELA FALA — e falar errado aqui e o app dizendo que nao
+ * acompanha o jogo.
+ *
+ * `types.constantes.test.ts` cobra este numero contra o GAME_MASTER cru, pra
+ * ele nao envelhecer em silencio como o anterior envelheceu.
+ */
+export const MAX_TRAINER_LEVEL = 80;
+
+/**
  * O maior nivel que uma especie pode APARENTAR.
  *
  * Diferente do de cima e a diferenca importa: o Melhor Amigo mostra o PC ja com
@@ -103,9 +142,5 @@ export function isValidIV(v: number): boolean {
 
 /** Niveis validos sao multiplos de 0.5 dentro de [1, MAX_LEVEL]. */
 export function isValidLevel(level: number): boolean {
-  return (
-    level >= MIN_LEVEL &&
-    level <= MAX_LEVEL &&
-    Number.isInteger(level * 2)
-  );
+  return level >= MIN_LEVEL && level <= MAX_LEVEL && Number.isInteger(level * 2);
 }
