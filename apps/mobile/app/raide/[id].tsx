@@ -6,6 +6,7 @@ import {
   RAID_TIERS,
   effectiveness,
   estimateRaid,
+  faixaDePC,
   rankCounters,
   rankMovesets,
   type Counter,
@@ -123,6 +124,16 @@ export default function Raide() {
     return { lista: ranked, estimativa: estimateRaid(ranked, chefeInput) };
   }, [dados, chefe, tier]);
 
+  /* A faixa de PC com que o chefe sai da raide, com e sem clima favorável. */
+  const faixa = useMemo(
+    () => (chefe && dados ? faixaDePC(chefe.baseStats, "raide", dados.cpm) : null),
+    [chefe, dados],
+  );
+  const faixaClima = useMemo(
+    () => (chefe && dados ? faixaDePC(chefe.baseStats, "raide", dados.cpm, true) : null),
+    [chefe, dados],
+  );
+
   if (!chefe || !dados) return <View className="flex-1 bg-fundo" />;
 
   return (
@@ -154,6 +165,45 @@ export default function Raide() {
           </TouchableOpacity>
         ))}
       </View>
+
+      {/*
+        O PC DE CAPTURA — e ele vem ANTES de "eu dou conta".
+
+        ⚠️ É o número que a pessoa vai comparar na tela do jogo daqui a cinco
+        minutos, e o print 8 põe ele em destaque no topo por isso. Bater exato no
+        máximo significa 100% de IV sem precisar avaliar — é a informação mais
+        acionável da tela inteira, e ela não existia aqui.
+
+        Âmbar, e não a cor do veredito: isto não é um conselho, é um fato do
+        jogo. Pintar de verde ou azul faria parecer recomendação.
+      */}
+      {faixa && (
+        <View
+          className="rounded-cartao px-4 py-4 mt-5"
+          style={{ backgroundColor: `${cores.guardar}1A`, borderWidth: 1, borderColor: `${cores.guardar}44` }}
+        >
+          <Text className="text-legenda" style={{ color: cores.guardar }}>
+            {t("raid.catchTitle").toUpperCase()}
+          </Text>
+          <Text className="text-texto mt-1" style={{ fontSize: 30, fontWeight: "800" }}>
+            {faixa.min.toLocaleString(idioma)} – {faixa.max.toLocaleString(idioma)}
+          </Text>
+          <Text className="text-texto2 text-legenda mt-2 leading-4">
+            {t("raid.catchBody", {
+              min: faixa.min.toLocaleString(idioma),
+              max: faixa.max.toLocaleString(idioma),
+            })}
+          </Text>
+          {faixaClima && (
+            <Text className="text-texto3 text-legenda mt-1.5 leading-4">
+              {t("raid.catchWeather", {
+                min: faixaClima.min.toLocaleString(idioma),
+                max: faixaClima.max.toLocaleString(idioma),
+              })}
+            </Text>
+          )}
+        </View>
+      )}
 
       {/*
         EU DOU CONTA?

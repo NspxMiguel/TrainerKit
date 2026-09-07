@@ -207,34 +207,43 @@ export default function Time() {
       <Text className="text-texto3 text-legenda mt-6 mb-2">
         {t("team.theTeam").toUpperCase()}
       </Text>
-      <View className="bg-superficie rounded-cartao overflow-hidden">
+      {/* ⚠️ GRADE 3×2, e não lista. O print 7 mostra os seis como cartões numa
+          grade: dá para ver o time INTEIRO de uma vez, que é a pergunta ("esse
+          time está bom?"). Em lista, seis linhas de altura de dedo obrigam a
+          rolar para ver o sexto. */}
+      <View className="flex-row flex-wrap gap-2">
         {time.map((m, i) => {
           const sp = dados?.species.find((s) => s.id === m.speciesId);
           const tenho = meus.has(m.speciesId);
           return (
             <View
               key={m.speciesId}
-              className="flex-row items-center gap-3 px-4 py-3"
-              style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: cores.linha } : undefined}
+              className="bg-superficie rounded-cartao-sm items-center px-2 py-3"
+              style={{ flexBasis: "31%", flexGrow: 1 }}
             >
-              <Text className="text-texto3 text-xs w-4">{i + 1}</Text>
-              {sp && <Selo especie={sp} tamanho={36} />}
-              <View className="flex-1">
-                <Text className="text-texto text-corpo font-semibold">{m.name}</Text>
-                {/* O GOLPE, e não só o tipo: montar o time sem saber com que
-                    ataque não serve de nada, e é aqui que o ✦ avisa que aquele
-                    conjunto depende de TM Elite — um dos itens mais raros do
-                    jogo. */}
-                <Text className="text-texto3 text-legenda" numberOfLines={1}>
-                  {golpes[m.speciesId] ?? m.types.map((x) => t(`type.${x}` as never)).join(" / ")}
-                </Text>
-              </View>
+              {sp && <Selo especie={sp} tamanho={44} />}
+              <Text
+                className="text-texto text-legenda font-semibold mt-2 text-center"
+                numberOfLines={1}
+              >
+                {m.name}
+              </Text>
+              {/* O GOLPE, e não só o tipo: montar o time sem saber com que
+                  ataque não serve de nada, e é aqui que o ✦ avisa que aquele
+                  conjunto depende de TM Elite — um dos itens mais raros do jogo. */}
+              <Text
+                className="text-texto3 text-center mt-0.5"
+                numberOfLines={2}
+                style={{ fontSize: 9, lineHeight: 12 }}
+              >
+                {golpes[m.speciesId] ?? m.types.map((x) => t(`type.${x}` as never)).join(" / ")}
+              </Text>
               {/* TENHO ou CAÇAR. É a diferença entre uma lista de nomes e um
                   plano: o que falta é o que a pessoa vai atrás. */}
               {itens !== null && (
                 <Text
-                  className="text-legenda"
-                  style={{ color: tenho ? cores.investir : cores.texto3 }}
+                  className="mt-1"
+                  style={{ fontSize: 9, color: tenho ? cores.investir : cores.texto3 }}
                 >
                   {t(tenho ? "team.have" : "team.hunt").toUpperCase()}
                 </Text>
