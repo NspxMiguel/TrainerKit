@@ -63,7 +63,7 @@ function ArteDoHeroi({ especie }: { especie: Especie }) {
       source={{ uri: url }}
       onError={() => setFalhou(true)}
       resizeMode="contain"
-      style={{ width: "100%", height: 190 }}
+      style={{ width: "100%", height: 150 }}
     />
   );
 }
@@ -260,11 +260,17 @@ function Heroi({
           ⚠️ Só aparece com uma fonte de imagem LIGADA. Sem ela o app é
           distribuído sem arte nenhuma, e o número continua sendo a textura.
         */}
-        <View pointerEvents="none" style={{ position: "absolute", left: 0, right: 0, top: alto + 54 }}>
-          <ArteDoHeroi especie={especie} />
-        </View>
-
         <View className="flex-1 justify-end items-center px-5" style={{ paddingBottom: 110 }}>
+          {/* ⚠️ A ARTE ENTRA NA COLUNA, e não flutuando por cima dela. Ela era
+              `position: "absolute"` num topo cravado, e o resultado dependia da
+              altura do texto embaixo: com o nome e a frase de duas linhas a
+              cauda do Charizard cortava o rótulo e o próprio nome. Na coluna,
+              o `justify-end` empilha arte, rótulo, nome e ação de baixo pra
+              cima e a sobreposição deixa de ser possível. */}
+          <View pointerEvents="none" className="w-full">
+            <ArteDoHeroi especie={especie} />
+          </View>
+
           <View className="rounded-pilula px-3 py-1 mb-2 bg-black/35">
             <Text className="text-legenda text-white">{t("home.today").toUpperCase()}</Text>
           </View>
@@ -416,7 +422,17 @@ export default function Inicio() {
       .filter((s): s is Especie => !!s);
   }, [fila, dados]);
 
-  const [passo, setPasso] = useState(0);
+  /*
+   * ⚠️ O DIA ENTRA NA SEMENTE, e isto FALTAVA — o comentário acima já dizia
+   * "vem do dia mais o toque nos pontinhos" e o código começava cravado em
+   * zero. Consequência: toda abertura do app mostrava o MESMO bicho, para
+   * sempre. Era exatamente a reclamação: "não é só o Charizard que fica aí".
+   *
+   * O dia, e não o relógio: reabrir o app não pode virar roleta — quem voltou
+   * para tocar no que viu há um minuto precisa achar aquilo ali. Amanhã é
+   * outro, e os pontinhos trocam agora.
+   */
+  const [passo, setPasso] = useState(() => Math.floor(Date.now() / 86_400_000));
   const indice = candidatos.length > 0 ? passo % candidatos.length : 0;
   const destaque = candidatos[indice];
   const pendenteAtual = fila.length > 0 ? fila[indice] : null;
