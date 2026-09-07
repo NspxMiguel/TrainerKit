@@ -5,6 +5,7 @@ import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from "reac
 import { badgeFor, ivPercentOf, ivTotalOf, solveIVs, type IVCandidate } from "@trainerkit/core";
 import { guardar } from "../../src/colecao";
 import { useDados } from "../../src/dados";
+import { EntreOsSeus } from "../../src/EntreOsSeus";
 import { useT } from "../../src/i18n";
 import { useTema } from "../../src/tema";
 import { Selo } from "../../src/Selo";
@@ -204,6 +205,14 @@ export default function Calculadora() {
               {unico.ivs.atk} / {unico.ivs.def} / {unico.ivs.hp} · {t("iv.level")} {unico.level}
             </Text>
 
+            {/* ⚠️ AQUI a pergunta é mais aguda que na ficha: a pessoa acabou de
+                medir e vai decidir agora se guarda ou manda embora. `jaSalvo`
+                fica falso porque este exemplar ainda não entrou na coleção — e
+                ele precisa entrar na conta para o "de {count}" fazer sentido. */}
+            {especie && dados && (
+              <EntreOsSeus especie={especie} ivs={unico.ivs} todas={dados.species} />
+            )}
+
             {/* Guardar so aparece quando a conta FECHOU numa combinacao. Salvar
                 uma faixa seria guardar uma duvida, e a colecao existe pra
                 responder depois — nao pra repetir a pergunta. */}
@@ -223,7 +232,23 @@ export default function Calculadora() {
             </TouchableOpacity>
           </>
         ) : candidatos.length === 0 ? (
-          <Text className="text-texto2 text-sm">{t("iv.noMatch")}</Text>
+          /*
+            NENHUMA COMBINAÇÃO FECHA — e isso quase sempre é erro de digitação,
+            não bug.
+
+            ⚠️ O texto explica O QUE conferir (PC, PS, poeira, nível de amigo)
+            em vez de só dizer "não achei". A força bruta cobre os 109 níveis e
+            as 4.096 combinações: se nada fecha, um dos quatro números está
+            errado, e dizer isso poupa a pessoa de achar que o app quebrou.
+          */
+          <>
+            <Text className="text-texto text-corpo font-semibold">
+              {t("iv.impossible.title")}
+            </Text>
+            <Text className="text-texto2 text-corpo mt-2 leading-5">
+              {t("iv.impossible.body", { cp, hp, name: especie?.name ?? "" })}
+            </Text>
+          </>
         ) : (
           <>
             <Text className="text-texto3 text-[11px] tracking-widest">IV</Text>

@@ -36,6 +36,14 @@ export interface Especie {
    * O mesmo filtro do app web (`SpeciesBrowser.tsx`): `cosmeticOf === null`.
    */
   cosmeticOf: string | null;
+  /**
+   * A família evolutiva — o que junta Machop, Machoke e Machamp.
+   *
+   * ⚠️ Vinha no arquivo e o tipo nativo ignorava, então o app não conseguia
+   * responder "esse é melhor que os que eu já tenho?" — a comparação é por
+   * FAMÍLIA, porque eles competem pelo mesmo lugar na mochila.
+   */
+  familyId: string | null;
   dex: number;
   name: string;
   types: string[];

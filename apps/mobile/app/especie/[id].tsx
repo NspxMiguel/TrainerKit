@@ -35,6 +35,7 @@ import { definirMeuMotivo, guardar, remover, useColecao } from "../../src/coleca
 import { BlocoSpreads, BlocoTroca, BlocoUsos } from "../../src/BlocosDaFicha";
 import { Segmented } from "../../src/Segmented";
 import { Cascata } from "../../src/Cascata";
+import { EntreOsSeus } from "../../src/EntreOsSeus";
 import { Toque } from "../../src/Toque";
 import { calar, falar } from "../../src/voz";
 import { useSetup } from "../../src/setup";
@@ -673,6 +674,18 @@ export default function Ficha() {
             </View>
           )}
         </>
+      )}
+
+      {/* ── ENTRE OS SEUS ──────────────────────────────────────────────────
+          "Esse aqui é melhor que os que eu já tenho?" — a pergunta do momento
+          em que se joga, e a única que cruza o IV com a coleção. */}
+      {salvo && !salvo.ivDesconhecido && dados && (
+        <EntreOsSeus
+          especie={especie}
+          ivs={salvo.ivs}
+          todas={dados.species}
+          jaSalvo
+        />
       )}
 
       {/*
