@@ -37,6 +37,27 @@ Follows the system's light/dark theme automatically.
 | **Lens mode** | The device. Point the camera, hear the entry read out loud, ask questions about what's on screen. |
 | **10 languages** | pt-BR, English, Spanish (Spain and LatAm), French, German, Italian, Japanese, Korean, Russian — interface, species names and move names. |
 
+## The iOS app
+
+The same core, the same ten languages, the same numbers — with what only a
+native app can do:
+
+- **Pokedex Mode** — the camera open, the entry read aloud by the system voice,
+  and a seen counter that gives the Pokedex progress. No key, no account, no
+  network: image recognition is deliberately absent, because that needs a vision
+  model and in the app the AI is your own.
+- **Live Activity** — the event that is running sits on the Lock Screen and in
+  the Dynamic Island, counting down. One at a time, the one ending soonest.
+- **Local notifications** for events. Scheduled on device; there is no server
+  and no push token anywhere in this app.
+- **Liquid Glass** through `expo-glass-effect`, on the tab bar, the verdict card,
+  the AI panel and the events happening now — never on everything at once.
+- **Named collections**, kept on device, each with its own verdicts.
+
+Build it with `pnpm --filter @trainerkit/mobile exec expo run:ios`, or archive
+with `xcodebuild`; the signing team lives in `plugins/ios-assinatura.js`, not in
+your shell history.
+
 ## The math is checked against the game, not against itself
 
 - Max CP at level 40 with perfect IVs, for species whose value is public (Machamp 3056, Dragonite 3792, Tyranitar 3834, Rhydon 3179).
@@ -101,8 +122,14 @@ packages/
 │   └── moves.ts            # best moveset per context (raid, PvP, Rocket)
 └── dataset/             # CI-only ETL: GAME_MASTER -> compact JSON + rankings
 apps/
-└── web/                 # the PWA (Vite + React 19)
-    └── src/ai/             # AI and voice: prompts, topic filter, quota, TTS engines
+├── web/                 # the PWA (Vite + React 19)
+│   └── src/ai/             # AI and voice: prompts, topic filter, quota, TTS engines
+└── mobile/              # the iOS app (Expo + expo-router + NativeWind)
+    ├── app/(abas)/         # the three tabs: Home, Pokedex, Settings
+    ├── app/dex/            # Pokedex Mode: camera, voice, seen counter
+    ├── targets/atividade/  # WidgetKit extension: the events Live Activity
+    ├── modules/tk-atividade/  # ActivityKit bridge that starts and ends it
+    └── plugins/            # config plugins: signing team, build flags
 api/                     # Vercel edge functions (shared AI key, voice)
 ```
 
