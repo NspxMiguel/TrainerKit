@@ -551,7 +551,8 @@ export const PT_BR: Dict = {
   "privacy.native.local": "A sua coleção e as suas preferências ficam guardadas neste aparelho, no armazenamento do próprio app. Nada disso é enviado pra lugar nenhum.",
   "privacy.native.network": "• GitHub (EUA) — o app busca lá a lista de eventos e a de ovos enquanto você olha O que tá rolando ou a Chocadeira. Vai o endereço do arquivo e o seu IP, nada mais. Nenhum dado seu vai junto.",
   "privacy.native.images": "• GitHub (EUA) — com uma fonte ligada em Ajustes › Imagens, a arte das espécies é buscada de lá enquanto você navega. Vai o endereço da imagem e o seu IP, nada mais. Escolhendo \"Sem imagens\", isso para.",
-  "privacy.native.transfer": "O único serviço citado acima fica fora do Brasil, nos Estados Unidos, e ele não recebe nada sobre você — só o pedido de um arquivo público.",
+  "privacy.native.ownSource": "• O endereço que você apontou. Com uma fonte própria em Ajustes › Imagens, ou em Ajustes › Base do jogo, o app passa a pedir ÀQUELE host, e quem o mantém vê o seu IP. Ninguém além de você escolheu esse endereço, e voltar para a que vem no app encerra isso.",
+  "privacy.native.transfer": "Os serviços citados acima ficam fora do Brasil, nos Estados Unidos. O GitHub recebe só o pedido de um arquivo público. A Groq, quando você liga a IA, recebe a sua pergunta — e, ao identificar por foto, a imagem que você escolher. Um endereço que você mesmo apontar pode ficar em qualquer lugar; quem escolheu foi você.",
   "privacy.native.rights": "A LGPD (art. 18) garante acesso, correção e exclusão dos seus dados. Como tudo fica neste aparelho, apagar o app apaga tudo. Nós não temos cópia.",
   "privacy.native.minors": "O app não pede nem coleta nenhum dado pessoal, de ninguém, de nenhuma idade. Não tem conta, não tem cadastro e não tem medição de uso.",
 

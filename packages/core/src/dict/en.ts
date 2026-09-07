@@ -586,7 +586,8 @@ const EN = {
   "privacy.native.local": "Your collection and your preferences are stored on this device, in the app's own storage. None of it is ever sent anywhere.",
   "privacy.native.network": "• GitHub (USA) — the app fetches the event and egg lists from there while you look at What's on or Egg hatches. Only the file address and your IP go out. Nothing about you travels with it.",
   "privacy.native.images": "• GitHub (USA) — with an image source turned on in Settings › Images, the species artwork is fetched from there while you browse. Only the image address and your IP go out. Choosing \"No images\" stops it.",
-  "privacy.native.transfer": "The one service named above is outside Brazil, in the United States, and it receives nothing about you — only a request for a public file.",
+  "privacy.native.ownSource": "• The address you set. With your own source in Settings — Images, or Settings — Game database — the app requests from THAT host, and its owner sees your IP. Nobody chose it but you, and going back to the bundled one stops it.",
+  "privacy.native.transfer": "The services named above sit outside Brazil, in the United States. GitHub receives only the request for a public file. Groq, when you turn the AI on, receives your question — and, when identifying from a photo, the image you pick. An address you set yourself can be anywhere; you are the one who chose it.",
   "privacy.native.rights": "Brazil's LGPD (art. 18) guarantees access, correction and deletion of your data. Since everything stays on this device, deleting the app deletes all of it. We have no copy.",
   "privacy.native.minors": "The app does not ask for or collect any personal data, from anyone, at any age. It has no account, no sign-up and no analytics.",
 

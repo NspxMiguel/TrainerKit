@@ -3,6 +3,8 @@ import { Linking, Platform, Pressable, ScrollView, Text, View } from "react-nati
 
 import { useT } from "../../src/i18n";
 import { useImagens } from "../../src/imagens";
+import { useFonteDeDados } from "../../src/fonteDados";
+import { useIA } from "../../src/ia";
 import { useTema } from "../../src/tema";
 
 /**
@@ -35,7 +37,7 @@ import { useTema } from "../../src/tema";
  * `app/` e `src/` devolve UM host: `raw.githubusercontent.com`, de onde vêm as
  * listas de evento e de ovo do ScrapedDuck. Mais nada.
  */
-const ATUALIZADA = "2026-09-06";
+const ATUALIZADA = "2026-09-07";
 
 /** Contato do controlador (LGPD art. 41). Trocar aqui troca nos dez idiomas. */
 const CONTATO = "miguel@nspx.dev";
@@ -73,6 +75,8 @@ export default function Legal() {
   const { t, idioma } = useT();
   const { cores } = useTema();
   const { fonte } = useImagens();
+  const { url: urlDados } = useFonteDeDados();
+  const { chave } = useIA();
 
   const bloco = (titulo: string, corpo: string[]) => (
     <View key={titulo} className="bg-superficie rounded-3xl p-5 mb-3">
@@ -100,9 +104,19 @@ export default function Legal() {
         omiti-lo com a fonte ligada faria o contrário, que é pior. A política
         descreve o app configurado como ele está.
       */}
+      {/*
+        ⚠️ AS TRÊS CONDICIONAIS SEGUEM A MESMA REGRA DE CIMA.
+        A Groq só recebe pedido com chave configurada; a FOTO só sai com a
+        identificação por imagem, e ela é o único arquivo do aparelho que sai
+        daqui — declarar isso não é formalidade, é a diferença entre a política
+        ser verdadeira e ser propaganda. E uma fonte própria acrescenta um host
+        que EU não escolhi e não posso nomear.
+      */}
       {bloco(t("privacy.third.title"), [
         t("privacy.native.network"),
         ...(fonte === "off" ? [] : [t("privacy.native.images")]),
+        ...(fonte === "custom" || urlDados ? [t("privacy.native.ownSource")] : []),
+        ...(chave ? [t("privacy.third.groq"), t("privacy.third.photo")] : []),
         t("privacy.third.none"),
       ])}
       {bloco(t("privacy.transfer.title"), [t("privacy.native.transfer")])}
