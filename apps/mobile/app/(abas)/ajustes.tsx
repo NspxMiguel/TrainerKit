@@ -17,6 +17,7 @@ import { SymbolView } from "expo-symbols";
 import { useDados } from "../../src/dados";
 import { useT } from "../../src/i18n";
 import { apagarTudo } from "../../src/apagar";
+import { useOffline } from "../../src/offline";
 import { useTraducao } from "../../src/traducao";
 import { FONTES, SPRITE_SOURCE_KEYS, useImagens } from "../../src/imagens";
 import { useIA } from "../../src/ia";
@@ -127,6 +128,7 @@ export default function Ajustes() {
   const [secao, setSecao] = useState<string | null>(null);
   const [confirmandoApagar, setConfirmandoApagar] = useState(false);
   const { dados } = useDados();
+  const off = useOffline(fonte);
   const { mostrar: traduzir, alternar: alternarTraducao } = useTraducao();
 
   const alto = useSafeAreaInsets().top;
@@ -409,6 +411,69 @@ export default function Ajustes() {
             </View>
             <Text className="text-texto text-base ml-3">{traduzir ? "✓" : ""}</Text>
           </Pressable>
+        </>
+      )}
+
+      {/* ── AS IMAGENS NO APARELHO ─────────────────────────────────────────
+          ⚠️ Só aparece com uma fonte LIGADA: sem imagem escolhida não há o que
+          baixar, e um botão de download que não baixa nada é promessa falsa. */}
+      {fonte !== "off" && (
+        <>
+          <Text className="text-texto3 text-legenda mt-7 mb-2">
+            {t("prefetch.title").toUpperCase()}
+          </Text>
+          <View className="bg-superficie rounded-cartao px-4 py-4">
+            <Text className="text-texto2 text-corpo leading-5">
+              {off.estado.baixando
+                ? `${off.estado.feitas} / ${off.estado.total}`
+                : t("prefetch.stored", { count: off.estado.guardadas })}
+            </Text>
+            {off.estado.baixando && (
+              <View
+                className="rounded-pilula mt-3 overflow-hidden"
+                style={{ height: 5, backgroundColor: cores.linha }}
+              >
+                <View
+                  className="rounded-pilula"
+                  style={{
+                    height: 5,
+                    width: `${Math.round((off.estado.feitas / Math.max(1, off.estado.total)) * 100)}%`,
+                    backgroundColor: cores.investir,
+                  }}
+                />
+              </View>
+            )}
+            <Text className="text-texto3 text-legenda mt-2 leading-4">
+              {t("prefetch.warning")}
+            </Text>
+          </View>
+          <View className="flex-row gap-2 mt-3">
+            <Pressable
+              onPress={() => {
+                if (off.estado.baixando) return;
+                void off.baixar((dados?.canonicas ?? []).map((e) => e.spriteId));
+              }}
+              className="rounded-pilula py-3.5 items-center flex-1"
+              style={{ borderWidth: 1, borderColor: cores.linha }}
+            >
+              <Text className="text-texto text-corpo font-semibold">
+                {off.estado.baixando
+                  ? t("prefetch.background")
+                  : t("prefetch.start", { count: (dados?.canonicas ?? []).length })}
+              </Text>
+            </Pressable>
+            {off.estado.guardadas > 0 && !off.estado.baixando && (
+              <Pressable
+                onPress={off.apagar}
+                className="rounded-pilula py-3.5 items-center flex-1"
+                style={{ borderWidth: 1, borderColor: cores.linha }}
+              >
+                <Text className="text-texto2 text-corpo font-semibold">
+                  {t("prefetch.clear")}
+                </Text>
+              </Pressable>
+            )}
+          </View>
         </>
       )}
 

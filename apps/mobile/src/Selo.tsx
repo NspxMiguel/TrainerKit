@@ -6,6 +6,7 @@ import { seloDaEspecie, spriteUrl } from "@trainerkit/core";
 
 import type { Especie } from "./dados";
 import { useImagens } from "./imagens";
+import { arquivoLocal } from "./offline";
 
 /**
  * O selo da especie.
@@ -88,7 +89,11 @@ export function tintaSobre(fundo: string): string {
 export function Selo({ especie, tamanho = 44 }: { especie: Especie; tamanho?: number }) {
   const { fonte } = useImagens();
   const [falhou, setFalhou] = useState(false);
-  const url = falhou ? null : spriteUrl({ spriteId: especie.spriteId }, fonte);
+  /* ⚠️ O ARQUIVO LOCAL VEM PRIMEIRO. Se a rede viesse antes, baixar as imagens
+     não mudaria nada: a tela continuaria esperando o GitHub responder para só
+     então olhar o disco. */
+  const local = arquivoLocal(especie.spriteId, fonte);
+  const url = falhou ? null : (local ?? spriteUrl({ spriteId: especie.spriteId }, fonte));
   /*
    * A cor vem da ESPECIE, com o tipo de reserva — a mesma conta do web, agora
    * em `packages/core`. O selo do Mewtwo saia rosa porque Psiquico e rosa;
