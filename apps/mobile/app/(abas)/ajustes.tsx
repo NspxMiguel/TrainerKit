@@ -12,7 +12,9 @@ import {
   tetoDePowerUp,
   type Key,
 } from "@trainerkit/core";
+import { useDados } from "../../src/dados";
 import { useT } from "../../src/i18n";
+import { apagarTudo } from "../../src/apagar";
 import { FONTES, SPRITE_SOURCE_KEYS, useImagens } from "../../src/imagens";
 import { useIA } from "../../src/ia";
 import { useSetup } from "../../src/setup";
@@ -37,6 +39,15 @@ const FAIXA: Record<number, Key> = {
   80: "onb.level.max",
 };
 
+/**
+ * Em que aparelhos isto foi realmente testado.
+ *
+ * ⚠️ A lista é curta e fica curta. "Testado em iOS" quando foram dois aparelhos
+ * é promessa que o app não pode cumprir; nomear os dois é o que dá para
+ * afirmar.
+ */
+const APARELHOS_TESTADOS = ["Poco X3 Pro", "iPhone 17 Pro"];
+
 const TEMAS: { valor: Escolha; chave: Key }[] = [
   { valor: "sistema", chave: "settings.theme.system" },
   { valor: "claro", chave: "settings.theme.light" },
@@ -51,6 +62,8 @@ export default function Ajustes() {
   const { chave, definir: definirChave } = useIA();
   const [rascunho, setRascunho] = useState<string | null>(null);
   const [copiado, setCopiado] = useState(false);
+  const [confirmandoApagar, setConfirmandoApagar] = useState(false);
+  const { dados } = useDados();
 
   const alto = useSafeAreaInsets().top;
 
@@ -271,6 +284,79 @@ export default function Ajustes() {
         </Text>
       </Pressable>
       <Text className="text-texto3 text-[12px] leading-5 mt-3">{t("support.note")}</Text>
+
+      {/* ── O DADO DO JOGO ─────────────────────────────────────────────────
+          De quando é o arquivo que o app está usando. Dataset velho é a
+          explicação mais comum para um número que não bate com o jogo, e sem
+          esta linha não havia como a pessoa desconfiar disso. */}
+      <Text className="text-texto3 text-legenda mt-7 mb-2">
+        {t("settings.gameData").toUpperCase()}
+      </Text>
+      <View className="bg-superficie rounded-cartao px-4 py-4">
+        <Text className="text-texto text-corpo">
+          {dados?.version.generatedAt
+            ? t("settings.buildOf", {
+                date: new Date(dados.version.generatedAt).toLocaleDateString(idioma),
+              })
+            : t("common.unknown")}
+        </Text>
+        {dados?.version.generatedAt && (
+          <Text className="text-texto3 text-legenda mt-1">
+            {t("settings.dataAge", {
+              n: Math.max(
+                0,
+                Math.floor(
+                  (Date.now() - Date.parse(dados.version.generatedAt)) / 86_400_000,
+                ),
+              ),
+            })}
+          </Text>
+        )}
+      </View>
+
+      {/* ── SOBRE ──────────────────────────────────────────────────────────
+          Quem fez, e em que aparelhos isto foi testado de verdade. A lista é
+          curta de propósito: dizer "testado em iOS" quando foram dois aparelhos
+          é promessa que o app não pode cumprir. */}
+      <Text className="text-texto3 text-legenda mt-7 mb-2">{t("about.title").toUpperCase()}</Text>
+      <View className="bg-superficie rounded-cartao px-4 py-4">
+        <Text className="text-texto2 text-corpo leading-5">{t("about.solo")}</Text>
+        <Text className="text-texto3 text-legenda mt-3 leading-4">
+          {t("about.devices", { aparelhos: APARELHOS_TESTADOS.join(" · ") })}
+        </Text>
+      </View>
+
+      {/* ── APAGAR TUDO ────────────────────────────────────────────────────
+          ⚠️ NÃO EXISTE SERVIDOR: o que sumir aqui sumiu. Por isso são dois
+          toques e um aviso do que exatamente vai embora — e por isso a coleção
+          se exporta na tela dela antes. */}
+      <Text className="text-texto3 text-legenda mt-7 mb-2">{t("wipe.title").toUpperCase()}</Text>
+      <View className="bg-superficie rounded-cartao px-4 py-4">
+        <Text className="text-texto2 text-corpo leading-5">{t("wipe.noServer")}</Text>
+        {(["wipe.item.collection", "wipe.item.settings", "wipe.item.cache"] as const).map((k) => (
+          <Text key={k} className="text-texto3 text-legenda mt-2 leading-4">
+            • {t(k)}
+          </Text>
+        ))}
+      </View>
+      <Pressable
+        onPress={() => {
+          if (!confirmandoApagar) {
+            setConfirmandoApagar(true);
+            return;
+          }
+          void apagarTudo().then(() => setConfirmandoApagar(false));
+        }}
+        className="rounded-pilula py-3.5 items-center mt-3"
+        style={{ borderWidth: 1, borderColor: confirmandoApagar ? cores.transferir : cores.linha }}
+      >
+        <Text
+          className="text-corpo font-semibold"
+          style={{ color: confirmandoApagar ? cores.transferir : cores.texto2 }}
+        >
+          {t(confirmandoApagar ? "wipe.confirm" : "wipe.action")}
+        </Text>
+      </Pressable>
 
       {/* Privacidade e aviso de marca. As lojas exigem que seja alcançável de
           DENTRO do app, e o aviso de marca precisa chegar a quem instala — o

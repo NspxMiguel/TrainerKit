@@ -205,7 +205,7 @@ export default function Pokedex() {
             {termo ? t("collection.noMatch.title") : t("collection.empty.title")}
           </Text>
           <Text className="text-texto3 text-legenda text-center mt-2 leading-5">
-            {termo ? t("collection.noMatch.body") : t("collection.empty.body")}
+            {termo ? t("collection.noMatch.body", { q: busca.trim() }) : t("collection.empty.body")}
           </Text>
         </View>
       ) : (

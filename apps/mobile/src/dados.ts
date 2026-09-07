@@ -81,7 +81,17 @@ export interface Base {
   /** So as canonicas. E o que uma lista mostra. */
   canonicas: Especie[];
   cpm: number[];
-  version: { levelCap: number };
+  version: {
+    levelCap: number;
+    /*
+     * ⚠️ Os dois vinham no arquivo e o tipo nativo os ignorava, então Ajustes
+     * não tinha como dizer de quando é o dado que o app está usando — e um
+     * dataset velho é a explicação mais comum para um número que não bate com o
+     * jogo.
+     */
+    batchId?: string;
+    generatedAt?: string;
+  };
   typeChart: Record<string, number[]>;
   typeOrder: string[];
   fastMoves: Golpe[];

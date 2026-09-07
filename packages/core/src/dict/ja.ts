@@ -347,6 +347,7 @@ export const JA: Dict = {
   "settings.dataProtected": "データ保護",
   "settings.checking": "確認中…",
   "settings.unsupported": "非対応",
+  "common.unknown": "不明",
   "settings.spaceUsed": "使用容量",
   "offline.title": "オフラインで動きます",
   "offline.sub": "すでに端末にあるもの。約束ではなく、いま測った結果です。",
@@ -359,6 +360,7 @@ export const JA: Dict = {
   "settings.language": "言語",
   "settings.showTranslation": "わざ名の訳を表示",
   "settings.showTranslationDetail": "Counter（カウンター）",
+  "settings.dataAge": "{n} 日前に取得",
   "settings.gameData": "ゲームデータ",
   "settings.datasetVersion": "データのバージョン",
   "settings.about": "このアプリについて",
@@ -415,6 +417,7 @@ export const JA: Dict = {
   "privacy.minors.body": "アプリは年齢を問わず、誰からも個人データを求めず、収集しません。ただし AI と音声は第三者にテキストを送るため、未成年の方は保護者の同伴のもとでのご利用をおすすめします。",
   "privacy.controller.title": "管理者の連絡先",
   "privacy.controller.body": "TrainerKit は個人プロジェクトで、背後に法人はありません。プライバシーに関するご質問・ご要望は：{contact}",
+  "about.title": "このアプリについて",
   "about.solo":
     "これは一人で作っている独立アプリです。テストチームも QA もベータ版のグループもありません。だからバグはあります。まだ残っているのは、私自身がまだ出会っていないものです。",
   "about.devices":

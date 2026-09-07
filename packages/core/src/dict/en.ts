@@ -387,6 +387,7 @@ const EN = {
   "settings.dataProtected": "Data protected",
   "settings.checking": "Checking…",
   "settings.unsupported": "Not supported",
+  "common.unknown": "unknown",
   "settings.spaceUsed": "Space used",
   "offline.title": "Works offline",
   "offline.sub": "What is already stored on this device. Measured now, not promised.",
@@ -399,6 +400,7 @@ const EN = {
   "settings.language": "Language",
   "settings.showTranslation": "Show move translations",
   "settings.showTranslationDetail": "Counter (Contra-atacar)",
+  "settings.dataAge": "Downloaded {n} days ago",
   "settings.gameData": "Game data",
   "settings.datasetVersion": "Dataset version",
   "settings.about": "About",
@@ -467,6 +469,7 @@ const EN = {
    * A lista de aparelhos entra por parametro (`APARELHOS_TESTADOS`) pra ela ser
    * escrita UMA vez, e nao dez.
    */
+  "about.title": "About",
   "about.solo":
     "This is an independent app, made by one person. No test team, no QA, no beta group — so yes, it has bugs, and the ones still in here are the ones I haven't run into yet.",
   "about.devices":

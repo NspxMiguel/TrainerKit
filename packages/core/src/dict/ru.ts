@@ -347,6 +347,7 @@ export const RU: Dict = {
   "settings.dataProtected": "Данные защищены",
   "settings.checking": "Проверяю…",
   "settings.unsupported": "Не поддерживается",
+  "common.unknown": "неизвестно",
   "settings.spaceUsed": "Занято места",
   "offline.title": "Работает без сети",
   "offline.sub": "Что уже сохранено на устройстве. Измерено сейчас, а не обещано.",
@@ -359,6 +360,7 @@ export const RU: Dict = {
   "settings.language": "Язык",
   "settings.showTranslation": "Показывать перевод атак",
   "settings.showTranslationDetail": "Counter (Контрудар)",
+  "settings.dataAge": "Загружено {n} дн. назад",
   "settings.gameData": "Данные игры",
   "settings.datasetVersion": "Версия базы",
   "settings.about": "О приложении",
@@ -415,6 +417,7 @@ export const RU: Dict = {
   "privacy.minors.body": "Приложение не запрашивает и не собирает персональные данные ни у кого и ни в каком возрасте. Тем не менее ИИ и голос отправляют текст сторонним сервисам, поэтому несовершеннолетним рекомендуем пользоваться под присмотром взрослых.",
   "privacy.controller.title": "КОНТАКТ ОПЕРАТОРА",
   "privacy.controller.body": "TrainerKit — личный проект, за ним не стоит компания. По любым вопросам о конфиденциальности: {contact}",
+  "about.title": "О приложении",
   "about.solo":
     "Это независимое приложение, которое делает один человек. Ни команды тестировщиков, ни QA, ни бета-группы — так что да, в нём есть ошибки, и оставшиеся — это те, на которые я сам ещё не наткнулся.",
   "about.devices":

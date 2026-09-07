@@ -364,6 +364,7 @@ export const PT_BR: Dict = {
   "settings.dataProtected": "Dados protegidos",
   "settings.checking": "Verificando…",
   "settings.unsupported": "Não suportado",
+  "common.unknown": "desconhecido",
   "settings.spaceUsed": "Espaço usado",
   "offline.title": "Funciona sem rede",
   "offline.sub": "O que já está guardado no aparelho. Medido agora, não prometido.",
@@ -376,6 +377,7 @@ export const PT_BR: Dict = {
   "settings.language": "Idioma",
   "settings.showTranslation": "Mostrar tradução dos ataques",
   "settings.showTranslationDetail": "Counter (Contra-atacar)",
+  "settings.dataAge": "Baixado há {n} dias",
   "settings.gameData": "Dados do jogo",
   "settings.datasetVersion": "Versão da base",
   "settings.about": "Sobre",
@@ -433,6 +435,7 @@ export const PT_BR: Dict = {
   "privacy.controller.title": "CONTROLADOR (LGPD ART. 41)",
   "privacy.controller.body": "O TrainerKit é um projeto pessoal, sem empresa por trás. Para qualquer dúvida ou pedido sobre privacidade: {contact}",
   /* A idade de um app se mede em aparelhos testados — ver a nota em `en.ts`. */
+  "about.title": "Sobre",
   "about.solo":
     "Este é um app independente, feito por uma pessoa só. Sem equipe de teste, sem QA, sem grupo de beta — então sim, ele tem bugs, e os que continuam aqui são os que eu ainda não encontrei.",
   "about.devices":

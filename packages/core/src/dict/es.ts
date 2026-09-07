@@ -347,6 +347,7 @@ export const ES: Dict = {
   "settings.dataProtected": "Datos protegidos",
   "settings.checking": "Comprobando…",
   "settings.unsupported": "No soportado",
+  "common.unknown": "desconocido",
   "settings.spaceUsed": "Espacio usado",
   "offline.title": "Funciona sin red",
   "offline.sub": "Lo que ya está guardado en el dispositivo. Medido ahora, no prometido.",
@@ -359,6 +360,7 @@ export const ES: Dict = {
   "settings.language": "Idioma",
   "settings.showTranslation": "Mostrar traducción de los ataques",
   "settings.showTranslationDetail": "Counter (Contraataque)",
+  "settings.dataAge": "Descargado hace {n} días",
   "settings.gameData": "Datos del juego",
   "settings.datasetVersion": "Versión de la base",
   "settings.about": "Acerca de",
@@ -415,6 +417,7 @@ export const ES: Dict = {
   "privacy.minors.body": "La app no pide ni recoge ningún dato personal, de nadie, de ninguna edad. Aun así, usar la IA y la voz envía texto a servicios de terceros, por lo que recomendamos que los menores lo usen con supervisión de un adulto.",
   "privacy.controller.title": "RESPONSABLE DEL TRATAMIENTO",
   "privacy.controller.body": "TrainerKit es un proyecto personal, sin empresa detrás. Para cualquier duda o solicitud sobre privacidad: {contact}",
+  "about.title": "Acerca de",
   "about.solo":
     "Esta es una app independiente, hecha por una sola persona. Sin equipo de pruebas, sin QA, sin grupo beta: así que sí, tiene errores, y los que siguen aquí son los que aún no me he encontrado.",
   "about.devices":

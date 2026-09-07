@@ -347,6 +347,7 @@ export const KO: Dict = {
   "settings.dataProtected": "데이터 보호",
   "settings.checking": "확인 중…",
   "settings.unsupported": "지원 안 함",
+  "common.unknown": "알 수 없음",
   "settings.spaceUsed": "사용 중인 용량",
   "offline.title": "오프라인에서 됩니다",
   "offline.sub": "이미 기기에 있는 것. 약속이 아니라 지금 측정한 값입니다.",
@@ -359,6 +360,7 @@ export const KO: Dict = {
   "settings.language": "언어",
   "settings.showTranslation": "기술 번역 표시",
   "settings.showTranslationDetail": "Counter (카운터)",
+  "settings.dataAge": "{n}일 전에 받음",
   "settings.gameData": "게임 데이터",
   "settings.datasetVersion": "데이터 버전",
   "settings.about": "정보",
@@ -415,6 +417,7 @@ export const KO: Dict = {
   "privacy.minors.body": "앱은 나이와 무관하게 누구에게도 개인정보를 요구하거나 수집하지 않습니다. 다만 AI와 음성은 제3자에게 텍스트를 보내므로, 미성년자는 보호자와 함께 사용하기를 권합니다.",
   "privacy.controller.title": "관리자 연락처",
   "privacy.controller.body": "TrainerKit은 회사가 없는 개인 프로젝트입니다. 개인정보 관련 문의는: {contact}",
+  "about.title": "정보",
   "about.solo":
     "혼자 만드는 독립 앱입니다. 테스트 팀도, QA도, 베타 그룹도 없습니다. 그래서 버그가 있습니다. 아직 남아 있는 건 제가 아직 마주치지 못한 것들입니다.",
   "about.devices":
