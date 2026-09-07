@@ -88,16 +88,20 @@ export function Segmented<T extends string>({
               style={{ minHeight: 36 }}
               className="rounded-pilula px-4 justify-center"
             >
+              {/* ⚠️ AZUL, e não a tinta do tema. É o que o pacote usa no
+                  segmented e na ação principal — o mesmo acento em toda a
+                  navegação. Branco competia com o conteúdo e sumia no tema
+                  claro. */}
               {ativo && (
                 <View
-                  style={{ backgroundColor: cores.texto }}
+                  style={{ backgroundColor: cores.evoluir }}
                   className="absolute inset-0 rounded-pilula"
                 />
               )}
               <Text
                 className="text-legenda"
                 numberOfLines={1}
-                style={{ color: ativo ? cores.fundo : cores.texto2 }}
+                style={{ color: ativo ? "#FFFFFF" : cores.texto2 }}
               >
                 {o.rotulo}
               </Text>

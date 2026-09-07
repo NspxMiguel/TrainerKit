@@ -17,6 +17,8 @@ import { useDados, type Especie } from "../../src/dados";
 import { useT } from "../../src/i18n";
 import { usePendencias, vereditoDe } from "../../src/pendencias";
 import { Segmented } from "../../src/Segmented";
+import { SymbolView } from "expo-symbols";
+
 import { Selo } from "../../src/Selo";
 import { useSetup } from "../../src/setup";
 import { useTema } from "../../src/tema";
@@ -79,6 +81,15 @@ const POR_QUE: Record<Ordem, Key> = {
 
 const PERFEITO = { atk: 15, def: 15, hp: 15 };
 
+/** O símbolo de cada veredito, como o print 2 os desenha. */
+const SIMBOLO: Record<string, string> = {
+  investir: "↑",
+  evoluir: "✦",
+  guardar: "◆",
+  transferir: "→",
+  descobrir: "?",
+};
+
 /** Qual cor do tema pinta cada veredito. */
 const COR_DA_ACAO: Record<string, "investir" | "evoluir" | "guardar" | "transferir"> = {
   investir: "investir",
@@ -93,10 +104,12 @@ interface Meu {
   especie: Especie;
   acao: Action;
   pendente: boolean;
+  /** O PC DELE, não o da espécie — é como se acha o exemplar na tela do jogo. */
+  pc: number | null;
 }
 
 export default function Pokedex() {
-  const { t } = useT();
+  const { t, idioma } = useT();
   const { cores } = useTema();
   const { pronto, erro, dados } = useDados();
   const { setup } = useSetup();
@@ -107,7 +120,10 @@ export default function Pokedex() {
   const [aba, setAba] = useState<Aba>("todos");
   /* Grade ou lista, e só em "meus": a grade de todas as espécies existe para
      varrer por cor, e uma lista de 1.182 linhas não serve para nada disso. */
-  const [emGrade, setEmGrade] = useState(true);
+  /* ⚠️ LISTA por padrão em "meus", e não grade: o print 2 mostra uma lista, e
+     é o formato certo para ela — a grade serve para varrer 1.182 espécies por
+     cor, e a coleção se lê por veredito, que é texto. */
+  const [emGrade, setEmGrade] = useState(false);
   const [ordem, setOrdem] = useState<Ordem>("dex");
 
   const fila = usePendencias(dados);
@@ -193,6 +209,9 @@ export default function Pokedex() {
           especie,
           acao: veredito.action,
           pendente: pendentes.has(g.id),
+          pc: g.ivDesconhecido
+            ? null
+            : computeCPAtLevel(dados.cpm, especie.baseStats, g.ivs, g.level),
         };
       })
       .filter((x): x is Meu => x !== null)
@@ -279,6 +298,37 @@ export default function Pokedex() {
 
         {/* A FAIXA DA FAXINA. Ela só aparece quando há mesmo o que transferir —
             um atalho permanente para uma tela vazia ensina a ignorá-lo. */}
+        {/* O CARTÃO DO MODO POKÉDEX.
+            ⚠️ Ele fica aqui, logo abaixo da busca, e não escondido num atalho
+            do Início: é o print 2 do pacote, e o motivo é que a Pokédex é onde
+            a pessoa está quando quer apontar a câmera para um bicho. */}
+        {aba === "meus" && (
+          <Toque
+            onPress={() => router.push("/dex")}
+            className="rounded-cartao px-4 py-3 mt-3 flex-row items-center gap-3"
+            style={{ backgroundColor: cores.superficie }}
+          >
+            <View
+              className="rounded-pilula items-center justify-center"
+              style={{ width: 38, height: 38, backgroundColor: "#E4483B" }}
+            >
+              <SymbolView
+                name="camera.viewfinder"
+                size={17}
+                tintColor="#FFFFFF"
+                fallback={<View />}
+              />
+            </View>
+            <View className="flex-1">
+              <Text className="text-texto text-corpo font-semibold">{t("dex.open")}</Text>
+              <Text className="text-texto3 text-legenda mt-0.5" numberOfLines={2}>
+                {t("dex.openDetail")}
+              </Text>
+            </View>
+            <Text className="text-texto3 text-base">›</Text>
+          </Toque>
+        )}
+
         {aba === "meus" && podemSair > 0 && (
           <Toque
             onPress={() => router.push("/faxina")}
@@ -359,7 +409,7 @@ export default function Pokedex() {
           keyExtractor={(m) => m.guardado.id}
           {...(emGrade ? { columnWrapperStyle: { gap: 10 } } : {})}
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 10 }}
-          renderItem={({ item }) => (
+          renderItem={({ item, index }) => (
             <Toque
                 onPress={() =>
                   router.push({ pathname: "/especie/[id]", params: { id: item.especie.id } })
@@ -367,7 +417,7 @@ export default function Pokedex() {
                 className={
                   emGrade
                     ? "items-center bg-superficie rounded-tile py-3"
-                    : "flex-row items-center gap-3 bg-superficie rounded-cartao-sm p-3"
+                    : "flex-row items-center gap-3 bg-superficie px-3 py-3"
                 }
                 /* A borda esquerda na cor do veredito é o que faz a lista ser
                    varrível: dá para achar "o que transferir" sem ler nome nenhum. */
@@ -379,6 +429,13 @@ export default function Pokedex() {
                         borderLeftColor: item.pendente
                           ? cores[COR_DA_ACAO[item.acao] ?? "linha"]
                           : "transparent",
+                        /* O cartão é a LISTA inteira: só a primeira e a última
+                           linha arredondam, e o meio fica reto. */
+                        borderTopLeftRadius: index === 0 ? 20 : 0,
+                        borderTopRightRadius: index === 0 ? 20 : 0,
+                        borderBottomLeftRadius: index === meus.length - 1 ? 20 : 0,
+                        borderBottomRightRadius: index === meus.length - 1 ? 20 : 0,
+                        overflow: "hidden",
                       }
                 }
               >
@@ -390,10 +447,15 @@ export default function Pokedex() {
                   >
                     {item.especie.name}
                   </Text>
-                  <Text className="text-texto3 text-legenda mt-0.5">
+                  {/* ⚠️ IV, PC e NÍVEL — os três, como o print 2. Só o IV não
+                      identifica o exemplar: quem tem dois Machamp de 96% precisa
+                      do PC para saber qual é qual na tela do jogo. */}
+                  <Text className="text-texto3 text-legenda mt-0.5" numberOfLines={1}>
                     {item.guardado.ivDesconhecido
                       ? t("collection.ivUnknown")
-                      : `${ivTotalOf(item.guardado.ivs)}/45 · ${Math.round(ivPercentOf(item.guardado.ivs))}%`}
+                      : `IV ${Math.round(ivPercentOf(item.guardado.ivs))}% · ${t("common.cp")} ${
+                          item.pc?.toLocaleString(idioma) ?? "—"
+                        } · ${t("common.level")} ${item.guardado.level}`}
                   </Text>
                 </View>
                 {!emGrade && (
@@ -412,11 +474,18 @@ export default function Pokedex() {
                     }}
                     hitSlop={8}
                     accessibilityLabel={t(item.pendente ? "collection.markDone" : "collection.undoDone")}
+                    /* ⚠️ CHIP PREENCHIDO, e não contornado: no print 2 o
+                       veredito é uma pastilha com a cor por dentro, e é ela que
+                       faz a lista ser varrível de longe. Contorno some contra o
+                       fundo escuro. */
                     className="rounded-pilula px-3 py-1.5"
                     style={{
+                      backgroundColor: item.pendente
+                        ? `${cores[COR_DA_ACAO[item.acao] ?? "linha"]}26`
+                        : "transparent",
                       borderWidth: 1,
                       borderColor: item.pendente
-                        ? cores[COR_DA_ACAO[item.acao] ?? "linha"]
+                        ? `${cores[COR_DA_ACAO[item.acao] ?? "linha"]}4D`
                         : cores.linha,
                     }}
                   >
@@ -428,7 +497,9 @@ export default function Pokedex() {
                           : cores.texto3,
                       }}
                     >
-                      {item.pendente ? t(ACTION_KEYS[item.acao] as Key).toUpperCase() : "✓"}
+                      {item.pendente
+                        ? `${SIMBOLO[item.acao] ?? ""} ${t(ACTION_KEYS[item.acao] as Key).toUpperCase()}`
+                        : "✓"}
                     </Text>
                   </Pressable>
                 )}
