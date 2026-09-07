@@ -14,6 +14,7 @@ import { useDados, type Especie } from "../../src/dados";
 import { useT } from "../../src/i18n";
 import { corDoTipo, Selo, tintaSobre } from "../../src/Selo";
 import { DicaDoDia } from "../../src/DicaDoDia";
+import { useSetup } from "../../src/setup";
 import { useTema } from "../../src/tema";
 import { Toque } from "../../src/Toque";
 
@@ -46,6 +47,7 @@ function Heroi({
   linha,
   acao,
   onFeito,
+  quantos = 0,
 }: {
   especie: Especie;
   linha: string;
@@ -53,14 +55,20 @@ function Heroi({
   acao?: string;
   /** Marcar como resolvido sem abrir a ficha. */
   onFeito?: () => void;
+  /** Quantos pedem decisão — vira os pontinhos embaixo do herói. */
+  quantos?: number;
 }) {
   const { t } = useT();
+  const { cores } = useTema();
   const cor = corDoTipo(especie.types[0]);
   const tinta = tintaSobre(cor);
 
   return (
     <Link href={{ pathname: "/especie/[id]", params: { id: especie.id } }} asChild>
-      <Pressable className="rounded-cartao-lg overflow-hidden" style={{ height: 268 }}>
+      {/* ⚠️ SEM raio e SEM margem: no desenho o herói encosta nas duas bordas e
+          na barra de status. Com cantos arredondados ele lê como "mais um
+          cartão"; full-bleed ele É a tela. */}
+      <Pressable className="overflow-hidden" style={{ height: 372 }}>
         {/*
           O GRADIENTE E DO TIPO, e nao uma cor de marca. Foi assim que o violeta
           saiu do app sem a tela ficar cinza: a cor continua existindo, so que
@@ -83,9 +91,12 @@ function Heroi({
         <Text
           style={{
             position: "absolute",
-            right: -10,
-            top: 18,
-            fontSize: 150,
+            alignSelf: "center",
+            top: 10,
+            /* ⚠️ ELE TRANSBORDA de propósito: no desenho o monograma é largo o
+               bastante para ser cortado pelas duas bordas, e é esse corte que
+               faz ele ler como textura e não como palavra. */
+            fontSize: 250,
             fontWeight: "800",
             color: tinta,
             opacity: 0.16,
@@ -103,17 +114,17 @@ function Heroi({
         */}
         <LinearGradient
           colors={["transparent", "rgba(10,12,16,0.40)"]}
-          style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 130 }}
+          style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 190 }}
         />
-        <View className="flex-1 justify-end p-5">
-          <View className="self-start rounded-pilula px-3 py-1 mb-2 bg-black/35">
+        <View className="flex-1 justify-end items-center px-5 pb-5">
+          <View className="rounded-pilula px-3 py-1 mb-2 bg-black/35">
             <Text className="text-legenda text-white">{t("home.today").toUpperCase()}</Text>
           </View>
-          <Text className="text-saudacao text-white">{especie.name}</Text>
+          <Text className="text-saudacao text-white text-center">{especie.name}</Text>
           {/* Tipos MAIS o porquê. O desenho põe uma frase aqui — "Fogo · Voador ·
               IV 93 — vale cada grama de poeira hoje" — e só os tipos deixavam o
               herói dizendo o que a pessoa já vê na cor. */}
-          <Text className="text-corpo text-white/85 mt-1" numberOfLines={2}>
+          <Text className="text-corpo text-white/85 mt-1 text-center" numberOfLines={2}>
             {especie.types.map((x) => t(`type.${x}` as Key)).join(" · ")}
             {linha ? ` — ${linha}` : ""}
           </Text>
@@ -127,10 +138,10 @@ function Heroi({
             navegar duas telas para dizer isso.
           */}
           {acao && (
-            <View className="flex-row items-center gap-2 mt-3">
-              <View className="rounded-pilula px-4 py-2.5 bg-white">
-                <Text className="text-legenda" style={{ color: "#111" }}>
-                  {acao.toUpperCase()}
+            <View className="flex-row items-center gap-2 mt-4">
+              <View className="rounded-pilula px-6 py-3 bg-white">
+                <Text className="text-corpo font-bold" style={{ color: "#111" }}>
+                  {acao}
                 </Text>
               </View>
               {onFeito && (
@@ -156,6 +167,25 @@ function Heroi({
               )}
             </View>
           )}
+
+          {/* OS PONTINHOS. Eles dizem quantos ainda esperam decisão — no desenho
+              são o que promete que há mais de um assunto. Um só não desenha
+              nada: um ponto sozinho não é um carrossel. */}
+          {quantos > 1 && (
+            <View className="flex-row gap-1.5 mt-4 self-center">
+              {Array.from({ length: Math.min(quantos, 5) }, (_, i) => (
+                <View
+                  key={i}
+                  style={{
+                    width: i === 0 ? 14 : 5,
+                    height: 5,
+                    borderRadius: 3,
+                    backgroundColor: i === 0 ? "#FFFFFF" : "rgba(255,255,255,0.45)",
+                  }}
+                />
+              ))}
+            </View>
+          )}
         </View>
       </Pressable>
     </Link>
@@ -171,18 +201,17 @@ const COR_DA_ACAO: Record<string, "investir" | "evoluir" | "guardar" | "transfer
   descobrir: "investir",
 };
 
+/**
+ * OS ATALHOS — e são DOIS.
+ *
+ * ⚠️ Eram sete, e sete pílulas pequenas viravam uma parede que competia com a
+ * ação principal. O desenho põe só estes dois, e os outros cinco continuam
+ * alcançáveis: Modo Pokédex e Itens pela aba Pokédex, agenda e chocadeira pela
+ * agenda, contas pelo avatar da saudação.
+ */
 const ATALHOS: { rota: string; rotulo: Key; icone: string }[] = [
-  { rota: "/dex", rotulo: "dex.open", icone: "camera.viewfinder" },
   { rota: "/time", rotulo: "team.title", icone: "person.3.fill" },
   { rota: "/ginasio", rotulo: "gym.title", icone: "shield.fill" },
-  { rota: "/chocadeira", rotulo: "eggs.title", icone: "circle.dashed" },
-  { rota: "/agenda", rotulo: "agenda.title", icone: "calendar" },
-  /* ⚠️ "Contas", e não "Meus": a lista dos seus bichos passou a viver na aba
-     Pokédex, e esta tela virou a das CONTAS (criar, trocar, apagar) mais o
-     backup. Dois atalhos chamados "Meus" levando a telas diferentes é o tipo de
-     coisa que faz a pessoa achar que o app perdeu a coleção dela. */
-  { rota: "/colecao", rotulo: "colecoes.title", icone: "person.crop.circle" },
-  { rota: "/itens", rotulo: "items.short", icone: "bag.fill" },
 ];
 
 export default function Inicio() {
@@ -193,6 +222,7 @@ export default function Inicio() {
   const router = useRouter();
   const { top: alto, bottom: baixo } = useSafeAreaInsets();
   const [agora] = useState(() => new Date().getHours());
+  const { setup } = useSetup();
 
   const fila = usePendencias(dados);
 
@@ -267,80 +297,104 @@ export default function Inicio() {
     );
   }
 
+  const nome = setup.nome.trim() || t("home.trainer");
+
   return (
     <ScrollView
       className="flex-1 bg-fundo"
       contentContainerStyle={{ paddingBottom: baixo + 110 }}
       showsVerticalScrollIndicator={false}
     >
-      <View className="px-4" style={{ paddingTop: alto + 8 }}>
-        <Text className="text-saudacao text-texto mb-4">{t(saudacao(agora))}</Text>
-
-        {/* A BUSCA DO INÍCIO leva para a Pokédex já filtrada. Ela existe porque
-            procurar um bicho é a coisa mais frequente do app, e obrigar a trocar
-            de aba antes de digitar põe um passo no caminho de todo mundo. */}
-        <Toque
-          onPress={() => router.push("/pokedex")}
-          className="rounded-pilula px-5 py-3 mb-4 flex-row items-center gap-2"
-          style={{ backgroundColor: cores.superficie }}
+      {/* ⚠️ A SAUDAÇÃO E O HERÓI VÊM COLADOS, e a busca desceu.
+          Eu tinha posto a busca entre os dois, e ela empurrava o herói para
+          baixo da dobra — no desenho ele ocupa quase metade da tela logo de
+          cara, e é isso que faz a tela ter um assunto. */}
+      <View className="px-4 flex-row items-center gap-3" style={{ paddingTop: alto + 8 }}>
+        {/* UMA LINHA. "Boa tarde, Treinador." quebrava em duas e empurrava o
+            herói; encolher a fonte é melhor que perder a primeira dobra. */}
+        <Text
+          className="text-saudacao text-texto flex-1"
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.7}
         >
-          <SymbolView
-            name="magnifyingglass"
-            size={15}
-            tintColor={cores.texto3}
-            fallback={<View />}
-          />
-          <Text className="text-texto3 text-corpo">{t("home.search")}</Text>
+          {t(saudacao(agora))}, {nome}.
+        </Text>
+        {/* O AVATAR, com a inicial. É o que o desenho põe no canto e o que dá o
+            caminho para as contas — hoje o único lugar onde se troca de coleção. */}
+        <Toque
+          onPress={() => router.push("/colecao")}
+          accessibilityLabel={t("colecoes.title")}
+          className="rounded-pilula items-center justify-center"
+          style={{ width: 38, height: 38, backgroundColor: cores.superficie }}
+        >
+          <Text className="text-texto text-corpo font-bold">
+            {nome.slice(0, 1).toUpperCase()}
+          </Text>
         </Toque>
-        {destaque && (
-          <Heroi
-            especie={destaque}
-            linha={linhaDoDestaque}
-            {...(pendente
-              ? {
-                  acao: t(ACTION_KEYS[pendente.veredito.action] as Key),
-                  onFeito: () => {
-                    void marcarFeito(pendente.guardado.id, pendente.veredito.action).then(
-                      recarregar,
-                    );
-                  },
-                }
-              : {})}
-          />
-        )}
+      </View>
 
-        {/* A ACAO PRINCIPAL, largura cheia e em pilula. E a unica coisa do app
-            que resolve o problema inteiro em um passo, entao e a unica que
-            ganha a cor de acento e a sombra de CTA. */}
+      {/* O HERÓI É FULL-BLEED: sem margem lateral, encostando nas duas bordas.
+          Com margem ele lê como "mais um cartão"; sem, ele é a tela. */}
+      {destaque && (
+        <Heroi
+          especie={destaque}
+          linha={linhaDoDestaque}
+          quantos={fila.length}
+          {...(pendente
+            ? {
+                acao: t(ACTION_KEYS[pendente.veredito.action] as Key),
+                onFeito: () => {
+                  void marcarFeito(pendente.guardado.id, pendente.veredito.action).then(
+                    recarregar,
+                  );
+                },
+              }
+            : {})}
+        />
+      )}
+
+      <View className="px-4">
+        {/* A ACAO PRINCIPAL, largura cheia e em pilula.
+            ⚠️ AZUL e não branca: no desenho ela é a única coisa com COR de
+            acento na tela, e é assim que ela se separa dos atalhos. Branca ela
+            competia com o herói. */}
         <Link href="/print" asChild>
           <Toque
-            className="rounded-pilula py-4 items-center mt-4 flex-row justify-center gap-2"
+            className="rounded-pilula py-4 items-center mt-5 flex-row justify-center gap-2"
             style={{
-              backgroundColor: cores.texto,
-              shadowColor: cores.texto,
-              shadowOpacity: 0.22,
+              backgroundColor: cores.evoluir,
+              shadowColor: cores.evoluir,
+              shadowOpacity: 0.42,
               shadowRadius: 22,
               shadowOffset: { width: 0, height: 8 },
             }}
           >
-            <SymbolView name="viewfinder" size={17} tintColor={cores.fundo} fallback={<View />} />
-            <Text className="text-corpo font-bold" style={{ color: cores.fundo }}>
+            <SymbolView name="viewfinder" size={17} tintColor="#FFFFFF" fallback={<View />} />
+            <Text className="text-corpo font-bold" style={{ color: "#FFFFFF" }}>
               {t("scan.pick")}
             </Text>
           </Toque>
         </Link>
 
-        <View className="flex-row flex-wrap gap-2 mt-3">
+        {/* ⚠️ DOIS atalhos, não sete. O desenho põe só "Monta um time" e
+            "Ginásio" — os outros cinco viraram uma parede de pílulas que
+            competia com a ação principal. O resto continua alcançável: Modo
+            Pokédex e Itens pela Pokédex, agenda e chocadeira pelos eventos. */}
+        <View className="flex-row gap-2 mt-3">
           {ATALHOS.map((a) => (
             <Link key={a.rota} href={a.rota as never} asChild>
-              <Toque className="bg-superficie rounded-pilula px-4 py-3 flex-row items-center gap-2">
+              <Toque
+                estiloExterno={{ flex: 1 }}
+                className="bg-superficie rounded-pilula py-3.5 items-center justify-center flex-row gap-2"
+              >
                 <SymbolView
                   name={a.icone as never}
                   size={15}
                   tintColor={cores.texto3}
                   fallback={<View />}
                 />
-                <Text className="text-texto text-legenda">{t(a.rotulo)}</Text>
+                <Text className="text-texto text-corpo font-semibold">{t(a.rotulo)}</Text>
               </Toque>
             </Link>
           ))}
@@ -348,9 +402,21 @@ export default function Inicio() {
 
         {meus.length > 0 && (
           <>
-            <Text className="text-texto3 text-legenda mt-6 mb-2">
-              {t("especies.mine").toUpperCase()}
-            </Text>
+            {/* DUAS LEGENDAS, uma em cada ponta — é o que o desenho põe, e é a
+                que está à direita que dá o motivo de olhar a tira. */}
+            <View className="flex-row items-baseline justify-between mt-7 mb-3">
+              <Text className="text-texto3 text-legenda">
+                {t("home.yourCollection").toUpperCase()}
+              </Text>
+              {fila.length > 0 && (
+                <Text className="text-legenda" style={{ color: cores.evoluir }}>
+                  {t(
+                    fila.length === 1 ? "home.needsDecision.one" : "home.needsDecision.many",
+                    { count: fila.length },
+                  ).toUpperCase()}
+                </Text>
+              )}
+            </View>
             <FlatList
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -361,23 +427,28 @@ export default function Inicio() {
                   href={{ pathname: "/especie/[id]", params: { id: item.especie.id } }}
                   asChild
                 >
-                  <Toque className="items-center mr-3" style={{ width: 62 }}>
-                    <Selo especie={item.especie} tamanho={54} />
-                    <Text className="text-texto text-legenda mt-1.5 text-center" numberOfLines={1}>
-                      {item.especie.name}
-                    </Text>
+                  {/* CÍRCULOS GRANDES: no desenho a tira é a segunda coisa que
+                      o olho pega, e um selo de 54 com o nome embaixo lia como
+                      lista. 64 com o rótulo colorido é o que a torna varrível. */}
+                  <Toque className="items-center mr-4" style={{ width: 68 }}>
+                    <Selo especie={item.especie} tamanho={64} />
                     {/* O rótulo do veredito embaixo, na cor dele — é o que o
                         desenho mostra e o que faz a tira valer mais que uma
                         lista de nomes. */}
-                    {item.acao && (
-                      <Text
-                        className="text-legenda text-center mt-0.5"
-                        numberOfLines={1}
-                        style={{ color: cores[COR_DA_ACAO[item.acao] ?? "texto3"], fontSize: 9 }}
-                      >
-                        {t(ACTION_KEYS[item.acao] as Key).toUpperCase()}
-                      </Text>
-                    )}
+                    <Text
+                      className="text-legenda text-center mt-2"
+                      numberOfLines={1}
+                      style={{
+                        color: item.acao
+                          ? cores[COR_DA_ACAO[item.acao] ?? "texto3"]
+                          : cores.texto3,
+                        fontSize: 9,
+                      }}
+                    >
+                      {item.acao
+                        ? t(ACTION_KEYS[item.acao] as Key).toUpperCase()
+                        : item.especie.name.toUpperCase()}
+                    </Text>
                   </Toque>
                 </Link>
               )}

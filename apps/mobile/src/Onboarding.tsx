@@ -8,7 +8,7 @@ import {
 } from "@trainerkit/core";
 import * as Clipboard from "expo-clipboard";
 import { useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 
 import { useT } from "./i18n";
 import { useSetup } from "./setup";
@@ -153,6 +153,19 @@ export function Onboarding() {
             <Text className="text-texto text-[34px] font-extrabold mb-2">
               {t("onb.level.title")}
             </Text>
+
+            {/* O NOME, aqui e não numa etapa própria: uma tela inteira só para
+                pedir um nome que é opcional custa mais atenção do que vale. */}
+            <TextInput
+              value={setup.nome}
+              onChangeText={(v) => definir({ nome: v })}
+              placeholder={t("onb.namePlaceholder")}
+              placeholderTextColor={cores.texto3}
+              accessibilityLabel={t("onb.nameAria")}
+              className="bg-superficie rounded-pilula px-5 py-3.5 text-[15px] mb-5"
+              style={{ color: cores.texto }}
+              returnKeyType="done"
+            />
             <Text className="text-texto2 text-[15px] leading-6 mb-6">{t("onb.tagline")}</Text>
 
             <View className="flex-row flex-wrap gap-2">

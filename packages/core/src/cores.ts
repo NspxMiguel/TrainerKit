@@ -140,16 +140,38 @@ export function seloDaEspecie(
  * As posições (0% / 46% / 72%) também são do pacote: a última parada NÃO é
  * 100%, e é isso que deixa o pé do degradê com uma faixa da cor clara em vez de
  * um ponto. Tirar essa folga achata o efeito.
+ *
+ * ⚠️ A COR DO TIPO É A PARADA CLARA, e não a do meio.
+ *
+ * Medido contra os três degradês do pacote: a última parada deles bate com a
+ * cor de tipo que o app já usa (fogo 53 vs 59, dragão 68 vs 67, gelo 69 vs 67
+ * de luminosidade). Tratar a cor do tipo como o MEIO — que foi o meu primeiro
+ * palpite — deixava o degradê inteiro uns dez pontos mais claro, e ele reparou
+ * de longe: o resultado era laranja médio uniforme onde o desenho tem sombra
+ * em cima e laranja forte no meio.
  */
 export const PARADAS_DO_DEGRADE = [0, 0.46, 0.72] as const;
 
 export function degradeDoTipo(cor: string): [string, string, string] {
   const [h, s, l] = paraHsl(cor);
+  /*
+   * ⚠️ A SATURAÇÃO SOBE MUITO, e isso é de propósito.
+   *
+   * A paleta de tipo do app é dessaturada porque ela precisa passar em 4,5:1
+   * como FUNDO DE SELO, com texto por cima. O degradê não tem texto por cima —
+   * o nome fica sobre o scrim — então ele pode e deve usar a cor cheia.
+   *
+   * Sem isso o herói sai "apagado" ao lado do mockup, que foi exatamente o que
+   * ele viu: o pacote usa `#EA580C` (90% de saturação) onde a paleta do app tem
+   * `#F0813F` (85% mas 59% de luz, o que lava a cor).
+   */
+  const viva = Math.min(1, s * 1.45);
   return [
-    /* Escuro: a saturação CAI junto com a luz. Escurecer mantendo a saturação
-       dá um roxo/marrom sujo em vez de sombra. */
-    paraHex(h, Math.min(1, s * 0.86), Math.max(0.16, l * 0.52)),
-    paraHex(h, Math.min(1, s * 1.08), l),
-    paraHex(h, Math.min(1, s * 1.12), Math.min(0.78, l * 1.24)),
+    /* Escuro: a saturação cai um pouco junto com a luz — escurecer com a
+       saturação cheia dá marrom sujo em vez de sombra. */
+    paraHex(h, Math.min(1, s * 1.05), Math.max(0.10, l * 0.30)),
+    /* Meio: a parada mais saturada das três. É ela que dá o corpo do degradê. */
+    paraHex(h, viva, l * 0.72),
+    paraHex(h, viva, Math.min(0.72, l * 1.02)),
   ];
 }

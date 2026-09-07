@@ -23,6 +23,16 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 const KEY = "tk:setup";
 
 export interface Setup {
+  /**
+   * O NOME, para a saudação.
+   *
+   * ⚠️ Ficou de fora quando o setup nativo nasceu, e a saudação virou um "Boa
+   * noite" sem destinatário — o desenho diz "Boa noite, Miguel." com ponto
+   * final, e é o nome que faz a tela parecer dele.
+   *
+   * Vazio é um estado válido: quem não quiser dizer o nome lê "Treinador".
+   */
+  nome: string;
   /** `false` até a pessoa concluir a primeira configuração. */
   done: boolean;
   level: TrainerLevel;
@@ -32,7 +42,7 @@ export interface Setup {
  * 50 e não 20, pelo mesmo motivo do web: é o que o app assumia antes deste
  * campo existir. Quem atualiza não vê veredito nenhum mudar sozinho.
  */
-const PADRAO: Setup = { done: false, level: 50 };
+const PADRAO: Setup = { done: false, level: 50, nome: "" };
 
 interface Ctx {
   /** `false` enquanto a leitura assíncrona não voltou. */
@@ -52,7 +62,11 @@ export function ConfigInicial({ children }: { children: ReactNode }) {
       .then((raw) => {
         if (raw) {
           const lido = JSON.parse(raw) as Partial<Setup>;
-          setSetup({ done: lido.done === true, level: nivelValido(lido.level, PADRAO.level) });
+          setSetup({
+            done: lido.done === true,
+            level: nivelValido(lido.level, PADRAO.level),
+            nome: typeof lido.nome === "string" ? lido.nome : "",
+          });
         }
       })
       .catch(() => {
