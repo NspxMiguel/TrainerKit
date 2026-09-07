@@ -1,3 +1,4 @@
+import { degradeDoHeroi } from "@trainerkit/core";
 import { useEffect, useMemo } from "react";
 
 import tabela from "../../../../packages/core/src/paleta.json";
@@ -248,14 +249,23 @@ function paraHex(h: number, s: number, l: number): string {
   const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
   const m = l - c / 2;
   const [r, g, b] =
-    h < 60 ? [c, x, 0]
-    : h < 120 ? [x, c, 0]
-    : h < 180 ? [0, c, x]
-    : h < 240 ? [0, x, c]
-    : h < 300 ? [x, 0, c]
-    : [c, 0, x];
+    h < 60
+      ? [c, x, 0]
+      : h < 120
+        ? [x, c, 0]
+        : h < 180
+          ? [0, c, x]
+          : h < 240
+            ? [0, x, c]
+            : h < 300
+              ? [x, 0, c]
+              : [c, 0, x];
   return `#${[r, g, b]
-    .map((v) => Math.round((v + m) * 255).toString(16).padStart(2, "0"))
+    .map((v) =>
+      Math.round((v + m) * 255)
+        .toString(16)
+        .padStart(2, "0"),
+    )
     .join("")}`;
 }
 
@@ -265,11 +275,7 @@ function luminancia(hexa: string): number {
     const x = v / 255;
     return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
   };
-  return (
-    0.2126 * canal((n >> 16) & 255) +
-    0.7152 * canal((n >> 8) & 255) +
-    0.0722 * canal(n & 255)
-  );
+  return 0.2126 * canal((n >> 16) & 255) + 0.7152 * canal((n >> 8) & 255) + 0.0722 * canal(n & 255);
 }
 
 function contraste(a: string, b: string): number {
@@ -298,26 +304,8 @@ const FUNDO_ESCURO = "#0a0c10";
 const FUNDO_CLARO = "#f1f3f8";
 const ALVO = 4.7;
 
-/**
- * O teto de luminância das paradas do gradiente do hero.
- *
- * ⚠️ LUMINÂNCIA, e não claridade — e essa distinção é o defeito inteiro.
- *
- * O nome da especie é branco e fica sobre o gradiente. Eu limitava as paradas
- * por claridade HSL (0,45 e 0,56), o que parece uniforme e não é: amarelo em
- * `l = 0.56` tem quase o triplo da luminância de azul na mesma claridade,
- * porque o olho (e a fórmula da WCAG) pesa verde e vermelho muito mais que
- * azul.
- *
- * Resultado da varredura: **152 espécies** com o nome reprovando — Bellsprout
- * em 1,73:1, Abra em 2,04, Pikachu em 2,73. Todas amarelas ou verde-claras.
- * Nenhuma azul ou roxa falhou, que é por que nunca apareceu nos meus testes:
- * Dragonite, Bulbasaur, Mewtwo e Venusaur passam todos.
- *
- * 0,30 é o que garante 3:1 para o nome, que é texto grande (38px/800). O texto
- * pequeno do hero não fica aqui — ele vive sobre o véu escuro da base.
- */
-const TETO_LUZ_HERO = 0.3;
+/* O teto de luminância das paradas do hero mora no `packages/core`
+   (`TETO_LUZ_HEROI`), junto da conta que o usa. */
 
 /**
  * As três paradas do hero CLARO, com PISO e TETO de luminância em cada uma.
@@ -593,12 +581,17 @@ export function paletaDaEspecie(spriteId: number | null): Paleta {
      * não há como intercalar porcentagens entre itens de uma lista.
      */
     topo: topoCor,
-    topoTinta: contraste(topoCor, "#ffffff") >= contraste(topoCor, "#0a0c10") ? "#ffffff" : "#0a0c10",
-    gradiente: [
-      `${topoCor} 0%`,
-      `${escurecerAte(h, sv, 0.45, TETO_LUZ_HERO)} 48%`,
-      `${escurecerAte(h, Math.max(0.4, sv - 0.04), 0.56, TETO_LUZ_HERO)} 72%`,
-    ].join(", "),
+    topoTinta:
+      contraste(topoCor, "#ffffff") >= contraste(topoCor, "#0a0c10") ? "#ffffff" : "#0a0c10",
+    /* ⚠️ A CONTA MORA NO `packages/core` agora (`degradeDoHeroi`), e não aqui.
+       O app nativo pintava o herói pela cor do TIPO e o web pela cor da
+       ESPÉCIE: medido no Charizard, a terceira parada do nativo era 28% mais
+       luminosa e saturada até o talo — laranja de néon ao lado deste. Duas
+       contas para o mesmo desenho só podiam divergir. O que sobra aqui é a
+       POSIÇÃO das paradas, que o CSS não consegue intercalar sozinho. */
+    gradiente: degradeDoHeroi(spriteId, cruas[0] ?? "#888888", true)
+      .map((cor, i) => `${cor} ${[0, 48, 72][i]}%`)
+      .join(", "),
     /*
      * O ESPELHO do tema escuro, e não a cópia dele.
      *
@@ -607,7 +600,7 @@ export function paletaDaEspecie(spriteId: number | null): Paleta {
      * direção do próprio fundo — que é o que faz o hero acabar sem emenda nos
      * dois temas. Ver a nota longa em `HERO_CLARO`.
      */
-    gradienteClaro: paradasClaras
+    gradienteClaro: degradeDoHeroi(spriteId, cruas[0] ?? "#888888", false)
       .map((cor, i) => `${cor} ${[0, 48, 72][i]}%`)
       .join(", "),
     topoClaro: topoClaroCor,
@@ -722,7 +715,7 @@ function paraHexRgb(r: number, g: number, b: number): string {
 /** Branco ou quase-preto, o que contrastar mais. Mesma regra de `typeInk`. */
 function melhorTinta(fundo: string): string {
   const lf = luminancia(fundo);
-  const claro = (1.05) / (lf + 0.05);
+  const claro = 1.05 / (lf + 0.05);
   const escuro = (lf + 0.05) / (luminancia("#141920") + 0.05);
   return claro >= escuro ? "#ffffff" : "#141920";
 }
@@ -733,10 +726,7 @@ export function temPaleta(spriteId: number | null): boolean {
   return Array.isArray(c) && c.length > 0;
 }
 
-export function gradienteDaEspecie(
-  spriteId: number | null,
-  reserva: string,
-): string {
+export function gradienteDaEspecie(spriteId: number | null, reserva: string): string {
   const cruas = spriteId == null ? undefined : CORES[String(spriteId)]?.c;
   if (!cruas || cruas.length === 0) return reserva;
 

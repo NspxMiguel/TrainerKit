@@ -15,9 +15,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
   ACTION_KEYS,
-  degradeDoTipo,
+  degradeDoHeroi,
   misturar,
-  PARADAS_DO_DEGRADE,
+  tintaDoHeroi,
+  veuDoHeroi,
   type Key,
 } from "@trainerkit/core";
 import { marcarFeito, useColecao } from "../../src/colecao";
@@ -71,7 +72,7 @@ function ArteDoHeroi({ especie }: { especie: Especie }) {
       source={{ uri: url }}
       onError={() => setFalhou(true)}
       resizeMode="contain"
-      style={{ width: "100%", height: 150 }}
+      style={{ width: "100%", height: 200 }}
     />
   );
 }
@@ -105,16 +106,53 @@ function Heroi({
   cabecalho: ReactNode;
 }) {
   const { t } = useT();
-  const { cores } = useTema();
+  const { cores, escuro } = useTema();
   const cor = corDoTipo(especie.types[0]);
-  const tinta = tintaSobre(cor);
+  /*
+   * ⚠️ A COR VEM DA ESPÉCIE, e não do TIPO — "as cores tao muito diferente".
+   *
+   * Medido lado a lado com o site no Charizard: pela cor do tipo as paradas
+   * saíam `#512505 → #ce5800 → #ff8225` (luminância 0,031 / 0,201 / 0,374) e
+   * pelo site `#603110 → #bd6628 → #d27f44` (0,047 / 0,205 / 0,293). A última
+   * do nativo era 28% mais luminosa e saturada até o talo — laranja de néon ao
+   * lado do outro.
+   *
+   * E pelo tipo TODA espécie de Fogo abria a tela com o mesmo laranja. Agora a
+   * conta é uma só, no `packages/core`, e o Charmander tem o laranja dele.
+   */
+  const paradas = degradeDoHeroi(especie.spriteId, cor, escuro);
+  const veu = veuDoHeroi(escuro);
+  /*
+   * ⚠️ A FAIXA DE COR TEM ALTURA PRÓPRIA, e não a do herói.
+   *
+   * Era isto a outra metade do "as cores tao muito diferente". As paradas já
+   * batiam com as do site (medidas: as duas dão `#603110 → #bd6628 → #d27f44`
+   * no Charizard), mas o site espalha essa rampa por 332 pontos e o nativo
+   * espalhava pelos 529 do herói. Resultado, medido na mesma altura de TELA: a
+   * 20% da tela o site pinta `#ce6418` e o nativo pintava `#9e5420` — a mesma
+   * receita, um terço mais escura, porque estava esticada.
+   *
+   * Prendendo a cor a 332 pontos, o que sobra do herói já é o fundo da página
+   * — exatamente como no site, onde o botão do herói também fica quase no
+   * preto. As posições viram fração da altura real em vez de números soltos.
+   */
+  const ALTURA_DA_COR = 332;
+  const f = (q: number) => (q * ALTURA_DA_COR) / (470 + alto);
+  /* A tinta deixou de ser branca cravada: no tema claro as paradas são
+     claras de verdade e branco sobre elas é ilegível. */
+  const tintaHeroi = tintaDoHeroi(paradas, escuro);
+  /* A pílula e o botão redondo acompanham a tinta: sobre fundo claro um
+     véu preto de 35% vira uma mancha, e sobre escuro um branco vira. */
+  const veuDaPilula = tintaHeroi === "#FFFFFF" ? "rgba(0,0,0,0.35)" : "rgba(255,255,255,0.45)";
 
   return (
     <Link href={{ pathname: "/especie/[id]", params: { id: especie.id } }} asChild>
       {/* ⚠️ SEM raio e SEM margem: no desenho o herói encosta nas duas bordas e
           na barra de status. Com cantos arredondados ele lê como "mais um
           cartão"; full-bleed ele É a tela. */}
-      <Pressable className="overflow-hidden" style={{ height: 430 + alto }}>
+      {/* ⚠️ 470 e não 430: "ta muito pequeno o charizard". Os 40 pontos a mais
+          são o que a arte cresceu (150 → 200) sem espremer o nome. */}
+      <Pressable className="overflow-hidden" style={{ height: 470 + alto }}>
         {/*
           O GRADIENTE E DO TIPO, e nao uma cor de marca. Foi assim que o violeta
           saiu do app sem a tela ficar cinza: a cor continua existindo, so que
@@ -152,13 +190,13 @@ function Heroi({
             Chegando ao fundo em 92% e ficando nele até 100%, os últimos 8% já
             SÃO a página — não há emenda para ver.
           */
-          colors={[
-            ...degradeDoTipo(cor),
-            misturar(degradeDoTipo(cor)[2], cores.fundo, 0.55),
-            cores.fundo,
-            cores.fundo,
-          ]}
-          locations={[...PARADAS_DO_DEGRADE, 0.86, 0.94, 1]}
+          colors={[...paradas, misturar(paradas[2], cores.fundo, 0.55), cores.fundo, cores.fundo]}
+          /* ⚠️ AS TRÊS PRIMEIRAS presas aos 332 pontos do site — é isso que põe a
+             faixa mais forte na altura do bicho. A CAUDA, não: ela desce
+             devagar até o pé do herói, senão o nome e a ação caem num preto
+             chapado e o herói vira uma tarja colorida com texto embaixo. No
+             site a cor também alcança o nome e morre no botão. */
+          locations={[f(0), f(0.48), f(0.72), 0.72, 0.88, 1]}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
           style={{ position: "absolute", inset: 0 }}
@@ -201,11 +239,15 @@ function Heroi({
             lineHeight: 200,
             fontWeight: "900",
             letterSpacing: -10,
-            color: tinta,
+            color: tintaHeroi,
             opacity: 0.12,
           }}
         >
-          {especie.dex}
+          {/* ⚠️ TRÊS ALGARISMOS, sempre — "n coloca numero 6, coloca 006, pq da
+              pra encher melhor dai". Um "6" sozinho no meio de uma faixa de 200
+              pontos não é textura, é um algarismo perdido; "006" ocupa a
+              largura e é como o site escreve. */}
+          {String(especie.dex).padStart(3, "0")}
         </Text>
         {/*
           O SCRIM VOLTOU, e agora ele é MEDIDO.
@@ -235,9 +277,19 @@ function Heroi({
           desaparece antes de o gradiente encontrar a página. Os 4,5:1 continuam
           valendo: o nome e a frase ficam justamente nessa faixa.
         */}
+        {/* ⚠️ O VÉU AGORA É O DO SITE, e a diferença é metade do "as cores tao
+            muito diferente". O de antes escurecia de 42% a 78% com 45% de preto
+            cravado — apagava justamente a faixa onde a cor é mais forte. O do
+            site só age na metade de baixo (transparente até 50%), que é onde o
+            texto mora, e INVERTE de cor com o tema: preto no escuro, quase
+            branco no claro. Aplicar preto nos dois é o que fazia a listra
+            cinza. A conta está no `packages/core`, e uma varredura das 1.100+
+            espécies confere 4,5:1 nos dois temas. */}
         <LinearGradient
-          colors={["transparent", "rgba(0,0,0,0.45)", "rgba(0,0,0,0.45)", "transparent"]}
-          locations={[0.42, 0.56, 0.78, 0.93]}
+          colors={veu.cores}
+          /* O véu acompanha o TEXTO, não a faixa de cor: ele nasce onde o nome
+             começa e some antes do pé. */
+          locations={[0, 0.45, 0.72, 0.9]}
           style={{ position: "absolute", inset: 0 }}
           pointerEvents="none"
         />
@@ -263,7 +315,11 @@ function Heroi({
           ⚠️ Só aparece com uma fonte de imagem LIGADA. Sem ela o app é
           distribuído sem arte nenhuma, e o número continua sendo a textura.
         */}
-        <View className="flex-1 justify-end items-center px-5" style={{ paddingBottom: 110 }}>
+        {/* ⚠️ 40 e não 110 — "dava pra abaixar o nome e etc". O respiro de 110
+            empurrava o bloco inteiro para o meio da faixa; com 40 ele desce, e
+            o espaço em que a cor se dissolve continua existindo porque as três
+            últimas paradas do degradê já são o fundo da página. */}
+        <View className="flex-1 justify-end items-center px-5" style={{ paddingBottom: 40 }}>
           {/* ⚠️ A ARTE ENTRA NA COLUNA, e não flutuando por cima dela. Ela era
               `position: "absolute"` num topo cravado, e o resultado dependia da
               altura do texto embaixo: com o nome e a frase de duas linhas a
@@ -274,14 +330,22 @@ function Heroi({
             <ArteDoHeroi especie={especie} />
           </View>
 
-          <View className="rounded-pilula px-3 py-1 mb-2 bg-black/35">
-            <Text className="text-legenda text-white">{t("home.today").toUpperCase()}</Text>
+          <View className="rounded-pilula px-3 py-1 mb-2" style={{ backgroundColor: veuDaPilula }}>
+            <Text className="text-legenda" style={{ color: tintaHeroi }}>
+              {t("home.today").toUpperCase()}
+            </Text>
           </View>
-          <Text className="text-saudacao text-white text-center">{especie.name}</Text>
+          <Text className="text-saudacao text-center" style={{ color: tintaHeroi }}>
+            {especie.name}
+          </Text>
           {/* Tipos MAIS o porquê. O desenho põe uma frase aqui — "Fogo · Voador ·
               IV 93 — vale cada grama de poeira hoje" — e só os tipos deixavam o
               herói dizendo o que a pessoa já vê na cor. */}
-          <Text className="text-corpo text-white/85 mt-1 text-center" numberOfLines={2}>
+          <Text
+            className="text-corpo mt-1 text-center"
+            style={{ color: tintaHeroi, opacity: 0.85 }}
+            numberOfLines={2}
+          >
             {especie.types.map((x) => t(`type.${x}` as Key)).join(" · ")}
             {linha ? ` — ${linha}` : ""}
           </Text>
@@ -296,8 +360,11 @@ function Heroi({
           */}
           {acao && (
             <View className="flex-row items-center gap-2 mt-4">
-              <View className="rounded-pilula px-6 py-3 bg-white">
-                <Text className="text-corpo font-bold" style={{ color: "#111" }}>
+              <View className="rounded-pilula px-6 py-3" style={{ backgroundColor: tintaHeroi }}>
+                <Text
+                  className="text-corpo font-bold"
+                  style={{ color: tintaHeroi === "#FFFFFF" ? "#111" : "#FFFFFF" }}
+                >
                   {acao}
                 </Text>
               </View>
@@ -311,14 +378,20 @@ function Heroi({
                   }}
                   hitSlop={10}
                   accessibilityLabel={t("collection.markDone")}
-                  className="rounded-pilula bg-black/40"
-                  style={{ width: 40, height: 40, alignItems: "center", justifyContent: "center" }}
+                  className="rounded-pilula"
+                  style={{
+                    width: 40,
+                    height: 40,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: veuDaPilula,
+                  }}
                 >
                   <SymbolView
                     name="checkmark"
                     size={16}
-                    tintColor="#FFFFFF"
-                    fallback={<Text style={{ color: "#fff" }}>✓</Text>}
+                    tintColor={tintaHeroi}
+                    fallback={<Text style={{ color: tintaHeroi }}>✓</Text>}
                   />
                 </Pressable>
               )}
@@ -347,7 +420,7 @@ function Heroi({
                     width: i === indice % 5 ? 14 : 5,
                     height: 5,
                     borderRadius: 3,
-                    backgroundColor: i === indice % 5 ? "#FFFFFF" : "rgba(255,255,255,0.45)",
+                    backgroundColor: i === indice % 5 ? tintaHeroi : veuDaPilula,
                   }}
                 />
               ))}
@@ -383,7 +456,7 @@ const ATALHOS: { rota: string; rotulo: Key; icone: string }[] = [
 
 export default function Inicio() {
   const { t, tm } = useT();
-  const { cores } = useTema();
+  const { cores, escuro } = useTema();
   const { pronto, dados } = useDados();
   const { itens, recarregar } = useColecao();
   const router = useRouter();
@@ -436,6 +509,17 @@ export default function Inicio() {
   const [passo, setPasso] = useState(() => Math.floor(Date.now() / 86_400_000));
   const indice = candidatos.length > 0 ? passo % candidatos.length : 0;
   const destaque = candidatos[indice];
+  /*
+   * ⚠️ A SAUDAÇÃO TEM TINTA PRÓPRIA, e não a do resto do herói.
+   *
+   * Ela mora no TOPO da faixa, sobre a primeira parada e sem véu nenhum por
+   * cima; o nome mora embaixo, sobre a terceira JÁ com o véu. São dois fundos
+   * diferentes, e usar a mesma tinta nos dois deixava "Boa noite, Miguel."
+   * branco sobre `#fa964e` no tema claro — 2,2:1, ilegível.
+   */
+  const tintaDaSaudacao = destaque
+    ? tintaSobre(degradeDoHeroi(destaque.spriteId, corDoTipo(destaque.types[0]), escuro)[0])
+    : "#FFFFFF";
   const pendenteAtual = fila.length > 0 ? fila[indice] : null;
 
   /* A frase do herói: o motivo do veredito quando há fila, e a posição no
@@ -524,7 +608,8 @@ export default function Inicio() {
             <View className="px-4 flex-row items-center gap-3">
               {/* UMA LINHA. "Boa tarde, Treinador." quebrava em duas. */}
               <Text
-                className="text-saudacao text-white flex-1"
+                className="text-saudacao flex-1"
+                style={{ color: tintaDaSaudacao }}
                 numberOfLines={1}
                 adjustsFontSizeToFit
                 minimumFontScale={0.7}
@@ -537,9 +622,14 @@ export default function Inicio() {
                 onPress={() => router.push("/colecao")}
                 accessibilityLabel={t("colecoes.title")}
                 className="rounded-pilula items-center justify-center"
-                style={{ width: 40, height: 40, backgroundColor: "rgba(255,255,255,0.18)" }}
+                style={{
+                  width: 40,
+                  height: 40,
+                  backgroundColor:
+                    tintaDaSaudacao === "#FFFFFF" ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.12)",
+                }}
               >
-                <Text className="text-corpo font-bold" style={{ color: "#FFFFFF" }}>
+                <Text className="text-corpo font-bold" style={{ color: tintaDaSaudacao }}>
                   {nome.slice(0, 1).toUpperCase()}
                 </Text>
               </Toque>

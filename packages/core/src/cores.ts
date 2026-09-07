@@ -60,9 +60,7 @@ export function luminancia(hexa: string): number {
     const x = v / 255;
     return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
   };
-  return (
-    0.2126 * canal((n >> 16) & 255) + 0.7152 * canal((n >> 8) & 255) + 0.0722 * canal(n & 255)
-  );
+  return 0.2126 * canal((n >> 16) & 255) + 0.7152 * canal((n >> 8) & 255) + 0.0722 * canal(n & 255);
 }
 
 export function contraste(a: string, b: string): number {
@@ -111,9 +109,8 @@ export function seloDaEspecie(
   } else {
     fundo = reserva;
   }
-  const tinta = contraste("#ffffff", fundo) >= contraste(TINTA_ESCURA, fundo)
-    ? "#ffffff"
-    : TINTA_ESCURA;
+  const tinta =
+    contraste("#ffffff", fundo) >= contraste(TINTA_ESCURA, fundo) ? "#ffffff" : TINTA_ESCURA;
   return { fundo, tinta };
 }
 
@@ -169,7 +166,7 @@ export function degradeDoTipo(cor: string): [string, string, string] {
   return [
     /* Escuro: a saturação cai um pouco junto com a luz — escurecer com a
        saturação cheia dá marrom sujo em vez de sombra. */
-    paraHex(h, Math.min(1, s * 1.05), Math.max(0.10, l * 0.30)),
+    paraHex(h, Math.min(1, s * 1.05), Math.max(0.1, l * 0.3)),
     /* Meio: a parada mais saturada das três. É ela que dá o corpo do degradê. */
     paraHex(h, viva, l * 0.72),
     paraHex(h, viva, Math.min(0.72, l * 1.02)),
@@ -202,4 +199,129 @@ export function misturar(cor: string, fundo: string, quanto: number): string {
   const g = canal(8);
   const bl = canal(0);
   return `#${((r << 16) | (g << 8) | bl).toString(16).padStart(6, "0")}`;
+}
+
+// ───────────────────────────────────────────── o degradê do herói, por ESPÉCIE
+
+/**
+ * AS TRÊS PARADAS DO HERÓI — a conta do app web, agora compartilhada.
+ *
+ * ⚠️ O nativo pintava o herói com a cor do TIPO, e o web com a cor da ESPÉCIE.
+ * Medido lado a lado no Charizard: o nativo dava `#512505 → #ce5800 → #ff8225`
+ * (luminância 0,031 / 0,201 / 0,374) e o web `#603110 → #bd6628 → #d27f44`
+ * (0,047 / 0,205 / 0,293). A terceira parada do nativo é 28% mais luminosa e
+ * saturada até o talo — é ela que lia como laranja de néon ao lado do web.
+ *
+ * E a diferença não era só de tom: pela cor do tipo, TODA espécie de Fogo abre
+ * a tela com o mesmo laranja. Pela cor da espécie, o Charmander e o Charizard
+ * têm cada um o seu — que é o que o web faz e o que ele reconheceu como certo.
+ *
+ * A forma vem do handoff do pacote de desenho: `linear-gradient(180deg, p1 0%,
+ * p2 48%, p3 72%)`, escuro em cima e a luz crescendo até o terço final. O
+ * `SCRIM` por cima é que devolve o contraste embaixo — as duas peças trabalham
+ * juntas, e mexer numa sem a outra já custou uma reescrita.
+ */
+export function degradeDoHeroi(
+  spriteId: number | null,
+  reserva: string,
+  escuro: boolean,
+): [string, string, string] {
+  const cruas = spriteId == null ? undefined : CORES[String(spriteId)]?.c;
+  const [h, s] = paraHsl(cruas && cruas.length > 0 ? (cruas[0] ?? reserva) : reserva);
+  /*
+   * ⚠️ TETO PROPORCIONAL, e não um piso fixo de saturação.
+   *
+   * A arte oficial é sombreada com muito meio-tom, então a média de um balde
+   * sai lavada e precisa do empurrão. Mas com piso fixo o cinza-lavanda do
+   * Mewtwo viraria roxo saturado: cor sem saturação tem que continuar sem.
+   */
+  const sv = Math.min(0.95, s * 1.15);
+
+  if (escuro) {
+    return [
+      paraHex(h, Math.min(0.95, sv + 0.06), 0.22),
+      escurecerAte(h, sv, 0.45, TETO_LUZ_HEROI),
+      escurecerAte(h, Math.max(0.4, sv - 0.04), 0.56, TETO_LUZ_HEROI),
+    ];
+  }
+  return [
+    entre(h, Math.min(0.95, sv * 1.5), 0.62, 0.42, 0.56),
+    entre(h, Math.min(0.95, sv * 1.15), 0.8, 0.55, 0.68),
+    entre(h, Math.min(0.95, sv * 0.55), 0.92, 0.8, 0.88),
+  ] as [string, string, string];
+}
+
+/**
+ * O TETO DE LUMINÂNCIA das paradas do herói escuro.
+ *
+ * ⚠️ Luminância, e não claridade — e a distinção é o defeito inteiro. Limitando
+ * por claridade HSL, amarelo em `l = 0,56` tem quase o triplo da luminância de
+ * azul na mesma claridade, porque a fórmula da WCAG pesa verde e vermelho muito
+ * mais que azul. A varredura achou 152 espécies com o nome reprovando —
+ * Bellsprout em 1,73:1, Abra em 2,04 — todas amarelas ou verde-claras.
+ */
+const TETO_LUZ_HEROI = 0.3;
+
+/** Anda a claridade até a luminância cair na faixa pedida, preservando a matiz. */
+function entre(h: number, s: number, l: number, piso: number, teto: number): string {
+  let atual = l;
+  let cor = paraHex(h, s, atual);
+  for (let i = 0; i < 80; i++) {
+    const luz = luminancia(cor);
+    if (luz >= piso && luz <= teto) break;
+    atual += luz < piso ? 0.012 : -0.012;
+    if (atual > 0.99 || atual < 0.02) break;
+    cor = paraHex(h, s, atual);
+  }
+  return cor;
+}
+
+/**
+ * O VÉU DO HERÓI — a mesma rampa do app web, e ela INVERTE com o tema.
+ *
+ * ⚠️ O nativo escurecia de 42% a 78% com 45% de preto cravado. Isso apagava
+ * justamente a faixa onde a cor é mais forte, e era metade do "as cores tao
+ * muito diferente": as paradas já batiam com as do site, mas o véu por cima
+ * tirava delas o brilho que o site mostra.
+ *
+ * A rampa do site começa a agir só na METADE de baixo (0% até 50%
+ * transparente) porque é lá que o texto mora — em cima não há o que proteger, e
+ * escurecer o topo é o que deixava a cor lavada.
+ *
+ * E ela troca de cor com o tema: no escuro o meio precisa ESCURECER para o
+ * texto branco passar; no claro precisa CLAREAR, para o texto escuro passar.
+ * Aplicar preto nos dois dava a listra cinza no tema claro, que ele já
+ * fotografou uma vez.
+ */
+export const VEU_DO_HEROI = {
+  escuro: { cor: "#0a0c10", forca: 0.55 },
+  claro: { cor: "#fafbfd", forca: 0.34 },
+} as const;
+
+/** As paradas do véu, prontas para um `LinearGradient` — cor e posição. */
+export function veuDoHeroi(escuro: boolean): {
+  cores: [string, string, string, string];
+  paradas: [number, number, number, number];
+} {
+  const { cor, forca } = escuro ? VEU_DO_HEROI.escuro : VEU_DO_HEROI.claro;
+  const rgb = (a: number) => {
+    const n = parseInt(cor.slice(1), 16);
+    return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+  };
+  return { cores: [rgb(0), rgb(0), rgb(forca), rgb(0)], paradas: [0, 0.5, 0.82, 1] };
+}
+
+/**
+ * A TINTA DO HERÓI: branca ou escura, decidida pela cor que fica sob o texto.
+ *
+ * ⚠️ Ela era branca CRAVADA, e isso só funcionava enquanto o degradê ignorava o
+ * tema. Agora o tema claro dá paradas claras de verdade (`#f2e9e3` no
+ * Charizard) e branco sobre elas é ilegível. Quem decide é a mesma conta de
+ * contraste do resto do app, feita sobre a parada de baixo JÁ COM o véu — que é
+ * literalmente o pixel que fica atrás da letra.
+ */
+export function tintaDoHeroi(paradas: readonly string[], escuro: boolean): string {
+  const { cor, forca } = escuro ? VEU_DO_HEROI.escuro : VEU_DO_HEROI.claro;
+  const sob = misturar(paradas[2] ?? "#888888", cor, forca);
+  return contraste(sob, "#FFFFFF") >= contraste(sob, TINTA_ESCURA) ? "#FFFFFF" : TINTA_ESCURA;
 }

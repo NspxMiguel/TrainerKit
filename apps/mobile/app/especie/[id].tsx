@@ -19,13 +19,12 @@ import {
   computeCPAtLevel,
   ivPercentOf,
   decide,
-  degradeDoTipo,
+  degradeDoHeroi,
   groqChat,
   custoDosMaxAtaques,
   fazGigantamax,
   groupIdenticalContexts,
   papelNaBatalhaMax,
-  PARADAS_DO_DEGRADE,
   rankMovesets,
   rotuloDoGolpe,
   shadowDamageMultiplier,
@@ -121,7 +120,7 @@ function ArteDaFicha({ especie }: { especie: Especie }) {
 
 export default function Ficha() {
   const { t, tm, idioma } = useT();
-  const { cores } = useTema();
+  const { cores, escuro } = useTema();
   /* O cabecalho e transparente nesta tela, entao a faixa colorida cresce pelo
      inset em vez de comecar abaixo dele. */
   const alto = useSafeAreaInsets().top;
@@ -180,6 +179,13 @@ export default function Ficha() {
   };
 
   const especie = useMemo(() => dados?.species.find((s) => s.id === id) ?? null, [dados, id]);
+  /* A faixa da ficha usa a mesma conta do herói do Início — uma só, no core. */
+  const faixa = especie
+    ? degradeDoHeroi(especie.spriteId, corDoTipo(especie.types[0]), escuro)
+    : (["#888888", "#888888", "#888888"] as [string, string, string]);
+  /* ⚠️ Sobre a PRIMEIRA parada: aqui não há véu, e o nome mora no alto da
+     faixa. Usar a tinta da terceira daria branco sobre o creme do tema claro. */
+  const tintaDaFaixa = tintaSobre(faixa[0]);
 
   /*
    * O EXEMPLAR GUARDADO desta espécie, se houver.
@@ -481,8 +487,13 @@ export default function Ficha() {
       */}
         <View style={{ height: 176 + alto, overflow: "hidden" }}>
           <LinearGradient
-            colors={degradeDoTipo(corDoTipo(especie.types[0]))}
-            locations={PARADAS_DO_DEGRADE as unknown as [number, number, number]}
+            /* ⚠️ A COR DA ESPÉCIE, e não a do TIPO — a mesma correção do herói
+               do Início. Pela cor do tipo, toda espécie de Fogo abria a ficha
+               com o mesmo laranja, e a rampa era a mesma nos dois temas: no
+               claro isso dava um retângulo escuro no alto de uma página quase
+               branca. A conta mora no `packages/core` e é a do site. */
+            colors={faixa}
+            locations={[0, 0.48, 0.72]}
             start={{ x: 0.5, y: 0 }}
             end={{ x: 0.5, y: 1 }}
             style={{ position: "absolute", inset: 0 }}
@@ -501,7 +512,7 @@ export default function Ficha() {
               lineHeight: 132,
               letterSpacing: -6,
               fontWeight: "800",
-              color: tintaSobre(corDoTipo(especie.types[0])),
+              color: tintaDaFaixa,
               opacity: 0.15,
             }}
           >
@@ -520,18 +531,35 @@ export default function Ficha() {
           </View>
 
           <View className="flex-1 justify-end px-5 pb-4">
-            <Text className="text-titulo-tela text-white">{especie.name}</Text>
+            <Text className="text-titulo-tela" style={{ color: tintaDaFaixa }}>
+              {especie.name}
+            </Text>
             <View className="flex-row gap-2 mt-2">
               {/* Os tipos TRADUZIDOS, em chip: o dicionario tem `type.grass` etc.
                 Mostrar "grass / poison" seria o app falando o idioma do arquivo
                 de dados em vez do idioma da pessoa. */}
               {especie.types.map((tp) => (
-                <View key={tp} className="rounded-pilula px-3 py-1 bg-black/30">
-                  <Text className="text-legenda text-white">{t(`type.${tp}` as never)}</Text>
+                <View
+                  key={tp}
+                  className="rounded-pilula px-3 py-1"
+                  style={{
+                    backgroundColor:
+                      tintaDaFaixa === "#FFFFFF" ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.45)",
+                  }}
+                >
+                  <Text className="text-legenda" style={{ color: tintaDaFaixa }}>
+                    {t(`type.${tp}` as never)}
+                  </Text>
                 </View>
               ))}
-              <View className="rounded-pilula px-3 py-1 bg-black/30">
-                <Text className="text-legenda text-white">
+              <View
+                className="rounded-pilula px-3 py-1"
+                style={{
+                  backgroundColor:
+                    tintaDaFaixa === "#FFFFFF" ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.45)",
+                }}
+              >
+                <Text className="text-legenda" style={{ color: tintaDaFaixa }}>
                   #{String(especie.dex).padStart(3, "0")}
                 </Text>
               </View>
@@ -1227,11 +1255,13 @@ export default function Ficha() {
         <Pressable onPress={() => router.back()} hitSlop={12} accessibilityLabel={t("common.back")}>
           <Vidro raio={999} interativo style={{ width: 40, height: 40 }}>
             <View className="flex-1 items-center justify-center">
+              {/* ⚠️ A tinta da FAIXA, e não branco cravado: o × flutua sobre a
+                  cor da espécie, e no tema claro branco sobre o creme sumia. */}
               <SymbolView
                 name="xmark"
                 size={15}
-                tintColor="#FFFFFF"
-                fallback={<Text style={{ color: "#fff", fontSize: 18 }}>×</Text>}
+                tintColor={tintaDaFaixa}
+                fallback={<Text style={{ color: tintaDaFaixa, fontSize: 18 }}>×</Text>}
               />
             </View>
           </Vidro>

@@ -1,72 +1,66 @@
 import { describe, expect, it } from "vitest";
 
-import { contraste, degradeDoTipo } from "./cores.js";
+import tabela from "./paleta.json" with { type: "json" };
+import { VEU_DO_HEROI, contraste, degradeDoHeroi, misturar, tintaDoHeroi } from "./cores.js";
 
 /**
- * O TEXTO DO HERÓI TEM QUE SER LEGÍVEL EM TODOS OS DEZOITO TIPOS.
+ * O TEXTO DO HERÓI TEM QUE SER LEGÍVEL EM TODA ESPÉCIE, NOS DOIS TEMAS.
  *
- * ⚠️ Este teste nasceu de um defeito meu. O herói do Início desenha texto
- * BRANCO CRAVADO sobre o degradê do tipo, e eu tirei o scrim para a cor não
- * ficar lavada. Medido depois: branco sobre a parada clara do Gelo dá 1,49:1 e
- * sobre a do Elétrico 1,48:1 — o projeto exige 4,5:1.
+ * ⚠️ Este teste varria os DEZOITO TIPOS, e isso deixou de ser o que a tela
+ * desenha: o herói agora usa a cor da ESPÉCIE, como o app web sempre usou —
+ * são mais de mil degradês diferentes, não dezoito. Varrer os tipos passaria
+ * enquanto uma espécie amarela reprovava, que é exatamente o modo de falha que
+ * a varredura do web já tinha encontrado (152 espécies, Bellsprout em 1,73:1).
  *
- * O scrim voltou em `rgba(0,0,0,0.45)`, que é o MENOR alfa que passa nos
- * dezoito. Este teste refaz a conta e falha se alguém mexer na saturação do
- * degradê, na luminosidade das paradas ou naquele número.
- *
- * ⚠️ ELE NÃO COBRE O HERÓI INTEIRO, e não precisa. Ele vale de 56% a 78% da
- * altura — a faixa onde o texto está — e some antes do pé, porque 45% de preto
- * na borda de baixo é o que fazia a listra cinza no tema claro. O que este
- * teste garante é o contraste NAQUELA faixa, que é onde o texto mora.
+ * A conta é feita sobre o pixel de verdade: a parada de baixo do degradê,
+ * misturada com o véu na força daquele tema, que é o que fica atrás da letra.
  */
-const SCRIM = 0.45;
+const CORES = tabela as unknown as Record<string, { c: string[] }>;
+const IDS = Object.keys(CORES);
 
-/** As dezoito cores de tipo, como `Selo.tsx` as define. */
-const TIPOS: Record<string, string> = {
-  normal: "#B4AFA3",
-  fighting: "#D4633F",
-  flying: "#9FB6E8",
-  poison: "#B173C4",
-  ground: "#D9A65E",
-  rock: "#B8A583",
-  bug: "#A9BE4A",
-  ghost: "#8A7CC4",
-  steel: "#A9B4C0",
-  fire: "#F0813F",
-  water: "#5BA8EE",
-  grass: "#6FC163",
-  electric: "#F0C63F",
-  psychic: "#EE7FA6",
-  ice: "#79D2DC",
-  dragon: "#8274E2",
-  dark: "#7C6D62",
-  fairy: "#EE9DC6",
-};
-
-/** Preto com alfa por cima, do jeito que o `LinearGradient` compõe. */
-function comScrim(cor: string, alfa: number): string {
-  const n = parseInt(cor.slice(1), 16);
-  const canal = (v: number) => Math.round(v * (1 - alfa));
-  const r = canal((n >> 16) & 255);
-  const g = canal((n >> 8) & 255);
-  const b = canal(n & 255);
-  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
+/** O que fica atrás da letra: a parada de baixo já com o véu por cima. */
+function sobOTexto(spriteId: number, escuro: boolean): string {
+  const { cor, forca } = escuro ? VEU_DO_HEROI.escuro : VEU_DO_HEROI.claro;
+  return misturar(degradeDoHeroi(spriteId, "#888888", escuro)[2], cor, forca);
 }
 
-describe("o texto branco do herói passa em 4,5:1", () => {
-  for (const [tipo, cor] of Object.entries(TIPOS)) {
-    it(`${tipo}`, () => {
-      const [, meio, claro] = degradeDoTipo(cor);
-      /* As duas paradas que ficam ATRÁS do texto. A escura está no topo, onde
-         não há texto nenhum. */
-      for (const parada of [meio, claro]) {
-        expect(contraste(comScrim(parada, SCRIM), "#FFFFFF")).toBeGreaterThanOrEqual(4.5);
+describe("contraste do herói", () => {
+  it("a tabela de cores tem espécie de sobra para a varredura valer alguma coisa", () => {
+    expect(IDS.length).toBeGreaterThan(1000);
+  });
+
+  for (const escuro of [true, false]) {
+    const tema = escuro ? "escuro" : "claro";
+
+    it(`toda espécie passa em 4,5:1 no tema ${tema}`, () => {
+      const ruins: string[] = [];
+      for (const id of IDS) {
+        const n = Number(id);
+        if (!Number.isFinite(n)) continue;
+        const fundo = sobOTexto(n, escuro);
+        const razao = contraste(fundo, tintaDoHeroi(degradeDoHeroi(n, "#888888", escuro), escuro));
+        if (razao < 4.5) ruins.push(`${id} ${fundo} ${razao.toFixed(2)}:1`);
+      }
+      expect(ruins, ruins.slice(0, 10).join(" | ")).toEqual([]);
+    });
+
+    it(`a tinta escolhida é a MELHOR das duas no tema ${tema}`, () => {
+      /* Sem isto o teste passaria com uma tinta pior desde que ela alcançasse
+         4,5:1 — e a escolha deixaria de ser uma escolha. */
+      for (const id of IDS.slice(0, 200)) {
+        const n = Number(id);
+        const fundo = sobOTexto(n, escuro);
+        const escolhida = tintaDoHeroi(degradeDoHeroi(n, "#888888", escuro), escuro);
+        const outra = escolhida === "#FFFFFF" ? "#141920" : "#FFFFFF";
+        expect(contraste(fundo, escolhida)).toBeGreaterThanOrEqual(contraste(fundo, outra));
       }
     });
   }
 
-  it("o scrim é o MENOR que passa — 0,40 já reprova", () => {
-    const [, , claro] = degradeDoTipo(TIPOS.electric!);
-    expect(contraste(comScrim(claro, 0.4), "#FFFFFF")).toBeLessThan(4.5);
+  it("o véu do tema claro CLAREIA, e o do escuro escurece", () => {
+    /* ⚠️ Aplicar preto nos dois foi o que fez a listra cinza que ele
+       fotografou: 45% de preto sobre um fundo quase branco dá cinza. */
+    expect(VEU_DO_HEROI.escuro.cor).toBe("#0a0c10");
+    expect(VEU_DO_HEROI.claro.cor).toBe("#fafbfd");
   });
 });
