@@ -1,7 +1,9 @@
-import type { DadosDynamax, NomesDeGolpe } from "@trainerkit/core";
+import { validarDataset, type DadosDynamax, type NomesDeGolpe } from "@trainerkit/core";
 import { Asset } from "expo-asset";
 import { File } from "expo-file-system";
 import { useEffect, useState } from "react";
+
+import { useFonteDeDados } from "./fonteDados";
 
 /**
  * O dataset, lido do proprio pacote.
@@ -152,11 +154,42 @@ export interface Base {
 
 export function useDados(): EstadoDados {
   const [estado, setEstado] = useState<EstadoDados>({ pronto: false, erro: null, dados: null });
+  const { url, pronto: fontePronta } = useFonteDeDados();
 
   useEffect(() => {
+    /* A leitura do disco ainda não voltou: buscar agora usaria a embarcada e
+       depois trocaria por baixo da tela. */
+    if (!fontePronta) return;
     let vivo = true;
     void (async () => {
       try {
+        /*
+         * A BASE PRÓPRIA VEM PRIMEIRO, e cair na embarcada é o plano B — não o
+         * contrário. Quem apontou para um fork mais atualizado apontou porque a
+         * minha não serve; abrir na minha "enquanto isso" mostraria número
+         * velho como se fosse o de hoje.
+         *
+         * ⚠️ E a queda é SILENCIOSA de propósito: sem rede, o app abre com a
+         * base embarcada em vez de não abrir. O que não pode acontecer é aceitar
+         * um JSON qualquer — `validarDataset` recusa antes de calcular sobre
+         * lixo.
+         */
+        if (url) {
+          try {
+            const r = await fetch(url);
+            if (r.ok) {
+              const bruto = (await r.json()) as unknown;
+              if (validarDataset(bruto) === null) {
+                const propria = bruto as Base;
+                propria.canonicas = propria.species.filter((e) => !e.cosmeticOf);
+                if (vivo) setEstado({ pronto: true, erro: null, dados: propria });
+                return;
+              }
+            }
+          } catch {
+            /* Sem rede ou base ruim: segue para a embarcada, logo abaixo. */
+          }
+        }
         const asset = Asset.fromModule(require("../assets/dataset/gamedata.tkdata"));
         await asset.downloadAsync();
         const caminho = asset.localUri ?? asset.uri;
@@ -179,7 +212,7 @@ export function useDados(): EstadoDados {
     return () => {
       vivo = false;
     };
-  }, []);
+  }, [url, fontePronta]);
 
   return estado;
 }

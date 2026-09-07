@@ -9,8 +9,13 @@ import {
   MAX_POWERUP_LEVEL,
   BITCOIN_ADDRESS,
   TRAINER_LEVELS,
+  checarUrl,
+  partirUrl,
   tetoDePowerUp,
+  validarDataset,
+  validarManifesto,
   type Key,
+  type SpriteManifest,
 } from "@trainerkit/core";
 import { SymbolView } from "expo-symbols";
 
@@ -20,6 +25,7 @@ import { apagarTudo } from "../../src/apagar";
 import { useOffline } from "../../src/offline";
 import { useTraducao } from "../../src/traducao";
 import { FONTES, SPRITE_SOURCE_KEYS, useImagens } from "../../src/imagens";
+import { useFonteDeDados } from "../../src/fonteDados";
 import { useIA } from "../../src/ia";
 import { useSetup } from "../../src/setup";
 import { useTema, type Escolha } from "../../src/tema";
@@ -118,11 +124,116 @@ function Linha({
   );
 }
 
+/**
+ * BUSCA UM JSON E DIZ O QUE DEU ERRADO — em chave, não em frase.
+ *
+ * ⚠️ Devolve `string` quando falhou e o objeto quando deu certo. Parece torto e
+ * é de propósito: o chamador precisa distinguir "não chegou" de "chegou e não
+ * serve", e as duas coisas viram a MESMA linha vermelha na tela.
+ */
+/** Só o host, para caber na linha fechada dos Ajustes. */
+function dominioDe(url: string): string {
+  return partirUrl(url)?.host ?? url;
+}
+
+async function buscarJson(url: string): Promise<unknown> {
+  try {
+    const r = await fetch(url);
+    if (!r.ok) return "source.err.network";
+    return (await r.json()) as unknown;
+  } catch {
+    return "source.err.network";
+  }
+}
+
+/**
+ * O CAMPO DE ENDEREÇO de uma fonte própria.
+ *
+ * `aoConfirmar` devolve a CHAVE do erro, ou `null` quando aceitou — assim toda
+ * a validação (endereço, rede, formato) mora em um lugar só e a tela cuida
+ * apenas de mostrar. Enquanto confere, o botão vira texto: um endereço lento
+ * sem retorno visual parece botão quebrado.
+ */
+function CampoDeFonte({
+  marca,
+  inicial,
+  aoConfirmar,
+  aoLimpar,
+}: {
+  marca: string;
+  inicial: string;
+  aoConfirmar: (url: string) => Promise<string | null>;
+  aoLimpar?: () => void;
+}) {
+  const { t } = useT();
+  const { cores } = useTema();
+  const [texto, setTexto] = useState(inicial);
+  const [erro, setErro] = useState<string | null>(null);
+  const [conferindo, setConferindo] = useState(false);
+
+  return (
+    <View className="mt-3">
+      <TextInput
+        value={texto}
+        onChangeText={(v) => {
+          setTexto(v);
+          setErro(null);
+        }}
+        placeholder={marca}
+        placeholderTextColor={cores.texto3}
+        autoCapitalize="none"
+        autoCorrect={false}
+        keyboardType="url"
+        className="bg-fundo rounded-2xl px-3 py-2.5 text-[13px]"
+        style={{ color: cores.texto, borderWidth: 0.5, borderColor: cores.linha }}
+      />
+      <View className="flex-row items-center gap-3 mt-2">
+        <Pressable
+          disabled={conferindo || texto.trim() === ""}
+          onPress={() => {
+            setConferindo(true);
+            setErro(null);
+            void aoConfirmar(texto.trim())
+              .then(setErro)
+              .finally(() => setConferindo(false));
+          }}
+          hitSlop={8}
+        >
+          <Text
+            className="text-[13px] font-semibold"
+            style={{ color: texto.trim() === "" ? cores.texto3 : cores.evoluir }}
+          >
+            {t(conferindo ? "source.checking" : "source.check")}
+          </Text>
+        </Pressable>
+        {aoLimpar && (
+          <Pressable
+            onPress={() => {
+              setTexto("");
+              setErro(null);
+              aoLimpar();
+            }}
+            hitSlop={8}
+          >
+            <Text className="text-texto3 text-[13px]">{t("source.clear")}</Text>
+          </Pressable>
+        )}
+      </View>
+      {erro && (
+        <Text className="text-[12px] leading-4 mt-1.5" style={{ color: cores.guardar }}>
+          {t(erro as Key)}
+        </Text>
+      )}
+    </View>
+  );
+}
+
 export default function Ajustes() {
   const { t, idioma, trocar } = useT();
   const { cores, escolha, definir } = useTema();
   const { setup, definir: definirSetup } = useSetup();
-  const { fonte, definir: definirFonte } = useImagens();
+  const { fonte, definir: definirFonte, manifesto, manifestoUrl, definirManifesto } =
+    useImagens();
   const { chave, definir: definirChave } = useIA();
   const [rascunho, setRascunho] = useState<string | null>(null);
   const [copiado, setCopiado] = useState(false);
@@ -131,7 +242,11 @@ export default function Ajustes() {
   const [secao, setSecao] = useState<string | null>(null);
   const [confirmandoApagar, setConfirmandoApagar] = useState(false);
   const { dados } = useDados();
-  const off = useOffline(fonte);
+  const { url: urlDados, definir: definirUrlDados } = useFonteDeDados();
+  /* ⚠️ A fonte própria não entra no download offline: um manifesto pode
+     apontar cada espécie para um host diferente. Ela chega aqui como "off",
+     que é o estado honesto — não há o que baixar em lote. */
+  const off = useOffline(fonte === "custom" ? "off" : fonte);
   const { mostrar: traduzir, alternar: alternarTraducao } = useTraducao();
 
   const alto = useSafeAreaInsets().top;
@@ -262,7 +377,11 @@ export default function Ajustes() {
         icone="photo"
         cor="#10B981"
         titulo={t("sprites.title")}
-        valor={t((SPRITE_SOURCE_KEYS[fonte]?.title ?? "sprites.none") as Key)}
+        valor={
+          fonte === "custom"
+            ? (manifesto?.name ?? t("source.img.custom"))
+            : t((SPRITE_SOURCE_KEYS[fonte]?.title ?? "sprites.none") as Key)
+        }
         aberta={secao === "imagens"}
         onAlternar={() => setSecao((v) => (v === "imagens" ? null : "imagens"))}
       >
@@ -287,8 +406,72 @@ export default function Ajustes() {
             </Text>
           </Pressable>
         ))}
+        {/* A QUARTA: o manifesto de quem usa. Ela não entra em `FONTES` porque
+            não é uma escolha seca — precisa de um endereço para existir. */}
+        <View
+          className="px-4 py-3.5"
+          style={{ borderTopWidth: 0.5, borderTopColor: cores.linha }}
+        >
+          <View className="flex-row items-center">
+            <Text
+              className={`flex-1 text-[15px] ${fonte === "custom" ? "text-texto font-bold" : "text-texto2"}`}
+            >
+              {manifesto?.name ?? t("source.img.custom")}
+            </Text>
+            {fonte === "custom" && <Text className="text-texto text-base">✓</Text>}
+          </View>
+          <Text className="text-texto3 text-[12px] leading-4 mt-1">
+            {t("source.img.customDetail")}
+          </Text>
+          <CampoDeFonte
+            marca={t("source.img.hint")}
+            inicial={manifestoUrl ?? ""}
+            aoConfirmar={async (url) => {
+              const erro = checarUrl(url, false);
+              if (erro) return erro;
+              const bruto = await buscarJson(url);
+              if (typeof bruto === "string") return bruto;
+              const ruim = validarManifesto(bruto);
+              if (ruim) return ruim;
+              definirManifesto(url, bruto as SpriteManifest);
+              return null;
+            }}
+          />
+        </View>
       </View>
 
+      </Linha>
+
+      {/*
+        A BASE DO JOGO — logo abaixo das imagens porque é a mesma ideia: o app
+        aponta, não hospeda. Vem depois delas por ser a mais rara de trocar.
+      */}
+      <Linha
+        icone="cylinder.split.1x2"
+        cor="#6366F1"
+        titulo={t("source.data.title")}
+        valor={urlDados ? t("source.ok", { name: dominioDe(urlDados) }) : t("source.data.builtin")}
+        aberta={secao === "base"}
+        onAlternar={() => setSecao((v) => (v === "base" ? null : "base"))}
+      >
+        <View className="bg-superficie rounded-3xl px-4 py-3.5">
+          <Text className="text-texto3 text-[12px] leading-4">{t("source.data.body")}</Text>
+          <CampoDeFonte
+            marca={t("source.data.hint")}
+            inicial={urlDados ?? ""}
+            aoLimpar={() => definirUrlDados(null)}
+            aoConfirmar={async (url) => {
+              const erro = checarUrl(url, false);
+              if (erro) return erro;
+              const bruto = await buscarJson(url);
+              if (typeof bruto === "string") return bruto;
+              const ruim = validarDataset(bruto);
+              if (ruim) return ruim;
+              definirUrlDados(url);
+              return null;
+            }}
+          />
+        </View>
       </Linha>
 
       <Linha

@@ -2,7 +2,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Image, Text, View } from "react-native";
 import { useState } from "react";
 
-import { seloDaEspecie, spriteUrl } from "@trainerkit/core";
+import { seloDaEspecie } from "@trainerkit/core";
 
 import type { Especie } from "./dados";
 import { useImagens } from "./imagens";
@@ -87,13 +87,13 @@ export function tintaSobre(fundo: string): string {
 }
 
 export function Selo({ especie, tamanho = 44 }: { especie: Especie; tamanho?: number }) {
-  const { fonte } = useImagens();
+  const { fonte, urlDaEspecie } = useImagens();
   const [falhou, setFalhou] = useState(false);
   /* ⚠️ O ARQUIVO LOCAL VEM PRIMEIRO. Se a rede viesse antes, baixar as imagens
      não mudaria nada: a tela continuaria esperando o GitHub responder para só
      então olhar o disco. */
   const local = arquivoLocal(especie.spriteId, fonte);
-  const url = falhou ? null : (local ?? spriteUrl({ spriteId: especie.spriteId }, fonte));
+  const url = falhou ? null : (local ?? urlDaEspecie(especie));
   /*
    * A cor vem da ESPECIE, com o tipo de reserva — a mesma conta do web, agora
    * em `packages/core`. O selo do Mewtwo saia rosa porque Psiquico e rosa;

@@ -40,3 +40,142 @@ export function spriteUrl(req: SpriteRequest, source: BuiltinSourceId): string |
   const pasta = source === "pokeapi-artwork" ? "other/official-artwork" : "other/home";
   return `${POKEAPI}/${pasta}${shiny}/${req.spriteId}.png`;
 }
+
+// ─────────────────────────────────────────────────────────── fonte própria
+
+/**
+ * O MANIFESTO DE UMA FONTE PRÓPRIA.
+ *
+ * O app não hospeda arte, e a lista de fontes embutidas é uma escolha minha —
+ * que não precisa ser de quem usa. Um manifesto é um JSON com um endereço
+ * modelo e, opcionalmente, o mapa espécie a espécie:
+ *
+ * ```json
+ * {
+ *   "name": "Meu acervo",
+ *   "template": "https://exemplo.com/sprites/{dex}.png",
+ *   "images": { "machamp": "https://exemplo.com/machamp.png" }
+ * }
+ * ```
+ *
+ * ⚠️ `images` VENCE o `template`, e aceita tanto o id da espécie quanto a dex
+ * escrita como texto — quem monta o arquivo à mão usa um ou outro sem pensar,
+ * e recusar metade dos arquivos por causa disso seria maldade gratuita.
+ */
+export interface SpriteManifest {
+  name: string;
+  version?: number;
+  /** `{dex}`, `{id}` e `{spriteId}` são substituídos. */
+  template?: string;
+  /** Mapa explícito, por id de espécie ou por dex. Vence o `template`. */
+  images?: Record<string, string>;
+}
+
+/**
+ * O manifesto serve? Devolve a CHAVE do erro, ou `null` quando está de pé.
+ *
+ * ⚠️ Chave e não frase: o texto do erro é lido por quem usa, então mora no
+ * dicionário como o resto. Devolver português daqui deixaria a tela em duas
+ * línguas para quem estiver em japonês.
+ */
+export function validarManifesto(valor: unknown): string | null {
+  if (typeof valor !== "object" || valor === null) return "source.err.notObject";
+  const m = valor as Record<string, unknown>;
+  if (typeof m.name !== "string" || m.name.trim() === "") return "source.err.noName";
+  const temTemplate = typeof m.template === "string" && m.template.includes("{");
+  const temImagens =
+    typeof m.images === "object" && m.images !== null && Object.keys(m.images).length > 0;
+  if (!temTemplate && !temImagens) return "source.err.noImages";
+  if (m.images !== undefined && (typeof m.images !== "object" || m.images === null)) {
+    return "source.err.badImages";
+  }
+  return null;
+}
+
+/** URL da imagem numa fonte própria, ou `null` quando aquela espécie não tem. */
+export function manifestSpriteUrl(
+  req: SpriteRequest & { id: string; dex: number },
+  manifest: SpriteManifest,
+): string | null {
+  const direto = manifest.images?.[req.id] ?? manifest.images?.[String(req.dex)];
+  if (typeof direto === "string" && direto !== "") return direto;
+  if (!manifest.template) return null;
+  return manifest.template
+    .replaceAll("{dex}", String(req.dex))
+    .replaceAll("{id}", req.id)
+    .replaceAll("{spriteId}", String(req.spriteId ?? req.dex));
+}
+
+// ───────────────────────────────────────────────────── fonte de dados própria
+
+/**
+ * O ENDEREÇO SERVE? Devolve a chave do erro, ou `null`.
+ *
+ * ⚠️ `http://` a partir de uma página `https://` é bloqueado pelo navegador
+ * como conteúdo misto, e o que chega ao app é um `TypeError: Failed to fetch` —
+ * idêntico a "servidor fora do ar". Dizer qual dos dois é poupa meia hora de
+ * quem estiver do outro lado. No app nativo não há página, então `paginaHttps`
+ * chega `false` e a checagem some sozinha.
+ */
+export function checarUrl(url: string, paginaHttps: boolean): string | null {
+  const partes = partirUrl(url);
+  if (!partes) return "source.err.badUrl";
+  if (partes.esquema !== "https" && partes.esquema !== "http") return "source.err.scheme";
+  const local = partes.host === "localhost" || partes.host === "127.0.0.1";
+  if (partes.esquema === "http" && paginaHttps && !local) return "source.err.mixed";
+  return null;
+}
+
+/**
+ * Esquema e host, sem `new URL`.
+ *
+ * ⚠️ E não é preciosismo: o `URL` do Hermes NÃO parseia endereço absoluto —
+ * `new URL("https://exemplo.com/a.json")` lança, e o app nativo respondia
+ * "endereço inválido" para um endereço perfeitamente válido. Medido no
+ * simulador. O que o app precisa saber cabe num padrão: o esquema e o host.
+ */
+export function partirUrl(url: string): { esquema: string; host: string } | null {
+  const m = /^([a-zA-Z][a-zA-Z0-9+.-]*):\/\/([^/?#\s]+)/.exec(url.trim());
+  if (!m) return null;
+  /* Fora o host pode vir `user:senha@host:porta` — o que interessa é o host. */
+  const autoridade = (m[2] ?? "").split("@").pop() ?? "";
+  const host = autoridade.startsWith("[")
+    ? (autoridade.slice(0, autoridade.indexOf("]") + 1) || autoridade)
+    : (autoridade.split(":")[0] ?? "");
+  if (host === "") return null;
+  return { esquema: (m[1] ?? "").toLowerCase(), host: host.toLowerCase() };
+}
+
+/**
+ * O que voltou parece mesmo um dataset do TrainerKit?
+ *
+ * Sem isto, apontar para um JSON qualquer daria tela branca ou — pior — número
+ * errado calculado sobre lixo. A checagem é do formato MÍNIMO de que o app
+ * precisa: uma base própria pode legitimamente não trazer `rankings` ou
+ * `moveNames`, e aí a tela some em vez de quebrar.
+ */
+export function validarDataset(valor: unknown): string | null {
+  if (typeof valor === "string") return "source.err.text";
+  if (typeof valor !== "object" || valor === null) return "source.err.notObject";
+
+  const d = valor as Record<string, unknown>;
+  const exigidos: Array<[string, (v: unknown) => boolean]> = [
+    ["cpm", (v) => Array.isArray(v) && v.length > 0 && typeof v[0] === "number"],
+    ["species", (v) => Array.isArray(v) && v.length > 0],
+    ["fastMoves", Array.isArray],
+    ["chargedMoves", Array.isArray],
+    ["typeChart", (v) => typeof v === "object" && v !== null],
+    ["typeOrder", (v) => Array.isArray(v) && v.length === 18],
+    ["settings", (v) => typeof v === "object" && v !== null],
+    ["version", (v) => typeof v === "object" && v !== null],
+  ];
+  for (const [campo, ok] of exigidos) {
+    if (!(campo in d)) return "source.err.missingField";
+    if (!ok(d[campo])) return "source.err.badField";
+  }
+  const primeira = (d.species as unknown[])[0] as Record<string, unknown>;
+  for (const campo of ["id", "name", "baseStats", "types"]) {
+    if (!(campo in primeira)) return "source.err.badSpecies";
+  }
+  return null;
+}

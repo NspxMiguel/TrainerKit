@@ -8,7 +8,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   ACTION_KEYS,
   degradeDoTipo,
-  spriteUrl,
   misturar,
   PARADAS_DO_DEGRADE,
   type Key,
@@ -54,10 +53,10 @@ function saudacao(hora: number): Key {
  * o herói inteiro renderizar de novo a cada carga.
  */
 function ArteDoHeroi({ especie }: { especie: Especie }) {
-  const { fonte } = useImagens();
+  const { fonte, urlDaEspecie } = useImagens();
   const [falhou, setFalhou] = useState(false);
   const local = arquivoLocal(especie.spriteId, fonte);
-  const url = falhou ? null : (local ?? spriteUrl({ spriteId: especie.spriteId }, fonte));
+  const url = falhou ? null : (local ?? urlDaEspecie(especie));
   if (!url) return null;
   return (
     <Image

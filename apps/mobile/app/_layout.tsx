@@ -8,6 +8,7 @@ import { Onboarding } from "../src/Onboarding";
 import { IA } from "../src/ia";
 import { Imagens } from "../src/imagens";
 import { ConfigInicial, useSetup } from "../src/setup";
+import { FonteDeDados } from "../src/fonteDados";
 import { DUR } from "../src/movimento";
 import { Tema, useTema } from "../src/tema";
 
@@ -173,13 +174,15 @@ export default function Layout() {
   return (
     <Tema>
       <Idioma>
-        <ConfigInicial>
-          <Imagens>
-            <IA>
-              <Casca />
-            </IA>
-          </Imagens>
-        </ConfigInicial>
+        <FonteDeDados>
+          <ConfigInicial>
+            <Imagens>
+              <IA>
+                <Casca />
+              </IA>
+            </Imagens>
+          </ConfigInicial>
+        </FonteDeDados>
       </Idioma>
     </Tema>
   );

@@ -3,6 +3,8 @@ import { useCallback, useEffect, useState } from "react";
 
 import { spriteUrl, type BuiltinSourceId } from "@trainerkit/core";
 
+import type { FonteId } from "./imagens";
+
 /**
  * AS IMAGENS NO APARELHO.
  *
@@ -26,8 +28,12 @@ function pasta(fonte: BuiltinSourceId): Directory {
 }
 
 /** Onde a imagem daquela espécie mora, se estiver baixada. */
-export function arquivoLocal(spriteId: number | null, fonte: BuiltinSourceId): string | null {
-  if (spriteId == null || fonte === "off") return null;
+export function arquivoLocal(spriteId: number | null, fonte: FonteId): string | null {
+  /* ⚠️ A fonte PRÓPRIA não tem cópia local: o download offline baixa das
+     duas embutidas, que têm um endereço por spriteId. Um manifesto pode
+     apontar cada espécie para um host diferente, e varrer isso seria
+     outro recurso — não um detalhe deste. */
+  if (spriteId == null || fonte === "off" || fonte === "custom") return null;
   const f = new File(pasta(fonte), `${spriteId}.png`);
   return f.exists ? f.uri : null;
 }
