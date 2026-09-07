@@ -50,8 +50,13 @@ native app can do:
   the Dynamic Island, counting down. One at a time, the one ending soonest.
 - **Local notifications** for events. Scheduled on device; there is no server
   and no push token anywhere in this app.
-- **Liquid Glass** through `expo-glass-effect`, on the tab bar, the verdict card,
-  the AI panel and the events happening now — never on everything at once.
+- **Liquid Glass**, and the real one: the tab bar is a `UITabBarController`
+  through `NativeTabs`, so the material, the shrink-on-scroll and the transitions
+  come from iOS itself. `expo-glass-effect` is used only for surfaces that are
+  ours — the verdict card, the AI panel, the events happening now — never on
+  everything at once.
+- **Move names in both languages**, English first: it is the language move names
+  circulate in, and searching a translated name finds nothing.
 - **Named collections**, kept on device, each with its own verdicts.
 
 Build it with `pnpm --filter @trainerkit/mobile exec expo run:ios`, or archive
