@@ -23,6 +23,8 @@ import {
 } from "@trainerkit/core";
 import { useDados } from "../../src/dados";
 import { useT } from "../../src/i18n";
+import { SymbolView } from "expo-symbols";
+
 import { useIA } from "../../src/ia";
 import { calar, falar } from "../../src/voz";
 import { useSetup } from "../../src/setup";
@@ -88,6 +90,7 @@ export default function Ficha() {
   const [rastro, setRastro] = useState(true);
   const { chave } = useIA();
   const [pergunta, setPergunta] = useState("");
+  const [aberto, setAberto] = useState(false);
   const [resposta, setResposta] = useState<string | null>(null);
   const [pensando, setPensando] = useState(false);
   const [falandoAgora, setFalandoAgora] = useState(false);
@@ -378,7 +381,8 @@ export default function Ficha() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-fundo" contentContainerStyle={{ padding: 20 }}>
+    <View className="flex-1 bg-fundo">
+    <ScrollView className="flex-1 bg-fundo" contentContainerStyle={{ padding: 20, paddingBottom: 120 }}>
       <View className="items-center">
         <Selo especie={especie} tamanho={112} />
         <Text className="text-texto text-titulo-tela mt-4">{especie.name}</Text>
@@ -651,28 +655,6 @@ export default function Ficha() {
         </View>
       )}
 
-      {/* ── PERGUNTAR (só com chave) ────────────────────────────────────────── */}
-      {chave && (
-        <View className="bg-superficie rounded-cartao p-5 mt-3">
-          <Text className="text-texto3 text-[11px] tracking-widest">
-            {t("dex.ask").toUpperCase()}
-          </Text>
-          <TextInput
-            value={pergunta}
-            onChangeText={setPergunta}
-            onSubmitEditing={perguntar}
-            returnKeyType="send"
-            placeholder={t("dex.askPlaceholder")}
-            placeholderTextColor={cores.texto3}
-            className="text-texto text-[15px] mt-3"
-          />
-          {pensando && <Text className="text-texto3 text-[13px] mt-3">{t("ai.thinking")}</Text>}
-          {resposta && !pensando && (
-            <Text className="text-texto2 text-[13px] leading-5 mt-3">{resposta}</Text>
-          )}
-        </View>
-      )}
-
       {/* ── LENTE ──────────────────────────────────────────────────────────── */}
       {lente && (
         <View className="bg-superficie rounded-cartao p-5 mt-3">
@@ -787,5 +769,58 @@ export default function Ficha() {
         ))}
       </View>
     </ScrollView>
+
+      {/*
+        O BOTAO FLUTUANTE DA IA.
+
+        A caixa de perguntar vivia enterrada no fim da rolagem, depois de golpes,
+        ligas e Batalha Max — quem quisesse perguntar tinha que passar por tudo.
+        Agora ela e um painel que sobe, e o botao fica sempre alcancavel.
+
+        ⚠️ So aparece COM CHAVE, e isso e regra do projeto e nao economia de
+        tela: no app a IA e a da pessoa, com a chave dela. Um botao que abrisse
+        "configure a IA" prometeria um recurso que o app nao da.
+      */}
+      {chave && (
+        <View
+          pointerEvents="box-none"
+          style={{ position: "absolute", right: 18, bottom: 24, left: 18 }}
+        >
+          {aberto && (
+            <Vidro raio={26} style={{ padding: 18, marginBottom: 12 }}>
+              <Text className="text-texto3 text-legenda">{t("dex.ask").toUpperCase()}</Text>
+              <TextInput
+                value={pergunta}
+                onChangeText={setPergunta}
+                onSubmitEditing={perguntar}
+                returnKeyType="send"
+                autoFocus
+                placeholder={t("dex.askPlaceholder")}
+                placeholderTextColor={cores.texto3}
+                className="text-texto text-corpo mt-3"
+              />
+              {pensando && <Text className="text-texto3 text-legenda mt-3">{t("ai.thinking")}</Text>}
+              {resposta && !pensando && (
+                <Text className="text-texto2 text-corpo mt-3">{resposta}</Text>
+              )}
+            </Vidro>
+          )}
+          <View className="items-end">
+            <Pressable onPress={() => setAberto((v) => !v)} accessibilityLabel={t("dex.ask")}>
+              <Vidro raio={999} interativo ativo={aberto} style={{ width: 54, height: 54 }}>
+                <View className="flex-1 items-center justify-center">
+                  <SymbolView
+                    name={aberto ? "xmark" : "sparkles"}
+                    size={22}
+                    tintColor={cores.texto}
+                    fallback={<Text style={{ color: cores.texto, fontSize: 22 }}>+</Text>}
+                  />
+                </View>
+              </Vidro>
+            </Pressable>
+          </View>
+        </View>
+      )}
+    </View>
   );
 }
