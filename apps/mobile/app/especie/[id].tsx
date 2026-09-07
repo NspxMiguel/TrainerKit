@@ -31,7 +31,7 @@ import { SymbolView } from "expo-symbols";
 
 import { useIA } from "../../src/ia";
 import { marcarVisto } from "../../src/vistos";
-import { guardar, remover, useColecao } from "../../src/colecao";
+import { definirMeuMotivo, guardar, remover, useColecao } from "../../src/colecao";
 import { BlocoSpreads, BlocoTroca, BlocoUsos } from "../../src/BlocosDaFicha";
 import { Segmented } from "../../src/Segmented";
 import { Cascata } from "../../src/Cascata";
@@ -104,6 +104,7 @@ export default function Ficha() {
   const [rastro, setRastro] = useState(true);
   const [confirmandoTirar, setConfirmandoTirar] = useState(false);
   const [indiceDoGrupo, setIndiceDoGrupo] = useState(0);
+  const [discordando, setDiscordando] = useState(false);
   const { itens, recarregar } = useColecao();
   const { chave } = useIA();
   const [pergunta, setPergunta] = useState("");
@@ -672,6 +673,70 @@ export default function Ficha() {
             </View>
           )}
         </>
+      )}
+
+      {/*
+        DISCORDO.
+
+        ⚠️ O veredito continua na tela; o que ele perde é o direito de COBRAR.
+        Um app que insiste em transferir um bicho que a pessoa já disse que vai
+        guardar não está conversando, está repetindo.
+
+        ⚠️ O motivo é ESCOLHIDO e não digitado: três razões cobrem o caso todo
+        ("gosto", "eu uso", "é um desafio meu"), e um campo livre viraria um
+        diário que ninguém relê.
+      */}
+      {salvo && (
+        <View className="mt-3">
+          {salvo.meuMotivo ? (
+            <View className="bg-superficie rounded-cartao px-4 py-3 flex-row items-center">
+              <Text className="text-texto2 text-corpo flex-1">
+                {t("verdict.mine.kept")} · {t(`verdict.mine.${salvo.meuMotivo}` as never)}
+              </Text>
+              <Pressable
+                onPress={() => void definirMeuMotivo(salvo.id, null).then(recarregar)}
+                hitSlop={8}
+              >
+                <Text className="text-texto text-legenda font-semibold">
+                  {t("verdict.mine.undo")}
+                </Text>
+              </Pressable>
+            </View>
+          ) : discordando ? (
+            <View className="bg-superficie rounded-cartao px-4 py-3">
+              <Text className="text-texto3 text-legenda mb-2">
+                {t("verdict.disagree.title")}
+              </Text>
+              <View className="flex-row flex-wrap gap-2">
+                {(["gosto", "uso", "desafio"] as const).map((m) => (
+                  <Pressable
+                    key={m}
+                    onPress={() => {
+                      void definirMeuMotivo(salvo.id, m).then(() => {
+                        setDiscordando(false);
+                        recarregar();
+                      });
+                    }}
+                    className="rounded-pilula px-4 py-2"
+                    style={{ borderWidth: 1, borderColor: cores.linha }}
+                  >
+                    <Text className="text-texto2 text-legenda">
+                      {t(`verdict.mine.${m}` as never)}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          ) : (
+            <Pressable
+              onPress={() => setDiscordando(true)}
+              className="self-start rounded-pilula px-4 py-2"
+              style={{ borderWidth: 1, borderColor: cores.linha }}
+            >
+              <Text className="text-texto3 text-legenda">{t("verdict.disagree")}</Text>
+            </Pressable>
+          )}
+        </View>
       )}
 
       {/* ── TROCA ──────────────────────────────────────────────────────────

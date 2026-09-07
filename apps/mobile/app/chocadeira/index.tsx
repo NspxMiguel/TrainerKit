@@ -102,7 +102,26 @@ export default function Chocadeira() {
                       </Text>
                     )}
                   </View>
-                  {o.canBeShiny && <Text className="text-guardar text-sm">✦</Text>}
+                  {/* REGIONAL antes de brilhante: "não choca aqui" muda se vale
+                      a pena andar atrás do ovo, e brilhante é só um bônus. Os
+                      dois têm rótulo acessível — um asterisco sozinho não diz
+                      nada para quem usa leitor de tela. */}
+                  {o.isRegional && (
+                    <Text
+                      className="text-texto3 text-legenda"
+                      accessibilityLabel={t("eggs.regional")}
+                    >
+                      {t("eggs.regional")}
+                    </Text>
+                  )}
+                  {o.canBeShiny && (
+                    <Text
+                      className="text-guardar text-sm"
+                      accessibilityLabel={t("eggs.shiny")}
+                    >
+                      ✦
+                    </Text>
+                  )}
                 </View>
               );
               return sp ? (
