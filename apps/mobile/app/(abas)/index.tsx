@@ -119,17 +119,21 @@ function Heroi({
             left: 0,
             right: 0,
             top: "46%",
-            marginTop: -120,
+            marginTop: -100,
             textAlign: "center",
             /* ⚠️ O `letterSpacing` negativo do React Native também tira o
                espaço DEPOIS do último algarismo, e isso empurra o centro
                óptico para a esquerda. O `paddingLeft` devolve o que a última
                letra perdeu. */
-            paddingLeft: 14,
-            fontSize: 240,
-            lineHeight: 240,
+            paddingLeft: 10,
+            /* ⚠️ 200 e não 268: com três algarismos a 268 o número ocupa mais
+               que a largura da tela e o corte come dois deles — sobra um "8"
+               gigante que não é o número de nada. A 200 os três cabem, com só
+               uma lasca de corte nas bordas, que é o que dá a textura. */
+            fontSize: 200,
+            lineHeight: 200,
             fontWeight: "900",
-            letterSpacing: -14,
+            letterSpacing: -10,
             color: tinta,
             opacity: 0.12,
           }}
