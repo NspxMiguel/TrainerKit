@@ -151,3 +151,17 @@ está tudo em `DESIGN.md`.
 herói para fora da primeira dobra. A Pokédex está a um toque e tem a busca
 inteira, com filtro e ordem. Isso é a única coisa em que o nativo deixou de
 seguir o PWA de propósito, e o motivo é o desenho.
+
+
+## 07/09/2026 — o que a varredura de chave não pegou
+
+Duas coisas que só apareceram porque ele olhou a tela:
+
+- **Nome do golpe nos dois idiomas.** `moveNames` estava no arquivo desde
+  sempre; o tipo nativo de `Base` não declarava, então o app mostrava só o
+  inglês. `rotuloDoGolpe` foi para o core e vale nos dois apps.
+- **A barra de abas não era Liquid Glass de verdade.** Era `GlassView` numa
+  `View` desenhada à mão. Virou `NativeTabs` — ver `DESIGN.md`.
+
+A lição das duas é a mesma: varrer chave de i18n acha função que FALTA, não
+função que está errada. Para isso não tem substituto para abrir o app.

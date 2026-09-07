@@ -43,7 +43,10 @@ representa o pacote. O que existe já está pronto.
 
 ## O que separa isso do app de hoje, e não é CSS
 
-- **não existe tab bar** no nativo: é uma pilha do expo-router com voltar
+- ~~**não existe tab bar** no nativo~~ — feito em 06/09, e refeito em 07/09:
+  a primeira versão era uma `View` com `GlassView` dentro, que tinha o material
+  e nada mais. Hoje é `NativeTabs`, um `UITabBarController` de verdade, e é daí
+  que vêm o encolher ao rolar, a cápsula do ativo e o Liquid Glass inteiro
 - **não existe tela de Início** com saudação, herói e tira da coleção
 - **não existe monograma de 2 letras** sobre gradiente do tipo
 - **não existe barra de confiança** nem o cartão POR QUÊ com pesos
