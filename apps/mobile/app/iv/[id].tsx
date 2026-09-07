@@ -189,6 +189,9 @@ export default function Calculadora() {
         })}
       </View>
 
+      {/* ⚠️ O cartão só existe quando há o que dizer. Com os campos vazios ele
+          imprimia "Nenhum nível dá PC  com PS " — a frase com os buracos à
+          mostra, que parece defeito. */}
       <View className="bg-superficie rounded-3xl p-5 mt-7">
         {unico ? (
           <>
@@ -250,7 +253,7 @@ export default function Calculadora() {
               <Text className="text-fundo font-bold">{t("iv.saveToCollection")}</Text>
             </TouchableOpacity>
           </>
-        ) : candidatos.length === 0 ? (
+        ) : candidatos.length === 0 && cp.trim() !== "" && hp.trim() !== "" ? (
           /*
             NENHUMA COMBINAÇÃO FECHA — e isso quase sempre é erro de digitação,
             não bug.
