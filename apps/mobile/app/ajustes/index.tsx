@@ -1,7 +1,7 @@
 import * as Clipboard from "expo-clipboard";
 import { Link } from "expo-router";
 import { useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 
 import {
   LANGUAGES,
@@ -13,6 +13,7 @@ import {
 } from "@trainerkit/core";
 import { useT } from "../../src/i18n";
 import { FONTES, SPRITE_SOURCE_KEYS, useImagens } from "../../src/imagens";
+import { useIA } from "../../src/ia";
 import { useSetup } from "../../src/setup";
 import { useTema, type Escolha } from "../../src/tema";
 
@@ -44,6 +45,8 @@ export default function Ajustes() {
   const { cores, escolha, definir } = useTema();
   const { setup, definir: definirSetup } = useSetup();
   const { fonte, definir: definirFonte } = useImagens();
+  const { chave, definir: definirChave } = useIA();
+  const [rascunho, setRascunho] = useState<string | null>(null);
   const [copiado, setCopiado] = useState(false);
 
   return (
@@ -100,6 +103,41 @@ export default function Ajustes() {
         roda uma vez não pode ser o único lugar de um valor que muda com o
         tempo.
       */}
+      {/*
+        A IA — a chave é DELA, e só existem duas opções.
+
+        "app a pessoa coloca a ia dela, key dela, nada free, free so o site". A
+        opção "grátis com limite" do PWA sai do bolso dele e por isso não está
+        aqui. Sem chave = desligado; com chave = ligado. Não há terceiro estado,
+        então não há seletor: o campo é o interruptor.
+      */}
+      <Text className="text-texto3 text-[11px] tracking-widest mt-7 mb-2">
+        {t("ai.title").toUpperCase()}
+      </Text>
+      <View className="bg-superficie rounded-3xl px-4 py-4">
+        <Text className="text-texto2 text-[13px] leading-5">
+          {t(chave ? "onb.ai.groq" : "onb.ai.off")}
+        </Text>
+        <TextInput
+          value={rascunho ?? chave ?? ""}
+          onChangeText={setRascunho}
+          onEndEditing={() => {
+            definirChave(rascunho);
+            setRascunho(null);
+          }}
+          placeholder="gsk_…"
+          placeholderTextColor={cores.texto3}
+          autoCapitalize="none"
+          autoCorrect={false}
+          /* `secureTextEntry` não: quem digita uma chave de 56 caracteres num
+             teclado de celular precisa ver o que digitou. Ela não é senha de
+             ninguém — é um token que a própria pessoa revoga num clique. */
+          className="text-texto text-[13px] mt-3 font-mono"
+          style={{ borderTopWidth: 0.5, borderTopColor: cores.linha, paddingTop: 12 }}
+        />
+        <Text className="text-texto3 text-[12px] leading-4 mt-2">{t("onb.ai.groqDetail")}</Text>
+      </View>
+
       {/*
         IMAGENS — desligado por padrão, e a tela de Privacidade depende disso.
         Ligar acrescenta um segundo host que recebe pedido do app, e é por isso

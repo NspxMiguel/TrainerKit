@@ -1,13 +1,15 @@
 import { Link, useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 
 import {
   ACTION_KEYS,
   CONTEXT_KEYS,
   buildDexEntry,
+  GROQ_MODEL,
   computeCPAtLevel,
   decide,
+  groqChat,
   custoDosMaxAtaques,
   fazGigantamax,
   groupIdenticalContexts,
@@ -21,6 +23,8 @@ import {
 } from "@trainerkit/core";
 import { useDados } from "../../src/dados";
 import { useT } from "../../src/i18n";
+import { useIA } from "../../src/ia";
+import { calar, falar } from "../../src/voz";
 import { useSetup } from "../../src/setup";
 import { useTema, type Paleta } from "../../src/tema";
 import { Selo } from "../../src/Selo";
@@ -65,7 +69,7 @@ const COR_ACAO: Record<string, keyof Paleta> = {
 };
 
 export default function Ficha() {
-  const { t } = useT();
+  const { t, idioma } = useT();
   const { cores } = useTema();
   const { setup } = useSetup();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -78,6 +82,38 @@ export default function Ficha() {
    * carregados e reordena tudo, em vez de so mostrar um aviso.
    */
   const [sombroso, setSombroso] = useState(false);
+  const { chave } = useIA();
+  const [pergunta, setPergunta] = useState("");
+  const [resposta, setResposta] = useState<string | null>(null);
+  const [pensando, setPensando] = useState(false);
+  const [falandoAgora, setFalandoAgora] = useState(false);
+
+  /*
+   * A LENTE FALADA — é o que o modo Lente do web faz, e a única metade dele que
+   * atravessou. A voz do sistema lê as mesmas frases que estão na tela; nada é
+   * gerado na hora e nada sai do aparelho.
+   */
+  const ouvirLente = () => {
+    if (!lente) return;
+    if (falandoAgora) {
+      calar();
+      setFalandoAgora(false);
+      return;
+    }
+    const frases = [
+      t("dex.line.name", { name: especie?.name ?? "", dex: String(especie?.dex ?? "") }),
+      t(ARQUETIPO[lente.build]!),
+      t(lente.evolves ? "dex.line.evolves" : "dex.line.final"),
+      lente.raidRank
+        ? t("dex.line.raid", {
+            type: t(`type.${lente.raidRank.type}` as never),
+            position: lente.raidRank.position,
+          })
+        : "",
+    ].filter(Boolean);
+    falar(frases.join(" "), idioma);
+    setFalandoAgora(true);
+  };
 
   const especie = useMemo(() => dados?.species.find((s) => s.id === id) ?? null, [dados, id]);
 
@@ -284,6 +320,59 @@ export default function Ficha() {
     );
   }
 
+  /**
+   * PERGUNTAR SOBRE A ESPÉCIE — com a chave de quem pergunta.
+   *
+   * ⚠️ O modelo NÃO inventa número: os fatos vão no `system`, calculados aqui
+   * pelo `packages/core`, e a instrução é responder a partir deles. Deixar o
+   * modelo lembrar de stat base é como o app passa a mentir com voz de certeza.
+   *
+   * Sem chave a caixa nem aparece — um campo dizendo "configure a IA" seria
+   * propaganda ocupando espaço de quem não pediu.
+   */
+  const perguntar = () => {
+    if (!chave || !especie || !veredito || pergunta.trim() === "") return;
+    setPensando(true);
+    setResposta(null);
+    const fatos = [
+      `${especie.name} (#${especie.dex}), tipo ${especie.types.join("/")}`,
+      `stats base: ataque ${especie.baseStats.atk}, defesa ${especie.baseStats.def}, PS ${especie.baseStats.hp}`,
+      `veredito do app: ${veredito.action} (confianca ${Math.round(veredito.confidence * 100)}%)`,
+      tetos.length > 0
+        ? `PC maximo com IV perfeito: ${tetos.map((x) => `${x.pc} no nivel ${x.nivel}`).join(", ")}`
+        : "",
+      grupos[0]?.movesets[0]
+        ? `melhor conjunto: ${grupos[0].movesets[0].fast.name} + ${grupos[0].movesets[0].charged.name}`
+        : "",
+      lente?.raidRank
+        ? `entre os atacantes de ${lente.raidRank.type}, e o numero ${lente.raidRank.position} para raides`
+        : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    groqChat(
+      chave,
+      GROQ_MODEL,
+      [
+        {
+          role: "system",
+          content:
+            `Voce responde sobre Pokemon GO em ${idioma}, em no maximo 3 frases curtas. ` +
+            `Use SOMENTE os fatos abaixo; se a resposta nao estiver neles, diga que nao sabe. ` +
+            `Nao invente numero.\n\n${fatos}`,
+        },
+        { role: "user", content: pergunta.trim() },
+      ],
+      { maxTokens: 220 },
+    )
+      .then(setResposta)
+      /* A mensagem da Groq (401, 429, modelo fora do catalogo) vale mais que um
+         "deu erro" nosso: ela diz o que fazer. */
+      .catch((e: Error) => setResposta(e.message))
+      .finally(() => setPensando(false));
+  };
+
   return (
     <ScrollView className="flex-1 bg-fundo" contentContainerStyle={{ padding: 20 }}>
       <View className="items-center">
@@ -465,12 +554,42 @@ export default function Ficha() {
         </View>
       )}
 
+      {/* ── PERGUNTAR (só com chave) ────────────────────────────────────────── */}
+      {chave && (
+        <View className="bg-superficie rounded-3xl p-5 mt-3">
+          <Text className="text-texto3 text-[11px] tracking-widest">
+            {t("dex.ask").toUpperCase()}
+          </Text>
+          <TextInput
+            value={pergunta}
+            onChangeText={setPergunta}
+            onSubmitEditing={perguntar}
+            returnKeyType="send"
+            placeholder={t("dex.askPlaceholder")}
+            placeholderTextColor={cores.texto3}
+            className="text-texto text-[15px] mt-3"
+          />
+          {pensando && <Text className="text-texto3 text-[13px] mt-3">{t("ai.thinking")}</Text>}
+          {resposta && !pensando && (
+            <Text className="text-texto2 text-[13px] leading-5 mt-3">{resposta}</Text>
+          )}
+        </View>
+      )}
+
       {/* ── LENTE ──────────────────────────────────────────────────────────── */}
       {lente && (
         <View className="bg-superficie rounded-3xl p-5 mt-3">
-          <Text className="text-texto3 text-[11px] tracking-widest">
-            {t("dex.title").toUpperCase()}
-          </Text>
+          <View className="flex-row items-center">
+            <Text className="flex-1 text-texto3 text-[11px] tracking-widest">
+              {t("dex.title").toUpperCase()}
+            </Text>
+            {/* A voz do sistema: sem chave, sem conta, sem rede. */}
+            <Pressable onPress={ouvirLente} hitSlop={10}>
+              <Text className="text-texto2 text-[12px] font-semibold">
+                {t(falandoAgora ? "dex.voiceOff" : "dex.speak")}
+              </Text>
+            </Pressable>
+          </View>
           <Text className="text-texto2 text-[13px] leading-5 mt-3">
             {t(ARQUETIPO[lente.build]!)}
           </Text>
