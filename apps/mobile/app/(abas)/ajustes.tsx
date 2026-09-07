@@ -1,6 +1,6 @@
 import * as Clipboard from "expo-clipboard";
 import { Link } from "expo-router";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -12,6 +12,8 @@ import {
   tetoDePowerUp,
   type Key,
 } from "@trainerkit/core";
+import { SymbolView } from "expo-symbols";
+
 import { useDados } from "../../src/dados";
 import { useT } from "../../src/i18n";
 import { apagarTudo } from "../../src/apagar";
@@ -55,6 +57,63 @@ const TEMAS: { valor: Escolha; chave: Key }[] = [
   { valor: "escuro", chave: "settings.theme.dark" },
 ];
 
+
+/**
+ * UMA LINHA DE AJUSTES — ícone, nome e o VALOR DE AGORA.
+ *
+ * ⚠️ É o print 9. A tela era uma parede de opções abertas: os três temas, os
+ * dez idiomas e as três fontes de imagem sempre à mostra, o que fazia rolar
+ * três telas para chegar em "Apagar tudo". Aqui cada assunto é uma linha que
+ * diz o estado atual e abre só quando a pessoa quer mudar.
+ *
+ * ⚠️ O VALOR À DIREITA não é enfeite: é o que responde "em que idioma está?"
+ * sem abrir nada, que é a pergunta que traz alguém aos Ajustes na maioria das
+ * vezes.
+ */
+function Linha({
+  icone,
+  cor,
+  titulo,
+  valor,
+  aberta,
+  onAlternar,
+  children,
+}: {
+  icone: string;
+  cor: string;
+  titulo: string;
+  valor?: string;
+  aberta: boolean;
+  onAlternar: () => void;
+  children: ReactNode;
+}) {
+  const { cores } = useTema();
+  return (
+    <View className="bg-superficie rounded-cartao overflow-hidden mt-3">
+      <Pressable onPress={onAlternar} className="flex-row items-center gap-3 px-4 py-3.5">
+        <View
+          className="items-center justify-center"
+          style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: cor }}
+        >
+          <SymbolView name={icone as never} size={14} tintColor="#FFFFFF" fallback={<View />} />
+        </View>
+        <Text className="text-texto text-corpo flex-1">{titulo}</Text>
+        {valor ? (
+          <Text className="text-texto3 text-legenda" numberOfLines={1}>
+            {valor}
+          </Text>
+        ) : null}
+        <Text className="text-texto3 text-base ml-1">{aberta ? "⌄" : "›"}</Text>
+      </Pressable>
+      {aberta && (
+        <View className="px-4 pb-4" style={{ borderTopWidth: 1, borderTopColor: cores.linha }}>
+          {children}
+        </View>
+      )}
+    </View>
+  );
+}
+
 export default function Ajustes() {
   const { t, idioma, trocar } = useT();
   const { cores, escolha, definir } = useTema();
@@ -63,6 +122,9 @@ export default function Ajustes() {
   const { chave, definir: definirChave } = useIA();
   const [rascunho, setRascunho] = useState<string | null>(null);
   const [copiado, setCopiado] = useState(false);
+  /* ⚠️ UMA seção aberta por vez. Com várias abertas a tela volta a ser a parede
+     de opções que isto veio resolver. */
+  const [secao, setSecao] = useState<string | null>(null);
   const [confirmandoApagar, setConfirmandoApagar] = useState(false);
   const { dados } = useDados();
   const { mostrar: traduzir, alternar: alternarTraducao } = useTraducao();
@@ -76,9 +138,16 @@ export default function Ajustes() {
          a ultima linha de Ajustes fica atras do vidro e nao da pra tocar. */
       contentContainerStyle={{ padding: 20, paddingTop: alto + 12, paddingBottom: 32 }}
     >
-      <Text className="text-texto3 text-[11px] tracking-widest mb-2">
-        {t("settings.appearance").toUpperCase()}
-      </Text>
+      <Text className="text-titulo-tela text-texto mb-1">{t("settings.title")}</Text>
+
+      <Linha
+        icone="circle.lefthalf.filled"
+        cor="#3B82F6"
+        titulo={t("settings.appearance")}
+        valor={t(TEMAS.find((x) => x.valor === escolha)?.chave ?? "settings.theme.system")}
+        aberta={secao === "tema"}
+        onAlternar={() => setSecao((v) => (v === "tema" ? null : "tema"))}
+      >
       <View className="bg-superficie rounded-3xl overflow-hidden mb-7">
         {TEMAS.map((op, i) => (
           <Pressable
@@ -97,9 +166,16 @@ export default function Ajustes() {
         ))}
       </View>
 
-      <Text className="text-texto3 text-[11px] tracking-widest mb-2">
-        {t("settings.language").toUpperCase()}
-      </Text>
+      </Linha>
+
+      <Linha
+        icone="globe"
+        cor="#8B5CF6"
+        titulo={t("settings.language")}
+        valor={LANGUAGES.find((l) => l.code === idioma)?.label ?? idioma}
+        aberta={secao === "idioma"}
+        onAlternar={() => setSecao((v) => (v === "idioma" ? null : "idioma"))}
+      >
       <View className="bg-superficie rounded-3xl overflow-hidden">
         {LANGUAGES.map((l, i) => (
           <Pressable
@@ -136,9 +212,16 @@ export default function Ajustes() {
         aqui. Sem chave = desligado; com chave = ligado. Não há terceiro estado,
         então não há seletor: o campo é o interruptor.
       */}
-      <Text className="text-texto3 text-[11px] tracking-widest mt-7 mb-2">
-        {t("ai.title").toUpperCase()}
-      </Text>
+      </Linha>
+
+      <Linha
+        icone="sparkles"
+        cor="#EC4899"
+        titulo={t("ai.title")}
+        valor={t(chave ? "ai.provider.groq" : "ai.off")}
+        aberta={secao === "ia"}
+        onAlternar={() => setSecao((v) => (v === "ia" ? null : "ia"))}
+      >
       <View className="bg-superficie rounded-3xl px-4 py-4">
         <Text className="text-texto2 text-[13px] leading-5">
           {t(chave ? "onb.ai.groq" : "onb.ai.off")}
@@ -168,9 +251,16 @@ export default function Ajustes() {
         Ligar acrescenta um segundo host que recebe pedido do app, e é por isso
         que a política declara esse host condicionado a esta escolha.
       */}
-      <Text className="text-texto3 text-[11px] tracking-widest mt-7 mb-2">
-        {t("sprites.title").toUpperCase()}
-      </Text>
+      </Linha>
+
+      <Linha
+        icone="photo"
+        cor="#10B981"
+        titulo={t("sprites.title")}
+        valor={t((SPRITE_SOURCE_KEYS[fonte]?.title ?? "sprites.none") as Key)}
+        aberta={secao === "imagens"}
+        onAlternar={() => setSecao((v) => (v === "imagens" ? null : "imagens"))}
+      >
       <View className="bg-superficie rounded-3xl overflow-hidden">
         {FONTES.map((f, i) => (
           <Pressable
@@ -194,9 +284,16 @@ export default function Ajustes() {
         ))}
       </View>
 
-      <Text className="text-texto3 text-[11px] tracking-widest mt-7 mb-2">
-        {t("onb.level.title").toUpperCase()}
-      </Text>
+      </Linha>
+
+      <Linha
+        icone="figure.walk"
+        cor="#F59E0B"
+        titulo={t("onb.level.title")}
+        valor={String(setup.level)}
+        aberta={secao === "nivel"}
+        onAlternar={() => setSecao((v) => (v === "nivel" ? null : "nivel"))}
+      >
       <View className="flex-row flex-wrap gap-2">
         {TRAINER_LEVELS.map((n) => (
           <Pressable
@@ -230,6 +327,8 @@ export default function Ajustes() {
           teto: tetoDePowerUp(setup.level, MAX_POWERUP_LEVEL),
         })}
       </Text>
+
+      </Linha>
 
       <Text className="text-texto3 text-[11px] tracking-widest mt-7 mb-2">
         {t("faxina.title").toUpperCase()}
