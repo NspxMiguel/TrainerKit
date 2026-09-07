@@ -13,6 +13,7 @@ import { Selo } from "../../src/Selo";
 import { useSetup } from "../../src/setup";
 import { Vidro } from "../../src/Vidro";
 import { calar, falar } from "../../src/voz";
+import { useVozLigada } from "../../src/vozLigada";
 import { marcarVisto, useVistos } from "../../src/vistos";
 
 /**
@@ -57,6 +58,7 @@ export default function ModoPokedex() {
   const [busca, setBusca] = useState("");
   const [escolhida, setEscolhida] = useState<Especie | null>(null);
   const [lendo, setLendo] = useState(false);
+  const { ligada: vozLigada, alternar: alternarVoz } = useVozLigada();
 
   /* A camera so liga depois de a pessoa entrar na tela: pedir permissao na
      abertura do app assustaria sem explicar pra que serve. */
@@ -65,6 +67,7 @@ export default function ModoPokedex() {
   }, [permissao, pedirPermissao]);
 
   useEffect(() => () => calar(), []);
+
 
   const achados = useMemo(() => {
     if (!dados) return [];
@@ -103,9 +106,32 @@ export default function ModoPokedex() {
     });
   }, [dados, escolhida, setup.level]);
 
+  /*
+   * A LOCUÇÃO INTEIRA, na ordem em que a série fala.
+   *
+   * ⚠️ Eram três linhas — arquétipo, evolui/final e raide — e o `buildDexEntry`
+   * já devolvia tipos, atributos e PC máximo. A ficha do PWA lê tudo isso; a
+   * nativa jogava metade fora, e é justamente a metade que faz a locução soar
+   * como uma Pokédex em vez de um resumo.
+   */
   const linhas = useMemo(() => {
     if (!ficha) return [];
-    const l = [t(ARQUETIPO[ficha.build]!), t(ficha.evolves ? "dex.line.evolves" : "dex.line.final")];
+    const l: string[] = [
+      t("dex.line.types", {
+        types: ficha.types.map((x) => t(`type.${x}` as Key)).join(" / "),
+      }),
+      t(ARQUETIPO[ficha.build]!),
+      t("dex.line.stats", {
+        atk: ficha.baseStats.atk,
+        def: ficha.baseStats.def,
+        hp: ficha.baseStats.hp,
+      }),
+      t("dex.line.maxCp", {
+        cp: ficha.maxCP.toLocaleString(idioma),
+        level: tetoDePowerUp(setup.level, dados?.version.levelCap ?? 50),
+      }),
+      t(ficha.evolves ? "dex.line.evolves" : "dex.line.final"),
+    ];
     if (ficha.raidRank) {
       l.push(
         t("dex.line.raid", {
@@ -114,25 +140,55 @@ export default function ModoPokedex() {
         }),
       );
     }
+    if (ficha.leagueRank) {
+      l.push(
+        t("dex.line.league", {
+          league: t(`rank.league.${ficha.leagueRank.league}` as Key),
+          position: ficha.leagueRank.position,
+        }),
+      );
+    }
     return l;
-  }, [ficha, t]);
+  }, [ficha, t, idioma, setup.level, dados]);
 
   const escolher = (s: Especie) => {
     setEscolhida(s);
     setBusca("");
     void marcarVisto(s.id);
+    /* Com a voz ligada ela fala SOZINHA ao escolher — é o que uma Pokédex faz.
+       Calar antes evita duas locuções sobrepostas ao folhear rápido. */
+    calar();
+    setLendo(false);
   };
 
-  const ouvir = () => {
-    if (lendo) {
-      calar();
-      setLendo(false);
-      return;
-    }
-    if (!escolhida) return;
+  /*
+   * ANTERIOR e PRÓXIMO, na ordem da dex — e circular.
+   *
+   * ⚠️ É o que faz o modo virar uma Pokédex de verdade em vez de uma busca com
+   * câmera atrás: dá para FOLHEAR. Circular porque parar no 1 e no último
+   * obrigaria a rolar mil e cento e oitenta nomes para voltar ao começo.
+   */
+  const ordenadas = useMemo(
+    () => (dados ? [...dados.canonicas].sort((a, b) => a.dex - b.dex) : []),
+    [dados],
+  );
+
+  const pular = (passo: number) => {
+    if (ordenadas.length === 0) return;
+    const atual = escolhida ? ordenadas.findIndex((s) => s.id === escolhida.id) : -1;
+    const proximo = ordenadas[(atual + passo + ordenadas.length) % ordenadas.length];
+    if (proximo) escolher(proximo);
+  };
+
+  /* A locução dispara quando as LINHAS mudam, e não no `escolher`: as linhas
+     dependem do dataset e do idioma, e falar antes delas ficarem prontas leria
+     a ficha do bicho anterior. */
+  useEffect(() => {
+    if (!vozLigada || !escolhida || linhas.length === 0) return;
     falar([escolhida.name, ...linhas].join(". "), idioma);
     setLendo(true);
-  };
+  }, [escolhida, linhas, vozLigada, idioma]);
+
 
   const capturados = itens?.length ?? 0;
 
@@ -216,18 +272,46 @@ export default function ModoPokedex() {
           {escolhida && ficha && (
             <View className="mt-4">
               <View className="flex-row items-center justify-between">
-                <Text className="text-titulo-cartao" style={{ color: "#FFFFFF" }}>
-                  {escolhida.name}
-                </Text>
-                <Pressable onPress={ouvir} hitSlop={10} className="flex-row items-center gap-1.5">
+                <View className="flex-row items-center gap-2 flex-1">
+                  {/* FOLHEAR. É o que faz o modo virar Pokédex em vez de busca
+                      com câmera atrás. */}
+                  <Pressable onPress={() => pular(-1)} hitSlop={10} accessibilityLabel={t("dex.prev")}>
+                    <Text style={{ color: "#FFFFFF", fontSize: 20 }}>‹</Text>
+                  </Pressable>
+                  <Text
+                    className="text-titulo-cartao flex-1"
+                    numberOfLines={1}
+                    style={{ color: "#FFFFFF" }}
+                  >
+                    {escolhida.name}
+                  </Text>
+                  <Pressable onPress={() => pular(1)} hitSlop={10} accessibilityLabel={t("dex.next")}>
+                    <Text style={{ color: "#FFFFFF", fontSize: 20 }}>›</Text>
+                  </Pressable>
+                </View>
+                {/* O INTERRUPTOR DA VOZ, e não só "falar de novo": quem não
+                    quer locução não quer ser perguntado a cada espécie. A
+                    escolha fica salva. */}
+                <Pressable
+                  onPress={() => {
+                    if (vozLigada) calar();
+                    setLendo(false);
+                    alternarVoz();
+                  }}
+                  hitSlop={10}
+                  className="flex-row items-center gap-1.5 ml-3"
+                >
                   <SymbolView
-                    name={lendo ? "speaker.slash.fill" : "speaker.wave.2.fill"}
+                    name={vozLigada ? "speaker.wave.2.fill" : "speaker.slash.fill"}
                     size={15}
-                    tintColor="#FFFFFF"
+                    tintColor={vozLigada ? "#FFFFFF" : "rgba(255,255,255,0.5)"}
                     fallback={<Text style={{ color: "#fff" }}>♪</Text>}
                   />
-                  <Text className="text-legenda" style={{ color: "#FFFFFF" }}>
-                    {t(lendo ? "dex.voiceOff" : "dex.speak")}
+                  <Text
+                    className="text-legenda"
+                    style={{ color: vozLigada ? "#FFFFFF" : "rgba(255,255,255,0.5)" }}
+                  >
+                    {t(vozLigada ? "dex.voiceOn" : "dex.voiceOff")}
                   </Text>
                 </Pressable>
               </View>
