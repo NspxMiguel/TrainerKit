@@ -69,3 +69,52 @@ antes.
 - **Notificação local** de evento (`src/avisos.ts`)
 - **Barra de abas de vidro** e tela de Início com herói na cor do tipo
 - **Modo Pokédex com câmera de verdade** — o PWA depende da câmera do navegador
+
+
+## 07/09/2026 — segunda rodada
+
+Pedido dele: *"quero todas as funcoes, tudo igual ou melhor, todas as funções do
+wpa, com o desing do claude desing, tudo igual, tudo funcionando"*.
+
+### O degradê
+
+O herói e o cabeçalho da ficha usavam um degradê **diagonal de duas paradas**
+terminando em transparente — que só apaga a cor. O pacote usa **três paradas
+verticais** (escuro, a cor, claro) em `0% / 46% / 72%`, e é isso que dá a
+sensação de luz subindo. Está em `degradeDoTipo()` no core, com teste que trava
+a relação (a luz sobe, a matiz não anda) em vez dos hexadecimais.
+
+### A ficha, bloco a bloco
+
+Faltavam sete blocos que o PWA tem, e a ordem era outra. Agora segue a do web:
+troca → pra que serve → atributos → tetos de PC → Batalha Max → lente →
+sombroso → melhores golpes (segmented) → melhores IV por liga → evolução.
+
+Entraram: **troca**, **pra que serve**, **melhores IV por liga com seletor**,
+**"Eu tenho esse"**, **tirar da coleção em dois passos**, **seletor de contexto
+de golpe** e a **nota de cada moveset**.
+
+### O resto
+
+| O que | Onde |
+| --- | --- |
+| Fila de pendências (as 3 condições do web) | `src/pendencias.ts` |
+| Herói mostra o que pede decisão, com ação e "feito" | `app/(abas)/index.tsx` |
+| Selo de pendências na aba | `app/(abas)/_layout.tsx` |
+| Busca no Início, dica do dia, esqueleto | `app/(abas)/index.tsx` |
+| Todos/Meus com contagem, grade/lista, 9 ordens | `app/(abas)/pokedex.tsx` |
+| Marcar veredito como feito na lista | idem |
+| Faixa da faxina, condicional | idem |
+| Importar backup | `src/colecao.ts`, `app/colecao/index.tsx` |
+| Ajustes: dado do jogo, sobre, apagar tudo | `app/(abas)/ajustes.tsx` |
+| Modo Pokédex: ficha inteira, folhear, voz persistente | `app/dex/index.tsx` |
+| Movimento: entrada em cascata, mola, transição | `src/movimento.ts` e cia. |
+
+### Duas armadilhas que custaram tempo
+
+- **`createAnimatedComponent(Pressable)` do Reanimated não entrega o toque.** A
+  grade inteira ficou muda, sem erro nenhum. O `Animated` do próprio React
+  Native resolve, e é o suficiente para uma mola de escala.
+- **`UIVisualEffectView` dentro de view com `opacity` animada perde o vidro.**
+  O cartão do veredito sumia ao entrar na cascata. A `Entrada` larga a camada
+  animada quando termina.
