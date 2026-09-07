@@ -118,3 +118,23 @@ de golpe** e a **nota de cada moveset**.
 - **`UIVisualEffectView` dentro de view com `opacity` animada perde o vidro.**
   O cartão do veredito sumia ao entrar na cascata. A `Entrada` larga a camada
   animada quando termina.
+
+
+## 07/09/2026 — terceira rodada, achada por varredura de chave
+
+Método: toda chave `t("…")` usada em `apps/web/src` que não aparecia em
+`apps/mobile`. Sete buracos reais, todos fechados:
+
+| O que faltava | Onde entrou |
+| --- | --- |
+| **Discordo** — o veredito para de cobrar, sem sumir | `app/especie/[id].tsx` |
+| **Faxina de verdade** — selecionar, confirmar, desfazer, o que ficou | `app/faxina/index.tsx` |
+| **"Você consegue?"** na raide — solar, sem chance, quantos treinadores | `app/raide/[id].tsx` |
+| **Objetivo do time** — raide ou liga, e o que falta caçar | `app/time/index.tsx` |
+| **IV impossível** — diz o que conferir em vez de "não achei" | `app/iv/[id].tsx` |
+| **Entre os seus** — a posição dele na sua família | `src/EntreOsSeus.tsx` |
+| **Ovo regional** | `app/chocadeira/index.tsx` |
+
+De passagem: `useColecao` passou a memoizar a lista filtrada. Sem isso ela era
+um array novo a cada render, e a Faxina entrou em laço infinito
+(*Maximum update depth exceeded*).
