@@ -20,6 +20,7 @@ import { useDados, type Base, type Especie } from "../../src/dados";
 import { useT } from "../../src/i18n";
 import { useTema } from "../../src/tema";
 import { Selo } from "../../src/Selo";
+import { Titulo } from "../../src/Titulo";
 
 /**
  * Como derrubar este bicho numa raide.
@@ -137,7 +138,14 @@ export default function Raide() {
   if (!chefe || !dados) return <View className="flex-1 bg-fundo" />;
 
   return (
-    <ScrollView className="flex-1 bg-fundo" contentContainerStyle={{ padding: 20 }}>
+    <ScrollView
+      className="flex-1 bg-fundo"
+      contentContainerStyle={{ padding: 20 }}
+      /* Sem isto o titulo grande do header nao reserva espaco e o
+         conteudo nasce por baixo dele. */
+      contentInsetAdjustmentBehavior="automatic"
+    >
+      <Titulo>{t("raid.title")}</Titulo>
       <View className="flex-row items-center gap-3">
         <Selo especie={chefe} tamanho={48} />
         <Text className="text-texto text-lg font-bold">{chefe.name}</Text>

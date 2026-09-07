@@ -22,6 +22,7 @@ import { useDados } from "../../src/dados";
 import { useT } from "../../src/i18n";
 import { useTema } from "../../src/tema";
 import { Selo } from "../../src/Selo";
+import { Titulo } from "../../src/Titulo";
 
 /**
  * EXPORTAR — e nao e conforto, e o que a politica de privacidade promete.
@@ -94,6 +95,7 @@ export default function Colecao() {
    */
   const barra = (
     <View className="px-5 pt-4">
+      <Titulo>{t("colecoes.title")}</Titulo>
       <FlatList
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -153,6 +155,7 @@ export default function Colecao() {
 
   return (
     <FlatList
+      contentInsetAdjustmentBehavior="automatic"
       className="flex-1 bg-fundo"
       contentContainerStyle={{ padding: 20 }}
       data={itens}

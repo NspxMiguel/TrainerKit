@@ -6,6 +6,7 @@ import { useDados } from "../../src/dados";
 import { useT } from "../../src/i18n";
 import { useTema } from "../../src/tema";
 import { Selo } from "../../src/Selo";
+import { Titulo } from "../../src/Titulo";
 
 /**
  * Quem deixar no ginasio.
@@ -51,7 +52,14 @@ export default function Ginasio() {
   }, [dados]);
 
   return (
-    <ScrollView className="flex-1 bg-fundo" contentContainerStyle={{ padding: 20 }}>
+    <ScrollView
+      className="flex-1 bg-fundo"
+      contentContainerStyle={{ padding: 20 }}
+      /* Sem isto o titulo grande do header nao reserva espaco e o
+         conteudo nasce por baixo dele. */
+      contentInsetAdjustmentBehavior="automatic"
+    >
+      <Titulo>{t("gym.title")}</Titulo>
       <Text className="text-texto3 text-[11px] tracking-widest mb-2">
         {t("gym.howMany").toUpperCase()}
       </Text>

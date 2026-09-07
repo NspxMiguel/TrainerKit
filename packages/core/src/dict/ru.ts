@@ -157,6 +157,7 @@ export const RU: Dict = {
   "context.pvp.detail": "Ходы и энергия.",
   "context.rocket.title": "Rocket",
   "context.rocket.detail": "Лидеры блокируют первые две заряженные атаки.",
+  "iv.calcTitle": "Калькулятор IV",
   "iv.title": "IV моего {name}",
   "iv.cp": "CP",
   "iv.hp": "HP",

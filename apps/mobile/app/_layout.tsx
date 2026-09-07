@@ -1,9 +1,9 @@
 import "../global.css";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { Idioma } from "../src/i18n";
+import { Idioma, useT } from "../src/i18n";
 import { Onboarding } from "../src/Onboarding";
 import { IA } from "../src/ia";
 import { Imagens } from "../src/imagens";
@@ -18,9 +18,31 @@ import { Tema, useTema } from "../src/tema";
  * do `useTema` — e por isso a `Casca` e um componente separado: ela precisa
  * estar DENTRO do `<Tema>` pra ler o contexto.
  */
+/**
+ * O × que fecha uma folha.
+ *
+ * ⚠️ Em `headerRight` e não como `headerLeft`: o gesto de arrastar da borda
+ * esquerda continua voltando, e o botão à direita é o que o desenho põe.
+ */
+function Fechar() {
+  const { cores } = useTema();
+  const router = useRouter();
+  return (
+    <Pressable onPress={() => router.back()} hitSlop={12}>
+      <View
+        className="rounded-pilula items-center justify-center"
+        style={{ width: 30, height: 30, backgroundColor: cores.superficie }}
+      >
+        <Text style={{ color: cores.texto2, fontSize: 15, lineHeight: 18 }}>✕</Text>
+      </View>
+    </Pressable>
+  );
+}
+
 function Casca() {
   const { cores, escuro } = useTema();
   const { pronto, setup } = useSetup();
+  const { t } = useT();
 
   return (
     <>
@@ -70,24 +92,56 @@ function Casca() {
             animationDuration: DUR.folha,
           }}
         />
-        <Stack.Screen name="iv/[id]" options={{ title: "" }} />
-        <Stack.Screen name="encontro/[id]" options={{ title: "" }} />
-        <Stack.Screen name="raide/[id]" options={{ title: "" }} />
-        <Stack.Screen name="chocadeira/index" options={{ title: "" }} />
-        <Stack.Screen name="agenda/index" options={{ title: "" }} />
-        <Stack.Screen name="colecao/index" options={{ title: "" }} />
-        <Stack.Screen name="faxina/index" options={{ title: "" }} />
-        <Stack.Screen name="time/index" options={{ title: "" }} />
-        <Stack.Screen name="ginasio/index" options={{ title: "" }} />
+        {/*
+          AS TELAS DE FERRAMENTA: título GRANDE e × à direita.
+
+          ⚠️ Elas tinham `title: ""` e o chevron de voltar — os prints 6, 7 e 8
+          mostram um título grande dentro da tela e um × no canto. E não é só
+          aparência: elas são FOLHAS abertas a partir de outra tela, e folha se
+          fecha, não se volta.
+
+          `headerLargeTitle` é o comportamento nativo do iOS — o título grande
+          encolhe para a barra ao rolar, de graça. Desenhar isso à mão daria o
+          visual sem o movimento, que foi o erro da barra de abas.
+        */}
+        {(
+          [
+            "iv/[id]",
+            "encontro/[id]",
+            "raide/[id]",
+            "chocadeira/index",
+            "agenda/index",
+            "colecao/index",
+            "faxina/index",
+            "time/index",
+            "ginasio/index",
+            "itens/index",
+            "print/index",
+          ] as const
+        ).map((rota) => (
+          <Stack.Screen
+            key={rota}
+            name={rota}
+            options={{
+              /* ⚠️ TITULO VAZIO, e o grande e desenhado DENTRO da tela pelo
+                 `Titulo`. O `headerLargeTitle` do react-native-screens reserva
+                 o espaco e nao pinta texto nenhum nesta versao — medido com
+                 cor vermelha cravada, some do mesmo jeito. */
+              title: "",
+              headerShadowVisible: false,
+              headerBackVisible: false,
+              headerRight: () => <Fechar />,
+            }}
+          />
+        ))}
+
         <Stack.Screen name="legal/index" options={{ title: "" }} />
-        <Stack.Screen name="print/index" options={{ title: "" }} />
         {/* Sem cabecalho: a camera e a tela inteira, e o fechar e o botao de
             vidro que a propria tela desenha. */}
         <Stack.Screen
           name="dex/index"
           options={{ headerShown: false, animation: "fade", animationDuration: DUR.base }}
         />
-        <Stack.Screen name="itens/index" options={{ title: "" }} />
       </Stack>
 
       {/*

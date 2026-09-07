@@ -157,6 +157,7 @@ export const JA: Dict = {
   "context.pvp.detail": "ターンとエネルギー。",
   "context.rocket.title": "ロケット団",
   "context.rocket.detail": "リーダーは最初の2発を必ず防ぎます。",
+  "iv.calcTitle": "個体値計算",
   "iv.title": "うちの{name}の個体値",
   "iv.cp": "CP",
   "iv.hp": "HP",

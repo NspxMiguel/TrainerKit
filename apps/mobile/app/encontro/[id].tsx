@@ -17,6 +17,7 @@ import { useDados } from "../../src/dados";
 import { useT } from "../../src/i18n";
 import { useTema } from "../../src/tema";
 import { Selo } from "../../src/Selo";
+import { Titulo } from "../../src/Titulo";
 
 /**
  * O IV ANTES de capturar, pelo PC.
@@ -65,7 +66,14 @@ export default function Encontro() {
   const selo = exato ? badgeFor(ivTotalOf(exato)) : null;
 
   return (
-    <ScrollView className="flex-1 bg-fundo" contentContainerStyle={{ padding: 20 }}>
+    <ScrollView
+      className="flex-1 bg-fundo"
+      contentContainerStyle={{ padding: 20 }}
+      /* Sem isto o titulo grande do header nao reserva espaco e o
+         conteudo nasce por baixo dele. */
+      contentInsetAdjustmentBehavior="automatic"
+    >
+      <Titulo>{t("pre.short")}</Titulo>
       <View className="flex-row items-center gap-3">
         <Selo especie={especie} tamanho={48} />
         <Text className="text-texto text-lg font-bold">{especie.name}</Text>

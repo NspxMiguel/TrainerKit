@@ -14,6 +14,7 @@ import { useT } from "../../src/i18n";
 import { useSetup } from "../../src/setup";
 import { useTema } from "../../src/tema";
 import { Selo } from "../../src/Selo";
+import { Titulo } from "../../src/Titulo";
 
 /**
  * A faxina.
@@ -190,7 +191,9 @@ export default function Faxina() {
     <ScrollView
       className="flex-1 bg-fundo"
       contentContainerStyle={{ padding: 20, paddingBottom: 140 }}
+      contentInsetAdjustmentBehavior="automatic"
     >
+      <Titulo>{t("faxina.title")}</Titulo>
       <Text className="text-texto2 text-corpo leading-6">{t("faxina.intro")}</Text>
 
       {plano.soltos.length === 0 ? (

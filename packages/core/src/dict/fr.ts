@@ -157,6 +157,7 @@ export const FR: Dict = {
   "context.pvp.detail": "Tours et énergie.",
   "context.rocket.title": "Rocket",
   "context.rocket.detail": "Les leaders bloquent tes deux premières attaques chargées.",
+  "iv.calcTitle": "Calculateur d'IV",
   "iv.title": "IV de mon {name}",
   "iv.cp": "PC",
   "iv.hp": "PV",

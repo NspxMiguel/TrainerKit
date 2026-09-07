@@ -14,6 +14,7 @@ import { Segmented } from "../../src/Segmented";
 import { useT } from "../../src/i18n";
 import { useTema } from "../../src/tema";
 import { Selo } from "../../src/Selo";
+import { Titulo } from "../../src/Titulo";
 
 /**
  * Seis bichos que se cobrem.
@@ -125,7 +126,14 @@ export default function Time() {
   const temElite = Object.values(golpes).some((g) => g.endsWith("✦"));
 
   return (
-    <ScrollView className="flex-1 bg-fundo" contentContainerStyle={{ padding: 20 }}>
+    <ScrollView
+      className="flex-1 bg-fundo"
+      contentContainerStyle={{ padding: 20 }}
+      /* Sem isto o titulo grande do header nao reserva espaco e o
+         conteudo nasce por baixo dele. */
+      contentInsetAdjustmentBehavior="automatic"
+    >
+      <Titulo>{t("team.title")}</Titulo>
       <Text className="text-texto3 text-legenda mb-2">{t("team.goal").toUpperCase()}</Text>
       <Segmented
         rotuloAcessivel={t("team.goal")}

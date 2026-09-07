@@ -9,6 +9,7 @@ import { useT } from "../../src/i18n";
 import { bitmapDoArquivo } from "../../src/print";
 import { useTema } from "../../src/tema";
 import { Selo } from "../../src/Selo";
+import { Titulo } from "../../src/Titulo";
 
 /**
  * O LEITOR DE PRINT — a função que dá nome ao app no site.
@@ -82,7 +83,14 @@ export default function Print() {
       : [];
 
   return (
-    <ScrollView className="flex-1 bg-fundo" contentContainerStyle={{ padding: 20 }}>
+    <ScrollView
+      className="flex-1 bg-fundo"
+      contentContainerStyle={{ padding: 20 }}
+      /* Sem isto o titulo grande do header nao reserva espaco e o
+         conteudo nasce por baixo dele. */
+      contentInsetAdjustmentBehavior="automatic"
+    >
+      <Titulo>{t("home.quickScan")}</Titulo>
       <Text className="text-texto text-[28px] font-extrabold">{t("scan.prompt")}</Text>
       <Text className="text-texto2 text-[15px] leading-6 mt-2">{t("scan.promptDetail")}</Text>
 

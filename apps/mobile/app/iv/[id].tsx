@@ -9,6 +9,7 @@ import { EntreOsSeus } from "../../src/EntreOsSeus";
 import { useT } from "../../src/i18n";
 import { useTema } from "../../src/tema";
 import { Selo } from "../../src/Selo";
+import { Titulo } from "../../src/Titulo";
 
 /**
  * O IV pelas tres barras da avaliacao.
@@ -102,7 +103,14 @@ export default function Calculadora() {
   const selo = unico ? badgeFor(ivTotalOf(unico.ivs)) : null;
 
   return (
-    <ScrollView className="flex-1 bg-fundo" contentContainerStyle={{ padding: 20 }}>
+    <ScrollView
+      className="flex-1 bg-fundo"
+      contentContainerStyle={{ padding: 20 }}
+      /* Sem isto o titulo grande do header nao reserva espaco e o
+         conteudo nasce por baixo dele. */
+      contentInsetAdjustmentBehavior="automatic"
+    >
+      <Titulo>{t("iv.calcTitle")}</Titulo>
       <View className="flex-row items-center gap-3">
         <Selo especie={especie} tamanho={48} />
         <Text className="text-texto text-lg font-bold">{especie.name}</Text>

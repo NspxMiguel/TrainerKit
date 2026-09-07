@@ -157,6 +157,7 @@ export const KO: Dict = {
   "context.pvp.detail": "턴과 에너지.",
   "context.rocket.title": "로켓단",
   "context.rocket.detail": "리더는 첫 두 차지 기술을 반드시 막습니다.",
+  "iv.calcTitle": "개체값 계산기",
   "iv.title": "내 {name}의 개체값",
   "iv.cp": "CP",
   "iv.hp": "HP",

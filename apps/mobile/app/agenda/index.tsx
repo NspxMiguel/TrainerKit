@@ -14,6 +14,7 @@ import { useT } from "../../src/i18n";
 import { useTema } from "../../src/tema";
 import { Vidro } from "../../src/Vidro";
 import { acompanharEventoAtual, pararAtividade, suportaAtividade } from "../../src/atividade";
+import { Titulo } from "../../src/Titulo";
 
 /**
  * O que esta acontecendo.
@@ -107,7 +108,14 @@ export default function Agenda() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-fundo" contentContainerStyle={{ padding: 20 }}>
+    <ScrollView
+      className="flex-1 bg-fundo"
+      contentContainerStyle={{ padding: 20 }}
+      /* Sem isto o titulo grande do header nao reserva espaco e o
+         conteudo nasce por baixo dele. */
+      contentInsetAdjustmentBehavior="automatic"
+    >
+      <Titulo>{t("agenda.title")}</Titulo>
       {/*
         ME AVISA — notificação LOCAL, não push.
 

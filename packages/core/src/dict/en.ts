@@ -185,6 +185,7 @@ const EN = {
   "context.rocket.detail": "Leaders block your first two charged moves.",
 
   // ---------------------------------------------------------------- calculadora
+  "iv.calcTitle": "IV calculator",
   "iv.title": "My {name}'s IVs",
   "iv.cp": "CP",
   "iv.hp": "HP",

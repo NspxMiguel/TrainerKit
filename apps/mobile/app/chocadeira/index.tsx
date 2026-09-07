@@ -14,6 +14,7 @@ import { useDados, type Especie } from "../../src/dados";
 import { useT } from "../../src/i18n";
 import { useTema } from "../../src/tema";
 import { Selo } from "../../src/Selo";
+import { Titulo } from "../../src/Titulo";
 
 /**
  * O que sai de cada ovo.
@@ -66,7 +67,14 @@ export default function Chocadeira() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-fundo" contentContainerStyle={{ padding: 20 }}>
+    <ScrollView
+      className="flex-1 bg-fundo"
+      contentContainerStyle={{ padding: 20 }}
+      /* Sem isto o titulo grande do header nao reserva espaco e o
+         conteudo nasce por baixo dele. */
+      contentInsetAdjustmentBehavior="automatic"
+    >
+      <Titulo>{t("eggs.title")}</Titulo>
       {grupos.map(([distancia, ovos]) => (
         <View key={distancia} className="mt-4">
           <Text className="text-texto3 text-[11px] tracking-widest mb-2">

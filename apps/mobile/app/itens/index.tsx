@@ -6,6 +6,7 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { useDados } from "../../src/dados";
 import { useT } from "../../src/i18n";
 import { useTema } from "../../src/tema";
+import { Titulo } from "../../src/Titulo";
 
 /**
  * PRA QUE SERVE CADA ITEM.
@@ -54,8 +55,14 @@ export default function Itens() {
   );
 
   return (
-    <ScrollView className="flex-1 bg-fundo" contentContainerStyle={{ padding: 20 }}>
-      <Text className="text-texto text-[28px] font-extrabold">{t("items.title")}</Text>
+    <ScrollView
+      className="flex-1 bg-fundo"
+      contentContainerStyle={{ padding: 20 }}
+      /* Sem isto o titulo grande do header nao reserva espaco e o
+         conteudo nasce por baixo dele. */
+      contentInsetAdjustmentBehavior="automatic"
+    >
+      <Titulo>{t("items.title")}</Titulo>
       <Text className="text-texto2 text-[15px] leading-6 mt-2">{t("items.intro")}</Text>
 
       <Text className="text-texto3 text-[11px] tracking-widest mt-7 mb-2">

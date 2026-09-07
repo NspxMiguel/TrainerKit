@@ -167,6 +167,7 @@ export const PT_BR: Dict = {
   "context.rocket.title": "Rocket",
   "context.rocket.detail": "Os líderes bloqueiam seus dois primeiros carregados.",
 
+  "iv.calcTitle": "Calculadora de IV",
   "iv.title": "IV do meu {name}",
   "iv.cp": "PC",
   "iv.hp": "PS",

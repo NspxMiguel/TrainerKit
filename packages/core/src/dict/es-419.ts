@@ -157,6 +157,7 @@ export const ES_419: Dict = {
   "context.pvp.detail": "Turnos y energía.",
   "context.rocket.title": "Rocket",
   "context.rocket.detail": "Los líderes bloquean tus dos primeros cargados.",
+  "iv.calcTitle": "Calculadora de IV",
   "iv.title": "IV de mi {name}",
   "iv.cp": "PC",
   "iv.hp": "PS",
