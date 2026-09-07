@@ -43,9 +43,11 @@ The same core, the same ten languages, the same numbers — with what only a
 native app can do:
 
 - **Pokedex Mode** — the camera open, the entry read aloud by the system voice,
-  and a seen counter that gives the Pokedex progress. No key, no account, no
-  network: image recognition is deliberately absent, because that needs a vision
-  model and in the app the AI is your own.
+  and a seen counter that gives the Pokedex progress. Reading an entry needs no
+  key, no account and no network. With your own key it also identifies the
+  species from the camera or from a photo; the name it returns is matched
+  against the dataset before any sheet opens, because a vision model invents a
+  name in the same voice it uses when it is right.
 - **Live Activity** — the event that is running sits on the Lock Screen and in
   the Dynamic Island, counting down. One at a time, the one ending soonest.
 - **Local notifications** for events. Scheduled on device; there is no server
@@ -58,6 +60,13 @@ native app can do:
 - **Move names in both languages**, English first: it is the language move names
   circulate in, and searching a translated name finds nothing.
 - **Named collections**, kept on device, each with its own verdicts.
+- **Your own sources.** The app ships with no artwork and one database, and
+  neither choice has to stay ours: point it at a manifest for the images, or at
+  another `gamedata.json` for the numbers. The database falls back to the
+  bundled one when the address fails, and validates the payload before anything
+  is calculated on it.
+- **Ask about the whole collection**, not one species at a time — the questions
+  worth asking compare its members with each other.
 
 Build it with `pnpm --filter @trainerkit/mobile exec expo run:ios`, or archive
 with `xcodebuild`; the signing team lives in `plugins/ios-assinatura.js`, not in
