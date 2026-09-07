@@ -15,9 +15,29 @@ import { useCallback, useEffect, useState } from "react";
  * complexidade pra um problema que nao existe.
  */
 const CHAVE = "tk:colecao";
+const CHAVE_COLECOES = "tk:colecoes";
+const CHAVE_ATIVA = "tk:colecao-ativa";
+
+/** A colecao que a migracao cria e carimba em tudo que ja existia. */
+export const COLECAO_PADRAO = "principal";
+
+export interface Colecao {
+  id: string;
+  nome: string;
+  criadaEm: number;
+}
 
 export interface Guardado {
   id: string;
+  /**
+   * A que colecao este bicho pertence.
+   *
+   * ⚠️ OPCIONAL DE PROPOSITO, e nao por desleixo: quem ja usava o app tem
+   * registros gravados SEM este campo. `ler` carimba todos na colecao padrao
+   * na primeira leitura — sem isso a colecao abriria vazia, com os dados ainda
+   * la e invisiveis, porque o filtro nao casaria com nada.
+   */
+  colecao?: string;
   speciesId: string;
   ivs: { atk: number; def: number; hp: number };
   level: number;
@@ -37,11 +57,99 @@ async function ler(): Promise<Guardado[]> {
   if (cache) return cache;
   try {
     const cru = await AsyncStorage.getItem(CHAVE);
-    cache = cru ? (JSON.parse(cru) as Guardado[]) : [];
+    const lido = cru ? (JSON.parse(cru) as Guardado[]) : [];
+    /* A MIGRACAO, e ela roda uma vez por aparelho: tudo que nao tem colecao
+       passa a ser da padrao. Regravar so acontece se algo mudou. */
+    const semColecao = lido.filter((g) => !g.colecao);
+    if (semColecao.length > 0) {
+      for (const g of semColecao) g.colecao = COLECAO_PADRAO;
+      await AsyncStorage.setItem(CHAVE, JSON.stringify(lido));
+    }
+    cache = lido;
   } catch {
     cache = [];
   }
   return cache;
+}
+
+async function lerColecoes(): Promise<Colecao[]> {
+  try {
+    const cru = await AsyncStorage.getItem(CHAVE_COLECOES);
+    const lido = cru ? (JSON.parse(cru) as Colecao[]) : [];
+    if (lido.length > 0) return lido;
+  } catch {
+    // cai na criacao da padrao
+  }
+  const padrao: Colecao[] = [{ id: COLECAO_PADRAO, nome: "Principal", criadaEm: 0 }];
+  await AsyncStorage.setItem(CHAVE_COLECOES, JSON.stringify(padrao));
+  return padrao;
+}
+
+/** Todas as colecoes, com a padrao garantida. */
+export async function listarColecoes(): Promise<Colecao[]> {
+  return lerColecoes();
+}
+
+/** Qual colecao esta em uso. */
+export async function colecaoAtiva(): Promise<string> {
+  try {
+    return (await AsyncStorage.getItem(CHAVE_ATIVA)) || COLECAO_PADRAO;
+  } catch {
+    return COLECAO_PADRAO;
+  }
+}
+
+export async function trocarColecao(id: string): Promise<void> {
+  await AsyncStorage.setItem(CHAVE_ATIVA, id);
+  avisar();
+}
+
+export async function criarColecao(nome: string): Promise<Colecao> {
+  const lista = await lerColecoes();
+  const nova: Colecao = {
+    id: `c${lista.length + 1}-${nome.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 24)}`,
+    nome: nome.trim() || "Sem nome",
+    criadaEm: 0,
+  };
+  await AsyncStorage.setItem(CHAVE_COLECOES, JSON.stringify([...lista, nova]));
+  avisar();
+  return nova;
+}
+
+export async function renomearColecao(id: string, nome: string): Promise<void> {
+  const lista = await lerColecoes();
+  const alvo = lista.find((c) => c.id === id);
+  if (!alvo) return;
+  alvo.nome = nome.trim() || alvo.nome;
+  await AsyncStorage.setItem(CHAVE_COLECOES, JSON.stringify(lista));
+  avisar();
+}
+
+/**
+ * Apaga a colecao E o que estava dentro dela.
+ *
+ * ⚠️ A padrao nao se apaga: sem ela um aparelho ficaria sem destino pra guardar
+ * o proximo bicho, e a proxima leitura recriaria uma vazia com outro id.
+ */
+export async function apagarColecao(id: string): Promise<void> {
+  if (id === COLECAO_PADRAO) return;
+  const lista = await lerColecoes();
+  await AsyncStorage.setItem(CHAVE_COLECOES, JSON.stringify(lista.filter((c) => c.id !== id)));
+  const bichos = await ler();
+  await gravar(bichos.filter((g) => g.colecao !== id));
+  if ((await colecaoAtiva()) === id) await trocarColecao(COLECAO_PADRAO);
+  avisar();
+}
+
+/** Quantos bichos em cada colecao. */
+export async function contarPorColecao(): Promise<Record<string, number>> {
+  const bichos = await ler();
+  const conta: Record<string, number> = {};
+  for (const g of bichos) {
+    const c = g.colecao ?? COLECAO_PADRAO;
+    conta[c] = (conta[c] ?? 0) + 1;
+  }
+  return conta;
 }
 
 async function gravar(lista: Guardado[]): Promise<void> {
@@ -54,13 +162,19 @@ async function gravar(lista: Guardado[]): Promise<void> {
   }
 }
 
-export async function guardar(
-  entrada: Omit<Guardado, "id" | "em">,
-): Promise<void> {
+export async function guardar(entrada: Omit<Guardado, "id" | "em">): Promise<void> {
   const lista = await ler();
+  /* Sem colecao dita, vai pra que estiver em uso — e nao pra padrao fixa: quem
+     esta com "Time de PvP" aberta espera guardar ali. */
+  const colecao = entrada.colecao ?? (await colecaoAtiva());
   await gravar([
     ...lista,
-    { ...entrada, id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, em: Date.now() },
+    {
+      ...entrada,
+      colecao,
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      em: Date.now(),
+    },
   ]);
 }
 
@@ -69,21 +183,38 @@ export async function remover(id: string): Promise<void> {
   await gravar(lista.filter((g) => g.id !== id));
 }
 
-export function useColecao(): { itens: Guardado[] | null; recarregar: () => void } {
-  const [itens, setItens] = useState<Guardado[] | null>(cache);
+/**
+ * Os bichos da colecao EM USO, mais o estado das colecoes.
+ *
+ * ⚠️ `itens` filtra pela ativa. Devolver a lista inteira e deixar cada tela
+ * filtrar seria a mesma regra escrita seis vezes — e a primeira tela que
+ * esquecesse mostraria bicho de outra colecao sem ninguem notar.
+ */
+export function useColecao(): {
+  itens: Guardado[] | null;
+  todos: Guardado[] | null;
+  colecoes: Colecao[];
+  ativa: string;
+  recarregar: () => void;
+} {
+  const [todos, setTodos] = useState<Guardado[] | null>(cache);
+  const [colecoes, setColecoes] = useState<Colecao[]>([]);
+  const [ativa, setAtiva] = useState(COLECAO_PADRAO);
 
   const recarregar = useCallback(() => {
-    void ler().then((l) => setItens([...l]));
+    void ler().then((l) => setTodos([...l]));
+    void lerColecoes().then(setColecoes);
+    void colecaoAtiva().then(setAtiva);
   }, []);
 
   useEffect(() => {
-    const fn = () => setItens(cache ? [...cache] : []);
-    ouvintes.add(fn);
+    ouvintes.add(recarregar);
     recarregar();
     return () => {
-      ouvintes.delete(fn);
+      ouvintes.delete(recarregar);
     };
   }, [recarregar]);
 
-  return { itens, recarregar };
+  const itens = todos?.filter((g) => (g.colecao ?? COLECAO_PADRAO) === ativa) ?? null;
+  return { itens, todos, colecoes, ativa, recarregar };
 }

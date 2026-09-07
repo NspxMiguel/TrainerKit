@@ -321,6 +321,7 @@ export const KO: Dict = {
   "colecoes.namePlaceholder": "계정 이름",
   "collection.markDone": "이미 했어요",
   "collection.undoDone": "아직 안 했어요",
+  "collection.newName": "새 컬렉션…",
   "collection.export": "내보내기",
   "collection.exportFailed": "파일을 저장하지 못했습니다. 공간을 확보한 뒤 다시 시도해 주세요.",
   "collection.import": "가져오기",

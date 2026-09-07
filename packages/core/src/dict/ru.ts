@@ -321,6 +321,7 @@ export const RU: Dict = {
   "colecoes.namePlaceholder": "Название аккаунта",
   "collection.markDone": "Уже сделал",
   "collection.undoDone": "Ещё не сделал",
+  "collection.newName": "Новая коллекция…",
   "collection.export": "Экспорт",
   "collection.exportFailed": "Не удалось записать файл. Освободите место и попробуйте снова.",
   "collection.import": "Импорт",

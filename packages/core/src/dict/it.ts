@@ -321,6 +321,7 @@ export const IT: Dict = {
   "colecoes.namePlaceholder": "Nome account",
   "collection.markDone": "L’ho già fatto",
   "collection.undoDone": "Non l’ho ancora fatto",
+  "collection.newName": "Nuova collezione…",
   "collection.export": "Esporta",
   "collection.exportFailed": "Non sono riuscito a scrivere il file. Libera spazio e riprova.",
   "collection.import": "Importa",

@@ -321,6 +321,7 @@ export const JA: Dict = {
   "colecoes.namePlaceholder": "アカウント名",
   "collection.markDone": "もうやった",
   "collection.undoDone": "やっぱりまだ",
+  "collection.newName": "新しいコレクション…",
   "collection.export": "書き出し",
   "collection.exportFailed": "ファイルを書き込めませんでした。空き容量を作ってからもう一度お試しください。",
   "collection.import": "読み込み",
