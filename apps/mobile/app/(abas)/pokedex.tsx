@@ -28,6 +28,7 @@ import { Segmented } from "../../src/Segmented";
 import { SymbolView } from "expo-symbols";
 
 import { corDoTipo, Selo, tintaSobre } from "../../src/Selo";
+import { PerguntarColecao } from "../../src/PerguntarColecao";
 import { useSetup } from "../../src/setup";
 import { useTema } from "../../src/tema";
 import { Toque } from "../../src/Toque";
@@ -393,6 +394,11 @@ export default function Pokedex() {
             </View>
             <Text className="text-texto3 text-base">›</Text>
           </Toque>
+        )}
+
+        {/* A PERGUNTA SOBRE A COLEÇÃO INTEIRA — só na aba que tem coleção. */}
+        {aba === "meus" && (
+          <PerguntarColecao itens={itens ?? []} especies={dados?.species ?? []} />
         )}
 
         {aba === "meus" && podemSair > 0 && (
