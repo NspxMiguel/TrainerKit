@@ -10,7 +10,5 @@ import { Text } from "react-native";
  * os prints 6, 7 e 8 do pacote de desenho mostram.
  */
 export function Titulo({ children }: { children: string }) {
-  return (
-    <Text className="text-texto text-[28px] font-extrabold leading-9 mb-1">{children}</Text>
-  );
+  return <Text className="text-texto text-[28px] font-extrabold leading-9 mb-1">{children}</Text>;
 }

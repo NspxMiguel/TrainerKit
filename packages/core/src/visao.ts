@@ -49,7 +49,10 @@ export function nomeDaResposta(bruto: string): string | null {
   const limpo = bruto.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
   if (limpo === "" || /^unknown$/i.test(limpo)) return null;
   const primeira = limpo.split("\n")[0] ?? "";
-  const nome = primeira.replace(/[.!?]+$/, "").trim().slice(0, 40);
+  const nome = primeira
+    .replace(/[.!?]+$/, "")
+    .trim()
+    .slice(0, 40);
   return nome === "" || /^unknown$/i.test(nome) ? null : nome;
 }
 

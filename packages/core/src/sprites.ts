@@ -127,7 +127,8 @@ export function manifestSpriteUrl(
 export function checarUrl(url: string, paginaHttps: boolean): ProblemaDaFonte | null {
   const partes = partirUrl(url);
   if (!partes) return { chave: "source.err.badUrl" };
-  if (partes.esquema !== "https" && partes.esquema !== "http") return { chave: "source.err.scheme" };
+  if (partes.esquema !== "https" && partes.esquema !== "http")
+    return { chave: "source.err.scheme" };
   const local = partes.host === "localhost" || partes.host === "127.0.0.1";
   if (partes.esquema === "http" && paginaHttps && !local) return { chave: "source.err.mixed" };
   return null;
@@ -147,7 +148,7 @@ export function partirUrl(url: string): { esquema: string; host: string } | null
   /* Fora o host pode vir `user:senha@host:porta` — o que interessa é o host. */
   const autoridade = (m[2] ?? "").split("@").pop() ?? "";
   const host = autoridade.startsWith("[")
-    ? (autoridade.slice(0, autoridade.indexOf("]") + 1) || autoridade)
+    ? autoridade.slice(0, autoridade.indexOf("]") + 1) || autoridade
     : (autoridade.split(":")[0] ?? "");
   if (host === "") return null;
   return { esquema: (m[1] ?? "").toLowerCase(), host: host.toLowerCase() };

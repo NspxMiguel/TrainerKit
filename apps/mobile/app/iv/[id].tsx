@@ -272,9 +272,7 @@ export default function Calculadora() {
             errado, e dizer isso poupa a pessoa de achar que o app quebrou.
           */
           <>
-            <Text className="text-texto text-corpo font-semibold">
-              {t("iv.impossible.title")}
-            </Text>
+            <Text className="text-texto text-corpo font-semibold">{t("iv.impossible.title")}</Text>
             <Text className="text-texto2 text-corpo mt-2 leading-5">
               {t("iv.impossible.body", { cp, hp, name: especie?.name ?? "" })}
             </Text>

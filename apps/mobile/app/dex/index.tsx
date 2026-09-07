@@ -82,7 +82,6 @@ export default function ModoPokedex() {
 
   useEffect(() => () => calar(), []);
 
-
   const achados = useMemo(() => {
     if (!dados) return [];
     const termo = busca.trim().toLowerCase();
@@ -269,7 +268,6 @@ export default function ModoPokedex() {
     setLendo(true);
   }, [escolhida, linhas, vozLigada, idioma]);
 
-
   const capturados = itens?.length ?? 0;
 
   return (
@@ -392,7 +390,10 @@ export default function ModoPokedex() {
                 onPress={identificarDaCamera}
                 disabled={identificando || !permissao?.granted}
                 className="flex-1 rounded-pilula py-3 items-center"
-                style={{ backgroundColor: "rgba(228,72,59,0.85)", opacity: identificando ? 0.5 : 1 }}
+                style={{
+                  backgroundColor: "rgba(228,72,59,0.85)",
+                  opacity: identificando ? 0.5 : 1,
+                }}
               >
                 <Text className="text-legenda font-semibold" style={{ color: "#FFFFFF" }}>
                   {t(identificando ? "dex.identifying" : "dex.scanNow")}
@@ -414,7 +415,10 @@ export default function ModoPokedex() {
             </View>
           )}
           {naoSoube && (
-            <Text className="text-legenda mt-2 leading-4" style={{ color: "rgba(255,255,255,0.7)" }}>
+            <Text
+              className="text-legenda mt-2 leading-4"
+              style={{ color: "rgba(255,255,255,0.7)" }}
+            >
               {t("dex.notSure")}
             </Text>
           )}
@@ -457,7 +461,11 @@ export default function ModoPokedex() {
                 <View className="flex-row items-center gap-2 flex-1">
                   {/* FOLHEAR. É o que faz o modo virar Pokédex em vez de busca
                       com câmera atrás. */}
-                  <Pressable onPress={() => pular(-1)} hitSlop={10} accessibilityLabel={t("dex.prev")}>
+                  <Pressable
+                    onPress={() => pular(-1)}
+                    hitSlop={10}
+                    accessibilityLabel={t("dex.prev")}
+                  >
                     <Text style={{ color: "#FFFFFF", fontSize: 20 }}>‹</Text>
                   </Pressable>
                   <Text
@@ -467,7 +475,11 @@ export default function ModoPokedex() {
                   >
                     {escolhida.name}
                   </Text>
-                  <Pressable onPress={() => pular(1)} hitSlop={10} accessibilityLabel={t("dex.next")}>
+                  <Pressable
+                    onPress={() => pular(1)}
+                    hitSlop={10}
+                    accessibilityLabel={t("dex.next")}
+                  >
                     <Text style={{ color: "#FFFFFF", fontSize: 20 }}>›</Text>
                   </Pressable>
                 </View>

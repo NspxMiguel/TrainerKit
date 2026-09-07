@@ -206,7 +206,13 @@ export default function Agenda() {
             ativo={g.chave === "agora"}
             {...(g.chave === "agora"
               ? {}
-              : { style: { backgroundColor: cores.superficie, borderRadius: 26, overflow: "hidden" as const } })}
+              : {
+                  style: {
+                    backgroundColor: cores.superficie,
+                    borderRadius: 26,
+                    overflow: "hidden" as const,
+                  },
+                })}
           >
             {g.itens.map((e, i) => (
               <Pressable

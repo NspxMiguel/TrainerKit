@@ -27,13 +27,7 @@ const SUGESTOES: Key[] = ["ask.s1", "ask.s2", "ask.s3"];
  * ⚠️ E ela só existe COM CHAVE. Um botão que abrisse "configure a IA" seria
  * propaganda ocupando o lugar de quem não pediu — a mesma regra da ficha.
  */
-export function PerguntarColecao({
-  itens,
-  especies,
-}: {
-  itens: Guardado[];
-  especies: Especie[];
-}) {
+export function PerguntarColecao({ itens, especies }: { itens: Guardado[]; especies: Especie[] }) {
   const { t, idioma } = useT();
   const { cores } = useTema();
   const { chave } = useIA();

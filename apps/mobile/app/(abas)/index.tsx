@@ -2,7 +2,15 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Link, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useMemo, useState, type ReactNode } from "react";
-import { ActivityIndicator, FlatList, Image, Pressable, ScrollView, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
@@ -228,12 +236,7 @@ function Heroi({
           valendo: o nome e a frase ficam justamente nessa faixa.
         */}
         <LinearGradient
-          colors={[
-            "transparent",
-            "rgba(0,0,0,0.45)",
-            "rgba(0,0,0,0.45)",
-            "transparent",
-          ]}
+          colors={["transparent", "rgba(0,0,0,0.45)", "rgba(0,0,0,0.45)", "transparent"]}
           locations={[0.42, 0.56, 0.78, 0.93]}
           style={{ position: "absolute", inset: 0 }}
           pointerEvents="none"
@@ -344,8 +347,7 @@ function Heroi({
                     width: i === indice % 5 ? 14 : 5,
                     height: 5,
                     borderRadius: 3,
-                    backgroundColor:
-                      i === indice % 5 ? "#FFFFFF" : "rgba(255,255,255,0.45)",
+                    backgroundColor: i === indice % 5 ? "#FFFFFF" : "rgba(255,255,255,0.45)",
                   }}
                 />
               ))}
@@ -403,7 +405,6 @@ export default function Inicio() {
    * decisão abria o app e via um bicho que nem é dele.
    */
 
-
   /*
    * ⚠️ OS DESTAQUES RODAM. "n é só charizard q fica ai, os pokemons mudam
    * sabia?" — e ele está certo: o herói mostrava sempre o primeiro da fila ou o
@@ -439,7 +440,9 @@ export default function Inicio() {
 
   /* A frase do herói: o motivo do veredito quando há fila, e a posição no
      ranking quando não há. As duas vêm do core — nada inventado aqui. */
-  const linhaDoDestaque = pendenteAtual ? tm(pendenteAtual.veredito.reason) : t("home.hero.topRaid");
+  const linhaDoDestaque = pendenteAtual
+    ? tm(pendenteAtual.veredito.reason)
+    : t("home.hero.topRaid");
 
   /*
    * A tira da coleção, com o VEREDITO de cada um.
@@ -549,10 +552,9 @@ export default function Inicio() {
             ? {
                 acao: t(ACTION_KEYS[pendenteAtual.veredito.action] as Key),
                 onFeito: () => {
-                  void marcarFeito(
-                    pendenteAtual.guardado.id,
-                    pendenteAtual.veredito.action,
-                  ).then(recarregar);
+                  void marcarFeito(pendenteAtual.guardado.id, pendenteAtual.veredito.action).then(
+                    recarregar,
+                  );
                 },
               }
             : {})}
@@ -633,10 +635,9 @@ export default function Inicio() {
               </Text>
               {fila.length > 0 && (
                 <Text className="text-legenda" style={{ color: cores.evoluir }}>
-                  {t(
-                    fila.length === 1 ? "home.needsDecision.one" : "home.needsDecision.many",
-                    { count: fila.length },
-                  ).toUpperCase()}
+                  {t(fila.length === 1 ? "home.needsDecision.one" : "home.needsDecision.many", {
+                    count: fila.length,
+                  }).toUpperCase()}
                 </Text>
               )}
             </View>
@@ -646,10 +647,7 @@ export default function Inicio() {
               data={meus}
               keyExtractor={(x) => x.g.id}
               renderItem={({ item }) => (
-                <Link
-                  href={{ pathname: "/especie/[id]", params: { id: item.especie.id } }}
-                  asChild
-                >
+                <Link href={{ pathname: "/especie/[id]", params: { id: item.especie.id } }} asChild>
                   {/* CÍRCULOS GRANDES: no desenho a tira é a segunda coisa que
                       o olho pega, e um selo de 54 com o nome embaixo lia como
                       lista. 64 com o rótulo colorido é o que a torna varrível. */}
@@ -662,9 +660,7 @@ export default function Inicio() {
                       className="text-legenda text-center mt-2"
                       numberOfLines={1}
                       style={{
-                        color: item.acao
-                          ? cores[COR_DA_ACAO[item.acao] ?? "texto3"]
-                          : cores.texto3,
+                        color: item.acao ? cores[COR_DA_ACAO[item.acao] ?? "texto3"] : cores.texto3,
                         fontSize: 9,
                       }}
                     >

@@ -129,7 +129,10 @@ export default function Colecao() {
           placeholderTextColor={cores.texto3}
           className="flex-1 bg-superficie text-texto rounded-pilula px-4 py-2.5 text-legenda"
           onSubmitEditing={() => {
-            if (novo.trim()) void criarColecao(novo).then((c) => trocarColecao(c.id)).then(() => setNovo(""));
+            if (novo.trim())
+              void criarColecao(novo)
+                .then((c) => trocarColecao(c.id))
+                .then(() => setNovo(""));
           }}
           returnKeyType="done"
         />
@@ -142,12 +145,12 @@ export default function Colecao() {
       <View className="flex-1 bg-fundo">
         {barra}
         <View className="flex-1 items-center justify-center px-10">
-        <Text className="text-texto text-base font-semibold text-center">
-          {t("raid.emptyTitle")}
-        </Text>
-        <Text className="text-texto3 text-sm text-center mt-2 leading-6">
-          {t("raid.emptyBody")}
-        </Text>
+          <Text className="text-texto text-base font-semibold text-center">
+            {t("raid.emptyTitle")}
+          </Text>
+          <Text className="text-texto3 text-sm text-center mt-2 leading-6">
+            {t("raid.emptyBody")}
+          </Text>
         </View>
       </View>
     );

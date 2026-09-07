@@ -45,10 +45,7 @@ export default function Ginasio() {
       ivs: { atk: 15, def: 15, hp: 15 },
       level: 40,
     }));
-    return pickDefenders(
-      rankDefenders(entrada, dados.cpm, dados.typeChart, dados.typeOrder),
-      6,
-    );
+    return pickDefenders(rankDefenders(entrada, dados.cpm, dados.typeChart, dados.typeOrder), 6);
   }, [dados]);
 
   return (

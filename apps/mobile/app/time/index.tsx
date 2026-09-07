@@ -42,10 +42,7 @@ export default function Time() {
 
   /* O que ele JÁ TEM, para o time dizer o que falta caçar. Sem isso a tela
      recomenda seis bichos sem dizer quais já estão na mochila. */
-  const meus = useMemo(
-    () => new Set((itens ?? []).map((g) => g.speciesId)),
-    [itens],
-  );
+  const meus = useMemo(() => new Set((itens ?? []).map((g) => g.speciesId)), [itens]);
 
   /* Sugestões do chefe, a partir de duas letras: com uma só a lista é o dex
      inteiro e não ajuda ninguém. */
@@ -69,7 +66,9 @@ export default function Time() {
       : null;
     const lista =
       objetivo === "raide"
-        ? (porTipo && porTipo.length > 0 ? porTipo : dados.rankings.raidOverall)
+        ? porTipo && porTipo.length > 0
+          ? porTipo
+          : dados.rankings.raidOverall
         : (dados.rankings.statProductByLeague[liga] ?? []);
     const cands: Candidate[] = [];
     for (const [i, r] of lista.entries()) {
@@ -212,9 +211,7 @@ export default function Time() {
         </View>
       )}
 
-      <Text className="text-texto3 text-legenda mt-6 mb-2">
-        {t("team.theTeam").toUpperCase()}
-      </Text>
+      <Text className="text-texto3 text-legenda mt-6 mb-2">{t("team.theTeam").toUpperCase()}</Text>
       {/* ⚠️ GRADE 3×2, e não lista. O print 7 mostra os seis como cartões numa
           grade: dá para ver o time INTEIRO de uma vez, que é a pergunta ("esse
           time está bom?"). Em lista, seis linhas de altura de dedo obrigam a

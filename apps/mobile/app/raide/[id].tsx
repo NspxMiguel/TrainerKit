@@ -188,7 +188,11 @@ export default function Raide() {
       {faixa && (
         <View
           className="rounded-cartao px-4 py-4 mt-5"
-          style={{ backgroundColor: `${cores.guardar}1A`, borderWidth: 1, borderColor: `${cores.guardar}44` }}
+          style={{
+            backgroundColor: `${cores.guardar}1A`,
+            borderWidth: 1,
+            borderColor: `${cores.guardar}44`,
+          }}
         >
           <Text className="text-legenda" style={{ color: cores.guardar }}>
             {t("raid.catchTitle").toUpperCase()}

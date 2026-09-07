@@ -51,10 +51,7 @@ export default function Encontro() {
 
   const leitura = useMemo(() => {
     if (!dados || !especie || !temCp) return null;
-    return lerEncontro(
-      { base: especie.baseStats, cp: nCp, origem, clima: climaAtivo },
-      dados.cpm,
-    );
+    return lerEncontro({ base: especie.baseStats, cp: nCp, origem, clima: climaAtivo }, dados.cpm);
   }, [dados, especie, temCp, nCp, origem, climaAtivo]);
 
   if (!especie || !faixa) return <View className="flex-1 bg-fundo" />;
@@ -112,9 +109,7 @@ export default function Encontro() {
           onPress={() => setClima((v) => !v)}
           className={`rounded-2xl p-4 mt-3 ${clima ? "bg-texto" : "bg-superficie"}`}
         >
-          <Text className={clima ? "text-fundo font-bold" : "text-texto2"}>
-            {t("pre.weather")}
-          </Text>
+          <Text className={clima ? "text-fundo font-bold" : "text-texto2"}>{t("pre.weather")}</Text>
           <Text className={`text-xs mt-1 ${clima ? "text-fundo" : "text-texto3"}`}>
             {t("pre.weatherDetail")}
           </Text>

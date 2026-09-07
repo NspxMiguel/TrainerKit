@@ -290,7 +290,9 @@ export default function Faxina() {
             {t(total === 1 ? "faxina.selected.one" : "faxina.selected.many", { count: total })}
           </Text>
           {confirmando && (
-            <Text className="text-texto2 text-legenda mb-2 leading-4">{t("faxina.confirm.body")}</Text>
+            <Text className="text-texto2 text-legenda mb-2 leading-4">
+              {t("faxina.confirm.body")}
+            </Text>
           )}
           <Pressable
             onPress={() => {

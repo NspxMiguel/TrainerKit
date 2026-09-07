@@ -69,7 +69,6 @@ const TEMAS: { valor: Escolha; chave: Key }[] = [
   { valor: "escuro", chave: "settings.theme.dark" },
 ];
 
-
 /**
  * UMA LINHA DE AJUSTES — ícone, nome e o VALOR DE AGORA.
  *
@@ -235,8 +234,7 @@ export default function Ajustes() {
   const { t, idioma, trocar } = useT();
   const { cores, escolha, definir } = useTema();
   const { setup, definir: definirSetup } = useSetup();
-  const { fonte, definir: definirFonte, manifesto, manifestoUrl, definirManifesto } =
-    useImagens();
+  const { fonte, definir: definirFonte, manifesto, manifestoUrl, definirManifesto } = useImagens();
   const { chave, definir: definirChave } = useIA();
   const [rascunho, setRascunho] = useState<string | null>(null);
   const [copiado, setCopiado] = useState(false);
@@ -247,8 +245,7 @@ export default function Ajustes() {
   const { dados } = useDados();
   const { url: urlDados, definir: definirUrlDados } = useFonteDeDados();
   /** O problema vira frase aqui: o core devolve chave, a tela devolve texto. */
-  const dizer = (p: ProblemaDaFonte) =>
-    t(p.chave as Key, p.campo ? { field: p.campo } : {});
+  const dizer = (p: ProblemaDaFonte) => t(p.chave as Key, p.campo ? { field: p.campo } : {});
   /* ⚠️ A fonte própria não entra no download offline: um manifesto pode
      apontar cada espécie para um host diferente. Ela chega aqui como "off",
      que é o estado honesto — não há o que baixar em lote. */
@@ -288,24 +285,23 @@ export default function Ajustes() {
         aberta={secao === "tema"}
         onAlternar={() => setSecao((v) => (v === "tema" ? null : "tema"))}
       >
-      <View className="bg-superficie rounded-3xl overflow-hidden mb-7">
-        {TEMAS.map((op, i) => (
-          <Pressable
-            key={op.valor}
-            onPress={() => definir(op.valor)}
-            className="flex-row items-center px-4 py-3.5"
-            style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: cores.linha } : undefined}
-          >
-            <Text
-              className={`flex-1 text-[15px] ${op.valor === escolha ? "text-texto font-bold" : "text-texto2"}`}
+        <View className="bg-superficie rounded-3xl overflow-hidden mb-7">
+          {TEMAS.map((op, i) => (
+            <Pressable
+              key={op.valor}
+              onPress={() => definir(op.valor)}
+              className="flex-row items-center px-4 py-3.5"
+              style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: cores.linha } : undefined}
             >
-              {t(op.chave)}
-            </Text>
-            {op.valor === escolha && <Text className="text-texto text-base">✓</Text>}
-          </Pressable>
-        ))}
-      </View>
-
+              <Text
+                className={`flex-1 text-[15px] ${op.valor === escolha ? "text-texto font-bold" : "text-texto2"}`}
+              >
+                {t(op.chave)}
+              </Text>
+              {op.valor === escolha && <Text className="text-texto text-base">✓</Text>}
+            </Pressable>
+          ))}
+        </View>
       </Linha>
 
       <Linha
@@ -316,26 +312,26 @@ export default function Ajustes() {
         aberta={secao === "idioma"}
         onAlternar={() => setSecao((v) => (v === "idioma" ? null : "idioma"))}
       >
-      <View className="bg-superficie rounded-3xl overflow-hidden">
-        {LANGUAGES.map((l, i) => (
-          <Pressable
-            key={l.code}
-            onPress={() => trocar(l.code)}
-            className="flex-row items-center px-4 py-3.5"
-            style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: cores.linha } : undefined}
-          >
-            <Text className="text-[17px] mr-3">{l.flag}</Text>
-            <Text
-              className={`flex-1 text-[15px] ${l.code === idioma ? "text-texto font-bold" : "text-texto2"}`}
+        <View className="bg-superficie rounded-3xl overflow-hidden">
+          {LANGUAGES.map((l, i) => (
+            <Pressable
+              key={l.code}
+              onPress={() => trocar(l.code)}
+              className="flex-row items-center px-4 py-3.5"
+              style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: cores.linha } : undefined}
             >
-              {l.label}
-            </Text>
-            {l.code === idioma && <Text className="text-texto text-base">✓</Text>}
-          </Pressable>
-        ))}
-      </View>
+              <Text className="text-[17px] mr-3">{l.flag}</Text>
+              <Text
+                className={`flex-1 text-[15px] ${l.code === idioma ? "text-texto font-bold" : "text-texto2"}`}
+              >
+                {l.label}
+              </Text>
+              {l.code === idioma && <Text className="text-texto text-base">✓</Text>}
+            </Pressable>
+          ))}
+        </View>
 
-      {/*
+        {/*
         O NÍVEL DO TREINADOR mora aqui também, e não só no setup.
 
         Ele é o único ajuste do app que muda VEREDITO — quem sobe de nível no
@@ -344,7 +340,7 @@ export default function Ajustes() {
         roda uma vez não pode ser o único lugar de um valor que muda com o
         tempo.
       */}
-      {/*
+        {/*
         A IA — a chave é DELA, e só existem duas opções.
 
         "app a pessoa coloca a ia dela, key dela, nada free, free so o site". A
@@ -362,31 +358,31 @@ export default function Ajustes() {
         aberta={secao === "ia"}
         onAlternar={() => setSecao((v) => (v === "ia" ? null : "ia"))}
       >
-      <View className="bg-superficie rounded-3xl px-4 py-4">
-        <Text className="text-texto2 text-[13px] leading-5">
-          {t(chave ? "onb.ai.groq" : "onb.ai.off")}
-        </Text>
-        <TextInput
-          value={rascunho ?? chave ?? ""}
-          onChangeText={setRascunho}
-          onEndEditing={() => {
-            definirChave(rascunho);
-            setRascunho(null);
-          }}
-          placeholder="gsk_…"
-          placeholderTextColor={cores.texto3}
-          autoCapitalize="none"
-          autoCorrect={false}
-          /* `secureTextEntry` não: quem digita uma chave de 56 caracteres num
+        <View className="bg-superficie rounded-3xl px-4 py-4">
+          <Text className="text-texto2 text-[13px] leading-5">
+            {t(chave ? "onb.ai.groq" : "onb.ai.off")}
+          </Text>
+          <TextInput
+            value={rascunho ?? chave ?? ""}
+            onChangeText={setRascunho}
+            onEndEditing={() => {
+              definirChave(rascunho);
+              setRascunho(null);
+            }}
+            placeholder="gsk_…"
+            placeholderTextColor={cores.texto3}
+            autoCapitalize="none"
+            autoCorrect={false}
+            /* `secureTextEntry` não: quem digita uma chave de 56 caracteres num
              teclado de celular precisa ver o que digitou. Ela não é senha de
              ninguém — é um token que a própria pessoa revoga num clique. */
-          className="text-texto text-[13px] mt-3 font-mono"
-          style={{ borderTopWidth: 0.5, borderTopColor: cores.linha, paddingTop: 12 }}
-        />
-        <Text className="text-texto3 text-[12px] leading-4 mt-2">{t("onb.ai.groqDetail")}</Text>
-      </View>
+            className="text-texto text-[13px] mt-3 font-mono"
+            style={{ borderTopWidth: 0.5, borderTopColor: cores.linha, paddingTop: 12 }}
+          />
+          <Text className="text-texto3 text-[12px] leading-4 mt-2">{t("onb.ai.groqDetail")}</Text>
+        </View>
 
-      {/*
+        {/*
         IMAGENS — desligado por padrão, e a tela de Privacidade depende disso.
         Ligar acrescenta um segundo host que recebe pedido do app, e é por isso
         que a política declara esse host condicionado a esta escolha.
@@ -405,61 +401,60 @@ export default function Ajustes() {
         aberta={secao === "imagens"}
         onAlternar={() => setSecao((v) => (v === "imagens" ? null : "imagens"))}
       >
-      <View className="bg-superficie rounded-3xl overflow-hidden">
-        {FONTES.map((f, i) => (
-          <Pressable
-            key={f}
-            onPress={() => definirFonte(f)}
+        <View className="bg-superficie rounded-3xl overflow-hidden">
+          {FONTES.map((f, i) => (
+            <Pressable
+              key={f}
+              onPress={() => definirFonte(f)}
+              className="px-4 py-3.5"
+              style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: cores.linha } : undefined}
+            >
+              <View className="flex-row items-center">
+                <Text
+                  className={`flex-1 text-[15px] ${f === fonte ? "text-texto font-bold" : "text-texto2"}`}
+                >
+                  {t(SPRITE_SOURCE_KEYS[f].title as Key)}
+                </Text>
+                {f === fonte && <Text className="text-texto text-base">✓</Text>}
+              </View>
+              <Text className="text-texto3 text-[12px] leading-4 mt-1">
+                {t(SPRITE_SOURCE_KEYS[f].detail as Key)}
+              </Text>
+            </Pressable>
+          ))}
+          {/* A QUARTA: o manifesto de quem usa. Ela não entra em `FONTES` porque
+            não é uma escolha seca — precisa de um endereço para existir. */}
+          <View
             className="px-4 py-3.5"
-            style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: cores.linha } : undefined}
+            style={{ borderTopWidth: 0.5, borderTopColor: cores.linha }}
           >
             <View className="flex-row items-center">
               <Text
-                className={`flex-1 text-[15px] ${f === fonte ? "text-texto font-bold" : "text-texto2"}`}
+                className={`flex-1 text-[15px] ${fonte === "custom" ? "text-texto font-bold" : "text-texto2"}`}
               >
-                {t(SPRITE_SOURCE_KEYS[f].title as Key)}
+                {manifesto?.name ?? t("source.img.custom")}
               </Text>
-              {f === fonte && <Text className="text-texto text-base">✓</Text>}
+              {fonte === "custom" && <Text className="text-texto text-base">✓</Text>}
             </View>
             <Text className="text-texto3 text-[12px] leading-4 mt-1">
-              {t(SPRITE_SOURCE_KEYS[f].detail as Key)}
+              {t("source.img.customDetail")}
             </Text>
-          </Pressable>
-        ))}
-        {/* A QUARTA: o manifesto de quem usa. Ela não entra em `FONTES` porque
-            não é uma escolha seca — precisa de um endereço para existir. */}
-        <View
-          className="px-4 py-3.5"
-          style={{ borderTopWidth: 0.5, borderTopColor: cores.linha }}
-        >
-          <View className="flex-row items-center">
-            <Text
-              className={`flex-1 text-[15px] ${fonte === "custom" ? "text-texto font-bold" : "text-texto2"}`}
-            >
-              {manifesto?.name ?? t("source.img.custom")}
-            </Text>
-            {fonte === "custom" && <Text className="text-texto text-base">✓</Text>}
+            <CampoDeFonte
+              marca={t("source.img.hint")}
+              inicial={manifestoUrl ?? ""}
+              aoConfirmar={async (url) => {
+                const erro = checarUrl(url, false);
+                if (erro) return dizer(erro);
+                const r = await buscarJson(url);
+                if (!r.ok) return t("source.err.network");
+                const ruim = validarManifesto(r.valor);
+                if (ruim) return dizer(ruim);
+                definirManifesto(url, r.valor as SpriteManifest);
+                return null;
+              }}
+            />
           </View>
-          <Text className="text-texto3 text-[12px] leading-4 mt-1">
-            {t("source.img.customDetail")}
-          </Text>
-          <CampoDeFonte
-            marca={t("source.img.hint")}
-            inicial={manifestoUrl ?? ""}
-            aoConfirmar={async (url) => {
-              const erro = checarUrl(url, false);
-              if (erro) return dizer(erro);
-              const r = await buscarJson(url);
-              if (!r.ok) return t("source.err.network");
-              const ruim = validarManifesto(r.valor);
-              if (ruim) return dizer(ruim);
-              definirManifesto(url, r.valor as SpriteManifest);
-              return null;
-            }}
-          />
         </View>
-      </View>
-
       </Linha>
 
       {/*
@@ -502,40 +497,39 @@ export default function Ajustes() {
         aberta={secao === "nivel"}
         onAlternar={() => setSecao((v) => (v === "nivel" ? null : "nivel"))}
       >
-      <View className="flex-row flex-wrap gap-2">
-        {TRAINER_LEVELS.map((n) => (
-          <Pressable
-            key={n}
-            onPress={() => definirSetup({ level: n })}
-            className="items-center rounded-cartao-sm py-3"
-            /* Sete faixas nao cabem numa linha: 22% de base faz quatro por
+        <View className="flex-row flex-wrap gap-2">
+          {TRAINER_LEVELS.map((n) => (
+            <Pressable
+              key={n}
+              onPress={() => definirSetup({ level: n })}
+              className="items-center rounded-cartao-sm py-3"
+              /* Sete faixas nao cabem numa linha: 22% de base faz quatro por
                linha e o `flexGrow` fecha a sobra da segunda. */
-            style={{
-              flexBasis: "22%",
-              flexGrow: 1,
-              backgroundColor: cores.superficie,
-              borderWidth: 1,
-              borderColor: n === setup.level ? cores.texto : "transparent",
-            }}
-          >
-            <Text
-              className={`text-[19px] font-extrabold ${n === setup.level ? "text-texto" : "text-texto2"}`}
+              style={{
+                flexBasis: "22%",
+                flexGrow: 1,
+                backgroundColor: cores.superficie,
+                borderWidth: 1,
+                borderColor: n === setup.level ? cores.texto : "transparent",
+              }}
             >
-              {n}
-            </Text>
-            <Text className="text-texto3 text-[10px] tracking-widest mt-0.5">
-              {FAIXA[n] ? t(FAIXA[n]!).toUpperCase() : ""}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
-      <Text className="text-texto3 text-[12px] leading-5 mt-2">
-        {t("onb.level.what", {
-          nivel: setup.level,
-          teto: tetoDePowerUp(setup.level, MAX_POWERUP_LEVEL),
-        })}
-      </Text>
-
+              <Text
+                className={`text-[19px] font-extrabold ${n === setup.level ? "text-texto" : "text-texto2"}`}
+              >
+                {n}
+              </Text>
+              <Text className="text-texto3 text-[10px] tracking-widest mt-0.5">
+                {FAIXA[n] ? t(FAIXA[n]!).toUpperCase() : ""}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+        <Text className="text-texto3 text-[12px] leading-5 mt-2">
+          {t("onb.level.what", {
+            nivel: setup.level,
+            teto: tetoDePowerUp(setup.level, MAX_POWERUP_LEVEL),
+          })}
+        </Text>
       </Linha>
 
       <Text className="text-texto3 text-[11px] tracking-widest mt-7 mb-2">
@@ -657,9 +651,7 @@ export default function Ajustes() {
           não tem por que lembrar onde religar. Preferência de acessibilidade
           mora nos Ajustes; o botão de lá continua existindo, porque é durante o
           uso que se quer calar. */}
-      <Text className="text-texto3 text-legenda mt-7 mb-2">
-        {t("voice.title").toUpperCase()}
-      </Text>
+      <Text className="text-texto3 text-legenda mt-7 mb-2">{t("voice.title").toUpperCase()}</Text>
       <Pressable
         onPress={alternarVoz}
         className="bg-superficie rounded-cartao px-4 py-4 flex-row items-center"
@@ -700,9 +692,7 @@ export default function Ajustes() {
                 />
               </View>
             )}
-            <Text className="text-texto3 text-legenda mt-2 leading-4">
-              {t("prefetch.warning")}
-            </Text>
+            <Text className="text-texto3 text-legenda mt-2 leading-4">{t("prefetch.warning")}</Text>
           </View>
           <View className="flex-row gap-2 mt-3">
             <Pressable
@@ -725,9 +715,7 @@ export default function Ajustes() {
                 className="rounded-pilula py-3.5 items-center flex-1"
                 style={{ borderWidth: 1, borderColor: cores.linha }}
               >
-                <Text className="text-texto2 text-corpo font-semibold">
-                  {t("prefetch.clear")}
-                </Text>
+                <Text className="text-texto2 text-corpo font-semibold">{t("prefetch.clear")}</Text>
               </Pressable>
             )}
           </View>
@@ -750,9 +738,7 @@ export default function Ajustes() {
             {t("settings.dataAge", {
               n: Math.max(
                 0,
-                Math.floor(
-                  (Date.now() - Date.parse(dados.version.generatedAt)) / 86_400_000,
-                ),
+                Math.floor((Date.now() - Date.parse(dados.version.generatedAt)) / 86_400_000),
               ),
             })}
           </Text>

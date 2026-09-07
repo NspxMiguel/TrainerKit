@@ -2,7 +2,7 @@
 
 **A companion app for Pokémon GO that decides, instead of just showing numbers.**
 
-There are enough calculators already. You attach the appraisal screenshot, "96.4%" shows up, and the real question is still unanswered: *so what?* Worth powering up? Worth evolving? Can I transfer it without regretting it?
+There are enough calculators already. You attach the appraisal screenshot, "96.4%" shows up, and the real question is still unanswered: _so what?_ Worth powering up? Worth evolving? Can I transfer it without regretting it?
 
 TrainerKit answers that — and shows its work.
 
@@ -14,11 +14,11 @@ Installable PWA, offline-first. No account, no server, nothing leaving your devi
 
 It's a website, so there is nothing to download.
 
-**iPhone / iPad** — open it in **Safari**, tap Share, then *Add to Home Screen*.
+**iPhone / iPad** — open it in **Safari**, tap Share, then _Add to Home Screen_.
 
 > On iOS this isn't optional. Safari erases the storage of any site left untouched for 7 days, and that would take your collection with it. Added to the Home Screen, it stays.
 
-**Android** — open it in Chrome, menu ⋮, then *Install app*.
+**Android** — open it in Chrome, menu ⋮, then _Install app_.
 
 **Computer** — Chrome, Edge and Brave show an install icon in the address bar.
 
@@ -26,16 +26,16 @@ Follows the system's light/dark theme automatically.
 
 ## What's included
 
-| | |
-| --- | --- |
+|                    |                                                                                                                                                                                                                                              |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Appraisal scan** | The three bars are geometry, not text — the app counts filled segments and returns the **exact** IV. Not OCR, so there is no "almost right": either it read them, or it says it couldn't. Validated against 26 real screenshots, 240p to 4K. |
-| **Verdict** | Power up, evolve, keep or transfer, with a one-line reason and a confidence bar that is literally how much the rules agree with each other. When two pull opposite ways it drops, as it should. |
-| **The trace** | Every verdict opens into named rules with weights. The engine was built to be explainable — an app that asks you to trust it without checking is just another app. |
-| **Raids** | DPS, TDO and an efficiency rating per moveset, plus the best counters **from your own collection**. If it says you need three people, you need three people. |
-| **PvP** | Stat product under each league's CP cap, and best movesets per league. Labelled as what it is: stat product, not a tier list. |
-| **Gyms** | Who actually holds one: defense × stamina, divided by what the type chart lets it take. |
-| **Lens mode** | The device. Point the camera, hear the entry read out loud, ask questions about what's on screen. |
-| **10 languages** | pt-BR, English, Spanish (Spain and LatAm), French, German, Italian, Japanese, Korean, Russian — interface, species names and move names. |
+| **Verdict**        | Power up, evolve, keep or transfer, with a one-line reason and a confidence bar that is literally how much the rules agree with each other. When two pull opposite ways it drops, as it should.                                              |
+| **The trace**      | Every verdict opens into named rules with weights. The engine was built to be explainable — an app that asks you to trust it without checking is just another app.                                                                           |
+| **Raids**          | DPS, TDO and an efficiency rating per moveset, plus the best counters **from your own collection**. If it says you need three people, you need three people.                                                                                 |
+| **PvP**            | Stat product under each league's CP cap, and best movesets per league. Labelled as what it is: stat product, not a tier list.                                                                                                                |
+| **Gyms**           | Who actually holds one: defense × stamina, divided by what the type chart lets it take.                                                                                                                                                      |
+| **Lens mode**      | The device. Point the camera, hear the entry read out loud, ask questions about what's on screen.                                                                                                                                            |
+| **10 languages**   | pt-BR, English, Spanish (Spain and LatAm), French, German, Italian, Japanese, Korean, Russian — interface, species names and move names.                                                                                                     |
 
 ## The iOS app
 
@@ -112,11 +112,11 @@ pnpm dev                                                # start the dev server o
 
 The dev server also listens on the local network, so you can open it on your phone using the machine's IP — which is the only way to test the camera and the screenshot reader properly.
 
-| Command | What it does |
-| --- | --- |
-| `pnpm -r test` | ~471 tests (core + web, Aug 2026) |
-| `pnpm -r typecheck` | TypeScript across all three packages |
-| `pnpm --filter ./apps/web build` | Production build + bundle audit |
+| Command                          | What it does                         |
+| -------------------------------- | ------------------------------------ |
+| `pnpm -r test`                   | ~471 tests (core + web, Aug 2026)    |
+| `pnpm -r typecheck`              | TypeScript across all three packages |
+| `pnpm --filter ./apps/web build` | Production build + bundle audit      |
 
 The dataset step is separate on purpose: it hits the network and takes a while, and nothing else in the repo depends on it being fresh.
 

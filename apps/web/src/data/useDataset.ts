@@ -131,9 +131,7 @@ export interface Dataset {
 }
 
 export type DatasetState =
-  | { status: "loading" }
-  | { status: "ready"; data: Dataset }
-  | { status: "error"; message: string };
+  { status: "loading" } | { status: "ready"; data: Dataset } | { status: "error"; message: string };
 
 /** Busca e valida um dataset. `null` quando nao deu — offline, 404, JSON torto. */
 async function carregar(url: string): Promise<Dataset | null> {

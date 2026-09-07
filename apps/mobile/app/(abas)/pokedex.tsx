@@ -201,9 +201,7 @@ export default function Pokedex() {
   const todas = useMemo(() => {
     if (!dados) return [];
     const porTipo = tipo ? dados.canonicas.filter((s) => s.types.includes(tipo)) : dados.canonicas;
-    const base = termo
-      ? porTipo.filter((s) => s.name.toLowerCase().includes(termo))
-      : porTipo;
+    const base = termo ? porTipo.filter((s) => s.name.toLowerCase().includes(termo)) : porTipo;
     if (ordem === "dex") return [...base].sort((a, b) => a.dex - b.dex);
 
     /*
@@ -226,26 +224,28 @@ export default function Pokedex() {
   const meus = useMemo<Meu[]>(() => {
     if (!dados || !itens) return [];
     const pendentes = new Set(fila.map((p) => p.guardado.id));
-    return itens
-      .map((g) => {
-        const especie = dados.species.find((s) => s.id === g.speciesId);
-        if (!especie) return null;
-        if (termo && !especie.name.toLowerCase().includes(termo)) return null;
-        const veredito = vereditoDe(g, especie, dados, setup.level);
-        return {
-          guardado: g,
-          especie,
-          acao: veredito.action,
-          pendente: pendentes.has(g.id),
-          pc: g.ivDesconhecido
-            ? null
-            : computeCPAtLevel(dados.cpm, especie.baseStats, g.ivs, g.level),
-        };
-      })
-      .filter((x): x is Meu => x !== null)
-      /* Quem pede decisão primeiro: a lista existe para responder o que fazer,
+    return (
+      itens
+        .map((g) => {
+          const especie = dados.species.find((s) => s.id === g.speciesId);
+          if (!especie) return null;
+          if (termo && !especie.name.toLowerCase().includes(termo)) return null;
+          const veredito = vereditoDe(g, especie, dados, setup.level);
+          return {
+            guardado: g,
+            especie,
+            acao: veredito.action,
+            pendente: pendentes.has(g.id),
+            pc: g.ivDesconhecido
+              ? null
+              : computeCPAtLevel(dados.cpm, especie.baseStats, g.ivs, g.level),
+          };
+        })
+        .filter((x): x is Meu => x !== null)
+        /* Quem pede decisão primeiro: a lista existe para responder o que fazer,
          e o que já foi resolvido não precisa ser reencontrado. */
-      .sort((a, b) => Number(b.pendente) - Number(a.pendente));
+        .sort((a, b) => Number(b.pendente) - Number(a.pendente))
+    );
   }, [dados, itens, termo, setup.level, fila]);
 
   if (erro) {
@@ -275,9 +275,7 @@ export default function Pokedex() {
           {/* Grade/lista nas DUAS abas — e só quando há o que ver. */}
           {(aba === "meus" ? meus.length > 0 : todas.length > 0) && (
             <Toque
-              onPress={() =>
-                aba === "meus" ? setEmGrade((v) => !v) : setTodasEmGrade((v) => !v)
-              }
+              onPress={() => (aba === "meus" ? setEmGrade((v) => !v) : setTodasEmGrade((v) => !v))}
               className="rounded-pilula px-3 py-2"
               style={{ backgroundColor: cores.superficie }}
             >
@@ -397,9 +395,7 @@ export default function Pokedex() {
         )}
 
         {/* A PERGUNTA SOBRE A COLEÇÃO INTEIRA — só na aba que tem coleção. */}
-        {aba === "meus" && (
-          <PerguntarColecao itens={itens ?? []} especies={dados?.species ?? []} />
-        )}
+        {aba === "meus" && <PerguntarColecao itens={itens ?? []} especies={dados?.species ?? []} />}
 
         {aba === "meus" && podemSair > 0 && (
           <Toque
@@ -494,99 +490,100 @@ export default function Pokedex() {
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 10 }}
           renderItem={({ item, index }) => (
             <Toque
-                onPress={() =>
-                  router.push({ pathname: "/especie/[id]", params: { id: item.especie.id } })
-                }
-                className={
-                  emGrade
-                    ? "items-center bg-superficie rounded-tile py-3"
-                    : "flex-row items-center gap-3 bg-superficie px-3 py-3"
-                }
-                /* A borda esquerda na cor do veredito é o que faz a lista ser
+              onPress={() =>
+                router.push({ pathname: "/especie/[id]", params: { id: item.especie.id } })
+              }
+              className={
+                emGrade
+                  ? "items-center bg-superficie rounded-tile py-3"
+                  : "flex-row items-center gap-3 bg-superficie px-3 py-3"
+              }
+              /* A borda esquerda na cor do veredito é o que faz a lista ser
                    varrível: dá para achar "o que transferir" sem ler nome nenhum. */
-                style={
-                  emGrade
-                    ? undefined
-                    : {
-                        borderLeftWidth: 3,
-                        borderLeftColor: item.pendente
-                          ? cores[COR_DA_ACAO[item.acao] ?? "linha"]
-                          : "transparent",
-                        /* O cartão é a LISTA inteira: só a primeira e a última
+              style={
+                emGrade
+                  ? undefined
+                  : {
+                      borderLeftWidth: 3,
+                      borderLeftColor: item.pendente
+                        ? cores[COR_DA_ACAO[item.acao] ?? "linha"]
+                        : "transparent",
+                      /* O cartão é a LISTA inteira: só a primeira e a última
                            linha arredondam, e o meio fica reto. */
-                        borderTopLeftRadius: index === 0 ? 20 : 0,
-                        borderTopRightRadius: index === 0 ? 20 : 0,
-                        borderBottomLeftRadius: index === meus.length - 1 ? 20 : 0,
-                        borderBottomRightRadius: index === meus.length - 1 ? 20 : 0,
-                        overflow: "hidden",
-                      }
-                }
-              >
-                <Selo especie={item.especie} tamanho={emGrade ? 52 : 44} />
-                <View className={emGrade ? "items-center" : "flex-1"}>
-                  <Text
-                    className={`text-texto font-semibold ${emGrade ? "text-[11px] mt-2 text-center px-1" : "text-corpo"}`}
-                    numberOfLines={1}
-                  >
-                    {item.especie.name}
-                  </Text>
-                  {/* ⚠️ IV, PC e NÍVEL — os três, como o print 2. Só o IV não
+                      borderTopLeftRadius: index === 0 ? 20 : 0,
+                      borderTopRightRadius: index === 0 ? 20 : 0,
+                      borderBottomLeftRadius: index === meus.length - 1 ? 20 : 0,
+                      borderBottomRightRadius: index === meus.length - 1 ? 20 : 0,
+                      overflow: "hidden",
+                    }
+              }
+            >
+              <Selo especie={item.especie} tamanho={emGrade ? 52 : 44} />
+              <View className={emGrade ? "items-center" : "flex-1"}>
+                <Text
+                  className={`text-texto font-semibold ${emGrade ? "text-[11px] mt-2 text-center px-1" : "text-corpo"}`}
+                  numberOfLines={1}
+                >
+                  {item.especie.name}
+                </Text>
+                {/* ⚠️ IV, PC e NÍVEL — os três, como o print 2. Só o IV não
                       identifica o exemplar: quem tem dois Machamp de 96% precisa
                       do PC para saber qual é qual na tela do jogo. */}
-                  <Text className="text-texto3 text-legenda mt-0.5" numberOfLines={1}>
-                    {item.guardado.ivDesconhecido
-                      ? t("collection.ivUnknown")
-                      : `IV ${Math.round(ivPercentOf(item.guardado.ivs))}% · ${t("common.cp")} ${
-                          item.pc?.toLocaleString(idioma) ?? "—"
-                        } · ${t("common.level")} ${item.guardado.level}`}
-                  </Text>
-                </View>
-                {!emGrade && (
-                  <Pressable
-                    /*
+                <Text className="text-texto3 text-legenda mt-0.5" numberOfLines={1}>
+                  {item.guardado.ivDesconhecido
+                    ? t("collection.ivUnknown")
+                    : `IV ${Math.round(ivPercentOf(item.guardado.ivs))}% · ${t("common.cp")} ${
+                        item.pc?.toLocaleString(idioma) ?? "—"
+                      } · ${t("common.level")} ${item.guardado.level}`}
+                </Text>
+              </View>
+              {!emGrade && (
+                <Pressable
+                  /*
                       MARCAR COMO FEITO sem abrir a ficha.
                       ⚠️ Sem isto a única forma de tirar um bicho da fila era
                       abrir a ficha dele, e quem acabou de evoluir seis quer
                       dizer isso seis vezes, não navegar doze telas.
                     */
-                    onPress={() => {
-                      void marcarFeito(
-                        item.guardado.id,
-                        item.pendente ? item.acao : null,
-                      ).then(recarregar);
-                    }}
-                    hitSlop={8}
-                    accessibilityLabel={t(item.pendente ? "collection.markDone" : "collection.undoDone")}
-                    /* ⚠️ CHIP PREENCHIDO, e não contornado: no print 2 o
+                  onPress={() => {
+                    void marcarFeito(item.guardado.id, item.pendente ? item.acao : null).then(
+                      recarregar,
+                    );
+                  }}
+                  hitSlop={8}
+                  accessibilityLabel={t(
+                    item.pendente ? "collection.markDone" : "collection.undoDone",
+                  )}
+                  /* ⚠️ CHIP PREENCHIDO, e não contornado: no print 2 o
                        veredito é uma pastilha com a cor por dentro, e é ela que
                        faz a lista ser varrível de longe. Contorno some contra o
                        fundo escuro. */
-                    className="rounded-pilula px-3 py-1.5"
+                  className="rounded-pilula px-3 py-1.5"
+                  style={{
+                    backgroundColor: item.pendente
+                      ? `${cores[COR_DA_ACAO[item.acao] ?? "linha"]}26`
+                      : "transparent",
+                    borderWidth: 1,
+                    borderColor: item.pendente
+                      ? `${cores[COR_DA_ACAO[item.acao] ?? "linha"]}4D`
+                      : cores.linha,
+                  }}
+                >
+                  <Text
+                    className="text-legenda"
                     style={{
-                      backgroundColor: item.pendente
-                        ? `${cores[COR_DA_ACAO[item.acao] ?? "linha"]}26`
-                        : "transparent",
-                      borderWidth: 1,
-                      borderColor: item.pendente
-                        ? `${cores[COR_DA_ACAO[item.acao] ?? "linha"]}4D`
-                        : cores.linha,
+                      color: item.pendente
+                        ? cores[COR_DA_ACAO[item.acao] ?? "texto3"]
+                        : cores.texto3,
                     }}
                   >
-                    <Text
-                      className="text-legenda"
-                      style={{
-                        color: item.pendente
-                          ? cores[COR_DA_ACAO[item.acao] ?? "texto3"]
-                          : cores.texto3,
-                      }}
-                    >
-                      {item.pendente
-                        ? `${SIMBOLO[item.acao] ?? ""} ${t(ACTION_KEYS[item.acao] as Key).toUpperCase()}`
-                        : "✓"}
-                    </Text>
-                  </Pressable>
-                )}
-              </Toque>
+                    {item.pendente
+                      ? `${SIMBOLO[item.acao] ?? ""} ${t(ACTION_KEYS[item.acao] as Key).toUpperCase()}`
+                      : "✓"}
+                  </Text>
+                </Pressable>
+              )}
+            </Toque>
           )}
         />
       )}

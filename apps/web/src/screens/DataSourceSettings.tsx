@@ -172,15 +172,17 @@ export function DataSourceSettings({
           passa a dizer outra coisa. Ver `DIAS_PRA_AVISAR`.
         */}
         {velha && (
-          <p className="tk-caption" style={{ margin: "8px 2px 0", lineHeight: 1.55, color: "var(--tk-warn)" }} role="status">
+          <p
+            className="tk-caption"
+            style={{ margin: "8px 2px 0", lineHeight: 1.55, color: "var(--tk-warn)" }}
+            role="status"
+          >
             {t("data.stale", { n: datasetIdade as number })}
           </p>
         )}
         <button type="button" className="tk-row" onClick={() => setOpen((v) => !v)}>
           <span className="tk-row-label">{t("data.source")}</span>
-          <span className="tk-row-value">
-            {custom ? t("data.custom") : t("data.builtin")} ›
-          </span>
+          <span className="tk-row-value">{custom ? t("data.custom") : t("data.builtin")} ›</span>
         </button>
       </section>
 

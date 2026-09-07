@@ -46,7 +46,9 @@ describe("manifesto de imagem", () => {
 
   it("recusa o que não é objeto e o que não tem nome", () => {
     expect(validarManifesto("https://x/manifesto.json")).toEqual({ chave: "source.err.notObject" });
-    expect(validarManifesto({ template: "https://x/{dex}.png" })).toEqual({ chave: "source.err.noName" });
+    expect(validarManifesto({ template: "https://x/{dex}.png" })).toEqual({
+      chave: "source.err.noName",
+    });
   });
 
   it("espécie fora do mapa e sem modelo devolve null, não uma URL quebrada", () => {

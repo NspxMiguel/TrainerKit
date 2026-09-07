@@ -88,11 +88,7 @@ export default function Chocadeira() {
               const linha = (
                 <View
                   className="flex-row items-center gap-3 px-4 py-3"
-                  style={
-                    i > 0
-                      ? { borderTopWidth: 0.5, borderTopColor: cores.linha }
-                      : undefined
-                  }
+                  style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: cores.linha } : undefined}
                 >
                   {sp ? (
                     <Selo especie={sp} tamanho={40} />
@@ -123,10 +119,7 @@ export default function Chocadeira() {
                     </Text>
                   )}
                   {o.canBeShiny && (
-                    <Text
-                      className="text-guardar text-sm"
-                      accessibilityLabel={t("eggs.shiny")}
-                    >
+                    <Text className="text-guardar text-sm" accessibilityLabel={t("eggs.shiny")}>
                       ✦
                     </Text>
                   )}
