@@ -41,12 +41,12 @@ describe("manifesto de imagem", () => {
   });
 
   it("sem modelo e sem imagens não serve — é o caso que daria fonte muda", () => {
-    expect(validarManifesto({ name: "Vazio" })).toBe("source.err.noImages");
+    expect(validarManifesto({ name: "Vazio" })).toEqual({ chave: "source.err.noImages" });
   });
 
   it("recusa o que não é objeto e o que não tem nome", () => {
-    expect(validarManifesto("https://x/manifesto.json")).toBe("source.err.notObject");
-    expect(validarManifesto({ template: "https://x/{dex}.png" })).toBe("source.err.noName");
+    expect(validarManifesto("https://x/manifesto.json")).toEqual({ chave: "source.err.notObject" });
+    expect(validarManifesto({ template: "https://x/{dex}.png" })).toEqual({ chave: "source.err.noName" });
   });
 
   it("espécie fora do mapa e sem modelo devolve null, não uma URL quebrada", () => {
@@ -57,7 +57,7 @@ describe("manifesto de imagem", () => {
 
 describe("endereço", () => {
   it("http numa página https é o erro que se confunde com servidor fora do ar", () => {
-    expect(checarUrl("http://exemplo.com/a.json", true)).toBe("source.err.mixed");
+    expect(checarUrl("http://exemplo.com/a.json", true)).toEqual({ chave: "source.err.mixed" });
     /* No app nativo não existe página, então a mesma URL passa. */
     expect(checarUrl("http://exemplo.com/a.json", false)).toBeNull();
   });
@@ -67,8 +67,8 @@ describe("endereço", () => {
   });
 
   it("recusa esquema que não é http nem endereço inválido", () => {
-    expect(checarUrl("ftp://exemplo.com/a.json", false)).toBe("source.err.scheme");
-    expect(checarUrl("nao é url", false)).toBe("source.err.badUrl");
+    expect(checarUrl("ftp://exemplo.com/a.json", false)).toEqual({ chave: "source.err.scheme" });
+    expect(checarUrl("nao é url", false)).toEqual({ chave: "source.err.badUrl" });
   });
 });
 
@@ -89,18 +89,54 @@ describe("base do jogo", () => {
   });
 
   it("recusa JSON qualquer, que é o que daria número errado em silêncio", () => {
-    expect(validarDataset({ hello: "world" })).toBe("source.err.missingField");
-    expect(validarDataset("<html>")).toBe("source.err.text");
+    expect(validarDataset({ hello: "world" })).toEqual({
+      chave: "source.err.missingField",
+      /* ⚠️ O CAMPO VAI JUNTO: "falta um campo" não ajuda quem está montando a
+         própria base; "falta o campo cpm" resolve sozinho. */
+      campo: "cpm",
+    });
+    expect(validarDataset("<html>")).toEqual({ chave: "source.err.text" });
   });
 
   it("18 tipos, não 17: a tabela de vantagem é o que quebraria calada", () => {
-    expect(validarDataset({ ...base, typeOrder: ["a"] })).toBe("source.err.badField");
+    expect(validarDataset({ ...base, typeOrder: ["a"] })).toEqual({
+      chave: "source.err.badField",
+      campo: "typeOrder",
+    });
+  });
+
+  it("cada campo que falta é NOMEADO — vinha do teste do web, e o nome é o valor", () => {
+    for (const campo of ["cpm", "species", "typeChart", "typeOrder", "settings", "version"]) {
+      const parcial: Record<string, unknown> = { ...base };
+      delete parcial[campo];
+      expect(validarDataset(parcial), campo).toEqual({
+        chave: "source.err.missingField",
+        campo,
+      });
+    }
+  });
+
+  it("o campo EXISTE mas com formato errado — o caso que passa por checagem preguiçosa", () => {
+    /* Estes quebrariam LONGE da causa: o app calcularia sobre lixo em vez de
+       recusar aqui. */
+    expect(validarDataset({ ...base, cpm: [] })).not.toBeNull();
+    expect(validarDataset({ ...base, cpm: ["a"] })).not.toBeNull();
+    expect(validarDataset({ ...base, species: [] })).not.toBeNull();
+  });
+
+  it("uma página de erro HTML servida com 200 chega como TEXTO", () => {
+    /* O caso mais comum de "apontei pro link errado", e o que mais engana:
+       status 200, corpo de HTML. */
+    expect(validarDataset("<!doctype html>")).toEqual({ chave: "source.err.text" });
+    expect(validarDataset(null)).toEqual({ chave: "source.err.notObject" });
+    expect(validarDataset(42)).toEqual({ chave: "source.err.notObject" });
   });
 
   it("espécie sem baseStats é recusada — é com ela que tudo é calculado", () => {
-    expect(validarDataset({ ...base, species: [{ id: "x", name: "X", types: [] }] })).toBe(
-      "source.err.badSpecies",
-    );
+    expect(validarDataset({ ...base, species: [{ id: "x", name: "X", types: [] }] })).toEqual({
+      chave: "source.err.badSpecies",
+      campo: "baseStats",
+    });
   });
 });
 

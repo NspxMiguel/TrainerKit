@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { looksLikeDataset, resolvedDatasetUrl, useDataSource } from "./source.ts";
+import { validarDataset, resolvedDatasetUrl, useDataSource } from "./source.ts";
 
 import type { BaseStats, DadosDynamax, RankedSpecies } from "@trainerkit/core";
 
@@ -141,7 +141,7 @@ async function carregar(url: string): Promise<Dataset | null> {
     const res = await fetch(url);
     if (!res.ok) return null;
     const data = (await res.json()) as Dataset;
-    return looksLikeDataset(data) ? null : data;
+    return validarDataset(data) ? null : data;
   } catch {
     return null;
   }

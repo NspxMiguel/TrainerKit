@@ -15,6 +15,7 @@ import {
   validarDataset,
   validarManifesto,
   type Key,
+  type ProblemaDaFonte,
   type SpriteManifest,
 } from "@trainerkit/core";
 import { SymbolView } from "expo-symbols";
@@ -137,13 +138,13 @@ function dominioDe(url: string): string {
   return partirUrl(url)?.host ?? url;
 }
 
-async function buscarJson(url: string): Promise<unknown> {
+async function buscarJson(url: string): Promise<{ ok: true; valor: unknown } | { ok: false }> {
   try {
     const r = await fetch(url);
-    if (!r.ok) return "source.err.network";
-    return (await r.json()) as unknown;
+    if (!r.ok) return { ok: false };
+    return { ok: true, valor: (await r.json()) as unknown };
   } catch {
-    return "source.err.network";
+    return { ok: false };
   }
 }
 
@@ -163,6 +164,7 @@ function CampoDeFonte({
 }: {
   marca: string;
   inicial: string;
+  /** Devolve a mensagem JÁ TRADUZIDA do erro, ou `null` quando aceitou. */
   aoConfirmar: (url: string) => Promise<string | null>;
   aoLimpar?: () => void;
 }) {
@@ -222,7 +224,7 @@ function CampoDeFonte({
       </View>
       {erro && (
         <Text className="text-[12px] leading-4 mt-1.5" style={{ color: cores.guardar }}>
-          {t(erro as Key)}
+          {erro}
         </Text>
       )}
     </View>
@@ -244,6 +246,9 @@ export default function Ajustes() {
   const [confirmandoApagar, setConfirmandoApagar] = useState(false);
   const { dados } = useDados();
   const { url: urlDados, definir: definirUrlDados } = useFonteDeDados();
+  /** O problema vira frase aqui: o core devolve chave, a tela devolve texto. */
+  const dizer = (p: ProblemaDaFonte) =>
+    t(p.chave as Key, p.campo ? { field: p.campo } : {});
   /* ⚠️ A fonte própria não entra no download offline: um manifesto pode
      apontar cada espécie para um host diferente. Ela chega aqui como "off",
      que é o estado honesto — não há o que baixar em lote. */
@@ -443,12 +448,12 @@ export default function Ajustes() {
             inicial={manifestoUrl ?? ""}
             aoConfirmar={async (url) => {
               const erro = checarUrl(url, false);
-              if (erro) return erro;
-              const bruto = await buscarJson(url);
-              if (typeof bruto === "string") return bruto;
-              const ruim = validarManifesto(bruto);
-              if (ruim) return ruim;
-              definirManifesto(url, bruto as SpriteManifest);
+              if (erro) return dizer(erro);
+              const r = await buscarJson(url);
+              if (!r.ok) return t("source.err.network");
+              const ruim = validarManifesto(r.valor);
+              if (ruim) return dizer(ruim);
+              definirManifesto(url, r.valor as SpriteManifest);
               return null;
             }}
           />
@@ -477,11 +482,11 @@ export default function Ajustes() {
             aoLimpar={() => definirUrlDados(null)}
             aoConfirmar={async (url) => {
               const erro = checarUrl(url, false);
-              if (erro) return erro;
-              const bruto = await buscarJson(url);
-              if (typeof bruto === "string") return bruto;
-              const ruim = validarDataset(bruto);
-              if (ruim) return ruim;
+              if (erro) return dizer(erro);
+              const r = await buscarJson(url);
+              if (!r.ok) return t("source.err.network");
+              const ruim = validarDataset(r.valor);
+              if (ruim) return dizer(ruim);
               definirUrlDados(url);
               return null;
             }}

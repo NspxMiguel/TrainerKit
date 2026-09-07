@@ -931,8 +931,8 @@ export const KO: Dict = {
   "source.err.scheme": "http 또는 https만",
   "source.err.mixed": "https 페이지에서 http는 브라우저가 막습니다 — https를 쓰세요",
   "source.err.text": "JSON이 아니라 텍스트가 왔습니다",
-  "source.err.missingField": "앱에 필요한 항목이 없습니다",
-  "source.err.badField": "항목 형식이 예상과 다릅니다",
-  "source.err.badSpecies": "종에 계산에 쓸 항목이 없습니다",
+  "source.err.missingField": "\"{field}\" 항목이 없습니다",
+  "source.err.badField": "\"{field}\" 항목의 형식이 예상과 다릅니다",
+  "source.err.badSpecies": "종에 \"{field}\"이(가) 없습니다",
   "source.err.network": "그 주소에 닿지 못했습니다",
 };

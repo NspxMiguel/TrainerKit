@@ -931,8 +931,8 @@ export const JA: Dict = {
   "source.err.scheme": "http か https のみ",
   "source.err.mixed": "https のページで http はブラウザに遮断されます — https を使ってください",
   "source.err.text": "JSON ではなくテキストが返りました",
-  "source.err.missingField": "アプリに必要な項目がありません",
-  "source.err.badField": "項目の形式が想定と違います",
-  "source.err.badSpecies": "種に計算用の項目がありません",
+  "source.err.missingField": "「{field}」の項目がありません",
+  "source.err.badField": "「{field}」の項目の形式が想定と違います",
+  "source.err.badSpecies": "種に「{field}」がありません",
   "source.err.network": "そのアドレスに届きませんでした",
 };

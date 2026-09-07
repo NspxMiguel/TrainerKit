@@ -931,8 +931,8 @@ export const RU: Dict = {
   "source.err.scheme": "Только http или https",
   "source.err.mixed": "Браузер блокирует http на странице https — используйте https",
   "source.err.text": "Вернулся текст, а не JSON",
-  "source.err.missingField": "Не хватает поля, которое нужно приложению",
-  "source.err.badField": "Поле пришло в неожиданном виде",
-  "source.err.badSpecies": "У видов нет того, по чему приложение считает",
+  "source.err.missingField": "Нет поля \"{field}\"",
+  "source.err.badField": "Поле \"{field}\" пришло в неожиданном виде",
+  "source.err.badSpecies": "У видов нет \"{field}\"",
   "source.err.network": "Не удалось достучаться до этого адреса",
 };

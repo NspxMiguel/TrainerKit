@@ -959,8 +959,8 @@ export const PT_BR: Dict = {
   "source.err.scheme": "Só http ou https",
   "source.err.mixed": "O navegador bloqueia http numa página https — use https",
   "source.err.text": "Veio texto, não JSON",
-  "source.err.missingField": "Falta um campo de que o app precisa",
-  "source.err.badField": "Um campo veio num formato inesperado",
-  "source.err.badSpecies": "As espécies estão sem o que o app usa para calcular",
+  "source.err.missingField": "Falta o campo \"{field}\"",
+  "source.err.badField": "O campo \"{field}\" está com formato inesperado",
+  "source.err.badSpecies": "As espécies não têm \"{field}\"",
   "source.err.network": "Não deu para alcançar esse endereço",
 };

@@ -72,22 +72,29 @@ export interface SpriteManifest {
 }
 
 /**
- * O manifesto serve? Devolve a CHAVE do erro, ou `null` quando está de pé.
+ * O que deu errado numa fonte.
  *
- * ⚠️ Chave e não frase: o texto do erro é lido por quem usa, então mora no
- * dicionário como o resto. Devolver português daqui deixaria a tela em duas
- * línguas para quem estiver em japonês.
+ * ⚠️ Chave e não frase: o texto é lido por quem usa, então mora no dicionário
+ * como o resto — devolver português daqui deixaria a tela em duas línguas para
+ * quem estiver em japonês. `campo` existe porque "falta um campo" é bem pior
+ * que "falta o campo cpm" para quem está montando a própria base.
  */
-export function validarManifesto(valor: unknown): string | null {
-  if (typeof valor !== "object" || valor === null) return "source.err.notObject";
+export interface ProblemaDaFonte {
+  chave: string;
+  campo?: string;
+}
+
+/** O manifesto serve? `null` quando está de pé. */
+export function validarManifesto(valor: unknown): ProblemaDaFonte | null {
+  if (typeof valor !== "object" || valor === null) return { chave: "source.err.notObject" };
   const m = valor as Record<string, unknown>;
-  if (typeof m.name !== "string" || m.name.trim() === "") return "source.err.noName";
+  if (typeof m.name !== "string" || m.name.trim() === "") return { chave: "source.err.noName" };
   const temTemplate = typeof m.template === "string" && m.template.includes("{");
   const temImagens =
     typeof m.images === "object" && m.images !== null && Object.keys(m.images).length > 0;
-  if (!temTemplate && !temImagens) return "source.err.noImages";
+  if (!temTemplate && !temImagens) return { chave: "source.err.noImages" };
   if (m.images !== undefined && (typeof m.images !== "object" || m.images === null)) {
-    return "source.err.badImages";
+    return { chave: "source.err.badImages" };
   }
   return null;
 }
@@ -117,12 +124,12 @@ export function manifestSpriteUrl(
  * quem estiver do outro lado. No app nativo não há página, então `paginaHttps`
  * chega `false` e a checagem some sozinha.
  */
-export function checarUrl(url: string, paginaHttps: boolean): string | null {
+export function checarUrl(url: string, paginaHttps: boolean): ProblemaDaFonte | null {
   const partes = partirUrl(url);
-  if (!partes) return "source.err.badUrl";
-  if (partes.esquema !== "https" && partes.esquema !== "http") return "source.err.scheme";
+  if (!partes) return { chave: "source.err.badUrl" };
+  if (partes.esquema !== "https" && partes.esquema !== "http") return { chave: "source.err.scheme" };
   const local = partes.host === "localhost" || partes.host === "127.0.0.1";
-  if (partes.esquema === "http" && paginaHttps && !local) return "source.err.mixed";
+  if (partes.esquema === "http" && paginaHttps && !local) return { chave: "source.err.mixed" };
   return null;
 }
 
@@ -154,9 +161,9 @@ export function partirUrl(url: string): { esquema: string; host: string } | null
  * precisa: uma base própria pode legitimamente não trazer `rankings` ou
  * `moveNames`, e aí a tela some em vez de quebrar.
  */
-export function validarDataset(valor: unknown): string | null {
-  if (typeof valor === "string") return "source.err.text";
-  if (typeof valor !== "object" || valor === null) return "source.err.notObject";
+export function validarDataset(valor: unknown): ProblemaDaFonte | null {
+  if (typeof valor === "string") return { chave: "source.err.text" };
+  if (typeof valor !== "object" || valor === null) return { chave: "source.err.notObject" };
 
   const d = valor as Record<string, unknown>;
   const exigidos: Array<[string, (v: unknown) => boolean]> = [
@@ -170,12 +177,12 @@ export function validarDataset(valor: unknown): string | null {
     ["version", (v) => typeof v === "object" && v !== null],
   ];
   for (const [campo, ok] of exigidos) {
-    if (!(campo in d)) return "source.err.missingField";
-    if (!ok(d[campo])) return "source.err.badField";
+    if (!(campo in d)) return { chave: "source.err.missingField", campo };
+    if (!ok(d[campo])) return { chave: "source.err.badField", campo };
   }
   const primeira = (d.species as unknown[])[0] as Record<string, unknown>;
   for (const campo of ["id", "name", "baseStats", "types"]) {
-    if (!(campo in primeira)) return "source.err.badSpecies";
+    if (!(campo in primeira)) return { chave: "source.err.badSpecies", campo };
   }
   return null;
 }

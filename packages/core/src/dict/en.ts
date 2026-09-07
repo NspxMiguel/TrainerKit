@@ -999,9 +999,9 @@ const EN = {
   "source.err.scheme": "Only http or https",
   "source.err.mixed": "The browser blocks http on an https page — use https",
   "source.err.text": "Text came back, not JSON",
-  "source.err.missingField": "A field the app needs is missing",
-  "source.err.badField": "A field came in an unexpected shape",
-  "source.err.badSpecies": "The species are missing what the app calculates from",
+  "source.err.missingField": "The \"{field}\" field is missing",
+  "source.err.badField": "The \"{field}\" field has an unexpected shape",
+  "source.err.badSpecies": "The species have no \"{field}\"",
   "source.err.network": "Could not reach that address",
 } as const;
 

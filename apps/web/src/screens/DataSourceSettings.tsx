@@ -2,11 +2,12 @@ import { useState } from "react";
 
 import {
   BUILTIN_DATASET,
-  checkUrl,
+  checarUrl,
   getDataSource,
-  looksLikeDataset,
   setDataSource,
   useDataSource,
+  validarDataset,
+  type ProblemaDaFonte,
 } from "../data/source.ts";
 import { useT, type Key, type TFunction } from "../i18n/t.ts";
 import { DIAS_PRA_AVISAR, type DatasetSource } from "./../data/useDataset.ts";
@@ -67,12 +68,19 @@ export function DataSourceSettings({
   const velha = datasetIdade !== null && datasetIdade >= DIAS_PRA_AVISAR;
   const idadeBuild = textoIdade(t, buildIdade);
 
+  /** A chave do core vira frase aqui — a tela é quem tem o dicionário. */
+  const dizer = (p: ProblemaDaFonte): string =>
+    t(p.chave as Key, p.campo ? { field: p.campo } : {});
+
   const apply = async () => {
     const target = url.trim();
     if (!target) return;
-    const bad = checkUrl(target);
+    /* ⚠️ `true`: aqui é uma PÁGINA, e um `http://` a partir de `https://` é
+       bloqueado como conteúdo misto — o erro que chega é um `Failed to fetch`
+       indistinguível de "servidor fora do ar". */
+    const bad = checarUrl(target, globalThis.location?.protocol === "https:");
     if (bad) {
-      setError(bad);
+      setError(dizer(bad));
       return;
     }
 
@@ -81,8 +89,8 @@ export function DataSourceSettings({
     try {
       const res = await fetch(target);
       if (!res.ok) throw new Error(`${res.status}`);
-      const problem = looksLikeDataset(await res.json());
-      if (problem) throw new Error(problem);
+      const problem = validarDataset(await res.json());
+      if (problem) throw new Error(dizer(problem));
       setDataSource(target);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));

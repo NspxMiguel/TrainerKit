@@ -71,75 +71,16 @@ export function useDataSource(): string | null {
   );
 }
 
-/**
- * O endereco e utilizavel a partir daqui?
- *
- * Um `http://` numa pagina servida por `https://` e bloqueado pelo navegador
- * como conteudo misto, e o erro que chega ao app e um `TypeError: Failed to
- * fetch` — indistinguivel de "servidor fora do ar". Melhor dizer o que
- * realmente aconteceu.
- */
-export function checkUrl(url: string): string | null {
-  let parsed: URL;
-  try {
-    parsed = new URL(url);
-  } catch {
-    return "endereço inválido";
-  }
-  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
-    return "só http ou https";
-  }
-  if (
-    parsed.protocol === "http:" &&
-    globalThis.location?.protocol === "https:" &&
-    parsed.hostname !== "localhost" &&
-    parsed.hostname !== "127.0.0.1"
-  ) {
-    return "o navegador bloqueia http numa página https — use https";
-  }
-  return null;
-}
-
 /** Endereco efetivo: o do usuario, ou o embarcado. */
 export function resolvedDatasetUrl(): string {
   return current ?? BUILTIN_DATASET;
 }
 
-/**
- * Confere se o que voltou parece mesmo um dataset do TrainerKit.
- *
- * Sem isto, apontar pra um JSON qualquer daria uma tela branca ou, pior,
- * numeros errados calculados sobre lixo. A checagem e do formato MINIMO que o
- * app precisa pra funcionar, nao do arquivo inteiro: um dataset customizado
- * pode legitimamente nao trazer `rankings` ou `moveNames`, e a tela some em vez
- * de quebrar.
+/*
+ * ⚠️ `checkUrl` e `looksLikeDataset` MORAVAM AQUI e foram para o
+ * `packages/core` (`checarUrl`, `validarDataset`): o app nativo precisa das
+ * mesmas duas checagens, e a cópia que existia aqui devolvia frase em
+ * português cravada — o que deixava a tela em duas línguas para quem não
+ * estivesse em português. Agora elas devolvem CHAVE, e quem mostra traduz.
  */
-export function looksLikeDataset(value: unknown): string | null {
-  if (typeof value === "string") return "veio texto, não JSON";
-  if (typeof value !== "object" || value === null) return "não é um objeto JSON";
-
-  const d = value as Record<string, unknown>;
-  const required: Array<[string, (v: unknown) => boolean]> = [
-    ["cpm", (v) => Array.isArray(v) && v.length > 0 && typeof v[0] === "number"],
-    ["species", (v) => Array.isArray(v) && v.length > 0],
-    ["fastMoves", Array.isArray],
-    ["chargedMoves", Array.isArray],
-    ["typeChart", (v) => typeof v === "object" && v !== null],
-    ["typeOrder", (v) => Array.isArray(v) && v.length === 18],
-    ["settings", (v) => typeof v === "object" && v !== null],
-    ["version", (v) => typeof v === "object" && v !== null],
-  ];
-
-  for (const [field, ok] of required) {
-    if (!(field in d)) return `falta o campo "${field}"`;
-    if (!ok(d[field])) return `o campo "${field}" está com formato inesperado`;
-  }
-
-  // Uma especie precisa ter o minimo pra calcular qualquer coisa.
-  const first = (d.species as unknown[])[0] as Record<string, unknown>;
-  for (const field of ["id", "name", "baseStats", "types"]) {
-    if (!(field in first)) return `as espécies não têm "${field}"`;
-  }
-
-  return null;
-}
+export { checarUrl, validarDataset, type ProblemaDaFonte } from "@trainerkit/core";
