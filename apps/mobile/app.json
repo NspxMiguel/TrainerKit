@@ -26,6 +26,8 @@
       "edgeToEdgeEnabled": true
     },
     "plugins": [
+      "./plugins/ios-assinatura",
+      "./plugins/ios-build",
       "expo-router",
       "expo-localization",
       [
@@ -40,8 +42,6 @@
           "cameraPermission": "O Modo Pokédex aponta a câmera para o que está à sua frente. Nada é enviado nem gravado."
         }
       ],
-      "./plugins/ios-build",
-      "./plugins/ios-assinatura",
       "@bacons/apple-targets"
     ],
     "experiments": {

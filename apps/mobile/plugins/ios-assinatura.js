@@ -1,4 +1,4 @@
-const { withXcodeProject } = require("expo/config-plugins");
+const { withEntitlementsPlist, withXcodeProject } = require("expo/config-plugins");
 
 /**
  * O TIME DE ASSINATURA, em UM lugar só.
@@ -24,6 +24,28 @@ const TIME = "SW36PU2B3T";
 
 module.exports = function iosAssinatura(config) {
   config.extra = { ...(config.extra ?? {}), appleTeamId: TIME };
+
+  /*
+   * FORA O `aps-environment`.
+   *
+   * ⚠️ O `expo-notifications` declara a permissão de push só por estar
+   * instalado, e o TrainerKit não manda push NENHUM: os avisos de evento são
+   * LOCAIS, agendados no aparelho (`src/avisos.ts`), sem servidor e sem token.
+   *
+   * Com a permissão declarada, o archive falha inteiro — "Provisioning profile
+   * doesn't include the Push Notifications capability" — porque o perfil de
+   * time com curinga não concede push. Tirar a linha é o correto e não uma
+   * gambiarra: o app não usa o recurso.
+   *
+   * ⚠️ ORDEM IMPORTA. No `plugins` do app.json, quem aparece PRIMEIRO executa
+   * por ÚLTIMO — então este plugin tem que estar no COMEÇO da lista para o
+   * `aps-environment` que o expo-notifications escreve já ter sido escrito
+   * quando ele apagar.
+   */
+  config = withEntitlementsPlist(config, (cfg) => {
+    delete cfg.modResults["aps-environment"];
+    return cfg;
+  });
 
   return withXcodeProject(config, (cfg) => {
     const projeto = cfg.modResults;
