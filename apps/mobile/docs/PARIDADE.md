@@ -138,3 +138,16 @@ Método: toda chave `t("…")` usada em `apps/web/src` que não aparecia em
 De passagem: `useColecao` passou a memoizar a lista filtrada. Sem isso ela era
 um array novo a cada render, e a Faxina entrou em laço infinito
 (*Maximum update depth exceeded*).
+
+
+## 07/09/2026 — a rodada de comparar print a print
+
+Ele mandou *"ta longe de fica parecido ein"* depois da primeira comparação lado
+a lado, e estava certo. Montar as duas telas uma ao lado da outra achou seis
+diferenças no Início e seis na ficha que eu não tinha visto olhando só o app —
+está tudo em `DESIGN.md`.
+
+⚠️ **A busca do Início SAIU.** O PWA tem, o desenho não — e ela empurrava o
+herói para fora da primeira dobra. A Pokédex está a um toque e tem a busca
+inteira, com filtro e ordem. Isso é a única coisa em que o nativo deixou de
+seguir o PWA de propósito, e o motivo é o desenho.
