@@ -1,6 +1,7 @@
 import { Link, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
   ACTION_KEYS,
@@ -23,6 +24,7 @@ import {
 } from "@trainerkit/core";
 import { useDados } from "../../src/dados";
 import { useT } from "../../src/i18n";
+import { LinearGradient } from "expo-linear-gradient";
 import { SymbolView } from "expo-symbols";
 
 import { useIA } from "../../src/ia";
@@ -30,7 +32,7 @@ import { marcarVisto } from "../../src/vistos";
 import { calar, falar } from "../../src/voz";
 import { useSetup } from "../../src/setup";
 import { useTema, type Paleta } from "../../src/tema";
-import { Selo } from "../../src/Selo";
+import { corDoTipo, tintaSobre } from "../../src/Selo";
 import { Vidro } from "../../src/Vidro";
 
 /**
@@ -75,6 +77,9 @@ const COR_ACAO: Record<string, keyof Paleta> = {
 export default function Ficha() {
   const { t, tm, idioma } = useT();
   const { cores } = useTema();
+  /* O cabecalho e transparente nesta tela, entao a faixa colorida cresce pelo
+     inset em vez de comecar abaixo dele. */
+  const alto = useSafeAreaInsets().top;
   const { setup } = useSetup();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { pronto, dados } = useDados();
@@ -389,18 +394,63 @@ export default function Ficha() {
 
   return (
     <View className="flex-1 bg-fundo">
-    <ScrollView className="flex-1 bg-fundo" contentContainerStyle={{ padding: 20, paddingBottom: 120 }}>
-      <View className="items-center">
-        <Selo especie={especie} tamanho={112} />
-        <Text className="text-texto text-titulo-tela mt-4">{especie.name}</Text>
-        <Text className="text-texto3 text-xs mt-1">
-          {/* Os tipos TRADUZIDOS: o dicionario tem `type.grass` etc. Mostrar
-              "grass / poison" seria o app falando o idioma do arquivo de dados
-              em vez do idioma da pessoa. */}
-          #{String(especie.dex).padStart(3, "0")} ·{" "}
-          {especie.types.map((tp) => t(`type.${tp}` as never)).join(" / ")}
+    <ScrollView
+      className="flex-1 bg-fundo"
+      contentContainerStyle={{ paddingBottom: 120 }}
+      showsVerticalScrollIndicator={false}
+    >
+      {/*
+        O CABECALHO NA COR DO TIPO.
+
+        Era um selo de 112px centralizado sobre fundo preto — correto e mudo. O
+        desenho pinta a faixa inteira com a cor do TIPO primario e poe o
+        monograma gigante como marca d'agua atras: a pessoa reconhece de que
+        bicho e a tela antes de ler o nome.
+      */}
+      <View style={{ height: 176 + alto, overflow: "hidden" }}>
+        <LinearGradient
+          colors={[corDoTipo(especie.types[0]), `${corDoTipo(especie.types[0])}33`]}
+          start={{ x: 0.1, y: 0 }}
+          end={{ x: 0.95, y: 1 }}
+          style={{ position: "absolute", inset: 0 }}
+        />
+        <Text
+          style={{
+            position: "absolute",
+            right: -16,
+            bottom: -34,
+            fontSize: 132,
+            fontWeight: "800",
+            color: tintaSobre(corDoTipo(especie.types[0])),
+            opacity: 0.15,
+          }}
+        >
+          {especie.name
+            .replace(/[^A-Za-zÀ-ÿ]/g, "")
+            .slice(0, 2)
+            .toUpperCase()}
         </Text>
+        <View className="flex-1 justify-end px-5 pb-4">
+          <Text className="text-titulo-tela text-white">{especie.name}</Text>
+          <View className="flex-row gap-2 mt-2">
+            {/* Os tipos TRADUZIDOS, em chip: o dicionario tem `type.grass` etc.
+                Mostrar "grass / poison" seria o app falando o idioma do arquivo
+                de dados em vez do idioma da pessoa. */}
+            {especie.types.map((tp) => (
+              <View key={tp} className="rounded-pilula px-3 py-1 bg-black/30">
+                <Text className="text-legenda text-white">{t(`type.${tp}` as never)}</Text>
+              </View>
+            ))}
+            <View className="rounded-pilula px-3 py-1 bg-black/30">
+              <Text className="text-legenda text-white">
+                #{String(especie.dex).padStart(3, "0")}
+              </Text>
+            </View>
+          </View>
+        </View>
       </View>
+
+      <View className="px-5 pt-5">
 
       {/* Duas acoes: o IV do que ele TEM, e o IV do que ele esta VENDO. */}
       <Link href={{ pathname: "/iv/[id]", params: { id: especie.id } }} asChild>
@@ -774,6 +824,7 @@ export default function Ficha() {
             <Text className="text-texto text-sm font-semibold">{valor}</Text>
           </View>
         ))}
+      </View>
       </View>
     </ScrollView>
 

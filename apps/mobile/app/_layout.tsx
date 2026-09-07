@@ -40,7 +40,13 @@ function Casca() {
             voltar: sem ele o expo-router usa o NOME DA ROTA, e a ficha abria
             com um botao escrito "(abas)". */}
         <Stack.Screen name="(abas)" options={{ headerShown: false, title: "" }} />
-        <Stack.Screen name="especie/[id]" options={{ title: "" }} />
+        {/* Cabecalho TRANSPARENTE so aqui: a faixa colorida da ficha vai ate a
+            borda de cima, e uma barra opaca por cima dela cortaria a cor num
+            retangulo preto. A tela paga o preco com o proprio inset. */}
+        <Stack.Screen
+          name="especie/[id]"
+          options={{ title: "", headerTransparent: true, headerStyle: undefined }}
+        />
         <Stack.Screen name="iv/[id]" options={{ title: "" }} />
         <Stack.Screen name="encontro/[id]" options={{ title: "" }} />
         <Stack.Screen name="raide/[id]" options={{ title: "" }} />
