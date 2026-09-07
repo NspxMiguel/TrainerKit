@@ -175,3 +175,31 @@ export function degradeDoTipo(cor: string): [string, string, string] {
     paraHex(h, viva, Math.min(0.72, l * 1.02)),
   ];
 }
+
+/**
+ * A PONTE ATÉ O FUNDO — o que faz o gradiente CONECTAR em vez de encostar.
+ *
+ * ⚠️ Interpolar direto da cor do tipo para o fundo passa pelo CINZA: em sRGB o
+ * caminho entre um roxo saturado e o branco cruza um mauve dessaturado, e o
+ * olho lê essa faixa como uma listra estranha no meio da tela. Foi exatamente
+ * o que ele fotografou.
+ *
+ * A saída é uma parada intermediária que já é quase o fundo mas ainda tem a
+ * MATIZ da cor: assim o caminho todo continua sendo "a cor clareando", e a
+ * última parada encontra o fundo sendo idêntica a ele.
+ *
+ * `quanto` é o quanto do fundo entra: 0 devolve a cor, 1 devolve o fundo.
+ */
+export function misturar(cor: string, fundo: string, quanto: number): string {
+  const a = parseInt(cor.slice(1), 16);
+  const b = parseInt(fundo.slice(1), 16);
+  const canal = (deslocamento: number) => {
+    const ca = (a >> deslocamento) & 255;
+    const cb = (b >> deslocamento) & 255;
+    return Math.round(ca + (cb - ca) * quanto);
+  };
+  const r = canal(16);
+  const g = canal(8);
+  const bl = canal(0);
+  return `#${((r << 16) | (g << 8) | bl).toString(16).padStart(6, "0")}`;
+}

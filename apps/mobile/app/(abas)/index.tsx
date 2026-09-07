@@ -5,7 +5,13 @@ import { useMemo, useState, type ReactNode } from "react";
 import { ActivityIndicator, FlatList, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { ACTION_KEYS, degradeDoTipo, PARADAS_DO_DEGRADE, type Key } from "@trainerkit/core";
+import {
+  ACTION_KEYS,
+  degradeDoTipo,
+  misturar,
+  PARADAS_DO_DEGRADE,
+  type Key,
+} from "@trainerkit/core";
 import { marcarFeito, useColecao } from "../../src/colecao";
 import { usePendencias } from "../../src/pendencias";
 import type { Action } from "@trainerkit/core";
@@ -90,8 +96,30 @@ function Heroi({
           continuava vendo.
         */}
         <LinearGradient
-          colors={[...degradeDoTipo(cor), cores.fundo]}
-          locations={[...PARADAS_DO_DEGRADE, 1]}
+          /*
+            ⚠️ SEIS PARADAS, e as duas últimas são o fundo.
+
+            "é para ser contínuo, parecer q o roxo vira branco até ficar igual o
+            branco de baixo, algo q se conecta."
+
+            Duas coisas faziam a listra que ele fotografou. A primeira: ir da
+            cor direto ao fundo passa pelo CINZA — em sRGB o caminho entre um
+            roxo saturado e o branco cruza um mauve dessaturado. `misturar` põe
+            no meio uma parada que já é quase o fundo mas ainda tem a matiz da
+            cor, então o trajeto inteiro continua sendo "a cor clareando".
+
+            A segunda: a última parada caía exatamente na borda do herói, e a
+            emenda com a página ficava a um pixel de distância da conversão.
+            Chegando ao fundo em 92% e ficando nele até 100%, os últimos 8% já
+            SÃO a página — não há emenda para ver.
+          */
+          colors={[
+            ...degradeDoTipo(cor),
+            misturar(degradeDoTipo(cor)[2], cores.fundo, 0.55),
+            cores.fundo,
+            cores.fundo,
+          ]}
+          locations={[...PARADAS_DO_DEGRADE, 0.86, 0.94, 1]}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
           style={{ position: "absolute", inset: 0 }}
@@ -157,9 +185,25 @@ function Heroi({
           herói não tem texto, e escurecê-la de novo devolveria a cor lavada que
           ele reclamou.
         */}
+        {/*
+          ⚠️ O SCRIM SOME ANTES DO PÉ, e é isso que tirava a listra cinza.
+
+          Ele terminava em 45% de preto na borda de baixo. No tema claro, 45% de
+          preto sobre um fundo quase branco DÁ CINZA — a faixa que ele
+          fotografou não era o gradiente da cor, era o véu por cima dele.
+
+          Agora ele existe só na faixa onde há texto (50% a 80% da altura) e
+          desaparece antes de o gradiente encontrar a página. Os 4,5:1 continuam
+          valendo: o nome e a frase ficam justamente nessa faixa.
+        */}
         <LinearGradient
-          colors={["transparent", "rgba(0,0,0,0.45)", "rgba(0,0,0,0.45)"]}
-          locations={[0.45, 0.78, 1]}
+          colors={[
+            "transparent",
+            "rgba(0,0,0,0.45)",
+            "rgba(0,0,0,0.45)",
+            "transparent",
+          ]}
+          locations={[0.42, 0.56, 0.78, 0.93]}
           style={{ position: "absolute", inset: 0 }}
           pointerEvents="none"
         />
