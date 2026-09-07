@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<style>
+body{margin:0;background:#000000;font-family:-apple-system,BlinkMacSystemFont,"SF Pro",system-ui,sans-serif;-webkit-font-smoothing:antialiased;display:flex;align-items:center;justify-content:center;min-height:100vh}
+a{color:#4DB2FF;text-decoration:none}a:hover{color:#7CC6FF}
+@keyframes tkin{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes tkpop{0%{opacity:0;transform:scale(.94)}60%{opacity:1;transform:scale(1.015)}100%{transform:scale(1)}}
+@keyframes tkglow{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:1;transform:scale(1.06)}}
+@keyframes tkrec{0%,100%{opacity:.45}50%{opacity:1}}
+@keyframes tkbar{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1)}}
+@keyframes tkfill{from{width:0}}
+@keyframes tksweep{from{transform:translateX(-120%)}to{transform:translateX(220%)}}
+</style>
+</helmet>
+
+<div style="padding:36px;display:flex;flex-direction:column;align-items:center;gap:16px">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="402px,874px">
+  <div style="position:relative;height:100%;background:#000000;overflow:hidden">
+
+    <sc-if value="{{ isSetup }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute;inset:0;z-index:60;background:#000000;overflow:hidden">
+        <div style="position:absolute;top:-140px;left:-80px;width:460px;height:400px;background:radial-gradient(closest-side,rgba(77,178,255,.28),transparent);pointer-events:none"></div>
+        <div style="position:absolute;bottom:-120px;right:-90px;width:380px;height:340px;background:radial-gradient(closest-side,rgba(234,88,12,.16),transparent);pointer-events:none"></div>
+
+        <div style="position:relative;height:100%;display:flex;flex-direction:column;padding:70px 24px 34px;box-sizing:border-box">
+          <div style="display:flex;gap:6px;margin-bottom:26px">
+            <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
+              <span style="flex:1;height:4px;border-radius:99px;background:{{ s.bg }}"></span>
+            </sc-for>
+          </div>
+
+          <div key="{{ setupStep }}" style="flex:1;display:flex;flex-direction:column;animation:tkin .24s ease-out">
+
+            <sc-if value="{{ st0 }}" hint-placeholder-val="{{ true }}">
+              <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:20px;text-align:center">
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <div style="font-size:34px;font-weight:800;letter-spacing:-1px;line-height:1.1;color:#F4F6FA">TrainerKit</div>
+                  <div style="font-size:16px;line-height:1.5;max-width:290px;color:rgba(235,238,245,.65)">Um assistente que <span style="color:#7CC6FF;font-weight:600">decide por você</span> — em vez de despejar números na tela.</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px;width:100%;margin-top:6px">
+                  <sc-for list="{{ pitch }}" as="p" hint-placeholder-count="3">
+                    <div style="height:66px;box-sizing:border-box;border-radius:20px;padding:0 15px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);display:flex;align-items:center;gap:13px;text-align:left">
+                      <span style="flex:none;width:36px;height:36px;border-radius:12px;background:{{ p.bg }};border:1px solid {{ p.bd }};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:{{ p.c }}">{{ p.i }}</span>
+                      <span style="font-size:13.5px;line-height:1.35;color:rgba(235,238,245,.72)">{{ p.t }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ st1 }}" hint-placeholder-val="{{ false }}">
+              <div style="flex:1;display:flex;flex-direction:column;gap:22px">
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <span style="font-size:11px;font-weight:700;letter-spacing:.09em;color:#4DB2FF">PASSO 2 DE 4</span>
+                  <div style="font-size:30px;font-weight:800;letter-spacing:-.7px;line-height:1.15;color:#F4F6FA">Como te chamo?</div>
+                  <div style="font-size:14.5px;line-height:1.45;color:rgba(235,238,245,.6)">Só para a saudação. Nada sai deste aparelho.</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:9px">
+                  <span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:rgba(235,238,245,.45)">NOME DO TREINADOR</span>
+                  <div style="height:56px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(77,178,255,.4);box-shadow:0 0 0 3px rgba(77,178,255,.12);display:flex;align-items:center;padding:0 16px;gap:2px">
+                    <span style="font-size:19px;font-weight:600;color:#F4F6FA">{{ nameVal }}</span>
+                    <span style="width:2px;height:22px;background:#4DB2FF"></span>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:9px">
+                  <span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:rgba(235,238,245,.45)">SEU NÍVEL — MUDA O QUE VALE A PENA</span>
+                  <div style="display:flex;gap:8px">
+                    <sc-for list="{{ levels }}" as="l" hint-placeholder-count="4">
+                      <div onClick="{{ l.pick }}" style="flex:1;height:52px;border-radius:16px;background:{{ l.bg }};border:1px solid {{ l.bd }};box-shadow:{{ l.sh }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer">
+                        <span style="font-size:16px;font-weight:700;color:{{ l.fg }}">{{ l.n }}</span>
+                        <span style="font-size:9.5px;font-weight:600;letter-spacing:.04em;color:{{ l.sub }}">{{ l.label }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="border-radius:20px;padding:14px 16px;background:rgba(77,178,255,.08);border:1px solid rgba(77,178,255,.22);display:flex;flex-direction:column;gap:4px">
+                  <span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#7CC6FF">O QUE ISSO MUDA</span>
+                  <span style="font-size:13.5px;line-height:1.45;color:rgba(235,238,245,.7)">{{ levelHint }}</span>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ st2 }}" hint-placeholder-val="{{ false }}">
+              <div style="flex:1;display:flex;flex-direction:column;gap:20px">
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <span style="font-size:11px;font-weight:700;letter-spacing:.09em;color:#4DB2FF">PASSO 3 DE 4</span>
+                  <div style="font-size:30px;font-weight:800;letter-spacing:-.7px;line-height:1.15;color:#F4F6FA">Do seu jeito</div>
+                  <div style="font-size:14.5px;line-height:1.45;color:rgba(235,238,245,.6)">Dá para mudar tudo depois, em Ajustes.</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:9px">
+                  <span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:rgba(235,238,245,.45)">TEMA</span>
+                  <div style="height:48px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);padding:4px;display:flex;gap:4px">
+                    <sc-for list="{{ themes }}" as="t" hint-placeholder-count="3">
+                      <div onClick="{{ t.pick }}" style="flex:1;border-radius:999px;background:{{ t.bg }};box-shadow:{{ t.sh }};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:{{ t.fw }};color:{{ t.fg }};cursor:pointer">{{ t.n }}</div>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:9px">
+                  <span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:rgba(235,238,245,.45)">IDIOMA</span>
+                  <div style="border-radius:20px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);overflow:hidden">
+                    <sc-for list="{{ langs }}" as="l" hint-placeholder-count="3">
+                      <div onClick="{{ l.pick }}" style="display:flex;align-items:center;gap:12px;min-height:48px;padding:0 16px;border-bottom:1px solid rgba(255,255,255,.06);cursor:pointer">
+                        <span style="flex:1;font-size:15.5px;color:#F4F6FA">{{ l.n }}</span>
+                        <span style="font-size:16px;font-weight:800;color:{{ l.tick }}">✓</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:9px">
+                  <span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:rgba(235,238,245,.45)">VOZ DA FICHA</span>
+                  <div style="border-radius:20px;padding:13px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);display:flex;align-items:center;gap:12px">
+                    <div style="width:38px;height:38px;border-radius:12px;background:linear-gradient(180deg,#FB923C,#EA580C);display:flex;align-items:center;justify-content:center">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M4 10v4"></path><path d="M8 7v10"></path><path d="M12 4v16"></path><path d="M16 7v10"></path><path d="M20 10v4"></path></svg>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column;gap:1px">
+                      <span style="font-size:15px;font-weight:600;color:#F4F6FA">Camila · Neural</span>
+                      <span style="font-size:12px;color:rgba(235,238,245,.45)">Lê a ficha em voz alta</span>
+                    </div>
+                    <div onClick="{{ toggleVoice }}" style="width:52px;height:32px;border-radius:999px;background:{{ voiceBg }};padding:3px;box-sizing:border-box;display:flex;justify-content:{{ voiceJustify }};cursor:pointer">
+                      <span style="width:26px;height:26px;border-radius:999px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.3)"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ st3 }}" hint-placeholder-val="{{ false }}">
+              <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:20px">
+                <div style="display:flex;flex-direction:column;gap:8px;align-items:center;text-align:center">
+                  <div style="width:76px;height:76px;border-radius:999px;background:rgba(61,220,151,.14);border:1px solid rgba(61,220,151,.3);display:flex;align-items:center;justify-content:center;margin-bottom:4px">
+                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#3DDC97" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"></path></svg>
+                  </div>
+                  <div style="font-size:30px;font-weight:800;letter-spacing:-.7px;line-height:1.15;color:#F4F6FA">Pronto, {{ nameVal }}.</div>
+                  <div style="font-size:14.5px;line-height:1.5;max-width:290px;color:rgba(235,238,245,.6)">Escaneie um print do jogo e o TrainerKit já te diz o que fazer com aquele bicho.</div>
+                </div>
+                <div style="border-radius:24px;padding:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);display:flex;flex-direction:column;gap:11px">
+                  <sc-for list="{{ summary }}" as="s" hint-placeholder-count="4">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                      <span style="font-size:13.5px;color:rgba(235,238,245,.55)">{{ s.k }}</span>
+                      <span style="font-size:13.5px;font-weight:600;color:#F4F6FA">{{ s.v }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="border-radius:20px;padding:13px 16px;background:rgba(61,220,151,.07);border:1px solid rgba(61,220,151,.2);display:flex;flex-direction:column;gap:3px">
+                  <span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#3DDC97">INSTALAR COMO APP</span>
+                  <span style="font-size:13px;line-height:1.45;color:rgba(235,238,245,.65)">Compartilhar → Adicionar à Tela de Início. Funciona offline depois disso.</span>
+                </div>
+              </div>
+            </sc-if>
+
+          </div>
+
+          <div style="display:flex;gap:10px;align-items:center;margin-top:18px">
+            <sc-if value="{{ canBack }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ back }}" style="width:54px;height:54px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);display:flex;align-items:center;justify-content:center;cursor:pointer" style-active="transform:scale(.96)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F4F6FA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>
+              </div>
+            </sc-if>
+            <div onClick="{{ next }}" style="flex:1;height:54px;border-radius:999px;background:linear-gradient(180deg,#6EC6FF,#2E9EFF);box-shadow:0 8px 24px rgba(46,158,255,.4),inset 0 1px 0 rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:600;color:#fff;cursor:pointer" style-active="transform:scale(.985)">{{ nextLabel }}</div>
+          </div>
+          <sc-if value="{{ st0 }}" hint-placeholder-val="{{ true }}">
+            <div onClick="{{ skip }}" style="text-align:center;font-size:13px;font-weight:600;color:rgba(235,238,245,.45);margin-top:12px;cursor:pointer">Já usei antes — pular</div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isInicio }}" hint-placeholder-val="{{ false }}">
+      <div style="height:100%;display:flex;flex-direction:column;overflow:hidden;animation:tkin .34s cubic-bezier(.22,1,.36,1)">
+        <div style="position:relative;height:474px;flex-shrink:0">
+          <div style="position:absolute;inset:0;background:{{ heroGrad }}"></div>
+          <div style="position:absolute;left:50%;top:80px;transform:translateX(-50%);font-size:220px;font-weight:800;letter-spacing:-10px;line-height:1;color:rgba(255,255,255,.1)">{{ heroMono }}</div>
+          <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,12,16,.4) 0%,rgba(10,12,16,0) 22%,rgba(10,12,16,0) 50%,rgba(10,12,16,.55) 78%,#000000 100%)"></div>
+          <div style="position:absolute;top:62px;left:20px;right:20px;display:flex;justify-content:space-between;align-items:center">
+            <div style="font-size:34px;font-weight:700;letter-spacing:-.5px;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.3)">Boa noite, {{ nameVal }}.</div>
+            <div style="width:40px;height:40px;border-radius:999px;background:rgba(255,255,255,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:.5px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff">{{ initial }}</div>
+          </div>
+          <div style="position:absolute;left:0;right:0;bottom:10px;display:flex;flex-direction:column;align-items:center;gap:10px">
+            <span style="padding:5px 14px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.09em;color:#fff;background:rgba(10,12,16,.35);border:.5px solid rgba(255,255,255,.25);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)">DESTAQUE DE HOJE</span>
+            <div style="font-size:46px;font-weight:800;letter-spacing:-1.5px;line-height:1;color:#fff;text-shadow:0 4px 24px rgba(0,0,0,.35)">{{ heroName }}</div>
+            <div style="max-width:300px;text-align:center;font-size:14px;line-height:1.4;color:rgba(255,255,255,.85)">{{ heroLine }}</div>
+            <div style="display:flex;gap:12px;align-items:center;margin-top:2px">
+              <div onClick="{{ openHero }}" style="height:48px;padding:0 26px;border-radius:999px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.35);display:flex;align-items:center;font-size:15px;font-weight:700;color:#000000;cursor:pointer" style-active="transform:scale(.97)">{{ heroCta }}</div>
+              <div onClick="{{ nextHero }}" style="width:48px;height:48px;border-radius:999px;background:rgba(10,12,16,.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:.5px solid rgba(255,255,255,.28);display:flex;align-items:center;justify-content:center;cursor:pointer" style-active="transform:scale(.95)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"></path></svg>
+              </div>
+            </div>
+            <div style="display:flex;gap:7px;margin-top:6px">
+              <sc-for list="{{ dots }}" as="d" hint-placeholder-count="3">
+                <span style="width:{{ d.w }}px;height:7px;border-radius:999px;background:{{ d.bg }}"></span>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;padding:14px 20px 0">
+          <div onClick="{{ openCalc }}" style="height:54px;border-radius:999px;background:linear-gradient(180deg,#6EC6FF,#2E9EFF);box-shadow:0 8px 24px rgba(46,158,255,.4),inset 0 1px 0 rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;gap:9px;font-size:17px;font-weight:600;color:#fff;cursor:pointer" style-active="transform:scale(.985)">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M4 8V6a2 2 0 0 1 2-2h2"></path><path d="M16 4h2a2 2 0 0 1 2 2v2"></path><path d="M20 16v2a2 2 0 0 1-2 2h-2"></path><path d="M8 20H6a2 2 0 0 1-2-2v-2"></path><circle cx="12" cy="12" r="3.2"></circle></svg>
+            Escanear um print
+          </div>
+          <div style="display:flex;gap:10px">
+            <div onClick="{{ openTeam }}" style="flex:1;height:48px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);box-shadow:inset 0 1px 0 rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:#F4F6FA;cursor:pointer" style-active="transform:scale(.98)">Monta um time</div>
+            <div onClick="{{ openRaid }}" style="flex:1;height:48px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);box-shadow:inset 0 1px 0 rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:#F4F6FA;cursor:pointer" style-active="transform:scale(.98)">Ginásio</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:rgba(235,238,245,.45)">SUA COLEÇÃO</span>
+              <span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#4DB2FF">4 PEDEM DECISÃO</span>
+            </div>
+            <div style="display:flex;gap:12px">
+              <sc-for list="{{ strip }}" as="p" hint-placeholder-count="5">
+                <div onClick="{{ p.open }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer">
+                  <div style="width:56px;height:56px;border-radius:999px;border:2.5px solid {{ p.vc }};padding:2px;box-sizing:border-box">
+                    <div style="width:100%;height:100%;border-radius:999px;background:{{ p.g }};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:rgba(255,255,255,.95)">{{ p.m }}</div>
+                  </div>
+                  <span style="font-size:9.5px;font-weight:800;letter-spacing:.04em;color:{{ p.vc }}">{{ p.v }}</span>
+                </div>
+              </sc-for>
+              <div onClick="{{ goDex }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer">
+                <div style="width:56px;height:56px;border-radius:999px;border:2.5px solid rgba(255,255,255,.18);padding:2px;box-sizing:border-box">
+                  <div style="width:100%;height:100%;border-radius:999px;background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(235,238,245,.8)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"></path></svg>
+                  </div>
+                </div>
+                <span style="font-size:9.5px;font-weight:800;letter-spacing:.04em;color:rgba(235,238,245,.5)">VER MAIS</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isDex }}" hint-placeholder-val="{{ false }}">
+      <div style="height:100%;display:flex;flex-direction:column;gap:14px;padding:74px 20px 0;box-sizing:border-box;overflow:hidden;animation:tkin .34s cubic-bezier(.22,1,.36,1)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:34px;font-weight:700;letter-spacing:-.5px;color:#F4F6FA">Pokédex</div>
+          <div style="width:44px;height:44px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);box-shadow:inset 0 1px 0 rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(235,238,245,.75)" stroke-width="2" stroke-linecap="round"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg>
+          </div>
+        </div>
+        <div style="height:44px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);padding:4px;display:flex;gap:4px">
+          <div onClick="{{ showTodos }}" style="flex:1;border-radius:999px;background:{{ todosBg }};box-shadow:{{ todosSh }};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:{{ todosFg }};cursor:pointer">Todos · 1.182</div>
+          <div onClick="{{ showMeus }}" style="flex:1;border-radius:999px;background:{{ meusBg }};box-shadow:{{ meusSh }};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:{{ meusFg }};cursor:pointer">Meus · 247</div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <div style="flex:1;height:44px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:8px;padding:0 16px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(235,238,245,.45)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+            <span style="font-size:15px;color:rgba(235,238,245,.45)">Buscar na coleção</span>
+          </div>
+          <div style="height:44px;padding:0 16px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;font-size:14px;font-weight:600;color:rgba(235,238,245,.75)">Decisão ↓</div>
+        </div>
+        <div onClick="{{ openDexMode }}" style="border-radius:28px;padding:13px 16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);box-shadow:inset 0 1px 0 rgba(255,255,255,.08);display:flex;align-items:center;gap:14px;cursor:pointer" style-active="transform:scale(.99)">
+          <div style="width:48px;height:48px;border-radius:16px;background:linear-gradient(160deg,#F87171,#DC2626);box-shadow:0 6px 16px rgba(220,38,38,.35);display:flex;align-items:center;justify-content:center">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7.5" stroke="#fff" stroke-width="2"></circle><circle cx="12" cy="12" r="2.6" fill="#fff"></circle><circle cx="17.2" cy="7" r="1.4" fill="#fff"></circle></svg>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+            <span style="font-size:16px;font-weight:700;color:#F4F6FA">Modo Pokédex</span>
+            <span style="font-size:12.5px;color:rgba(235,238,245,.5)">Aponte a câmera e ouça a ficha em voz alta</span>
+          </div>
+          <svg width="8" height="14" viewBox="0 0 8 14"><path d="M1 1l6 6-6 6" stroke="rgba(235,238,245,.3)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </div>
+        <sc-if value="{{ dexMeus }}" hint-placeholder-val="{{ true }}">
+          <div style="border-radius:28px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);box-shadow:inset 0 1px 0 rgba(255,255,255,.07);overflow:hidden">
+            <sc-for list="{{ mine }}" as="p" hint-placeholder-count="4">
+              <div onClick="{{ p.open }}" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.07);cursor:pointer">
+                <div style="width:46px;height:46px;border-radius:15px;background:{{ p.g }};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:rgba(255,255,255,.95)">{{ p.m }}</div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                  <span style="font-size:16px;font-weight:600;color:#F4F6FA">{{ p.n }}</span>
+                  <span style="font-size:12.5px;color:rgba(235,238,245,.45)">{{ p.meta }}</span>
+                  <sc-if value="{{ p.trade }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size:11.5px;font-weight:700;color:#FFC55C">↻ Troca: 78% de vir melhor</span>
+                  </sc-if>
+                </div>
+                <span style="white-space:nowrap;padding:4px 10px;border-radius:999px;font-size:10.5px;font-weight:800;letter-spacing:.06em;color:{{ p.vc }};background:{{ p.vb }};border:1px solid {{ p.vbd }}">{{ p.chip }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ dexTodos }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+            <sc-for list="{{ all }}" as="p" hint-placeholder-count="9">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+                <div style="width:100%;aspect-ratio:1;border-radius:20px;background:{{ p.g }};display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:rgba(255,255,255,.95)">{{ p.m }}</div>
+                <span style="font-size:12.5px;font-weight:600;color:#F4F6FA">{{ p.n }}</span>
+                <span style="font-size:10.5px;color:rgba(235,238,245,.4);margin-top:-4px">{{ p.num }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isSet }}" hint-placeholder-val="{{ false }}">
+      <div style="height:100%;display:flex;flex-direction:column;gap:16px;padding:74px 20px 116px;box-sizing:border-box;overflow-y:auto;animation:tkin .34s cubic-bezier(.22,1,.36,1)">
+        <div style="flex:none;font-size:34px;font-weight:700;letter-spacing:-.5px;color:#F4F6FA">Ajustes</div>
+        <div style="flex:none;height:44px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:8px;padding:0 16px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(235,238,245,.45)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+          <span style="flex:1;font-size:15px;color:rgba(235,238,245,.45)">Buscar</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(235,238,245,.45)" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0"></path><path d="M12 18v3"></path></svg>
+        </div>
+        <div style="flex:none;border-radius:26px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);box-shadow:inset 0 1px 0 rgba(255,255,255,.07);overflow:hidden">
+          <sc-for list="{{ setA }}" as="r" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:12px;min-height:52px;padding:0 16px;border-bottom:1px solid rgba(255,255,255,.07)">
+              <div style="width:30px;height:30px;border-radius:8px;background:{{ r.g }};display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff">{{ r.i }}</div>
+              <span style="flex:1;font-size:16px;color:#F4F6FA">{{ r.t }}</span>
+              <span style="font-size:15px;color:rgba(235,238,245,.5);margin-right:6px">{{ r.v }}</span>
+              <svg width="8" height="14" viewBox="0 0 8 14"><path d="M1 1l6 6-6 6" stroke="rgba(235,238,245,.3)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </div>
+          </sc-for>
+        </div>
+        <div style="flex:none;border-radius:26px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);box-shadow:inset 0 1px 0 rgba(255,255,255,.07);overflow:hidden">
+          <sc-for list="{{ setB }}" as="r" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:12px;min-height:52px;padding:0 16px;border-bottom:1px solid rgba(255,255,255,.07)">
+              <div style="width:30px;height:30px;border-radius:8px;background:{{ r.g }};display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff">{{ r.i }}</div>
+              <span style="flex:1;font-size:16px;color:#F4F6FA">{{ r.t }}</span>
+              <span style="font-size:15px;color:rgba(235,238,245,.5);margin-right:6px">{{ r.v }}</span>
+              <svg width="8" height="14" viewBox="0 0 8 14"><path d="M1 1l6 6-6 6" stroke="rgba(235,238,245,.3)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </div>
+          </sc-for>
+        </div>
+        <div style="flex:none;border-radius:26px;padding:16px;background:{{ cacheBg }};border:1px solid {{ cacheBd }};box-shadow:inset 0 1px 0 rgba(255,255,255,.07);display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:38px;height:38px;border-radius:12px;background:{{ cacheIconBg }};display:flex;align-items:center;justify-content:center">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"></path><path d="M8 10.5l4 4 4-4"></path><path d="M4 17v2.5h16V17"></path></svg>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+              <span style="font-size:16px;font-weight:700;color:#F4F6FA">Dump offline completo</span>
+              <span style="font-size:12.5px;line-height:1.35;color:rgba(235,238,245,.5)">{{ cacheSub }}</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <div style="height:8px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden">
+              <div style="width:{{ cacheW }};height:100%;border-radius:999px;background:{{ cacheFill }};transition:width .5s cubic-bezier(.22,1,.36,1)"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;letter-spacing:.06em">
+              <span style="color:rgba(235,238,245,.45)">{{ cacheStage }}</span>
+              <span style="color:{{ cacheAccent }}">{{ cachePctTxt }}</span>
+            </div>
+          </div>
+          <div style="border-radius:16px;background:rgba(255,255,255,.04);overflow:hidden">
+            <sc-for list="{{ cacheItems }}" as="c" hint-placeholder-count="5">
+              <div style="display:flex;align-items:center;gap:10px;min-height:38px;padding:0 13px;border-bottom:1px solid rgba(255,255,255,.05)">
+                <span style="width:16px;font-size:13px;font-weight:800;color:{{ c.tickColor }}">{{ c.tick }}</span>
+                <span style="flex:1;font-size:13.5px;color:{{ c.fg }}">{{ c.t }}</span>
+                <span style="font-size:12px;color:rgba(235,238,245,.4)">{{ c.size }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div onClick="{{ toggleCache }}" style="height:48px;border-radius:999px;background:{{ cacheBtnBg }};border:{{ cacheBtnBd }};box-shadow:{{ cacheBtnSh }};display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:600;color:{{ cacheBtnFg }};cursor:pointer" style-active="transform:scale(.985)">{{ cacheBtn }}</div>
+          <span style="font-size:11.5px;line-height:1.4;color:rgba(235,238,245,.4)">Baixa espécies, contadores, tabela de tipos, seus prints e as regras de veredito. Depois disso o app não toca a rede — nem para calcular, nem para ler em voz alta.</span>
+        </div>
+        <div onClick="{{ replaySetup }}" style="align-self:center;height:44px;padding:0 20px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;font-size:14px;font-weight:600;color:rgba(235,238,245,.7);cursor:pointer;flex:none">Rever o setup inicial</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ sheetFicha }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:#000000;z-index:40;display:flex;flex-direction:column;overflow:hidden;animation:tkin .34s cubic-bezier(.22,1,.36,1)">
+        <div style="position:relative;height:216px;background:{{ selGrad }};flex-shrink:0;overflow:hidden">
+          <div style="position:absolute;right:-14px;bottom:-34px;font-size:150px;font-weight:800;color:rgba(255,255,255,.1);letter-spacing:-6px;line-height:1">{{ selMono }}</div>
+          <div onClick="{{ closeSheet }}" style="position:absolute;top:66px;right:16px;width:44px;height:44px;border-radius:999px;background:rgba(10,12,16,.35);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:.5px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;cursor:pointer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M5 5l14 14"></path><path d="M19 5L5 19"></path></svg>
+          </div>
+          <div style="position:absolute;left:20px;bottom:18px;display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:28px;font-weight:700;letter-spacing:-.3px;color:#fff">{{ selName }}</div>
+            <div style="display:flex;gap:8px">
+              <sc-for list="{{ selTypes }}" as="t" hint-placeholder-count="2">
+                <span style="padding:4px 12px;border-radius:999px;font-size:12px;font-weight:600;color:#fff;background:rgba(255,255,255,.16);border:.5px solid rgba(255,255,255,.25);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)">{{ t.n }}</span>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:14px;padding:16px 20px 0">
+          <div style="border-radius:28px;padding:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 8px 24px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:12px">
+            <span style="font-size:24px;font-weight:800;letter-spacing:.04em;color:{{ selVc }}">{{ selChip }}</span>
+            <div style="font-size:15px;line-height:1.45;color:rgba(235,238,245,.7)">{{ selWhy }}</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;justify-content:space-between;font-size:12px">
+                <span style="font-weight:700;letter-spacing:.06em;color:rgba(235,238,245,.45)">AS REGRAS CONCORDAM</span>
+                <span style="font-weight:800;color:{{ selVc }}">{{ selConfTxt }}</span>
+              </div>
+              <div style="height:6px;border-radius:999px;background:rgba(255,255,255,.08)"><div style="width:{{ selConfW }};height:100%;border-radius:999px;background:linear-gradient(90deg,#2E9EFF,#4DB2FF)"></div></div>
+            </div>
+          </div>
+          <div style="border-radius:28px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);overflow:hidden">
+            <div onClick="{{ toggleWhy }}" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.07);cursor:pointer">
+              <span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:rgba(235,238,245,.45)">POR QUÊ · 3 REGRAS</span>
+              <span style="font-size:11px;font-weight:700;color:#4DB2FF">{{ whyLabel }}</span>
+            </div>
+            <sc-if value="{{ whyOpen }}" hint-placeholder-val="{{ true }}">
+              <div>
+                <sc-for list="{{ rules }}" as="r" hint-placeholder-count="3">
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.07)">
+                    <span style="font-size:14px;color:rgba(235,238,245,.8)">{{ r.t }}</span>
+                    <span style="font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:700;color:{{ r.c }}">{{ r.w }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+          <div style="display:flex;justify-content:center;gap:16px;font-size:13px;color:rgba(235,238,245,.45)">
+            <span>PC {{ selPc }}</span><span>·</span><span>IV {{ selIv }}</span><span>·</span><span>Nível {{ selLv }}</span><span>·</span><span>Doces {{ selCandy }}</span>
+          </div>
+          <div style="display:flex;gap:10px">
+            <div style="flex:1.4;height:50px;border-radius:999px;background:linear-gradient(180deg,#6EC6FF,#2E9EFF);box-shadow:0 8px 24px rgba(46,158,255,.4),inset 0 1px 0 rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:#fff;cursor:pointer" style-active="transform:scale(.985)">{{ selAction }}</div>
+            <div style="flex:1;height:50px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);display:flex;align-items:center;justify-content:center;gap:7px;font-size:16px;font-weight:600;color:#F4F6FA;cursor:pointer" style-active="transform:scale(.98)">
+              <svg width="11" height="14" viewBox="0 0 12 15"><path d="M1.5 1.5h9V14L6 10.9 1.5 14V1.5z" fill="#F4F6FA"></path></svg>Guardar
+            </div>
+          </div>
+        </div>
+        <div style="position:absolute;right:18px;bottom:30px;width:54px;height:54px;border-radius:999px;background:rgba(24,28,38,.6);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);border:.5px solid rgba(255,255,255,.16);box-shadow:0 10px 28px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer" style-active="transform:scale(.95)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4L12 3z" fill="url(#tkai)"></path><defs><linearGradient id="tkai" x1="4" y1="4" x2="20" y2="20"><stop offset="0" stop-color="#7CC6FF"></stop><stop offset="1" stop-color="#4DB2FF"></stop></linearGradient></defs></svg>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ sheetCalc }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:#000000;z-index:40;display:flex;flex-direction:column;gap:14px;padding:74px 20px 0;box-sizing:border-box;overflow:hidden;animation:tkin .34s cubic-bezier(.22,1,.36,1)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:28px;font-weight:700;letter-spacing:-.3px;color:#F4F6FA">Calculadora de IV</div>
+          <div onClick="{{ closeSheet }}" style="width:44px;height:44px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);display:flex;align-items:center;justify-content:center;cursor:pointer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(235,238,245,.75)" stroke-width="2.5" stroke-linecap="round"><path d="M5 5l14 14"></path><path d="M19 5L5 19"></path></svg>
+          </div>
+        </div>
+        <div style="border-radius:20px;padding:12px 14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:12px">
+          <div style="width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#232833,#3A4150);display:flex;align-items:center;justify-content:center">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(235,238,245,.6)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><circle cx="8.5" cy="10" r="1.5"></circle><path d="M21 16l-5-5-9 8"></path></svg>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+            <span style="font-size:14.5px;font-weight:600;color:#F4F6FA">print_garchomp.png</span>
+            <span style="font-size:12px;color:rgba(235,238,245,.45)">Lido em 0,8 s · tudo no aparelho</span>
+          </div>
+          <span style="font-size:13px;font-weight:600;color:#4DB2FF">Trocar</span>
+        </div>
+        <div style="border-radius:20px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);display:flex;padding:14px 0">
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border-right:1px solid rgba(255,255,255,.07)"><span style="font-size:10px;font-weight:700;letter-spacing:.08em;color:rgba(235,238,245,.4)">PC LIDO</span><span style="font-size:17px;font-weight:700;color:#F4F6FA">2.874</span></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border-right:1px solid rgba(255,255,255,.07)"><span style="font-size:10px;font-weight:700;letter-spacing:.08em;color:rgba(235,238,245,.4)">PS</span><span style="font-size:17px;font-weight:700;color:#F4F6FA">178</span></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px"><span style="font-size:10px;font-weight:700;letter-spacing:.08em;color:rgba(235,238,245,.4)">POEIRA</span><span style="font-size:17px;font-weight:700;color:#F4F6FA">5.000</span></div>
+        </div>
+        <div style="border-radius:28px;padding:20px 16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 8px 24px rgba(0,0,0,.35);display:flex;flex-direction:column;align-items:center;gap:10px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,#2E2A78,#5B3DF5 55%,#7C5CFF);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:rgba(255,255,255,.95)">GA</div>
+            <div style="display:flex;flex-direction:column">
+              <span style="font-size:18px;font-weight:700;color:#F4F6FA">Garchomp</span>
+              <span style="font-size:12.5px;color:rgba(235,238,245,.5)">Nível 31 · Dragão · Terra</span>
+            </div>
+          </div>
+          <div style="font-size:52px;font-weight:800;letter-spacing:-2px;line-height:1;color:#F4F6FA">IV 96<span style="font-size:26px;font-weight:700;color:rgba(235,238,245,.5)">%</span></div>
+          <div style="width:100%;height:8px;border-radius:999px;background:rgba(255,255,255,.08)"><div style="width:96%;height:100%;border-radius:999px;background:linear-gradient(90deg,#2E9EFF,#4DB2FF)"></div></div>
+          <span style="padding:5px 12px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.07em;color:#4DB2FF;background:rgba(77,178,255,.16);border:1px solid rgba(77,178,255,.3)">✦ EVOLUIR</span>
+          <div style="font-size:14px;line-height:1.45;text-align:center;max-width:280px;color:rgba(235,238,245,.65)">Ele ainda evolui — e evoluir muda tudo. Melhor uso da sua poeira hoje.</div>
+          <span onClick="{{ openHero }}" style="font-size:14px;font-weight:600;color:#4DB2FF;cursor:pointer">Ver o rastro da conta →</span>
+        </div>
+        <div style="height:54px;border-radius:999px;background:linear-gradient(180deg,#6EC6FF,#2E9EFF);box-shadow:0 8px 24px rgba(46,158,255,.4),inset 0 1px 0 rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;gap:9px;font-size:17px;font-weight:600;color:#fff;cursor:pointer" style-active="transform:scale(.985)">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M4 8V6a2 2 0 0 1 2-2h2"></path><path d="M16 4h2a2 2 0 0 1 2 2v2"></path><path d="M20 16v2a2 2 0 0 1-2 2h-2"></path><path d="M8 20H6a2 2 0 0 1-2-2v-2"></path><circle cx="12" cy="12" r="3.2"></circle></svg>
+          Escanear outro print
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ sheetDexMode }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;z-index:45;background:radial-gradient(circle at 50% 38%,#252B36,#0E1116 72%);overflow:hidden;animation:tkin .34s cubic-bezier(.22,1,.36,1)">
+        <div style="position:absolute;top:64px;left:0;right:0;display:flex;justify-content:center">
+          <div style="height:40px;padding:0 18px;border-radius:999px;background:rgba(24,28,38,.5);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);border:.5px solid rgba(255,255,255,.15);box-shadow:inset 0 1px 1px rgba(255,255,255,.14);display:flex;align-items:center;gap:8px">
+            <span style="width:8px;height:8px;border-radius:999px;background:#F87171;box-shadow:0 0 8px rgba(248,113,113,.8)"></span>
+            <span style="font-size:11px;font-weight:700;letter-spacing:.09em;color:#fff">MODO POKÉDEX</span>
+          </div>
+        </div>
+        <div onClick="{{ closeSheet }}" style="position:absolute;top:62px;right:16px;width:44px;height:44px;border-radius:999px;background:rgba(24,28,38,.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:.5px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M5 5l14 14"></path><path d="M19 5L5 19"></path></svg>
+        </div>
+        <div style="position:absolute;top:150px;left:50%;transform:translateX(-50%);width:250px;height:250px">
+          <div style="position:absolute;top:0;left:0;width:36px;height:36px;border-top:3px solid rgba(255,255,255,.9);border-left:3px solid rgba(255,255,255,.9);border-top-left-radius:18px"></div>
+          <div style="position:absolute;top:0;right:0;width:36px;height:36px;border-top:3px solid rgba(255,255,255,.9);border-right:3px solid rgba(255,255,255,.9);border-top-right-radius:18px"></div>
+          <div style="position:absolute;bottom:0;left:0;width:36px;height:36px;border-bottom:3px solid rgba(255,255,255,.9);border-left:3px solid rgba(255,255,255,.9);border-bottom-left-radius:18px"></div>
+          <div style="position:absolute;bottom:0;right:0;width:36px;height:36px;border-bottom:3px solid rgba(255,255,255,.9);border-right:3px solid rgba(255,255,255,.9);border-bottom-right-radius:18px"></div>
+          <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:72px;height:72px;border-radius:999px;border:3px solid #F87171;box-shadow:0 0 24px rgba(248,113,113,.45),inset 0 0 12px rgba(248,113,113,.3)"></div>
+        </div>
+        <div style="position:absolute;top:428px;left:0;right:0;display:flex;justify-content:center">
+          <span style="padding:5px 14px;border-radius:999px;font-size:11.5px;font-weight:700;color:#3DDC97;background:rgba(61,220,151,.14);border:1px solid rgba(61,220,151,.3)">Identificado · 98% de certeza</span>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;border-radius:28px 28px 0 0;background:rgba(20,23,30,.72);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border-top:.5px solid rgba(255,255,255,.14);box-shadow:inset 0 1px 1px rgba(255,255,255,.1);padding:18px 20px 42px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div style="width:54px;height:54px;border-radius:18px;background:linear-gradient(135deg,#7C2D12,#EA580C 55%,#F97316);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:rgba(255,255,255,.95)">CH</div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+              <span style="font-size:20px;font-weight:700;color:#F4F6FA">Charizard</span>
+              <span style="font-size:12.5px;color:rgba(235,238,245,.5)">Fogo · Voador · #0006</span>
+            </div>
+            <div style="width:44px;height:44px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F4F6FA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6.5 9H3v6h3.5L11 19V5z" fill="#F4F6FA" stroke="none"></path><path d="M15.5 8.5a5 5 0 0 1 0 7"></path><path d="M18.5 5.5a9.5 9.5 0 0 1 0 13"></path></svg>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:3px;height:28px">
+            <sc-for list="{{ wave }}" as="w" hint-placeholder-count="16">
+              <span style="width:4px;height:{{ w.h }}px;border-radius:99px;background:{{ w.c }}"></span>
+            </sc-for>
+          </div>
+          <div style="font-size:14px;line-height:1.5;color:rgba(235,238,245,.7)">"Charizard, o Pokémon Chama. Contra ele, ataques de pedra causam dano em dobro…"</div>
+          <div style="display:flex;gap:10px">
+            <div onClick="{{ closeSheet }}" style="flex:1.3;height:48px;border-radius:999px;background:linear-gradient(180deg,#6EC6FF,#2E9EFF);box-shadow:0 8px 24px rgba(46,158,255,.4),inset 0 1px 0 rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:#fff;cursor:pointer">Abrir ficha</div>
+            <div style="flex:1;height:48px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:#F4F6FA;cursor:pointer">Pausar voz</div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ sheetTeam }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:#000000;z-index:40;display:flex;flex-direction:column;gap:14px;padding:74px 20px 0;box-sizing:border-box;overflow:hidden;animation:tkin .34s cubic-bezier(.22,1,.36,1)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:28px;font-weight:700;letter-spacing:-.3px;color:#F4F6FA">Monta um time</div>
+          <div onClick="{{ closeSheet }}" style="width:44px;height:44px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);display:flex;align-items:center;justify-content:center;cursor:pointer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(235,238,245,.75)" stroke-width="2.5" stroke-linecap="round"><path d="M5 5l14 14"></path><path d="M19 5L5 19"></path></svg>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <sc-for list="{{ modes }}" as="m" hint-placeholder-count="3">
+            <span onClick="{{ m.pick }}" style="padding:8px 16px;border-radius:999px;font-size:13.5px;font-weight:{{ m.fw }};color:{{ m.fg }};background:{{ m.bg }};border:1px solid {{ m.bd }};cursor:pointer">{{ m.n }}</span>
+          </sc-for>
+        </div>
+        <div style="font-size:14px;line-height:1.5;color:rgba(235,238,245,.6)">{{ teamCtx }}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+          <sc-for list="{{ team }}" as="p" hint-placeholder-count="6">
+            <div style="border-radius:20px;padding:12px 8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);display:flex;flex-direction:column;align-items:center;gap:6px">
+              <div style="width:54px;height:54px;border-radius:17px;background:{{ p.g }};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:rgba(255,255,255,.95)">{{ p.m }}</div>
+              <span style="font-size:12.5px;font-weight:600;color:#F4F6FA">{{ p.n }}</span>
+              <span style="font-size:10.5px;color:rgba(235,238,245,.4);margin-top:-4px">{{ p.pc }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="border-radius:20px;padding:12px 16px;background:rgba(61,220,151,.07);border:1px solid rgba(61,220,151,.2);display:flex;flex-direction:column;gap:3px">
+          <span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#3DDC97">POR QUE ESSE TIME</span>
+          <span style="font-size:13.5px;line-height:1.45;color:rgba(235,238,245,.65)">{{ teamWhy }}</span>
+        </div>
+        <div style="display:flex;gap:10px">
+          <div onClick="{{ closeSheet }}" style="flex:1.4;height:50px;border-radius:999px;background:linear-gradient(180deg,#6EC6FF,#2E9EFF);box-shadow:0 8px 24px rgba(46,158,255,.4),inset 0 1px 0 rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:#fff;cursor:pointer">Usar esse time</div>
+          <div onClick="{{ reroll }}" style="flex:1;height:50px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:#F4F6FA;cursor:pointer">Trocar</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ sheetRaid }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:#000000;z-index:40;display:flex;flex-direction:column;gap:14px;padding:74px 20px 0;box-sizing:border-box;overflow:hidden;animation:tkin .34s cubic-bezier(.22,1,.36,1)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:28px;font-weight:700;letter-spacing:-.3px;color:#F4F6FA">Raide de hoje</div>
+          <div onClick="{{ closeSheet }}" style="width:44px;height:44px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);display:flex;align-items:center;justify-content:center;cursor:pointer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(235,238,245,.75)" stroke-width="2.5" stroke-linecap="round"><path d="M5 5l14 14"></path><path d="M19 5L5 19"></path></svg>
+          </div>
+        </div>
+        <div style="border-radius:28px;padding:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);box-shadow:inset 0 1px 0 rgba(255,255,255,.08);display:flex;align-items:center;gap:14px">
+          <div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#2E2A78,#5B3DF5 55%,#7C5CFF);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:rgba(255,255,255,.95)">RA</div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+            <span style="font-size:20px;font-weight:700;color:#F4F6FA">Rayquaza</span>
+            <span style="font-size:12.5px;color:rgba(235,238,245,.5)">Chefe nível 5 · Dragão · Voador</span>
+          </div>
+        </div>
+        <div style="border-radius:28px;padding:16px;background:rgba(255,197,92,.07);border:1px solid rgba(255,197,92,.22);display:flex;flex-direction:column;gap:6px">
+          <span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#FFC55C">PC DE CAPTURA</span>
+          <div style="font-size:30px;font-weight:800;letter-spacing:-1px;color:#F4F6FA">2.294 – 2.387</div>
+          <span style="font-size:13.5px;line-height:1.45;color:rgba(235,238,245,.65)">Se vier exatamente <span style="font-weight:700;color:#FFC55C">2.387</span>, é IV 100%. Com clima de vento, a faixa sobe para 2.868–2.984.</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:rgba(235,238,245,.45)">SEUS MELHORES COUNTERS</span>
+          <span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#4DB2FF">DA SUA COLEÇÃO</span>
+        </div>
+        <div style="border-radius:28px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);overflow:hidden">
+          <sc-for list="{{ counters }}" as="c" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.07)">
+              <div style="width:46px;height:46px;border-radius:15px;background:{{ c.g }};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:rgba(255,255,255,.95)">{{ c.m }}</div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                <span style="font-size:16px;font-weight:600;color:#F4F6FA">{{ c.n }}</span>
+                <span style="font-size:12.5px;color:rgba(235,238,245,.45)">{{ c.moves }}</span>
+              </div>
+              <span style="white-space:nowrap;padding:4px 10px;border-radius:999px;font-size:10.5px;font-weight:800;letter-spacing:.06em;color:{{ c.fg }};background:{{ c.bg }};border:1px solid {{ c.bd }}">{{ c.tag }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div onClick="{{ openTeam }}" style="height:54px;border-radius:999px;background:linear-gradient(180deg,#6EC6FF,#2E9EFF);box-shadow:0 8px 24px rgba(46,158,255,.4),inset 0 1px 0 rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:600;color:#fff;cursor:pointer">Montar time com esses</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showTabs }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;left:26px;right:26px;bottom:24px;height:58px;border-radius:999px;background:rgba(28,30,38,.4);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:.5px solid rgba(255,255,255,.12);box-shadow:0 14px 36px rgba(0,0,0,.5),inset 0 1px 1px rgba(255,255,255,.14);display:flex;align-items:center;z-index:50">
+        <div onClick="{{ goHome }}" style="flex:{{ homeFlex }};height:{{ homeH }}px;margin:{{ homeM }};border-radius:999px;background:{{ homeBg }};backdrop-filter:{{ homeBlur }};-webkit-backdrop-filter:{{ homeBlur }};box-shadow:{{ homeSh }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;transition:flex .38s cubic-bezier(.22,1,.36,1),height .38s cubic-bezier(.22,1,.36,1),margin .38s cubic-bezier(.22,1,.36,1),background .28s ease-out,box-shadow .28s ease-out">
+          <svg width="20" height="20" viewBox="0 0 24 24"><path fill="{{ homeFg }}" d="M11.33 3.53a1 1 0 0 1 1.34 0l7.5 6.7a1 1 0 0 1 .33.74v8.83c0 .66-.54 1.2-1.2 1.2h-4.05v-5.9a1 1 0 0 0-1-1h-4.5a1 1 0 0 0-1 1V21H4.7c-.66 0-1.2-.54-1.2-1.2V10.97a1 1 0 0 1 .33-.74l7.5-6.7z"></path></svg>
+          <span style="font-size:10px;font-weight:{{ homeFw }};color:{{ homeFg }}">Início</span>
+        </div>
+        <div onClick="{{ goDex }}" style="flex:{{ dexFlex }};height:{{ dexH }}px;margin:{{ dexM }};border-radius:999px;background:{{ dexBg }};backdrop-filter:{{ dexBlur }};-webkit-backdrop-filter:{{ dexBlur }};box-shadow:{{ dexSh }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;transition:flex .38s cubic-bezier(.22,1,.36,1),height .38s cubic-bezier(.22,1,.36,1),margin .38s cubic-bezier(.22,1,.36,1),background .28s ease-out,box-shadow .28s ease-out">
+          <svg width="20" height="20" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="2.4" fill="{{ dexFg }}"></rect><rect x="13" y="3.5" width="7.5" height="7.5" rx="2.4" fill="{{ dexFg }}"></rect><rect x="3.5" y="13" width="7.5" height="7.5" rx="2.4" fill="{{ dexFg }}"></rect><rect x="13" y="13" width="7.5" height="7.5" rx="2.4" fill="{{ dexFg }}"></rect></svg>
+          <span style="font-size:10px;font-weight:{{ dexFw }};color:{{ dexFg }}">Pokédex</span>
+        </div>
+        <div onClick="{{ goSet }}" style="flex:{{ setFlex }};height:{{ setH }}px;margin:{{ setM }};border-radius:999px;background:{{ setBg }};backdrop-filter:{{ setBlur }};-webkit-backdrop-filter:{{ setBlur }};box-shadow:{{ setSh }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;transition:flex .38s cubic-bezier(.22,1,.36,1),height .38s cubic-bezier(.22,1,.36,1),margin .38s cubic-bezier(.22,1,.36,1),background .28s ease-out,box-shadow .28s ease-out">
+          <svg width="20" height="20" viewBox="0 0 16 16"><path fill="{{ setFg }}" fill-rule="evenodd" d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"></path></svg>
+          <span style="font-size:10px;font-weight:{{ setFw }};color:{{ setFg }}">Ajustes</span>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+</x-import>
+<div style="font-size:11.5px;color:rgba(235,238,245,.4);text-align:center;max-width:420px;line-height:1.5">Mockup navegável — setup em 4 passos, 3 abas, ficha, calculadora, Modo Pokédex, time e raide. Toque em tudo.</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:474,&quot;height&quot;:980}}">
+const V = {
+  investir:  { chip: '↑ INVESTIR',   c: '#3DDC97', bg: 'rgba(61,220,151,.14)',  bd: 'rgba(61,220,151,.3)' },
+  evoluir:   { chip: '✦ EVOLUIR',    c: '#4DB2FF', bg: 'rgba(77,178,255,.16)', bd: 'rgba(77,178,255,.3)' },
+  guardar:   { chip: '◆ GUARDAR',    c: '#FFC55C', bg: 'rgba(255,197,92,.14)',  bd: 'rgba(255,197,92,.3)' },
+  transferir:{ chip: '→ TRANSFERIR', c: '#9AA6B8', bg: 'rgba(154,166,184,.14)', bd: 'rgba(154,166,184,.3)' },
+};
+const G = {
+  dragao:  'linear-gradient(135deg,#2E2A78,#5B3DF5 55%,#7C5CFF)',
+  fogo:    'linear-gradient(135deg,#7C2D12,#EA580C 55%,#F97316)',
+  agua:    'linear-gradient(135deg,#1E3A8A,#2563EB 55%,#38BDF8)',
+  planta:  'linear-gradient(135deg,#14532D,#16A34A 55%,#84CC16)',
+  eletrico:'linear-gradient(135deg,#92400E,#F59E0B 55%,#FBBF24)',
+  fada:    'linear-gradient(135deg,#9D174D,#EC4899 55%,#F9A8D4)',
+  psi:     'linear-gradient(135deg,#312E81,#7C3AED 55%,#A78BFA)',
+  normal:  'linear-gradient(135deg,#374151,#6B7280 55%,#9CA3AF)',
+  gelo:    'linear-gradient(135deg,#155E75,#0891B2 55%,#67E8F9)',
+  luta:    'linear-gradient(135deg,#9A3412,#F97316 55%,#FDBA74)',
+};
+const MON = [
+  { id:'ga', n:'Garchomp',  m:'GA', g:G.dragao,  t:['Dragão','Terra'],  v:'evoluir',   pc:'2.874', iv:'96%', lv:31, candy:87,
+    why:'Custa 100 doces e destrava Garra Dragão — o melhor ataque da linha. Depois disso, vale investir.', conf:86, action:'Evoluir agora',
+    rules:[['IV 96 — entre os 5% melhores','+42','#3DDC97'],['Evolução destrava ataque de elite','+31','#3DDC97'],['Poeira em falta na sua conta','−8','#9AA6B8']] },
+  { id:'ma', n:'Magnezone', m:'MA', g:G.eletrico, t:['Elétrico','Aço'], v:'investir',  pc:'2.340', iv:'91%', lv:28, candy:112,
+    why:'Melhor counter elétrico que você tem. Subir 4 níveis já muda o resultado de ginásio.', conf:91, action:'Subir de nível',
+    rules:[['Melhor elétrico da coleção','+38','#3DDC97'],['Ataque de carga ideal','+26','#3DDC97'],['Fraco contra Terra','−6','#9AA6B8']] },
+  { id:'sy', n:'Sylveon',   m:'SY', g:G.fada,    t:['Fada'],            v:'guardar',   pc:'2.110', iv:'98%', lv:26, candy:64,
+    why:'IV quase perfeito, mas nada urgente hoje. Guarde para o próximo evento de Fada.', conf:74, action:'Guardar no cofre',
+    rules:[['IV 98 — quase perfeito','+44','#3DDC97'],['Sem evento ativo de Fada','−12','#9AA6B8'],['Custo de poeira alto agora','−9','#9AA6B8']] },
+  { id:'gy', n:'Gyarados',  m:'GY', g:G.agua,    t:['Água','Voador'],   v:'transferir', pc:'1.203', iv:'44%', lv:22, candy:23, trade:true,
+    why:'IV baixo e você tem três melhores. Trocar tem 78% de chance de vir um melhor que esse.', conf:81, action:'Transferir',
+    rules:[['IV 44 — abaixo da média','−36','#9AA6B8'],['Três melhores na coleção','−18','#9AA6B8'],['Troca com 78% de ganho','+22','#3DDC97']] },
+  { id:'ve', n:'Venusaur',  m:'VE', g:G.planta,  t:['Planta','Veneno'], v:'investir',  pc:'2.560', iv:'89%', lv:30, candy:140,
+    why:'Seu melhor planta. Contra os ginásios de Água do bairro, ele resolve sozinho.', conf:88, action:'Subir de nível',
+    rules:[['Melhor planta da coleção','+35','#3DDC97'],['Vantagem no meta local','+29','#3DDC97'],['Ataque rápido subótimo','−7','#9AA6B8']] },
+];
+const HEROES = [
+  { id:'ch', n:'Charizard', m:'CH', g:'linear-gradient(180deg,#7C2D12 0%,#EA580C 48%,#F97316 72%)',
+    line:'Fogo · Voador · IV 93 — vale cada grama de poeira hoje.', cta:'↑ Investir — ver a conta', mon:'ma' },
+  { id:'ga', n:'Garchomp', m:'GA', g:'linear-gradient(180deg,#2E2A78 0%,#5B3DF5 45%,#7C5CFF 72%)',
+    line:'Dragão · Terra · IV 96 — ele ainda evolui, e evoluir muda tudo.', cta:'✦ Evoluir — ver a conta', mon:'ga' },
+  { id:'gl', n:'Glaceon', m:'GL', g:'linear-gradient(180deg,#155E75 0%,#0891B2 48%,#67E8F9 74%)',
+    line:'Gelo · IV 87 — a raide de amanhã é de Dragão. Ele é sua resposta.', cta:'↑ Investir — ver a conta', mon:'ve' },
+];
+const ALL = [
+  ['Bulbasaur','BU','planta','#0001'],['Charmander','CH','fogo','#0004'],['Squirtle','SQ','agua','#0007'],
+  ['Pikachu','PI','eletrico','#0025'],['Gengar','GE','psi','#0094'],['Dragonite','DR','dragao','#0149'],
+  ['Sylveon','SY','fada','#0700'],['Snorlax','SN','normal','#0143'],['Lucario','LU','luta','#0448'],
+];
+const TEAMS = {
+  ginasio: { ctx:'Contra o ginásio da Rua Augusta — 3 defensores, maioria de tipo Água. Seu melhor sexteto:',
+    why:'Planta e Elétrico dobram o dano contra Água; Garchomp segura o que sobrar.',
+    six:[['Venusaur','VE','planta','PC 2.560'],['Magnezone','MA','eletrico','PC 2.340'],['Garchomp','GA','dragao','PC 2.874'],['Lucario','LU','luta','PC 2.703'],['Raichu','RA','eletrico','PC 2.102'],['Roserade','RO','planta','PC 2.360']] },
+  raide: { ctx:'Contra Rayquaza (Dragão · Voador) — 6 melhores da sua coleção:',
+    why:'Gelo dobra contra Dragão e Voador ao mesmo tempo. Mamoswine é o dobro de dano por segundo.',
+    six:[['Mamoswine','MM','gelo','PC 2.680'],['Glaceon','GL','gelo','PC 2.420'],['Garchomp','GA','dragao','PC 2.874'],['Weavile','WE','gelo','PC 2.510'],['Dragonite','DR','dragao','PC 2.930'],['Rhyperior','RH','normal','PC 2.744']] },
+  liga: { ctx:'Liga Ultra, limite 2.500 PC — trio equilibrado + reservas:',
+    why:'Sylveon absorve Dragão, Magnezone cobre Voador e Aço, e Gyarados fecha o ciclo.',
+    six:[['Sylveon','SY','fada','PC 2.480'],['Magnezone','MA','eletrico','PC 2.340'],['Gyarados','GY','agua','PC 2.499'],['Venusaur','VE','planta','PC 2.460'],['Lucario','LU','luta','PC 2.410'],['Snorlax','SN','normal','PC 2.495']] },
+};
+
+const CACHE = [
+  { t: '1.182 espécies e evoluções', size: '412 MB', at: 18 },
+  { t: 'Tabela de tipos e counters',  size: '38 MB',  at: 38 },
+  { t: 'Regras de veredito',          size: '6 MB',   at: 56 },
+  { t: 'Seus 247 prints',             size: '680 MB', at: 78 },
+  { t: 'Voz neural (pt-BR)',          size: '94 MB',  at: 94 },
+];
+
+class Component extends DCLogic {
+  state = {
+    setupStep: 0, done: false, name: 'Miguel', level: 40, theme: 1, lang: 0, voice: true,
+    tab: 'inicio', dexTab: 'meus', hero: 0, sheet: null, selId: 'ga', whyOpen: true, teamMode: 'ginasio',
+    cache: 'idle', cachePct: 0,
+  };
+
+  set = (p) => this.setState(p);
+
+  componentWillUnmount() { clearInterval(this._t); }
+
+  runCache = () => {
+    if (this.state.cache === 'done') { this.set({ cache: 'idle', cachePct: 0 }); return; }
+    if (this.state.cache === 'running') return;
+    this.set({ cache: 'running', cachePct: 0 });
+    clearInterval(this._t);
+    this._t = setInterval(() => {
+      const p = this.state.cachePct + 4;
+      if (p >= 100) { clearInterval(this._t); this.set({ cache: 'done', cachePct: 100 }); }
+      else this.set({ cachePct: p });
+    }, 90);
+  };
+
+  renderVals() {
+    const s = this.state;
+    const sel = MON.find(m => m.id === s.selId) || MON[0];
+    const hero = HEROES[s.hero % HEROES.length];
+    const v = V[sel.v];
+    const team = TEAMS[s.teamMode];
+    const stageItem = CACHE.find(c => s.cachePct < c.at) || CACHE[CACHE.length - 1];
+    const cacheStage = stageItem.t.toUpperCase();
+
+    const pill = (on) => ({
+      flex: on ? 1.25 : 1,
+      h: on ? 66 : 58,
+      m: on ? '-4px 0' : '0',
+      bg: on ? 'rgba(16,18,26,.3)' : 'transparent',
+      blur: on ? 'blur(8px) saturate(160%)' : 'none',
+      sh: on ? 'inset 0 2.5px 4px -1.5px rgba(255,255,255,.45),inset 0 -2.5px 4px -1.5px rgba(255,255,255,.28),inset 3px 0 4px -2px rgba(255,255,255,.16),inset -3px 0 4px -2px rgba(255,255,255,.16),0 6px 16px rgba(0,0,0,.35)' : 'none',
+      fg: on ? '#7CC6FF' : '#fff',
+      fw: on ? 600 : 500,
+    });
+    const H = pill(s.tab === 'inicio'), D = pill(s.tab === 'dex'), S = pill(s.tab === 'set');
+
+    const seg = (on) => ({
+      bg: on ? 'rgba(77,178,255,.2)' : 'transparent',
+      sh: on ? 'inset 0 1px 0 rgba(255,255,255,.12)' : 'none',
+      fg: on ? '#7CC6FF' : 'rgba(235,238,245,.6)',
+    });
+    const T = seg(s.dexTab === 'todos'), M = seg(s.dexTab === 'meus');
+
+    const openMon = (id) => () => this.set({ selId: id, sheet: 'ficha', whyOpen: true });
+    const levelHints = {
+      20: 'Até o nível 30 o app prioriza evoluções baratas e economiza poeira.',
+      30: 'Você já pega bichos fortes o bastante — o app começa a sugerir investimento.',
+      40: 'Foco em ataques de elite e no que rende em raide e liga.',
+      50: 'Nada de tutorial: só o veredito e o rastro, direto.',
+    };
+    const themeNames = ['Sistema', 'Escuro', 'Claro'];
+    const langNames = ['Português (BR)', 'English', 'Español'];
+    const nextLabels = ['Começar', 'Continuar', 'Continuar', 'Abrir o TrainerKit'];
+
+    return {
+      isSetup: !s.done,
+      setupStep: s.setupStep,
+      st0: s.setupStep === 0, st1: s.setupStep === 1, st2: s.setupStep === 2, st3: s.setupStep === 3,
+      canBack: s.setupStep > 0,
+      nextLabel: nextLabels[s.setupStep],
+      steps: [0,1,2,3].map(i => ({ bg: i <= s.setupStep ? '#4DB2FF' : 'rgba(255,255,255,.12)' })),
+      next: () => s.setupStep < 3 ? this.set({ setupStep: s.setupStep + 1 }) : this.set({ done: true }),
+      back: () => this.set({ setupStep: Math.max(0, s.setupStep - 1) }),
+      skip: () => this.set({ done: true }),
+      replaySetup: () => this.set({ done: false, setupStep: 0, tab: 'inicio', sheet: null }),
+
+      pitch: [
+        { i: '↑', t: 'Investir, Evoluir, Guardar ou Transferir — uma palavra, não uma planilha.', c: '#3DDC97', bg: 'rgba(61,220,151,.16)', bd: 'rgba(61,220,151,.3)' },
+        { i: '✦', t: 'Todo veredito abre e mostra as regras que levaram até ele.', c: '#4DB2FF', bg: 'rgba(77,178,255,.16)', bd: 'rgba(77,178,255,.3)' },
+        { i: '⊘', t: 'Zero anúncio, zero rastreamento, funciona offline.', c: '#9AA6B8', bg: 'rgba(154,166,184,.16)', bd: 'rgba(154,166,184,.3)' },
+      ],
+
+      cacheW: (s.cache === 'idle' ? 0 : s.cachePct) + '%',
+      cachePctTxt: s.cache === 'done' ? 'COMPLETO' : s.cache === 'running' ? s.cachePct + '%' : '0%',
+      cacheStage: s.cache === 'done' ? 'PRONTO PARA A RUA' : s.cache === 'running' ? cacheStage : 'NUNCA BAIXADO',
+      cacheSub: s.cache === 'done' ? '1.182 espécies · 247 prints · 1,2 GB no aparelho' : s.cache === 'running' ? 'Baixando tudo — pode fechar o app' : 'Baixe tudo agora e nunca mais depende de sinal',
+      cacheBtn: s.cache === 'done' ? 'Apagar e baixar de novo' : s.cache === 'running' ? 'Baixando… ' + s.cachePct + '%' : 'Baixar tudo para offline',
+      toggleCache: this.runCache,
+      cacheBg: s.cache === 'done' ? 'rgba(61,220,151,.07)' : 'rgba(255,255,255,.06)',
+      cacheBd: s.cache === 'done' ? 'rgba(61,220,151,.22)' : 'rgba(255,255,255,.09)',
+      cacheIconBg: s.cache === 'done' ? 'linear-gradient(180deg,#3DDC97,#059669)' : 'linear-gradient(180deg,#6EC6FF,#2E9EFF)',
+      cacheFill: s.cache === 'done' ? 'linear-gradient(90deg,#059669,#3DDC97)' : 'linear-gradient(90deg,#2E9EFF,#4DB2FF)',
+      cacheAccent: s.cache === 'done' ? '#3DDC97' : '#4DB2FF',
+      cacheBtnBg: s.cache === 'done' ? 'rgba(255,255,255,.07)' : 'linear-gradient(180deg,#6EC6FF,#2E9EFF)',
+      cacheBtnBd: s.cache === 'done' ? '1px solid rgba(255,255,255,.11)' : 'none',
+      cacheBtnSh: s.cache === 'done' ? 'none' : '0 8px 24px rgba(46,158,255,.4),inset 0 1px 0 rgba(255,255,255,.3)',
+      cacheBtnFg: s.cache === 'done' ? '#F4F6FA' : '#fff',
+      cacheItems: CACHE.map((c, i) => {
+        const on = s.cache === 'done' || (s.cache === 'running' && s.cachePct >= c.at);
+        return { t: c.t, size: c.size, tick: on ? '✓' : '·', tickColor: on ? '#3DDC97' : 'rgba(235,238,245,.3)', fg: on ? '#F4F6FA' : 'rgba(235,238,245,.45)' };
+      }),
+
+      nameVal: s.name,
+      initial: s.name.slice(0, 1),
+      levels: [20, 30, 40, 50].map(n => ({
+        n, label: n === 20 ? 'INÍCIO' : n === 30 ? 'MÉDIO' : n === 40 ? 'ALTO' : 'MÁX',
+        pick: () => this.set({ level: n }),
+        bg: s.level === n ? 'rgba(77,178,255,.18)' : 'rgba(255,255,255,.05)',
+        bd: s.level === n ? 'rgba(77,178,255,.45)' : 'rgba(255,255,255,.09)',
+        sh: s.level === n ? '0 0 0 3px rgba(77,178,255,.1)' : 'none',
+        fg: s.level === n ? '#7CC6FF' : '#F4F6FA',
+        sub: s.level === n ? 'rgba(124,207,255,.7)' : 'rgba(235,238,245,.35)',
+      })),
+      levelHint: levelHints[s.level],
+      themes: themeNames.map((n, i) => ({
+        n, pick: () => this.set({ theme: i }),
+        bg: s.theme === i ? 'rgba(77,178,255,.2)' : 'transparent',
+        sh: s.theme === i ? 'inset 0 1px 0 rgba(255,255,255,.12)' : 'none',
+        fg: s.theme === i ? '#7CC6FF' : 'rgba(235,238,245,.6)',
+        fw: s.theme === i ? 700 : 600,
+      })),
+      langs: langNames.map((n, i) => ({
+        n, pick: () => this.set({ lang: i }),
+        tick: s.lang === i ? '#4DB2FF' : 'transparent',
+      })),
+      toggleVoice: () => this.set({ voice: !s.voice }),
+      voiceBg: s.voice ? '#4DB2FF' : 'rgba(255,255,255,.14)',
+      voiceJustify: s.voice ? 'flex-end' : 'flex-start',
+      summary: [
+        { k: 'Treinador', v: s.name },
+        { k: 'Nível', v: String(s.level) },
+        { k: 'Tema', v: themeNames[s.theme] },
+        { k: 'Idioma', v: langNames[s.lang] },
+        { k: 'Voz da ficha', v: s.voice ? 'Camila · Neural' : 'Desligada' },
+      ],
+
+      isInicio: s.done && s.tab === 'inicio',
+      isDex: s.done && s.tab === 'dex',
+      isSet: s.done && s.tab === 'set',
+      showTabs: s.done && !s.sheet,
+
+      heroGrad: hero.g, heroMono: hero.m, heroName: hero.n, heroLine: hero.line, heroCta: hero.cta,
+      dots: HEROES.map((_, i) => ({ w: i === (s.hero % HEROES.length) ? 22 : 7, bg: i === (s.hero % HEROES.length) ? 'rgba(255,255,255,.9)' : 'rgba(255,255,255,.35)' })),
+      nextHero: () => this.set({ hero: s.hero + 1 }),
+      openHero: openMon(hero.mon),
+
+      strip: MON.map(m => ({ m: m.m, g: m.g, vc: V[m.v].c, v: V[m.v].chip.slice(2), open: openMon(m.id) })),
+      mine: MON.map(m => ({
+        n: m.n, m: m.m, g: m.g, meta: `IV ${m.iv} · PC ${m.pc} · nv ${m.lv}`,
+        chip: V[m.v].chip, vc: V[m.v].c, vb: V[m.v].bg, vbd: V[m.v].bd,
+        trade: !!m.trade, open: openMon(m.id),
+      })),
+      all: ALL.map(([n, m, t, num]) => ({ n, m, num, g: G[t] })),
+      dexMeus: s.dexTab === 'meus', dexTodos: s.dexTab === 'todos',
+      showMeus: () => this.set({ dexTab: 'meus' }), showTodos: () => this.set({ dexTab: 'todos' }),
+      todosBg: T.bg, todosSh: T.sh, todosFg: T.fg, meusBg: M.bg, meusSh: M.sh, meusFg: M.fg,
+
+      setA: [
+        { i: '◐', t: 'Tema', v: themeNames[s.theme], g: 'linear-gradient(180deg,#6EC6FF,#2E9EFF)' },
+        { i: '⌾', t: 'Idioma', v: langNames[s.lang], g: 'linear-gradient(180deg,#38BDF8,#2563EB)' },
+        { i: '▣', t: 'Imagens', v: 'Só no Wi-Fi', g: 'linear-gradient(180deg,#34D399,#059669)' },
+        { i: '≣', t: 'Voz', v: s.voice ? 'Camila · Neural' : 'Desligada', g: 'linear-gradient(180deg,#FB923C,#EA580C)' },
+      ],
+      setB: [
+        { i: '⛁', t: 'Dados do jogo', v: 'Atualizado hoje', g: 'linear-gradient(180deg,#2DD4BF,#0D9488)' },
+        { i: '✦', t: 'Assistente de IA', v: 'Ativo', g: 'linear-gradient(180deg,#F472B6,#DB2777)' },
+        { i: '⬢', t: 'Armazenamento', v: '1,2 GB', g: 'linear-gradient(180deg,#94A3B8,#64748B)' },
+        { i: '⛨', t: 'Privacidade', v: 'Zero rastreio', g: 'linear-gradient(180deg,#60A5FA,#2563EB)' },
+        { i: 'i', t: 'Sobre', v: 'v2.4.1', g: 'linear-gradient(180deg,#7B8494,#4B5563)' },
+      ],
+
+      sheetFicha: s.sheet === 'ficha', sheetCalc: s.sheet === 'calc', sheetDexMode: s.sheet === 'dexmode',
+      sheetTeam: s.sheet === 'team', sheetRaid: s.sheet === 'raid',
+      closeSheet: () => this.set({ sheet: null }),
+      openCalc: () => this.set({ sheet: 'calc' }),
+      openDexMode: () => this.set({ sheet: 'dexmode' }),
+      openTeam: () => this.set({ sheet: 'team' }),
+      openRaid: () => this.set({ sheet: 'raid' }),
+
+      selName: sel.n, selMono: sel.m, selGrad: sel.g, selTypes: sel.t.map(n => ({ n })),
+      selChip: v.chip, selVc: v.c, selWhy: sel.why, selConfTxt: sel.conf + '%', selConfW: sel.conf + '%',
+      selPc: sel.pc, selIv: sel.iv, selLv: sel.lv, selCandy: sel.candy, selAction: sel.action,
+      rules: sel.rules.map(([t, w, c]) => ({ t, w, c })),
+      whyOpen: s.whyOpen, whyLabel: s.whyOpen ? 'Ocultar' : 'Mostrar',
+      toggleWhy: () => this.set({ whyOpen: !s.whyOpen }),
+
+      wave: [10,18,26,14,22,9,17,25,12,20,8,15,11,6,9,5].map((h, i) => ({
+        h, c: i < 5 ? '#7CC6FF' : i < 10 ? '#4DB2FF' : 'rgba(77,178,255,.4)',
+      })),
+
+      modes: [['ginasio','Atacar ginásio'],['raide','Raide'],['liga','Liga']].map(([k, n]) => ({
+        n, pick: () => this.set({ teamMode: k }),
+        bg: s.teamMode === k ? 'rgba(77,178,255,.2)' : 'rgba(255,255,255,.06)',
+        bd: s.teamMode === k ? 'rgba(77,178,255,.3)' : 'rgba(255,255,255,.1)',
+        fg: s.teamMode === k ? '#7CC6FF' : 'rgba(235,238,245,.6)',
+        fw: s.teamMode === k ? 700 : 600,
+      })),
+      teamCtx: team.ctx, teamWhy: team.why,
+      team: team.six.map(([n, m, t, pc]) => ({ n, m, pc, g: G[t] })),
+      reroll: () => this.set({ teamMode: s.teamMode === 'ginasio' ? 'raide' : s.teamMode === 'raide' ? 'liga' : 'ginasio' }),
+
+      counters: [
+        { n:'Mamoswine', m:'MM', g:G.gelo, moves:'Presa de Gelo · Avalanche', tag:'★ MELHOR', fg:'#3DDC97', bg:'rgba(61,220,151,.14)', bd:'rgba(61,220,151,.3)' },
+        { n:'Garchomp', m:'GA', g:G.dragao, moves:'Garra Dragão · Explosão', tag:'✦ ÓTIMO', fg:'#4DB2FF', bg:'rgba(77,178,255,.16)', bd:'rgba(77,178,255,.3)' },
+        { n:'Glaceon', m:'GL', g:G.gelo, moves:'Vento Gélido · Avalanche', tag:'• BOM', fg:'#9AA6B8', bg:'rgba(154,166,184,.14)', bd:'rgba(154,166,184,.3)' },
+      ],
+
+      goHome: () => this.set({ tab: 'inicio', sheet: null }),
+      goDex: () => this.set({ tab: 'dex', sheet: null }),
+      goSet: () => this.set({ tab: 'set', sheet: null }),
+      homeFlex: H.flex, homeH: H.h, homeM: H.m, homeBg: H.bg, homeBlur: H.blur, homeSh: H.sh, homeFg: H.fg, homeFw: H.fw,
+      dexFlex: D.flex, dexH: D.h, dexM: D.m, dexBg: D.bg, dexBlur: D.blur, dexSh: D.sh, dexFg: D.fg, dexFw: D.fw,
+      setFlex: S.flex, setH: S.h, setM: S.m, setBg: S.bg, setBlur: S.blur, setSh: S.sh, setFg: S.fg, setFw: S.fw,
+    };
+  }
+}
+</script>
+</body>
+</html>

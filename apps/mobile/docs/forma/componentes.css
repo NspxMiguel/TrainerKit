@@ -1,0 +1,118 @@
+/*
+ * Classes de FORMA — usam var(--tk-cor-*) que já existem no global.css do
+ * app (investir/guardar/evoluir/transferir/fundo/superficie/texto) e as
+ * var(--tk-*) novas de tokens.css. Nenhuma cor literal aqui.
+ */
+
+/* ---------- vidro ---------- */
+.tk-vidro {
+  background: color-mix(in srgb, rgb(var(--tk-superficie)) 55%, transparent);
+  backdrop-filter: blur(var(--tk-vidro-blur)) saturate(var(--tk-vidro-sat));
+  -webkit-backdrop-filter: blur(var(--tk-vidro-blur)) saturate(var(--tk-vidro-sat));
+  border: var(--tk-vidro-bd);
+}
+
+/* tab bar: pílula de vidro que FLUTUA sobre o conteúdo, não é rodapé opaco */
+.tk-tabbar {
+  position: absolute;
+  left: 22px; right: 22px; bottom: 24px;
+  height: 60px;
+  border-radius: var(--tk-raio-pilula);
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  z-index: 30;
+  background: color-mix(in srgb, rgb(var(--tk-superficie)) 55%, transparent);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: .5px solid rgba(255,255,255,.12);
+  box-shadow: var(--tk-sombra-vidro);
+}
+.tk-tabbar-item {
+  flex: 1; height: 50px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  border-radius: var(--tk-raio-pilula);
+  min-height: var(--tk-alvo-min);
+  transition: flex var(--tk-dur-sheet) var(--tk-ease-out), background var(--tk-dur-base) var(--tk-ease-out);
+}
+/* a bolha que TRANSBORDA a barra, não é um preenchimento raso */
+.tk-tabbar-item--ativo {
+  flex: 1.15;
+  height: 66px;
+  margin: -8px 0;
+  background: color-mix(in srgb, rgb(var(--tk-evoluir)) 16%, transparent);
+}
+
+/* ---------- pílula (controle de ação) ---------- */
+.tk-pilula {
+  border-radius: var(--tk-raio-pilula);
+  min-height: var(--tk-alvo-min);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600; font-size: 15px;
+}
+.tk-pilula--primaria {
+  background: rgb(var(--tk-evoluir));
+  color: rgb(var(--tk-fundo));
+  box-shadow: var(--tk-sombra-cta);
+}
+.tk-pilula--secundaria {
+  background: color-mix(in srgb, rgb(var(--tk-texto)) 7%, transparent);
+  border: 1px solid color-mix(in srgb, rgb(var(--tk-texto)) 11%, transparent);
+  color: rgb(var(--tk-texto));
+}
+.tk-pilula:active { transform: scale(.985); transition: transform var(--tk-dur-micro) var(--tk-ease-out); }
+
+/* ---------- cartão (superfície de conteúdo — NUNCA pílula) ---------- */
+.tk-cartao {
+  border-radius: var(--tk-raio-cartao);
+  background: color-mix(in srgb, rgb(var(--tk-texto)) 5%, transparent);
+  border: 1px solid color-mix(in srgb, rgb(var(--tk-texto)) 8%, transparent);
+  padding: 16px;
+}
+.tk-cartao--vidro {
+  border-radius: var(--tk-raio-cartao-lg);
+  background: color-mix(in srgb, rgb(var(--tk-texto)) 6%, transparent);
+  border: 1px solid color-mix(in srgb, rgb(var(--tk-texto)) 10%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, rgb(var(--tk-texto)) 8%, transparent), 0 8px 24px rgba(0,0,0,.35);
+  padding: 20px;
+}
+
+/* ---------- veredito — SEMPRE herói: palavra + cor + glifo, nunca um cartão igual aos outros ---------- */
+.tk-veredito {
+  font: var(--tk-tipo-veredito);
+  letter-spacing: var(--tk-tipo-veredito-espacamento);
+}
+.tk-veredito--investir  { color: rgb(var(--tk-investir)); }
+.tk-veredito--evoluir   { color: rgb(var(--tk-evoluir)); }
+.tk-veredito--guardar   { color: rgb(var(--tk-guardar)); }
+.tk-veredito--transferir{ color: rgb(var(--tk-transferir)); }
+
+.tk-chip {
+  display: inline-flex; gap: 5px; align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--tk-raio-pilula);
+  font-size: 10.5px; font-weight: 800; letter-spacing: .06em;
+}
+.tk-chip--investir  { color: rgb(var(--tk-investir));   background: color-mix(in srgb, rgb(var(--tk-investir)) 14%, transparent);   border: 1px solid color-mix(in srgb, rgb(var(--tk-investir)) 30%, transparent); }
+.tk-chip--evoluir    { color: rgb(var(--tk-evoluir));   background: color-mix(in srgb, rgb(var(--tk-evoluir)) 16%, transparent);   border: 1px solid color-mix(in srgb, rgb(var(--tk-evoluir)) 30%, transparent); }
+.tk-chip--guardar     { color: rgb(var(--tk-guardar));   background: color-mix(in srgb, rgb(var(--tk-guardar)) 14%, transparent);   border: 1px solid color-mix(in srgb, rgb(var(--tk-guardar)) 30%, transparent); }
+.tk-chip--transferir  { color: rgb(var(--tk-transferir)); background: color-mix(in srgb, rgb(var(--tk-transferir)) 14%, transparent); border: 1px solid color-mix(in srgb, rgb(var(--tk-transferir)) 30%, transparent); }
+
+/* ---------- tipografia por papel ---------- */
+.tk-t-saudacao      { font: var(--tk-tipo-saudacao); color: rgb(var(--tk-texto)); }
+.tk-t-titulo-tela   { font: var(--tk-tipo-titulo-tela); color: rgb(var(--tk-texto)); }
+.tk-t-titulo-cartao { font: var(--tk-tipo-titulo-cartao); color: rgb(var(--tk-texto)); }
+.tk-t-corpo         { font: var(--tk-tipo-corpo); color: rgb(var(--tk-texto2)); }
+.tk-t-legenda       { font: var(--tk-tipo-legenda); letter-spacing: var(--tk-tipo-legenda-espacamento); color: rgb(var(--tk-texto3)); text-transform: uppercase; }
+
+/* ---------- barra de confiança (ficha) ---------- */
+.tk-confianca-trilha { height: 6px; border-radius: var(--tk-raio-pilula); background: color-mix(in srgb, rgb(var(--tk-texto)) 8%, transparent); overflow: hidden; }
+.tk-confianca-preenchimento { height: 100%; border-radius: var(--tk-raio-pilula); background: rgb(var(--tk-evoluir)); transition: width var(--tk-dur-sheet) var(--tk-ease-out); }
+
+/* ---------- movimento reutilizável ---------- */
+@keyframes tk-entrar { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.tk-anim-entrar { animation: tk-entrar var(--tk-dur-sheet) var(--tk-ease-out); }
+@media (prefers-reduced-motion: reduce) {
+  .tk-anim-entrar { animation-duration: var(--tk-dur-micro); }
+  .tk-tabbar-item, .tk-pilula, .tk-confianca-preenchimento { transition: none; }
+}

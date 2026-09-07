@@ -28,6 +28,7 @@ import { calar, falar } from "../../src/voz";
 import { useSetup } from "../../src/setup";
 import { useTema, type Paleta } from "../../src/tema";
 import { Selo } from "../../src/Selo";
+import { Vidro } from "../../src/Vidro";
 
 /**
  * A ficha da especie — e a PROVA de que o port funciona.
@@ -377,7 +378,7 @@ export default function Ficha() {
     <ScrollView className="flex-1 bg-fundo" contentContainerStyle={{ padding: 20 }}>
       <View className="items-center">
         <Selo especie={especie} tamanho={112} />
-        <Text className="text-texto text-2xl font-extrabold mt-4">{especie.name}</Text>
+        <Text className="text-texto text-titulo-tela mt-4">{especie.name}</Text>
         <Text className="text-texto3 text-xs mt-1">
           {/* Os tipos TRADUZIDOS: o dicionario tem `type.grass` etc. Mostrar
               "grass / poison" seria o app falando o idioma do arquivo de dados
@@ -389,31 +390,43 @@ export default function Ficha() {
 
       {/* Duas acoes: o IV do que ele TEM, e o IV do que ele esta VENDO. */}
       <Link href={{ pathname: "/iv/[id]", params: { id: especie.id } }} asChild>
-        <Pressable className="bg-texto rounded-full py-4 items-center mt-7">
+        <Pressable className="bg-texto rounded-pilula py-4 items-center mt-7">
           <Text className="text-fundo font-bold text-base">{t("species.calcIV")}</Text>
         </Pressable>
       </Link>
 
       <Link href={{ pathname: "/encontro/[id]", params: { id: especie.id } }} asChild>
-        <Pressable className="bg-superficie rounded-full py-4 items-center mt-3">
+        <Pressable className="bg-superficie rounded-pilula py-4 items-center mt-3">
           <Text className="text-texto font-bold text-base">{t("pre.open")}</Text>
         </Pressable>
       </Link>
 
       <Link href={{ pathname: "/raide/[id]", params: { id: especie.id } }} asChild>
-        <Pressable className="bg-superficie rounded-full py-4 items-center mt-3">
+        <Pressable className="bg-superficie rounded-pilula py-4 items-center mt-3">
           <Text className="text-texto font-bold text-base">{t("raid.openBrowse")}</Text>
         </Pressable>
       </Link>
 
+      {/*
+        ⚠️ O VEREDITO É O HERÓI DA TELA, e antes era mais um cartão igual aos
+        outros — a resposta que o app inteiro existe pra dar, com o mesmo peso
+        visual de "stats base".
+
+        Agora ele é vidro (a única superfície de vidro da ficha, pra o destaque
+        não se diluir), com tipografia própria e a palavra grande. A cor continua
+        sendo a do veredito, que é a única cor com significado nesta tela.
+      */}
       {veredito && (
-        <View className="bg-superficie rounded-3xl p-5 mt-7">
+        <Vidro raio={26} style={{ marginTop: 28, padding: 20 }}>
           <Text className="text-texto3 text-[11px] tracking-widest">
             {t("assistant.title").toUpperCase()}
           </Text>
           <Text
-            className="text-xl font-bold mt-2"
-            style={{ color: cores[COR_ACAO[veredito.action] ?? "texto"] }}
+            className="text-veredito mt-2"
+            style={{
+              color: cores[COR_ACAO[veredito.action] ?? "texto"],
+              letterSpacing: 0.7,
+            }}
           >
             {/* A PALAVRA do veredito vem do dicionario, nao do enum: o `core`
                 devolve `investir`, e `ACTION_KEYS` diz qual chave le isso nos
@@ -423,7 +436,7 @@ export default function Ficha() {
           <Text className="text-texto2 text-xs mt-2">
             {t("verdict.confidence", { percent: Math.round(veredito.confidence * 100) })}
           </Text>
-        </View>
+        </Vidro>
       )}
 
       {/* Pilula, e nao botao de bloco: sombroso filtra o que vem abaixo, entao
@@ -461,7 +474,7 @@ export default function Ficha() {
           bloco so, e a legenda diz que os quatro coincidem — que informa mais
           do que quatro abas com a mesma resposta. */}
       {grupos.map((g) => (
-        <View key={g.contexts.join("+")} className="bg-superficie rounded-3xl p-5 mt-3">
+        <View key={g.contexts.join("+")} className="bg-superficie rounded-cartao p-5 mt-3">
           <Text className="text-texto3 text-[11px] tracking-widest">
             {g.contexts
               .map((c) => t(CONTEXT_KEYS[c].title as never))
@@ -523,7 +536,7 @@ export default function Ficha() {
 
       {/* ── EVOLUCAO ───────────────────────────────────────────────────────── */}
       {especie.evolvesInto.length > 0 && (
-        <View className="bg-superficie rounded-3xl p-5 mt-3">
+        <View className="bg-superficie rounded-cartao p-5 mt-3">
           <Text className="text-texto3 text-[11px] tracking-widest">
             {t("species.evolvesInto").toUpperCase()}
           </Text>
@@ -556,7 +569,7 @@ export default function Ficha() {
 
       {/* ── PERGUNTAR (só com chave) ────────────────────────────────────────── */}
       {chave && (
-        <View className="bg-superficie rounded-3xl p-5 mt-3">
+        <View className="bg-superficie rounded-cartao p-5 mt-3">
           <Text className="text-texto3 text-[11px] tracking-widest">
             {t("dex.ask").toUpperCase()}
           </Text>
@@ -578,7 +591,7 @@ export default function Ficha() {
 
       {/* ── LENTE ──────────────────────────────────────────────────────────── */}
       {lente && (
-        <View className="bg-superficie rounded-3xl p-5 mt-3">
+        <View className="bg-superficie rounded-cartao p-5 mt-3">
           <View className="flex-row items-center">
             <Text className="flex-1 text-texto3 text-[11px] tracking-widest">
               {t("dex.title").toUpperCase()}
@@ -617,7 +630,7 @@ export default function Ficha() {
 
       {/* ── BATALHA MAX ────────────────────────────────────────────────────── */}
       {max && (
-        <View className="bg-superficie rounded-3xl p-5 mt-3">
+        <View className="bg-superficie rounded-cartao p-5 mt-3">
           <Text className="text-texto3 text-[11px] tracking-widest">
             {t("species.maxBattle").toUpperCase()}
           </Text>
@@ -655,7 +668,7 @@ export default function Ficha() {
 
       {/* ── TETOS DE PC ────────────────────────────────────────────────────── */}
       {tetos.length > 0 && (
-        <View className="bg-superficie rounded-3xl p-5 mt-3">
+        <View className="bg-superficie rounded-cartao p-5 mt-3">
           <Text className="text-texto3 text-[11px] tracking-widest">
             {t("species.maxCP").toUpperCase()}
           </Text>
@@ -672,7 +685,7 @@ export default function Ficha() {
         </View>
       )}
 
-      <View className="bg-superficie rounded-3xl p-5 mt-3">
+      <View className="bg-superficie rounded-cartao p-5 mt-3">
         <Text className="text-texto3 text-[11px] tracking-widest">
           {t("species.baseStats").toUpperCase()}
         </Text>

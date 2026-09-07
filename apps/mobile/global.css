@@ -46,3 +46,24 @@
     --tk-descobrir: 168 173 186;
   }
 }
+
+/*
+ * ── FORMA ───────────────────────────────────────────────────────────────────
+ *
+ * Vindo do pacote do Claude Design (`docs/forma/tokens.css`). Só forma: vidro,
+ * raio, tipografia por PAPEL, movimento. Nenhum hex — a cor continua vindo dos
+ * tokens acima.
+ *
+ * ⚠️ A pílula é 999px SÓ em controle de ação e navegação. Superfície de
+ * conteúdo é cartão (20/26/28). Trocar isso faz tudo virar pastilha e o app
+ * perde a hierarquia que a forma dá.
+ */
+:root {
+  --tk-raio-pilula: 999px;
+  --tk-raio-chip: 14px;
+  --tk-raio-cartao-sm: 20px;
+  --tk-raio-cartao: 26px;
+  --tk-raio-cartao-lg: 28px;
+  --tk-raio-tile: 15px;
+  --tk-alvo-min: 44px;
+}

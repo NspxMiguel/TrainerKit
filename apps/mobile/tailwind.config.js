@@ -12,6 +12,24 @@ module.exports = {
   darkMode: "class",
   theme: {
     extend: {
+      /* Raio por PAPEL — pílula em ação/navegação, cartão em conteúdo. */
+      borderRadius: {
+        pilula: "999px",
+        chip: "14px",
+        cartao: "26px",
+        "cartao-sm": "20px",
+        "cartao-lg": "28px",
+        tile: "15px",
+      },
+      /* Tipografia por PAPEL e não por tela — antes cada tela chutava 15px. */
+      fontSize: {
+        saudacao: ["34px", { lineHeight: "1.1", fontWeight: "800" }],
+        "titulo-tela": ["28px", { lineHeight: "1.15", fontWeight: "700" }],
+        "titulo-cartao": ["20px", { lineHeight: "1.2", fontWeight: "700" }],
+        veredito: ["24px", { lineHeight: "1.1", fontWeight: "800" }],
+        corpo: ["15px", { lineHeight: "1.5" }],
+        legenda: ["11px", { lineHeight: "1", fontWeight: "700" }],
+      },
       colors: {
         fundo: "rgb(var(--tk-fundo) / <alpha-value>)",
         superficie: "rgb(var(--tk-superficie) / <alpha-value>)",

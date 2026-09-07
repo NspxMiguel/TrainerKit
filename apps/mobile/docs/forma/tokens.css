@@ -1,0 +1,50 @@
+/*
+ * Tokens de FORMA (vidro, raio, tipografia, movimento, sombra).
+ * Cor NÃO está aqui — cor já existe em paleta-atual-global.css /
+ * paleta-atual-tema.tsx do repo. Isso só soma as variáveis que faltam lá:
+ * --tk-vidro-*, --tk-raio-*, --tk-alvo-min, --tk-dur-*, --tk-ease-*.
+ * Import este arquivo DEPOIS do global.css do app.
+ */
+
+:root {
+  /* vidro — expo-glass-effect no nativo; backdrop-filter no web */
+  --tk-vidro-blur: 20px;
+  --tk-vidro-sat: 160%;
+  --tk-vidro-bd: 1px solid rgba(255,255,255,.10);
+  --tk-vidro-bd-fraca: .5px solid rgba(255,255,255,.14);
+
+  /* pílula vs cartão — 999px SÓ em controles de ação/navegação;
+     20/26/28 em superfícies de conteúdo */
+  --tk-raio-pilula: 999px;
+  --tk-raio-chip: 14px;
+  --tk-raio-cartao-sm: 20px;
+  --tk-raio-cartao: 26px;
+  --tk-raio-cartao-lg: 28px;
+  --tk-raio-tile: 15px;
+
+  /* alvo mínimo de toque */
+  --tk-alvo-min: 44px;
+
+  /* tipografia — tamanho/peso por PAPEL, não por tela */
+  --tk-tipo-saudacao: 800 34px/1.1 -apple-system;
+  --tk-tipo-titulo-tela: 700 28px/1.15 -apple-system;
+  --tk-tipo-titulo-cartao: 700 20px/1.2 -apple-system;
+  --tk-tipo-corpo: 400 15px/1.5 -apple-system;
+  --tk-tipo-legenda: 700 11px/1 -apple-system;
+  --tk-tipo-legenda-espacamento: .08em;
+  --tk-tipo-veredito: 800 24px/1.1 -apple-system;
+  --tk-tipo-veredito-espacamento: .03em;
+
+  /* movimento — Apple puro: rápido, mola discreta, nunca chama atenção */
+  --tk-ease-out: cubic-bezier(.32,.72,0,1);
+  --tk-ease-inout: cubic-bezier(.4,0,.2,1);
+  --tk-dur-micro: 200ms;
+  --tk-dur-base: 300ms;
+  --tk-dur-sheet: 440ms;
+  --tk-dur-exit: 180ms;
+  --tk-stagger: 28ms;
+
+  /* sombra — só em vidro flutuante (tab bar, sheet), nunca em cartão comum */
+  --tk-sombra-vidro: 0 14px 34px rgba(0,0,0,.5), inset 0 1px 1px rgba(255,255,255,.1);
+  --tk-sombra-cta: 0 8px 22px rgba(46,158,255,.32);
+}
