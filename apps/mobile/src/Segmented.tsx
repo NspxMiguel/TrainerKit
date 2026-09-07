@@ -2,6 +2,7 @@ import { useState } from "react";
 import { LayoutAnimation, Platform, Pressable, ScrollView, Text, UIManager, View } from "react-native";
 
 import { useTema } from "./tema";
+import { Vidro } from "./Vidro";
 import { DUR, MOLA } from "./movimento";
 
 /*
@@ -55,9 +56,16 @@ export function Segmented<T extends string>({
       accessibilityLabel={rotuloAcessivel}
       contentContainerStyle={{ flexGrow: 1 }}
     >
+      {/* VIDRO, porque o pacote lista "chips de filtro" entre o que flutua — e
+          um segmented é exatamente isso: um controle por cima do conteúdo que
+          ele filtra. */}
+      <Vidro
+        raio={999}
+        interativo
+        style={{ minWidth: largura, padding: 4 }}
+      >
       <View
-        className="flex-row rounded-pilula p-1"
-        style={{ backgroundColor: cores.superficie, minWidth: largura }}
+        className="flex-row"
         onLayout={(e) => setLargura(e.nativeEvent.layout.width)}
       >
         {opcoes.map((o) => {
@@ -97,6 +105,7 @@ export function Segmented<T extends string>({
           );
         })}
       </View>
+      </Vidro>
     </ScrollView>
   );
 }

@@ -1,4 +1,4 @@
-import { Link, useLocalSearchParams } from "expo-router";
+import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -87,6 +87,7 @@ export default function Ficha() {
   /* O cabecalho e transparente nesta tela, entao a faixa colorida cresce pelo
      inset em vez de comecar abaixo dele. */
   const alto = useSafeAreaInsets().top;
+  const router = useRouter();
   const { setup } = useSetup();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { pronto, dados } = useDados();
@@ -974,6 +975,29 @@ export default function Ficha() {
       </Cascata>
       </View>
     </ScrollView>
+
+      {/*
+        FECHAR, em vidro, sobre a faixa colorida.
+
+        ⚠️ Ele é da TELA e não da barra de navegação: o cabeçalho colorido vai
+        até a borda de cima, e qualquer barra — mesmo transparente — reserva
+        altura e corta a cor. Em vidro porque é o que o índice do pacote manda
+        para "botões de fechar sobre o cabeçalho colorido".
+      */}
+      <View style={{ position: "absolute", top: alto + 8, left: 16 }}>
+        <Pressable onPress={() => router.back()} hitSlop={12} accessibilityLabel={t("common.back")}>
+          <Vidro raio={999} interativo style={{ width: 40, height: 40 }}>
+            <View className="flex-1 items-center justify-center">
+              <SymbolView
+                name="chevron.left"
+                size={16}
+                tintColor="#FFFFFF"
+                fallback={<Text style={{ color: "#fff", fontSize: 18 }}>‹</Text>}
+              />
+            </View>
+          </Vidro>
+        </Pressable>
+      </View>
 
       {/*
         O BOTAO FLUTUANTE DA IA.

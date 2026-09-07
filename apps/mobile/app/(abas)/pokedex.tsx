@@ -7,6 +7,7 @@ import { useDados, type Especie } from "../../src/dados";
 import { useT } from "../../src/i18n";
 import { useTema } from "../../src/tema";
 import { Toque } from "../../src/Toque";
+import { Vidro } from "../../src/Vidro";
 import { Selo } from "../../src/Selo";
 
 /**
@@ -33,7 +34,9 @@ export default function Pokedex() {
   if (erro) {
     return (
       <View className="flex-1 items-center justify-center px-6">
-        <Text className="text-texto text-base">{t("especies.title")}</Text>
+        <Text className="text-texto text-base">{/* O MESMO nome da aba. A tela dizia "Espécies" e a aba dizia "Pokédex":
+            dois nomes para o mesmo lugar, e quem navega perde a referência. */
+          t("tabs.pokedex")}</Text>
         <Text className="text-texto3 text-xs mt-2 text-center">{erro}</Text>
       </View>
     );
@@ -50,16 +53,23 @@ export default function Pokedex() {
   return (
     <View className="flex-1 bg-fundo">
       <View className="px-4 pb-2" style={{ paddingTop: alto + 8 }}>
-        <Text className="text-titulo-tela text-texto mb-3">{t("especies.title")}</Text>
+        <Text className="text-titulo-tela text-texto mb-3">{/* O MESMO nome da aba. A tela dizia "Espécies" e a aba dizia "Pokédex":
+            dois nomes para o mesmo lugar, e quem navega perde a referência. */
+          t("tabs.pokedex")}</Text>
         {/* Busca em PILULA — controle de acao, entao raio 999 (tokens.css diz
             que cartao de conteudo fica em 20/26/28 e controle fica em pilula). */}
-        <TextInput
-          value={busca}
-          onChangeText={setBusca}
-          placeholder={t("especies.searchPlaceholder")}
-          placeholderTextColor={cores.texto3}
-          className="bg-superficie text-texto rounded-pilula px-5 py-3 text-corpo"
-        />
+        {/* A BUSCA É VIDRO. O índice do pacote lista onde ele entra, e a busca
+            está lá: ela flutua sobre a grade, que continua rolando por baixo. */}
+        <Vidro raio={999} interativo>
+          <TextInput
+            value={busca}
+            onChangeText={setBusca}
+            placeholder={t("especies.searchPlaceholder")}
+            placeholderTextColor={cores.texto3}
+            className="text-texto px-5 py-3 text-corpo"
+            style={{ color: cores.texto }}
+          />
+        </Vidro>
         <Text className="text-texto3 text-xs mt-4">
           {t("especies.count", { n: visiveis.length.toLocaleString() })}
         </Text>
