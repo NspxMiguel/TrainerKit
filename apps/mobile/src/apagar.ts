@@ -24,6 +24,7 @@ const CHAVES = [
   "tk:ia",
   "tk:imagens",
   "tk:voz",
+  "tk:traducao",
 ] as const;
 
 export async function apagarTudo(): Promise<void> {

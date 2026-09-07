@@ -19,6 +19,7 @@ import {
   papelNaBatalhaMax,
   PARADAS_DO_DEGRADE,
   rankMovesets,
+  rotuloDoGolpe,
   shadowDamageMultiplier,
   tetoDePowerUp,
   withFrustration,
@@ -32,6 +33,7 @@ import { SymbolView } from "expo-symbols";
 
 import { useIA } from "../../src/ia";
 import { marcarVisto } from "../../src/vistos";
+import { useTraducao } from "../../src/traducao";
 import { definirMeuMotivo, guardar, remover, useColecao } from "../../src/colecao";
 import { BlocoSpreads, BlocoTroca, BlocoUsos } from "../../src/BlocosDaFicha";
 import { Segmented } from "../../src/Segmented";
@@ -107,6 +109,7 @@ export default function Ficha() {
   const [confirmandoTirar, setConfirmandoTirar] = useState(false);
   const [indiceDoGrupo, setIndiceDoGrupo] = useState(0);
   const [discordando, setDiscordando] = useState(false);
+  const { mostrar: traduzir } = useTraducao();
   const { itens, recarregar } = useColecao();
   const { chave } = useIA();
   const [pergunta, setPergunta] = useState("");
@@ -1036,11 +1039,32 @@ export default function Ficha() {
                 }
               >
                 <View className="flex-1">
+                  {/* ⚠️ INGLÊS EM CIMA, tradução embaixo — e o inglês PRIMEIRO
+                      não é preferência: é o idioma em que os nomes de golpe
+                      circulam em guia e em vídeo. Procurar "Ataque de Chamas"
+                      no YouTube não acha nada, e "Flame Charge" dentro do jogo
+                      em português também não. */}
                   <Text
                     className={`text-corpo ${i === 0 ? "text-texto font-bold" : "text-texto2"}`}
                   >
                     {m.fast.name} + {m.charged.name}
                   </Text>
+                  {(() => {
+                    const f = rotuloDoGolpe(m.fast.name, dados?.moveNames, m.fast.id, idioma, traduzir);
+                    const c = rotuloDoGolpe(
+                      m.charged.name,
+                      dados?.moveNames,
+                      m.charged.id,
+                      idioma,
+                      traduzir,
+                    );
+                    if (!f.secundario && !c.secundario) return null;
+                    return (
+                      <Text className="text-texto3 text-legenda mt-0.5">
+                        {f.secundario ?? f.principal} + {c.secundario ?? c.principal}
+                      </Text>
+                    );
+                  })()}
                   {/* ✦ e a marca de TM Elite — um dos itens mais raros do jogo.
                       Sem dizer isso, a recomendacao manda comprar o que nao se
                       compra. */}

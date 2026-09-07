@@ -1,4 +1,4 @@
-import type { DadosDynamax } from "@trainerkit/core";
+import type { DadosDynamax, NomesDeGolpe } from "@trainerkit/core";
 import { Asset } from "expo-asset";
 import { File } from "expo-file-system";
 import { useEffect, useState } from "react";
@@ -104,6 +104,14 @@ export interface Base {
   typeOrder: string[];
   fastMoves: Golpe[];
   chargedMoves: Golpe[];
+  /**
+   * O nome oficial de cada golpe por idioma — `moveNames["pt-BR"]["counter_fast"]`.
+   *
+   * ⚠️ Vinha no arquivo e o tipo nativo ignorava, então o app mostrava só o
+   * inglês sem dizer que era inglês. Opcional porque dataset de terceiro pode
+   * não trazer, e aí a tela cai no inglês sozinha.
+   */
+  moveNames?: NomesDeGolpe;
   /*
    * A Batalha Max, que tambem ja vinha no arquivo sem tipo.
    *

@@ -15,6 +15,7 @@ import {
 import { useDados } from "../../src/dados";
 import { useT } from "../../src/i18n";
 import { apagarTudo } from "../../src/apagar";
+import { useTraducao } from "../../src/traducao";
 import { FONTES, SPRITE_SOURCE_KEYS, useImagens } from "../../src/imagens";
 import { useIA } from "../../src/ia";
 import { useSetup } from "../../src/setup";
@@ -64,6 +65,7 @@ export default function Ajustes() {
   const [copiado, setCopiado] = useState(false);
   const [confirmandoApagar, setConfirmandoApagar] = useState(false);
   const { dados } = useDados();
+  const { mostrar: traduzir, alternar: alternarTraducao } = useTraducao();
 
   const alto = useSafeAreaInsets().top;
 
@@ -72,7 +74,7 @@ export default function Ajustes() {
       className="flex-1 bg-fundo"
       /* +110 embaixo: a barra de abas FLUTUA sobre o conteudo, entao sem folga
          a ultima linha de Ajustes fica atras do vidro e nao da pra tocar. */
-      contentContainerStyle={{ padding: 20, paddingTop: alto + 12, paddingBottom: 130 }}
+      contentContainerStyle={{ padding: 20, paddingTop: alto + 12, paddingBottom: 32 }}
     >
       <Text className="text-texto3 text-[11px] tracking-widest mb-2">
         {t("settings.appearance").toUpperCase()}
@@ -289,6 +291,28 @@ export default function Ajustes() {
           De quando é o arquivo que o app está usando. Dataset velho é a
           explicação mais comum para um número que não bate com o jogo, e sem
           esta linha não havia como a pessoa desconfiar disso. */}
+      {/* ⚠️ Só aparece FORA do inglês: em inglês não há segunda linha para
+          mostrar, e um interruptor que não muda nada é mobília. */}
+      {idioma !== "en" && (
+        <>
+          <Text className="text-texto3 text-legenda mt-7 mb-2">
+            {t("settings.showTranslation").toUpperCase()}
+          </Text>
+          <Pressable
+            onPress={alternarTraducao}
+            className="bg-superficie rounded-cartao px-4 py-4 flex-row items-center"
+          >
+            <View className="flex-1">
+              <Text className="text-texto text-corpo">{t("settings.showTranslation")}</Text>
+              <Text className="text-texto3 text-legenda mt-1 leading-4">
+                {t("settings.showTranslationDetail")}
+              </Text>
+            </View>
+            <Text className="text-texto text-base ml-3">{traduzir ? "✓" : ""}</Text>
+          </Pressable>
+        </>
+      )}
+
       <Text className="text-texto3 text-legenda mt-7 mb-2">
         {t("settings.gameData").toUpperCase()}
       </Text>

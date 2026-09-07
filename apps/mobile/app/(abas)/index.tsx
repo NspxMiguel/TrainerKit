@@ -302,7 +302,10 @@ export default function Inicio() {
   return (
     <ScrollView
       className="flex-1 bg-fundo"
-      contentContainerStyle={{ paddingBottom: baixo + 110 }}
+      /* ⚠️ 24 e não 110: a barra agora é a do sistema, e ela ajusta o inset da
+         rolagem sozinha. O respiro grande era para a barra flutuante desenhada
+         à mão, e com a nativa ele vira um buraco no fim da lista. */
+      contentContainerStyle={{ paddingBottom: baixo + 24 }}
       showsVerticalScrollIndicator={false}
     >
       {/* ⚠️ A SAUDAÇÃO E O HERÓI VÊM COLADOS, e a busca desceu.

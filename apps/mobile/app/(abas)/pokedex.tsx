@@ -312,7 +312,7 @@ export default function Pokedex() {
           numColumns={4}
           keyExtractor={(s: Especie) => s.id}
           columnWrapperStyle={{ gap: 10 }}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 132, gap: 10 }}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 10 }}
           renderItem={({ item }) => (
             /*
               ⚠️ `router.push` e NAO `<Link asChild>`.
@@ -358,7 +358,7 @@ export default function Pokedex() {
           numColumns={emGrade ? 3 : 1}
           keyExtractor={(m) => m.guardado.id}
           {...(emGrade ? { columnWrapperStyle: { gap: 10 } } : {})}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 132, gap: 10 }}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 10 }}
           renderItem={({ item }) => (
             <Toque
                 onPress={() =>
