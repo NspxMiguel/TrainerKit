@@ -1,3 +1,4 @@
+import { Asset } from "expo-asset";
 import { Directory, File, Paths } from "expo-file-system";
 import { useCallback, useEffect, useState } from "react";
 
@@ -129,4 +130,51 @@ export function useOffline(fonte: BuiltinSourceId): {
   }, [fonte, recontar]);
 
   return { estado, baixar, apagar, recontar };
+}
+
+/**
+ * QUANTO O APP OCUPA — medido agora, no disco, não estimado.
+ *
+ * ⚠️ Percorre as pastas de TODAS as fontes, não só a ligada: quem baixou a arte
+ * oficial e depois trocou para os renders 3D continua com as duas no aparelho, e
+ * uma medida que só olhasse a fonte atual esconderia metade do que ocupa.
+ *
+ * A base do jogo entra separada porque ela é o único item que não dá para
+ * apagar — vem no pacote e é o que faz o app funcionar sem rede.
+ */
+export async function medirArmazenamento(): Promise<{
+  base: number;
+  imagens: number;
+  total: number;
+}> {
+  let imagens = 0;
+  try {
+    if (RAIZ.exists) {
+      for (const dir of RAIZ.list()) {
+        if (!(dir instanceof Directory)) continue;
+        for (const f of dir.list()) if (f instanceof File) imagens += f.size ?? 0;
+      }
+    }
+  } catch {
+    /* Pasta some entre o `exists` e o `list` numa limpeza do sistema. */
+  }
+  let base = 0;
+  try {
+    const asset = Asset.fromModule(require("../assets/dataset/gamedata.tkdata"));
+    /* ⚠️ Em desenvolvimento o asset chega pelo Metro e `localUri` e nulo ate o
+       download. Sem esta espera a base media 0 MB — um numero errado com cara
+       de certo. */
+    await asset.downloadAsync();
+    const uri = asset.localUri ?? asset.uri;
+    if (uri.startsWith("file:")) base = new File(uri).size ?? 0;
+  } catch {
+    /* Sem o caminho local a base ainda existe; o que falta é o número dela. */
+  }
+  return { base, imagens, total: base + imagens };
+}
+
+/** `1,2 MB` no idioma de quem lê — `Intl` já faz isso e não precisa de tabela. */
+export function emMegabytes(bytes: number, idioma: string): string {
+  const mb = bytes / (1024 * 1024);
+  return `${new Intl.NumberFormat(idioma, { maximumFractionDigits: mb < 10 ? 1 : 0 }).format(mb)} MB`;
 }

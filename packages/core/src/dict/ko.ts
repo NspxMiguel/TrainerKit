@@ -785,6 +785,7 @@ export const KO: Dict = {
   "voice.system": "시스템 음성",
   "voice.what": "자료를 읽어 주는 음성입니다. 눌러서 미리 들어 보세요.",
   "voice.enabled": "음성 켜짐",
+  "voice.lensDetail": "렌즈가 시스템 음성으로 도감을 읽어 줍니다. 키도 계정도 네트워크도 필요 없습니다.",
   "voice.intro": "목소리를 고르세요. 눌러서 미리 들어볼 수 있습니다.",
   "voice.forYourLanguage": "이 언어를 쓰는 목소리",
   "voice.otherLanguages": "다른 언어",

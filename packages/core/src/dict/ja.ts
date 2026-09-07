@@ -785,6 +785,7 @@ export const JA: Dict = {
   "voice.system": "システムの音声",
   "voice.what": "データを読み上げる声です。タップすると試聴できます。",
   "voice.enabled": "音声オン",
+  "voice.lensDetail": "レンズが端末の音声で図鑑を読み上げます。キーもアカウントも通信も不要。",
   "voice.intro": "声を選んでください。決める前に試聴できます。",
   "voice.forYourLanguage": "この言語を話す声",
   "voice.otherLanguages": "他の言語の声",

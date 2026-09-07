@@ -812,6 +812,7 @@ export const PT_BR: Dict = {
   "voice.system": "Vozes do sistema",
   "voice.what": "Qual voz lê as fichas em voz alta. Toque numa pra ouvir.",
   "voice.enabled": "Voz ligada",
+  "voice.lensDetail": "A lente lê a ficha em voz alta com a voz do sistema. Sem chave, sem conta, sem rede.",
   "voice.intro": "Escolha uma voz. Ouça uma antes de decidir.",
   "voice.forYourLanguage": "FALAM O SEU IDIOMA",
   "voice.otherLanguages": "OUTROS IDIOMAS",

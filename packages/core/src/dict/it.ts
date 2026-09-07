@@ -785,6 +785,7 @@ export const IT: Dict = {
   "voice.system": "Voci di sistema",
   "voice.what": "Quale voce legge le schede ad alta voce. Toccane una per sentirla.",
   "voice.enabled": "Voce attiva",
+  "voice.lensDetail": "La lente legge la scheda ad alta voce con la voce di sistema. Nessuna chiave, nessun account, nessuna rete.",
   "voice.intro": "Scegli una voce. Ascoltane una prima di decidere.",
   "voice.forYourLanguage": "PARLANO LA TUA LINGUA",
   "voice.otherLanguages": "ALTRE LINGUE",

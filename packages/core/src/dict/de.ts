@@ -781,6 +781,7 @@ export const DE: Dict = {
   "voice.system": "Systemstimmen",
   "voice.what": "Welche Stimme die Einträge vorliest. Tippe eine an, um sie zu hören.",
   "voice.enabled": "Stimme an",
+  "voice.lensDetail": "Die Linse liest den Eintrag mit der Systemstimme vor. Kein Schlüssel, kein Konto, kein Netz.",
   "voice.intro": "Wähle eine Stimme. Hör dir eine an, bevor du dich entscheidest.",
   "voice.forYourLanguage": "SPRECHEN DEINE SPRACHE",
   "voice.otherLanguages": "ANDERE SPRACHEN",

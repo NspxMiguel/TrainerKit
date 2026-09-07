@@ -1,6 +1,6 @@
 import * as Clipboard from "expo-clipboard";
 import { Link } from "expo-router";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Linking, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -22,8 +22,9 @@ import { SymbolView } from "expo-symbols";
 import { useDados } from "../../src/dados";
 import { useT } from "../../src/i18n";
 import { apagarTudo } from "../../src/apagar";
-import { useOffline } from "../../src/offline";
+import { emMegabytes, medirArmazenamento, useOffline } from "../../src/offline";
 import { useTraducao } from "../../src/traducao";
+import { useVozLigada } from "../../src/vozLigada";
 import { FONTES, SPRITE_SOURCE_KEYS, useImagens } from "../../src/imagens";
 import { useFonteDeDados } from "../../src/fonteDados";
 import { useIA } from "../../src/ia";
@@ -248,6 +249,20 @@ export default function Ajustes() {
      que é o estado honesto — não há o que baixar em lote. */
   const off = useOffline(fonte === "custom" ? "off" : fonte);
   const { mostrar: traduzir, alternar: alternarTraducao } = useTraducao();
+  const { ligada: vozLigada, alternar: alternarVoz } = useVozLigada();
+  /* ⚠️ Medido a cada abertura da tela, e não guardado: o número muda
+     quando se baixa ou apaga imagem, e um valor em cache mentiria
+     exatamente no momento em que a pessoa foi conferir. */
+  const [espaco, setEspaco] = useState({ base: 0, imagens: 0, total: 0 });
+  /*
+   * ⚠️ ASSÍNCRONO, e não um `useMemo`. Em desenvolvimento o asset do dataset
+   * ainda não tem caminho local — ele chega pelo Metro — e medir sem esperar o
+   * `downloadAsync` devolvia 0 MB para uma base de 2 MB. Zero não é "ainda não
+   * sei", é um número errado com cara de certo.
+   */
+  useEffect(() => {
+    void medirArmazenamento().then(setEspaco);
+  }, [off.estado.guardadas]);
 
   const alto = useSafeAreaInsets().top;
 
@@ -599,6 +614,57 @@ export default function Ajustes() {
           </Pressable>
         </>
       )}
+
+      {/* ── QUANTO ISTO OCUPA ──────────────────────────────────────────────
+          ⚠️ Medido no disco, não estimado. O app promete funcionar sem rede, e
+          essa promessa custa espaço — dizer quanto é parte de fazê-la honesta.
+          A base não some porque vem no pacote; as imagens, sim, e o botão de
+          apagar está logo abaixo. */}
+      <Text className="text-texto3 text-legenda mt-7 mb-2">
+        {t("settings.storage").toUpperCase()}
+      </Text>
+      <View className="bg-superficie rounded-cartao px-4 py-4">
+        <View className="flex-row items-center">
+          <Text className="text-texto2 text-corpo flex-1">{t("settings.gameData")}</Text>
+          <Text className="text-texto3 text-legenda">{emMegabytes(espaco.base, idioma)}</Text>
+        </View>
+        <View className="flex-row items-center mt-2">
+          <Text className="text-texto2 text-corpo flex-1">{t("sprites.title")}</Text>
+          <Text className="text-texto3 text-legenda">
+            {off.estado.guardadas} · {emMegabytes(espaco.imagens, idioma)}
+          </Text>
+        </View>
+        <View
+          className="flex-row items-center mt-3 pt-3"
+          style={{ borderTopWidth: 0.5, borderTopColor: cores.linha }}
+        >
+          <Text className="text-texto text-corpo font-semibold flex-1">
+            {t("settings.spaceUsed")}
+          </Text>
+          <Text className="text-texto text-corpo font-semibold">
+            {emMegabytes(espaco.total, idioma)}
+          </Text>
+        </View>
+      </View>
+
+      {/* ── A VOZ DO MODO LENTE ────────────────────────────────────────────
+          ⚠️ O interruptor existia SÓ dentro do modo lente, e quem desligou lá
+          não tem por que lembrar onde religar. Preferência de acessibilidade
+          mora nos Ajustes; o botão de lá continua existindo, porque é durante o
+          uso que se quer calar. */}
+      <Text className="text-texto3 text-legenda mt-7 mb-2">
+        {t("voice.title").toUpperCase()}
+      </Text>
+      <Pressable
+        onPress={alternarVoz}
+        className="bg-superficie rounded-cartao px-4 py-4 flex-row items-center"
+      >
+        <View className="flex-1">
+          <Text className="text-texto text-corpo">{t("voice.enabled")}</Text>
+          <Text className="text-texto3 text-legenda mt-1 leading-4">{t("voice.lensDetail")}</Text>
+        </View>
+        <Text className="text-texto text-base ml-3">{vozLigada ? "✓" : ""}</Text>
+      </Pressable>
 
       {/* ── AS IMAGENS NO APARELHO ─────────────────────────────────────────
           ⚠️ Só aparece com uma fonte LIGADA: sem imagem escolhida não há o que

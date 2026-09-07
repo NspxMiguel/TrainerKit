@@ -850,6 +850,7 @@ const EN = {
   "voice.system": "System voices",
   "voice.what": "Which voice reads the entries out loud. Tap one to hear it.",
   "voice.enabled": "Voice on",
+  "voice.lensDetail": "The lens reads each entry aloud with the system voice. No key, no account, no network.",
   "voice.intro": "Pick a voice. Play one to hear it before deciding.",
   "voice.forYourLanguage": "SPEAK YOUR LANGUAGE",
   "voice.otherLanguages": "OTHER LANGUAGES",

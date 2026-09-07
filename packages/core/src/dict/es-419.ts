@@ -785,6 +785,7 @@ export const ES_419: Dict = {
   "voice.system": "Voces del sistema",
   "voice.what": "Qué voz lee las fichas en voz alta. Toca una para oírla.",
   "voice.enabled": "Voz activada",
+  "voice.lensDetail": "La lente lee la ficha en voz alta con la voz del sistema. Sin clave, sin cuenta, sin red.",
   "voice.intro": "Elige una voz. Escucha una antes de decidir.",
   "voice.forYourLanguage": "HABLAN TU IDIOMA",
   "voice.otherLanguages": "OTROS IDIOMAS",

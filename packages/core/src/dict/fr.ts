@@ -785,6 +785,7 @@ export const FR: Dict = {
   "voice.system": "Voix du système",
   "voice.what": "Quelle voix lit les fiches à voix haute. Touchez-en une pour l’entendre.",
   "voice.enabled": "Voix activée",
+  "voice.lensDetail": "La lentille lit la fiche à voix haute avec la voix du système. Sans clé, sans compte, sans réseau.",
   "voice.intro": "Choisissez une voix. Écoutez-en une avant de décider.",
   "voice.forYourLanguage": "PARLENT VOTRE LANGUE",
   "voice.otherLanguages": "AUTRES LANGUES",
