@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDados, type Especie } from "../../src/dados";
 import { useT } from "../../src/i18n";
 import { useTema } from "../../src/tema";
+import { Toque } from "../../src/Toque";
 import { Selo } from "../../src/Selo";
 
 /**
@@ -81,7 +82,7 @@ export default function Pokedex() {
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 132, gap: 10 }}
         renderItem={({ item }) => (
           <Link href={{ pathname: "/especie/[id]", params: { id: item.id } }} asChild>
-            <Pressable className="flex-1 items-center bg-superficie rounded-tile py-3">
+            <Toque className="flex-1 items-center bg-superficie rounded-tile py-3">
               <Selo especie={item} tamanho={52} />
               <Text
                 className="text-texto text-[11px] font-semibold mt-2 text-center px-1"
@@ -90,7 +91,7 @@ export default function Pokedex() {
                 {item.name}
               </Text>
               <Text className="text-texto3 text-[10px]">#{String(item.dex).padStart(3, "0")}</Text>
-            </Pressable>
+            </Toque>
           </Link>
         )}
       />

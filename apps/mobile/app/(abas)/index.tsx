@@ -11,6 +11,7 @@ import { useDados, type Especie } from "../../src/dados";
 import { useT } from "../../src/i18n";
 import { corDoTipo, Selo, tintaSobre } from "../../src/Selo";
 import { useTema } from "../../src/tema";
+import { Toque } from "../../src/Toque";
 
 /**
  * O INICIO.
@@ -151,7 +152,7 @@ export default function Inicio() {
             que resolve o problema inteiro em um passo, entao e a unica que
             ganha a cor de acento e a sombra de CTA. */}
         <Link href="/print" asChild>
-          <Pressable
+          <Toque
             className="rounded-pilula py-4 items-center mt-4 flex-row justify-center gap-2"
             style={{
               backgroundColor: cores.texto,
@@ -165,13 +166,13 @@ export default function Inicio() {
             <Text className="text-corpo font-bold" style={{ color: cores.fundo }}>
               {t("scan.pick")}
             </Text>
-          </Pressable>
+          </Toque>
         </Link>
 
         <View className="flex-row flex-wrap gap-2 mt-3">
           {ATALHOS.map((a) => (
             <Link key={a.rota} href={a.rota as never} asChild>
-              <Pressable className="bg-superficie rounded-pilula px-4 py-3 flex-row items-center gap-2">
+              <Toque className="bg-superficie rounded-pilula px-4 py-3 flex-row items-center gap-2">
                 <SymbolView
                   name={a.icone as never}
                   size={15}
@@ -179,7 +180,7 @@ export default function Inicio() {
                   fallback={<View />}
                 />
                 <Text className="text-texto text-legenda">{t(a.rotulo)}</Text>
-              </Pressable>
+              </Toque>
             </Link>
           ))}
         </View>

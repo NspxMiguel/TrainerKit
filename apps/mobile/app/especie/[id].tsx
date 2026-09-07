@@ -34,7 +34,7 @@ import { marcarVisto } from "../../src/vistos";
 import { guardar, remover, useColecao } from "../../src/colecao";
 import { BlocoSpreads, BlocoTroca, BlocoUsos } from "../../src/BlocosDaFicha";
 import { Segmented } from "../../src/Segmented";
-import { Entrada } from "../../src/Entrada";
+import { Cascata } from "../../src/Cascata";
 import { Toque } from "../../src/Toque";
 import { calar, falar } from "../../src/voz";
 import { useSetup } from "../../src/setup";
@@ -479,6 +479,7 @@ export default function Ficha() {
       </View>
 
       <View className="px-5 pt-5">
+      <Cascata>
 
       {/*
         TENHO ESSE — guardar sem saber o IV.
@@ -970,6 +971,7 @@ export default function Ficha() {
           })}
         </View>
       )}
+      </Cascata>
       </View>
     </ScrollView>
 
@@ -1027,3 +1029,4 @@ export default function Ficha() {
     </View>
   );
 }
+

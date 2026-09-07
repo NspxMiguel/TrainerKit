@@ -1,10 +1,11 @@
 import { Tabs } from "expo-router";
 import { SymbolView, type SFSymbol } from "expo-symbols";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useT } from "../../src/i18n";
 import { useTema } from "../../src/tema";
+import { Toque } from "../../src/Toque";
 import { Vidro } from "../../src/Vidro";
 import type { Key } from "@trainerkit/core";
 
@@ -51,7 +52,7 @@ export default function Abas() {
               {ABAS.map((aba, i) => {
                 const ativo = state.index === i;
                 return (
-                  <Pressable
+                  <Toque
                     key={aba.nome}
                     accessibilityRole="tab"
                     accessibilityState={{ selected: ativo }}
@@ -88,7 +89,7 @@ export default function Abas() {
                     >
                       {t(aba.rotulo)}
                     </Text>
-                  </Pressable>
+                  </Toque>
                 );
               })}
             </View>
