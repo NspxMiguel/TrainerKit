@@ -301,6 +301,7 @@ export const RU: Dict = {
   "collection.add": "Добавить вида",
   "collection.backup": "Резервная копия",
   "collection.done": "Сделано",
+  "collection.ivUnknown": "IV ещё не измерены",
   "collection.remove": "Убрать из коллекции",
   "collection.removeSure": "Нажмите ещё раз, чтобы убрать",
   "collection.evolved": "Я его эволюционировал",

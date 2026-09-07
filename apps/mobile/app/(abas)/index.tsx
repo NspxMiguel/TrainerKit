@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import type { Key } from "@trainerkit/core";
+import { degradeDoTipo, PARADAS_DO_DEGRADE, type Key } from "@trainerkit/core";
 import { useColecao } from "../../src/colecao";
 import { useDados, type Especie } from "../../src/dados";
 import { useT } from "../../src/i18n";
@@ -49,10 +49,16 @@ function Heroi({ especie }: { especie: Especie }) {
           saiu do app sem a tela ficar cinza: a cor continua existindo, so que
           ela agora SIGNIFICA alguma coisa — Charizard e laranja porque e Fogo.
         */}
+        {/*
+          O DEGRADÊ QUE SOBE — escuro em cima, a cor no meio, claro embaixo, na
+          vertical. Ele estava errado aqui: era diagonal e terminava em
+          transparente, o que só apaga a cor. Ele reconheceu de longe.
+        */}
         <LinearGradient
-          colors={[cor, `${cor}22`]}
-          start={{ x: 0.1, y: 0 }}
-          end={{ x: 0.9, y: 1 }}
+          colors={degradeDoTipo(cor)}
+          locations={PARADAS_DO_DEGRADE as unknown as [number, number, number]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
           style={{ position: "absolute", inset: 0 }}
         />
         {/* O monograma gigante e marca d'agua: ele da massa e movimento ao

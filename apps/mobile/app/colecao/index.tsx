@@ -154,6 +154,7 @@ export default function Colecao() {
       renderItem={({ item }) => {
         const sp = dados?.species.find((s) => s.id === item.speciesId);
         const selo = badgeFor(ivTotalOf(item.ivs));
+        const semIV = item.ivDesconhecido === true;
         if (!sp) return null;
         return (
           <Link href={{ pathname: "/especie/[id]", params: { id: sp.id } }} asChild>
@@ -164,15 +165,23 @@ export default function Colecao() {
               <Selo especie={sp} tamanho={44} />
               <View className="flex-1">
                 <Text className="text-texto text-[15px] font-semibold">{sp.name}</Text>
+                {/* IV NÃO MEDIDO não vira 0%. Quem guardou por "Tenho esse"
+                    ainda não avaliou, e imprimir 0/45 ali é o app inventando um
+                    número que ele não tem — e depois acreditando nele. */}
                 <Text className="text-texto3 text-xs">
-                  {ivTotalOf(item.ivs)}/45 · {Math.round(ivPercentOf(item.ivs))}% · {t("iv.level")}{" "}
-                  {item.level}
+                  {item.ivDesconhecido
+                    ? t("collection.ivUnknown")
+                    : `${ivTotalOf(item.ivs)}/45 · ${Math.round(ivPercentOf(item.ivs))}% · ${t("iv.level")} ${item.level}`}
                 </Text>
               </View>
-              <Text className="text-guardar text-sm">
-                {"★".repeat(selo.litStars)}
-                {"☆".repeat(3 - selo.litStars)}
-              </Text>
+              {/* Sem IV medido não há estrela: a estrela é uma nota, e nota
+                  sobre dado que não existe é chute com cara de fato. */}
+              {!semIV && (
+                <Text className="text-guardar text-sm">
+                  {"★".repeat(selo.litStars)}
+                  {"☆".repeat(3 - selo.litStars)}
+                </Text>
+              )}
             </Pressable>
           </Link>
         );

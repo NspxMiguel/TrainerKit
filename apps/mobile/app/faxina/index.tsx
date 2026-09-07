@@ -55,7 +55,10 @@ export default function Faxina() {
       level: g.level,
       lucky: g.lucky,
       shadow: g.shadow,
-      ivDesconhecido: false,
+      /* PASSA ADIANTE, e nao `false` cravado: um bicho guardado por "Tenho esse"
+         nao tem IV medido, e a faxina julgando ele como 0/0/0 manda transferir
+         justamente o que ninguem avaliou ainda. */
+      ivDesconhecido: g.ivDesconhecido ?? false,
     }));
     return planejarFaxina({
       bichos,

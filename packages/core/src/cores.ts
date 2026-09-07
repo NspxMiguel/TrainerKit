@@ -116,3 +116,40 @@ export function seloDaEspecie(
     : TINTA_ESCURA;
   return { fundo, tinta };
 }
+
+/**
+ * O DEGRADÊ QUE SOBE.
+ *
+ * ⚠️ Não é a mesma coisa que uma cor virando transparente. O pacote do Claude
+ * Design pinta o herói e o cabeçalho da ficha com TRÊS paradas verticais —
+ * escuro em cima, a cor no meio, claro embaixo — e é isso que dá a sensação de
+ * luz subindo pela tela. Um degradê de duas paradas terminando em `#RRGGBB22`
+ * (o que eu tinha feito) só apaga a cor, e a tela fica chapada.
+ *
+ * As três paradas do pacote, medidas em HSL:
+ *
+ *   Fogo    (15, 75%, 28%) → (21, 90%, 48%) → (25, 95%, 53%)
+ *   Dragão  (243, 48%, 32%) → (250, 90%, 60%) → (252, 100%, 68%)
+ *   Gelo    (194, 70%, 27%) → (192, 91%, 36%) → (187, 92%, 69%)
+ *
+ * O que se repete nos três: a MATIZ quase não anda, a saturação sobe e a
+ * luminosidade sobe. É essa relação que a função reproduz a partir da cor do
+ * tipo que o app já usa — em vez de uma tabela com 18 trios escritos à mão, que
+ * envelheceria na primeira vez que uma cor de tipo fosse corrigida.
+ *
+ * As posições (0% / 46% / 72%) também são do pacote: a última parada NÃO é
+ * 100%, e é isso que deixa o pé do degradê com uma faixa da cor clara em vez de
+ * um ponto. Tirar essa folga achata o efeito.
+ */
+export const PARADAS_DO_DEGRADE = [0, 0.46, 0.72] as const;
+
+export function degradeDoTipo(cor: string): [string, string, string] {
+  const [h, s, l] = paraHsl(cor);
+  return [
+    /* Escuro: a saturação CAI junto com a luz. Escurecer mantendo a saturação
+       dá um roxo/marrom sujo em vez de sombra. */
+    paraHex(h, Math.min(1, s * 0.86), Math.max(0.16, l * 0.52)),
+    paraHex(h, Math.min(1, s * 1.08), l),
+    paraHex(h, Math.min(1, s * 1.12), Math.min(0.78, l * 1.24)),
+  ];
+}

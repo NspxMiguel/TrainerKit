@@ -301,6 +301,7 @@ export const KO: Dict = {
   "collection.add": "종 추가",
   "collection.backup": "백업",
   "collection.done": "완료함",
+  "collection.ivUnknown": "개체값 미측정",
   "collection.remove": "컬렉션에서 빼기",
   "collection.removeSure": "한 번 더 눌러 빼기",
   "collection.evolved": "진화시켰어요",

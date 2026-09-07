@@ -10,11 +10,13 @@ import {
   GROQ_MODEL,
   computeCPAtLevel,
   decide,
+  degradeDoTipo,
   groqChat,
   custoDosMaxAtaques,
   fazGigantamax,
   groupIdenticalContexts,
   papelNaBatalhaMax,
+  PARADAS_DO_DEGRADE,
   rankMovesets,
   shadowDamageMultiplier,
   tetoDePowerUp,
@@ -29,6 +31,11 @@ import { SymbolView } from "expo-symbols";
 
 import { useIA } from "../../src/ia";
 import { marcarVisto } from "../../src/vistos";
+import { guardar, remover, useColecao } from "../../src/colecao";
+import { BlocoSpreads, BlocoTroca, BlocoUsos } from "../../src/BlocosDaFicha";
+import { Segmented } from "../../src/Segmented";
+import { Entrada } from "../../src/Entrada";
+import { Toque } from "../../src/Toque";
 import { calar, falar } from "../../src/voz";
 import { useSetup } from "../../src/setup";
 import { useTema, type Paleta } from "../../src/tema";
@@ -94,6 +101,9 @@ export default function Ficha() {
   /* Aberto por padrao: o rastro E o argumento do app. Escondido por padrao
      ele vira nota de rodape, e ninguem abre nota de rodape. */
   const [rastro, setRastro] = useState(true);
+  const [confirmandoTirar, setConfirmandoTirar] = useState(false);
+  const [indiceDoGrupo, setIndiceDoGrupo] = useState(0);
+  const { itens, recarregar } = useColecao();
   const { chave } = useIA();
   const [pergunta, setPergunta] = useState("");
   const [aberto, setAberto] = useState(false);
@@ -129,6 +139,18 @@ export default function Ficha() {
   };
 
   const especie = useMemo(() => dados?.species.find((s) => s.id === id) ?? null, [dados, id]);
+
+  /*
+   * O EXEMPLAR GUARDADO desta espécie, se houver.
+   *
+   * ⚠️ O primeiro, e não "o melhor": quem tem dois Charizard vê a ficha do que
+   * guardou antes. Escolher o de maior IV pareceria esperto e faria a tela
+   * mudar de assunto sozinha quando a pessoa guardasse um terceiro.
+   */
+  const salvo = useMemo(
+    () => (itens ?? []).find((g) => g.speciesId === id) ?? null,
+    [itens, id],
+  );
 
   /* VISTO ao abrir a ficha. E o mais perto de "encontrei" que um app fora do
      jogo consegue afirmar sem inventar — e e o que faz a Pokedex ter progresso. */
@@ -216,6 +238,11 @@ export default function Ficha() {
    * se compara. Medido em PvP porque e onde a Frustracao doi mais e onde o
    * numero e mais facil de ler.
    */
+
+  /* CLAMP no índice: espécies diferentes têm números de grupo diferentes, e
+     voltar de um Charizard (4 grupos) para um Caterpie (1) deixaria o índice
+     apontando para um grupo que não existe. */
+  const grupoAtivo = grupos[Math.min(indiceDoGrupo, grupos.length - 1)] ?? null;
   const custoDaFrustracao = useMemo(() => {
     if (!dados || !especie || !sombroso) return null;
     const porId = new Map<string, MoveWithPvp>();
@@ -409,9 +436,10 @@ export default function Ficha() {
       */}
       <View style={{ height: 176 + alto, overflow: "hidden" }}>
         <LinearGradient
-          colors={[corDoTipo(especie.types[0]), `${corDoTipo(especie.types[0])}33`]}
-          start={{ x: 0.1, y: 0 }}
-          end={{ x: 0.95, y: 1 }}
+          colors={degradeDoTipo(corDoTipo(especie.types[0]))}
+          locations={PARADAS_DO_DEGRADE as unknown as [number, number, number]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
           style={{ position: "absolute", inset: 0 }}
         />
         <Text
@@ -452,10 +480,40 @@ export default function Ficha() {
 
       <View className="px-5 pt-5">
 
+      {/*
+        TENHO ESSE — guardar sem saber o IV.
+
+        ⚠️ Existe porque a coleção não pode exigir a calculadora. Quem acabou de
+        capturar quer marcar que tem, e descobrir o IV depois; obrigar a avaliar
+        primeiro faz a pessoa não guardar nada. O IV entra como desconhecido e a
+        própria ficha oferece calcular logo abaixo.
+      */}
+      {!salvo && (
+        <Toque
+          onPress={() => {
+            void guardar({
+              speciesId: especie.id,
+              ivs: { atk: 0, def: 0, hp: 0 },
+              /* MARCADO como não medido: sem isso a coleção mostraria 0% e o
+                 veredito mandaria transferir um bicho que ninguém avaliou. */
+              ivDesconhecido: true,
+              level: setup.level,
+              shadow: false,
+              lucky: false,
+            }).then(recarregar);
+          }}
+          className="bg-superficie rounded-pilula py-4 items-center mt-7"
+        >
+          <Text className="text-texto font-bold text-base">{t("species.iHaveThis")}</Text>
+        </Toque>
+      )}
+
       {/* Duas acoes: o IV do que ele TEM, e o IV do que ele esta VENDO. */}
       <Link href={{ pathname: "/iv/[id]", params: { id: especie.id } }} asChild>
-        <Pressable className="bg-texto rounded-pilula py-4 items-center mt-7">
-          <Text className="text-fundo font-bold text-base">{t("species.calcIV")}</Text>
+        <Pressable className={`bg-texto rounded-pilula py-4 items-center ${salvo ? "mt-7" : "mt-3"}`}>
+          <Text className="text-fundo font-bold text-base">
+            {t(salvo ? "species.seeMyIV" : "species.calcIV")}
+          </Text>
         </Pressable>
       </Link>
 
@@ -470,6 +528,36 @@ export default function Ficha() {
           <Text className="text-texto font-bold text-base">{t("raid.openBrowse")}</Text>
         </Pressable>
       </Link>
+
+      {/*
+        TIRAR DA COLEÇÃO, em DOIS passos.
+
+        ⚠️ Um passo só apagaria por toque errado, e não há desfazer — a coleção
+        mora no aparelho. O segundo toque é o desfazer que não existe.
+      */}
+      {salvo && (
+        <Toque
+          onPress={() => {
+            if (!confirmandoTirar) {
+              setConfirmandoTirar(true);
+              return;
+            }
+            void remover(salvo.id).then(() => {
+              setConfirmandoTirar(false);
+              recarregar();
+            });
+          }}
+          className="rounded-pilula py-3.5 items-center mt-3"
+          style={{ borderWidth: 1, borderColor: confirmandoTirar ? cores.transferir : cores.linha }}
+        >
+          <Text
+            className="font-semibold text-corpo"
+            style={{ color: confirmandoTirar ? cores.transferir : cores.texto2 }}
+          >
+            {t(confirmandoTirar ? "collection.removeSure" : "collection.remove")}
+          </Text>
+        </Toque>
+      )}
 
       {/*
         ⚠️ O VEREDITO É O HERÓI DA TELA, e antes era mais um cartão igual aos
@@ -614,70 +702,111 @@ export default function Ficha() {
         </Text>
       )}
 
-      {/* ── GOLPES ─────────────────────────────────────────────────────────
-          Um bloco por grupo de contexto. Quando os quatro coincidem sai um
-          bloco so, e a legenda diz que os quatro coincidem — que informa mais
-          do que quatro abas com a mesma resposta. */}
-      {grupos.map((g) => (
-        <View key={g.contexts.join("+")} className="bg-superficie rounded-cartao p-5 mt-3">
-          <Text className="text-texto3 text-[11px] tracking-widest">
-            {g.contexts
-              .map((c) => t(CONTEXT_KEYS[c].title as never))
-              .join(" · ")
-              .toUpperCase()}
+      {/* ── MELHORES GOLPES ────────────────────────────────────────────────
+          ⚠️ UM grupo por vez, com seletor — e não os quatro empilhados, que era
+          o que o nativo fazia. Quatro cartões de golpe seguidos ocupam a tela
+          inteira e a pessoa perde o que estava procurando; o PWA já resolvia
+          isso com um segmented, e é dele que esta tela vem. */}
+      <Text className="text-texto3 text-legenda mt-7 mb-2">
+        {t("species.bestMoves").toUpperCase()}
+      </Text>
+
+      {grupos.length > 1 && (
+        <View className="mb-3">
+          <Segmented
+            rotuloAcessivel={t("species.bestMoves")}
+            valor={String(indiceDoGrupo)}
+            opcoes={grupos.map((g, i) => ({
+              valor: String(i),
+              rotulo: g.contexts.map((c) => t(CONTEXT_KEYS[c].title as never)).join(" · "),
+            }))}
+            onEscolher={(v) => setIndiceDoGrupo(Number(v))}
+          />
+        </View>
+      )}
+
+      {grupoAtivo && (
+        <View className="bg-superficie rounded-cartao p-5">
+          {/* A frase que diz DE QUEM é a lista. Com um grupo só ela explica o
+              contexto; com vários, diz o que os outros têm em comum. */}
+          <Text className="text-texto3 text-legenda leading-4">
+            {grupoAtivo.contexts.length === 1
+              ? t(CONTEXT_KEYS[grupoAtivo.contexts[0]!].detail as never)
+              : grupoAtivo.mesmaLista
+                ? t("species.sameForAll", {
+                    contexts: grupoAtivo.contexts
+                      .map((c) => t(CONTEXT_KEYS[c].title as never))
+                      .join(", "),
+                  })
+                : t("species.sameBest", {
+                    contexts: grupoAtivo.contexts
+                      .map((c) => t(CONTEXT_KEYS[c].title as never))
+                      .join(", "),
+                    principal: t(CONTEXT_KEYS[grupoAtivo.contexts[0]!].title as never),
+                  })}
           </Text>
 
-          {g.movesets.length === 0 ? (
-            <Text className="text-texto2 text-sm mt-3">{t("species.noMoves")}</Text>
+          {grupoAtivo.movesets.length === 0 ? (
+            <Text className="text-texto2 text-corpo mt-3">{t("species.noMoves")}</Text>
           ) : (
-            g.movesets.slice(0, 3).map((m, i) => (
+            /* CINCO, e não três: é quantos o PWA mostra, e a quarta e a quinta
+               linha são justamente onde aparece a alternativa sem TM Elite. */
+            grupoAtivo.movesets.slice(0, 5).map((m, i) => (
               <View
                 key={`${m.fast.id}-${m.charged.id}`}
-                className="mt-3"
+                className="mt-3 flex-row items-start gap-3"
                 style={
                   i > 0
                     ? { borderTopWidth: 0.5, borderTopColor: cores.linha, paddingTop: 12 }
                     : undefined
                 }
               >
-                <Text className={`text-[15px] ${i === 0 ? "text-texto font-bold" : "text-texto2"}`}>
-                  {m.fast.name} + {m.charged.name}
-                </Text>
-                {/* ✦ e a marca de TM Elite — um dos itens mais raros do jogo.
-                    Sem dizer isso, a recomendacao manda comprar o que nao se
-                    compra. */}
-                {m.needsElite && (
-                  <Text className="text-texto3 text-[12px] mt-1">✦ {t("species.needsElite")}</Text>
-                )}
-                {m.isFrustration && (
-                  <Text className="text-texto3 text-[12px] mt-1">
-                    {t("species.stuckOnFrustration")}
+                <View className="flex-1">
+                  <Text
+                    className={`text-corpo ${i === 0 ? "text-texto font-bold" : "text-texto2"}`}
+                  >
+                    {m.fast.name} + {m.charged.name}
                   </Text>
-                )}
+                  {/* ✦ e a marca de TM Elite — um dos itens mais raros do jogo.
+                      Sem dizer isso, a recomendacao manda comprar o que nao se
+                      compra. */}
+                  {m.needsElite && (
+                    <Text className="text-texto3 text-legenda mt-1">
+                      ✦ {t("species.needsElite")}
+                    </Text>
+                  )}
+                  {m.isFrustration && (
+                    <Text className="text-texto3 text-legenda mt-1">
+                      {t("species.stuckOnFrustration")}
+                    </Text>
+                  )}
+                </View>
+                {/* A NOTA, que o nativo não mostrava. Sem ela as cinco linhas
+                    parecem cinco opções iguais, e a diferença entre a primeira e
+                    a quinta costuma ser grande. */}
+                <Text
+                  className="text-legenda"
+                  style={{
+                    fontFamily: "Menlo",
+                    color: i === 0 ? cores.texto : cores.texto3,
+                  }}
+                >
+                  {Math.round(m.score * 100)}
+                </Text>
               </View>
             ))
           )}
-
-          {/* Quando os contextos concordam sobre o MELHOR e divergem embaixo, a
-              tela precisa dizer de quem e a ordem que esta mostrando — senao a
-              unificacao vira uma afirmacao falsa sobre os outros tres. */}
-          {g.contexts.length > 1 && (
-            <Text className="text-texto3 text-[12px] mt-3">
-              {/* ⚠️ As duas frases tem `{contexts}`, e a segunda tem `{principal}`
-                  tambem. Chamar `t` sem eles imprime a chave crua na tela — o
-                  placeholder nao some sozinho. */}
-              {g.mesmaLista
-                ? t("species.sameForAll", {
-                    contexts: g.contexts.map((c) => t(CONTEXT_KEYS[c].title as never)).join(", "),
-                  })
-                : t("species.sameBest", {
-                    contexts: g.contexts.map((c) => t(CONTEXT_KEYS[c].title as never)).join(", "),
-                    principal: t(CONTEXT_KEYS[g.contexts[0]!].title as never),
-                  })}
-            </Text>
-          )}
         </View>
-      ))}
+      )}
+
+      {/* ── OS MELHORES IV POR LIGA ────────────────────────────────────────── */}
+      {dados && (
+        <BlocoSpreads
+          especie={especie}
+          dados={dados}
+          tetoDeNivel={tetoDePowerUp(setup.level, dados.version.levelCap)}
+        />
+      )}
 
       {/* ── EVOLUCAO ───────────────────────────────────────────────────────── */}
       {especie.evolvesInto.length > 0 && (
@@ -788,6 +917,22 @@ export default function Ficha() {
           )}
         </View>
       )}
+
+      {/* ── TROCA ──────────────────────────────────────────────────────────
+          Só para quem TEM o bicho: a conta é sobre os IV atuais dele, e sem
+          espécie guardada não existe "antes" para comparar. */}
+      {salvo && !salvo.ivDesconhecido && (
+        <BlocoTroca
+          ivs={salvo.ivs}
+          baseStats={especie.baseStats}
+          lucky={salvo.lucky}
+          shadow={salvo.shadow}
+          tm={tm}
+        />
+      )}
+
+      {/* ── PRA QUE SERVE ──────────────────────────────────────────────────── */}
+      {dados && <BlocoUsos especie={especie} dados={dados} />}
 
       {/* ── TETOS DE PC ────────────────────────────────────────────────────── */}
       {tetos.length > 0 && (

@@ -301,6 +301,7 @@ export const JA: Dict = {
   "collection.add": "種を追加",
   "collection.backup": "バックアップ",
   "collection.done": "済み",
+  "collection.ivUnknown": "個体値は未計測",
   "collection.remove": "コレクションから外す",
   "collection.removeSure": "もう一度タップで外す",
   "collection.evolved": "進化させた",

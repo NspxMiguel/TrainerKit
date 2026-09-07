@@ -44,6 +44,17 @@ export interface Guardado {
   shadow: boolean;
   lucky: boolean;
   em: number;
+  /**
+   * O IV ainda não foi medido.
+   *
+   * ⚠️ Sem esta marca, "Tenho esse" gravaria `0/0/0` e a coleção mostraria um
+   * Charizard de 0% — um número errado é pior que número nenhum, porque o
+   * veredito acredita nele e manda transferir.
+   *
+   * Opcional porque registro gravado antes disto não tem o campo, e a ausência
+   * significa "medido", que é o que aqueles registros são.
+   */
+  ivDesconhecido?: boolean;
 }
 
 let cache: Guardado[] | null = null;

@@ -301,6 +301,7 @@ export const FR: Dict = {
   "collection.add": "Ajouter une espèce",
   "collection.backup": "Sauvegarde",
   "collection.done": "Fait",
+  "collection.ivUnknown": "IV pas encore mesurés",
   "collection.remove": "Retirer de la collection",
   "collection.removeSure": "Touchez encore pour retirer",
   "collection.evolved": "Je l'ai fait évoluer",

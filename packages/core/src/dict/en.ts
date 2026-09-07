@@ -337,6 +337,7 @@ const EN = {
   "collection.add": "Add species",
   "collection.backup": "Backup",
   "collection.done": "Done",
+  "collection.ivUnknown": "IVs not measured yet",
   "collection.remove": "Remove from collection",
   "collection.removeSure": "Tap again to remove",
   "collection.evolved": "I evolved it",
