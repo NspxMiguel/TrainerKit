@@ -1,6 +1,14 @@
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
@@ -26,7 +34,7 @@ import {
   type Key,
   type MoveWithPvp,
 } from "@trainerkit/core";
-import { useDados } from "../../src/dados";
+import { useDados, type Especie } from "../../src/dados";
 import { useT } from "../../src/i18n";
 import { LinearGradient } from "expo-linear-gradient";
 import { SymbolView } from "expo-symbols";
@@ -44,6 +52,8 @@ import { calar, falar } from "../../src/voz";
 import { useSetup } from "../../src/setup";
 import { useTema, type Paleta } from "../../src/tema";
 import { corDoTipo, tintaSobre } from "../../src/Selo";
+import { useImagens } from "../../src/imagens";
+import { arquivoLocal } from "../../src/offline";
 import { Vidro } from "../../src/Vidro";
 
 /**
@@ -84,6 +94,30 @@ const COR_ACAO: Record<string, keyof Paleta> = {
   transferir: "transferir",
   descobrir: "descobrir",
 };
+
+/**
+ * A ARTE NA FAIXA DA FICHA.
+ *
+ * ⚠️ Componente à parte pelo mesmo motivo do herói: a imagem pode falhar, e um
+ * `useState` dentro da ficha faria a tela inteira renderizar de novo a cada
+ * carga. Falhando, ela some e a faixa volta a ser cor e número — que é o
+ * estado de qualquer espécie sem arquivo, em qualquer fonte.
+ */
+function ArteDaFicha({ especie }: { especie: Especie }) {
+  const { fonte, urlDaEspecie } = useImagens();
+  const [falhou, setFalhou] = useState(false);
+  const local = arquivoLocal(especie.spriteId, fonte);
+  const url = falhou ? null : (local ?? urlDaEspecie(especie));
+  if (!url) return null;
+  return (
+    <Image
+      source={{ uri: url }}
+      onError={() => setFalhou(true)}
+      resizeMode="contain"
+      style={{ flex: 1, width: "100%", opacity: 0.95 }}
+    />
+  );
+}
 
 export default function Ficha() {
   const { t, tm, idioma } = useT();
@@ -456,22 +490,38 @@ export default function Ficha() {
           end={{ x: 0.5, y: 1 }}
           style={{ position: "absolute", inset: 0 }}
         />
+        {/* ⚠️ O NÚMERO DA DEX, e não o monograma. "ao invez de ET, coloque o
+            numero do pokemon" — ele rejeitou as duas letras no herói do Início,
+            e a ficha continuava com elas. `numberOfLines={1}` porque três
+            dígitos quebravam em duas linhas quando a fonte crescia. */}
         <Text
+          numberOfLines={1}
           style={{
             position: "absolute",
-            right: -16,
-            bottom: -34,
+            right: -6,
+            bottom: -30,
             fontSize: 132,
+            lineHeight: 132,
+            letterSpacing: -6,
             fontWeight: "800",
             color: tintaSobre(corDoTipo(especie.types[0])),
             opacity: 0.15,
           }}
         >
-          {especie.name
-            .replace(/[^A-Za-zÀ-ÿ]/g, "")
-            .slice(0, 2)
-            .toUpperCase()}
+          {String(especie.dex).padStart(3, "0")}
         </Text>
+
+        {/* A ARTE DA ESPÉCIE, na faixa colorida.
+            ⚠️ O herói do Início já mostrava a foto e a ficha — que é A tela
+            daquele bicho — não mostrava nada além da cor. Ela fica à esquerda
+            do número e atrás do nome, que é onde sobra espaço na faixa. */}
+        <View
+          pointerEvents="none"
+          style={{ position: "absolute", right: 8, bottom: 0, top: alto, width: 150 }}
+        >
+          <ArteDaFicha especie={especie} />
+        </View>
+
         <View className="flex-1 justify-end px-5 pb-4">
           <Text className="text-titulo-tela text-white">{especie.name}</Text>
           <View className="flex-row gap-2 mt-2">
