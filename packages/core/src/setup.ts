@@ -7,9 +7,11 @@
  * persists through `expo-sqlite/kv-store` and cannot use any of it.
  *
  * What lives here is the part that must never disagree between the two: the
- * four levels offered, and the cap they imply. Two copies of `level + 2` is how
- * one app promises a ceiling the other does not calculate.
+ * levels offered, and the cap they imply. Two copies of the same arithmetic is
+ * how one app promises a ceiling the other does not calculate.
  */
+
+import { ALLOWED_LEVELS_ABOVE_PLAYER } from "./types.js";
 
 /**
  * Como a pessoa quer usar o app.
@@ -41,11 +43,13 @@ export const TRAINER_LEVELS: readonly TrainerLevel[] = [20, 30, 40, 50];
  * perfeito" da ficha, a ordenacao da Especies — continua sendo o teto do jogo,
  * porque ali o numero e um fato da especie e nao uma promessa.
  *
- * O `+2` e do jogo: sobe-se uma especie ate dois niveis acima do proprio, e o
- * `min` impede que um treinador de 50 passe do teto da temporada.
+ * QUANTOS niveis acima vem do GAME_MASTER e nao de memoria: era `+2` cravado
+ * aqui, com um comentario dizendo que o dois era do jogo, e
+ * `POKEMON_UPGRADE_SETTINGS.allowedLevelsAbovePlayer` responde 10. O `min`
+ * impede que a soma passe do teto da temporada.
  */
 export function tetoDePowerUp(nivelDoTreinador: number, tetoDoJogo: number): number {
-  return Math.min(nivelDoTreinador + 2, tetoDoJogo);
+  return Math.min(nivelDoTreinador + ALLOWED_LEVELS_ABOVE_PLAYER, tetoDoJogo);
 }
 
 /** Um nivel valido, ou o padrao — usado ao ler o que estava gravado. */

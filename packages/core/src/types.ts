@@ -97,6 +97,19 @@ export const MIN_LEVEL = 1;
  */
 export const MAX_POWERUP_LEVEL = 50;
 
+/**
+ * Quantos niveis ACIMA do proprio o jogador consegue subir uma especie.
+ *
+ * ⚠️ ISTO ERA `2` CRAVADO em `setup.ts`, com um comentario afirmando que o dois
+ * vinha do jogo. Nao vem mais: `POKEMON_UPGRADE_SETTINGS.allowedLevelsAbovePlayer`
+ * responde **10** no GAME_MASTER de hoje. Com o `2` antigo, o app dizia a um
+ * treinador de nivel 30 que ele so alcanca o nivel 32 — e ele alcanca o 40.
+ *
+ * O efeito e o oposto de conservador: o veredito recusava investir em especie
+ * que a pessoa alcanca sem problema, porque o teto de PC calculado ficava baixo.
+ */
+export const ALLOWED_LEVELS_ABOVE_PLAYER = 10;
+
 /** O que o Melhor Amigo soma por cima — `defaultCpBoostAdditionalLevel`. */
 export const BEST_BUDDY_LEVELS = 1;
 

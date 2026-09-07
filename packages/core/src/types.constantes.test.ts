@@ -3,7 +3,7 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { MAX_POWERUP_LEVEL, MAX_TRAINER_LEVEL } from "./types.js";
+import { ALLOWED_LEVELS_ABOVE_PLAYER, MAX_POWERUP_LEVEL, MAX_TRAINER_LEVEL } from "./types.js";
 
 /**
  * AS DUAS CONSTANTES DE NÍVEL, cobradas contra o GAME_MASTER cru.
@@ -52,5 +52,12 @@ describe("constantes de nível contra o GAME_MASTER", () => {
     // Sem este caso, alguém "simplifica" fazendo um apontar pro outro e o app
     // volta a chamar 50 de máximo, ou a inflar o PC com 80.
     expect(MAX_TRAINER_LEVEL).toBeGreaterThan(MAX_POWERUP_LEVEL);
+  });
+
+  it.runIf(temArquivo)("ALLOWED_LEVELS_ABOVE_PLAYER é o allowedLevelsAbovePlayer do jogo", () => {
+    const t = templates().find((x) => x.templateId === "POKEMON_UPGRADE_SETTINGS");
+    const up = t?.data?.pokemonUpgrades as { allowedLevelsAbovePlayer?: number } | undefined;
+    expect(up?.allowedLevelsAbovePlayer, "POKEMON_UPGRADE_SETTINGS sumiu do arquivo").toBeDefined();
+    expect(up!.allowedLevelsAbovePlayer).toBe(ALLOWED_LEVELS_ABOVE_PLAYER);
   });
 });

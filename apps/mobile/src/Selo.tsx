@@ -1,3 +1,4 @@
+import { LinearGradient } from "expo-linear-gradient";
 import { Image, Text, View } from "react-native";
 import { useState } from "react";
 
@@ -110,6 +111,20 @@ export function Selo({ especie, tamanho = 44 }: { especie: Especie; tamanho?: nu
         overflow: "hidden",
       }}
     >
+      {/*
+        GRADIENTE, e nao cor chapada. Em grade de quatro colunas a diferenca
+        aparece: cor chapada faz 1.182 quadrados iguais e o olho perde o lugar;
+        com a luz caindo de um canto cada selo ganha volume e a grade vira uma
+        superficie, que e o que o desenho mostra. A segunda parada e a MESMA cor
+        escurecida, e nao uma cor nova — inventar cor aqui quebraria a conta de
+        contraste que escolhe a tinta.
+      */}
+      <LinearGradient
+        colors={[fundo, `${fundo}B3`]}
+        start={{ x: 0.15, y: 0 }}
+        end={{ x: 0.85, y: 1 }}
+        style={{ position: "absolute", inset: 0 }}
+      />
       <Text style={{ color: tinta, fontWeight: "800", fontSize: Math.round(tamanho * 0.27) }}>
         {monograma(especie.name)}
       </Text>
