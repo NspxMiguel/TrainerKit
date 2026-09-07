@@ -192,17 +192,36 @@ export default function Calculadora() {
       <View className="bg-superficie rounded-3xl p-5 mt-7">
         {unico ? (
           <>
-            <Text className="text-texto3 text-[11px] tracking-widest">IV</Text>
-            <Text className="text-texto text-4xl font-extrabold mt-1">
-              {ivTotalOf(unico.ivs)}
-              <Text className="text-texto3 text-lg"> / 45</Text>
+            {/* ⚠️ A PORCENTAGEM É O NÚMERO GRANDE, com barra — é o print 6.
+                O total sobre 45 estava em 36px e a porcentagem numa legenda
+                cinza embaixo, e é a porcentagem que a pessoa fala em voz alta e
+                compara com a do jogo. */}
+            <Text className="text-texto3 text-legenda">IV</Text>
+            <Text className="text-texto mt-1" style={{ fontSize: 56, fontWeight: "800" }}>
+              {Math.round(ivPercentOf(unico.ivs))}
+              <Text className="text-texto3" style={{ fontSize: 22, fontWeight: "700" }}>
+                %
+              </Text>
             </Text>
-            <Text className="text-texto2 text-sm mt-1">
-              {Math.round(ivPercentOf(unico.ivs))}% · {"★".repeat(selo?.litStars ?? 0)}
+            {/* A BARRA. Um número de 0 a 100 sozinho não diz se 82 é bom; a
+                barra responde isso sem uma linha de texto. */}
+            <View
+              className="rounded-pilula mt-2 overflow-hidden"
+              style={{ height: 6, backgroundColor: cores.linha }}
+            >
+              <View
+                className="rounded-pilula"
+                style={{
+                  height: 6,
+                  width: `${Math.round(ivPercentOf(unico.ivs))}%`,
+                  backgroundColor: cores.evoluir,
+                }}
+              />
+            </View>
+            <Text className="text-texto2 text-corpo mt-3">
+              {ivTotalOf(unico.ivs)}/45 · {unico.ivs.atk}/{unico.ivs.def}/{unico.ivs.hp} ·{" "}
+              {t("iv.level")} {unico.level} · {"★".repeat(selo?.litStars ?? 0)}
               {"☆".repeat(3 - (selo?.litStars ?? 0))}
-            </Text>
-            <Text className="text-texto2 text-sm mt-3">
-              {unico.ivs.atk} / {unico.ivs.def} / {unico.ivs.hp} · {t("iv.level")} {unico.level}
             </Text>
 
             {/* ⚠️ AQUI a pergunta é mais aguda que na ficha: a pessoa acabou de
