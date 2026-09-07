@@ -11,6 +11,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
@@ -72,7 +73,7 @@ function ArteDoHeroi({ especie }: { especie: Especie }) {
       source={{ uri: url }}
       onError={() => setFalhou(true)}
       resizeMode="contain"
-      style={{ width: "100%", height: 200 }}
+      style={{ flex: 1, width: "100%" }}
     />
   );
 }
@@ -86,6 +87,7 @@ function Heroi({
   indice = 0,
   onTrocar,
   alto,
+  altura,
   cabecalho,
 }: {
   especie: Especie;
@@ -102,6 +104,8 @@ function Heroi({
   onTrocar?: () => void;
   /** O inset do topo: o herói começa em y=0, ATRÁS da barra de status. */
   alto: number;
+  /** Quanto da tela sobra para o herói, já descontado o resto do Início. */
+  altura: number;
   /** A saudação e o avatar, desenhados por cima da cor. */
   cabecalho: ReactNode;
 }) {
@@ -137,7 +141,17 @@ function Heroi({
    * preto. As posições viram fração da altura real em vez de números soltos.
    */
   const ALTURA_DA_COR = 332;
-  const f = (q: number) => (q * ALTURA_DA_COR) / (470 + alto);
+  const f = (q: number) => Math.min(1, (q * ALTURA_DA_COR) / altura);
+  /*
+   * ⚠️ A ARTE ENCOLHE COM O HERÓI. Num iPhone SE o herói tem uns 370 pontos, e
+   * 200 deles de bicho não deixam espaço para o nome — o rótulo e a ação
+   * saíam pela borda. Os 240 descontados são o que rótulo, nome, frase, ação e
+   * respiro ocupam juntos.
+   */
+  /* ⚠️ O número acompanha o herói. Cravado em 200 ele dominava a faixa curta
+     de um iPhone SE — os três algarismos viravam manchas cortadas em vez de
+     textura. */
+  const numero = Math.min(200, Math.round(altura * 0.42));
   /* A tinta deixou de ser branca cravada: no tema claro as paradas são
      claras de verdade e branco sobre elas é ilegível. */
   const tintaHeroi = tintaDoHeroi(paradas, escuro);
@@ -152,7 +166,7 @@ function Heroi({
           cartão"; full-bleed ele É a tela. */}
       {/* ⚠️ 470 e não 430: "ta muito pequeno o charizard". Os 40 pontos a mais
           são o que a arte cresceu (150 → 200) sem espremer o nome. */}
-      <Pressable className="overflow-hidden" style={{ height: 470 + alto }}>
+      <Pressable className="overflow-hidden" style={{ height: altura }}>
         {/*
           O GRADIENTE E DO TIPO, e nao uma cor de marca. Foi assim que o violeta
           saiu do app sem a tela ficar cinza: a cor continua existindo, so que
@@ -224,21 +238,21 @@ function Heroi({
             left: 0,
             right: 0,
             top: "46%",
-            marginTop: -100,
+            marginTop: -numero / 2,
             textAlign: "center",
             /* ⚠️ O `letterSpacing` negativo do React Native também tira o
                espaço DEPOIS do último algarismo, e isso empurra o centro
                óptico para a esquerda. O `paddingLeft` devolve o que a última
                letra perdeu. */
-            paddingLeft: 10,
+            paddingLeft: numero / 20,
             /* ⚠️ 200 e não 268: com três algarismos a 268 o número ocupa mais
                que a largura da tela e o corte come dois deles — sobra um "8"
                gigante que não é o número de nada. A 200 os três cabem, com só
                uma lasca de corte nas bordas, que é o que dá a textura. */
-            fontSize: 200,
-            lineHeight: 200,
+            fontSize: numero,
+            lineHeight: numero,
             fontWeight: "900",
-            letterSpacing: -10,
+            letterSpacing: -numero / 20,
             color: tintaHeroi,
             opacity: 0.12,
           }}
@@ -326,7 +340,17 @@ function Heroi({
               cauda do Charizard cortava o rótulo e o próprio nome. Na coluna,
               o `justify-end` empilha arte, rótulo, nome e ação de baixo pra
               cima e a sobreposição deixa de ser possível. */}
-          <View pointerEvents="none" className="w-full">
+          {/* ⚠️ A ARTE PEGA O QUE SOBRAR, e não uma altura calculada.
+              Com `flex: 1` dentro da coluna `justify-end` ela ocupa exatamente
+              o espaço que o rótulo, o nome, a frase e a ação deixaram — em
+              qualquer tela, sem número mágico. Cravada em 200 ela empurrava o
+              texto para fora num iPhone SE; calculada, sobrava um Charizard de
+              96 pontos sobreposto à saudação. O teto de 200 é só para ela não
+              virar um pôster num iPad. */}
+          <View
+            pointerEvents="none"
+            style={{ flex: 1, maxHeight: 200, width: "100%", minHeight: 72 }}
+          >
             <ArteDoHeroi especie={especie} />
           </View>
 
@@ -461,6 +485,23 @@ export default function Inicio() {
   const { itens, recarregar } = useColecao();
   const router = useRouter();
   const { top: alto, bottom: baixo } = useSafeAreaInsets();
+  const { height: telaAlta } = useWindowDimensions();
+  /*
+   * ⚠️ O HERÓI CABE NA TELA, e não tem altura cravada.
+   *
+   * Ele era `470 + alto`. Num iPhone 17 isso deixa espaço de sobra; num
+   * iPhone SE (667 pontos) sobravam 138 para o botão de escanear, os dois
+   * atalhos, a tira da coleção E a barra de abas — e como o Início NÃO ROLA
+   * (foi pedido), o que não cabia era simplesmente cortado: a barra de abas
+   * ficava inteira fora da tela e o app virava um beco sem saída.
+   *
+   * Os 356 são o que vem depois dele, medido: botão de escanear (64), a dupla
+   * de atalhos (56), o rótulo e a tira da coleção (124), os respiros — e os 78
+   * da barra de abas, que FLUTUA por cima. Ela precisa entrar na conta
+   * justamente por flutuar: como a tela não rola, o sistema não desconta o
+   * inset por nós, e a última linha ficava atrás do vidro.
+   */
+  const alturaDoHeroi = Math.max(300, Math.min(470 + alto, telaAlta - 356));
   const [agora] = useState(() => new Date().getHours());
   const { setup } = useSetup();
 
@@ -584,7 +625,7 @@ export default function Inicio() {
       /* ⚠️ 24 e não 110: a barra agora é a do sistema, e ela ajusta o inset da
          rolagem sozinha. O respiro grande era para a barra flutuante desenhada
          à mão, e com a nativa ele vira um buraco no fim da lista. */
-      contentContainerStyle={{ paddingBottom: baixo + 24 }}
+      contentContainerStyle={{ paddingBottom: baixo + 78 }}
       showsVerticalScrollIndicator={false}
       /* ⚠️ O INÍCIO NÃO ROLA. "bloqueia scroll na tela inicio, n tem scroll la"
          — no desenho tudo cabe numa tela, e uma tela inicial que rola convida a
@@ -604,6 +645,7 @@ export default function Inicio() {
           especie={destaque}
           linha={linhaDoDestaque}
           alto={alto}
+          altura={alturaDoHeroi}
           cabecalho={
             <View className="px-4 flex-row items-center gap-3">
               {/* UMA LINHA. "Boa tarde, Treinador." quebrava em duas. */}
