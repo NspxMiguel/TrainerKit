@@ -13,6 +13,11 @@ import { contraste, degradeDoTipo } from "./cores.js";
  * O scrim voltou em `rgba(0,0,0,0.45)`, que é o MENOR alfa que passa nos
  * dezoito. Este teste refaz a conta e falha se alguém mexer na saturação do
  * degradê, na luminosidade das paradas ou naquele número.
+ *
+ * ⚠️ ELE NÃO COBRE O HERÓI INTEIRO, e não precisa. Ele vale de 56% a 78% da
+ * altura — a faixa onde o texto está — e some antes do pé, porque 45% de preto
+ * na borda de baixo é o que fazia a listra cinza no tema claro. O que este
+ * teste garante é o contraste NAQUELA faixa, que é onde o texto mora.
  */
 const SCRIM = 0.45;
 
