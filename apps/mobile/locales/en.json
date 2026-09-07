@@ -1,0 +1,4 @@
+{
+  "NSCameraUsageDescription": "Pokédex Mode points the camera at what is in front of you. Nothing is sent or recorded.",
+  "NSPhotoLibraryUsageDescription": "TrainerKit reads the appraisal screenshot to work out the IVs. The image never leaves the device."
+}

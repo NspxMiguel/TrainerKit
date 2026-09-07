@@ -1,0 +1,4 @@
+{
+  "NSCameraUsageDescription": "도감 모드는 앞에 있는 것에 카메라를 향합니다. 전송하거나 녹화하지 않습니다.",
+  "NSPhotoLibraryUsageDescription": "TrainerKit은 개체값을 계산하려고 평가 스크린샷을 읽습니다. 이미지는 기기를 떠나지 않습니다."
+}

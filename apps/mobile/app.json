@@ -46,6 +46,18 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "locales": {
+      "pt-BR": "./locales/pt-BR.json",
+      "en": "./locales/en.json",
+      "es": "./locales/es.json",
+      "es-419": "./locales/es-419.json",
+      "fr": "./locales/fr.json",
+      "de": "./locales/de.json",
+      "it": "./locales/it.json",
+      "ja": "./locales/ja.json",
+      "ko": "./locales/ko.json",
+      "ru": "./locales/ru.json"
     }
   }
 }

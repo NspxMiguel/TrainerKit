@@ -1,0 +1,4 @@
+{
+  "NSCameraUsageDescription": "O Modo Pokédex aponta a câmera para o que está à sua frente. Nada é enviado nem gravado.",
+  "NSPhotoLibraryUsageDescription": "O TrainerKit lê o print da avaliação para calcular o IV. A imagem não sai do aparelho."
+}

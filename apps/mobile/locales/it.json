@@ -1,0 +1,4 @@
+{
+  "NSCameraUsageDescription": "La Modalità Pokédex punta la fotocamera su ciò che hai davanti. Niente viene inviato né registrato.",
+  "NSPhotoLibraryUsageDescription": "TrainerKit legge lo screenshot della valutazione per calcolare gli IV. L'immagine non lascia il dispositivo."
+}

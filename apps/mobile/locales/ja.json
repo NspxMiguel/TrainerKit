@@ -1,0 +1,4 @@
+{
+  "NSCameraUsageDescription": "ポケデックスモードは目の前のものにカメラを向けます。送信も録画もしません。",
+  "NSPhotoLibraryUsageDescription": "TrainerKit は個体値を計算するために評価のスクリーンショットを読み取ります。画像は端末から出ません。"
+}
