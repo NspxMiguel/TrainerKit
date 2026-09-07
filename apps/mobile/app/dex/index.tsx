@@ -1,12 +1,14 @@
 import { CameraView, useCameraPermissions } from "expo-camera";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FlatList, Pressable, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { buildDexEntry, tetoDePowerUp, type Key } from "@trainerkit/core";
+import { buildDexEntry, identificarEspecie, tetoDePowerUp, type Key } from "@trainerkit/core";
 import { useColecao } from "../../src/colecao";
+import { useIA } from "../../src/ia";
 import { useDados, type Especie } from "../../src/dados";
 import { useT } from "../../src/i18n";
 import { Selo } from "../../src/Selo";
@@ -25,11 +27,16 @@ import { marcarVisto, useVistos } from "../../src/vistos";
  *
  * O que ela faz, e o que ela NAO faz:
  *
- *   FAZ    abre a camera de verdade, deixa escolher a especie e LE a ficha em
+ *   SEMPRE abre a camera de verdade, deixa escolher a especie e LE a ficha em
  *          voz alta com a voz do sistema — sem chave, sem conta, sem rede.
- *   NAO    reconhece a especie pela imagem. Isso precisa de modelo de visao, e
- *          no app a IA e a da pessoa (regra do projeto). Prometer identificacao
- *          automatica e ter um botao que nao identifica e pior que nao ter.
+ *   COM     CHAVE, identifica a especie pela camera ou por uma foto da galeria.
+ *
+ * ⚠️ Isto dizia que o app NAO identificava por imagem, alegando que "a IA e a
+ * da pessoa". A alegacao nao separava os dois apps: no web ela tambem e, e e a
+ * chave dela que faz a chamada. O que faltava era o codigo atravessar, e ele
+ * atravessou — `identificarEspecie` no `packages/core`. Sem chave os botoes nao
+ * aparecem, que e a parte que continua valendo: um botao que responde
+ * "configure a IA" promete o que o app nao entrega.
  *
  * A camera e FUNDO e nao conteudo: ela da o gesto de apontar, e a informacao
  * mora na folha de vidro por cima — que e exatamente o `5-modo-pokedex.png` do
@@ -57,6 +64,13 @@ export default function ModoPokedex() {
   const [permissao, pedirPermissao] = useCameraPermissions();
   const [busca, setBusca] = useState("");
   const [escolhida, setEscolhida] = useState<Especie | null>(null);
+  const { chave } = useIA();
+  const camera = useRef<CameraView>(null);
+  const [identificando, setIdentificando] = useState(false);
+  /* `null` = nunca tentou. `true` = tentou e o modelo não soube. Sem os dois
+     estados, a tela ou mente ("não soube" antes de qualquer foto) ou some com o
+     recado no exato momento em que ele importa. */
+  const [naoSoube, setNaoSoube] = useState(false);
   const [lendo, setLendo] = useState(false);
   const { ligada: vozLigada, alternar: alternarVoz } = useVozLigada();
 
@@ -161,6 +175,72 @@ export default function ModoPokedex() {
     setLendo(false);
   };
 
+  /**
+   * IDENTIFICAR PELA IMAGEM.
+   *
+   * ⚠️ O nome que volta do modelo NÃO abre ficha nenhuma sozinho: ele é casado
+   * contra o dataset primeiro. Modelo de visão devolve nome inventado com a
+   * mesma voz com que acerta, e mostrar a ficha do bicho errado é pior que
+   * dizer "não soube" — porque a pessoa acredita.
+   *
+   * O casamento é frouxo de propósito (`includes` nos dois sentidos): o modelo
+   * responde "Mr. Mime" onde o dataset tem "Mr. Mime", mas responde "Nidoran"
+   * onde o dataset tem "Nidoran♀" — exigir igualdade jogaria fora um acerto.
+   */
+  const identificarDe = (dataUrl: string) => {
+    if (!chave) return;
+    setIdentificando(true);
+    setNaoSoube(false);
+    identificarEspecie(chave, dataUrl)
+      .then((nome) => {
+        if (!nome || !dados) {
+          setNaoSoube(true);
+          return;
+        }
+        const alvo = nome.toLowerCase();
+        const achada =
+          dados.canonicas.find((e) => e.name.toLowerCase() === alvo) ??
+          dados.canonicas.find(
+            (e) => e.name.toLowerCase().includes(alvo) || alvo.includes(e.name.toLowerCase()),
+          );
+        if (achada) escolher(achada);
+        else setNaoSoube(true);
+      })
+      /* A mensagem da Groq (limite de cota, chave recusada) diz o que fazer;
+         um "deu erro" nosso não diz. Ela vai pro campo de busca, que é o único
+         lugar de texto livre desta tela. */
+      .catch((e: Error) => setBusca(e.message.slice(0, 80)))
+      .finally(() => setIdentificando(false));
+  };
+
+  /** A câmera já está de pé como fundo — tirar a foto é só pedir o quadro. */
+  const identificarDaCamera = () => {
+    if (!camera.current || identificando) return;
+    setIdentificando(true);
+    void camera.current
+      .takePictureAsync({ base64: true, quality: 0.5, imageType: "jpg" })
+      .then((foto) => {
+        if (!foto?.base64) {
+          setIdentificando(false);
+          return;
+        }
+        identificarDe(`data:image/jpeg;base64,${foto.base64}`);
+      })
+      .catch(() => setIdentificando(false));
+  };
+
+  const identificarDaGaleria = () => {
+    if (identificando) return;
+    void ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      base64: true,
+      quality: 0.5,
+    }).then((r) => {
+      const b64 = r.canceled ? null : r.assets[0]?.base64;
+      if (b64) identificarDe(`data:image/jpeg;base64,${b64}`);
+    });
+  };
+
   /*
    * ANTERIOR e PRÓXIMO, na ordem da dex — e circular.
    *
@@ -195,7 +275,7 @@ export default function ModoPokedex() {
   return (
     <View className="flex-1" style={{ backgroundColor: "#000" }}>
       {permissao?.granted && (
-        <CameraView style={{ position: "absolute", inset: 0 }} facing="back" />
+        <CameraView ref={camera} style={{ position: "absolute", inset: 0 }} facing="back" />
       )}
 
       {/* O ACENTO VERMELHO E SO DA LENTE, e nao da tela. E o unico vermelho do
@@ -300,6 +380,44 @@ export default function ModoPokedex() {
               {t("dex.caught", { n: capturados })}
             </Text>
           </View>
+
+          {/* IDENTIFICAR PELA IMAGEM — os dois caminhos do PWA.
+              ⚠️ Só COM CHAVE. Sem ela os botões nem aparecem: um botão de
+              identificar que responde "configure a IA" promete o que o app não
+              entrega, que é justamente o motivo pelo qual esta tela nasceu sem
+              a função. Com chave, ela existe — a mesma regra da ficha. */}
+          {chave && (
+            <View className="flex-row gap-2 mt-3">
+              <Pressable
+                onPress={identificarDaCamera}
+                disabled={identificando || !permissao?.granted}
+                className="flex-1 rounded-pilula py-3 items-center"
+                style={{ backgroundColor: "rgba(228,72,59,0.85)", opacity: identificando ? 0.5 : 1 }}
+              >
+                <Text className="text-legenda font-semibold" style={{ color: "#FFFFFF" }}>
+                  {t(identificando ? "dex.identifying" : "dex.scanNow")}
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={identificarDaGaleria}
+                disabled={identificando}
+                className="rounded-pilula py-3 px-4 items-center"
+                style={{ backgroundColor: "rgba(255,255,255,0.12)" }}
+              >
+                <SymbolView
+                  name="photo"
+                  size={16}
+                  tintColor="#FFFFFF"
+                  fallback={<Text style={{ color: "#fff" }}>{t("dex.photo")}</Text>}
+                />
+              </Pressable>
+            </View>
+          )}
+          {naoSoube && (
+            <Text className="text-legenda mt-2 leading-4" style={{ color: "rgba(255,255,255,0.7)" }}>
+              {t("dex.notSure")}
+            </Text>
+          )}
 
           <TextInput
             value={busca}

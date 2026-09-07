@@ -889,6 +889,8 @@ const EN = {
   "dex.cameraDeniedNative": "Camera access was denied. Allow it in Settings › TrainerKit › Camera.",
   "dex.cameraDenied": "Camera access was denied. Allow it in the browser settings, or send a photo instead.",
   "dex.photo": "Attach a photo",
+  "dex.identifying": "Identifying…",
+  "dex.notSure": "I couldn't tell which one it is. Try again closer, or pick it below.",
   "dex.photoNeedsAi": "Photo ID needs the AI turned on in Settings — the free one works. On-device models cannot see images yet.",
   "dex.reading": "Reading…",
   "dex.notFound": "No data on this one.",

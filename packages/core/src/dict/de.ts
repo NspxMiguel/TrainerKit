@@ -820,6 +820,8 @@ export const DE: Dict = {
   "dex.cameraDeniedNative": "Kamerazugriff wurde verweigert. Erlaube ihn in Einstellungen › TrainerKit › Kamera.",
   "dex.cameraDenied": "Kamerazugriff wurde verweigert. Erlaube ihn in den Browsereinstellungen, oder schicke ein Foto.",
   "dex.photo": "Ein Foto anhängen",
+  "dex.identifying": "Wird erkannt …",
+  "dex.notSure": "Ich konnte es nicht erkennen. Versuch es näher, oder wähl es unten aus.",
   "dex.photoNeedsAi": "Foto-Erkennung braucht die KI in den Einstellungen — die kostenlose reicht. Modelle auf dem Gerät sehen noch keine Bilder.",
   "dex.reading": "Lese…",
   "dex.notFound": "Keine Daten zu diesem.",

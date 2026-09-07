@@ -46,3 +46,4 @@ export * from "./png.js";
 export * from "./sprites.js";
 export * from "./itens.js";
 export * from "./groq.js";
+export * from "./visao.js";

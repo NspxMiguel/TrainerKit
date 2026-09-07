@@ -851,6 +851,8 @@ export const PT_BR: Dict = {
   "dex.cameraDeniedNative": "O acesso à câmera foi negado. Libere em Ajustes › TrainerKit › Câmera.",
   "dex.cameraDenied": "O acesso à câmera foi negado. Libere nos ajustes do navegador, ou mande uma foto.",
   "dex.photo": "Anexar uma foto",
+  "dex.identifying": "Identificando…",
+  "dex.notSure": "Não consegui saber qual é. Tente mais perto, ou escolha aí embaixo.",
   "dex.photoNeedsAi": "Identificar por foto precisa da IA ligada nos Ajustes — a grátis serve. Os modelos que rodam no aparelho ainda não enxergam imagem.",
   "dex.reading": "Lendo…",
   "dex.notFound": "Sem dados sobre este aqui.",

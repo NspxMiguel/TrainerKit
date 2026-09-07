@@ -824,6 +824,8 @@ export const KO: Dict = {
   "dex.cameraDeniedNative": "카메라 접근이 거부되었습니다. 설정 › TrainerKit › 카메라에서 허용하세요.",
   "dex.cameraDenied": "카메라 접근이 거부되었습니다. 브라우저 설정에서 허용하거나 사진을 보내세요.",
   "dex.photo": "사진 첨부",
+  "dex.identifying": "확인 중…",
+  "dex.notSure": "어느 쪽인지 알 수 없었습니다. 더 가까이서 다시 하거나 아래에서 고르세요.",
   "dex.photoNeedsAi": "사진 판별은 설정에서 AI를 켜야 합니다 — 무료도 됩니다. 기기에서 도는 모델은 아직 이미지를 못 봅니다.",
   "dex.reading": "읽는 중…",
   "dex.notFound": "이 종에 대한 자료가 없습니다.",

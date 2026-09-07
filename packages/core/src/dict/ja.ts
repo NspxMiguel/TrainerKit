@@ -824,6 +824,8 @@ export const JA: Dict = {
   "dex.cameraDeniedNative": "カメラへのアクセスが拒否されました。設定 › TrainerKit › カメラ で許可してください。",
   "dex.cameraDenied": "カメラの使用が拒否されました。ブラウザの設定で許可するか、写真を送ってください。",
   "dex.photo": "写真を添付",
+  "dex.identifying": "識別中…",
+  "dex.notSure": "どれか分かりませんでした。もっと近づくか、下から選んでください。",
   "dex.photoNeedsAi": "写真での判別には設定でAIをオンにする必要があります（無料のもので十分です）。端末で動くモデルはまだ画像を見られません。",
   "dex.reading": "読み込み中…",
   "dex.notFound": "この種のデータはありません。",

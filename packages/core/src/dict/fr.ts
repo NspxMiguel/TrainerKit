@@ -824,6 +824,8 @@ export const FR: Dict = {
   "dex.cameraDeniedNative": "L'accès à la caméra a été refusé. Autorisez-le dans Réglages › TrainerKit › Appareil photo.",
   "dex.cameraDenied": "L’accès à la caméra a été refusé. Autorisez-le dans les réglages du navigateur, ou envoyez une photo.",
   "dex.photo": "Joindre une photo",
+  "dex.identifying": "Identification…",
+  "dex.notSure": "Je n'ai pas su lequel c'est. Réessaie de plus près, ou choisis-le en bas.",
   "dex.photoNeedsAi": "L’identification par photo nécessite l’IA activée dans les Réglages — la gratuite suffit. Les modèles sur l’appareil ne voient pas encore les images.",
   "dex.reading": "Lecture…",
   "dex.notFound": "Aucune donnée sur celui-ci.",
