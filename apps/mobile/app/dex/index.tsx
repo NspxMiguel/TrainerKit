@@ -200,7 +200,23 @@ export default function ModoPokedex() {
 
       {/* O ACENTO VERMELHO E SO DA LENTE, e nao da tela. E o unico vermelho do
           app, e ele existe pra dizer "isto e a Pokedex" sem pintar tudo. */}
-      <View style={{ position: "absolute", top: alto + 14, left: 18 }}>
+      {/* ⚠️ A PÍLULA VAI NO CENTRO e o × à direita — é o print 5. Antes o ×
+          ficava à esquerda e o rótulo à direita, o que lia como duas coisas
+          soltas em vez de um cabeçalho. */}
+      <View
+        style={{ position: "absolute", top: alto + 10, left: 0, right: 0 }}
+        className="items-center"
+      >
+        <Vidro raio={999} style={{ paddingHorizontal: 14, paddingVertical: 7 }}>
+          <View className="flex-row items-center gap-2">
+            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: "#E4483B" }} />
+            <Text className="text-legenda" style={{ color: "#FFFFFF" }}>
+              {t("dex.title").toUpperCase()}
+            </Text>
+          </View>
+        </Vidro>
+      </View>
+      <View style={{ position: "absolute", top: alto + 8, right: 18 }}>
         <Pressable onPress={() => router.back()} hitSlop={12}>
           <Vidro raio={999} interativo style={{ width: 40, height: 40 }}>
             <View className="flex-1 items-center justify-center">
@@ -214,15 +230,63 @@ export default function ModoPokedex() {
           </Vidro>
         </Pressable>
       </View>
-      <View
-        style={{ position: "absolute", top: alto + 20, right: 22 }}
-        className="flex-row items-center gap-2"
-      >
-        <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: "#E4483B" }} />
-        <Text className="text-legenda" style={{ color: "#FFFFFF" }}>
-          {t("dex.title").toUpperCase()}
-        </Text>
-      </View>
+
+      {/*
+        A MIRA.
+
+        ⚠️ Quatro cantos e um círculo, e ela não é enfeite: sem nada no meio da
+        tela a câmera parece travada, e a pessoa não sabe onde apontar. O
+        círculo é o único vermelho do app e marca a lente — o mesmo acento da
+        pílula lá em cima.
+      */}
+      {permissao?.granted && (
+        <View
+          pointerEvents="none"
+          style={{ position: "absolute", top: "26%", left: 0, right: 0 }}
+          className="items-center"
+        >
+          <View style={{ width: 210, height: 170 }}>
+            {/* Cada canto acende só duas bordas: as duas que se encontram
+                nele. Quatro `View` é mais barato que um SVG e não pede pacote. */}
+            {(
+              [
+                { cima: true, esq: true },
+                { cima: true, esq: false },
+                { cima: false, esq: true },
+                { cima: false, esq: false },
+              ] as const
+            ).map((c, i) => (
+              <View
+                key={i}
+                style={{
+                  position: "absolute",
+                  width: 34,
+                  height: 34,
+                  borderColor: "rgba(255,255,255,0.75)",
+                  ...(c.cima ? { top: 0 } : { bottom: 0 }),
+                  ...(c.esq ? { left: 0 } : { right: 0 }),
+                  borderTopWidth: c.cima ? 2 : 0,
+                  borderBottomWidth: c.cima ? 0 : 2,
+                  borderLeftWidth: c.esq ? 2 : 0,
+                  borderRightWidth: c.esq ? 0 : 2,
+                }}
+              />
+            ))}
+            <View
+              style={{
+                position: "absolute",
+                alignSelf: "center",
+                top: 50,
+                width: 68,
+                height: 68,
+                borderRadius: 34,
+                borderWidth: 2,
+                borderColor: "#E4483B",
+              }}
+            />
+          </View>
+        </View>
+      )}
 
       {/* A FOLHA DE VIDRO. Ela sobe do rodape e leva tudo que e informacao — a
           camera fica sendo so o gesto de apontar. */}
@@ -324,17 +388,55 @@ export default function ModoPokedex() {
                   {linha}
                 </Text>
               ))}
-              <Pressable
-                onPress={() =>
-                  router.push({ pathname: "/especie/[id]", params: { id: escolhida.id } })
-                }
-                className="rounded-pilula py-3 items-center mt-4"
-                style={{ backgroundColor: "#FFFFFF" }}
-              >
-                <Text className="text-corpo font-bold" style={{ color: "#000000" }}>
-                  {t("dex.openFull")}
-                </Text>
-              </Pressable>
+              {/* A ONDA DA VOZ.
+                  ⚠️ Ela só existe enquanto ele está falando, e as barras são
+                  estáticas: uma onda animada precisaria do nível de áudio, que
+                  o `expo-speech` não expõe. Fingir o nível seria desenhar um
+                  número que o app não tem — a onda aqui diz "está falando", e
+                  só isso. */}
+              {lendo && (
+                <View className="flex-row items-end gap-1 mt-3" style={{ height: 18 }}>
+                  {[6, 12, 18, 10, 15, 8, 14, 5, 11, 16, 7, 13].map((h, i) => (
+                    <View
+                      key={i}
+                      style={{
+                        width: 3,
+                        height: h,
+                        borderRadius: 2,
+                        backgroundColor: "rgba(120,190,255,0.9)",
+                      }}
+                    />
+                  ))}
+                </View>
+              )}
+
+              {/* Duas pílulas, como o print 5: abrir a ficha e calar a voz. */}
+              <View className="flex-row gap-2 mt-4">
+                <Pressable
+                  onPress={() =>
+                    router.push({ pathname: "/especie/[id]", params: { id: escolhida.id } })
+                  }
+                  className="rounded-pilula py-3 items-center flex-1"
+                  style={{ backgroundColor: "#2E9EFF" }}
+                >
+                  <Text className="text-corpo font-bold" style={{ color: "#FFFFFF" }}>
+                    {t("dex.openFull")}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => {
+                    if (vozLigada) calar();
+                    setLendo(false);
+                    alternarVoz();
+                  }}
+                  className="rounded-pilula py-3 items-center flex-1"
+                  style={{ backgroundColor: "rgba(255,255,255,0.14)" }}
+                >
+                  <Text className="text-corpo font-semibold" style={{ color: "#FFFFFF" }}>
+                    {t(vozLigada ? "dex.voiceOff" : "dex.voiceOn")}
+                  </Text>
+                </Pressable>
+              </View>
             </View>
           )}
 
