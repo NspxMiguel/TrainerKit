@@ -672,8 +672,138 @@ export default function Ficha() {
         </>
       )}
 
-      {/* Pilula, e nao botao de bloco: sombroso filtra o que vem abaixo, entao
-          ele pertence visualmente aos golpes e nao a barra de acoes do topo. */}
+      {/* ── TROCA ──────────────────────────────────────────────────────────
+          Só para quem TEM o bicho: a conta é sobre os IV atuais dele, e sem
+          espécie guardada não existe "antes" para comparar. */}
+      {salvo && !salvo.ivDesconhecido && (
+        <BlocoTroca
+          ivs={salvo.ivs}
+          baseStats={especie.baseStats}
+          lucky={salvo.lucky}
+          shadow={salvo.shadow}
+          tm={tm}
+        />
+      )}
+
+      {/* ── PRA QUE SERVE ──────────────────────────────────────────────────── */}
+      {dados && <BlocoUsos especie={especie} dados={dados} />}
+
+      <View className="bg-superficie rounded-cartao p-5 mt-3">
+        <Text className="text-texto3 text-[11px] tracking-widest">
+          {t("species.baseStats").toUpperCase()}
+        </Text>
+        {(
+          [
+            [t("common.attack"), especie.baseStats.atk],
+            [t("common.defense"), especie.baseStats.def],
+            [t("common.stamina"), especie.baseStats.hp],
+          ] as const
+        ).map(([rotulo, valor]) => (
+          <View key={rotulo} className="flex-row items-center justify-between mt-3">
+            <Text className="text-texto2 text-sm">{rotulo}</Text>
+            <Text className="text-texto text-sm font-semibold">{valor}</Text>
+          </View>
+        ))}
+      </View>
+
+      {/* ── TETOS DE PC ────────────────────────────────────────────────────── */}
+      {tetos.length > 0 && (
+        <View className="bg-superficie rounded-cartao p-5 mt-3">
+          <Text className="text-texto3 text-[11px] tracking-widest">
+            {t("species.maxCP").toUpperCase()}
+          </Text>
+          <View className="flex-row mt-3">
+            {tetos.map((x) => (
+              <View key={x.nivel} className="flex-1">
+                <Text className="text-texto text-[22px] font-extrabold">{x.pc}</Text>
+                <Text className="text-texto3 text-[12px] mt-0.5">
+                  {x.melhorAmigo ? t("species.bestBuddy") : `${t("common.level")} ${x.nivel}`}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
+
+      {/* ── BATALHA MAX ────────────────────────────────────────────────────── */}
+      {max && (
+        <View className="bg-superficie rounded-cartao p-5 mt-3">
+          <Text className="text-texto3 text-[11px] tracking-widest">
+            {t("species.maxBattle").toUpperCase()}
+          </Text>
+
+          {max.gigantamax && (
+            <View className="flex-row items-center justify-between mt-3">
+              <Text className="text-texto2 text-sm">{t("species.gigantamax")}</Text>
+              <Text className="text-texto text-sm font-semibold">{t("common.yes")}</Text>
+            </View>
+          )}
+
+          <View className="flex-row items-center justify-between mt-3">
+            <Text className="text-texto2 text-sm">{t("species.maxRole")}</Text>
+            <Text className="text-texto text-sm font-semibold">{t(PAPEL_MAX[max.papel]!)}</Text>
+          </View>
+
+          {max.custo && (
+            <View className="flex-row items-center justify-between mt-3">
+              <Text className="text-texto2 text-sm flex-1">{t("species.maxCost")}</Text>
+              <Text className="text-texto text-sm font-semibold ml-3">
+                {/* A soma dos TRES caminhos (ataque, guarda, espirito): e o que
+                    custa subir a especie inteira, que e a pergunta real. */}
+                {t("species.maxCostValue", {
+                  candy: max.custo.ataque.doces + max.custo.guarda.doces + max.custo.espirito.doces,
+                  xl:
+                    max.custo.ataque.docesXL +
+                    max.custo.guarda.docesXL +
+                    max.custo.espirito.docesXL,
+                })}
+              </Text>
+            </View>
+          )}
+        </View>
+      )}
+
+      {/* ── LENTE ──────────────────────────────────────────────────────────── */}
+      {lente && (
+        <View className="bg-superficie rounded-cartao p-5 mt-3">
+          <View className="flex-row items-center">
+            <Text className="flex-1 text-texto3 text-[11px] tracking-widest">
+              {t("dex.title").toUpperCase()}
+            </Text>
+            {/* A voz do sistema: sem chave, sem conta, sem rede. */}
+            <Pressable onPress={ouvirLente} hitSlop={10}>
+              <Text className="text-texto2 text-[12px] font-semibold">
+                {t(falandoAgora ? "dex.voiceOff" : "dex.speak")}
+              </Text>
+            </Pressable>
+          </View>
+          <Text className="text-texto2 text-[13px] leading-5 mt-3">
+            {t(ARQUETIPO[lente.build]!)}
+          </Text>
+          <Text className="text-texto2 text-[13px] leading-5 mt-2">
+            {t(lente.evolves ? "dex.line.evolves" : "dex.line.final")}
+          </Text>
+          {lente.raidRank && (
+            <Text className="text-texto2 text-[13px] leading-5 mt-2">
+              {t("dex.line.raid", {
+                type: t(`type.${lente.raidRank.type}` as never),
+                position: lente.raidRank.position,
+              })}
+            </Text>
+          )}
+          {lente.leagueRank && (
+            <Text className="text-texto2 text-[13px] leading-5 mt-2">
+              {t("dex.line.league", {
+                league: t(`rank.league.${lente.leagueRank.league}` as never),
+                position: lente.leagueRank.position,
+              })}
+            </Text>
+          )}
+        </View>
+      )}
+
+      {/* Pílula, e não botão de bloco: sombroso filtra o que vem abaixo, então
+          ele pertence visualmente aos golpes e não à barra de ações do topo. */}
       <Pressable
         onPress={() => setSombroso((v) => !v)}
         className="self-start rounded-full px-4 py-2 mt-7"
@@ -840,136 +970,6 @@ export default function Ficha() {
           })}
         </View>
       )}
-
-      {/* ── LENTE ──────────────────────────────────────────────────────────── */}
-      {lente && (
-        <View className="bg-superficie rounded-cartao p-5 mt-3">
-          <View className="flex-row items-center">
-            <Text className="flex-1 text-texto3 text-[11px] tracking-widest">
-              {t("dex.title").toUpperCase()}
-            </Text>
-            {/* A voz do sistema: sem chave, sem conta, sem rede. */}
-            <Pressable onPress={ouvirLente} hitSlop={10}>
-              <Text className="text-texto2 text-[12px] font-semibold">
-                {t(falandoAgora ? "dex.voiceOff" : "dex.speak")}
-              </Text>
-            </Pressable>
-          </View>
-          <Text className="text-texto2 text-[13px] leading-5 mt-3">
-            {t(ARQUETIPO[lente.build]!)}
-          </Text>
-          <Text className="text-texto2 text-[13px] leading-5 mt-2">
-            {t(lente.evolves ? "dex.line.evolves" : "dex.line.final")}
-          </Text>
-          {lente.raidRank && (
-            <Text className="text-texto2 text-[13px] leading-5 mt-2">
-              {t("dex.line.raid", {
-                type: t(`type.${lente.raidRank.type}` as never),
-                position: lente.raidRank.position,
-              })}
-            </Text>
-          )}
-          {lente.leagueRank && (
-            <Text className="text-texto2 text-[13px] leading-5 mt-2">
-              {t("dex.line.league", {
-                league: t(`rank.league.${lente.leagueRank.league}` as never),
-                position: lente.leagueRank.position,
-              })}
-            </Text>
-          )}
-        </View>
-      )}
-
-      {/* ── BATALHA MAX ────────────────────────────────────────────────────── */}
-      {max && (
-        <View className="bg-superficie rounded-cartao p-5 mt-3">
-          <Text className="text-texto3 text-[11px] tracking-widest">
-            {t("species.maxBattle").toUpperCase()}
-          </Text>
-
-          {max.gigantamax && (
-            <View className="flex-row items-center justify-between mt-3">
-              <Text className="text-texto2 text-sm">{t("species.gigantamax")}</Text>
-              <Text className="text-texto text-sm font-semibold">{t("common.yes")}</Text>
-            </View>
-          )}
-
-          <View className="flex-row items-center justify-between mt-3">
-            <Text className="text-texto2 text-sm">{t("species.maxRole")}</Text>
-            <Text className="text-texto text-sm font-semibold">{t(PAPEL_MAX[max.papel]!)}</Text>
-          </View>
-
-          {max.custo && (
-            <View className="flex-row items-center justify-between mt-3">
-              <Text className="text-texto2 text-sm flex-1">{t("species.maxCost")}</Text>
-              <Text className="text-texto text-sm font-semibold ml-3">
-                {/* A soma dos TRES caminhos (ataque, guarda, espirito): e o que
-                    custa subir a especie inteira, que e a pergunta real. */}
-                {t("species.maxCostValue", {
-                  candy: max.custo.ataque.doces + max.custo.guarda.doces + max.custo.espirito.doces,
-                  xl:
-                    max.custo.ataque.docesXL +
-                    max.custo.guarda.docesXL +
-                    max.custo.espirito.docesXL,
-                })}
-              </Text>
-            </View>
-          )}
-        </View>
-      )}
-
-      {/* ── TROCA ──────────────────────────────────────────────────────────
-          Só para quem TEM o bicho: a conta é sobre os IV atuais dele, e sem
-          espécie guardada não existe "antes" para comparar. */}
-      {salvo && !salvo.ivDesconhecido && (
-        <BlocoTroca
-          ivs={salvo.ivs}
-          baseStats={especie.baseStats}
-          lucky={salvo.lucky}
-          shadow={salvo.shadow}
-          tm={tm}
-        />
-      )}
-
-      {/* ── PRA QUE SERVE ──────────────────────────────────────────────────── */}
-      {dados && <BlocoUsos especie={especie} dados={dados} />}
-
-      {/* ── TETOS DE PC ────────────────────────────────────────────────────── */}
-      {tetos.length > 0 && (
-        <View className="bg-superficie rounded-cartao p-5 mt-3">
-          <Text className="text-texto3 text-[11px] tracking-widest">
-            {t("species.maxCP").toUpperCase()}
-          </Text>
-          <View className="flex-row mt-3">
-            {tetos.map((x) => (
-              <View key={x.nivel} className="flex-1">
-                <Text className="text-texto text-[22px] font-extrabold">{x.pc}</Text>
-                <Text className="text-texto3 text-[12px] mt-0.5">
-                  {x.melhorAmigo ? t("species.bestBuddy") : `${t("common.level")} ${x.nivel}`}
-                </Text>
-              </View>
-            ))}
-          </View>
-        </View>
-      )}
-
-      <View className="bg-superficie rounded-cartao p-5 mt-3">
-        <Text className="text-texto3 text-[11px] tracking-widest">
-          {t("species.baseStats").toUpperCase()}
-        </Text>
-        {(
-          [
-            [t("common.attack"), especie.baseStats.atk],
-            [t("common.defense"), especie.baseStats.def],
-            [t("common.stamina"), especie.baseStats.hp],
-          ] as const
-        ).map(([rotulo, valor]) => (
-          <View key={rotulo} className="flex-row items-center justify-between mt-3">
-            <Text className="text-texto2 text-sm">{rotulo}</Text>
-            <Text className="text-texto text-sm font-semibold">{valor}</Text>
-          </View>
-        ))}
-      </View>
       </View>
     </ScrollView>
 
