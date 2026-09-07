@@ -223,6 +223,55 @@ export async function definirMeuMotivo(id: string, motivo: string | null): Promi
   await gravar([...lista]);
 }
 
+/**
+ * RESTAURAR um backup.
+ *
+ * ⚠️ Ele SOMA, não substitui. Importar sobre uma coleção existente e apagar o
+ * que estava lá é a forma mais rápida de alguém perder tudo por tocar no botão
+ * errado — e não há servidor para desfazer.
+ *
+ * ⚠️ Todo registro entra na coleção EM USO, e o `colecao` que vier no arquivo é
+ * ignorado. O id de coleção é do aparelho de origem; restaurar num aparelho
+ * novo — que é para o que serve um backup — gravaria linhas apontando para uma
+ * coleção que nunca existiu aqui. Elas ficariam no banco e sumiriam da tela.
+ *
+ * Devolve quantos entraram.
+ */
+export async function importar(texto: string): Promise<number> {
+  const lido: unknown = JSON.parse(texto);
+  /* Aceita as duas formas: a lista crua que o `exportar` grava hoje, e o
+     `{ items: [...] }` do backup do PWA. */
+  const linhas: unknown = Array.isArray(lido)
+    ? lido
+    : ((lido as { items?: unknown }).items ?? null);
+  if (!Array.isArray(linhas)) throw new Error("nao-e-backup");
+
+  const validos = linhas.filter(
+    (x): x is Guardado =>
+      typeof x === "object" &&
+      x !== null &&
+      typeof (x as Guardado).speciesId === "string" &&
+      typeof (x as Guardado).ivs === "object",
+  );
+  if (validos.length === 0) throw new Error("nao-e-backup");
+
+  const destino = await colecaoAtiva();
+  const lista = await ler();
+  const agora = Date.now();
+  await gravar([
+    ...lista,
+    ...validos.map((g, i) => ({
+      ...g,
+      colecao: destino,
+      /* Id novo: dois backups do mesmo aparelho trariam ids repetidos, e
+         remover um apagaria o outro. */
+      id: `${agora}-${i}-${Math.random().toString(36).slice(2, 8)}`,
+      em: g.em ?? agora,
+    })),
+  ]);
+  return validos.length;
+}
+
 export async function remover(id: string): Promise<void> {
   const lista = await ler();
   await gravar(lista.filter((g) => g.id !== id));

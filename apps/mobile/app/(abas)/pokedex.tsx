@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
@@ -12,7 +12,7 @@ import {
   type Key,
 } from "@trainerkit/core";
 
-import { useColecao, type Guardado } from "../../src/colecao";
+import { marcarFeito, useColecao, type Guardado } from "../../src/colecao";
 import { useDados, type Especie } from "../../src/dados";
 import { useT } from "../../src/i18n";
 import { usePendencias, vereditoDe } from "../../src/pendencias";
@@ -100,7 +100,7 @@ export default function Pokedex() {
   const { cores } = useTema();
   const { pronto, erro, dados } = useDados();
   const { setup } = useSetup();
-  const { itens } = useColecao();
+  const { itens, recarregar } = useColecao();
   const alto = useSafeAreaInsets().top;
   const router = useRouter();
   const [busca, setBusca] = useState("");
@@ -111,6 +111,13 @@ export default function Pokedex() {
   const [ordem, setOrdem] = useState<Ordem>("dex");
 
   const fila = usePendencias(dados);
+
+  /* Quantos o veredito manda transferir — é o número que a faixa da faxina
+     mostra, e ela só existe se ele for maior que zero. */
+  const podemSair = useMemo(
+    () => fila.filter((p) => p.veredito.action === "transferir").length,
+    [fila],
+  );
 
   const termo = busca.trim().toLowerCase();
 
@@ -270,6 +277,23 @@ export default function Pokedex() {
           </View>
         )}
 
+        {/* A FAIXA DA FAXINA. Ela só aparece quando há mesmo o que transferir —
+            um atalho permanente para uma tela vazia ensina a ignorá-lo. */}
+        {aba === "meus" && podemSair > 0 && (
+          <Toque
+            onPress={() => router.push("/faxina")}
+            className="rounded-cartao-sm px-4 py-3 mt-3 flex-row items-center justify-between"
+            style={{ backgroundColor: cores.superficie }}
+          >
+            <Text className="text-texto text-corpo">{t("faxina.title")}</Text>
+            <Text className="text-texto3 text-legenda">
+              {t(podemSair === 1 ? "faxina.openDetail.one" : "faxina.openDetail.many", {
+                count: podemSair,
+              })}
+            </Text>
+          </Toque>
+        )}
+
         <Text className="text-texto3 text-xs mt-4">
           {t("especies.count", { n: total.toLocaleString() })}
           {aba === "todos" && ordem !== "dex" ? ` · ${t(POR_QUE[ordem])}` : ""}
@@ -373,12 +397,40 @@ export default function Pokedex() {
                   </Text>
                 </View>
                 {!emGrade && (
-                  <Text
-                    className="text-legenda"
-                    style={{ color: cores[COR_DA_ACAO[item.acao] ?? "texto3"] }}
+                  <Pressable
+                    /*
+                      MARCAR COMO FEITO sem abrir a ficha.
+                      ⚠️ Sem isto a única forma de tirar um bicho da fila era
+                      abrir a ficha dele, e quem acabou de evoluir seis quer
+                      dizer isso seis vezes, não navegar doze telas.
+                    */
+                    onPress={() => {
+                      void marcarFeito(
+                        item.guardado.id,
+                        item.pendente ? item.acao : null,
+                      ).then(recarregar);
+                    }}
+                    hitSlop={8}
+                    accessibilityLabel={t(item.pendente ? "collection.markDone" : "collection.undoDone")}
+                    className="rounded-pilula px-3 py-1.5"
+                    style={{
+                      borderWidth: 1,
+                      borderColor: item.pendente
+                        ? cores[COR_DA_ACAO[item.acao] ?? "linha"]
+                        : cores.linha,
+                    }}
                   >
-                    {t(ACTION_KEYS[item.acao] as Key).toUpperCase()}
-                  </Text>
+                    <Text
+                      className="text-legenda"
+                      style={{
+                        color: item.pendente
+                          ? cores[COR_DA_ACAO[item.acao] ?? "texto3"]
+                          : cores.texto3,
+                      }}
+                    >
+                      {item.pendente ? t(ACTION_KEYS[item.acao] as Key).toUpperCase() : "✓"}
+                    </Text>
+                  </Pressable>
                 )}
               </Toque>
           )}

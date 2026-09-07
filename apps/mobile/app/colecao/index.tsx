@@ -4,11 +4,14 @@ import { useEffect, useState } from "react";
 import { FlatList, Pressable, Share, Text, TextInput, View } from "react-native";
 
 import { badgeFor, ivPercentOf, ivTotalOf } from "@trainerkit/core";
+import * as DocumentPicker from "expo-document-picker";
+
 import {
   apagarColecao,
   colecaoAtiva,
   contarPorColecao,
   criarColecao,
+  importar,
   remover,
   trocarColecao,
   useColecao,
@@ -51,6 +54,32 @@ export default function Colecao() {
   const { dados } = useDados();
   const { cores } = useTema();
   const [erro, setErro] = useState(false);
+  const [importados, setImportados] = useState<number | null>(null);
+
+  /**
+   * RESTAURAR um backup.
+   *
+   * ⚠️ Ele SOMA à coleção em uso. Substituir seria a forma mais rápida de
+   * alguém perder tudo por tocar no botão errado, e não há servidor para
+   * desfazer.
+   */
+  const restaurar = async () => {
+    setErro(false);
+    setImportados(null);
+    const escolha = await DocumentPicker.getDocumentAsync({
+      type: "application/json",
+      copyToCacheDirectory: true,
+    });
+    if (escolha.canceled || !escolha.assets[0]) return;
+    try {
+      const arquivo = new File(escolha.assets[0].uri);
+      const quantos = await importar(await arquivo.text());
+      setImportados(quantos);
+      recarregar();
+    } catch {
+      setErro(true);
+    }
+  };
   const [novo, setNovo] = useState("");
   const [contas, setContas] = useState<Record<string, number>>({});
 
@@ -144,6 +173,20 @@ export default function Colecao() {
           >
             <Text className="text-texto text-[15px] font-semibold">{t("collection.export")}</Text>
           </Pressable>
+          <Pressable
+            onPress={() => {
+              void restaurar();
+            }}
+            className="rounded-full py-3.5 items-center mt-3"
+            style={{ borderWidth: 1, borderColor: cores.linha }}
+          >
+            <Text className="text-texto text-[15px] font-semibold">
+              {importados === null
+                ? t("collection.import")
+                : t("collection.imported", { count: importados })}
+            </Text>
+          </Pressable>
+
           {erro && (
             <Text className="text-texto3 text-[12px] leading-5 mt-2">
               {t("collection.exportFailed")}

@@ -24,6 +24,16 @@ const TIME = "SW36PU2B3T";
 
 module.exports = function iosAssinatura(config) {
   config.extra = { ...(config.extra ?? {}), appleTeamId: TIME };
+  /*
+   * ⚠️ `ios.appleTeamId` também, e não só `extra`.
+   *
+   * O `@bacons/apple-targets` — que é quem cria o alvo da Live Activity — lê
+   * daqui e avisa "iOS builds may fail until this is corrected" quando falta.
+   * Duas chaves com o mesmo valor não é duplicação: uma é o contrato daquele
+   * plugin e a outra é o que o app lê em runtime, e as duas saem da mesma
+   * constante logo acima.
+   */
+  config.ios = { ...(config.ios ?? {}), appleTeamId: TIME };
 
   /*
    * FORA O `aps-environment`.
