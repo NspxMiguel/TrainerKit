@@ -122,6 +122,30 @@ function Heroi({
           colors={["transparent", "rgba(10,12,16,0.40)"]}
           style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 190 }}
         />
+        {/*
+          O SCRIM VOLTOU, e agora ele é MEDIDO.
+
+          ⚠️ Eu tinha tirado porque ele apagava o pé do degradê — e com isso
+          quebrei a legibilidade: o texto do herói é branco cravado, e branco
+          sobre a parada clara do Gelo dá **1,49:1**, contra os 4,5:1 que o
+          projeto exige. Sobre Elétrico, 1,48:1.
+
+          `0.45` é o menor alfa que passa nos dezoito tipos: medido nas duas
+          paradas visíveis de cada um, o pior caso é Elétrico a 4,62:1.
+          `contraste-heroi.test.ts` refaz essa conta e falha se alguém mexer na
+          saturação, na luz ou neste número.
+
+          ⚠️ Ele começa em 45% da altura, e não no topo: a parte de cima do
+          herói não tem texto, e escurecê-la de novo devolveria a cor lavada que
+          ele reclamou.
+        */}
+        <LinearGradient
+          colors={["transparent", "rgba(0,0,0,0.45)", "rgba(0,0,0,0.45)"]}
+          locations={[0.45, 0.78, 1]}
+          style={{ position: "absolute", inset: 0 }}
+          pointerEvents="none"
+        />
+
         {/* A SAUDAÇÃO POR CIMA DA COR.
 
             ⚠️ Ela estava ACIMA do herói, sobre preto, e o laranja começava numa
