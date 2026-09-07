@@ -483,6 +483,11 @@ export const JA: Dict = {
   /* ── Support: voluntary, and it buys nothing. ─────────────────────────── */
 
   /* ── Guia de itens ─────────────────────────────────────────────────── */
+
+  "alerts.title": "通知する",
+  "alerts.off": "オフ",
+  "alerts.on": "{n} 件を予約済み",
+  "alerts.denied": "iOS の設定で TrainerKit の通知がオフになっています。",
   "items.title": "各アイテムの使い道",
   "items.short": "アイテム",
   "items.intro": "ゲームはアイテムを渡すだけで説明しません。ここに何が解放されるかをまとめました。",

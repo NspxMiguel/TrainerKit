@@ -483,6 +483,11 @@ export const DE: Dict = {
   /* ── Support: voluntary, and it buys nothing. ─────────────────────────── */
 
   /* ── Guia de itens ─────────────────────────────────────────────────── */
+
+  "alerts.title": "Erinnere mich",
+  "alerts.off": "Aus",
+  "alerts.on": "{n} Events geplant",
+  "alerts.denied": "Mitteilungen für TrainerKit sind in den iOS-Einstellungen aus.",
   "items.title": "Wofür jedes Item da ist",
   "items.short": "Items",
   "items.intro": "Das Spiel gibt dir das Item und erklärt nichts. Hier steht, was jedes freischaltet.",

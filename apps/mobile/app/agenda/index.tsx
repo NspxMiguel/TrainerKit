@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Linking, Pressable, ScrollView, Text, View } from "react-native";
 
 import {
@@ -9,6 +9,7 @@ import {
   useEventos,
   type EventoAgenda,
 } from "../../src/agenda";
+import { pedirPermissao, limpar, reagendar } from "../../src/avisos";
 import { useT } from "../../src/i18n";
 import { useTema } from "../../src/tema";
 
@@ -27,6 +28,9 @@ export default function Agenda() {
   const { t, idioma } = useT();
   const { cores } = useTema();
   const estado = useEventos();
+  /* `null` = desligado. Um número = quantos alarmes o iOS aceitou registrar. */
+  const [avisos, setAvisos] = useState<number | null>(null);
+  const [negado, setNegado] = useState(false);
 
   const grupos = useMemo(() => {
     const agora = Date.now();
@@ -41,7 +45,10 @@ export default function Agenda() {
     const semana: EventoAgenda[] = [];
     const depois: EventoAgenda[] = [];
     for (const e of lista) {
-      if (rolandoAgora(e, agora)) { agoraL.push(e); continue; }
+      if (rolandoAgora(e, agora)) {
+        agoraL.push(e);
+        continue;
+      }
       const inicio = e.start ? Date.parse(e.start) : NaN;
       if (Number.isNaN(inicio)) depois.push(e);
       else if (inicio <= fimDeHoje.getTime()) hoje.push(e);
@@ -98,6 +105,47 @@ export default function Agenda() {
 
   return (
     <ScrollView className="flex-1 bg-fundo" contentContainerStyle={{ padding: 20 }}>
+      {/*
+        ME AVISA — notificação LOCAL, não push.
+
+        ⚠️ Não há servidor, não há token de aparelho e não há conta: o app agenda
+        no próprio iOS um alarme para uma data que ele já conhece, porque a lista
+        de eventos já está baixada. Push exigiria um servidor guardando o token
+        de cada pessoa, que é exatamente o que a tela de Privacidade afirma que
+        não existe — e a afirmação vale mais que a notificação.
+
+        A permissão só é pedida QUANDO A PESSOA LIGA. O iOS só pergunta uma vez;
+        pedir na abertura, antes de ela saber o que o app faz, é como se ganha um
+        "não" definitivo.
+      */}
+      <Pressable
+        onPress={() => {
+          if (avisos !== null) {
+            void limpar().then(() => setAvisos(null));
+            return;
+          }
+          void pedirPermissao().then((ok) => {
+            if (!ok) {
+              setNegado(true);
+              return;
+            }
+            setNegado(false);
+            void reagendar(estado.itens ?? []).then(setAvisos);
+          });
+        }}
+        className="rounded-full py-3 items-center mb-4"
+        style={{ borderWidth: 1, borderColor: avisos !== null ? cores.texto : cores.linha }}
+      >
+        <Text className="text-texto text-[13px] font-semibold">
+          {avisos === null
+            ? `${t("alerts.title")} · ${t("alerts.off")}`
+            : t("alerts.on", { n: avisos })}
+        </Text>
+      </Pressable>
+      {negado && (
+        <Text className="text-texto3 text-[12px] leading-4 mb-4">{t("alerts.denied")}</Text>
+      )}
+
       {grupos.map((g) => (
         <View key={g.chave} className="mt-4">
           <Text className="text-texto3 text-[11px] tracking-widest mb-2">
@@ -110,9 +158,7 @@ export default function Agenda() {
                 onPress={() => void Linking.openURL(e.link)}
                 className="px-4 py-3 flex-row items-center gap-3"
                 style={{
-                  ...(i > 0
-                    ? { borderTopWidth: 0.5, borderTopColor: cores.linha }
-                    : {}),
+                  ...(i > 0 ? { borderTopWidth: 0.5, borderTopColor: cores.linha } : {}),
                   ...(g.chave === "agora"
                     ? { borderLeftWidth: 3, borderLeftColor: cores.texto }
                     : {}),

@@ -483,6 +483,11 @@ export const FR: Dict = {
   /* ── Support: voluntary, and it buys nothing. ─────────────────────────── */
 
   /* ── Guia de itens ─────────────────────────────────────────────────── */
+
+  "alerts.title": "Préviens-moi",
+  "alerts.off": "Désactivé",
+  "alerts.on": "{n} événements programmés",
+  "alerts.denied": "Les notifications de TrainerKit sont désactivées dans les Réglages iOS.",
   "items.title": "À quoi sert chaque objet",
   "items.short": "Objets",
   "items.intro": "Le jeu vous donne l'objet et n'explique rien. Voici ce que chacun débloque.",

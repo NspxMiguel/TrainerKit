@@ -483,6 +483,11 @@ export const KO: Dict = {
   /* ── Support: voluntary, and it buys nothing. ─────────────────────────── */
 
   /* ── Guia de itens ─────────────────────────────────────────────────── */
+
+  "alerts.title": "알림 받기",
+  "alerts.off": "꺼짐",
+  "alerts.on": "{n}개 예약됨",
+  "alerts.denied": "iOS 설정에서 TrainerKit 알림이 꺼져 있습니다.",
   "items.title": "각 아이템의 용도",
   "items.short": "아이템",
   "items.intro": "게임은 아이템만 주고 설명하지 않습니다. 각각이 무엇을 여는지 정리했습니다.",

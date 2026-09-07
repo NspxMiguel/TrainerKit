@@ -504,6 +504,11 @@ export const PT_BR: Dict = {
   /* ── Apoiar ─────────────────────────────────────────────────────────── */
 
   /* ── Guia de itens ─────────────────────────────────────────────────── */
+
+  "alerts.title": "Me avisa",
+  "alerts.off": "Desligado",
+  "alerts.on": "{n} eventos agendados",
+  "alerts.denied": "As notificações do TrainerKit estão desligadas nos Ajustes do iOS.",
   "items.title": "Pra que serve cada item",
   "items.short": "Itens",
   "items.intro": "O jogo te entrega o item e não explica nada. Aqui está o que cada um destrava.",

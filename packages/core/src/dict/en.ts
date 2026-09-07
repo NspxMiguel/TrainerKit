@@ -539,6 +539,11 @@ const EN = {
   /* ── Support: voluntary, and it buys nothing. ─────────────────────────── */
 
   /* ── Guia de itens ─────────────────────────────────────────────────── */
+
+  "alerts.title": "Remind me",
+  "alerts.off": "Off",
+  "alerts.on": "{n} events scheduled",
+  "alerts.denied": "Notifications are off for TrainerKit in iOS Settings.",
   "items.title": "What each item is for",
   "items.short": "Items",
   "items.intro": "The game hands you the item and explains nothing. Here is what each one unlocks.",
