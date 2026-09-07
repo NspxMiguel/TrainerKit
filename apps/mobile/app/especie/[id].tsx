@@ -70,7 +70,7 @@ const COR_ACAO: Record<string, keyof Paleta> = {
 };
 
 export default function Ficha() {
-  const { t, idioma } = useT();
+  const { t, tm, idioma } = useT();
   const { cores } = useTema();
   const { setup } = useSetup();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -83,6 +83,9 @@ export default function Ficha() {
    * carregados e reordena tudo, em vez de so mostrar um aviso.
    */
   const [sombroso, setSombroso] = useState(false);
+  /* Aberto por padrao: o rastro E o argumento do app. Escondido por padrao
+     ele vira nota de rodape, e ninguem abre nota de rodape. */
+  const [rastro, setRastro] = useState(true);
   const { chave } = useIA();
   const [pergunta, setPergunta] = useState("");
   const [resposta, setResposta] = useState<string | null>(null);
@@ -417,26 +420,107 @@ export default function Ficha() {
         sendo a do veredito, que é a única cor com significado nesta tela.
       */}
       {veredito && (
-        <Vidro raio={26} style={{ marginTop: 28, padding: 20 }}>
-          <Text className="text-texto3 text-[11px] tracking-widest">
-            {t("assistant.title").toUpperCase()}
-          </Text>
-          <Text
-            className="text-veredito mt-2"
-            style={{
-              color: cores[COR_ACAO[veredito.action] ?? "texto"],
-              letterSpacing: 0.7,
-            }}
-          >
-            {/* A PALAVRA do veredito vem do dicionario, nao do enum: o `core`
-                devolve `investir`, e `ACTION_KEYS` diz qual chave le isso nos
-                dez idiomas. */}
-            {t(ACTION_KEYS[veredito.action] as never)}
-          </Text>
-          <Text className="text-texto2 text-xs mt-2">
-            {t("verdict.confidence", { percent: Math.round(veredito.confidence * 100) })}
-          </Text>
-        </Vidro>
+        <>
+          <Vidro raio={26} style={{ marginTop: 28, padding: 20 }}>
+            <Text className="text-texto3 text-legenda">
+              {t("assistant.title").toUpperCase()}
+            </Text>
+            <Text
+              className="text-veredito mt-2"
+              style={{
+                color: cores[COR_ACAO[veredito.action] ?? "texto"],
+                letterSpacing: 0.7,
+              }}
+            >
+              {/* A PALAVRA do veredito vem do dicionario, nao do enum: o `core`
+                  devolve `investir`, e `ACTION_KEYS` diz qual chave le isso nos
+                  dez idiomas. */}
+              {t(ACTION_KEYS[veredito.action] as never)}
+            </Text>
+
+            {/* O MOTIVO, que faltava. O `core` sempre devolveu `verdict.reason`
+                e a ficha nativa mostrava so a palavra — a pessoa lia "Evoluir"
+                sem uma linha dizendo por que. E o site mostra. */}
+            <Text className="text-corpo text-texto2 mt-2">{tm(veredito.reason)}</Text>
+
+            {/* A BARRA DE CONFIANCA. O numero sozinho ("88%") e abstrato; a
+                barra e o que faz "as regras concordam" virar uma quantidade
+                que o olho le sem contar. */}
+            <Text className="text-texto3 text-legenda mt-4">
+              {t("verdict.confidence", { percent: Math.round(veredito.confidence * 100) })}
+            </Text>
+            <View
+              className="rounded-pilula mt-2 overflow-hidden"
+              style={{ height: 4, backgroundColor: cores.linha }}
+            >
+              <View
+                className="rounded-pilula"
+                style={{
+                  height: 4,
+                  width: `${Math.round(veredito.confidence * 100)}%`,
+                  backgroundColor: cores[COR_ACAO[veredito.action] ?? "texto"],
+                }}
+              />
+            </View>
+          </Vidro>
+
+          {/*
+            O RASTRO — "POR QUE · N REGRAS".
+
+            E o que separa este app de um numero na tela: a decisao mostra a
+            conta. Cada linha e um sinal do `core`, com o peso a direita em
+            MONOESPACADA, porque coluna de numero so alinha em fonte de largura
+            fixa — e desalinhado o olho para de conseguir comparar.
+
+            Cartao comum, e nao vidro: vidro em tudo vira sopa, e nesta tela ele
+            e do veredito. `signals.length` e a condicao (e nao a acao), porque
+            um veredito sem sinal nenhum nao tem rastro pra abrir.
+          */}
+          {veredito.signals.length > 0 && (
+            <View className="bg-superficie rounded-cartao mt-3 px-4 py-3">
+              <Pressable
+                onPress={() => setRastro((v) => !v)}
+                className="flex-row items-center justify-between py-1"
+              >
+                <Text className="text-texto3 text-legenda">
+                  {/* Singular tem chave propria: "1 REGRAS" existia na tela e e o tipo
+                      de erro que so aparece com o dado real. */
+                  veredito.signals.length === 1
+                    ? t("verdict.why1")
+                    : t("verdict.why", { n: veredito.signals.length })}
+                </Text>
+                <Text className="text-texto2 text-legenda">
+                  {t(rastro ? "verdict.hide" : "verdict.show")}
+                </Text>
+              </Pressable>
+
+              {rastro &&
+                veredito.signals.map((sinal, i) => (
+                  <View
+                    key={`${sinal.rule}-${i}`}
+                    className="flex-row items-start justify-between gap-3 py-2.5"
+                    style={i > 0 ? { borderTopWidth: 1, borderTopColor: cores.linha } : undefined}
+                  >
+                    <Text className="text-corpo text-texto flex-1">{tm(sinal.because)}</Text>
+                    <Text
+                      className="text-legenda"
+                      style={{
+                        fontFamily: "Menlo",
+                        color: cores[COR_ACAO[sinal.towards] ?? "texto3"],
+                      }}
+                    >
+                      {/* Peso de 0 a 1 vira inteiro com sinal: e como o desenho
+                          mostra (+42, +31, −8) e como se le de relance. O sinal
+                          e MENOS quando a regra puxa pra outro lado que nao o
+                          veredito — ela pesou CONTRA o que ficou decidido. */}
+                      {sinal.towards === veredito.action ? "+" : "−"}
+                      {Math.round(sinal.weight * 100)}
+                    </Text>
+                  </View>
+                ))}
+            </View>
+          )}
+        </>
       )}
 
       {/* Pilula, e nao botao de bloco: sombroso filtra o que vem abaixo, entao

@@ -2,7 +2,7 @@ import { getLocales } from "expo-localization";
 import AsyncStorage from "expo-sqlite/kv-store";
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
-import { DICTS, EN, type Key } from "@trainerkit/core";
+import { DICTS, EN, type Key, type Message } from "@trainerkit/core";
 
 /**
  * O idioma, e o texto que a pessoa le.
@@ -34,6 +34,19 @@ interface Ctx {
   idioma: string;
   trocar: (i: string) => void;
   t: (k: Key, vars?: Record<string, string | number>) => string;
+  /**
+   * A `Message` do core, virada frase.
+   *
+   * ⚠️ Isto FALTAVA no app nativo, e o buraco era grande: `verdict.reason` e
+   * `signal.because` sao `Message`, entao sem `tm` a ficha nao tinha como
+   * mostrar NEM o motivo do veredito NEM o rastro das regras — os dois blocos
+   * que o site mostra e que sao o argumento inteiro do app.
+   *
+   * Todo parametro numerico passa por `toLocaleString` do idioma: o core
+   * devolve `4096` cru, e o separador de milhar muda de idioma pra idioma
+   * (4.096 em portugues, 4,096 em ingles, 4 096 em frances).
+   */
+  tm: (m: Message) => string;
 }
 
 const Contexto = createContext<Ctx | null>(null);
@@ -62,22 +75,32 @@ export function Idioma({ children }: { children: ReactNode }) {
 
   const valor = useMemo<Ctx>(() => {
     const dict = DICTS[idioma] ?? EN;
+    /* `traduz` e uma funcao nomeada, e nao um metodo do objeto, porque `tm`
+       precisa chama-la — e dentro do literal o objeto ainda nao existe. */
+    const traduz = (k: Key, vars?: Record<string, string | number>): string => {
+      /* Cai no ingles por chave, e nao no dicionario inteiro: um idioma com
+         uma chave faltando mostra so aquela linha em ingles. */
+      let texto: string = dict[k] ?? EN[k] ?? String(k);
+      if (vars) {
+        for (const [nome, v] of Object.entries(vars)) {
+          texto = texto.replaceAll(`{${nome}}`, String(v));
+        }
+      }
+      return texto;
+    };
     return {
       idioma,
       trocar: (i) => {
         setIdioma(i);
         AsyncStorage.setItem(CHAVE, i).catch(() => {});
       },
-      t: (k, vars) => {
-        /* Cai no ingles por chave, e nao no dicionario inteiro: um idioma com
-           uma chave faltando mostra so aquela linha em ingles. */
-        let texto: string = dict[k] ?? EN[k] ?? String(k);
-        if (vars) {
-          for (const [nome, v] of Object.entries(vars)) {
-            texto = texto.replaceAll(`{${nome}}`, String(v));
-          }
+      t: traduz,
+      tm: (m) => {
+        const params: Record<string, string | number> = {};
+        for (const [nome, v] of Object.entries(m.params ?? {})) {
+          params[nome] = typeof v === "number" ? v.toLocaleString(idioma) : v;
         }
-        return texto;
+        return traduz(m.key as Key, params);
       },
     };
   }, [idioma]);

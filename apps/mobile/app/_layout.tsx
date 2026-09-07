@@ -30,12 +30,16 @@ function Casca() {
           headerTintColor: cores.texto,
           headerTitleStyle: { fontWeight: "700" },
           contentStyle: { backgroundColor: cores.fundo },
+          headerBackButtonDisplayMode: "minimal",
         }}
       >
         {/* AS ABAS SAO A RAIZ. O resto continua em pilha POR CIMA delas —
             ficha, calculadora e leitor sao destinos de leitura, nao lugares
             onde se mora, entao entram com voltar e nao com aba. */}
-        <Stack.Screen name="(abas)" options={{ headerShown: false }} />
+        {/* `headerBackButtonDisplayMode: "minimal"` e o que tira o rotulo do
+            voltar: sem ele o expo-router usa o NOME DA ROTA, e a ficha abria
+            com um botao escrito "(abas)". */}
+        <Stack.Screen name="(abas)" options={{ headerShown: false, title: "" }} />
         <Stack.Screen name="especie/[id]" options={{ title: "" }} />
         <Stack.Screen name="iv/[id]" options={{ title: "" }} />
         <Stack.Screen name="encontro/[id]" options={{ title: "" }} />
