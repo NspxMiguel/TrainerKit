@@ -1,7 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { Link, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { ActivityIndicator, FlatList, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -48,6 +48,8 @@ function Heroi({
   acao,
   onFeito,
   quantos = 0,
+  alto,
+  cabecalho,
 }: {
   especie: Especie;
   linha: string;
@@ -57,6 +59,10 @@ function Heroi({
   onFeito?: () => void;
   /** Quantos pedem decisão — vira os pontinhos embaixo do herói. */
   quantos?: number;
+  /** O inset do topo: o herói começa em y=0, ATRÁS da barra de status. */
+  alto: number;
+  /** A saudação e o avatar, desenhados por cima da cor. */
+  cabecalho: ReactNode;
 }) {
   const { t } = useT();
   const { cores } = useTema();
@@ -68,7 +74,7 @@ function Heroi({
       {/* ⚠️ SEM raio e SEM margem: no desenho o herói encosta nas duas bordas e
           na barra de status. Com cantos arredondados ele lê como "mais um
           cartão"; full-bleed ele É a tela. */}
-      <Pressable className="overflow-hidden" style={{ height: 372 }}>
+      <Pressable className="overflow-hidden" style={{ height: 430 + alto }}>
         {/*
           O GRADIENTE E DO TIPO, e nao uma cor de marca. Foi assim que o violeta
           saiu do app sem a tela ficar cinza: a cor continua existindo, so que
@@ -116,7 +122,18 @@ function Heroi({
           colors={["transparent", "rgba(10,12,16,0.40)"]}
           style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 190 }}
         />
-        <View className="flex-1 justify-end items-center px-5 pb-5">
+        {/* A SAUDAÇÃO POR CIMA DA COR.
+
+            ⚠️ Ela estava ACIMA do herói, sobre preto, e o laranja começava numa
+            linha reta logo abaixo dela. Ele pediu que a cor subisse até o topo —
+            e é o que a referência mostra: a cor preenche a tela inteira, a
+            saudação flutua nela, e a barra de status fica em cima da cor. */}
+        <View style={{ paddingTop: alto + 8 }}>{cabecalho}</View>
+
+        {/* ⚠️ O CONTEÚDO PARA ANTES DO FIM, e a folga não é estética: é o
+            espaço em que a cor se dissolve. Colado no pé, o texto ficava sobre
+            a parte já opaca do degradê e a faixa terminava numa linha. */}
+        <View className="flex-1 justify-end items-center px-5" style={{ paddingBottom: 110 }}>
           <View className="rounded-pilula px-3 py-1 mb-2 bg-black/35">
             <Text className="text-legenda text-white">{t("home.today").toUpperCase()}</Text>
           </View>
@@ -307,43 +324,45 @@ export default function Inicio() {
          à mão, e com a nativa ele vira um buraco no fim da lista. */
       contentContainerStyle={{ paddingBottom: baixo + 24 }}
       showsVerticalScrollIndicator={false}
+      /* ⚠️ `never`: com o ajuste automático o iOS empurraria o conteúdo para
+         baixo da barra de status, e o herói deixaria de encostar no topo — que
+         é justamente o que ele pediu. O inset entra à mão, dentro do herói. */
+      contentInsetAdjustmentBehavior="never"
     >
-      {/* ⚠️ A SAUDAÇÃO E O HERÓI VÊM COLADOS, e a busca desceu.
-          Eu tinha posto a busca entre os dois, e ela empurrava o herói para
-          baixo da dobra — no desenho ele ocupa quase metade da tela logo de
-          cara, e é isso que faz a tela ter um assunto. */}
-      <View className="px-4 flex-row items-center gap-3" style={{ paddingTop: alto + 8 }}>
-        {/* UMA LINHA. "Boa tarde, Treinador." quebrava em duas e empurrava o
-            herói; encolher a fonte é melhor que perder a primeira dobra. */}
-        <Text
-          className="text-saudacao text-texto flex-1"
-          numberOfLines={1}
-          adjustsFontSizeToFit
-          minimumFontScale={0.7}
-        >
-          {t(saudacao(agora))}, {nome}.
-        </Text>
-        {/* O AVATAR, com a inicial. É o que o desenho põe no canto e o que dá o
-            caminho para as contas — hoje o único lugar onde se troca de coleção. */}
-        <Toque
-          onPress={() => router.push("/colecao")}
-          accessibilityLabel={t("colecoes.title")}
-          className="rounded-pilula items-center justify-center"
-          style={{ width: 38, height: 38, backgroundColor: cores.superficie }}
-        >
-          <Text className="text-texto text-corpo font-bold">
-            {nome.slice(0, 1).toUpperCase()}
-          </Text>
-        </Toque>
-      </View>
-
-      {/* O HERÓI É FULL-BLEED: sem margem lateral, encostando nas duas bordas.
-          Com margem ele lê como "mais um cartão"; sem, ele é a tela. */}
+      {/* ⚠️ A COR SOBE ATÉ O TOPO. A saudação é desenhada DENTRO do herói,
+          por cima do degradê, e a barra de status fica sobre a cor. Antes ela
+          ficava acima, sobre preto, e o laranja começava numa linha reta. */}
       {destaque && (
         <Heroi
           especie={destaque}
           linha={linhaDoDestaque}
           quantos={fila.length}
+          alto={alto}
+          cabecalho={
+            <View className="px-4 flex-row items-center gap-3">
+              {/* UMA LINHA. "Boa tarde, Treinador." quebrava em duas. */}
+              <Text
+                className="text-saudacao text-white flex-1"
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.7}
+              >
+                {t(saudacao(agora))}, {nome}.
+              </Text>
+              {/* O avatar leva para as contas — hoje o único lugar onde se troca
+                  de coleção. Em vidro porque flutua sobre a cor. */}
+              <Toque
+                onPress={() => router.push("/colecao")}
+                accessibilityLabel={t("colecoes.title")}
+                className="rounded-pilula items-center justify-center"
+                style={{ width: 40, height: 40, backgroundColor: "rgba(255,255,255,0.18)" }}
+              >
+                <Text className="text-corpo font-bold" style={{ color: "#FFFFFF" }}>
+                  {nome.slice(0, 1).toUpperCase()}
+                </Text>
+              </Toque>
+            </View>
+          }
           {...(pendente
             ? {
                 acao: t(ACTION_KEYS[pendente.veredito.action] as Key),
@@ -355,6 +374,20 @@ export default function Inicio() {
               }
             : {})}
         />
+      )}
+
+      {/* Sem destaque não há herói, e a saudação precisa existir mesmo assim. */}
+      {!destaque && (
+        <View className="px-4 flex-row items-center gap-3" style={{ paddingTop: alto + 8 }}>
+          <Text
+            className="text-saudacao text-texto flex-1"
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.7}
+          >
+            {t(saudacao(agora))}, {nome}.
+          </Text>
+        </View>
       )}
 
       <View className="px-4">
