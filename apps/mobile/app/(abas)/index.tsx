@@ -37,11 +37,6 @@ function saudacao(hora: number): Key {
   return "home.greeting.night";
 }
 
-/** As duas primeiras letras — o mesmo monograma do selo, em tamanho de heroi. */
-function monograma(nome: string): string {
-  return nome.replace(/[^A-Za-zÀ-ÿ]/g, "").slice(0, 2).toUpperCase();
-}
-
 function Heroi({
   especie,
   linha,
@@ -85,43 +80,62 @@ function Heroi({
           vertical. Ele estava errado aqui: era diagonal e terminava em
           transparente, o que só apaga a cor. Ele reconheceu de longe.
         */}
+        {/*
+          ⚠️ QUATRO PARADAS, e a última é o FUNDO DO TEMA.
+
+          É a receita do PWA, que ele apontou como a certa: a cor vive de 0 a
+          72% e do 72 ao 100 ela morre dentro do próprio degradê. Antes eu punha
+          uma segunda camada por cima para "derreter" o pé — e duas camadas
+          interpolando em ritmos diferentes é o que produzia a borda que ele
+          continuava vendo.
+        */}
         <LinearGradient
-          colors={degradeDoTipo(cor)}
-          locations={PARADAS_DO_DEGRADE as unknown as [number, number, number]}
+          colors={[...degradeDoTipo(cor), cores.fundo]}
+          locations={[...PARADAS_DO_DEGRADE, 1]}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
           style={{ position: "absolute", inset: 0 }}
         />
-        {/* O monograma gigante e marca d'agua: ele da massa e movimento ao
-            fundo sem depender de arte nenhuma — e o app e distribuido sem arte. */}
+        {/*
+          O NÚMERO DA DEX como marca d'água — não o monograma.
+
+          ⚠️ É o que o PWA faz, e ele pediu por nome. O monograma repetia as
+          duas primeiras letras de um nome que já está escrito em 34px logo
+          abaixo; o número é a única coisa da espécie que não aparece em lugar
+          nenhum da tela.
+
+          Centrado em 46% da altura, e não colado no topo — "o ET tá pra cima
+          dms". 12% de opacidade: abaixo disso ele some no degradê, acima vira
+          um número que a pessoa tenta ler, e o assunto da tela é o bicho.
+        */}
         <Text
+          numberOfLines={1}
+          /* ⚠️ `numberOfLines` NÃO é detalhe: sem ele "890" quebrava em "89" e
+             "0" em linhas separadas, e o herói ficava com dois algarismos
+             gigantes empilhados. Transbordar na horizontal é o certo — é assim
+             que ele lê como textura. */
           style={{
             position: "absolute",
-            alignSelf: "center",
-            top: 10,
-            /* ⚠️ ELE TRANSBORDA de propósito: no desenho o monograma é largo o
-               bastante para ser cortado pelas duas bordas, e é esse corte que
-               faz ele ler como textura e não como palavra. */
-            fontSize: 250,
-            fontWeight: "800",
+            left: 0,
+            right: 0,
+            top: "46%",
+            marginTop: -120,
+            textAlign: "center",
+            /* ⚠️ O `letterSpacing` negativo do React Native também tira o
+               espaço DEPOIS do último algarismo, e isso empurra o centro
+               óptico para a esquerda. O `paddingLeft` devolve o que a última
+               letra perdeu. */
+            paddingLeft: 14,
+            fontSize: 240,
+            lineHeight: 240,
+            fontWeight: "900",
+            letterSpacing: -14,
             color: tinta,
-            opacity: 0.16,
+            opacity: 0.12,
           }}
         >
-          {monograma(especie.name)}
+          {especie.dex}
         </Text>
-        {/*
-          Scrim, e ELE É DISCRETO.
-
-          ⚠️ Estava em 0,55 e apagava justamente o pé do degradê — a parte clara,
-          que é o que dá a sensação de luz subindo. O pacote usa `rgba(10,12,16,.4)`
-          e é esse o teto: escuro o suficiente para o texto branco passar em
-          contraste, claro o suficiente para a cor continuar aparecendo por baixo.
-        */}
-        <LinearGradient
-          colors={["transparent", "rgba(10,12,16,0.40)"]}
-          style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 190 }}
-        />
         {/*
           O SCRIM VOLTOU, e agora ele é MEDIDO.
 

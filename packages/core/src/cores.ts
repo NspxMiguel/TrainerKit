@@ -150,7 +150,7 @@ export function seloDaEspecie(
  * de longe: o resultado era laranja médio uniforme onde o desenho tem sombra
  * em cima e laranja forte no meio.
  */
-export const PARADAS_DO_DEGRADE = [0, 0.46, 0.72] as const;
+export const PARADAS_DO_DEGRADE = [0, 0.48, 0.72] as const;
 
 export function degradeDoTipo(cor: string): [string, string, string] {
   const [h, s, l] = paraHsl(cor);
