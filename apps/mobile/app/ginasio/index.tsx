@@ -88,7 +88,19 @@ export default function Ginasio() {
             >
               <Text className="text-texto3 text-xs w-4">{i + 1}</Text>
               {sp && <Selo especie={sp} tamanho={36} />}
-              <Text className="flex-1 text-texto text-sm font-semibold">{d.name}</Text>
+              <View className="flex-1">
+                <Text className="text-texto text-corpo font-semibold">{d.name}</Text>
+                {/* A FRAQUEZA NOMEADA, porque é ela que decide quem te derruba.
+                    "Fraco a Lutador" é acionável; uma nota de 0 a 100 sozinha
+                    não é — e era só isso que a linha mostrava. */}
+                <Text className="text-texto3 text-legenda" numberOfLines={1}>
+                  {d.weakTo.length === 0
+                    ? t("gym.noWeak")
+                    : t("gym.weakTo", {
+                        types: d.weakTo.map((x) => t(`type.${x}` as never)).join(", "),
+                      })}
+                </Text>
+              </View>
               <Text className="text-texto3 text-[11px]">{Math.round(d.bulk)}</Text>
             </View>
           );
