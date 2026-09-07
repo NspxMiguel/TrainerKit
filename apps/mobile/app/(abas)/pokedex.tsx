@@ -1,6 +1,14 @@
 import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, Pressable, Text, TextInput, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
@@ -19,7 +27,7 @@ import { usePendencias, vereditoDe } from "../../src/pendencias";
 import { Segmented } from "../../src/Segmented";
 import { SymbolView } from "expo-symbols";
 
-import { Selo } from "../../src/Selo";
+import { corDoTipo, Selo, tintaSobre } from "../../src/Selo";
 import { useSetup } from "../../src/setup";
 import { useTema } from "../../src/tema";
 import { Toque } from "../../src/Toque";
@@ -124,7 +132,25 @@ export default function Pokedex() {
      é o formato certo para ela — a grade serve para varrer 1.182 espécies por
      cor, e a coleção se lê por veredito, que é texto. */
   const [emGrade, setEmGrade] = useState(false);
+  /*
+   * ⚠️ ESTADO SEPARADO PARA "TODOS", e não o mesmo `emGrade`.
+   *
+   * As duas abas querem padrões OPOSTOS: a de todas nasce em grade (mil e
+   * cento e oitenta espécies se varrem por cor) e a coleção nasce em lista
+   * (ela se lê por veredito, que é texto). Um estado só faria escolher numa
+   * aba estragar a outra.
+   */
+  const [todasEmGrade, setTodasEmGrade] = useState(true);
   const [ordem, setOrdem] = useState<Ordem>("dex");
+  /*
+   * O TIPO, e um só por vez.
+   *
+   * ⚠️ Multi-seleção parece mais poderosa e responde uma pergunta que ninguém
+   * faz: "me mostra os de Fogo OU de Água" não é como se procura bicho. O que
+   * se procura é "quem eu tenho de Fogo", e para isso um tipo basta — tocar de
+   * novo no mesmo limpa.
+   */
+  const [tipo, setTipo] = useState<string | null>(null);
 
   const fila = usePendencias(dados);
 
@@ -173,9 +199,10 @@ export default function Pokedex() {
 
   const todas = useMemo(() => {
     if (!dados) return [];
+    const porTipo = tipo ? dados.canonicas.filter((s) => s.types.includes(tipo)) : dados.canonicas;
     const base = termo
-      ? dados.canonicas.filter((s) => s.name.toLowerCase().includes(termo))
-      : dados.canonicas;
+      ? porTipo.filter((s) => s.name.toLowerCase().includes(termo))
+      : porTipo;
     if (ordem === "dex") return [...base].sort((a, b) => a.dex - b.dex);
 
     /*
@@ -193,7 +220,7 @@ export default function Pokedex() {
       if (nb === undefined) return -1;
       return nb - na || a.dex - b.dex;
     });
-  }, [dados, termo, ordem, notas]);
+  }, [dados, termo, tipo, ordem, notas]);
 
   const meus = useMemo<Meu[]>(() => {
     if (!dados || !itens) return [];
@@ -244,15 +271,21 @@ export default function Pokedex() {
       <View className="px-4 pb-2" style={{ paddingTop: alto + 8 }}>
         <View className="flex-row items-center justify-between mb-3">
           <Text className="text-titulo-tela text-texto">{t("tabs.pokedex")}</Text>
-          {/* Grade/lista só faz sentido em "meus" — e só quando há o que ver. */}
-          {aba === "meus" && meus.length > 0 && (
+          {/* Grade/lista nas DUAS abas — e só quando há o que ver. */}
+          {(aba === "meus" ? meus.length > 0 : todas.length > 0) && (
             <Toque
-              onPress={() => setEmGrade((v) => !v)}
+              onPress={() =>
+                aba === "meus" ? setEmGrade((v) => !v) : setTodasEmGrade((v) => !v)
+              }
               className="rounded-pilula px-3 py-2"
               style={{ backgroundColor: cores.superficie }}
             >
               <Text className="text-texto2 text-legenda">
-                {t(emGrade ? "collection.asListShort" : "collection.asGridShort")}
+                {t(
+                  (aba === "meus" ? emGrade : todasEmGrade)
+                    ? "collection.asListShort"
+                    : "collection.asGridShort",
+                )}
               </Text>
             </Toque>
           )}
@@ -293,6 +326,39 @@ export default function Pokedex() {
               opcoes={ORDENS.map((o) => ({ valor: o.id, rotulo: t(o.chave) }))}
               onEscolher={(v) => setOrdem(v as Ordem)}
             />
+            {/* OS 18 TIPOS. Rolam na horizontal porque não cabem, e cada um
+                usa a PRÓPRIA cor: a lista de tipos é lida por cor antes de ser
+                lida por nome, e uma fileira monocromática desperdiça isso. */}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              className="mt-2"
+              contentContainerStyle={{ gap: 6, paddingRight: 20 }}
+            >
+              {(dados?.typeOrder ?? []).map((tp) => {
+                const escolhido = tipo === tp;
+                const cor = corDoTipo(tp);
+                return (
+                  <Pressable
+                    key={tp}
+                    onPress={() => setTipo((v) => (v === tp ? null : tp))}
+                    className="rounded-pilula px-3 py-1.5"
+                    style={{
+                      backgroundColor: escolhido ? cor : cores.superficie,
+                      borderWidth: 1,
+                      borderColor: escolhido ? cor : cores.linha,
+                    }}
+                  >
+                    <Text
+                      className="text-[12px] font-semibold"
+                      style={{ color: escolhido ? tintaSobre(cor) : cores.texto2 }}
+                    >
+                      {t(`type.${tp}` as Key)}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
           </View>
         )}
 
@@ -358,10 +424,10 @@ export default function Pokedex() {
         */
         <FlatList
           data={todas}
-          key="grade-4"
-          numColumns={4}
+          key={todasEmGrade ? "todas-grade-4" : "todas-lista"}
+          numColumns={todasEmGrade ? 4 : 1}
           keyExtractor={(s: Especie) => s.id}
-          columnWrapperStyle={{ gap: 10 }}
+          {...(todasEmGrade ? { columnWrapperStyle: { gap: 10 } } : {})}
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 10 }}
           renderItem={({ item }) => (
             /*
@@ -376,20 +442,31 @@ export default function Pokedex() {
               /* ⚠️ `flex: 1` SÓ na camada de fora. Ele na de dentro também
                  esticava o tile até a altura da linha inteira, e a grade virava
                  colunas ocas com o bicho no pé. */
-              estiloExterno={{ flex: 1 }}
-              className="items-center bg-superficie rounded-tile py-3"
+              {...(todasEmGrade ? { estiloExterno: { flex: 1 } } : {})}
+              className={
+                todasEmGrade
+                  ? "items-center bg-superficie rounded-tile py-3"
+                  : "flex-row items-center gap-3 bg-superficie rounded-cartao-sm px-4 py-3"
+              }
             >
-                <Selo especie={item} tamanho={52} />
+              <Selo especie={item} tamanho={todasEmGrade ? 52 : 44} />
+              <View className={todasEmGrade ? "items-center" : "flex-1"}>
                 <Text
-                  className="text-texto text-[11px] font-semibold mt-2 text-center px-1"
+                  className={`text-texto font-semibold ${todasEmGrade ? "text-[11px] mt-2 text-center px-1" : "text-corpo"}`}
                   numberOfLines={1}
                 >
                   {item.name}
                 </Text>
-                <Text className="text-texto3 text-[10px]">
+                <Text className={`text-texto3 ${todasEmGrade ? "text-[10px]" : "text-legenda"}`}>
                   #{String(item.dex).padStart(3, "0")}
+                  {/* Na lista há largura para dizer o TIPO, que é justamente o
+                      que a grade comunica por cor e a lista perderia. */}
+                  {todasEmGrade
+                    ? ""
+                    : ` · ${item.types.map((tp) => t(`type.${tp}` as Key)).join(" / ")}`}
                 </Text>
-              </Toque>
+              </View>
+            </Toque>
           )}
         />
       ) : meus.length === 0 ? (
