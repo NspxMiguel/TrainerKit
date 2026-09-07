@@ -90,6 +90,7 @@ function Heroi({ especie }: { especie: Especie }) {
 }
 
 const ATALHOS: { rota: string; rotulo: Key; icone: string }[] = [
+  { rota: "/dex", rotulo: "dex.open", icone: "camera.viewfinder" },
   { rota: "/time", rotulo: "team.title", icone: "person.3.fill" },
   { rota: "/ginasio", rotulo: "gym.title", icone: "shield.fill" },
   { rota: "/chocadeira", rotulo: "eggs.title", icone: "circle.dashed" },

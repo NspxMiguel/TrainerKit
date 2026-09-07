@@ -52,6 +52,9 @@ function Casca() {
         <Stack.Screen name="ginasio/index" options={{ title: "" }} />
         <Stack.Screen name="legal/index" options={{ title: "" }} />
         <Stack.Screen name="print/index" options={{ title: "" }} />
+        {/* Sem cabecalho: a camera e a tela inteira, e o fechar e o botao de
+            vidro que a propria tela desenha. */}
+        <Stack.Screen name="dex/index" options={{ headerShown: false }} />
         <Stack.Screen name="itens/index" options={{ title: "" }} />
       </Stack>
 

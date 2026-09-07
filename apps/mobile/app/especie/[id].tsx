@@ -1,5 +1,5 @@
 import { Link, useLocalSearchParams } from "expo-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 
 import {
@@ -26,6 +26,7 @@ import { useT } from "../../src/i18n";
 import { SymbolView } from "expo-symbols";
 
 import { useIA } from "../../src/ia";
+import { marcarVisto } from "../../src/vistos";
 import { calar, falar } from "../../src/voz";
 import { useSetup } from "../../src/setup";
 import { useTema, type Paleta } from "../../src/tema";
@@ -123,6 +124,12 @@ export default function Ficha() {
   };
 
   const especie = useMemo(() => dados?.species.find((s) => s.id === id) ?? null, [dados, id]);
+
+  /* VISTO ao abrir a ficha. E o mais perto de "encontrei" que um app fora do
+     jogo consegue afirmar sem inventar — e e o que faz a Pokedex ter progresso. */
+  useEffect(() => {
+    if (especie) void marcarVisto(especie.id);
+  }, [especie]);
 
   const veredito = useMemo(() => {
     if (!dados || !especie) return null;
