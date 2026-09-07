@@ -5,11 +5,14 @@ import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import {
   RAID_TIERS,
   effectiveness,
+  estimateRaid,
   rankCounters,
   rankMovesets,
+  type Counter,
   type CounterInput,
   type Move,
   type MoveWithPvp,
+  type RaidEstimate,
   type RaidTier,
 } from "@trainerkit/core";
 import { useDados, type Base, type Especie } from "../../src/dados";
@@ -57,8 +60,11 @@ export default function Raide() {
   const chefe = dados?.species.find((s) => s.id === id) ?? null;
   const [tier, setTier] = useState<RaidTier>(chefe?.legendary ? 5 : 3);
 
-  const recomendados = useMemo(() => {
-    if (!dados || !chefe) return [];
+  const { lista: recomendados, estimativa } = useMemo<{
+    lista: Counter[];
+    estimativa: RaidEstimate | null;
+  }>(() => {
+    if (!dados || !chefe) return { lista: [], estimativa: null };
     const golpe = (gid: string): Move | null =>
       (dados.fastMoves.find((m) => m.id === gid) ??
         dados.chargedMoves.find((m) => m.id === gid) ??
@@ -104,7 +110,7 @@ export default function Raide() {
       });
     }
 
-    return rankCounters(
+    const ranked = rankCounters(
       time,
       chefeInput,
       dados.cpm,
@@ -112,6 +118,9 @@ export default function Raide() {
       dados.typeOrder,
       dados.settings.battle as never,
     );
+    /* A ESTIMATIVA vem junto: a lista responde "com quem", e a pergunta que
+       vem antes dela é "eu dou conta?". O nativo mostrava só a lista. */
+    return { lista: ranked, estimativa: estimateRaid(ranked, chefeInput) };
   }, [dados, chefe, tier]);
 
   if (!chefe || !dados) return <View className="flex-1 bg-fundo" />;
@@ -145,6 +154,59 @@ export default function Raide() {
           </TouchableOpacity>
         ))}
       </View>
+
+      {/*
+        EU DOU CONTA?
+
+        ⚠️ Esta é a pergunta que vem ANTES de "com quem", e o nativo pulava
+        direto para a lista. A cor não é enfeite: verde é "vai sozinho", âmbar é
+        "não adianta chamar gente, troque de counter", e o resto é quantos
+        treinadores faltam.
+
+        ⚠️ Com `beyondLobby`, o NÚMERO DE TREINADORES não é dito. Ele existe no
+        cálculo mas não quer dizer nada ali — o conselho é outro, e imprimir "18
+        treinadores" mandaria a pessoa procurar dezoito pessoas para uma raide
+        que não se ganha assim.
+      */}
+      {estimativa && recomendados.length > 0 && (
+        <View
+          className="bg-superficie rounded-cartao px-4 py-4 mt-7"
+          style={{
+            borderWidth: 1,
+            borderColor: estimativa.canSolo
+              ? cores.investir
+              : estimativa.beyondLobby
+                ? cores.guardar
+                : cores.linha,
+          }}
+        >
+          <Text className="text-texto3 text-legenda">{t("raid.canYou").toUpperCase()}</Text>
+          <Text
+            className="text-veredito mt-2"
+            style={{
+              color: estimativa.canSolo
+                ? cores.investir
+                : estimativa.beyondLobby
+                  ? cores.guardar
+                  : cores.texto,
+            }}
+          >
+            {estimativa.canSolo
+              ? t("raid.solo")
+              : estimativa.beyondLobby
+                ? t("raid.hopeless")
+                : t("raid.needTrainers", { n: estimativa.trainers })}
+          </Text>
+          <Text className="text-texto2 text-corpo mt-2 leading-5">
+            {estimativa.beyondLobby
+              ? t("raid.hopelessBody")
+              : estimativa.canSolo
+                ? t("raid.soloIn", { seconds: Math.ceil(estimativa.seconds) })
+                : t("raid.limitedByDamage")}
+            {!estimativa.beyondLobby && estimativa.frail ? ` ${t("raid.frail")}` : ""}
+          </Text>
+        </View>
+      )}
 
       <Text className="text-texto3 text-[11px] tracking-widest mt-7 mb-2">
         {t("raid.recommended").toUpperCase()}
