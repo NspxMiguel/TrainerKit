@@ -12,6 +12,7 @@ import {
 import { pedirPermissao, limpar, reagendar } from "../../src/avisos";
 import { useT } from "../../src/i18n";
 import { useTema } from "../../src/tema";
+import { Vidro } from "../../src/Vidro";
 
 /**
  * O que esta acontecendo.
@@ -151,7 +152,23 @@ export default function Agenda() {
           <Text className="text-texto3 text-[11px] tracking-widest mb-2">
             {g.titulo.toUpperCase()}
           </Text>
-          <View className="bg-superficie rounded-3xl overflow-hidden">
+          {/*
+            VIDRO SÓ NO QUE ESTÁ ROLANDO AGORA.
+
+            ⚠️ Vidro em toda lista de evento viraria sopa — ele marca o que
+            flutua, e "flutuar" aqui é o que está acontecendo enquanto a pessoa
+            olha. Os grupos "depois" e "acabou" continuam em superfície sólida:
+            se tudo brilha, nada brilha, e a pessoa perde justamente a linha que
+            importa.
+          */}
+          <Vidro
+            raio={26}
+            interativo={g.chave === "agora"}
+            ativo={g.chave === "agora"}
+            {...(g.chave === "agora"
+              ? {}
+              : { style: { backgroundColor: cores.superficie, borderRadius: 26, overflow: "hidden" as const } })}
+          >
             {g.itens.map((e, i) => (
               <Pressable
                 key={e.eventID}
@@ -177,7 +194,7 @@ export default function Agenda() {
                 </Text>
               </Pressable>
             ))}
-          </View>
+          </Vidro>
         </View>
       ))}
       <Text className="text-texto3 text-xs mt-6 leading-5">
