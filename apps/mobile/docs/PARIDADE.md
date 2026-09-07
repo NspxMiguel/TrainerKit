@@ -165,3 +165,25 @@ Duas coisas que só apareceram porque ele olhou a tela:
 
 A lição das duas é a mesma: varrer chave de i18n acha função que FALTA, não
 função que está errada. Para isso não tem substituto para abrir o app.
+
+
+## 07/09/2026 (tarde) — as oito telas do pacote, print a print
+
+Ele disse *"app ainda bem longe do esperado"* e estava certo: eu tinha igualado
+só duas das dez telas do pacote. Montei cada uma lado a lado com o print e
+corrigi o que a comparação mostrou.
+
+| Print | O que estava diferente |
+| --- | --- |
+| 2 · Pokédex Meus | sem cartão do Modo lente; coleção em grade e em cartões soltos; chip do veredito contornado; sem PC e nível na linha |
+| 3 · Pokédex Todos | já batia |
+| 5 · Modo Pokédex | × à esquerda e rótulo à direita; sem mira; sem onda da voz; um botão só no pé |
+| 6 · Calculadora | o total sobre 45 como número grande e a porcentagem numa legenda; sem barra |
+| 7 · Monta um time | seis em lista; sem objetivo, sem chefe, sem golpes |
+| 8 · Raide | **sem o PC de captura** — o número mais acionável da tela |
+| 9 · Ajustes | parede de opções abertas em vez de linhas com o valor atual |
+| 10 · Offline | o download de imagens não existia |
+
+**Com isto, a paridade com o PWA fecha.** A única coisa do site que o nativo
+deixa de fazer de propósito é a busca no Início, que o desenho não tem (ver a
+seção de 07/09 acima).
