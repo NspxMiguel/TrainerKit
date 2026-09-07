@@ -3,7 +3,9 @@ import { SymbolView, type SFSymbol } from "expo-symbols";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useDados } from "../../src/dados";
 import { useT } from "../../src/i18n";
+import { usePendencias } from "../../src/pendencias";
 import { useTema } from "../../src/tema";
 import { Toque } from "../../src/Toque";
 import { Vidro } from "../../src/Vidro";
@@ -37,6 +39,10 @@ export default function Abas() {
   const { cores } = useTema();
   const { t } = useT();
   const baixo = useSafeAreaInsets().bottom;
+  const { dados } = useDados();
+  /* O SELO DE PENDÊNCIAS na aba da Pokédex. É a única coisa do app que puxa a
+     pessoa de volta sem notificação: quantas decisões estão esperando. */
+  const pendentes = usePendencias(dados).length;
 
   return (
     <Tabs
@@ -74,15 +80,36 @@ export default function Abas() {
                         className="absolute inset-0 rounded-full"
                       />
                     )}
-                    <SymbolView
-                      name={aba.icone}
-                      size={19}
-                      tintColor={ativo ? cores.texto : cores.texto3}
-                      resizeMode="scaleAspectFit"
-                      fallback={
-                        <Text style={{ color: ativo ? cores.texto : cores.texto3 }}>■</Text>
-                      }
-                    />
+                    <View>
+                      <SymbolView
+                        name={aba.icone}
+                        size={19}
+                        tintColor={ativo ? cores.texto : cores.texto3}
+                        resizeMode="scaleAspectFit"
+                        fallback={
+                          <Text style={{ color: ativo ? cores.texto : cores.texto3 }}>■</Text>
+                        }
+                      />
+                      {aba.nome === "pokedex" && pendentes > 0 && (
+                        <View
+                          className="absolute rounded-pilula px-1.5"
+                          style={{
+                            top: -6,
+                            right: -12,
+                            minWidth: 18,
+                            backgroundColor: cores.investir,
+                            alignItems: "center",
+                          }}
+                        >
+                          <Text
+                            className="text-legenda"
+                            style={{ color: cores.fundo, fontSize: 10, lineHeight: 16 }}
+                          >
+                            {pendentes > 99 ? "99+" : pendentes}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
                     <Text
                       className="text-legenda mt-1"
                       style={{ color: ativo ? cores.texto : cores.texto3 }}

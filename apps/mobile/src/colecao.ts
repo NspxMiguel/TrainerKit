@@ -55,6 +55,22 @@ export interface Guardado {
    * significa "medido", que é o que aqueles registros são.
    */
   ivDesconhecido?: boolean;
+  /**
+   * O veredito que a pessoa já EXECUTOU neste exemplar.
+   *
+   * ⚠️ É o que tira o bicho da fila sem apagar o veredito: quem já evoluiu não
+   * quer ser cobrado de novo, e o app continuar dizendo "Evoluir" depois de a
+   * pessoa evoluir é o app não estar prestando atenção.
+   */
+  doneAction?: string | null;
+  /**
+   * Por que ela vai ficar com ele mesmo assim.
+   *
+   * ⚠️ É o "discordo". O veredito continua calculado e visível na ficha; o que
+   * ele perde é o direito de COBRAR. Um contador que soma bichos que a pessoa
+   * já disse que vai guardar é insistência.
+   */
+  meuMotivo?: string | null;
 }
 
 let cache: Guardado[] | null = null;
@@ -187,6 +203,24 @@ export async function guardar(entrada: Omit<Guardado, "id" | "em">): Promise<voi
       em: Date.now(),
     },
   ]);
+}
+
+/** Marca (ou desmarca) o veredito como já executado. */
+export async function marcarFeito(id: string, acao: string | null): Promise<void> {
+  const lista = await ler();
+  const alvo = lista.find((g) => g.id === id);
+  if (!alvo) return;
+  alvo.doneAction = acao;
+  await gravar([...lista]);
+}
+
+/** Guarda (ou apaga) o motivo de ficar com ele mesmo contra o veredito. */
+export async function definirMeuMotivo(id: string, motivo: string | null): Promise<void> {
+  const lista = await ler();
+  const alvo = lista.find((g) => g.id === id);
+  if (!alvo) return;
+  alvo.meuMotivo = motivo;
+  await gravar([...lista]);
 }
 
 export async function remover(id: string): Promise<void> {

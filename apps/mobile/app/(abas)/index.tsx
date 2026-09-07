@@ -5,8 +5,11 @@ import { useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { degradeDoTipo, PARADAS_DO_DEGRADE, type Key } from "@trainerkit/core";
-import { useColecao } from "../../src/colecao";
+import { ACTION_KEYS, degradeDoTipo, PARADAS_DO_DEGRADE, type Key } from "@trainerkit/core";
+import { marcarFeito, useColecao } from "../../src/colecao";
+import { usePendencias } from "../../src/pendencias";
+import type { Action } from "@trainerkit/core";
+import type { Guardado } from "../../src/colecao";
 import { useDados, type Especie } from "../../src/dados";
 import { useT } from "../../src/i18n";
 import { corDoTipo, Selo, tintaSobre } from "../../src/Selo";
@@ -37,7 +40,19 @@ function monograma(nome: string): string {
   return nome.replace(/[^A-Za-zÀ-ÿ]/g, "").slice(0, 2).toUpperCase();
 }
 
-function Heroi({ especie }: { especie: Especie }) {
+function Heroi({
+  especie,
+  linha,
+  acao,
+  onFeito,
+}: {
+  especie: Especie;
+  linha: string;
+  /** A palavra do veredito, quando o herói é um bicho que pede decisão. */
+  acao?: string;
+  /** Marcar como resolvido sem abrir a ficha. */
+  onFeito?: () => void;
+}) {
   const { t } = useT();
   const cor = corDoTipo(especie.types[0]);
   const tinta = tintaSobre(cor);
@@ -77,24 +92,83 @@ function Heroi({ especie }: { especie: Especie }) {
         >
           {monograma(especie.name)}
         </Text>
-        {/* Scrim: sem ele o texto branco some no meio do gradiente claro. */}
+        {/*
+          Scrim, e ELE É DISCRETO.
+
+          ⚠️ Estava em 0,55 e apagava justamente o pé do degradê — a parte clara,
+          que é o que dá a sensação de luz subindo. O pacote usa `rgba(10,12,16,.4)`
+          e é esse o teto: escuro o suficiente para o texto branco passar em
+          contraste, claro o suficiente para a cor continuar aparecendo por baixo.
+        */}
         <LinearGradient
-          colors={["transparent", "rgba(0,0,0,0.55)"]}
-          style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 170 }}
+          colors={["transparent", "rgba(10,12,16,0.40)"]}
+          style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 130 }}
         />
         <View className="flex-1 justify-end p-5">
           <View className="self-start rounded-pilula px-3 py-1 mb-2 bg-black/35">
             <Text className="text-legenda text-white">{t("home.today").toUpperCase()}</Text>
           </View>
           <Text className="text-saudacao text-white">{especie.name}</Text>
-          <Text className="text-corpo text-white/80 mt-1" numberOfLines={2}>
+          {/* Tipos MAIS o porquê. O desenho põe uma frase aqui — "Fogo · Voador ·
+              IV 93 — vale cada grama de poeira hoje" — e só os tipos deixavam o
+              herói dizendo o que a pessoa já vê na cor. */}
+          <Text className="text-corpo text-white/85 mt-1" numberOfLines={2}>
             {especie.types.map((x) => t(`type.${x}` as Key)).join(" · ")}
+            {linha ? ` — ${linha}` : ""}
           </Text>
+
+          {/*
+            A AÇÃO, dentro do herói.
+
+            ⚠️ Ela existe porque o herói é uma PERGUNTA — "no que eu mexo hoje?"
+            — e uma pergunta sem resposta ao lado é decoração. O botão redondo
+            fecha a pendência sem abrir a ficha: quem já evoluiu não quer
+            navegar duas telas para dizer isso.
+          */}
+          {acao && (
+            <View className="flex-row items-center gap-2 mt-3">
+              <View className="rounded-pilula px-4 py-2.5 bg-white">
+                <Text className="text-legenda" style={{ color: "#111" }}>
+                  {acao.toUpperCase()}
+                </Text>
+              </View>
+              {onFeito && (
+                <Pressable
+                  onPress={(e) => {
+                    /* Sem isto o toque sobe para o `Link` do herói e a ficha
+                       abre por cima da ação que a pessoa acabou de concluir. */
+                    e.stopPropagation();
+                    onFeito();
+                  }}
+                  hitSlop={10}
+                  accessibilityLabel={t("collection.markDone")}
+                  className="rounded-pilula bg-black/40"
+                  style={{ width: 40, height: 40, alignItems: "center", justifyContent: "center" }}
+                >
+                  <SymbolView
+                    name="checkmark"
+                    size={16}
+                    tintColor="#FFFFFF"
+                    fallback={<Text style={{ color: "#fff" }}>✓</Text>}
+                  />
+                </Pressable>
+              )}
+            </View>
+          )}
         </View>
       </Pressable>
     </Link>
   );
 }
+
+/** Qual cor do tema pinta cada veredito — a mesma tabela da ficha. */
+const COR_DA_ACAO: Record<string, "investir" | "evoluir" | "guardar" | "transferir"> = {
+  investir: "investir",
+  evoluir: "evoluir",
+  guardar: "guardar",
+  transferir: "transferir",
+  descobrir: "investir",
+};
 
 const ATALHOS: { rota: string; rotulo: Key; icone: string }[] = [
   { rota: "/dex", rotulo: "dex.open", icone: "camera.viewfinder" },
@@ -107,28 +181,59 @@ const ATALHOS: { rota: string; rotulo: Key; icone: string }[] = [
 ];
 
 export default function Inicio() {
-  const { t } = useT();
+  const { t, tm } = useT();
   const { cores } = useTema();
   const { pronto, dados } = useDados();
-  const { itens } = useColecao();
+  const { itens, recarregar } = useColecao();
   const { top: alto, bottom: baixo } = useSafeAreaInsets();
   const [agora] = useState(() => new Date().getHours());
 
-  /* O destaque e o primeiro do ranking de raide: e o unico "hoje" que o app
-     consegue afirmar sem inventar evento. Quando a agenda tiver evento ativo,
-     e ele que deve entrar aqui. */
+  const fila = usePendencias(dados);
+
+  /*
+   * O DESTAQUE, em ordem de utilidade — e isto é o que o PWA faz.
+   *
+   * 1. O que PEDE DECISÃO. Se existe um bicho esperando uma escolha, ele é o
+   *    assunto do dia: o app existe pra responder "no que eu mexo hoje?".
+   * 2. Sem fila, o melhor atacante de raide — o único "hoje" que o app afirma
+   *    sem inventar evento.
+   *
+   * O nativo só fazia o passo 2, então quem tinha a coleção inteira pedindo
+   * decisão abria o app e via um bicho que nem é dele.
+   */
+  const pendente = fila[0] ?? null;
+
   const destaque = useMemo(() => {
+    if (pendente) return pendente.especie;
     const id = dados?.rankings?.raidOverall?.[0]?.speciesId;
     return id ? dados?.species.find((s) => s.id === id) : undefined;
-  }, [dados]);
+  }, [dados, pendente]);
 
+  /* A frase do herói: o motivo do veredito quando há fila, e a posição no
+     ranking quando não há. As duas vêm do core — nada inventado aqui. */
+  const linhaDoDestaque = pendente ? tm(pendente.veredito.reason) : t("home.hero.topRaid");
+
+  /*
+   * A tira da coleção, com o VEREDITO de cada um.
+   *
+   * ⚠️ Quem pede decisão vem primeiro. Sem isso a tira mostrava os doze
+   * primeiros guardados, em ordem de cadastro, e a pessoa tinha que abrir um
+   * por um para descobrir qual deles queria alguma coisa dela.
+   */
   const meus = useMemo(() => {
     if (!dados) return [];
+    const pendentes = new Set(fila.map((p) => p.guardado.id));
     return (itens ?? [])
-      .map((c) => dados.species.find((s) => s.id === c.speciesId))
-      .filter((s): s is Especie => !!s)
+      .map((g) => {
+        const especie = dados.species.find((s) => s.id === g.speciesId);
+        if (!especie) return null;
+        const p = fila.find((x) => x.guardado.id === g.id);
+        return { g, especie, acao: p?.veredito.action ?? null };
+      })
+      .filter((x): x is { g: Guardado; especie: Especie; acao: Action | null } => x !== null)
+      .sort((a, b) => Number(pendentes.has(b.g.id)) - Number(pendentes.has(a.g.id)))
       .slice(0, 12);
-  }, [itens, dados]);
+  }, [itens, dados, fila]);
 
   if (!pronto) {
     return (
@@ -146,7 +251,22 @@ export default function Inicio() {
     >
       <View className="px-4" style={{ paddingTop: alto + 8 }}>
         <Text className="text-saudacao text-texto mb-4">{t(saudacao(agora))}</Text>
-        {destaque && <Heroi especie={destaque} />}
+        {destaque && (
+          <Heroi
+            especie={destaque}
+            linha={linhaDoDestaque}
+            {...(pendente
+              ? {
+                  acao: t(ACTION_KEYS[pendente.veredito.action] as Key),
+                  onFeito: () => {
+                    void marcarFeito(pendente.guardado.id, pendente.veredito.action).then(
+                      recarregar,
+                    );
+                  },
+                }
+              : {})}
+          />
+        )}
 
         {/* A ACAO PRINCIPAL, largura cheia e em pilula. E a unica coisa do app
             que resolve o problema inteiro em um passo, entao e a unica que
@@ -194,15 +314,30 @@ export default function Inicio() {
               horizontal
               showsHorizontalScrollIndicator={false}
               data={meus}
-              keyExtractor={(s) => s.id}
+              keyExtractor={(x) => x.g.id}
               renderItem={({ item }) => (
-                <Link href={{ pathname: "/especie/[id]", params: { id: item.id } }} asChild>
-                  <Pressable className="items-center mr-3" style={{ width: 62 }}>
-                    <Selo especie={item} tamanho={54} />
+                <Link
+                  href={{ pathname: "/especie/[id]", params: { id: item.especie.id } }}
+                  asChild
+                >
+                  <Toque className="items-center mr-3" style={{ width: 62 }}>
+                    <Selo especie={item.especie} tamanho={54} />
                     <Text className="text-texto text-legenda mt-1.5 text-center" numberOfLines={1}>
-                      {item.name}
+                      {item.especie.name}
                     </Text>
-                  </Pressable>
+                    {/* O rótulo do veredito embaixo, na cor dele — é o que o
+                        desenho mostra e o que faz a tira valer mais que uma
+                        lista de nomes. */}
+                    {item.acao && (
+                      <Text
+                        className="text-legenda text-center mt-0.5"
+                        numberOfLines={1}
+                        style={{ color: cores[COR_DA_ACAO[item.acao] ?? "texto3"], fontSize: 9 }}
+                      >
+                        {t(ACTION_KEYS[item.acao] as Key).toUpperCase()}
+                      </Text>
+                    )}
+                  </Toque>
                 </Link>
               )}
             />
