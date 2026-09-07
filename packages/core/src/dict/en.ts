@@ -377,7 +377,7 @@ const EN = {
   // -------------------------------------------------------------------- ajustes
   "home.today": "Today's pick",
   "tabs.home": "Home",
-  "tabs.pokedex": "Pokédex",
+  "tabs.pokedex": "Species",
   "tabs.settings": "Settings",
   "settings.title": "Settings",
   "settings.appearance": "Appearance",

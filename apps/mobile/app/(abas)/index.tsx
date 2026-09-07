@@ -83,9 +83,6 @@ function Heroi({
   linha,
   acao,
   onFeito,
-  quantos = 0,
-  indice = 0,
-  onTrocar,
   alto,
   altura,
   cabecalho,
@@ -96,12 +93,6 @@ function Heroi({
   acao?: string;
   /** Marcar como resolvido sem abrir a ficha. */
   onFeito?: () => void;
-  /** Quantos destaques existem — vira os pontinhos embaixo do herói. */
-  quantos?: number;
-  /** Qual deles está à mostra, para o pontinho aceso. */
-  indice?: number;
-  /** Passar para o próximo destaque. */
-  onTrocar?: () => void;
   /** O inset do topo: o herói começa em y=0, ATRÁS da barra de status. */
   alto: number;
   /** Quanto da tela sobra para o herói, já descontado o resto do Início. */
@@ -422,34 +413,14 @@ function Heroi({
             </View>
           )}
 
-          {/* OS PONTINHOS. Eles dizem quantos ainda esperam decisão — no desenho
-              são o que promete que há mais de um assunto. Um só não desenha
-              nada: um ponto sozinho não é um carrossel. */}
           {/* Os pontinhos são TOCÁVEIS: é como se passa para o próximo destaque
               sem gesto escondido. O aceso é o que está à mostra. */}
-          {quantos > 1 && (
-            <Pressable
-              onPress={(e) => {
-                e.stopPropagation();
-                onTrocar?.();
-              }}
-              hitSlop={12}
-              accessibilityLabel={t("dex.next")}
-              className="flex-row gap-1.5 mt-4 self-center"
-            >
-              {Array.from({ length: Math.min(quantos, 5) }, (_, i) => (
-                <View
-                  key={i}
-                  style={{
-                    width: i === indice % 5 ? 14 : 5,
-                    height: 5,
-                    borderRadius: 3,
-                    backgroundColor: i === indice % 5 ? tintaHeroi : veuDaPilula,
-                  }}
-                />
-              ))}
-            </Pressable>
-          )}
+          {/* ⚠️ OS PONTINHOS SAÍRAM. Com um destaque só eles viravam um traço
+              branco solto embaixo da frase — "um menos perdido", nos prints
+              dele — e mesmo com cinco ninguém liga um ponto de 5px a "trocar de
+              bicho". O site não tem carrossel nenhum: o destaque muda com o
+              dia, e tocar no herói abre a ficha. É a mesma promessa com uma
+              peça a menos. */}
         </View>
       </Pressable>
     </Link>
@@ -547,7 +518,8 @@ export default function Inicio() {
    * para tocar no que viu há um minuto precisa achar aquilo ali. Amanhã é
    * outro, e os pontinhos trocam agora.
    */
-  const [passo, setPasso] = useState(() => Math.floor(Date.now() / 86_400_000));
+  /* Sem `setPasso`: os pontinhos saíram e quem troca o destaque é o DIA. */
+  const passo = Math.floor(Date.now() / 86_400_000);
   const indice = candidatos.length > 0 ? passo % candidatos.length : 0;
   const destaque = candidatos[indice];
   /*
@@ -677,9 +649,6 @@ export default function Inicio() {
               </Toque>
             </View>
           }
-          quantos={candidatos.length}
-          indice={indice}
-          onTrocar={() => setPasso((p) => p + 1)}
           {...(pendenteAtual
             ? {
                 acao: t(ACTION_KEYS[pendenteAtual.veredito.action] as Key),
@@ -712,9 +681,13 @@ export default function Inicio() {
             ⚠️ AZUL e não branca: no desenho ela é a única coisa com COR de
             acento na tela, e é assim que ela se separa dos atalhos. Branca ela
             competia com o herói. */}
+        {/* ⚠️ CARTÃO, e não pílula lisa — é a forma do site. O ícone num quadrado
+            e o subtítulo dizendo o RESULTADO ("IV exato e um veredito") fazem a
+            ação principal parecer o que ela é; uma pílula com uma frase parecia
+            mais um dos atalhos, só que azul. */}
         <Link href="/print" asChild>
           <Toque
-            className="rounded-pilula py-4 items-center mt-5 flex-row justify-center gap-2"
+            className="rounded-cartao px-4 py-3.5 items-center mt-5 flex-row gap-3"
             style={{
               backgroundColor: cores.evoluir,
               shadowColor: cores.evoluir,
@@ -723,14 +696,24 @@ export default function Inicio() {
               shadowOffset: { width: 0, height: 8 },
             }}
           >
-            <SymbolView name="viewfinder" size={17} tintColor="#FFFFFF" fallback={<View />} />
-            {/* ⚠️ "Escolher print" não dizia PARA QUÊ. "oq seria escolher
+            <View
+              className="items-center justify-center rounded-cartao-sm"
+              style={{ width: 44, height: 44, backgroundColor: "rgba(255,255,255,0.22)" }}
+            >
+              <SymbolView name="camera" size={20} tintColor="#FFFFFF" fallback={<View />} />
+            </View>
+            <View className="flex-1">
+              {/* ⚠️ "Escolher print" não dizia PARA QUÊ. "oq seria escolher
                 print? na tela de inicio? fica confuso para usuario" — e é: o
                 botão nomeava o gesto (escolher um arquivo) em vez do resultado
                 (descobrir o IV). `home.quickScan` é a frase que o site usa. */}
-            <Text className="text-corpo font-bold" style={{ color: "#FFFFFF" }}>
-              {t("home.quickScan")}
-            </Text>
+              <Text className="text-corpo font-bold" style={{ color: "#FFFFFF" }}>
+                {t("home.quickScan")}
+              </Text>
+              <Text className="text-legenda" style={{ color: "rgba(255,255,255,0.82)" }}>
+                {t("home.quickScanDetail")}
+              </Text>
+            </View>
           </Toque>
         </Link>
 

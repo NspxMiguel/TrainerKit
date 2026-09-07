@@ -25,6 +25,7 @@ import { useT } from "../../src/i18n";
 import { apagarTudo } from "../../src/apagar";
 import { emMegabytes, medirArmazenamento, useOffline } from "../../src/offline";
 import { useTraducao } from "../../src/traducao";
+import { TopoDeVidro } from "../../src/TopoDeVidro";
 import { useVozLigada } from "../../src/vozLigada";
 import { FONTES, SPRITE_SOURCE_KEYS, useImagens } from "../../src/imagens";
 import { useFonteDeDados } from "../../src/fonteDados";
@@ -89,6 +90,7 @@ function Linha({
   aberta,
   onAlternar,
   children,
+  primeira = false,
 }: {
   icone: string;
   cor: string;
@@ -97,11 +99,20 @@ function Linha({
   aberta: boolean;
   onAlternar: () => void;
   children: ReactNode;
+  /** A primeira linha do grupo não leva o fio de cima. */
+  primeira?: boolean;
 }) {
   const { cores } = useTema();
   return (
-    <View className="bg-superficie rounded-cartao overflow-hidden mt-3">
-      <Pressable onPress={onAlternar} className="flex-row items-center gap-3 px-4 py-3.5">
+    /* ⚠️ SEM cartão próprio: quem desenha o cartão é o `Grupo`. Cada linha
+       flutuando sozinha era o "tudo bagunçado" — dez pílulas soltas onde o
+       site mostra três cartões com o fio separando as linhas dentro. */
+    <View className="overflow-hidden">
+      <Pressable
+        onPress={onAlternar}
+        className="flex-row items-center gap-3 px-4 py-3.5"
+        style={primeira ? undefined : { borderTopWidth: 0.5, borderTopColor: cores.linha }}
+      >
         <View
           className="items-center justify-center"
           style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: cor }}
@@ -121,6 +132,66 @@ function Linha({
           {children}
         </View>
       )}
+    </View>
+  );
+}
+
+/**
+ * UMA LINHA QUE LIGA E DESLIGA — mesma anatomia da `Linha`, sem o abrir.
+ *
+ * ⚠️ Ela existe para o interruptor NÃO virar uma linha que abre: um chevron que
+ * promete uma tela e entrega um ✓ é pior que um ✓ direto.
+ */
+function Interruptor({
+  icone,
+  cor,
+  titulo,
+  detalhe,
+  ligado,
+  onAlternar,
+}: {
+  icone: string;
+  cor: string;
+  titulo: string;
+  detalhe: string;
+  ligado: boolean;
+  onAlternar: () => void;
+}) {
+  const { cores } = useTema();
+  return (
+    <Pressable
+      onPress={onAlternar}
+      className="flex-row items-center gap-3 px-4 py-3.5"
+      style={{ borderTopWidth: 0.5, borderTopColor: cores.linha }}
+    >
+      <View
+        className="items-center justify-center"
+        style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: cor }}
+      >
+        <SymbolView name={icone as never} size={14} tintColor="#FFFFFF" fallback={<View />} />
+      </View>
+      <View className="flex-1">
+        <Text className="text-texto text-corpo">{titulo}</Text>
+        <Text className="text-texto3 text-legenda mt-0.5 leading-4">{detalhe}</Text>
+      </View>
+      <Text className="text-texto text-base ml-1">{ligado ? "✓" : ""}</Text>
+    </Pressable>
+  );
+}
+
+/**
+ * UM CARTÃO COM VÁRIAS LINHAS DENTRO — a forma dos Ajustes do iOS, e a do site.
+ *
+ * ⚠️ O rótulo fica FORA do cartão, em caixa alta e pequeno, como no site: posto
+ * dentro ele vira mais uma linha e o grupo deixa de se ler de relance.
+ */
+function Grupo({ titulo, children }: { titulo?: string; children: ReactNode }) {
+  return (
+    <View className="mt-7">
+      {titulo ? (
+        <Text className="text-texto3 text-legenda mb-2 px-1">{titulo.toUpperCase()}</Text>
+      ) : null}
+      <View className="bg-superficie rounded-cartao overflow-hidden">{children}</View>
     </View>
   );
 }
@@ -269,69 +340,77 @@ export default function Ajustes() {
   const alto = useSafeAreaInsets().top;
 
   return (
-    <ScrollView
-      className="flex-1 bg-fundo"
-      /* +110 embaixo: a barra de abas FLUTUA sobre o conteudo, entao sem folga
+    <>
+      <TopoDeVidro />
+      <ScrollView
+        className="flex-1 bg-fundo"
+        /* +110 embaixo: a barra de abas FLUTUA sobre o conteudo, entao sem folga
          a ultima linha de Ajustes fica atras do vidro e nao da pra tocar. */
-      contentContainerStyle={{ padding: 20, paddingTop: alto + 12, paddingBottom: 32 }}
-    >
-      <Text className="text-titulo-tela text-texto mb-1">{t("settings.title")}</Text>
-
-      <Linha
-        icone="circle.lefthalf.filled"
-        cor="#3B82F6"
-        titulo={t("settings.appearance")}
-        valor={t(TEMAS.find((x) => x.valor === escolha)?.chave ?? "settings.theme.system")}
-        aberta={secao === "tema"}
-        onAlternar={() => setSecao((v) => (v === "tema" ? null : "tema"))}
+        /* ⚠️ 96 embaixo, e não 32: a barra de abas do `NativeTabs` FLUTUA sobre
+         o conteúdo, e a última linha ficava atrás do vidro — dá para ver em
+         três dos prints. O sistema só desconta esse inset sozinho quando a
+         rolagem é a raiz da cena, o que aqui não é. */
+        contentContainerStyle={{ padding: 20, paddingTop: alto + 12, paddingBottom: 96 }}
       >
-        <View className="bg-superficie rounded-3xl overflow-hidden mb-7">
-          {TEMAS.map((op, i) => (
-            <Pressable
-              key={op.valor}
-              onPress={() => definir(op.valor)}
-              className="flex-row items-center px-4 py-3.5"
-              style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: cores.linha } : undefined}
-            >
-              <Text
-                className={`flex-1 text-[15px] ${op.valor === escolha ? "text-texto font-bold" : "text-texto2"}`}
-              >
-                {t(op.chave)}
-              </Text>
-              {op.valor === escolha && <Text className="text-texto text-base">✓</Text>}
-            </Pressable>
-          ))}
-        </View>
-      </Linha>
+        <Text className="text-titulo-tela text-texto mb-1">{t("settings.title")}</Text>
 
-      <Linha
-        icone="globe"
-        cor="#8B5CF6"
-        titulo={t("settings.language")}
-        valor={LANGUAGES.find((l) => l.code === idioma)?.label ?? idioma}
-        aberta={secao === "idioma"}
-        onAlternar={() => setSecao((v) => (v === "idioma" ? null : "idioma"))}
-      >
-        <View className="bg-superficie rounded-3xl overflow-hidden">
-          {LANGUAGES.map((l, i) => (
-            <Pressable
-              key={l.code}
-              onPress={() => trocar(l.code)}
-              className="flex-row items-center px-4 py-3.5"
-              style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: cores.linha } : undefined}
-            >
-              <Text className="text-[17px] mr-3">{l.flag}</Text>
-              <Text
-                className={`flex-1 text-[15px] ${l.code === idioma ? "text-texto font-bold" : "text-texto2"}`}
-              >
-                {l.label}
-              </Text>
-              {l.code === idioma && <Text className="text-texto text-base">✓</Text>}
-            </Pressable>
-          ))}
-        </View>
+        <Grupo>
+          <Linha
+            primeira
+            icone="circle.lefthalf.filled"
+            cor="#3B82F6"
+            titulo={t("settings.appearance")}
+            valor={t(TEMAS.find((x) => x.valor === escolha)?.chave ?? "settings.theme.system")}
+            aberta={secao === "tema"}
+            onAlternar={() => setSecao((v) => (v === "tema" ? null : "tema"))}
+          >
+            <View className="bg-superficie rounded-3xl overflow-hidden mb-7">
+              {TEMAS.map((op, i) => (
+                <Pressable
+                  key={op.valor}
+                  onPress={() => definir(op.valor)}
+                  className="flex-row items-center px-4 py-3.5"
+                  style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: cores.linha } : undefined}
+                >
+                  <Text
+                    className={`flex-1 text-[15px] ${op.valor === escolha ? "text-texto font-bold" : "text-texto2"}`}
+                  >
+                    {t(op.chave)}
+                  </Text>
+                  {op.valor === escolha && <Text className="text-texto text-base">✓</Text>}
+                </Pressable>
+              ))}
+            </View>
+          </Linha>
 
-        {/*
+          <Linha
+            icone="globe"
+            cor="#8B5CF6"
+            titulo={t("settings.language")}
+            valor={LANGUAGES.find((l) => l.code === idioma)?.label ?? idioma}
+            aberta={secao === "idioma"}
+            onAlternar={() => setSecao((v) => (v === "idioma" ? null : "idioma"))}
+          >
+            <View className="bg-superficie rounded-3xl overflow-hidden">
+              {LANGUAGES.map((l, i) => (
+                <Pressable
+                  key={l.code}
+                  onPress={() => trocar(l.code)}
+                  className="flex-row items-center px-4 py-3.5"
+                  style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: cores.linha } : undefined}
+                >
+                  <Text className="text-[17px] mr-3">{l.flag}</Text>
+                  <Text
+                    className={`flex-1 text-[15px] ${l.code === idioma ? "text-texto font-bold" : "text-texto2"}`}
+                  >
+                    {l.label}
+                  </Text>
+                  {l.code === idioma && <Text className="text-texto text-base">✓</Text>}
+                </Pressable>
+              ))}
+            </View>
+
+            {/*
         O NÍVEL DO TREINADOR mora aqui também, e não só no setup.
 
         Ele é o único ajuste do app que muda VEREDITO — quem sobe de nível no
@@ -340,7 +419,7 @@ export default function Ajustes() {
         roda uma vez não pode ser o único lugar de um valor que muda com o
         tempo.
       */}
-        {/*
+            {/*
         A IA — a chave é DELA, e só existem duas opções.
 
         "app a pessoa coloca a ia dela, key dela, nada free, free so o site". A
@@ -348,476 +427,508 @@ export default function Ajustes() {
         aqui. Sem chave = desligado; com chave = ligado. Não há terceiro estado,
         então não há seletor: o campo é o interruptor.
       */}
-      </Linha>
+          </Linha>
 
-      <Linha
-        icone="sparkles"
-        cor="#EC4899"
-        titulo={t("ai.title")}
-        valor={t(chave ? "ai.provider.groq" : "ai.off")}
-        aberta={secao === "ia"}
-        onAlternar={() => setSecao((v) => (v === "ia" ? null : "ia"))}
-      >
-        <View className="bg-superficie rounded-3xl px-4 py-4">
-          <Text className="text-texto2 text-[13px] leading-5">
-            {t(chave ? "onb.ai.groq" : "onb.ai.off")}
-          </Text>
-          <TextInput
-            value={rascunho ?? chave ?? ""}
-            onChangeText={setRascunho}
-            onEndEditing={() => {
-              definirChave(rascunho);
-              setRascunho(null);
-            }}
-            placeholder="gsk_…"
-            placeholderTextColor={cores.texto3}
-            autoCapitalize="none"
-            autoCorrect={false}
-            /* `secureTextEntry` não: quem digita uma chave de 56 caracteres num
+          <Linha
+            icone="sparkles"
+            cor="#EC4899"
+            titulo={t("ai.title")}
+            valor={t(chave ? "ai.provider.groq" : "ai.off")}
+            aberta={secao === "ia"}
+            onAlternar={() => setSecao((v) => (v === "ia" ? null : "ia"))}
+          >
+            <View className="bg-superficie rounded-3xl px-4 py-4">
+              <Text className="text-texto2 text-[13px] leading-5">
+                {t(chave ? "onb.ai.groq" : "onb.ai.off")}
+              </Text>
+              <TextInput
+                value={rascunho ?? chave ?? ""}
+                onChangeText={setRascunho}
+                onEndEditing={() => {
+                  definirChave(rascunho);
+                  setRascunho(null);
+                }}
+                placeholder="gsk_…"
+                placeholderTextColor={cores.texto3}
+                autoCapitalize="none"
+                autoCorrect={false}
+                /* `secureTextEntry` não: quem digita uma chave de 56 caracteres num
              teclado de celular precisa ver o que digitou. Ela não é senha de
              ninguém — é um token que a própria pessoa revoga num clique. */
-            className="text-texto text-[13px] mt-3 font-mono"
-            style={{ borderTopWidth: 0.5, borderTopColor: cores.linha, paddingTop: 12 }}
-          />
-          <Text className="text-texto3 text-[12px] leading-4 mt-2">{t("onb.ai.groqDetail")}</Text>
-        </View>
+                className="text-texto text-[13px] mt-3 font-mono"
+                style={{ borderTopWidth: 0.5, borderTopColor: cores.linha, paddingTop: 12 }}
+              />
+              <Text className="text-texto3 text-[12px] leading-4 mt-2">
+                {t("onb.ai.groqDetail")}
+              </Text>
+            </View>
 
-        {/*
+            {/*
         IMAGENS — desligado por padrão, e a tela de Privacidade depende disso.
         Ligar acrescenta um segundo host que recebe pedido do app, e é por isso
         que a política declara esse host condicionado a esta escolha.
       */}
-      </Linha>
+          </Linha>
 
-      <Linha
-        icone="photo"
-        cor="#10B981"
-        titulo={t("sprites.title")}
-        valor={
-          fonte === "custom"
-            ? (manifesto?.name ?? t("source.img.custom"))
-            : t((SPRITE_SOURCE_KEYS[fonte]?.title ?? "sprites.none") as Key)
-        }
-        aberta={secao === "imagens"}
-        onAlternar={() => setSecao((v) => (v === "imagens" ? null : "imagens"))}
-      >
-        <View className="bg-superficie rounded-3xl overflow-hidden">
-          {FONTES.map((f, i) => (
-            <Pressable
-              key={f}
-              onPress={() => definirFonte(f)}
-              className="px-4 py-3.5"
-              style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: cores.linha } : undefined}
-            >
-              <View className="flex-row items-center">
-                <Text
-                  className={`flex-1 text-[15px] ${f === fonte ? "text-texto font-bold" : "text-texto2"}`}
+          <Linha
+            icone="photo"
+            cor="#10B981"
+            titulo={t("sprites.title")}
+            valor={
+              fonte === "custom"
+                ? (manifesto?.name ?? t("source.img.custom"))
+                : t((SPRITE_SOURCE_KEYS[fonte]?.title ?? "sprites.none") as Key)
+            }
+            aberta={secao === "imagens"}
+            onAlternar={() => setSecao((v) => (v === "imagens" ? null : "imagens"))}
+          >
+            <View className="bg-superficie rounded-3xl overflow-hidden">
+              {FONTES.map((f, i) => (
+                <Pressable
+                  key={f}
+                  onPress={() => definirFonte(f)}
+                  className="px-4 py-3.5"
+                  style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: cores.linha } : undefined}
                 >
-                  {t(SPRITE_SOURCE_KEYS[f].title as Key)}
-                </Text>
-                {f === fonte && <Text className="text-texto text-base">✓</Text>}
-              </View>
-              <Text className="text-texto3 text-[12px] leading-4 mt-1">
-                {t(SPRITE_SOURCE_KEYS[f].detail as Key)}
-              </Text>
-            </Pressable>
-          ))}
-          {/* A QUARTA: o manifesto de quem usa. Ela não entra em `FONTES` porque
+                  <View className="flex-row items-center">
+                    <Text
+                      className={`flex-1 text-[15px] ${f === fonte ? "text-texto font-bold" : "text-texto2"}`}
+                    >
+                      {t(SPRITE_SOURCE_KEYS[f].title as Key)}
+                    </Text>
+                    {f === fonte && <Text className="text-texto text-base">✓</Text>}
+                  </View>
+                  <Text className="text-texto3 text-[12px] leading-4 mt-1">
+                    {t(SPRITE_SOURCE_KEYS[f].detail as Key)}
+                  </Text>
+                </Pressable>
+              ))}
+              {/* A QUARTA: o manifesto de quem usa. Ela não entra em `FONTES` porque
             não é uma escolha seca — precisa de um endereço para existir. */}
-          <View
-            className="px-4 py-3.5"
-            style={{ borderTopWidth: 0.5, borderTopColor: cores.linha }}
-          >
-            <View className="flex-row items-center">
-              <Text
-                className={`flex-1 text-[15px] ${fonte === "custom" ? "text-texto font-bold" : "text-texto2"}`}
-              >
-                {manifesto?.name ?? t("source.img.custom")}
-              </Text>
-              {fonte === "custom" && <Text className="text-texto text-base">✓</Text>}
-            </View>
-            <Text className="text-texto3 text-[12px] leading-4 mt-1">
-              {t("source.img.customDetail")}
-            </Text>
-            <CampoDeFonte
-              marca={t("source.img.hint")}
-              inicial={manifestoUrl ?? ""}
-              aoConfirmar={async (url) => {
-                const erro = checarUrl(url, false);
-                if (erro) return dizer(erro);
-                const r = await buscarJson(url);
-                if (!r.ok) return t("source.err.network");
-                const ruim = validarManifesto(r.valor);
-                if (ruim) return dizer(ruim);
-                definirManifesto(url, r.valor as SpriteManifest);
-                return null;
-              }}
-            />
-          </View>
-        </View>
-      </Linha>
-
-      {/*
-        A BASE DO JOGO — logo abaixo das imagens porque é a mesma ideia: o app
-        aponta, não hospeda. Vem depois delas por ser a mais rara de trocar.
-      */}
-      <Linha
-        icone="cylinder.split.1x2"
-        cor="#6366F1"
-        titulo={t("source.data.title")}
-        valor={urlDados ? t("source.ok", { name: dominioDe(urlDados) }) : t("source.data.builtin")}
-        aberta={secao === "base"}
-        onAlternar={() => setSecao((v) => (v === "base" ? null : "base"))}
-      >
-        <View className="bg-superficie rounded-3xl px-4 py-3.5">
-          <Text className="text-texto3 text-[12px] leading-4">{t("source.data.body")}</Text>
-          <CampoDeFonte
-            marca={t("source.data.hint")}
-            inicial={urlDados ?? ""}
-            aoLimpar={() => definirUrlDados(null)}
-            aoConfirmar={async (url) => {
-              const erro = checarUrl(url, false);
-              if (erro) return dizer(erro);
-              const r = await buscarJson(url);
-              if (!r.ok) return t("source.err.network");
-              const ruim = validarDataset(r.valor);
-              if (ruim) return dizer(ruim);
-              definirUrlDados(url);
-              return null;
-            }}
-          />
-        </View>
-      </Linha>
-
-      <Linha
-        icone="figure.walk"
-        cor="#F59E0B"
-        titulo={t("onb.level.title")}
-        valor={String(setup.level)}
-        aberta={secao === "nivel"}
-        onAlternar={() => setSecao((v) => (v === "nivel" ? null : "nivel"))}
-      >
-        <View className="flex-row flex-wrap gap-2">
-          {TRAINER_LEVELS.map((n) => (
-            <Pressable
-              key={n}
-              onPress={() => definirSetup({ level: n })}
-              className="items-center rounded-cartao-sm py-3"
-              /* Sete faixas nao cabem numa linha: 22% de base faz quatro por
-               linha e o `flexGrow` fecha a sobra da segunda. */
-              style={{
-                flexBasis: "22%",
-                flexGrow: 1,
-                backgroundColor: cores.superficie,
-                borderWidth: 1,
-                borderColor: n === setup.level ? cores.texto : "transparent",
-              }}
-            >
-              <Text
-                className={`text-[19px] font-extrabold ${n === setup.level ? "text-texto" : "text-texto2"}`}
-              >
-                {n}
-              </Text>
-              <Text className="text-texto3 text-[10px] tracking-widest mt-0.5">
-                {FAIXA[n] ? t(FAIXA[n]!).toUpperCase() : ""}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-        <Text className="text-texto3 text-[12px] leading-5 mt-2">
-          {t("onb.level.what", {
-            nivel: setup.level,
-            teto: tetoDePowerUp(setup.level, MAX_POWERUP_LEVEL),
-          })}
-        </Text>
-      </Linha>
-
-      <Text className="text-texto3 text-[11px] tracking-widest mt-7 mb-2">
-        {t("faxina.title").toUpperCase()}
-      </Text>
-      <Link href="/ginasio" asChild>
-        <Pressable className="bg-superficie rounded-3xl px-4 py-4 mb-2">
-          <Text className="text-texto text-[15px]">{t("gym.title")}</Text>
-        </Pressable>
-      </Link>
-      <Link href="/time" asChild>
-        <Pressable className="bg-superficie rounded-3xl px-4 py-4 mb-2">
-          <Text className="text-texto text-[15px]">{t("team.open")}</Text>
-        </Pressable>
-      </Link>
-      <Link href="/faxina" asChild>
-        <Pressable className="bg-superficie rounded-3xl px-4 py-4">
-          <Text className="text-texto text-[15px]">{t("faxina.open")}</Text>
-        </Pressable>
-      </Link>
-
-      {/*
-        APOIAR fica aqui também, e não só no setup.
-
-        O setup roda uma vez, na abertura, antes de o app ter provado que serve
-        pra alguma coisa. Quem decide que valeu decide no terceiro mês — e nessa
-        hora precisa de um lugar pra achar a chave.
-      */}
-      <Text className="text-texto3 text-[11px] tracking-widest mt-7 mb-2">
-        {t("support.title").toUpperCase()}
-      </Text>
-      <View className="bg-superficie rounded-3xl px-4 py-4">
-        <Text className="text-texto2 text-[13px] leading-5 mb-3">{t("support.body")}</Text>
-        <Text className="text-texto3 text-[11px] tracking-widest mb-1.5">
-          {t("support.address").toUpperCase()}
-        </Text>
-        <Text selectable className="text-texto text-[13px] leading-5 font-mono">
-          {BITCOIN_ADDRESS}
-        </Text>
-      </View>
-      <Pressable
-        onPress={() => {
-          Clipboard.setStringAsync(BITCOIN_ADDRESS)
-            .then(() => {
-              setCopiado(true);
-              setTimeout(() => setCopiado(false), 2000);
-            })
-            .catch(() => {});
-        }}
-        className="rounded-full py-3.5 items-center mt-3"
-        style={{ borderWidth: 1, borderColor: cores.linha }}
-      >
-        <Text className="text-texto text-[15px] font-semibold">
-          {copiado ? t("support.copied") : t("support.copy")}
-        </Text>
-      </Pressable>
-      <Text className="text-texto3 text-[12px] leading-5 mt-3">{t("support.note")}</Text>
-
-      {/* ── O DADO DO JOGO ─────────────────────────────────────────────────
-          De quando é o arquivo que o app está usando. Dataset velho é a
-          explicação mais comum para um número que não bate com o jogo, e sem
-          esta linha não havia como a pessoa desconfiar disso. */}
-      {/* ⚠️ Só aparece FORA do inglês: em inglês não há segunda linha para
-          mostrar, e um interruptor que não muda nada é mobília. */}
-      {idioma !== "en" && (
-        <>
-          <Text className="text-texto3 text-legenda mt-7 mb-2">
-            {t("settings.showTranslation").toUpperCase()}
-          </Text>
-          <Pressable
-            onPress={alternarTraducao}
-            className="bg-superficie rounded-cartao px-4 py-4 flex-row items-center"
-          >
-            <View className="flex-1">
-              <Text className="text-texto text-corpo">{t("settings.showTranslation")}</Text>
-              <Text className="text-texto3 text-legenda mt-1 leading-4">
-                {t("settings.showTranslationDetail")}
-              </Text>
-            </View>
-            <Text className="text-texto text-base ml-3">{traduzir ? "✓" : ""}</Text>
-          </Pressable>
-        </>
-      )}
-
-      {/* ── QUANTO ISTO OCUPA ──────────────────────────────────────────────
-          ⚠️ Medido no disco, não estimado. O app promete funcionar sem rede, e
-          essa promessa custa espaço — dizer quanto é parte de fazê-la honesta.
-          A base não some porque vem no pacote; as imagens, sim, e o botão de
-          apagar está logo abaixo. */}
-      <Text className="text-texto3 text-legenda mt-7 mb-2">
-        {t("settings.storage").toUpperCase()}
-      </Text>
-      <View className="bg-superficie rounded-cartao px-4 py-4">
-        <View className="flex-row items-center">
-          <Text className="text-texto2 text-corpo flex-1">{t("settings.gameData")}</Text>
-          <Text className="text-texto3 text-legenda">{emMegabytes(espaco.base, idioma)}</Text>
-        </View>
-        <View className="flex-row items-center mt-2">
-          <Text className="text-texto2 text-corpo flex-1">{t("sprites.title")}</Text>
-          <Text className="text-texto3 text-legenda">
-            {off.estado.guardadas} · {emMegabytes(espaco.imagens, idioma)}
-          </Text>
-        </View>
-        <View
-          className="flex-row items-center mt-3 pt-3"
-          style={{ borderTopWidth: 0.5, borderTopColor: cores.linha }}
-        >
-          <Text className="text-texto text-corpo font-semibold flex-1">
-            {t("settings.spaceUsed")}
-          </Text>
-          <Text className="text-texto text-corpo font-semibold">
-            {emMegabytes(espaco.total, idioma)}
-          </Text>
-        </View>
-      </View>
-
-      {/* ── A VOZ DO MODO LENTE ────────────────────────────────────────────
-          ⚠️ O interruptor existia SÓ dentro do modo lente, e quem desligou lá
-          não tem por que lembrar onde religar. Preferência de acessibilidade
-          mora nos Ajustes; o botão de lá continua existindo, porque é durante o
-          uso que se quer calar. */}
-      <Text className="text-texto3 text-legenda mt-7 mb-2">{t("voice.title").toUpperCase()}</Text>
-      <Pressable
-        onPress={alternarVoz}
-        className="bg-superficie rounded-cartao px-4 py-4 flex-row items-center"
-      >
-        <View className="flex-1">
-          <Text className="text-texto text-corpo">{t("voice.enabled")}</Text>
-          <Text className="text-texto3 text-legenda mt-1 leading-4">{t("voice.lensDetail")}</Text>
-        </View>
-        <Text className="text-texto text-base ml-3">{vozLigada ? "✓" : ""}</Text>
-      </Pressable>
-
-      {/* ── AS IMAGENS NO APARELHO ─────────────────────────────────────────
-          ⚠️ Só aparece com uma fonte LIGADA: sem imagem escolhida não há o que
-          baixar, e um botão de download que não baixa nada é promessa falsa. */}
-      {fonte !== "off" && (
-        <>
-          <Text className="text-texto3 text-legenda mt-7 mb-2">
-            {t("prefetch.title").toUpperCase()}
-          </Text>
-          <View className="bg-superficie rounded-cartao px-4 py-4">
-            <Text className="text-texto2 text-corpo leading-5">
-              {off.estado.baixando
-                ? `${off.estado.feitas} / ${off.estado.total}`
-                : t("prefetch.stored", { count: off.estado.guardadas })}
-            </Text>
-            {off.estado.baixando && (
               <View
-                className="rounded-pilula mt-3 overflow-hidden"
-                style={{ height: 5, backgroundColor: cores.linha }}
+                className="px-4 py-3.5"
+                style={{ borderTopWidth: 0.5, borderTopColor: cores.linha }}
               >
-                <View
-                  className="rounded-pilula"
-                  style={{
-                    height: 5,
-                    width: `${Math.round((off.estado.feitas / Math.max(1, off.estado.total)) * 100)}%`,
-                    backgroundColor: cores.investir,
+                <View className="flex-row items-center">
+                  <Text
+                    className={`flex-1 text-[15px] ${fonte === "custom" ? "text-texto font-bold" : "text-texto2"}`}
+                  >
+                    {manifesto?.name ?? t("source.img.custom")}
+                  </Text>
+                  {fonte === "custom" && <Text className="text-texto text-base">✓</Text>}
+                </View>
+                <Text className="text-texto3 text-[12px] leading-4 mt-1">
+                  {t("source.img.customDetail")}
+                </Text>
+                <CampoDeFonte
+                  marca={t("source.img.hint")}
+                  inicial={manifestoUrl ?? ""}
+                  aoConfirmar={async (url) => {
+                    const erro = checarUrl(url, false);
+                    if (erro) return dizer(erro);
+                    const r = await buscarJson(url);
+                    if (!r.ok) return t("source.err.network");
+                    const ruim = validarManifesto(r.valor);
+                    if (ruim) return dizer(ruim);
+                    definirManifesto(url, r.valor as SpriteManifest);
+                    return null;
                   }}
                 />
               </View>
-            )}
-            <Text className="text-texto3 text-legenda mt-2 leading-4">{t("prefetch.warning")}</Text>
-          </View>
-          <View className="flex-row gap-2 mt-3">
+            </View>
+          </Linha>
+
+          {/*
+        A BASE DO JOGO — logo abaixo das imagens porque é a mesma ideia: o app
+        aponta, não hospeda. Vem depois delas por ser a mais rara de trocar.
+      */}
+          <Linha
+            icone="cylinder.split.1x2"
+            cor="#6366F1"
+            titulo={t("source.data.title")}
+            valor={
+              urlDados ? t("source.ok", { name: dominioDe(urlDados) }) : t("source.data.builtin")
+            }
+            aberta={secao === "base"}
+            onAlternar={() => setSecao((v) => (v === "base" ? null : "base"))}
+          >
+            <View className="bg-superficie rounded-3xl px-4 py-3.5">
+              <Text className="text-texto3 text-[12px] leading-4">{t("source.data.body")}</Text>
+              <CampoDeFonte
+                marca={t("source.data.hint")}
+                inicial={urlDados ?? ""}
+                aoLimpar={() => definirUrlDados(null)}
+                aoConfirmar={async (url) => {
+                  const erro = checarUrl(url, false);
+                  if (erro) return dizer(erro);
+                  const r = await buscarJson(url);
+                  if (!r.ok) return t("source.err.network");
+                  const ruim = validarDataset(r.valor);
+                  if (ruim) return dizer(ruim);
+                  definirUrlDados(url);
+                  return null;
+                }}
+              />
+            </View>
+          </Linha>
+
+          <Linha
+            icone="figure.walk"
+            cor="#F59E0B"
+            titulo={t("onb.level.title")}
+            valor={String(setup.level)}
+            aberta={secao === "nivel"}
+            onAlternar={() => setSecao((v) => (v === "nivel" ? null : "nivel"))}
+          >
+            <View className="flex-row flex-wrap gap-2">
+              {TRAINER_LEVELS.map((n) => (
+                <Pressable
+                  key={n}
+                  onPress={() => definirSetup({ level: n })}
+                  className="items-center rounded-cartao-sm py-3"
+                  /* Sete faixas nao cabem numa linha: 22% de base faz quatro por
+               linha e o `flexGrow` fecha a sobra da segunda. */
+                  style={{
+                    flexBasis: "22%",
+                    flexGrow: 1,
+                    backgroundColor: cores.superficie,
+                    borderWidth: 1,
+                    borderColor: n === setup.level ? cores.texto : "transparent",
+                  }}
+                >
+                  <Text
+                    className={`text-[19px] font-extrabold ${n === setup.level ? "text-texto" : "text-texto2"}`}
+                  >
+                    {n}
+                  </Text>
+                  <Text className="text-texto3 text-[10px] tracking-widest mt-0.5">
+                    {FAIXA[n] ? t(FAIXA[n]!).toUpperCase() : ""}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+            <Text className="text-texto3 text-[12px] leading-5 mt-2">
+              {t("onb.level.what", {
+                nivel: setup.level,
+                teto: tetoDePowerUp(setup.level, MAX_POWERUP_LEVEL),
+              })}
+            </Text>
+          </Linha>
+        </Grupo>
+
+        {/* ⚠️ TRÊS PÍLULAS SOLTAS viraram um cartão só. Eram três retângulos
+          idênticos boiando um sobre o outro — a mesma bagunça das linhas de
+          cima, e o site nunca fez isso: ali cada grupo é um cartão. */}
+        <Grupo titulo={t("faxina.title")}>
+          {(
+            [
+              ["/ginasio", "gym.title"],
+              ["/time", "team.open"],
+              ["/faxina", "faxina.open"],
+            ] as const
+          ).map(([rota, chave], i) => (
+            <Link key={rota} href={rota} asChild>
+              <Pressable
+                className="px-4 py-3.5 flex-row items-center"
+                style={i > 0 ? { borderTopWidth: 0.5, borderTopColor: cores.linha } : undefined}
+              >
+                <Text className="text-texto text-corpo flex-1">{t(chave)}</Text>
+                <Text className="text-texto3 text-base">›</Text>
+              </Pressable>
+            </Link>
+          ))}
+        </Grupo>
+
+        {/* ── O APARELHO ─────────────────────────────────────────────────────
+          ⚠️ Cinco blocos soltos viraram UM cartão de linhas que abrem. Cada um
+          era um rótulo em caixa alta mais um cartão inteiro despejado na tela,
+          um embaixo do outro — dez seções antes de chegar ao fim. O site
+          esconde tudo isso atrás de linhas, e é o que faz a tela dele caber. */}
+        <Grupo titulo={t("settings.storage")}>
+          <Linha
+            primeira
+            icone="internaldrive"
+            cor="#64748B"
+            titulo={t("settings.storage")}
+            valor={emMegabytes(espaco.total, idioma)}
+            aberta={secao === "espaco"}
+            onAlternar={() => setSecao((v) => (v === "espaco" ? null : "espaco"))}
+          >
+            <View className="flex-row items-center mt-3">
+              <Text className="text-texto2 text-corpo flex-1">{t("settings.gameData")}</Text>
+              <Text className="text-texto3 text-legenda">{emMegabytes(espaco.base, idioma)}</Text>
+            </View>
+            <View className="flex-row items-center mt-2">
+              <Text className="text-texto2 text-corpo flex-1">{t("sprites.title")}</Text>
+              <Text className="text-texto3 text-legenda">
+                {off.estado.guardadas} · {emMegabytes(espaco.imagens, idioma)}
+              </Text>
+            </View>
+          </Linha>
+
+          {fonte !== "off" && (
+            <Linha
+              icone="arrow.down.circle"
+              cor="#0EA5E9"
+              titulo={t("prefetch.title")}
+              valor={String(off.estado.guardadas)}
+              aberta={secao === "baixar"}
+              onAlternar={() => setSecao((v) => (v === "baixar" ? null : "baixar"))}
+            >
+              <Text className="text-texto2 text-corpo leading-5 mt-3">
+                {off.estado.baixando
+                  ? `${off.estado.feitas} / ${off.estado.total}`
+                  : t("prefetch.stored", { count: off.estado.guardadas })}
+              </Text>
+              {off.estado.baixando && (
+                <View
+                  className="rounded-pilula mt-3 overflow-hidden"
+                  style={{ height: 5, backgroundColor: cores.linha }}
+                >
+                  <View
+                    className="rounded-pilula"
+                    style={{
+                      height: 5,
+                      width: `${Math.round((off.estado.feitas / Math.max(1, off.estado.total)) * 100)}%`,
+                      backgroundColor: cores.investir,
+                    }}
+                  />
+                </View>
+              )}
+              <Text className="text-texto3 text-legenda mt-2 leading-4">
+                {t("prefetch.warning")}
+              </Text>
+              <View className="flex-row gap-2 mt-3">
+                <Pressable
+                  onPress={() => {
+                    if (off.estado.baixando) return;
+                    void off.baixar((dados?.canonicas ?? []).map((e) => e.spriteId));
+                  }}
+                  className="rounded-pilula py-3 items-center flex-1"
+                  style={{ borderWidth: 1, borderColor: cores.linha }}
+                >
+                  <Text className="text-texto text-corpo font-semibold">
+                    {off.estado.baixando
+                      ? t("prefetch.background")
+                      : t("prefetch.start", { count: (dados?.canonicas ?? []).length })}
+                  </Text>
+                </Pressable>
+                {off.estado.guardadas > 0 && !off.estado.baixando && (
+                  <Pressable
+                    onPress={off.apagar}
+                    className="rounded-pilula py-3 items-center flex-1"
+                    style={{ borderWidth: 1, borderColor: cores.linha }}
+                  >
+                    <Text className="text-texto2 text-corpo font-semibold">
+                      {t("prefetch.clear")}
+                    </Text>
+                  </Pressable>
+                )}
+              </View>
+            </Linha>
+          )}
+
+          <Linha
+            icone="calendar"
+            cor="#14B8A6"
+            titulo={t("settings.gameData")}
+            valor={
+              dados?.version.generatedAt
+                ? new Date(dados.version.generatedAt).toLocaleDateString(idioma)
+                : t("common.unknown")
+            }
+            aberta={secao === "versao"}
+            onAlternar={() => setSecao((v) => (v === "versao" ? null : "versao"))}
+          >
+            {dados?.version.generatedAt ? (
+              <Text className="text-texto3 text-legenda mt-3 leading-4">
+                {t("settings.dataAge", {
+                  n: Math.max(
+                    0,
+                    Math.floor((Date.now() - Date.parse(dados.version.generatedAt)) / 86_400_000),
+                  ),
+                })}
+              </Text>
+            ) : null}
+          </Linha>
+
+          {/* A VOZ e a TRADUÇÃO são interruptores: viram linha com ✓ à direita,
+            não linha que abre. */}
+          <Interruptor
+            icone="waveform"
+            cor="#F97316"
+            titulo={t("voice.enabled")}
+            detalhe={t("voice.lensDetail")}
+            ligado={vozLigada}
+            onAlternar={alternarVoz}
+          />
+          {/* ⚠️ Só FORA do inglês: lá não há segunda linha para mostrar, e um
+            interruptor que não muda nada é mobília. */}
+          {idioma !== "en" && (
+            <Interruptor
+              icone="character.book.closed"
+              cor="#8B5CF6"
+              titulo={t("settings.showTranslation")}
+              detalhe={t("settings.showTranslationDetail")}
+              ligado={traduzir}
+              onAlternar={alternarTraducao}
+            />
+          )}
+        </Grupo>
+
+        {/* ── SOBRE, PRIVACIDADE, FEEDBACK E APOIAR ───────────────────────── */}
+        <Grupo>
+          <Linha
+            primeira
+            icone="info.circle"
+            cor="#6B7280"
+            titulo={t("about.title")}
+            aberta={secao === "sobre"}
+            onAlternar={() => setSecao((v) => (v === "sobre" ? null : "sobre"))}
+          >
+            <Text className="text-texto2 text-corpo leading-5 mt-3">{t("about.solo")}</Text>
+            <Text className="text-texto3 text-legenda mt-3 leading-4">
+              {t("about.devices", { aparelhos: APARELHOS_TESTADOS.join(" · ") })}
+            </Text>
+          </Linha>
+
+          {/* Privacidade é EXIGÊNCIA das lojas: alcançável de dentro do app. */}
+          <Link href="/legal" asChild>
+            <Pressable
+              className="flex-row items-center gap-3 px-4 py-3.5"
+              style={{ borderTopWidth: 0.5, borderTopColor: cores.linha }}
+            >
+              <View
+                className="items-center justify-center"
+                style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: "#3B82F6" }}
+              >
+                <SymbolView
+                  name={"lock.shield" as never}
+                  size={14}
+                  tintColor="#FFFFFF"
+                  fallback={<View />}
+                />
+              </View>
+              <Text className="text-texto text-corpo flex-1">{t("privacy.title")}</Text>
+              <Text className="text-texto3 text-base">›</Text>
+            </Pressable>
+          </Link>
+
+          {/* ⚠️ FEEDBACK NO NÍVEL DE CIMA, e não enterrado no texto legal — quem
+            quer avisar que algo quebrou não vai procurar lá dentro. */}
+          <Pressable
+            onPress={() => {
+              const corpo = [
+                "",
+                "---",
+                `${Platform.OS} ${Platform.Version}`,
+                `${t("settings.language")}: ${idioma}`,
+              ].join("\n");
+              void Linking.openURL(
+                `mailto:miguel@nspx.dev?subject=${encodeURIComponent("TrainerKit")}&body=${encodeURIComponent(corpo)}`,
+              );
+            }}
+            className="flex-row items-center gap-3 px-4 py-3.5"
+            style={{ borderTopWidth: 0.5, borderTopColor: cores.linha }}
+          >
+            <View
+              className="items-center justify-center"
+              style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: "#F59E0B" }}
+            >
+              <SymbolView
+                name={"bubble.left" as never}
+                size={14}
+                tintColor="#FFFFFF"
+                fallback={<View />}
+              />
+            </View>
+            <Text className="text-texto text-corpo flex-1">{t("feedback.title")}</Text>
+            <Text className="text-texto3 text-base">›</Text>
+          </Pressable>
+
+          {/*
+          APOIAR fica aqui também, e não só no setup: o setup roda uma vez, antes
+          de o app ter provado que serve pra alguma coisa. Quem decide que valeu
+          decide no terceiro mês, e nessa hora precisa achar o endereço.
+        */}
+          <Linha
+            icone="heart"
+            cor="#EC4899"
+            titulo={t("support.title")}
+            aberta={secao === "apoiar"}
+            onAlternar={() => setSecao((v) => (v === "apoiar" ? null : "apoiar"))}
+          >
+            <Text className="text-texto2 text-legenda leading-5 mt-3">{t("support.body")}</Text>
+            <Text className="text-texto3 text-[11px] tracking-widest mt-3 mb-1.5">
+              {t("support.address").toUpperCase()}
+            </Text>
+            <Text selectable className="text-texto text-[13px] leading-5 font-mono">
+              {BITCOIN_ADDRESS}
+            </Text>
             <Pressable
               onPress={() => {
-                if (off.estado.baixando) return;
-                void off.baixar((dados?.canonicas ?? []).map((e) => e.spriteId));
+                Clipboard.setStringAsync(BITCOIN_ADDRESS)
+                  .then(() => {
+                    setCopiado(true);
+                    setTimeout(() => setCopiado(false), 2000);
+                  })
+                  .catch(() => {});
               }}
-              className="rounded-pilula py-3.5 items-center flex-1"
+              className="rounded-pilula py-3 items-center mt-3"
               style={{ borderWidth: 1, borderColor: cores.linha }}
             >
               <Text className="text-texto text-corpo font-semibold">
-                {off.estado.baixando
-                  ? t("prefetch.background")
-                  : t("prefetch.start", { count: (dados?.canonicas ?? []).length })}
+                {copiado ? t("support.copied") : t("support.copy")}
               </Text>
             </Pressable>
-            {off.estado.guardadas > 0 && !off.estado.baixando && (
-              <Pressable
-                onPress={off.apagar}
-                className="rounded-pilula py-3.5 items-center flex-1"
-                style={{ borderWidth: 1, borderColor: cores.linha }}
-              >
-                <Text className="text-texto2 text-corpo font-semibold">{t("prefetch.clear")}</Text>
-              </Pressable>
-            )}
-          </View>
-        </>
-      )}
+            <Text className="text-texto3 text-legenda leading-4 mt-3">{t("support.note")}</Text>
+          </Linha>
+        </Grupo>
 
-      <Text className="text-texto3 text-legenda mt-7 mb-2">
-        {t("settings.gameData").toUpperCase()}
-      </Text>
-      <View className="bg-superficie rounded-cartao px-4 py-4">
-        <Text className="text-texto text-corpo">
-          {dados?.version.generatedAt
-            ? t("settings.buildOf", {
-                date: new Date(dados.version.generatedAt).toLocaleDateString(idioma),
-              })
-            : t("common.unknown")}
-        </Text>
-        {dados?.version.generatedAt && (
-          <Text className="text-texto3 text-legenda mt-1">
-            {t("settings.dataAge", {
-              n: Math.max(
-                0,
-                Math.floor((Date.now() - Date.parse(dados.version.generatedAt)) / 86_400_000),
+        {/* ── APAGAR TUDO ────────────────────────────────────────────────────
+          ⚠️ Cartão SEPARADO, e no fim: NÃO EXISTE SERVIDOR, o que sumir aqui
+          sumiu. Dois toques e a lista do que exatamente vai embora. */}
+        <Grupo>
+          <Linha
+            primeira
+            icone="trash"
+            cor="#EF4444"
+            titulo={t("wipe.action")}
+            aberta={secao === "apagar"}
+            onAlternar={() => setSecao((v) => (v === "apagar" ? null : "apagar"))}
+          >
+            <Text className="text-texto2 text-corpo leading-5 mt-3">{t("wipe.noServer")}</Text>
+            {(["wipe.item.collection", "wipe.item.settings", "wipe.item.cache"] as const).map(
+              (k) => (
+                <Text key={k} className="text-texto3 text-legenda mt-2 leading-4">
+                  • {t(k)}
+                </Text>
               ),
-            })}
-          </Text>
-        )}
-      </View>
-
-      {/* ── SOBRE ──────────────────────────────────────────────────────────
-          Quem fez, e em que aparelhos isto foi testado de verdade. A lista é
-          curta de propósito: dizer "testado em iOS" quando foram dois aparelhos
-          é promessa que o app não pode cumprir. */}
-      <Text className="text-texto3 text-legenda mt-7 mb-2">{t("about.title").toUpperCase()}</Text>
-      <View className="bg-superficie rounded-cartao px-4 py-4">
-        <Text className="text-texto2 text-corpo leading-5">{t("about.solo")}</Text>
-        <Text className="text-texto3 text-legenda mt-3 leading-4">
-          {t("about.devices", { aparelhos: APARELHOS_TESTADOS.join(" · ") })}
-        </Text>
-      </View>
-
-      {/* ── APAGAR TUDO ────────────────────────────────────────────────────
-          ⚠️ NÃO EXISTE SERVIDOR: o que sumir aqui sumiu. Por isso são dois
-          toques e um aviso do que exatamente vai embora — e por isso a coleção
-          se exporta na tela dela antes. */}
-      <Text className="text-texto3 text-legenda mt-7 mb-2">{t("wipe.title").toUpperCase()}</Text>
-      <View className="bg-superficie rounded-cartao px-4 py-4">
-        <Text className="text-texto2 text-corpo leading-5">{t("wipe.noServer")}</Text>
-        {(["wipe.item.collection", "wipe.item.settings", "wipe.item.cache"] as const).map((k) => (
-          <Text key={k} className="text-texto3 text-legenda mt-2 leading-4">
-            • {t(k)}
-          </Text>
-        ))}
-      </View>
-      <Pressable
-        onPress={() => {
-          if (!confirmandoApagar) {
-            setConfirmandoApagar(true);
-            return;
-          }
-          void apagarTudo().then(() => setConfirmandoApagar(false));
-        }}
-        className="rounded-pilula py-3.5 items-center mt-3"
-        style={{ borderWidth: 1, borderColor: confirmandoApagar ? cores.transferir : cores.linha }}
-      >
-        <Text
-          className="text-corpo font-semibold"
-          style={{ color: confirmandoApagar ? cores.transferir : cores.texto2 }}
-        >
-          {t(confirmandoApagar ? "wipe.confirm" : "wipe.action")}
-        </Text>
-      </Pressable>
-
-      {/* ⚠️ FEEDBACK NO NÍVEL DE CIMA, e não enterrado no fim da tela de
-          privacidade. "adiciona botao de sla, feedback e etc" — quem quer avisar
-          que algo quebrou não vai procurar isso dentro do texto legal. */}
-      <Pressable
-        onPress={() => {
-          const corpo = [
-            "",
-            "---",
-            `${Platform.OS} ${Platform.Version}`,
-            `${t("settings.language")}: ${idioma}`,
-          ].join("\n");
-          void Linking.openURL(
-            `mailto:miguel@nspx.dev?subject=${encodeURIComponent("TrainerKit")}&body=${encodeURIComponent(corpo)}`,
-          );
-        }}
-        className="bg-superficie rounded-cartao px-4 py-4 mt-3 flex-row items-center"
-      >
-        <Text className="text-texto text-corpo flex-1">{t("feedback.title")}</Text>
-        <Text className="text-texto3 text-base">›</Text>
-      </Pressable>
-
-      {/* Privacidade e aviso de marca. As lojas exigem que seja alcançável de
-          DENTRO do app, e o aviso de marca precisa chegar a quem instala — o
-          README não alcança essa pessoa. */}
-      <Link href="/legal" asChild>
-        <Pressable className="bg-superficie rounded-3xl px-4 py-4 mt-7">
-          <Text className="text-texto text-[15px]">{t("privacy.title")}</Text>
-        </Pressable>
-      </Link>
-    </ScrollView>
+            )}
+            <Pressable
+              onPress={() => {
+                if (!confirmandoApagar) {
+                  setConfirmandoApagar(true);
+                  return;
+                }
+                void apagarTudo().then(() => setConfirmandoApagar(false));
+              }}
+              className="rounded-pilula py-3 items-center mt-3"
+              style={{
+                borderWidth: 1,
+                borderColor: confirmandoApagar ? cores.transferir : cores.linha,
+              }}
+            >
+              <Text
+                className="text-corpo font-semibold"
+                style={{ color: confirmandoApagar ? cores.transferir : cores.texto2 }}
+              >
+                {t(confirmandoApagar ? "wipe.confirm" : "wipe.action")}
+              </Text>
+            </Pressable>
+          </Linha>
+        </Grupo>
+      </ScrollView>
+    </>
   );
 }

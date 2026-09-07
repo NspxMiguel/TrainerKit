@@ -337,7 +337,7 @@ export const RU: Dict = {
   "assistant.title": "Что я думаю",
   "home.today": "Выбор дня",
   "tabs.home": "Главная",
-  "tabs.pokedex": "Покедекс",
+  "tabs.pokedex": "Виды",
   "tabs.settings": "Настройки",
   "settings.title": "Настройки",
   "settings.appearance": "Оформление",

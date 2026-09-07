@@ -337,7 +337,7 @@ export const JA: Dict = {
   "assistant.title": "わたしの見立て",
   "home.today": "今日の注目",
   "tabs.home": "ホーム",
-  "tabs.pokedex": "ずかん",
+  "tabs.pokedex": "図鑑",
   "tabs.settings": "設定",
   "settings.title": "設定",
   "settings.appearance": "外観",

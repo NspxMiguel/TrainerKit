@@ -354,7 +354,7 @@ export const PT_BR: Dict = {
 
   "home.today": "Destaque de hoje",
   "tabs.home": "Início",
-  "tabs.pokedex": "Pokédex",
+  "tabs.pokedex": "Espécies",
   "tabs.settings": "Ajustes",
   "settings.title": "Ajustes",
   "settings.appearance": "Aparência",

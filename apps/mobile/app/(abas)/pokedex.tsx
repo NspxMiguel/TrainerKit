@@ -28,6 +28,7 @@ import { Segmented } from "../../src/Segmented";
 import { SymbolView } from "expo-symbols";
 
 import { corDoTipo, Selo, tintaSobre } from "../../src/Selo";
+import { TopoDeVidro } from "../../src/TopoDeVidro";
 import { PerguntarColecao } from "../../src/PerguntarColecao";
 import { useSetup } from "../../src/setup";
 import { useTema } from "../../src/tema";
@@ -152,6 +153,8 @@ export default function Pokedex() {
    * novo no mesmo limpa.
    */
   const [tipo, setTipo] = useState<string | null>(null);
+  /* Fechado por padrão: a tela abre para VER a lista, não para filtrá-la. */
+  const [filtroAberto, setFiltroAberto] = useState(false);
 
   const fila = usePendencias(dados);
 
@@ -269,6 +272,7 @@ export default function Pokedex() {
 
   return (
     <View className="flex-1 bg-fundo">
+      <TopoDeVidro />
       <View className="px-4 pb-2" style={{ paddingTop: alto + 8 }}>
         <View className="flex-row items-center justify-between mb-3">
           <Text className="text-titulo-tela text-texto">{t("tabs.pokedex")}</Text>
@@ -304,20 +308,47 @@ export default function Pokedex() {
           />
         </View>
 
-        <Vidro raio={999} interativo>
-          <TextInput
-            value={busca}
-            onChangeText={setBusca}
-            placeholder={t("especies.searchPlaceholder")}
-            placeholderTextColor={cores.texto3}
-            className="px-5 py-3 text-corpo"
-            style={{ color: cores.texto }}
-          />
-        </Vidro>
+        {/* ⚠️ A BUSCA E O FILTRO NA MESMA LINHA, como no site.
+            A ordenação e os dezoito tipos eram duas fileiras que rolavam de
+            lado e ficavam CORTADAS na borda — "Ultra Master Ataque" começando
+            no meio de uma palavra. Isso não é filtro, é sujeira: quem chega não
+            sabe que aquilo rola, e quem sabe não acha o que quer. Atrás de um
+            botão elas cabem inteiras. */}
+        <View className="flex-row gap-2">
+          <View className="flex-1">
+            <Vidro raio={999} interativo>
+              <TextInput
+                value={busca}
+                onChangeText={setBusca}
+                placeholder={t("especies.searchPlaceholder")}
+                placeholderTextColor={cores.texto3}
+                className="px-5 py-3 text-corpo"
+                style={{ color: cores.texto }}
+              />
+            </Vidro>
+          </View>
+          <Pressable
+            onPress={() => setFiltroAberto((v) => !v)}
+            accessibilityLabel={t("filter.sortBy")}
+            className="rounded-cartao-sm items-center justify-center"
+            style={{
+              width: 46,
+              backgroundColor:
+                filtroAberto || tipo || ordem !== "dex" ? cores.texto : cores.superficie,
+            }}
+          >
+            <SymbolView
+              name="slider.horizontal.3"
+              size={18}
+              tintColor={filtroAberto || tipo || ordem !== "dex" ? cores.fundo : cores.texto2}
+              fallback={<Text style={{ color: cores.texto2, fontSize: 16 }}>≡</Text>}
+            />
+          </Pressable>
+        </View>
 
         {/* A ORDEM, e só na aba de todas: "meus" já é ordenado por pendência,
             que é a pergunta daquela lista. */}
-        {aba === "todos" && (
+        {aba === "todos" && filtroAberto && (
           <View className="mt-3">
             <Segmented
               rotuloAcessivel={t("filter.sortBy")}
@@ -426,11 +457,14 @@ export default function Pokedex() {
         */
         <FlatList
           data={todas}
-          key={todasEmGrade ? "todas-grade-4" : "todas-lista"}
-          numColumns={todasEmGrade ? 4 : 1}
+          key={todasEmGrade ? "todas-grade-3" : "todas-lista"}
+          /* ⚠️ TRÊS, e não quatro: com quatro o nome da espécie cabia em
+             11px e ainda cortava ("Rattata (Alo..."). O site usa três, e é
+             o que deixa o selo grande o suficiente para varrer por cor. */
+          numColumns={todasEmGrade ? 3 : 1}
           keyExtractor={(s: Especie) => s.id}
           {...(todasEmGrade ? { columnWrapperStyle: { gap: 10 } } : {})}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 10 }}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 96, gap: 10 }}
           renderItem={({ item }) => (
             /*
               ⚠️ `router.push` e NAO `<Link asChild>`.
@@ -487,7 +521,7 @@ export default function Pokedex() {
           numColumns={emGrade ? 3 : 1}
           keyExtractor={(m) => m.guardado.id}
           {...(emGrade ? { columnWrapperStyle: { gap: 10 } } : {})}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 10 }}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 96, gap: 10 }}
           renderItem={({ item, index }) => (
             <Toque
               onPress={() =>
