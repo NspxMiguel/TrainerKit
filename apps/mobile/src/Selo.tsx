@@ -68,6 +68,22 @@ function monograma(nome: string): string {
     .toUpperCase();
 }
 
+/**
+ * A COR DO TIPO, para quem nao e o selo.
+ *
+ * O cabecalho da ficha e o heroi do Inicio pintam com a cor do tipo primario —
+ * mesma tabela que o selo usa, exportada em vez de duplicada. Duplicar aqui
+ * garantiria divergencia na primeira vez que uma cor fosse corrigida.
+ */
+export function corDoTipo(tipo: string | undefined): string {
+  return CORES[tipo ?? ""] ?? RESERVA;
+}
+
+/** A tinta legivel sobre `corDoTipo` — a mesma conta de luminancia do selo. */
+export function tintaSobre(fundo: string): string {
+  return contraste(fundo, "#FFFFFF") >= contraste(fundo, TINTA_ESCURA) ? "#FFFFFF" : TINTA_ESCURA;
+}
+
 export function Selo({ especie, tamanho = 44 }: { especie: Especie; tamanho?: number }) {
   const { fonte } = useImagens();
   const [falhou, setFalhou] = useState(false);

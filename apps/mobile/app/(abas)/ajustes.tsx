@@ -2,6 +2,7 @@ import * as Clipboard from "expo-clipboard";
 import { Link } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
   LANGUAGES,
@@ -49,8 +50,15 @@ export default function Ajustes() {
   const [rascunho, setRascunho] = useState<string | null>(null);
   const [copiado, setCopiado] = useState(false);
 
+  const alto = useSafeAreaInsets().top;
+
   return (
-    <ScrollView className="flex-1 bg-fundo" contentContainerStyle={{ padding: 20 }}>
+    <ScrollView
+      className="flex-1 bg-fundo"
+      /* +110 embaixo: a barra de abas FLUTUA sobre o conteudo, entao sem folga
+         a ultima linha de Ajustes fica atras do vidro e nao da pra tocar. */
+      contentContainerStyle={{ padding: 20, paddingTop: alto + 12, paddingBottom: 130 }}
+    >
       <Text className="text-texto3 text-[11px] tracking-widest mb-2">
         {t("settings.appearance").toUpperCase()}
       </Text>

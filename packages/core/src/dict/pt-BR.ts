@@ -341,6 +341,10 @@ export const PT_BR: Dict = {
   "assistant.ask": "Perguntar",
   "assistant.title": "O que eu acho",
 
+  "home.today": "Destaque de hoje",
+  "tabs.home": "Início",
+  "tabs.pokedex": "Pokédex",
+  "tabs.settings": "Ajustes",
   "settings.title": "Ajustes",
   "settings.appearance": "Aparência",
   "settings.theme.system": "Sistema",

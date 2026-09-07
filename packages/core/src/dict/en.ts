@@ -364,6 +364,10 @@ const EN = {
   "assistant.title": "What I think",
 
   // -------------------------------------------------------------------- ajustes
+  "home.today": "Today's pick",
+  "tabs.home": "Home",
+  "tabs.pokedex": "Pokédex",
+  "tabs.settings": "Settings",
   "settings.title": "Settings",
   "settings.appearance": "Appearance",
   "settings.theme.system": "System",

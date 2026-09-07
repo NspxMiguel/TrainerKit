@@ -32,7 +32,10 @@ function Casca() {
           contentStyle: { backgroundColor: cores.fundo },
         }}
       >
-        <Stack.Screen name="index" options={{ title: "Espécies" }} />
+        {/* AS ABAS SAO A RAIZ. O resto continua em pilha POR CIMA delas —
+            ficha, calculadora e leitor sao destinos de leitura, nao lugares
+            onde se mora, entao entram com voltar e nao com aba. */}
+        <Stack.Screen name="(abas)" options={{ headerShown: false }} />
         <Stack.Screen name="especie/[id]" options={{ title: "" }} />
         <Stack.Screen name="iv/[id]" options={{ title: "" }} />
         <Stack.Screen name="encontro/[id]" options={{ title: "" }} />
@@ -41,7 +44,6 @@ function Casca() {
         <Stack.Screen name="agenda/index" options={{ title: "" }} />
         <Stack.Screen name="colecao/index" options={{ title: "" }} />
         <Stack.Screen name="faxina/index" options={{ title: "" }} />
-        <Stack.Screen name="ajustes/index" options={{ title: "" }} />
         <Stack.Screen name="time/index" options={{ title: "" }} />
         <Stack.Screen name="ginasio/index" options={{ title: "" }} />
         <Stack.Screen name="legal/index" options={{ title: "" }} />
