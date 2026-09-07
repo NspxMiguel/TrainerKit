@@ -1,5 +1,5 @@
 import AsyncStorage from "expo-sqlite/kv-store";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 /**
  * A colecao — os bichos que ele guardou.
@@ -272,6 +272,18 @@ export async function importar(texto: string): Promise<number> {
   return validos.length;
 }
 
+/**
+ * DEVOLVE o que a faxina tirou.
+ *
+ * ⚠️ Os registros voltam com o MESMO id. É isso que faz o desfazer ser um
+ * desfazer: um id novo criaria cópias e a coleção cresceria a cada vai-e-volta.
+ */
+export async function restaurar(linhas: readonly Guardado[]): Promise<void> {
+  const lista = await ler();
+  const existentes = new Set(lista.map((g) => g.id));
+  await gravar([...lista, ...linhas.filter((g) => !existentes.has(g.id))]);
+}
+
 export async function remover(id: string): Promise<void> {
   const lista = await ler();
   await gravar(lista.filter((g) => g.id !== id));
@@ -309,6 +321,18 @@ export function useColecao(): {
     };
   }, [recarregar]);
 
-  const itens = todos?.filter((g) => (g.colecao ?? COLECAO_PADRAO) === ativa) ?? null;
+  /*
+   * ⚠️ `useMemo` NÃO É OTIMIZAÇÃO AQUI, é correção.
+   *
+   * Sem ele `itens` era um array novo a cada render, e todo `useMemo` que
+   * depende dele recalculava sempre. Na Faxina isso virou laço infinito —
+   * "Maximum update depth exceeded" — porque o efeito que sincroniza a seleção
+   * dependia de uma lista que mudava de identidade em toda passada.
+   */
+  const itens = useMemo(
+    () => todos?.filter((g) => (g.colecao ?? COLECAO_PADRAO) === ativa) ?? null,
+    [todos, ativa],
+  );
+
   return { itens, todos, colecoes, ativa, recarregar };
 }

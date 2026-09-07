@@ -271,7 +271,7 @@ export const PT_BR: Dict = {
 
   // ------------------------------------------------------------------- faxina
   "faxina.title": "Faxina",
-  "faxina.intro": "O TrainerKit não mexe no jogo. Transfira no o jogo primeiro, depois tire daqui.",
+  "faxina.intro": "O TrainerKit não mexe no jogo. Transfira no jogo primeiro, depois tire daqui.",
   "faxina.open": "Faxina",
   "faxina.openDetail.many": "{n} podem sair",
   "faxina.sure": "Sem dúvida",
@@ -721,7 +721,7 @@ export const PT_BR: Dict = {
   "ai.sharedDetail": "Uma chave compartilhada com limite pequeno, guardada no servidor — os seus dados não passam por ela além da própria pergunta. Quando o limite acaba, use a sua chave da Groq ou o modelo no aparelho.",
   "ai.err.dailyQuota": "O limite grátis de hoje acabou. Pra continuar sem limite, use a IA no aparelho ou ponha a sua própria chave da Groq em Ajustes.",
   "ai.err.hourQuota": "Você usou as perguntas grátis desta hora. Espera um pouco, ou usa a IA no aparelho / a sua própria chave da Groq.",
-  "ai.err.offTopic": "Só sei falar de o jogo. Pergunta sobre uma espécie, um golpe, uma raide ou a sua coleção.",
+  "ai.err.offTopic": "Só sei falar do jogo. Pergunta sobre uma espécie, um golpe, uma raide ou a sua coleção.",
   "ai.err.tooLong": "Pergunta muito longa. Encurta um pouco.",
   "ai.err.empty": "Escreve a pergunta primeiro.",
   "ai.err.noKey": "Falta a chave da Groq. Põe ela em Ajustes › Assistente com IA.",

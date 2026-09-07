@@ -31,6 +31,26 @@ const PADROES: { idioma: string; regex: RegExp; explica: string }[] = [
     explica: "determinante singular antes de espécies",
   },
   {
+    idioma: "pt-BR",
+    /*
+     * CONTRAÇÃO QUE FALTOU.
+     *
+     * A troca de marca pôs "o jogo" onde antes havia um nome próprio, e em
+     * português a preposição contrai: "de o jogo" tinha que virar "do jogo".
+     * Apareceram dois — "Transfira no o jogo primeiro" e "Só sei falar de o
+     * jogo" — e os dois passaram por typecheck, teste de chave e revisão.
+     */
+    /*
+     * ⚠️ SEM o "a" solto na lista. O `\b` do JavaScript só conhece
+     * `[A-Za-z0-9_]`, então "ç" conta como fronteira e "alcança os" casava
+     * como se fosse a preposição "a" seguida de artigo. Duas frases corretas
+     * foram acusadas antes de eu perceber. Com "de", "em" e "por" o padrão
+     * fica sem ambiguidade.
+     */
+    regex: /\b(de|em|por) (o|a|os|as)\s/i,
+    explica: "preposição sem contrair (de o, em a, …)",
+  },
+  {
     idioma: "es",
     /* "de su especie" e "otro de su especie" estão CERTOS — o `de` antes muda a
        frase de posse para pertencimento, e aí o singular é o correto. */

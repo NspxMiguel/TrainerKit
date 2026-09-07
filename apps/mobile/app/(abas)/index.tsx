@@ -177,7 +177,11 @@ const ATALHOS: { rota: string; rotulo: Key; icone: string }[] = [
   { rota: "/ginasio", rotulo: "gym.title", icone: "shield.fill" },
   { rota: "/chocadeira", rotulo: "eggs.title", icone: "circle.dashed" },
   { rota: "/agenda", rotulo: "agenda.title", icone: "calendar" },
-  { rota: "/colecao", rotulo: "especies.mine", icone: "tray.full.fill" },
+  /* ⚠️ "Contas", e não "Meus": a lista dos seus bichos passou a viver na aba
+     Pokédex, e esta tela virou a das CONTAS (criar, trocar, apagar) mais o
+     backup. Dois atalhos chamados "Meus" levando a telas diferentes é o tipo de
+     coisa que faz a pessoa achar que o app perdeu a coleção dela. */
+  { rota: "/colecao", rotulo: "colecoes.title", icone: "person.crop.circle" },
   { rota: "/itens", rotulo: "items.short", icone: "bag.fill" },
 ];
 
