@@ -1,5 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, ScrollView, Text, View } from "react-native";
@@ -13,6 +13,7 @@ import type { Guardado } from "../../src/colecao";
 import { useDados, type Especie } from "../../src/dados";
 import { useT } from "../../src/i18n";
 import { corDoTipo, Selo, tintaSobre } from "../../src/Selo";
+import { DicaDoDia } from "../../src/DicaDoDia";
 import { useTema } from "../../src/tema";
 import { Toque } from "../../src/Toque";
 
@@ -185,6 +186,7 @@ export default function Inicio() {
   const { cores } = useTema();
   const { pronto, dados } = useDados();
   const { itens, recarregar } = useColecao();
+  const router = useRouter();
   const { top: alto, bottom: baixo } = useSafeAreaInsets();
   const [agora] = useState(() => new Date().getHours());
 
@@ -235,10 +237,28 @@ export default function Inicio() {
       .slice(0, 12);
   }, [itens, dados, fila]);
 
+  /*
+   * O ESQUELETO, e não um giro no meio da tela.
+   *
+   * ⚠️ Um `ActivityIndicator` centralizado diz "espere" e some; o esqueleto diz
+   * O QUE vai aparecer, e a tela não pula quando o dado chega — que é o defeito
+   * que a lista de lançamento do projeto chama pelo nome.
+   */
   if (!pronto) {
     return (
-      <View className="flex-1 items-center justify-center bg-fundo">
-        <ActivityIndicator color={cores.texto} />
+      <View className="flex-1 bg-fundo px-4" style={{ paddingTop: alto + 8 }}>
+        <View className="rounded-cartao-sm bg-superficie mb-4" style={{ height: 34, width: 180 }} />
+        <View className="rounded-cartao-lg bg-superficie" style={{ height: 268 }} />
+        <View className="rounded-pilula bg-superficie mt-4" style={{ height: 52 }} />
+        <View className="flex-row gap-2 mt-3">
+          {[0, 1, 2].map((i) => (
+            <View
+              key={i}
+              className="rounded-pilula bg-superficie"
+              style={{ height: 40, flex: 1 }}
+            />
+          ))}
+        </View>
       </View>
     );
   }
@@ -251,6 +271,23 @@ export default function Inicio() {
     >
       <View className="px-4" style={{ paddingTop: alto + 8 }}>
         <Text className="text-saudacao text-texto mb-4">{t(saudacao(agora))}</Text>
+
+        {/* A BUSCA DO INÍCIO leva para a Pokédex já filtrada. Ela existe porque
+            procurar um bicho é a coisa mais frequente do app, e obrigar a trocar
+            de aba antes de digitar põe um passo no caminho de todo mundo. */}
+        <Toque
+          onPress={() => router.push("/pokedex")}
+          className="rounded-pilula px-5 py-3 mb-4 flex-row items-center gap-2"
+          style={{ backgroundColor: cores.superficie }}
+        >
+          <SymbolView
+            name="magnifyingglass"
+            size={15}
+            tintColor={cores.texto3}
+            fallback={<View />}
+          />
+          <Text className="text-texto3 text-corpo">{t("home.search")}</Text>
+        </Toque>
         {destaque && (
           <Heroi
             especie={destaque}
@@ -343,6 +380,9 @@ export default function Inicio() {
             />
           </>
         )}
+        {/* A dica só aparece quando NÃO há pendência: com fila aberta o assunto
+            da tela é a fila, e ensinar por cima disso é ruído. */}
+        {!pendente && dados && <DicaDoDia dados={dados} />}
       </View>
     </ScrollView>
   );
