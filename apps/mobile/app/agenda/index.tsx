@@ -13,6 +13,7 @@ import { pedirPermissao, limpar, reagendar } from "../../src/avisos";
 import { useT } from "../../src/i18n";
 import { useTema } from "../../src/tema";
 import { Vidro } from "../../src/Vidro";
+import { acompanharEventoAtual, pararAtividade, suportaAtividade } from "../../src/atividade";
 
 /**
  * O que esta acontecendo.
@@ -32,6 +33,7 @@ export default function Agenda() {
   /* `null` = desligado. Um número = quantos alarmes o iOS aceitou registrar. */
   const [avisos, setAvisos] = useState<number | null>(null);
   const [negado, setNegado] = useState(false);
+  const [atividade, setAtividade] = useState<string | null>(null);
 
   const grupos = useMemo(() => {
     const agora = Date.now();
@@ -145,6 +147,35 @@ export default function Agenda() {
       </Pressable>
       {negado && (
         <Text className="text-texto3 text-[12px] leading-4 mb-4">{t("alerts.denied")}</Text>
+      )}
+
+      {/*
+        A LIVE ACTIVITY não é o mesmo que o aviso acima, e por isso é outro
+        botão: o aviso diz que um evento VAI começar; a atividade fica na tela
+        de bloqueio ENQUANTO ele acontece, contando quanto falta. O botão só
+        aparece onde a ponte nativa existe — em simulador sem a extensão
+        compilada, ou em Android, ele simplesmente não está lá.
+      */}
+      {suportaAtividade() && (
+        <Pressable
+          onPress={() => {
+            if (atividade) {
+              void pararAtividade().then(() => setAtividade(null));
+              return;
+            }
+            void acompanharEventoAtual(estado.itens ?? [], cores.texto).then((e) =>
+              setAtividade(e ? semEntidades(e.name) : null),
+            );
+          }}
+          className="rounded-full py-3 items-center mb-4"
+          style={{ borderWidth: 1, borderColor: atividade ? cores.texto : cores.linha }}
+        >
+          <Text className="text-texto text-[13px] font-semibold" numberOfLines={1}>
+            {atividade
+              ? t("liveActivity.on", { nome: atividade })
+              : `${t("liveActivity.title")} · ${t("alerts.off")}`}
+          </Text>
+        </Pressable>
       )}
 
       {grupos.map((g) => (

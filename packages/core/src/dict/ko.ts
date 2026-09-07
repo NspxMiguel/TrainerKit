@@ -493,6 +493,8 @@ export const KO: Dict = {
   /* ── Guia de itens ─────────────────────────────────────────────────── */
 
   "alerts.title": "알림 받기",
+  "liveActivity.title": "잠금 화면에 표시",
+  "liveActivity.on": "표시 중: {nome}",
   "alerts.off": "꺼짐",
   "alerts.on": "{n}개 예약됨",
   "alerts.denied": "iOS 설정에서 TrainerKit 알림이 꺼져 있습니다.",

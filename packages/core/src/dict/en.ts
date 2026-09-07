@@ -549,6 +549,8 @@ const EN = {
   /* ── Guia de itens ─────────────────────────────────────────────────── */
 
   "alerts.title": "Remind me",
+  "liveActivity.title": "On the Lock Screen",
+  "liveActivity.on": "On screen: {nome}",
   "alerts.off": "Off",
   "alerts.on": "{n} events scheduled",
   "alerts.denied": "Notifications are off for TrainerKit in iOS Settings.",

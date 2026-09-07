@@ -16,7 +16,10 @@
     "ios": {
       "bundleIdentifier": "com.trainerkit.app",
       "supportsTablet": true,
-      "icon": "./assets/icon.png"
+      "icon": "./assets/icon.png",
+      "infoPlist": {
+        "NSSupportsLiveActivities": true
+      }
     },
     "android": {
       "package": "com.trainerkit.app",
@@ -37,7 +40,9 @@
           "cameraPermission": "O Modo Pokédex aponta a câmera para o que está à sua frente. Nada é enviado nem gravado."
         }
       ],
-      "./plugins/ios-assinatura"
+      "./plugins/ios-build",
+      "./plugins/ios-assinatura",
+      "@bacons/apple-targets"
     ],
     "experiments": {
       "typedRoutes": true

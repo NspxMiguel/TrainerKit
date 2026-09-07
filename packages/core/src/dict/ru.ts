@@ -493,6 +493,8 @@ export const RU: Dict = {
   /* ── Guia de itens ─────────────────────────────────────────────────── */
 
   "alerts.title": "Напоминать",
+  "liveActivity.title": "На экране блокировки",
+  "liveActivity.on": "На экране: {nome}",
   "alerts.off": "Выключено",
   "alerts.on": "Запланировано: {n}",
   "alerts.denied": "Уведомления TrainerKit отключены в настройках iOS.",

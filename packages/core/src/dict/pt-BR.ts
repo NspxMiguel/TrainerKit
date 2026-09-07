@@ -514,6 +514,8 @@ export const PT_BR: Dict = {
   /* ── Guia de itens ─────────────────────────────────────────────────── */
 
   "alerts.title": "Me avisa",
+  "liveActivity.title": "Na tela de bloqueio",
+  "liveActivity.on": "Na tela: {nome}",
   "alerts.off": "Desligado",
   "alerts.on": "{n} eventos agendados",
   "alerts.denied": "As notificações do TrainerKit estão desligadas nos Ajustes do iOS.",

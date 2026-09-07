@@ -493,6 +493,8 @@ export const JA: Dict = {
   /* ── Guia de itens ─────────────────────────────────────────────────── */
 
   "alerts.title": "通知する",
+  "liveActivity.title": "ロック画面に表示",
+  "liveActivity.on": "表示中: {nome}",
   "alerts.off": "オフ",
   "alerts.on": "{n} 件を予約済み",
   "alerts.denied": "iOS の設定で TrainerKit の通知がオフになっています。",

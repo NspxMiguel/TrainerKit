@@ -11,6 +11,7 @@
     "test": "echo \"(sem testes proprios: a logica vive em @trainerkit/core)\""
   },
   "dependencies": {
+    "@bacons/apple-targets": "^5.0.0",
     "@trainerkit/core": "workspace:*",
     "expo": "~57.0.20",
     "expo-asset": "~57.0.16",
