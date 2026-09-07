@@ -1,7 +1,7 @@
 import * as Clipboard from "expo-clipboard";
 import { Link } from "expo-router";
 import { useState, type ReactNode } from "react";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Linking, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
@@ -46,11 +46,14 @@ const FAIXA: Record<number, Key> = {
 /**
  * Em que aparelhos isto foi realmente testado.
  *
- * ⚠️ A lista é curta e fica curta. "Testado em iOS" quando foram dois aparelhos
- * é promessa que o app não pode cumprir; nomear os dois é o que dá para
+ * ⚠️ A lista é curta e fica curta. "Testado em iOS" quando foi um aparelho é
+ * promessa que o app não pode cumprir; nomear o aparelho é o que dá para
  * afirmar.
+ *
+ * ⚠️ O Poco X3 Pro saiu: ele é do teste do PWA, e este é um app de iPhone.
+ * Citar um Android aqui promete uma plataforma que este binário não roda.
  */
-const APARELHOS_TESTADOS = ["Poco X3 Pro", "iPhone 17 Pro"];
+const APARELHOS_TESTADOS = ["iPhone 17 Pro"];
 
 const TEMAS: { valor: Escolha; chave: Key }[] = [
   { valor: "sistema", chave: "settings.theme.system" },
@@ -544,6 +547,27 @@ export default function Ajustes() {
         >
           {t(confirmandoApagar ? "wipe.confirm" : "wipe.action")}
         </Text>
+      </Pressable>
+
+      {/* ⚠️ FEEDBACK NO NÍVEL DE CIMA, e não enterrado no fim da tela de
+          privacidade. "adiciona botao de sla, feedback e etc" — quem quer avisar
+          que algo quebrou não vai procurar isso dentro do texto legal. */}
+      <Pressable
+        onPress={() => {
+          const corpo = [
+            "",
+            "---",
+            `${Platform.OS} ${Platform.Version}`,
+            `${t("settings.language")}: ${idioma}`,
+          ].join("\n");
+          void Linking.openURL(
+            `mailto:miguel@nspx.dev?subject=${encodeURIComponent("TrainerKit")}&body=${encodeURIComponent(corpo)}`,
+          );
+        }}
+        className="bg-superficie rounded-cartao px-4 py-4 mt-3 flex-row items-center"
+      >
+        <Text className="text-texto text-corpo flex-1">{t("feedback.title")}</Text>
+        <Text className="text-texto3 text-base">›</Text>
       </Pressable>
 
       {/* Privacidade e aviso de marca. As lojas exigem que seja alcançável de

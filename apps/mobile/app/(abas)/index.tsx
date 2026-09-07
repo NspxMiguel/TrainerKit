@@ -2,12 +2,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Link, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useMemo, useState, type ReactNode } from "react";
-import { ActivityIndicator, FlatList, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Image, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
   ACTION_KEYS,
   degradeDoTipo,
+  spriteUrl,
   misturar,
   PARADAS_DO_DEGRADE,
   type Key,
@@ -18,6 +19,8 @@ import type { Action } from "@trainerkit/core";
 import type { Guardado } from "../../src/colecao";
 import { useDados, type Especie } from "../../src/dados";
 import { useT } from "../../src/i18n";
+import { useImagens } from "../../src/imagens";
+import { arquivoLocal } from "../../src/offline";
 import { corDoTipo, Selo, tintaSobre } from "../../src/Selo";
 import { DicaDoDia } from "../../src/DicaDoDia";
 import { useSetup } from "../../src/setup";
@@ -43,12 +46,37 @@ function saudacao(hora: number): Key {
   return "home.greeting.night";
 }
 
+/**
+ * A arte da espécie no herói, se houver.
+ *
+ * ⚠️ Componente à parte porque ele tem estado — a imagem pode falhar, e quando
+ * falha o herói volta a ser só o número. Um `useState` dentro do `Heroi` faria
+ * o herói inteiro renderizar de novo a cada carga.
+ */
+function ArteDoHeroi({ especie }: { especie: Especie }) {
+  const { fonte } = useImagens();
+  const [falhou, setFalhou] = useState(false);
+  const local = arquivoLocal(especie.spriteId, fonte);
+  const url = falhou ? null : (local ?? spriteUrl({ spriteId: especie.spriteId }, fonte));
+  if (!url) return null;
+  return (
+    <Image
+      source={{ uri: url }}
+      onError={() => setFalhou(true)}
+      resizeMode="contain"
+      style={{ width: "100%", height: 190 }}
+    />
+  );
+}
+
 function Heroi({
   especie,
   linha,
   acao,
   onFeito,
   quantos = 0,
+  indice = 0,
+  onTrocar,
   alto,
   cabecalho,
 }: {
@@ -58,8 +86,12 @@ function Heroi({
   acao?: string;
   /** Marcar como resolvido sem abrir a ficha. */
   onFeito?: () => void;
-  /** Quantos pedem decisão — vira os pontinhos embaixo do herói. */
+  /** Quantos destaques existem — vira os pontinhos embaixo do herói. */
   quantos?: number;
+  /** Qual deles está à mostra, para o pontinho aceso. */
+  indice?: number;
+  /** Passar para o próximo destaque. */
+  onTrocar?: () => void;
   /** O inset do topo: o herói começa em y=0, ATRÁS da barra de status. */
   alto: number;
   /** A saudação e o avatar, desenhados por cima da cor. */
@@ -219,6 +251,20 @@ function Heroi({
         {/* ⚠️ O CONTEÚDO PARA ANTES DO FIM, e a folga não é estética: é o
             espaço em que a cor se dissolve. Colado no pé, o texto ficava sobre
             a parte já opaca do degradê e a faixa terminava numa linha. */}
+        {/*
+          A FOTO DA ESPÉCIE.
+
+          ⚠️ "kd foto? do charizard" — a tira da coleção já mostrava a arte e o
+          herói não. Ele fica sobre o número, no terço de cima, porque é ali que
+          o desenho põe o bicho: o nome e a ação ficam embaixo dele.
+
+          ⚠️ Só aparece com uma fonte de imagem LIGADA. Sem ela o app é
+          distribuído sem arte nenhuma, e o número continua sendo a textura.
+        */}
+        <View pointerEvents="none" style={{ position: "absolute", left: 0, right: 0, top: alto + 54 }}>
+          <ArteDoHeroi especie={especie} />
+        </View>
+
         <View className="flex-1 justify-end items-center px-5" style={{ paddingBottom: 110 }}>
           <View className="rounded-pilula px-3 py-1 mb-2 bg-black/35">
             <Text className="text-legenda text-white">{t("home.today").toUpperCase()}</Text>
@@ -274,20 +320,31 @@ function Heroi({
           {/* OS PONTINHOS. Eles dizem quantos ainda esperam decisão — no desenho
               são o que promete que há mais de um assunto. Um só não desenha
               nada: um ponto sozinho não é um carrossel. */}
+          {/* Os pontinhos são TOCÁVEIS: é como se passa para o próximo destaque
+              sem gesto escondido. O aceso é o que está à mostra. */}
           {quantos > 1 && (
-            <View className="flex-row gap-1.5 mt-4 self-center">
+            <Pressable
+              onPress={(e) => {
+                e.stopPropagation();
+                onTrocar?.();
+              }}
+              hitSlop={12}
+              accessibilityLabel={t("dex.next")}
+              className="flex-row gap-1.5 mt-4 self-center"
+            >
               {Array.from({ length: Math.min(quantos, 5) }, (_, i) => (
                 <View
                   key={i}
                   style={{
-                    width: i === 0 ? 14 : 5,
+                    width: i === indice % 5 ? 14 : 5,
                     height: 5,
                     borderRadius: 3,
-                    backgroundColor: i === 0 ? "#FFFFFF" : "rgba(255,255,255,0.45)",
+                    backgroundColor:
+                      i === indice % 5 ? "#FFFFFF" : "rgba(255,255,255,0.45)",
                   }}
                 />
               ))}
-            </View>
+            </Pressable>
           )}
         </View>
       </Pressable>
@@ -340,17 +397,34 @@ export default function Inicio() {
    * O nativo só fazia o passo 2, então quem tinha a coleção inteira pedindo
    * decisão abria o app e via um bicho que nem é dele.
    */
-  const pendente = fila[0] ?? null;
 
-  const destaque = useMemo(() => {
-    if (pendente) return pendente.especie;
-    const id = dados?.rankings?.raidOverall?.[0]?.speciesId;
-    return id ? dados?.species.find((s) => s.id === id) : undefined;
-  }, [dados, pendente]);
+
+  /*
+   * ⚠️ OS DESTAQUES RODAM. "n é só charizard q fica ai, os pokemons mudam
+   * sabia?" — e ele está certo: o herói mostrava sempre o primeiro da fila ou o
+   * primeiro do ranking, então abrir o app dez vezes dava dez vezes o mesmo
+   * bicho.
+   *
+   * Roda pela FILA quando há fila (é ela que a pessoa precisa resolver), e pelo
+   * topo do ranking de raide quando não há. O índice vem do dia mais o toque
+   * nos pontinhos: reabrir o app não vira roleta, mas tocar troca.
+   */
+  const candidatos = useMemo(() => {
+    if (fila.length > 0) return fila.map((p) => p.especie);
+    const ids = (dados?.rankings?.raidOverall ?? []).slice(0, 8).map((r) => r.speciesId);
+    return ids
+      .map((id) => dados?.species.find((s) => s.id === id))
+      .filter((s): s is Especie => !!s);
+  }, [fila, dados]);
+
+  const [passo, setPasso] = useState(0);
+  const indice = candidatos.length > 0 ? passo % candidatos.length : 0;
+  const destaque = candidatos[indice];
+  const pendenteAtual = fila.length > 0 ? fila[indice] : null;
 
   /* A frase do herói: o motivo do veredito quando há fila, e a posição no
      ranking quando não há. As duas vêm do core — nada inventado aqui. */
-  const linhaDoDestaque = pendente ? tm(pendente.veredito.reason) : t("home.hero.topRaid");
+  const linhaDoDestaque = pendenteAtual ? tm(pendenteAtual.veredito.reason) : t("home.hero.topRaid");
 
   /*
    * A tira da coleção, com o VEREDITO de cada um.
@@ -410,6 +484,11 @@ export default function Inicio() {
          à mão, e com a nativa ele vira um buraco no fim da lista. */
       contentContainerStyle={{ paddingBottom: baixo + 24 }}
       showsVerticalScrollIndicator={false}
+      /* ⚠️ O INÍCIO NÃO ROLA. "bloqueia scroll na tela inicio, n tem scroll la"
+         — no desenho tudo cabe numa tela, e uma tela inicial que rola convida a
+         procurar embaixo o que deveria estar à vista. O que não couber sai
+         daqui para a aba certa. */
+      scrollEnabled={false}
       /* ⚠️ `never`: com o ajuste automático o iOS empurraria o conteúdo para
          baixo da barra de status, e o herói deixaria de encostar no topo — que
          é justamente o que ele pediu. O inset entra à mão, dentro do herói. */
@@ -422,7 +501,6 @@ export default function Inicio() {
         <Heroi
           especie={destaque}
           linha={linhaDoDestaque}
-          quantos={fila.length}
           alto={alto}
           cabecalho={
             <View className="px-4 flex-row items-center gap-3">
@@ -449,13 +527,17 @@ export default function Inicio() {
               </Toque>
             </View>
           }
-          {...(pendente
+          quantos={candidatos.length}
+          indice={indice}
+          onTrocar={() => setPasso((p) => p + 1)}
+          {...(pendenteAtual
             ? {
-                acao: t(ACTION_KEYS[pendente.veredito.action] as Key),
+                acao: t(ACTION_KEYS[pendenteAtual.veredito.action] as Key),
                 onFeito: () => {
-                  void marcarFeito(pendente.guardado.id, pendente.veredito.action).then(
-                    recarregar,
-                  );
+                  void marcarFeito(
+                    pendenteAtual.guardado.id,
+                    pendenteAtual.veredito.action,
+                  ).then(recarregar);
                 },
               }
             : {})}
@@ -493,8 +575,12 @@ export default function Inicio() {
             }}
           >
             <SymbolView name="viewfinder" size={17} tintColor="#FFFFFF" fallback={<View />} />
+            {/* ⚠️ "Escolher print" não dizia PARA QUÊ. "oq seria escolher
+                print? na tela de inicio? fica confuso para usuario" — e é: o
+                botão nomeava o gesto (escolher um arquivo) em vez do resultado
+                (descobrir o IV). `home.quickScan` é a frase que o site usa. */}
             <Text className="text-corpo font-bold" style={{ color: "#FFFFFF" }}>
-              {t("scan.pick")}
+              {t("home.quickScan")}
             </Text>
           </Toque>
         </Link>
@@ -579,7 +665,7 @@ export default function Inicio() {
         )}
         {/* A dica só aparece quando NÃO há pendência: com fila aberta o assunto
             da tela é a fila, e ensinar por cima disso é ruído. */}
-        {!pendente && dados && <DicaDoDia dados={dados} />}
+        {!pendenteAtual && dados && <DicaDoDia dados={dados} />}
       </View>
     </ScrollView>
   );
