@@ -165,6 +165,8 @@ export const KO: Dict = {
   "iv.bestStats": "가장 높은 능력치",
   "iv.level": "레벨",
   "iv.noMatch": "그 수치에 맞는 조합이 없습니다. CP와 HP를 확인하세요.",
+  "iv.needNumbers.title": "CP와 HP를 입력하세요",
+  "iv.needNumbers.body": "둘 다 게임 속 포켓몬 화면에 있습니다. 그 값이 있으면 4,096가지를 맞는 것만 남깁니다.",
   "iv.candidates": "아직 {n}가지가 남았습니다 — 강조된 능력치를 선택하면 좁혀집니다.",
   "iv.whatItRead": "읽어낸 값",
   "iv.enterByHand": "직접 입력",

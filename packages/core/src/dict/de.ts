@@ -165,6 +165,8 @@ export const DE: Dict = {
   "iv.bestStats": "Höchster Wert",
   "iv.level": "Level",
   "iv.noMatch": "Nichts passt zu diesen Zahlen. Prüfe WP und KP.",
+  "iv.needNumbers.title": "Gib WP und KP ein",
+  "iv.needNumbers.body": "Beide stehen im Spiel auf der Seite des Pokémon selbst. Damit engt die App 4.096 Kombinationen auf die passenden ein.",
   "iv.candidates": "Es passen noch {n} Kombinationen — wähle den hervorgehobenen Wert.",
   "iv.whatItRead": "Was es gelesen hat",
   "iv.enterByHand": "Von Hand eintragen",

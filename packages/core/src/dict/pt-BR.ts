@@ -175,6 +175,8 @@ export const PT_BR: Dict = {
   "iv.bestStats": "Maior atributo",
   "iv.level": "nível",
   "iv.noMatch": "Nada bate com esses números. Confira o PC e o PS.",
+  "iv.needNumbers.title": "Digite o PC e o PS",
+  "iv.needNumbers.body": "Os dois estão na tela do próprio bicho, no jogo. Com eles o app reduz as 4.096 combinações às que fecham.",
   "iv.candidates": "Ainda cabem {n} combinações — marque o atributo destacado pra estreitar.",
   "iv.whatItRead": "O que ele leu",
   "iv.enterByHand": "Coloque manualmente",

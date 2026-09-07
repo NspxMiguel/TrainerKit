@@ -193,6 +193,8 @@ const EN = {
   "iv.bestStats": "Highest stat",
   "iv.level": "level",
   "iv.noMatch": "Nothing matches those numbers. Check the CP and HP.",
+  "iv.needNumbers.title": "Type the CP and the HP",
+  "iv.needNumbers.body": "Both are on the Pokémon's own screen in the game. With them the app narrows 4,096 combinations down to the ones that fit.",
   "iv.candidates": "{n} combinations still fit — pick the highlighted stat to narrow it.",
   "iv.whatItRead": "What it read",
   "iv.enterByHand": "Enter by hand",

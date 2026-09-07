@@ -165,6 +165,8 @@ export const JA: Dict = {
   "iv.bestStats": "最も高い個体値",
   "iv.level": "レベル",
   "iv.noMatch": "その数値に合う組み合わせがありません。CP と HP を確認してください。",
+  "iv.needNumbers.title": "CPとHPを入力",
+  "iv.needNumbers.body": "どちらもゲーム内のポケモンの画面にあります。それがあれば4,096通りを当てはまるものだけに絞れます。",
   "iv.candidates": "まだ {n} 通りあります。強調された項目を選ぶと絞り込めます。",
   "iv.whatItRead": "読み取った内容",
   "iv.enterByHand": "手入力する",

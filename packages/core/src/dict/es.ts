@@ -165,6 +165,8 @@ export const ES: Dict = {
   "iv.bestStats": "Mayor atributo",
   "iv.level": "nivel",
   "iv.noMatch": "Nada coincide con esos números. Revisa el PC y los PS.",
+  "iv.needNumbers.title": "Escribe el PC y los PS",
+  "iv.needNumbers.body": "Los dos están en la pantalla del propio Pokémon, en el juego. Con ellos la app reduce las 4096 combinaciones a las que encajan.",
   "iv.candidates": "Aún caben {n} combinaciones — marca el atributo destacado para acotar.",
   "iv.whatItRead": "Lo que leyó",
   "iv.enterByHand": "Introduce a mano",

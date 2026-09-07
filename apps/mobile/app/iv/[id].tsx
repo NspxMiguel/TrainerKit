@@ -277,6 +277,22 @@ export default function Calculadora() {
               {t("iv.impossible.body", { cp, hp, name: especie?.name ?? "" })}
             </Text>
           </>
+        ) : candidatos.length === 0 ? (
+          /*
+            ⚠️ SEM PC E SEM PS NÃO HÁ FAIXA — e sem este ramo a tela abria
+            dizendo "Infinity–-Infinity / 45".
+            `Math.min(...[])` é `Infinity` e `Math.max(...[])` é `-Infinity`; a
+            lista vazia caía direto no bloco da faixa porque a condição anterior
+            exigia os dois campos preenchidos. Quem abre a calculadora vê isso
+            ANTES de digitar qualquer coisa, ou seja, é a primeira coisa que a
+            tela dizia.
+          */
+          <>
+            <Text className="text-texto text-corpo font-semibold">{t("iv.needNumbers.title")}</Text>
+            <Text className="text-texto2 text-corpo mt-2 leading-5">
+              {t("iv.needNumbers.body")}
+            </Text>
+          </>
         ) : (
           <>
             <Text className="text-texto3 text-[11px] tracking-widest">IV</Text>
