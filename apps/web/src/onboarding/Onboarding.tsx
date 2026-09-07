@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 
-import { MAX_POWERUP_LEVEL, BITCOIN_ADDRESS } from "@trainerkit/core";
+import { MAX_POWERUP_LEVEL, MAX_TRAINER_LEVEL, BITCOIN_ADDRESS } from "@trainerkit/core";
 
 import { setGroqKey } from "../ai/groq.ts";
 import { hasWebGPU } from "../ai/local.ts";
@@ -291,16 +291,19 @@ export function Onboarding() {
                   onClick={() => setLevel(n)}
                 >
                   <span className="tk-onb-nivel-n">{n}</span>
+                  {/* Só as faixas que têm nome ganham legenda. Antes tudo que
+                      não fosse 20/30/40 caía em "ou mais", e com as faixas novas
+                      isso escreveria "OU MAIS" quatro vezes seguidas. */}
                   <span className="tk-onb-nivel-r">
-                    {t(
-                      n === 20
-                        ? "onb.level.start"
-                        : n === 30
-                          ? "onb.level.mid"
-                          : n === 40
-                            ? "onb.level.high"
-                            : "onb.level.max",
-                    )}
+                    {n === 20
+                      ? t("onb.level.start")
+                      : n === 30
+                        ? t("onb.level.mid")
+                        : n === 40
+                          ? t("onb.level.high")
+                          : n === MAX_TRAINER_LEVEL
+                            ? t("onb.level.max")
+                            : ""}
                   </span>
                 </button>
               ))}

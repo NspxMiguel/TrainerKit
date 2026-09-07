@@ -32,7 +32,9 @@ const FAIXA: Record<number, Key> = {
   20: "onb.level.start",
   30: "onb.level.mid",
   40: "onb.level.high",
-  50: "onb.level.max",
+  /* "OU MAIS" desceu do 50 pro 80: com as faixas novas ele passou a ser o
+     ULTIMO da lista, e "50 ou mais" ao lado de um 60 e um 80 e mentira. */
+  80: "onb.level.max",
 };
 
 const TEMAS: { valor: Escolha; chave: Key }[] = [
@@ -180,13 +182,17 @@ export default function Ajustes() {
       <Text className="text-texto3 text-[11px] tracking-widest mt-7 mb-2">
         {t("onb.level.title").toUpperCase()}
       </Text>
-      <View className="flex-row gap-2">
+      <View className="flex-row flex-wrap gap-2">
         {TRAINER_LEVELS.map((n) => (
           <Pressable
             key={n}
             onPress={() => definirSetup({ level: n })}
-            className="flex-1 items-center rounded-2xl py-3"
+            className="items-center rounded-cartao-sm py-3"
+            /* Sete faixas nao cabem numa linha: 22% de base faz quatro por
+               linha e o `flexGrow` fecha a sobra da segunda. */
             style={{
+              flexBasis: "22%",
+              flexGrow: 1,
               backgroundColor: cores.superficie,
               borderWidth: 1,
               borderColor: n === setup.level ? cores.texto : "transparent",
@@ -198,7 +204,7 @@ export default function Ajustes() {
               {n}
             </Text>
             <Text className="text-texto3 text-[10px] tracking-widest mt-0.5">
-              {t(FAIXA[n]!).toUpperCase()}
+              {FAIXA[n] ? t(FAIXA[n]!).toUpperCase() : ""}
             </Text>
           </Pressable>
         ))}

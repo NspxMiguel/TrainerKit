@@ -22,10 +22,21 @@ import { ALLOWED_LEVELS_ABOVE_PLAYER } from "./types.js";
  */
 export type UsageMode = "consulta" | "colecao";
 
-/** As quatro faixas que o setup oferece. */
-export type TrainerLevel = 20 | 30 | 40 | 50;
+/**
+ * As faixas que o setup oferece.
+ *
+ * ⚠️ Ia so ate 50, e o teto do treinador subiu pra 80 (`MAX_TRAINER_LEVEL`).
+ * Quem joga hoje passa dos 50 e nao se encontrava na lista — o app se anunciava
+ * desatualizado logo na primeira tela.
+ *
+ * Acima do 40 a conta de `tetoDePowerUp` satura (40 + 10 ja bate o teto de 50),
+ * entao as faixas de 50 pra cima nao mudam numero nenhum. Elas existem porque a
+ * pergunta e sobre a PESSOA, e uma lista que para onde a pessoa nao parou e uma
+ * lista errada.
+ */
+export type TrainerLevel = 20 | 30 | 40 | 50 | 60 | 70 | 80;
 
-export const TRAINER_LEVELS: readonly TrainerLevel[] = [20, 30, 40, 50];
+export const TRAINER_LEVELS: readonly TrainerLevel[] = [20, 30, 40, 50, 60, 70, 80];
 
 /**
  * Ate que nivel ESTE jogador consegue subir uma especie.
