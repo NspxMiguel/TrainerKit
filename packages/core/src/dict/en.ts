@@ -209,6 +209,8 @@ const EN = {
   "iv.or": "or",
 
   // ------------------------------------------- IV pelo PC, antes de capturar
+  "pre.short": "Not caught yet",
+  "raid.short": "How to beat it",
   "pre.open": "Haven't caught it yet? Find the IV from CP",
   "pre.title": "Before you catch it",
   "pre.why": "The encounter screen shows only CP. That is enough when the game fixes the level — a raid, an egg, a research reward. In the wild the level is random, and then it is not.",
@@ -254,6 +256,7 @@ const EN = {
 
   // ------------------------------------------------------------------- veredito
   "verdict.title": "Verdict",
+  "verdict.agree": "The rules agree",
   "verdict.confidence": "confidence {percent}%",
   "verdict.howIGotHere": "How I got here",
   "verdict.why1": "WHY · 1 RULE",

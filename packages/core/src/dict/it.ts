@@ -180,6 +180,8 @@ export const IT: Dict = {
   "iv.or": "o",
 
   // ------------------------------------------- IV pelo PC, antes de capturar
+  "pre.short": "Non ancora preso",
+  "raid.short": "Come sconfiggerlo",
   "pre.open": "Non l'hai ancora catturato? Trova l'IV dai PL",
   "pre.title": "Prima di catturarlo",
   "pre.why": "La schermata d'incontro mostra solo i PL. Basta quando il gioco fissa il livello — raid, uovo, ricerca. Allo stato brado il livello è sorteggiato, e allora non basta.",
@@ -220,6 +222,7 @@ export const IT: Dict = {
   "scan.fail.notEnough": "Ho trovato delle barre, ma non le tre che mi servono (Attacco, Difesa e PS).",
   "scan.fail.mismatch": "Ho trovato delle barre, ma con larghezze troppo diverse per essere le tre della valutazione.",
   "verdict.title": "Verdetto",
+  "verdict.agree": "Le regole concordano",
   "verdict.confidence": "fiducia {percent}%",
   "verdict.howIGotHere": "Come ci sono arrivato",
   "verdict.why1": "PERCHÉ · 1 REGOLA",

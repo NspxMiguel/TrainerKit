@@ -180,6 +180,8 @@ export const DE: Dict = {
   "iv.or": "oder",
 
   // ------------------------------------------- IV pelo PC, antes de capturar
+  "pre.short": "Noch nicht gefangen",
+  "raid.short": "Wie besiegen",
   "pre.open": "Noch nicht gefangen? IV aus der WP bestimmen",
   "pre.title": "Vor dem Fangen",
   "pre.why": "Der Begegnungsbildschirm zeigt nur die WP. Das reicht, wenn das Spiel das Level festlegt — Raid, Ei, Forschung. In der Wildnis ist das Level zufällig, und dann reicht es nicht.",
@@ -220,6 +222,7 @@ export const DE: Dict = {
   "scan.fail.notEnough": "Ich habe Balken gefunden, aber nicht die drei, die ich brauche (Angriff, Verteidigung, KP).",
   "scan.fail.mismatch": "Ich habe Balken gefunden, aber mit zu unterschiedlichen Breiten für die drei aus der Bewertung.",
   "verdict.title": "Urteil",
+  "verdict.agree": "Die Regeln stimmen überein",
   "verdict.confidence": "Sicherheit {percent}%",
   "verdict.howIGotHere": "Wie ich darauf komme",
   "verdict.why1": "WARUM · 1 REGEL",

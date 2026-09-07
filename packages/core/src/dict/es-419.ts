@@ -180,6 +180,8 @@ export const ES_419: Dict = {
   "iv.or": "o",
 
   // ------------------------------------------- IV pelo PC, antes de capturar
+  "pre.short": "Aún no lo tengo",
+  "raid.short": "Cómo vencerlo",
   "pre.open": "¿Todavía no lo capturaste? Descubrí el IV por el PC",
   "pre.title": "Antes de capturarlo",
   "pre.why": "La pantalla de encuentro solo muestra el PC. Alcanza cuando el juego fija el nivel — incursión, huevo, investigación. En estado salvaje el nivel es aleatorio, y ahí no alcanza.",
@@ -220,6 +222,7 @@ export const ES_419: Dict = {
   "scan.fail.notEnough": "Encontré barras, pero no las tres que necesito (Ataque, Defensa y PS).",
   "scan.fail.mismatch": "Encontré barras, pero con anchos demasiado distintos para ser las tres de la valoración.",
   "verdict.title": "Veredicto",
+  "verdict.agree": "Las reglas coinciden",
   "verdict.confidence": "confianza {percent}%",
   "verdict.howIGotHere": "Cómo llegué a esto",
   "verdict.why1": "POR QUÉ · 1 REGLA",

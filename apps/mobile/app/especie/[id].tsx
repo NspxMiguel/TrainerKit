@@ -9,6 +9,7 @@ import {
   buildDexEntry,
   GROQ_MODEL,
   computeCPAtLevel,
+  ivPercentOf,
   decide,
   degradeDoTipo,
   groqChat,
@@ -246,6 +247,13 @@ export default function Ficha() {
      voltar de um Charizard (4 grupos) para um Caterpie (1) deixaria o índice
      apontando para um grupo que não existe. */
   const grupoAtivo = grupos[Math.min(indiceDoGrupo, grupos.length - 1)] ?? null;
+
+  /* O PC DELE — não o da espécie. É o número que a pessoa vê no jogo, e o único
+     jeito de conferir que a calculadora acertou o exemplar certo. */
+  const pcDoSalvo = useMemo(() => {
+    if (!dados || !especie || !salvo || salvo.ivDesconhecido) return null;
+    return computeCPAtLevel(dados.cpm, especie.baseStats, salvo.ivs, salvo.level);
+  }, [dados, especie, salvo]);
   const custoDaFrustracao = useMemo(() => {
     if (!dados || !especie || !sombroso) return null;
     const porId = new Map<string, MoveWithPvp>();
@@ -485,85 +493,6 @@ export default function Ficha() {
       <Cascata>
 
       {/*
-        TENHO ESSE — guardar sem saber o IV.
-
-        ⚠️ Existe porque a coleção não pode exigir a calculadora. Quem acabou de
-        capturar quer marcar que tem, e descobrir o IV depois; obrigar a avaliar
-        primeiro faz a pessoa não guardar nada. O IV entra como desconhecido e a
-        própria ficha oferece calcular logo abaixo.
-      */}
-      {!salvo && (
-        <Toque
-          onPress={() => {
-            void guardar({
-              speciesId: especie.id,
-              ivs: { atk: 0, def: 0, hp: 0 },
-              /* MARCADO como não medido: sem isso a coleção mostraria 0% e o
-                 veredito mandaria transferir um bicho que ninguém avaliou. */
-              ivDesconhecido: true,
-              level: setup.level,
-              shadow: false,
-              lucky: false,
-            }).then(recarregar);
-          }}
-          className="bg-superficie rounded-pilula py-4 items-center mt-7"
-        >
-          <Text className="text-texto font-bold text-base">{t("species.iHaveThis")}</Text>
-        </Toque>
-      )}
-
-      {/* Duas acoes: o IV do que ele TEM, e o IV do que ele esta VENDO. */}
-      <Link href={{ pathname: "/iv/[id]", params: { id: especie.id } }} asChild>
-        <Pressable className={`bg-texto rounded-pilula py-4 items-center ${salvo ? "mt-7" : "mt-3"}`}>
-          <Text className="text-fundo font-bold text-base">
-            {t(salvo ? "species.seeMyIV" : "species.calcIV")}
-          </Text>
-        </Pressable>
-      </Link>
-
-      <Link href={{ pathname: "/encontro/[id]", params: { id: especie.id } }} asChild>
-        <Pressable className="bg-superficie rounded-pilula py-4 items-center mt-3">
-          <Text className="text-texto font-bold text-base">{t("pre.open")}</Text>
-        </Pressable>
-      </Link>
-
-      <Link href={{ pathname: "/raide/[id]", params: { id: especie.id } }} asChild>
-        <Pressable className="bg-superficie rounded-pilula py-4 items-center mt-3">
-          <Text className="text-texto font-bold text-base">{t("raid.openBrowse")}</Text>
-        </Pressable>
-      </Link>
-
-      {/*
-        TIRAR DA COLEÇÃO, em DOIS passos.
-
-        ⚠️ Um passo só apagaria por toque errado, e não há desfazer — a coleção
-        mora no aparelho. O segundo toque é o desfazer que não existe.
-      */}
-      {salvo && (
-        <Toque
-          onPress={() => {
-            if (!confirmandoTirar) {
-              setConfirmandoTirar(true);
-              return;
-            }
-            void remover(salvo.id).then(() => {
-              setConfirmandoTirar(false);
-              recarregar();
-            });
-          }}
-          className="rounded-pilula py-3.5 items-center mt-3"
-          style={{ borderWidth: 1, borderColor: confirmandoTirar ? cores.transferir : cores.linha }}
-        >
-          <Text
-            className="font-semibold text-corpo"
-            style={{ color: confirmandoTirar ? cores.transferir : cores.texto2 }}
-          >
-            {t(confirmandoTirar ? "collection.removeSure" : "collection.remove")}
-          </Text>
-        </Toque>
-      )}
-
-      {/*
         ⚠️ O VEREDITO É O HERÓI DA TELA, e antes era mais um cartão igual aos
         outros — a resposta que o app inteiro existe pra dar, com o mesmo peso
         visual de "stats base".
@@ -575,16 +504,17 @@ export default function Ficha() {
       {veredito && (
         <>
           <Vidro raio={26} style={{ marginTop: 28, padding: 20 }}>
-            <Text className="text-texto3 text-legenda">
-              {t("assistant.title").toUpperCase()}
-            </Text>
+            {/* ⚠️ SEM o rótulo "O QUE EU ACHO" em cima: no desenho a palavra
+                do veredito vem sozinha, com o símbolo colado nela. O rótulo
+                repetia em legenda o que a palavra já diz em 24px. */}
             <Text
-              className="text-veredito mt-2"
+              className="text-veredito"
               style={{
                 color: cores[COR_ACAO[veredito.action] ?? "texto"],
                 letterSpacing: 0.7,
               }}
             >
+              {"✦  "}
               {/* A PALAVRA do veredito vem do dicionario, nao do enum: o `core`
                   devolve `investir`, e `ACTION_KEYS` diz qual chave le isso nos
                   dez idiomas. */}
@@ -599,9 +529,18 @@ export default function Ficha() {
             {/* A BARRA DE CONFIANCA. O numero sozinho ("88%") e abstrato; a
                 barra e o que faz "as regras concordam" virar uma quantidade
                 que o olho le sem contar. */}
-            <Text className="text-texto3 text-legenda mt-4">
-              {t("verdict.confidence", { percent: Math.round(veredito.confidence * 100) })}
-            </Text>
+            {/* AS REGRAS CONCORDAM · 88% — rótulo à esquerda e o número na cor
+                do veredito à direita, que é como o desenho põe. A porcentagem
+                solta numa legenda cinza não era lida. */}
+            <View className="flex-row items-baseline justify-between mt-4">
+              <Text className="text-texto3 text-legenda">{t("verdict.agree").toUpperCase()}</Text>
+              <Text
+                className="text-legenda"
+                style={{ color: cores[COR_ACAO[veredito.action] ?? "texto"] }}
+              >
+                {Math.round(veredito.confidence * 100)}%
+              </Text>
+            </View>
             <View
               className="rounded-pilula mt-2 overflow-hidden"
               style={{ height: 4, backgroundColor: cores.linha }}
@@ -688,6 +627,24 @@ export default function Ficha() {
         />
       )}
 
+      {/* A LINHA SECA DE NÚMEROS.
+
+          ⚠️ Ela vem DEPOIS do rastro e ANTES das ações, que é onde o desenho a
+          põe: quem já leu o veredito e o porquê quer conferir os números antes
+          de apertar o botão. Solta lá embaixo, junto dos atributos base, ela
+          respondia tarde demais.
+
+          Só existe para quem TEM o bicho — são os números DELE, não da espécie. */}
+      {salvo && !salvo.ivDesconhecido && (
+        <Text className="text-texto3 text-legenda mt-3 text-center">
+          {[
+            `${t("common.cp")} ${pcDoSalvo?.toLocaleString(idioma) ?? "—"}`,
+            `IV ${Math.round(ivPercentOf(salvo.ivs))}%`,
+            `${t("common.level")} ${salvo.level}`,
+          ].join("  ·  ")}
+        </Text>
+      )}
+
       {/*
         DISCORDO.
 
@@ -750,6 +707,113 @@ export default function Ficha() {
             </Pressable>
           )}
         </View>
+      )}
+
+      {/*
+        TENHO ESSE — guardar sem saber o IV.
+
+        ⚠️ Existe porque a coleção não pode exigir a calculadora. Quem acabou de
+        capturar quer marcar que tem, e descobrir o IV depois; obrigar a avaliar
+        primeiro faz a pessoa não guardar nada. O IV entra como desconhecido e a
+        própria ficha oferece calcular logo abaixo.
+      */}
+      {!salvo && (
+        <Toque
+          onPress={() => {
+            void guardar({
+              speciesId: especie.id,
+              ivs: { atk: 0, def: 0, hp: 0 },
+              /* MARCADO como não medido: sem isso a coleção mostraria 0% e o
+                 veredito mandaria transferir um bicho que ninguém avaliou. */
+              ivDesconhecido: true,
+              level: setup.level,
+              shadow: false,
+              lucky: false,
+            }).then(recarregar);
+          }}
+          className="bg-superficie rounded-pilula py-4 items-center mt-7"
+        >
+          <Text className="text-texto font-bold text-base">{t("species.iHaveThis")}</Text>
+        </Toque>
+      )}
+
+      {/* Duas acoes: o IV do que ele TEM, e o IV do que ele esta VENDO. */}
+      {/* ⚠️ A AÇÃO PRINCIPAL LEVA A COR DO VEREDITO, com brilho — é o que o
+          desenho faz: o botão continua a frase do cartão de cima ("Evoluir" →
+          "Evoluir agora"). Branco ele era só mais um botão. */}
+      <Link href={{ pathname: "/iv/[id]", params: { id: especie.id } }} asChild>
+        <Toque
+          className={`rounded-pilula py-4 items-center ${salvo ? "mt-7" : "mt-3"}`}
+          style={{
+            backgroundColor: veredito ? cores[COR_ACAO[veredito.action] ?? "texto"] : cores.texto,
+            shadowColor: veredito ? cores[COR_ACAO[veredito.action] ?? "texto"] : cores.texto,
+            shadowOpacity: 0.38,
+            shadowRadius: 20,
+            shadowOffset: { width: 0, height: 8 },
+          }}
+        >
+          <Text className="font-bold text-base" style={{ color: "#FFFFFF" }}>
+            {t(salvo ? "species.seeMyIV" : "species.calcIV")}
+          </Text>
+        </Toque>
+      </Link>
+
+      {/* ⚠️ AS DUAS SECUNDÁRIAS DIVIDEM A LINHA, e não empilham.
+          Eram quatro botões de largura cheia entre o veredito e o resto da
+          ficha — uma escada que empurrava tudo. O desenho põe uma primária e
+          UMA secundária lado a lado; aqui são duas, porque as duas respondem
+          perguntas diferentes ("ainda não peguei" e "como derrubo"). */}
+      <View className="flex-row gap-2 mt-3">
+        <Link href={{ pathname: "/encontro/[id]", params: { id: especie.id } }} asChild>
+          <Toque
+            estiloExterno={{ flex: 1 }}
+            className="bg-superficie rounded-pilula py-3.5 items-center justify-center"
+          >
+            <Text className="text-texto2 font-semibold text-corpo" numberOfLines={1}>
+              {t("pre.short")}
+            </Text>
+          </Toque>
+        </Link>
+        <Link href={{ pathname: "/raide/[id]", params: { id: especie.id } }} asChild>
+          <Toque
+            estiloExterno={{ flex: 1 }}
+            className="bg-superficie rounded-pilula py-3.5 items-center justify-center"
+          >
+            <Text className="text-texto2 font-semibold text-corpo" numberOfLines={1}>
+              {t("raid.short")}
+            </Text>
+          </Toque>
+        </Link>
+      </View>
+
+      {/*
+        TIRAR DA COLEÇÃO, em DOIS passos.
+
+        ⚠️ Um passo só apagaria por toque errado, e não há desfazer — a coleção
+        mora no aparelho. O segundo toque é o desfazer que não existe.
+      */}
+      {salvo && (
+        <Toque
+          onPress={() => {
+            if (!confirmandoTirar) {
+              setConfirmandoTirar(true);
+              return;
+            }
+            void remover(salvo.id).then(() => {
+              setConfirmandoTirar(false);
+              recarregar();
+            });
+          }}
+          className="rounded-pilula py-3.5 items-center mt-3"
+          style={{ borderWidth: 1, borderColor: confirmandoTirar ? cores.transferir : cores.linha }}
+        >
+          <Text
+            className="font-semibold text-corpo"
+            style={{ color: confirmandoTirar ? cores.transferir : cores.texto2 }}
+          >
+            {t(confirmandoTirar ? "collection.removeSure" : "collection.remove")}
+          </Text>
+        </Toque>
       )}
 
       {/* ── TROCA ──────────────────────────────────────────────────────────
@@ -1062,15 +1126,19 @@ export default function Ficha() {
         altura e corta a cor. Em vidro porque é o que o índice do pacote manda
         para "botões de fechar sobre o cabeçalho colorido".
       */}
-      <View style={{ position: "absolute", top: alto + 8, left: 16 }}>
+      {/* ⚠️ × À DIREITA, e não ‹ à esquerda. O desenho fecha a ficha com um
+          × no canto direito porque ela é uma FOLHA que sobe, não uma tela numa
+          pilha — e a folha se fecha, não se volta. O gesto de arrastar continua
+          funcionando para quem prefere. */}
+      <View style={{ position: "absolute", top: alto + 8, right: 16 }}>
         <Pressable onPress={() => router.back()} hitSlop={12} accessibilityLabel={t("common.back")}>
           <Vidro raio={999} interativo style={{ width: 40, height: 40 }}>
             <View className="flex-1 items-center justify-center">
               <SymbolView
-                name="chevron.left"
-                size={16}
+                name="xmark"
+                size={15}
                 tintColor="#FFFFFF"
-                fallback={<Text style={{ color: "#fff", fontSize: 18 }}>‹</Text>}
+                fallback={<Text style={{ color: "#fff", fontSize: 18 }}>×</Text>}
               />
             </View>
           </Vidro>

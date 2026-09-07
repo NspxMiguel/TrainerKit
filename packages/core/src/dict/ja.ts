@@ -180,6 +180,8 @@ export const JA: Dict = {
   "iv.or": "または",
 
   // ------------------------------------------- IV pelo PC, antes de capturar
+  "pre.short": "まだ未捕獲",
+  "raid.short": "倒しかた",
   "pre.open": "まだ捕まえていない — CPから個体値を調べる",
   "pre.title": "捕まえる前に",
   "pre.why": "遭遇画面に出るのはCPだけです。レイド・タマゴ・タスクのようにゲーム側がレベルを固定する場合は、それで足ります。野生はレベルが抽選なので足りません。",
@@ -220,6 +222,7 @@ export const JA: Dict = {
   "scan.fail.notEnough": "バーは見つかりましたが、必要な3本（こうげき・ぼうぎょ・HP）が揃っていません。",
   "scan.fail.mismatch": "バーは見つかりましたが、幅が違いすぎて評価画面の3本とは考えられません。",
   "verdict.title": "判定",
+  "verdict.agree": "ルールの一致度",
   "verdict.confidence": "確信度 {percent}%",
   "verdict.howIGotHere": "この結論に至った理由",
   "verdict.why1": "理由 · ルール 1 個",

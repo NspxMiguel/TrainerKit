@@ -61,9 +61,11 @@ function Casca() {
         <Stack.Screen
           name="especie/[id]"
           options={{
-            title: "",
-            headerTransparent: true,
-            headerStyle: undefined,
+            /* ⚠️ SEM barra nenhuma: a ficha desenha o próprio × sobre a faixa
+               colorida. Com `headerTransparent` a barra continua existindo, e o
+               voltar dela aparecia ao lado do × — dois botões de sair, um em
+               cada canto. */
+            headerShown: false,
             animation: "slide_from_bottom",
             animationDuration: DUR.folha,
           }}

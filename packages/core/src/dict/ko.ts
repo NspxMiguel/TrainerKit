@@ -180,6 +180,8 @@ export const KO: Dict = {
   "iv.or": "또는",
 
   // ------------------------------------------- IV pelo PC, antes de capturar
+  "pre.short": "아직 안 잡음",
+  "raid.short": "쓰러뜨리는 법",
   "pre.open": "아직 안 잡았다면 — CP로 개체값 알아보기",
   "pre.title": "잡기 전에",
   "pre.why": "조우 화면에는 CP만 나옵니다. 레이드·알·리서치처럼 게임이 레벨을 고정하는 경우엔 그걸로 충분합니다. 야생은 레벨이 무작위라 충분하지 않습니다.",
@@ -220,6 +222,7 @@ export const KO: Dict = {
   "scan.fail.notEnough": "막대를 찾았지만 필요한 세 개(공격, 방어, HP)가 아닙니다.",
   "scan.fail.mismatch": "막대를 찾았지만 너비 차이가 너무 커서 평가 화면의 세 개로 볼 수 없습니다.",
   "verdict.title": "판정",
+  "verdict.agree": "규칙 일치도",
   "verdict.confidence": "신뢰도 {percent}%",
   "verdict.howIGotHere": "이 결론에 이른 과정",
   "verdict.why1": "이유 · 규칙 1개",

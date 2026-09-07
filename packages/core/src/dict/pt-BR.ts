@@ -191,6 +191,8 @@ export const PT_BR: Dict = {
   "iv.or": "ou",
 
   // ------------------------------------------- IV pelo PC, antes de capturar
+  "pre.short": "Ainda não peguei",
+  "raid.short": "Como derrubar",
   "pre.open": "Ainda não capturei — descobrir o IV pelo PC",
   "pre.title": "Antes de capturar",
   "pre.why": "A tela de encontro mostra só o PC. Isso basta quando o jogo fixa o nível — raide, ovo, pesquisa. No selvagem o nível é sorteado, e aí não basta.",
@@ -234,6 +236,7 @@ export const PT_BR: Dict = {
     "Achei barras, mas com larguras diferentes demais para serem as três da avaliação.",
 
   "verdict.title": "Veredito",
+  "verdict.agree": "As regras concordam",
   "verdict.confidence": "confiança {percent}%",
   "verdict.howIGotHere": "Como cheguei nisso",
   "verdict.why1": "POR QUÊ · 1 REGRA",
