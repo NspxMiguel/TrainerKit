@@ -1,9 +1,5 @@
-import { Pressable, type PressableProps } from "react-native";
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-
-import { MOLA } from "./movimento";
-
-const Animado = Animated.createAnimatedComponent(Pressable);
+import { forwardRef, useRef } from "react";
+import { Animated, Pressable, type PressableProps, type View, type ViewStyle } from "react-native";
 
 /**
  * O TOQUE COM MOLA.
@@ -12,30 +8,61 @@ const Animado = Animated.createAnimatedComponent(Pressable);
  * some em superfície escura — na prática o app não reagia ao dedo.
  *
  * ⚠️ Encolhe 3%, e não 10%. O pacote pede mola DISCRETA: o botão tem que ceder,
- * não afundar. Amortecimento alto para não balançar na volta.
+ * não afundar.
  *
- * ⚠️ `Animated.createAnimatedComponent(Pressable)` e não uma `View` animada por
- * dentro: assim o alvo de toque continua sendo o próprio botão, e o
- * `accessibilityRole` do Pressable não se perde numa camada extra.
+ * ⚠️ O `Animated` AQUI É O DO REACT NATIVE, e não o Reanimated que o resto do
+ * app usa. Não é preferência: `createAnimatedComponent(Pressable)` do
+ * Reanimated **não entrega o toque** nesta versão — a grade inteira da Pokédex
+ * ficou muda, sem erro e sem aviso no console, e o segmented ao lado (um
+ * `Pressable` cru, na mesma tela) respondia normalmente. Medido três vezes,
+ * inclusive com bundle limpo.
+ *
+ * Uma mola de escala é exatamente o caso em que o `Animated` da plataforma
+ * basta: um valor, `useNativeDriver`, sem worklet nenhum. O Reanimated continua
+ * sendo o certo para a entrada em cascata, que interpola layout.
  */
-export function Toque({ children, style, ...resto }: PressableProps) {
-  const escala = useSharedValue(1);
-  const animado = useAnimatedStyle(() => ({ transform: [{ scale: escala.value }] }));
+export const Toque = forwardRef<
+  View,
+  PressableProps & {
+    /**
+     * O que precisa ficar na camada de FORA.
+     *
+     * ⚠️ Existe por causa da grade: quem divide a linha é o filho direto do
+     * `columnWrapperStyle`, e aqui esse filho é a view animada — `flex-1` no
+     * `Pressable` de dentro não divide coluna nenhuma. Então o layout que a
+     * lista mede vem por aqui, e a aparência continua no `style`.
+     */
+    estiloExterno?: ViewStyle;
+  }
+>(function Toque({ children, style, estiloExterno, ...resto }, ref) {
+  const escala = useRef(new Animated.Value(1)).current;
+
+  const mola = (para: number) =>
+    Animated.spring(escala, {
+      toValue: para,
+      damping: 18,
+      stiffness: 220,
+      mass: 1,
+      useNativeDriver: true,
+    }).start();
 
   return (
-    <Animado
-      {...resto}
-      onPressIn={(e) => {
-        escala.value = withSpring(0.97, { damping: 18, stiffness: MOLA.rigidez });
-        resto.onPressIn?.(e);
-      }}
-      onPressOut={(e) => {
-        escala.value = withSpring(1, { damping: 18, stiffness: MOLA.rigidez });
-        resto.onPressOut?.(e);
-      }}
-      style={[animado, style as never]}
-    >
-      {children as never}
-    </Animado>
+    <Animated.View style={[estiloExterno, { transform: [{ scale: escala }] }]}>
+      <Pressable
+        ref={ref}
+        {...resto}
+        style={style}
+        onPressIn={(e) => {
+          mola(0.97);
+          resto.onPressIn?.(e);
+        }}
+        onPressOut={(e) => {
+          mola(1);
+          resto.onPressOut?.(e);
+        }}
+      >
+        {children as never}
+      </Pressable>
+    </Animated.View>
   );
-}
+});
