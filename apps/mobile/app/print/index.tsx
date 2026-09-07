@@ -91,8 +91,11 @@ export default function Print() {
       contentInsetAdjustmentBehavior="automatic"
     >
       <Titulo>{t("home.quickScan")}</Titulo>
-      <Text className="text-texto text-[28px] font-extrabold">{t("scan.prompt")}</Text>
-      <Text className="text-texto2 text-[15px] leading-6 mt-2">{t("scan.promptDetail")}</Text>
+      {/* ⚠️ `scan.prompt` era um SEGUNDO título de 28px, e com o título grande
+          do cabeçalho a tela abria com dois. Ele nunca foi título: é a
+          instrução do que fazer, e é isso que ele volta a ser. */}
+      <Text className="text-texto2 text-[15px] leading-6">{t("scan.prompt")}</Text>
+      <Text className="text-texto3 text-[13px] leading-5 mt-1">{t("scan.promptDetail")}</Text>
 
       <Pressable
         onPress={() => void escolher()}
