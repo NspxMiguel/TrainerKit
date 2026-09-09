@@ -324,7 +324,7 @@ function Heroi({
             empurrava o bloco inteiro para o meio da faixa; com 40 ele desce, e
             o espaço em que a cor se dissolve continua existindo porque as três
             últimas paradas do degradê já são o fundo da página. */}
-        <View className="flex-1 justify-end items-center px-5" style={{ paddingBottom: 40 }}>
+        <View className="flex-1 justify-end items-center px-5" style={{ paddingBottom: 12 }}>
           {/* ⚠️ A ARTE ENTRA NA COLUNA, e não flutuando por cima dela. Ela era
               `position: "absolute"` num topo cravado, e o resultado dependia da
               altura do texto embaixo: com o nome e a frase de duas linhas a
@@ -340,16 +340,20 @@ function Heroi({
               virar um pôster num iPad. */}
           <View
             pointerEvents="none"
-            style={{ flex: 1, maxHeight: 200, width: "100%", minHeight: 72 }}
+            /* ⚠️ 320 e não 200 — "o personagem ta muitp pequeno". Medido no
+               print do site: lá a arte ocupa ~91% da largura da tela; aqui,
+               travada em 200 de altura, um sprite quadrado saía com 200 de
+               largura numa tela de 402 — metade do site. O teto agora é o que
+               sobra do herói, e quem manda é o `flex`. */
+            style={{ flex: 1, maxHeight: 340, width: "100%", minHeight: 72 }}
           >
             <ArteDoHeroi especie={especie} />
           </View>
 
-          <View className="rounded-pilula px-3 py-1 mb-2" style={{ backgroundColor: veuDaPilula }}>
-            <Text className="text-legenda" style={{ color: tintaHeroi }}>
-              {t("home.today").toUpperCase()}
-            </Text>
-          </View>
+          {/* ⚠️ A PÍLULA "DESTAQUE DE HOJE" SAIU. Ela custava 32 pontos de
+              altura que o bicho queria, e o site não tem nada parecido: lá o
+              nome vem direto, e é o nome que diz de quem é a tela. Rótulo que
+              explica o óbvio come o espaço da coisa que ele explica. */}
           <Text className="text-saudacao text-center" style={{ color: tintaHeroi }}>
             {especie.name}
           </Text>
@@ -466,13 +470,14 @@ export default function Inicio() {
    * (foi pedido), o que não cabia era simplesmente cortado: a barra de abas
    * ficava inteira fora da tela e o app virava um beco sem saída.
    *
-   * Os 356 são o que vem depois dele, medido: botão de escanear (64), a dupla
-   * de atalhos (56), o rótulo e a tira da coleção (124), os respiros — e os 78
-   * da barra de abas, que FLUTUA por cima. Ela precisa entrar na conta
+   * Os 330 são o que vem depois dele, medido de novo com o cartão de escanear
+   * no lugar do botão: cartão (64), dupla de atalhos (48), rótulo e tira da
+   * coleção (106), respiros (34) — e os 78 da barra de abas, que FLUTUA por
+   * cima. Ela precisa entrar na conta
    * justamente por flutuar: como a tela não rola, o sistema não desconta o
    * inset por nós, e a última linha ficava atrás do vidro.
    */
-  const alturaDoHeroi = Math.max(300, Math.min(470 + alto, telaAlta - 356));
+  const alturaDoHeroi = Math.max(300, Math.min(470 + alto, telaAlta - 330));
   const [agora] = useState(() => new Date().getHours());
   const { setup } = useSetup();
 
