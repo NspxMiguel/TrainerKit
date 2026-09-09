@@ -582,6 +582,8 @@ export const PT_BR: Dict = {
   "prefetch.start": "Baixar as {count} imagens",
   "prefetch.warning": "A arte oficial dá centenas de megabytes. No 4G, espere o Wi‑Fi.",
   "prefetch.title": "Baixando as imagens",
+  "onb.aboutYou": "Sobre você",
+  "prefetch.onDevice": "Imagens no aparelho",
   "prefetch.doneTitle": "Imagens baixadas",
   "prefetch.progress": "{done} de {total} · {size}",
   "prefetch.failed": "{count} falharam",

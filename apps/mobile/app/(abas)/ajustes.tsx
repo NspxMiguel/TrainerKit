@@ -670,7 +670,7 @@ export default function Ajustes() {
             <Linha
               icone="arrow.down.circle"
               cor="#0EA5E9"
-              titulo={t("prefetch.title")}
+              titulo={t("prefetch.onDevice")}
               valor={String(off.estado.guardadas)}
               aberta={secao === "baixar"}
               onAlternar={() => setSecao((v) => (v === "baixar" ? null : "baixar"))}

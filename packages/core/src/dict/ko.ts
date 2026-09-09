@@ -560,6 +560,8 @@ export const KO: Dict = {
   "prefetch.start": "{count}장 한 번에 내려받기",
   "prefetch.warning": "공식 아트워크는 수백 MB입니다. 데이터라면 와이파이를 기다리세요.",
   "prefetch.title": "이미지 내려받는 중",
+  "onb.aboutYou": "당신에 대해",
+  "prefetch.onDevice": "기기에 있는 이미지",
   "prefetch.doneTitle": "내려받기 완료",
   "prefetch.progress": "{total}개 중 {done}개 · {size}",
   "prefetch.failed": "{count}개 실패",

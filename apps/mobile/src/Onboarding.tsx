@@ -150,12 +150,14 @@ export function Onboarding() {
 
         {passo === 1 && (
           <>
-            <Text className="text-texto text-[34px] font-extrabold mb-2">
-              {t("onb.level.title")}
-            </Text>
+            {/* ⚠️ O TÍTULO PERGUNTAVA O NÍVEL e o primeiro campo pedia o NOME —
+                a tela abria contradizendo a si mesma. Agora o título cobre os
+                dois e cada campo diz o que é. */}
+            <Text className="text-texto text-[34px] font-extrabold mb-4">{t("onb.aboutYou")}</Text>
 
             {/* O NOME, aqui e não numa etapa própria: uma tela inteira só para
                 pedir um nome que é opcional custa mais atenção do que vale. */}
+            <Text className="text-texto3 text-legenda mb-2">{t("onb.nameAria").toUpperCase()}</Text>
             <TextInput
               value={setup.nome}
               onChangeText={(v) => definir({ nome: v })}
@@ -167,6 +169,11 @@ export function Onboarding() {
               returnKeyType="done"
             />
             <Text className="text-texto2 text-[15px] leading-6 mb-6">{t("onb.tagline")}</Text>
+
+            {/* O NÍVEL ganha o rótulo que era o título da tela. */}
+            <Text className="text-texto3 text-legenda mb-2">
+              {t("onb.level.title").toUpperCase()}
+            </Text>
 
             <View className="flex-row flex-wrap gap-2">
               {TRAINER_LEVELS.map((n) => (

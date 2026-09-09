@@ -617,6 +617,8 @@ const EN = {
   "prefetch.start": "Download all {count} images",
   "prefetch.warning": "Official artwork runs to hundreds of megabytes. On mobile data, wait for Wi‑Fi.",
   "prefetch.title": "Downloading images",
+  "onb.aboutYou": "About you",
+  "prefetch.onDevice": "Images on the device",
   "prefetch.doneTitle": "Images downloaded",
   "prefetch.progress": "{done} of {total} · {size}",
   "prefetch.failed": "{count} failed",

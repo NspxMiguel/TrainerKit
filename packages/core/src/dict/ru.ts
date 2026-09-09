@@ -560,6 +560,8 @@ export const RU: Dict = {
   "prefetch.start": "Скачать все {count} изображений",
   "prefetch.warning": "Официальные иллюстрации весят сотни мегабайт. На мобильном интернете дождитесь Wi‑Fi.",
   "prefetch.title": "Скачиваем изображения",
+  "onb.aboutYou": "О вас",
+  "prefetch.onDevice": "Изображения на устройстве",
   "prefetch.doneTitle": "Изображения скачаны",
   "prefetch.progress": "{done} из {total} · {size}",
   "prefetch.failed": "{count} не удалось",

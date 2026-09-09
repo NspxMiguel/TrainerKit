@@ -560,6 +560,8 @@ export const JA: Dict = {
   "prefetch.start": "{count} 枚をまとめてダウンロード",
   "prefetch.warning": "公式イラストは数百 MB になります。モバイル通信なら Wi‑Fi を待ってください。",
   "prefetch.title": "画像をダウンロード中",
+  "onb.aboutYou": "あなたについて",
+  "prefetch.onDevice": "端末にある画像",
   "prefetch.doneTitle": "ダウンロード完了",
   "prefetch.progress": "{total} 件中 {done} 件 · {size}",
   "prefetch.failed": "{count} 件が失敗",
