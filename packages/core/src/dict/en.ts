@@ -53,6 +53,8 @@ const EN = {
   "home.greeting.morning": "Good morning",
   "home.greeting.afternoon": "Good afternoon",
   "home.greeting.lateNight": "Up late",
+  "desktop.notice.title": "Built for the phone",
+  "desktop.notice.body": "This is the desktop view of an app made to be installed on a phone. Everything works here, but the layout, the screenshot scan and the offline data were built for the small screen.",
   "home.trainer": "Trainer",
   "home.search": "Search your collection",
   "home.searchAll": "Search species",

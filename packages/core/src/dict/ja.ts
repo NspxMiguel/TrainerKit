@@ -37,6 +37,8 @@ export const JA: Dict = {
   "home.greeting.morning": "おはよう",
   "home.greeting.afternoon": "こんにちは",
   "home.greeting.lateNight": "夜ふかし中",
+  "desktop.notice.title": "スマートフォン向けに作られています",
+  "desktop.notice.body": "これはスマートフォンにインストールして使うアプリのデスクトップ表示です。ここでもすべて動きますが、レイアウト、スクリーンショットの読み取り、オフラインデータは小さな画面に合わせて作られています。",
   "home.trainer": "トレーナー",
   "home.search": "手持ちから検索",
   "home.searchAll": "種を検索",

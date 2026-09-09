@@ -37,6 +37,8 @@ export const ES: Dict = {
   "home.greeting.morning": "Buenos días",
   "home.greeting.afternoon": "Buenas tardes",
   "home.greeting.lateNight": "De madrugada",
+  "desktop.notice.title": "Pensado para el móvil",
+  "desktop.notice.body": "Esta es la versión de escritorio de una app hecha para instalarse en el móvil. Todo funciona aquí, pero el diseño, la lectura de capturas y los datos sin conexión se hicieron para la pantalla pequeña.",
   "home.trainer": "Entrenador",
   "home.search": "Buscar en tu colección",
   "home.searchAll": "Buscar especie",

@@ -37,6 +37,8 @@ export const RU: Dict = {
   "home.greeting.morning": "Доброе утро",
   "home.greeting.afternoon": "Добрый день",
   "home.greeting.lateNight": "Доброй ночи",
+  "desktop.notice.title": "Сделано для телефона",
+  "desktop.notice.body": "Это десктопная версия приложения, рассчитанного на установку на телефон. Здесь всё работает, но вёрстка, разбор скриншотов и офлайн-данные сделаны под маленький экран.",
   "home.trainer": "Тренер",
   "home.search": "Искать в коллекции",
   "home.searchAll": "Искать вида",

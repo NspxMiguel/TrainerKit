@@ -41,6 +41,7 @@ import {
   IconShield,
   IconSwords,
 } from "../ui/Icons.tsx";
+import { DesktopNotice } from "../ui/DesktopNotice.tsx";
 import { InstallBanner } from "../ui/InstallBanner.tsx";
 import { SpeciesTile } from "../ui/SpeciesTile.tsx";
 import { enquadrar, usarPaleta } from "../ui/paleta.ts";
@@ -830,6 +831,8 @@ export function HomeScreen({ dataset, persist, onGo }: Props) {
         )}
       </header>
 
+
+      <DesktopNotice />
 
       {showInstall && (
         <InstallBanner

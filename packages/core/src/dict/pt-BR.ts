@@ -40,6 +40,8 @@ export const PT_BR: Dict = {
   "home.greeting.morning": "Bom dia",
   "home.greeting.afternoon": "Boa tarde",
   "home.greeting.lateNight": "Boa madrugada",
+  "desktop.notice.title": "Feito para o celular",
+  "desktop.notice.body": "Esta é a versão de computador de um app pensado para ser instalado no celular. Tudo funciona aqui, mas o layout, a leitura de print e os dados offline foram feitos para a tela pequena.",
   "home.trainer": "Treinador",
   "home.search": "Buscar na coleção",
   "home.searchAll": "Buscar espécie",

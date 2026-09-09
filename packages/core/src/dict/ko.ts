@@ -37,6 +37,8 @@ export const KO: Dict = {
   "home.greeting.morning": "좋은 아침",
   "home.greeting.afternoon": "안녕하세요",
   "home.greeting.lateNight": "늦은 밤이네요",
+  "desktop.notice.title": "휴대폰을 위해 만들어졌습니다",
+  "desktop.notice.body": "휴대폰에 설치해서 쓰도록 만든 앱의 데스크톱 화면입니다. 여기서도 모두 작동하지만 레이아웃과 스크린샷 인식, 오프라인 데이터는 작은 화면에 맞춰 만들어졌습니다.",
   "home.trainer": "트레이너",
   "home.search": "내 종에서 검색",
   "home.searchAll": "종 검색",
