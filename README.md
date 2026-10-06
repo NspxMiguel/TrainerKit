@@ -1,12 +1,33 @@
-# TrainerKit
+<p align="center">
+  <img src="apps/mobile/assets/icon.png" alt="TrainerKit app icon" width="120">
+</p>
 
-**A companion app for Pokémon GO that decides, instead of just showing numbers.**
+<h1 align="center">TrainerKit</h1>
+
+<p align="center">
+  <b>A companion app for Pokémon GO that decides, instead of just showing numbers.</b>
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
+  <img alt="Platforms: PWA and iOS" src="https://img.shields.io/badge/platform-PWA%20%C2%B7%20iOS-black">
+  <img alt="Offline-first, no account" src="https://img.shields.io/badge/offline--first-no%20account-informational">
+  <a href="https://github.com/NspxMiguel/TrainerKit/actions/workflows/deploy.yml"><img alt="Deploy" src="https://img.shields.io/github/actions/workflow/status/NspxMiguel/TrainerKit/deploy.yml?branch=main&label=deploy"></a>
+</p>
+
+<p align="center">
+  <a href="https://trainerkit-zeta.vercel.app/">Open the app</a> ·
+  <a href="#install">Install</a> ·
+  <a href="#whats-included">What's included</a> ·
+  <a href="#the-ios-app">iOS app</a> ·
+  <a href="#privacy">Privacy</a> ·
+  <a href="#build-from-source">Build</a> ·
+  <a href="DATA.md">Data</a>
+</p>
 
 There are enough calculators already. You attach the appraisal screenshot, "96.4%" shows up, and the real question is still unanswered: _so what?_ Worth powering up? Worth evolving? Can I transfer it without regretting it?
 
 TrainerKit answers that — and shows its work.
-
-**[Open the app →](https://trainerkit-zeta.vercel.app/)**
 
 Installable PWA, offline-first. No account, no server, nothing leaving your device.
 
@@ -38,6 +59,9 @@ Follows the system's light/dark theme automatically.
 | **10 languages**   | pt-BR, English, Spanish (Spain and LatAm), French, German, Italian, Japanese, Korean, Russian — interface, species names and move names.                                                                                                     |
 
 ## The iOS app
+
+<details>
+<summary>Pokedex Mode, Live Activity, Liquid Glass and more</summary>
 
 The same core, the same ten languages, the same numbers — with what only a
 native app can do:
@@ -71,6 +95,8 @@ native app can do:
 Build it with `pnpm --filter @trainerkit/mobile exec expo run:ios`, or archive
 with `xcodebuild`; the signing team lives in `plugins/ios-assinatura.js`, not in
 your shell history.
+
+</details>
 
 ## The math is checked against the game, not against itself
 
@@ -122,6 +148,9 @@ The dataset step is separate on purpose: it hits the network and takes a while, 
 
 ## Structure
 
+<details>
+<summary>Repository layout</summary>
+
 ```
 packages/
 ├── core/                # pure TypeScript, zero DOM — every number in the app
@@ -151,6 +180,8 @@ api/                     # Vercel edge functions (shared AI key, voice)
 
 It also **writes no text**: it returns a translation key plus the numbers. The interface builds the sentence, because the interface knows the language. Ten languages, and the compiler breaks the build if one of them forgets a key.
 
+</details>
+
 ## Not affiliated
 
 TrainerKit is an independent fan-made app, not affiliated with, sponsored or endorsed by Scopely Explore (formerly Niantic), The Pokémon Company, Nintendo, Creatures Inc. or GAME FREAK. Pokémon, Pokémon GO and character names are trademarks of their respective owners.
@@ -161,14 +192,8 @@ It works exclusively from screenshots you provide, and **does not access, modify
 
 MIT — see [LICENSE](LICENSE). The license covers this repository's code; game data and the game's names belong to their respective owners.
 
----
+Made by [nspxmiguel](https://github.com/NspxMiguel).
 
-Made by [@NspxMiguel](https://github.com/NspxMiguel)
+## Documentation
 
----
-
-## Documentação
-
-Índice completo em [`docs/INDEX.md`](docs/INDEX.md).
-
-_Hub multi-repo: `~/Documents/Documentacao-Repos/INDEX.md` (atualizado 2026-08-31)._
+Full index in [`docs/INDEX.md`](docs/INDEX.md).
